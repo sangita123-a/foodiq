@@ -1,0 +1,50 @@
+"use client";
+
+import { motion, AnimatePresence } from "framer-motion";
+import { ShoppingBag, ChevronRight } from "lucide-react";
+import Link from "next/link";
+
+type RestaurantCartProps = {
+  totalItems: number;
+  totalPrice: number;
+};
+
+export default function RestaurantCart({ totalItems, totalPrice }: RestaurantCartProps) {
+  return (
+    <AnimatePresence>
+      {totalItems > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 50, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 50, scale: 0.9 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="fixed bottom-6 right-4 md:right-8 z-50 w-[calc(100%-2rem)] md:w-auto"
+        >
+          <Link href="/cart" className="bg-[#FF2D3B] text-white rounded-2xl shadow-[0_10px_40px_rgba(255,45,59,0.4)] flex items-center justify-between px-6 py-4 border border-white/10 md:min-w-[320px] overflow-hidden group cursor-pointer hover:bg-[#e02633] transition-colors block">
+            
+            {/* Ambient background glow */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+
+            <div className="flex flex-col relative z-10">
+              <span className="text-sm font-medium text-white/80">
+                {totalItems} {totalItems === 1 ? 'Item' : 'Items'}
+              </span>
+              <span className="font-bold text-lg">
+                ₹{totalPrice}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 font-bold relative z-10">
+              Proceed to Cart
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center transform group-hover:translate-x-1 transition-transform">
+                <ChevronRight className="w-5 h-5" />
+              </div>
+            </div>
+
+            <ShoppingBag className="absolute -right-4 -bottom-4 w-24 h-24 text-black/10 rotate-12 pointer-events-none" />
+          </Link>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}

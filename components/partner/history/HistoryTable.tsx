@@ -1,0 +1,135 @@
+"use client";
+
+import { motion, AnimatePresence } from "framer-motion";
+import { Order } from "@/components/partner/orders/types";
+import { Eye, Download, Printer, RotateCw, MoreVertical } from "lucide-react";
+import { useState } from "react";
+
+interface HistoryTableProps {
+  orders: Order[];
+  onViewDetails: (order: Order) => void;
+}
+
+export default function HistoryTable({ orders, onViewDetails }: HistoryTableProps) {
+  
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
+  const getStatusColor = (status: string) => {
+    switch(status) {
+      case "Delivered": return "bg-green-500/20 text-green-400 border-green-500/30";
+      case "Completed": return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+      case "Cancelled": return "bg-red-500/20 text-red-400 border-red-500/30";
+      case "Refunded": return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+      default: return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+    }
+  };
+
+  return (
+    <div className="bg-[#171717] rounded-3xl border border-white/5 overflow-hidden shadow-xl mb-8">
+      <div className="overflow-x-auto custom-scrollbar">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-white/5 bg-[#111]">
+              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Order Info</th>
+              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Customer</th>
+              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Amount & Payment</th>
+              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
+              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <AnimatePresence>
+              {orders.map((order, idx) => (
+                <motion.tr 
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2, delay: idx * 0.05 }}
+                  key={order.id} 
+                  className="border-b border-white/5 hover:bg-white/5 transition-colors group"
+                >
+                  
+                  {/* Order Info */}
+                  <td className="px-6 py-4">
+                    <p className="text-white font-mono font-black">{order.id}</p>
+                    <p className="text-gray-400 text-xs mt-1">{order.orderTime}</p>
+                    <div className="text-gray-500 text-xs mt-2 line-clamp-1 max-w-[200px]">
+                      {order.items.map(i => `${i.quantity}x ${i.name}`).join(", ")}
+                    </div>
+                  </td>
+
+                  {/* Customer */}
+                  <td className="px-6 py-4">
+                    <p className="text-white font-bold text-sm">{order.customerName}</p>
+                    <p className="text-gray-400 text-xs mt-1">{order.customerPhone}</p>
+                  </td>
+
+                  {/* Amount & Payment */}
+                  <td className="px-6 py-4">
+                    <p className="text-white font-black">₹{order.grandTotal}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`text-[10px] uppercase font-bold tracking-wider ${order.paymentStatus === 'Paid' ? 'text-green-400' : 'text-orange-400'}`}>
+                        {order.paymentStatus}
+                      </span>
+                      <span className="text-gray-500 text-xs">• {order.paymentMethod}</span>
+                    </div>
+                  </td>
+
+                  {/* Status */}
+                  <td className="px-6 py-4">
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${getStatusColor(order.status)}`}>
+                      {order.status}
+                    </span>
+                  </td>
+
+                  {/* Actions */}
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2 relative">
+                      <button 
+                        onClick={() => onViewDetails(order)}
+                        className="p-2 rounded-lg bg-[#111] border border-white/5 text-gray-400 hover:text-white hover:bg-primary/20 hover:border-primary/50 transition-colors tooltip-trigger relative"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      
+                      <button 
+                        onClick={() => setActiveDropdown(activeDropdown === order.id ? null : order.id)}
+                        className="p-2 rounded-lg bg-[#111] border border-white/5 text-gray-400 hover:text-white transition-colors"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+
+                      {/* Dropdown Menu */}
+                      <AnimatePresence>
+                        {activeDropdown === order.id && (
+                          <motion.div 
+                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            className="absolute right-0 top-12 w-48 bg-[#171717] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-20 text-left"
+                          >
+                            <button className="w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2 border-b border-white/5">
+                              <Download className="w-4 h-4 text-blue-400" /> Download Invoice
+                            </button>
+                            <button className="w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2 border-b border-white/5">
+                              <Printer className="w-4 h-4 text-gray-400" /> Print Receipt
+                            </button>
+                            <button className="w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2">
+                              <RotateCw className="w-4 h-4 text-primary" /> Reorder Summary
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </td>
+
+                </motion.tr>
+              ))}
+            </AnimatePresence>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

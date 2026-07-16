@@ -1,0 +1,318 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import PaymentsHeader from "@/components/payments/PaymentsHeader";
+import CreditCardItem, { CardType } from "@/components/payments/CreditCardItem";
+import UpiItem, { UpiType } from "@/components/payments/UpiItem";
+import WalletItem, { WalletType } from "@/components/payments/WalletItem";
+import PaymentFormModal from "@/components/payments/PaymentFormModal";
+import SecurityBadges from "@/components/payments/SecurityBadges";
+import PaymentsEmptyState from "@/components/payments/PaymentsEmptyState";
+import useSWR from "swr";
+import { format } from "date-fns";
+import api from "@/services/api";
+import { useToast } from "@/contexts/ToastContext";
+
+export default function PaymentMethodsPage() {
+  const { data, mutate, isLoading } = useSWR("/api/payment-methods");
+  const methods = data || [];
+  const { showToast } = useToast();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [initialModalType, setInitialModalType] = useState<"Card" | "UPI">("Card");
+
+  const { data: historyData, isLoading: isLoadingHistory, error: historyError } = useSWR("/api/payments/history");
+  const paymentHistory = historyData || [];
+
+  const cards: CardType[] = useMemo(
+    () =>
+      methods
+        .filter((m: any) => m.type === "credit_card" || m.type === "debit_card")
+        .map((m: any) => ({
+          id: m.id,
+          name: m.card_holder_name || "Card Holder",
+          maskedNumber: `**** **** **** ${m.card_last4 || "****"}`,
+          expiry: m.card_expiry || "--/--",
+          network: (m.card_brand as any) || "Visa",
+          isDefault: !!m.is_default,
+        })),
+    [methods]
+  );
+
+  const upis: UpiType[] = useMemo(
+    () =>
+      methods
+        .filter((m: any) => m.type === "upi")
+        .map((m: any) => ({ id: m.id, upiId: m.upi_id })),
+    [methods]
+  );
+
+  const wallets: WalletType[] = useMemo(() => {
+    const saved = methods.filter((m: any) => m.type === "wallet");
+    const names = ["PhonePe", "Google Pay", "Paytm", "Amazon Pay"];
+    return names.map((name, i) => {
+      const found = saved.find((w: any) => w.wallet_name === name);
+      return { id: found?.id || `w-${i}`, name, isConnected: !!found };
+    });
+  }, [methods]);
+
+  const handleAddNew = () => {
+    setEditingItem(null);
+    setInitialModalType("Card");
+    setIsModalOpen(true);
+  };
+
+  const handleEditCard = (card: CardType) => {
+    setEditingItem(card);
+    setInitialModalType("Card");
+    setIsModalOpen(true);
+  };
+
+  const handleRemoveCard = async (id: string) => {
+    try {
+      await api.delete(`/api/payment-methods/${id}`);
+      mutate();
+      showToast("Card removed", "success");
+    } catch (err: any) {
+      showToast(err.response?.data?.message || "Failed", "error");
+    }
+  };
+
+  const handleSetDefaultCard = async (id: string) => {
+    try {
+      await api.put(`/api/payment-methods/${id}/default`);
+      mutate();
+      showToast("Default card updated", "success");
+    } catch (err: any) {
+      showToast(err.response?.data?.message || "Failed", "error");
+    }
+  };
+
+  const handleSaveCard = async (card: CardType) => {
+    try {
+      const digits = card.maskedNumber.replace(/\D/g, "");
+      if (editingItem?.id && !editingItem.id.startsWith("c")) {
+        await api.put(`/api/payment-methods/${editingItem.id}`, {
+          card_holder_name: card.name,
+          card_brand: card.network,
+          card_expiry: card.expiry,
+          is_default: card.isDefault,
+          card_number: digits.length >= 4 ? digits : undefined,
+        });
+      } else {
+        await api.post("/api/payment-methods", {
+          type: "credit_card",
+          card_holder_name: card.name,
+          card_number: digits.length >= 12 ? digits : `411111111111${digits.slice(-4) || "1111"}`,
+          card_brand: card.network,
+          card_expiry: card.expiry,
+          is_default: card.isDefault,
+        });
+      }
+      mutate();
+      setIsModalOpen(false);
+      showToast("Card saved", "success");
+    } catch (err: any) {
+      showToast(err.response?.data?.message || "Failed to save card", "error");
+    }
+  };
+
+  const handleEditUpi = (upi: UpiType) => {
+    setEditingItem(upi);
+    setInitialModalType("UPI");
+    setIsModalOpen(true);
+  };
+
+  const handleRemoveUpi = async (id: string) => {
+    try {
+      await api.delete(`/api/payment-methods/${id}`);
+      mutate();
+      showToast("UPI removed", "success");
+    } catch (err: any) {
+      showToast(err.response?.data?.message || "Failed", "error");
+    }
+  };
+
+  const handleSaveUpi = async (upi: UpiType) => {
+    try {
+      if (editingItem?.id && !String(editingItem.id).startsWith("u")) {
+        await api.put(`/api/payment-methods/${editingItem.id}`, { upi_id: upi.upiId });
+      } else {
+        await api.post("/api/payment-methods", { type: "upi", upi_id: upi.upiId });
+      }
+      mutate();
+      setIsModalOpen(false);
+      showToast("UPI saved", "success");
+    } catch (err: any) {
+      showToast(err.response?.data?.message || "Failed to save UPI", "error");
+    }
+  };
+
+  const handleToggleWallet = async (id: string) => {
+    const wallet = wallets.find((w) => w.id === id);
+    if (!wallet) return;
+    try {
+      if (wallet.isConnected && !id.startsWith("w-")) {
+        await api.delete(`/api/payment-methods/${id}`);
+      } else {
+        await api.post("/api/payment-methods", { type: "wallet", wallet_name: wallet.name });
+      }
+      mutate();
+    } catch (err: any) {
+      showToast(err.response?.data?.message || "Failed to update wallet", "error");
+    }
+  };
+
+  const hasAnyPaymentMethod = cards.length > 0 || upis.length > 0 || wallets.some((w) => w.isConnected);
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-[#0B0B0B] pt-[90px]">
+        <Navbar />
+        <div className="container mx-auto px-4 py-12 max-w-5xl">
+          <div className="h-64 bg-white/5 animate-pulse rounded-3xl" />
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-[#0B0B0B] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+      <Navbar />
+
+      <div className="container mx-auto px-4 md:px-8 py-12 max-w-5xl">
+        <PaymentsHeader onAddNew={handleAddNew} />
+
+        {hasAnyPaymentMethod ? (
+          <div className="flex flex-col gap-12">
+            {cards.length > 0 && (
+              <section>
+                <h3 className="text-2xl font-bold text-white mb-6">Credit & Debit Cards</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                  <AnimatePresence>
+                    {cards.map((card) => (
+                      <CreditCardItem
+                        key={card.id}
+                        card={card}
+                        onEdit={handleEditCard}
+                        onRemove={handleRemoveCard}
+                        onSetDefault={handleSetDefaultCard}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </section>
+            )}
+
+            {upis.length > 0 && (
+              <section>
+                <h3 className="text-2xl font-bold text-white mb-6">UPI Accounts</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <AnimatePresence>
+                    {upis.map((upi) => (
+                      <UpiItem key={upi.id} upi={upi} onEdit={handleEditUpi} onRemove={handleRemoveUpi} />
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </section>
+            )}
+
+            <section>
+              <h3 className="text-2xl font-bold text-white mb-6">Wallets</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {wallets.map((wallet) => (
+                  <WalletItem key={wallet.id} wallet={wallet} onToggleConnect={handleToggleWallet} />
+                ))}
+              </div>
+            </section>
+          </div>
+        ) : (
+          <PaymentsEmptyState onAddNew={handleAddNew} />
+        )}
+
+        <div className="mt-16 mb-12">
+          <h3 className="text-2xl font-bold text-white mb-6">Payment History</h3>
+          {isLoadingHistory ? (
+            <div className="h-64 bg-white/5 animate-pulse rounded-2xl border border-white/10"></div>
+          ) : historyError ? (
+            <div className="p-6 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl text-center">
+              Failed to load payment history
+            </div>
+          ) : paymentHistory.length > 0 ? (
+            <div className="bg-[#171717] rounded-3xl border border-white/5 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm text-gray-400">
+                  <thead className="bg-white/5 text-white uppercase font-bold text-xs">
+                    <tr>
+                      <th className="px-6 py-4">Transaction ID</th>
+                      <th className="px-6 py-4">Date</th>
+                      <th className="px-6 py-4">Method</th>
+                      <th className="px-6 py-4">Amount</th>
+                      <th className="px-6 py-4">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paymentHistory.map((payment: any) => (
+                      <tr key={payment.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td className="px-6 py-4 font-mono text-xs">
+                          {payment.provider_transaction_id || "Pending..."}
+                        </td>
+                        <td className="px-6 py-4">
+                          {format(new Date(payment.created_at), "dd MMM yyyy, p")}
+                        </td>
+                        <td className="px-6 py-4 capitalize">
+                          {(payment.method || "").replace(/_/g, " ")}
+                        </td>
+                        <td className="px-6 py-4 text-white font-bold">
+                          ₹{parseFloat(payment.amount).toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                              payment.status === "completed"
+                                ? "bg-green-500/10 text-green-400 border-green-500/20"
+                                : payment.status === "pending"
+                                  ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+                                  : "bg-red-500/10 text-red-400 border-red-500/20"
+                            }`}
+                          >
+                            {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center text-gray-500 py-10 bg-[#171717] rounded-3xl border border-white/5">
+              No recent transactions found.
+            </div>
+          )}
+        </div>
+
+        <SecurityBadges />
+      </div>
+
+      <Footer />
+
+      <AnimatePresence>
+        {isModalOpen && (
+          <PaymentFormModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSaveCard={handleSaveCard}
+            onSaveUpi={handleSaveUpi}
+            initialData={editingItem}
+            initialType={initialModalType}
+          />
+        )}
+      </AnimatePresence>
+    </main>
+  );
+}
