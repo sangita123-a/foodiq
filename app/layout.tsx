@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -14,6 +14,11 @@ export const metadata: Metadata = {
   description: "Discover amazing restaurants and delicious food delivered straight to your doorstep.",
 };
 
+export const viewport: Viewport = {
+  themeColor: "#FFFFFF",
+  colorScheme: "light",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -24,7 +29,7 @@ export default function RootLayout({
       lang="en"
       className={`${poppins.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-full flex flex-col bg-white text-[#1C1C1C]">
         <Providers>
           {children}
         </Providers>

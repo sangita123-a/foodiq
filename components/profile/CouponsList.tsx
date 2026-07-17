@@ -61,11 +61,11 @@ export default function CouponsList() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3 }}
-      className="bg-[#171717] rounded-[24px] p-6 md:p-8 border border-white/5"
+      className="bg-[#F8FAFC] rounded-[24px] p-6 md:p-8 border border-[#E5E7EB]"
     >
-      <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/10">
+      <div className="flex items-center gap-3 mb-6 pb-6 border-b border-[#E5E7EB]">
         <Ticket className="w-6 h-6 text-primary" />
-        <h2 className="text-2xl font-bold text-white">My Coupons</h2>
+        <h2 className="text-2xl font-bold text-[#111827]">My Coupons</h2>
       </div>
 
       <div className="flex gap-2 mb-6 flex-wrap">
@@ -74,7 +74,7 @@ export default function CouponsList() {
             key={t}
             onClick={() => setTab(t)}
             className={`px-4 py-2 rounded-full text-sm font-bold capitalize ${
-              tab === t ? "bg-primary text-white" : "bg-white/5 text-gray-400 hover:text-white"
+              tab === t ? "bg-primary text-white" : "bg-[#F8FAFC] text-[#6B7280] hover:text-[#111827]"
             }`}
           >
             {t}
@@ -83,9 +83,9 @@ export default function CouponsList() {
       </div>
 
       {isLoading ? (
-        <div className="text-white text-center py-10">Loading coupons...</div>
+        <div className="text-[#111827] text-center py-10">Loading coupons...</div>
       ) : list.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">No {tab} coupons.</div>
+        <div className="text-center py-12 text-[#6B7280]">No {tab} coupons.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {list.map((coupon: any) => {
@@ -103,13 +103,13 @@ export default function CouponsList() {
             return (
               <div
                 key={id}
-                className={`bg-[#111] border border-white/5 hover:border-white/20 transition-colors rounded-2xl flex overflow-hidden group ${
+                className={`bg-white border border-[#E5E7EB] hover:border-[#E5E7EB] transition-colors rounded-2xl flex overflow-hidden group ${
                   tab === "expired" ? "opacity-60" : ""
                 }`}
               >
-                <div className="bg-primary/10 w-1/3 p-4 flex flex-col items-center justify-center border-r border-dashed border-white/10 relative">
-                  <div className="absolute -top-3 -right-3 w-6 h-6 bg-[#171717] rounded-full"></div>
-                  <div className="absolute -bottom-3 -right-3 w-6 h-6 bg-[#171717] rounded-full"></div>
+                <div className="bg-primary/10 w-1/3 p-4 flex flex-col items-center justify-center border-r border-dashed border-[#E5E7EB] relative">
+                  <div className="absolute -top-3 -right-3 w-6 h-6 bg-[#F8FAFC] rounded-full"></div>
+                  <div className="absolute -bottom-3 -right-3 w-6 h-6 bg-[#F8FAFC] rounded-full"></div>
                   <h3 className="text-xl font-black text-primary text-center leading-tight mb-2">
                     {title}
                   </h3>
@@ -118,17 +118,17 @@ export default function CouponsList() {
                 <div className="p-4 md:p-6 flex-1 flex flex-col justify-between relative">
                   <div>
                     <p className="text-white font-bold mb-1">{desc}</p>
-                    <p className="text-xs text-gray-500 mb-4">{expiry}</p>
+                    <p className="text-xs text-[#9CA3AF] mb-4">{expiry}</p>
                   </div>
 
                   <div className="flex items-center justify-between mt-auto gap-2 flex-wrap">
-                    <div className="border border-white/10 bg-[#171717] px-3 py-1.5 rounded-lg text-sm font-bold text-white tracking-widest uppercase">
+                    <div className="border border-[#E5E7EB] bg-[#F8FAFC] px-3 py-1.5 rounded-lg text-sm font-bold text-[#111827] tracking-widest uppercase">
                       {code}
                     </div>
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleCopy(id, code)}
-                        className="text-gray-400 hover:text-white font-bold text-sm flex items-center gap-1.5"
+                        className="text-[#6B7280] hover:text-[#111827] font-bold text-sm flex items-center gap-1.5"
                       >
                         {copiedId === id ? (
                           <>
@@ -159,7 +159,7 @@ export default function CouponsList() {
                       {tab === "available" && (
                         <button
                           onClick={() => handleSave(id)}
-                          className="text-gray-400 hover:text-white font-bold text-xs"
+                          className="text-[#6B7280] hover:text-[#111827] font-bold text-xs"
                         >
                           Save
                         </button>

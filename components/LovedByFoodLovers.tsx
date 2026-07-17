@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Quote, Calendar, Utensils, Store } from "lucide-react";
+import SafeImage from "@/components/ui/SafeImage";
+import { AVATAR_FALLBACK } from "@/lib/images";
 
 type Testimonial = {
   id: string;
@@ -21,7 +23,7 @@ const testimonialsData: Testimonial[] = [
     id: "t1",
     name: "Priya Sharma",
     city: "Hyderabad",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200",
+    image: AVATAR_FALLBACK,
     rating: 5,
     review: "The delivery was super fast and the food was still hot. Foodiq has become my favorite food ordering platform. Highly recommended!",
     restaurant: "Paradise Biryani",
@@ -32,7 +34,7 @@ const testimonialsData: Testimonial[] = [
     id: "t2",
     name: "Rahul Verma",
     city: "Mumbai",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200",
+    image: AVATAR_FALLBACK,
     rating: 5,
     review: "Absolutely seamless experience. The tracking is incredibly accurate and the food packaging was premium and tamper-proof.",
     restaurant: "Domino's Pizza",
@@ -43,7 +45,7 @@ const testimonialsData: Testimonial[] = [
     id: "t3",
     name: "Ananya Gupta",
     city: "Delhi",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200",
+    image: AVATAR_FALLBACK,
     rating: 5,
     review: "I love the exclusive discounts! I saved so much on my favorite sushi place today. Customer support is also super responsive.",
     restaurant: "Tokyo Sushi",
@@ -54,7 +56,7 @@ const testimonialsData: Testimonial[] = [
     id: "t4",
     name: "Arjun Reddy",
     city: "Bangalore",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
+    image: AVATAR_FALLBACK,
     rating: 5,
     review: "Best late-night delivery app out there. Finding great food at 2 AM is so easy now. Five stars all the way!",
     restaurant: "Midnight Bites",
@@ -65,7 +67,7 @@ const testimonialsData: Testimonial[] = [
     id: "t5",
     name: "Sneha Patil",
     city: "Pune",
-    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200",
+    image: AVATAR_FALLBACK,
     rating: 5,
     review: "The user interface is gorgeous. It feels like a premium app every time I open it. The curated collections are brilliant.",
     restaurant: "Green Leaf Cafe",
@@ -108,7 +110,7 @@ export default function LovedByFoodLovers() {
   }, [isHovered, cardsToShow]);
 
   return (
-    <section className="bg-[#0B0B0B] w-full py-[100px] overflow-hidden border-t border-white/5 mt-8">
+    <section className="bg-[#F8F9FA] w-full py-[100px] overflow-hidden border-t border-[#ECECEC] mt-8">
       <div className="w-[90%] max-w-7xl mx-auto">
         
         {/* Header */}
@@ -121,11 +123,11 @@ export default function LovedByFoodLovers() {
         >
           <div className="flex items-center justify-center gap-3 mb-4">
             <span className="text-3xl md:text-4xl">❤️</span>
-            <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight">
+            <h2 className="text-3xl md:text-5xl font-bold text-[#1C1C1C] tracking-[-0.045em]">
               Loved by Food Lovers
             </h2>
           </div>
-          <p className="text-gray-400 text-lg md:text-xl font-light">
+          <p className="text-[#686B78] text-base md:text-lg">
             See why thousands of customers choose Foodiq every day.
           </p>
         </motion.div>
@@ -146,40 +148,40 @@ export default function LovedByFoodLovers() {
                 className="flex-shrink-0"
                 style={{ width: `calc(${100 / cardsToShow}% - ${(6 * (cardsToShow - 1)) / cardsToShow}rem)` }}
               >
-                <div className="bg-white/5 backdrop-blur-md rounded-[24px] p-8 h-full border border-white/10 shadow-lg relative group hover:bg-white/10 transition-colors duration-300">
+                <div className="bg-white rounded-[20px] p-8 h-full border border-[#ECECEC] shadow-[0_8px_28px_rgba(28,28,28,0.06)] relative group hover:-translate-y-1 hover:border-[#FC8019]/25 hover:shadow-[0_18px_42px_rgba(28,28,28,0.1)] transition-all duration-300">
                   {/* Background Quote Icon */}
-                  <Quote className="absolute top-6 right-6 w-16 h-16 text-[#FF2D3B]/10 group-hover:text-[#FF2D3B]/20 transition-colors duration-300 pointer-events-none" />
+                  <Quote className="absolute top-6 right-6 w-16 h-16 text-[#FC8019]/10 group-hover:text-[#FC8019]/20 transition-colors duration-300 pointer-events-none" />
 
                   {/* Header: Rating & Profile */}
                   <div className="flex justify-between items-start mb-6 relative z-10">
-                    <div className="flex gap-1 bg-[#111] px-3 py-1.5 rounded-full border border-white/10">
+                    <div className="flex gap-1 bg-[#F8FAFC] px-3 py-1.5 rounded-full border border-[#E5E7EB]">
                       {[...Array(5)].map((_, i) => (
                         <Star 
                           key={i} 
-                          className={`w-3.5 h-3.5 ${i < testimonial.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} 
+                          className={`w-3.5 h-3.5 ${i < testimonial.rating ? 'text-yellow-400 fill-yellow-400' : 'text-[#9CA3AF]'}`} 
                         />
                       ))}
                     </div>
                   </div>
 
                   {/* Review Text */}
-                  <p className="text-gray-300 text-base leading-relaxed mb-8 italic relative z-10">
+                  <p className="text-[#686B78] text-sm leading-relaxed mb-8 italic relative z-10">
                     "{testimonial.review}"
                   </p>
 
                   {/* Order Details */}
-                  <div className="bg-black/30 rounded-xl p-4 mb-8 border border-white/5">
-                    <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+                  <div className="bg-[#F8F9FA] rounded-xl p-4 mb-8 border border-[#ECECEC]">
+                    <div className="flex items-center gap-2 text-sm text-[#6B7280] mb-2">
                       <Store className="w-4 h-4 text-primary" />
-                      <span className="font-semibold text-gray-300">Ordered From:</span> 
-                      <span className="text-white truncate">{testimonial.restaurant}</span>
+                      <span className="font-semibold text-[#374151]">Ordered From:</span> 
+                      <span className="text-[#111827] truncate">{testimonial.restaurant}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+                    <div className="flex items-center gap-2 text-sm text-[#6B7280] mb-2">
                       <Utensils className="w-4 h-4 text-primary" />
-                      <span className="font-semibold text-gray-300">Dish:</span> 
-                      <span className="text-white truncate">{testimonial.dish}</span>
+                      <span className="font-semibold text-[#374151]">Dish:</span> 
+                      <span className="text-[#111827] truncate">{testimonial.dish}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <div className="flex items-center gap-2 text-xs text-[#9CA3AF]">
                       <Calendar className="w-3.5 h-3.5" />
                       <span>{testimonial.date}</span>
                     </div>
@@ -187,16 +189,17 @@ export default function LovedByFoodLovers() {
 
                   {/* Customer Info */}
                   <div className="flex items-center gap-4 mt-auto">
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white/20">
-                      <img 
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-[#E5E7EB]">
+                      <SafeImage 
                         src={testimonial.image} 
+                        fallback={AVATAR_FALLBACK}
                         alt={testimonial.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div>
-                      <h4 className="text-white font-bold text-sm md:text-base">{testimonial.name}</h4>
-                      <p className="text-gray-500 text-xs md:text-sm">{testimonial.city}</p>
+                      <h4 className="text-[#1C1C1C] font-bold text-sm md:text-base">{testimonial.name}</h4>
+                      <p className="text-[#686B78] text-xs md:text-sm">{testimonial.city}</p>
                     </div>
                   </div>
                 </div>
@@ -213,8 +216,8 @@ export default function LovedByFoodLovers() {
               onClick={() => setCurrentIndex(idx)}
               className={`h-2 rounded-full transition-all duration-300 ${
                 currentIndex === idx 
-                ? 'w-8 bg-[#FF2D3B]' 
-                : 'w-2 bg-white/20 hover:bg-white/40'
+                ? 'w-8 bg-[#FC8019]' 
+                : 'w-2 bg-[#D1D5DB] hover:bg-[#9CA3AF]'
               }`}
               aria-label={`Go to slide ${idx + 1}`}
             />

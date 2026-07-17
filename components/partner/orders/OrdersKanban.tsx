@@ -56,7 +56,7 @@ export default function OrdersKanban({ orders, onUpdateStatus, onViewDetails }: 
         return (
           <div 
             key={column.id} 
-            className="flex-shrink-0 w-80 bg-[#171717] rounded-3xl border border-white/5 flex flex-col overflow-hidden"
+            className="flex-shrink-0 w-80 bg-[#FFFFFF] rounded-3xl border border-[#E5E7EB] flex flex-col overflow-hidden"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, column.id)}
           >
@@ -94,7 +94,7 @@ export default function OrdersKanban({ orders, onUpdateStatus, onViewDetails }: 
               </AnimatePresence>
 
               {columnOrders.length === 0 && (
-                <div className="h-32 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-xl text-gray-500">
+                <div className="h-32 flex flex-col items-center justify-center border-2 border-dashed border-[#E5E7EB] rounded-xl text-[#9CA3AF]">
                   <span className="text-sm font-bold">Drop here</span>
                 </div>
               )}

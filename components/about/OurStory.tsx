@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import SafeImage from "@/components/ui/SafeImage";
+import { RESTAURANT_FALLBACK } from "@/lib/images";
 
 export default function OurStory() {
   return (
@@ -17,14 +19,15 @@ export default function OurStory() {
             className="w-full lg:w-1/2 relative rounded-3xl overflow-hidden group shadow-2xl"
           >
             <div className="aspect-[4/3] w-full overflow-hidden rounded-3xl">
-              <img 
-                src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1000" 
+              <SafeImage 
+                src="/images/catalog/restaurants/indian.webp" 
+                fallback={RESTAURANT_FALLBACK}
                 alt="Our Story" 
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />
             </div>
             {/* Dark gradient overlay for premium feel */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0B] via-transparent to-transparent opacity-80 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#FFFFFF] via-transparent to-transparent opacity-80 pointer-events-none"></div>
           </motion.div>
 
           {/* Right: Content */}
@@ -38,10 +41,10 @@ export default function OurStory() {
             <h2 className="text-3xl md:text-5xl font-black text-white mb-6">Our Story</h2>
             <div className="w-20 h-1.5 bg-primary rounded-full mb-8"></div>
             
-            <p className="text-gray-300 text-lg leading-relaxed mb-6">
+            <p className="text-[#6B7280] text-lg leading-relaxed mb-6">
               Foodiq was built with one simple mission — to make food ordering faster, easier, and more enjoyable for everyone.
             </p>
-            <p className="text-gray-400 leading-relaxed">
+            <p className="text-[#6B7280] leading-relaxed">
               We connect customers with their favorite restaurants through a seamless digital experience, ensuring every meal arrives fresh, fast, and completely hassle-free. What started as a small idea has grown into a vast network of passionate food lovers and dedicated culinary partners.
             </p>
           </motion.div>

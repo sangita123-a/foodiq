@@ -30,7 +30,7 @@ const INITIAL_OFFERS: Offer[] = [
     applicableDishes: [],
     description: "Get 20% off on all orders above ₹500 during the summer weekends.",
     status: "Active",
-    bannerImage: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1000&auto=format&fit=crop"
+    bannerImage: "/images/catalog/cuisines/pizza.webp"
   },
   {
     id: "OFF-1002",
@@ -130,7 +130,7 @@ export default function PartnerOffersPage() {
   const featuredOffer = offers.find(o => o.status === "Active" && o.bannerImage);
 
   return (
-    <div className="min-h-screen bg-[#0B0B0B] flex selection:bg-[var(--color-primary)] selection:text-white">
+    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#FC8019] selection:text-white">
       
       {/* Sidebar - Fixed on left for desktop */}
       <div className="hidden lg:block w-64 flex-shrink-0">

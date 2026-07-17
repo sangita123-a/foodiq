@@ -19,19 +19,19 @@ type Props = {
 
 export default function OrderTimeline({ currentStageId }: Props) {
   return (
-    <div className="bg-[#171717] rounded-3xl p-6 md:p-8 border border-white/5 mb-8">
+    <div className="bg-[#F8FAFC] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] mb-8">
       <h3 className="text-xl font-bold text-white mb-8">Order Status</h3>
 
       <div className="relative pl-4">
         {/* Background Track */}
-        <div className="absolute top-2 bottom-2 left-[23px] w-0.5 bg-white/10 rounded-full"></div>
+        <div className="absolute top-2 bottom-2 left-[23px] w-0.5 bg-[#F8FAFC] rounded-full"></div>
 
         {/* Progress Track */}
         <motion.div 
           initial={{ height: 0 }}
           animate={{ height: `${((currentStageId - 1) / (stages.length - 1)) * 100}%` }}
           transition={{ duration: 1, ease: "easeInOut" }}
-          className="absolute top-2 left-[23px] w-0.5 bg-[#FF2D3B] rounded-full z-0"
+          className="absolute top-2 left-[23px] w-0.5 bg-[#FC8019] rounded-full z-0"
         ></motion.div>
 
         <div className="flex flex-col gap-8 relative z-10">
@@ -41,25 +41,25 @@ export default function OrderTimeline({ currentStageId }: Props) {
 
             return (
               <div key={stage.id} className="flex gap-6 items-start">
-                <div className="bg-[#171717] rounded-full p-1 relative z-10">
+                <div className="bg-[#F8FAFC] rounded-full p-1 relative z-10">
                   {isCompleted ? (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ type: "spring" }}
                     >
-                      <CheckCircle2 className={`w-6 h-6 ${isCurrent ? 'text-[#FF2D3B] drop-shadow-[0_0_10px_rgba(255,45,59,0.8)]' : 'text-white'}`} />
+                      <CheckCircle2 className={`w-6 h-6 ${isCurrent ? 'text-[#FC8019] drop-shadow-[0_0_10px_rgba(252,128,25,0.8)]' : 'text-[#111827]'}`} />
                     </motion.div>
                   ) : (
-                    <Circle className="w-6 h-6 text-white/20" />
+                    <Circle className="w-6 h-6 text-[#111827]/20" />
                   )}
                 </div>
                 <div className={`mt-0.5 ${isCompleted ? 'opacity-100' : 'opacity-40'}`}>
-                  <h4 className={`font-bold ${isCurrent ? 'text-white text-lg' : 'text-gray-300'}`}>
+                  <h4 className={`font-bold ${isCurrent ? 'text-white text-lg' : 'text-[#6B7280]'}`}>
                     {stage.title}
                   </h4>
                   {stage.time && (
-                    <p className="text-xs text-gray-500 mt-1">{stage.time}</p>
+                    <p className="text-xs text-[#9CA3AF] mt-1">{stage.time}</p>
                   )}
                 </div>
               </div>

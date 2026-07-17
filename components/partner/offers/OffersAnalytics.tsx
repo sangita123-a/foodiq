@@ -25,22 +25,22 @@ export default function OffersAnalytics({ data }: OffersAnalyticsProps) {
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
       
       {/* Daily Usage Chart */}
-      <div className="xl:col-span-2 bg-[#171717] rounded-3xl p-6 border border-white/5 shadow-xl">
-        <h3 className="text-xl font-black text-white flex items-center gap-2 mb-6">
-          <BarChart2 className="w-5 h-5 text-primary" /> Daily Coupon Usage
+      <div className="xl:col-span-2 bg-[#FFFFFF] rounded-3xl p-6 border border-[#E5E7EB] shadow-xl">
+        <h3 className="text-xl font-black text-[#111827] flex items-center gap-2 mb-6">
+          <BarChart2 className="w-5 h-5 text-[#FC8019]" /> Daily Coupon Usage
         </h3>
         
-        <div className="h-64 flex items-end justify-between gap-2 md:gap-6 pt-4 border-b border-white/5 pb-4">
+        <div className="h-64 flex items-end justify-between gap-2 md:gap-6 pt-4 border-b border-[#E5E7EB] pb-4">
           {weeklyData.map((d, idx) => (
             <div key={d.day} className="flex-1 flex flex-col items-center justify-end h-full group">
-              <div className="text-transparent group-hover:text-white text-xs font-bold mb-2 transition-colors">
+              <div className="text-transparent group-hover:text-[#111827] text-xs font-bold mb-2 transition-colors">
                 {d.usage}
               </div>
               <motion.div 
                 initial={{ height: 0 }}
                 animate={{ height: d.height }}
                 transition={{ duration: 1, delay: idx * 0.1, type: "spring" }}
-                className={`w-full max-w-[40px] rounded-t-lg transition-colors ${d.height === '100%' ? 'bg-primary' : 'bg-[#111] border-x border-t border-white/10 group-hover:bg-white/10'}`}
+                className={`w-full max-w-[40px] rounded-t-lg transition-colors ${d.height === '100%' ? 'bg-[#FC8019]' : 'bg-[#F8FAFC] border-x border-t border-[#E5E7EB] group-hover:bg-[#F8FAFC]'}`}
               />
             </div>
           ))}
@@ -48,7 +48,7 @@ export default function OffersAnalytics({ data }: OffersAnalyticsProps) {
         
         <div className="flex justify-between px-2 pt-4">
           {weeklyData.map(d => (
-            <div key={d.day} className="flex-1 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <div key={d.day} className="flex-1 text-center text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">
               {d.day}
             </div>
           ))}
@@ -56,36 +56,36 @@ export default function OffersAnalytics({ data }: OffersAnalyticsProps) {
       </div>
 
       {/* Quick Insights */}
-      <div className="bg-[#171717] rounded-3xl p-6 border border-white/5 shadow-xl flex flex-col gap-4">
-        <h3 className="text-xl font-black text-white mb-2">Performance Insights</h3>
+      <div className="bg-[#FFFFFF] rounded-3xl p-6 border border-[#E5E7EB] shadow-xl flex flex-col gap-4">
+        <h3 className="text-xl font-black text-[#111827] mb-2">Performance Insights</h3>
         
-        <div className="bg-[#111] border border-white/5 rounded-2xl p-4 flex items-center gap-4 group hover:border-white/20 transition-colors">
-          <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20 group-hover:bg-green-500 group-hover:text-white transition-colors">
-            <Star className="w-6 h-6 text-green-500 group-hover:text-white" />
+        <div className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-2xl p-4 flex items-center gap-4 group hover:border-[#E5E7EB] transition-colors">
+          <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20 group-hover:bg-green-500 group-hover:text-[#111827] transition-colors">
+            <Star className="w-6 h-6 text-green-500 group-hover:text-[#111827]" />
           </div>
           <div>
-            <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Most Successful Campaign</p>
-            <p className="text-white font-bold">Summer Weekend Blast</p>
+            <p className="text-[#6B7280] text-xs font-bold uppercase tracking-wider">Most Successful Campaign</p>
+            <p className="text-[#111827] font-bold">Summer Weekend Blast</p>
           </div>
         </div>
 
-        <div className="bg-[#111] border border-white/5 rounded-2xl p-4 flex items-center gap-4 group hover:border-white/20 transition-colors">
-          <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-            <Target className="w-6 h-6 text-blue-500 group-hover:text-white" />
+        <div className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-2xl p-4 flex items-center gap-4 group hover:border-[#E5E7EB] transition-colors">
+          <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 group-hover:bg-blue-500 group-hover:text-[#111827] transition-colors">
+            <Target className="w-6 h-6 text-blue-500 group-hover:text-[#111827]" />
           </div>
           <div>
-            <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Top Performing Coupon</p>
-            <p className="text-white font-bold text-lg">FLAT50</p>
+            <p className="text-[#6B7280] text-xs font-bold uppercase tracking-wider">Top Performing Coupon</p>
+            <p className="text-[#111827] font-bold text-lg">FLAT50</p>
           </div>
         </div>
 
-        <div className="bg-[#111] border border-white/5 rounded-2xl p-4 flex items-center gap-4 group hover:border-white/20 transition-colors">
-          <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20 group-hover:bg-purple-500 group-hover:text-white transition-colors">
-            <TrendingUp className="w-6 h-6 text-purple-500 group-hover:text-white" />
+        <div className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-2xl p-4 flex items-center gap-4 group hover:border-[#E5E7EB] transition-colors">
+          <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20 group-hover:bg-purple-500 group-hover:text-[#111827] transition-colors">
+            <TrendingUp className="w-6 h-6 text-purple-500 group-hover:text-[#111827]" />
           </div>
           <div>
-            <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Avg. Revenue / Promo</p>
-            <p className="text-white font-bold">₹24,500</p>
+            <p className="text-[#6B7280] text-xs font-bold uppercase tracking-wider">Avg. Revenue / Promo</p>
+            <p className="text-[#111827] font-bold">₹24,500</p>
           </div>
         </div>
       </div>

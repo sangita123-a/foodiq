@@ -20,22 +20,22 @@ export default function HistoryAnalytics() {
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
       
       {/* Daily Order Trend Chart */}
-      <div className="xl:col-span-2 bg-[#171717] rounded-3xl p-6 border border-white/5 shadow-xl">
-        <h3 className="text-xl font-black text-white flex items-center gap-2 mb-6">
-          <TrendingUp className="w-5 h-5 text-primary" /> Daily Order Trend
+      <div className="xl:col-span-2 bg-[#FFFFFF] rounded-3xl p-6 border border-[#E5E7EB] shadow-xl">
+        <h3 className="text-xl font-black text-[#111827] flex items-center gap-2 mb-6">
+          <TrendingUp className="w-5 h-5 text-[#FC8019]" /> Daily Order Trend
         </h3>
         
-        <div className="h-64 flex items-end justify-between gap-2 md:gap-6 pt-4 border-b border-white/5 pb-4">
+        <div className="h-64 flex items-end justify-between gap-2 md:gap-6 pt-4 border-b border-[#E5E7EB] pb-4">
           {weeklyData.map((data, idx) => (
             <div key={data.day} className="flex-1 flex flex-col items-center justify-end h-full group">
-              <div className="text-transparent group-hover:text-white text-xs font-bold mb-2 transition-colors">
+              <div className="text-transparent group-hover:text-[#111827] text-xs font-bold mb-2 transition-colors">
                 {data.orders}
               </div>
               <motion.div 
                 initial={{ height: 0 }}
                 animate={{ height: data.height }}
                 transition={{ duration: 1, delay: idx * 0.1, type: "spring" }}
-                className={`w-full max-w-[40px] rounded-t-lg transition-colors ${data.height === '100%' ? 'bg-primary' : 'bg-[#111] border-x border-t border-white/10 group-hover:bg-white/10'}`}
+                className={`w-full max-w-[40px] rounded-t-lg transition-colors ${data.height === '100%' ? 'bg-[#FC8019]' : 'bg-[#F8FAFC] border-x border-t border-[#E5E7EB] group-hover:bg-[#F8FAFC]'}`}
               />
             </div>
           ))}
@@ -43,7 +43,7 @@ export default function HistoryAnalytics() {
         
         <div className="flex justify-between px-2 pt-4">
           {weeklyData.map(data => (
-            <div key={data.day} className="flex-1 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <div key={data.day} className="flex-1 text-center text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">
               {data.day}
             </div>
           ))}
@@ -51,36 +51,36 @@ export default function HistoryAnalytics() {
       </div>
 
       {/* Quick Insights */}
-      <div className="bg-[#171717] rounded-3xl p-6 border border-white/5 shadow-xl flex flex-col gap-4">
-        <h3 className="text-xl font-black text-white mb-2">Key Insights</h3>
+      <div className="bg-[#FFFFFF] rounded-3xl p-6 border border-[#E5E7EB] shadow-xl flex flex-col gap-4">
+        <h3 className="text-xl font-black text-[#111827] mb-2">Key Insights</h3>
         
-        <div className="bg-[#111] border border-white/5 rounded-2xl p-4 flex items-center gap-4 group hover:border-white/20 transition-colors">
-          <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 group-hover:bg-orange-500 group-hover:text-white transition-colors">
-            <Flame className="w-6 h-6 text-orange-500 group-hover:text-white" />
+        <div className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-2xl p-4 flex items-center gap-4 group hover:border-[#E5E7EB] transition-colors">
+          <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 group-hover:bg-orange-500 group-hover:text-[#111827] transition-colors">
+            <Flame className="w-6 h-6 text-orange-500 group-hover:text-[#111827]" />
           </div>
           <div>
-            <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Top Selling Dish</p>
-            <p className="text-white font-bold">Hyderabadi Dum Biryani</p>
+            <p className="text-[#6B7280] text-xs font-bold uppercase tracking-wider">Top Selling Dish</p>
+            <p className="text-[#111827] font-bold">Hyderabadi Dum Biryani</p>
           </div>
         </div>
 
-        <div className="bg-[#111] border border-white/5 rounded-2xl p-4 flex items-center gap-4 group hover:border-white/20 transition-colors">
-          <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-            <Users className="w-6 h-6 text-blue-500 group-hover:text-white" />
+        <div className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-2xl p-4 flex items-center gap-4 group hover:border-[#E5E7EB] transition-colors">
+          <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 group-hover:bg-blue-500 group-hover:text-[#111827] transition-colors">
+            <Users className="w-6 h-6 text-blue-500 group-hover:text-[#111827]" />
           </div>
           <div>
-            <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Most Active Area</p>
-            <p className="text-white font-bold">Koramangala 4th Block</p>
+            <p className="text-[#6B7280] text-xs font-bold uppercase tracking-wider">Most Active Area</p>
+            <p className="text-[#111827] font-bold">Koramangala 4th Block</p>
           </div>
         </div>
 
-        <div className="bg-[#111] border border-white/5 rounded-2xl p-4 flex items-center gap-4 group hover:border-white/20 transition-colors">
-          <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20 group-hover:bg-purple-500 group-hover:text-white transition-colors">
-            <Clock className="w-6 h-6 text-purple-500 group-hover:text-white" />
+        <div className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-2xl p-4 flex items-center gap-4 group hover:border-[#E5E7EB] transition-colors">
+          <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20 group-hover:bg-purple-500 group-hover:text-[#111827] transition-colors">
+            <Clock className="w-6 h-6 text-purple-500 group-hover:text-[#111827]" />
           </div>
           <div>
-            <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Peak Order Time</p>
-            <p className="text-white font-bold">8:00 PM - 10:00 PM</p>
+            <p className="text-[#6B7280] text-xs font-bold uppercase tracking-wider">Peak Order Time</p>
+            <p className="text-[#111827] font-bold">8:00 PM - 10:00 PM</p>
           </div>
         </div>
       </div>

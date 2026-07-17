@@ -3,63 +3,66 @@
 import { motion } from "framer-motion";
 import { Offer } from "./types";
 import { Sparkles, ArrowRight } from "lucide-react";
+import SafeImage from "@/components/ui/SafeImage";
+import { OFFER_FALLBACK } from "@/lib/images";
 
 interface FeaturedOfferBannerProps {
   offer: Offer | undefined;
 }
 
 export default function FeaturedOfferBanner({ offer }: FeaturedOfferBannerProps) {
-  
+
   if (!offer) return null;
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="relative w-full h-64 md:h-80 rounded-3xl overflow-hidden mb-8 group"
     >
       {/* Background Image */}
-      <div className="absolute inset-0 bg-[#111]">
+      <div className="absolute inset-0 bg-[#F8FAFC]">
         {offer.bannerImage ? (
-          <img 
-            src={offer.bannerImage} 
-            alt={offer.name} 
-            className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" 
+          <SafeImage
+            src={offer.bannerImage}
+            fallback={OFFER_FALLBACK}
+            alt={offer.name}
+            className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-r from-[#171717] to-primary/20"></div>
+          <div className="w-full h-full bg-gradient-to-r from-[#FFFFFF] to-[#FC8019]/20"></div>
         )}
       </div>
 
       {/* Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
-      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/20 to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-[#FFFFFF] via-[#FFFFFF]/70 to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-[#FFFFFF] via-[#FFFFFF]/40 to-transparent"></div>
 
       {/* Content */}
       <div className="absolute inset-0 p-8 md:p-12 flex flex-col justify-end">
         <div className="flex items-center gap-2 mb-4">
-          <span className="bg-primary text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex items-center gap-1">
+          <span className="bg-[#FC8019] text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex items-center gap-1">
             <Sparkles className="w-3 h-3" /> Featured Campaign
           </span>
-          <span className="bg-white/10 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full border border-white/20">
+          <span className="bg-[#F8FAFC] backdrop-blur-md text-[#111827] text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full border border-[#E5E7EB]">
             {offer.type}
           </span>
         </div>
 
-        <h2 className="text-3xl md:text-5xl font-black text-white mb-2 max-w-2xl leading-tight">
+        <h2 className="text-3xl md:text-5xl font-black text-[#111827] mb-2 max-w-2xl leading-tight">
           {offer.name}
         </h2>
-        <p className="text-gray-300 max-w-xl mb-6 line-clamp-2">
+        <p className="text-[#6B7280] max-w-xl mb-6 line-clamp-2">
           {offer.description}
         </p>
 
         <div className="flex items-center gap-4">
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-5 py-3 flex flex-col">
-            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Coupon Code</span>
-            <span className="text-xl font-black text-white uppercase tracking-widest">{offer.code}</span>
+          <div className="bg-[#F8FAFC] backdrop-blur-md border border-[#E5E7EB] rounded-xl px-5 py-3 flex flex-col">
+            <span className="text-[10px] text-[#6B7280] font-bold uppercase tracking-wider">Coupon Code</span>
+            <span className="text-xl font-black text-[#111827] uppercase tracking-widest">{offer.code}</span>
           </div>
-          
-          <button className="bg-primary hover:bg-[#e02633] text-white px-6 py-4 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg shadow-primary/20 h-full">
+
+          <button className="bg-[#FC8019] hover:bg-[#E66F0D] text-white px-6 py-4 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg shadow-[#FC8019]/20 h-full">
             View Analytics <ArrowRight className="w-4 h-4" />
           </button>
         </div>

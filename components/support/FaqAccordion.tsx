@@ -22,18 +22,18 @@ export default function FaqAccordion({ faqs }: Props) {
   };
 
   return (
-    <div className="bg-[#171717] rounded-3xl p-6 md:p-8 border border-white/5">
+    <div className="bg-[#F8FAFC] rounded-3xl p-6 md:p-8 border border-[#E5E7EB]">
       <h2 className="text-2xl font-bold text-white mb-8">Frequently Asked Questions</h2>
       
       <div className="space-y-4">
         {faqs.map((faq) => (
           <div 
             key={faq.id} 
-            className="border border-white/5 rounded-2xl overflow-hidden bg-[#111]"
+            className="border border-[#E5E7EB] rounded-2xl overflow-hidden bg-white"
           >
             <button 
               onClick={() => toggle(faq.id)}
-              className="w-full flex items-center justify-between p-5 md:p-6 text-left transition-colors hover:bg-white/5"
+              className="w-full flex items-center justify-between p-5 md:p-6 text-left transition-colors hover:bg-[#F8FAFC]"
             >
               <span className={`font-bold pr-4 transition-colors ${openId === faq.id ? "text-primary" : "text-white"}`}>
                 {faq.question}
@@ -43,7 +43,7 @@ export default function FaqAccordion({ faqs }: Props) {
                 transition={{ duration: 0.2 }}
                 className="flex-shrink-0"
               >
-                <ChevronDown className={`w-5 h-5 ${openId === faq.id ? "text-primary" : "text-gray-400"}`} />
+                <ChevronDown className={`w-5 h-5 ${openId === faq.id ? "text-primary" : "text-[#6B7280]"}`} />
               </motion.div>
             </button>
             
@@ -55,7 +55,7 @@ export default function FaqAccordion({ faqs }: Props) {
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
-                  <div className="px-5 md:px-6 pb-6 pt-2 text-gray-400 leading-relaxed border-t border-white/5">
+                  <div className="px-5 md:px-6 pb-6 pt-2 text-[#6B7280] leading-relaxed border-t border-[#E5E7EB]">
                     {faq.answer}
                   </div>
                 </motion.div>

@@ -12,7 +12,7 @@ function ToggleSwitch({ checked, onClick }: { checked: boolean; onClick: () => v
     <button
       type="button"
       onClick={onClick}
-      className={`w-12 h-6 rounded-full p-1 transition-colors relative flex-shrink-0 ${checked ? "bg-primary" : "bg-[#111] border border-white/10"}`}
+      className={`w-12 h-6 rounded-full p-1 transition-colors relative flex-shrink-0 ${checked ? "bg-primary" : "bg-white border border-[#E5E7EB]"}`}
     >
       <motion.div
         layout
@@ -71,7 +71,7 @@ export default function NotificationSettings() {
   };
 
   if (isLoading) {
-    return <div className="text-white animate-pulse h-64 bg-white/5 rounded-3xl"></div>;
+    return <div className="text-[#111827] animate-pulse h-64 bg-[#F8FAFC] rounded-3xl"></div>;
   }
 
   return (
@@ -79,22 +79,22 @@ export default function NotificationSettings() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="bg-[#171717] rounded-3xl p-6 md:p-10 border border-white/5 shadow-2xl"
+      className="bg-[#F8FAFC] rounded-3xl p-6 md:p-10 border border-[#E5E7EB] shadow-2xl"
     >
       <h2 className="text-2xl font-bold text-white mb-8">Notification Preferences</h2>
 
       <form id="settings-form" onSubmit={handleSave}>
-        <div className="mb-10 pb-8 border-b border-white/5">
+        <div className="mb-10 pb-8 border-b border-[#E5E7EB]">
           <div className="flex items-center gap-3 mb-6">
             <BellRing className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-bold text-white">Push Notifications</h3>
+            <h3 className="text-lg font-bold text-[#111827]">Push Notifications</h3>
           </div>
 
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="text-white font-bold mb-1">Order Updates</h4>
-                <p className="text-gray-500 text-sm">Get real-time tracking updates for active orders.</p>
+                <p className="text-[#9CA3AF] text-sm">Get real-time tracking updates for active orders.</p>
               </div>
               <ToggleSwitch checked={toggles.orders} onClick={() => toggle("orders")} />
             </div>
@@ -102,7 +102,7 @@ export default function NotificationSettings() {
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="text-white font-bold mb-1">Offers & Promotions</h4>
-                <p className="text-gray-500 text-sm">Receive alerts for flash sales and daily discounts.</p>
+                <p className="text-[#9CA3AF] text-sm">Receive alerts for flash sales and daily discounts.</p>
               </div>
               <ToggleSwitch checked={toggles.offers} onClick={() => toggle("offers")} />
             </div>
@@ -110,7 +110,7 @@ export default function NotificationSettings() {
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="text-white font-bold mb-1">Reward Notifications</h4>
-                <p className="text-gray-500 text-sm">Know when you earn points or level up.</p>
+                <p className="text-[#9CA3AF] text-sm">Know when you earn points or level up.</p>
               </div>
               <ToggleSwitch checked={toggles.rewards} onClick={() => toggle("rewards")} />
             </div>
@@ -122,12 +122,12 @@ export default function NotificationSettings() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center">
-                  <Mail className="w-5 h-5 text-gray-400" />
+                <div className="w-10 h-10 bg-[#F8FAFC] rounded-xl flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-[#6B7280]" />
                 </div>
                 <div>
                   <h4 className="text-white font-bold mb-1">Email Newsletters</h4>
-                  <p className="text-gray-500 text-sm">Weekly summaries and special event invites.</p>
+                  <p className="text-[#9CA3AF] text-sm">Weekly summaries and special event invites.</p>
                 </div>
               </div>
               <ToggleSwitch checked={toggles.email} onClick={() => toggle("email")} />
@@ -135,12 +135,12 @@ export default function NotificationSettings() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center">
-                  <MessageSquare className="w-5 h-5 text-gray-400" />
+                <div className="w-10 h-10 bg-[#F8FAFC] rounded-xl flex items-center justify-center">
+                  <MessageSquare className="w-5 h-5 text-[#6B7280]" />
                 </div>
                 <div>
                   <h4 className="text-white font-bold mb-1">SMS Notifications</h4>
-                  <p className="text-gray-500 text-sm">Critical order updates only via text message.</p>
+                  <p className="text-[#9CA3AF] text-sm">Critical order updates only via text message.</p>
                 </div>
               </div>
               <ToggleSwitch checked={toggles.sms} onClick={() => toggle("sms")} />

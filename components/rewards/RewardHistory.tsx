@@ -16,15 +16,15 @@ type Props = {
 
 export default function RewardHistory({ history }: Props) {
   return (
-    <div className="bg-[#171717] rounded-3xl p-6 md:p-8 border border-white/5">
-      <div className="flex items-center gap-3 mb-8 pb-6 border-b border-white/5">
+    <div className="bg-[#F8FAFC] rounded-3xl p-6 md:p-8 border border-[#E5E7EB]">
+      <div className="flex items-center gap-3 mb-8 pb-6 border-b border-[#E5E7EB]">
         <History className="w-6 h-6 text-primary" />
-        <h2 className="text-2xl font-bold text-white">Reward History</h2>
+        <h2 className="text-2xl font-bold text-[#111827]">Reward History</h2>
       </div>
 
       <div className="flex flex-col gap-4">
         {history.map((item) => (
-          <div key={item.id} className="flex items-center justify-between p-4 bg-[#111] rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
+          <div key={item.id} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-[#E5E7EB] hover:border-[#E5E7EB] transition-colors">
             
             <div className="flex items-center gap-4">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
@@ -35,7 +35,7 @@ export default function RewardHistory({ history }: Props) {
               
               <div>
                 <h4 className="text-white font-bold">{item.title}</h4>
-                <p className="text-gray-500 text-xs font-bold mt-1">{item.date}</p>
+                <p className="text-[#9CA3AF] text-xs font-bold mt-1">{item.date}</p>
               </div>
             </div>
 

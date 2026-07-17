@@ -11,9 +11,9 @@ export default function AboutHero() {
       {/* Premium Food Background with Dark Overlay */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=2070')" }}
+        style={{ backgroundImage: "url('/images/catalog/cuisines/indian.webp')" }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0B0B0B]/90 via-[#0B0B0B]/80 to-[#0B0B0B]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/80 to-white"></div>
       </div>
 
       <div className="container mx-auto px-4 md:px-8 relative z-10 text-center">
@@ -21,7 +21,7 @@ export default function AboutHero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6"
+          className="mb-6 text-5xl font-black tracking-[-0.045em] text-[#1C1C1C] md:text-6xl lg:text-7xl"
         >
           About <span className="text-primary">Foodiq</span>
         </motion.h1>
@@ -30,7 +30,7 @@ export default function AboutHero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed"
+          className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-[#686B78] md:text-xl"
         >
           Connecting food lovers with the best restaurants, delivered fast and fresh straight to your door.
         </motion.p>
@@ -42,7 +42,7 @@ export default function AboutHero() {
         >
           <Link 
             href="/"
-            className="inline-flex items-center gap-2 bg-primary hover:bg-[#e02633] text-white px-8 py-4 rounded-xl font-black transition-colors shadow-[0_0_30px_rgba(255,45,59,0.4)] hover:-translate-y-1"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#FC8019] px-8 py-4 font-bold text-white shadow-[0_12px_30px_rgba(252,128,25,0.22)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#EF4F5F] hover:shadow-[0_16px_34px_rgba(239,79,95,0.22)]"
           >
             Explore Restaurants <ArrowRight className="w-5 h-5" />
           </Link>

@@ -20,23 +20,23 @@ export default function FaqPreview() {
   };
 
   return (
-    <div className="py-20 bg-[#111]">
+    <div className="py-20 bg-white">
       <div className="container mx-auto px-4 md:px-8 max-w-4xl">
         
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-black text-white mb-4">Frequently Asked Questions</h2>
-          <p className="text-gray-400">Find quick answers to common questions below.</p>
+          <p className="text-[#6B7280]">Find quick answers to common questions below.</p>
         </div>
 
         <div className="space-y-4 mb-10">
           {faqs.map((faq) => (
             <div 
               key={faq.id} 
-              className="border border-white/5 rounded-2xl overflow-hidden bg-[#171717]"
+              className="border border-[#E5E7EB] rounded-2xl overflow-hidden bg-[#F8FAFC]"
             >
               <button 
                 onClick={() => toggle(faq.id)}
-                className="w-full flex items-center justify-between p-5 md:p-6 text-left transition-colors hover:bg-white/5"
+                className="w-full flex items-center justify-between p-5 md:p-6 text-left transition-colors hover:bg-[#F8FAFC]"
               >
                 <span className={`font-bold pr-4 transition-colors ${openId === faq.id ? "text-primary" : "text-white"}`}>
                   {faq.question}
@@ -46,7 +46,7 @@ export default function FaqPreview() {
                   transition={{ duration: 0.2 }}
                   className="flex-shrink-0"
                 >
-                  <ChevronDown className={`w-5 h-5 ${openId === faq.id ? "text-primary" : "text-gray-400"}`} />
+                  <ChevronDown className={`w-5 h-5 ${openId === faq.id ? "text-primary" : "text-[#6B7280]"}`} />
                 </motion.div>
               </button>
               
@@ -58,7 +58,7 @@ export default function FaqPreview() {
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                   >
-                    <div className="px-5 md:px-6 pb-6 pt-2 text-gray-400 leading-relaxed border-t border-white/5">
+                    <div className="px-5 md:px-6 pb-6 pt-2 text-[#6B7280] leading-relaxed border-t border-[#E5E7EB]">
                       {faq.answer}
                     </div>
                   </motion.div>
@@ -71,9 +71,9 @@ export default function FaqPreview() {
         <div className="text-center">
           <Link 
             href="/help-support"
-            className="inline-flex items-center gap-2 bg-[#171717] hover:bg-white/5 text-white border border-white/10 px-8 py-4 rounded-xl font-bold transition-colors"
+            className="inline-flex items-center gap-2 bg-[#F8FAFC] hover:bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] px-8 py-4 rounded-xl font-bold transition-colors"
           >
-            View All FAQs <ArrowRight className="w-5 h-5 text-gray-400" />
+            View All FAQs <ArrowRight className="w-5 h-5 text-[#6B7280]" />
           </Link>
         </div>
 

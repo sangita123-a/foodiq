@@ -34,48 +34,48 @@ export default function ContactForm() {
     }
   };
   return (
-    <div className="bg-[#171717] rounded-3xl p-8 md:p-10 border border-white/5 shadow-2xl h-full">
+    <div className="bg-[#F8FAFC] rounded-3xl p-8 md:p-10 border border-[#E5E7EB] shadow-2xl h-full">
       <h2 className="text-2xl font-bold text-white mb-2">Send us a Message</h2>
-      <p className="text-gray-400 text-sm mb-8">Fill out the form below and we'll get back to you as soon as possible.</p>
+      <p className="text-[#6B7280] text-sm mb-8">Fill out the form below and we'll get back to you as soon as possible.</p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-bold text-gray-400 mb-2">Full Name</label>
+            <label className="block text-sm font-bold text-[#6B7280] mb-2">Full Name</label>
             <input 
               type="text" 
               name="name"
               required
               placeholder="John Doe"
-              className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-400 mb-2">Email Address</label>
+            <label className="block text-sm font-bold text-[#6B7280] mb-2">Email Address</label>
             <input 
               type="email" 
               name="email"
               required
               placeholder="john@example.com"
-              className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-bold text-gray-400 mb-2">Phone Number</label>
+            <label className="block text-sm font-bold text-[#6B7280] mb-2">Phone Number</label>
             <input 
               type="tel" 
               name="phone"
               placeholder="+91 9876543210"
-              className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-400 mb-2">Reason for Contact</label>
-            <select name="reason" className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer">
+            <label className="block text-sm font-bold text-[#6B7280] mb-2">Reason for Contact</label>
+            <select name="reason" className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer">
               <option>General Inquiry</option>
               <option>Order Support</option>
               <option>Partnership</option>
@@ -87,33 +87,33 @@ export default function ContactForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-400 mb-2">Subject</label>
+          <label className="block text-sm font-bold text-[#6B7280] mb-2">Subject</label>
           <input 
             type="text" 
             name="subject"
             required
             placeholder="How can we help?"
-            className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-400 mb-2">Message</label>
+          <label className="block text-sm font-bold text-[#6B7280] mb-2">Message</label>
           <textarea 
             name="message"
             required
             rows={5}
             placeholder="Write your message here..."
-            className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
+            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
           ></textarea>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 pt-4">
-          <button type="submit" disabled={isSubmitting} className="flex-1 bg-primary hover:bg-[#e02633] text-white px-6 py-4 rounded-xl font-black transition-colors shadow-xl flex items-center justify-center gap-2 disabled:opacity-50">
+          <button type="submit" disabled={isSubmitting} className="flex-1 bg-primary hover:bg-[#E76F0B] text-white px-6 py-4 rounded-xl font-black transition-colors shadow-xl flex items-center justify-center gap-2 disabled:opacity-50">
             {isSubmitting ? "Sending..." : "Send Message"} <Send className="w-4 h-4" />
           </button>
-          <button type="reset" className="w-full sm:w-auto bg-[#111] hover:bg-white/5 border border-white/10 text-white px-6 py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2">
-            Clear Form <RefreshCcw className="w-4 h-4 text-gray-400" />
+          <button type="reset" className="w-full sm:w-auto bg-white hover:bg-[#F8FAFC] border border-[#E5E7EB] text-white px-6 py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2">
+            Clear Form <RefreshCcw className="w-4 h-4 text-[#6B7280]" />
           </button>
         </div>
 

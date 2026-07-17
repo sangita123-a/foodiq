@@ -10,9 +10,9 @@ interface LocationInsightsProps {
 
 export default function LocationInsights({ data }: LocationInsightsProps) {
   return (
-    <div className="bg-[#171717] rounded-3xl p-6 md:p-8 border border-white/5 shadow-xl flex flex-col h-full">
+    <div className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-xl flex flex-col h-full">
       <div className="flex items-center justify-between mb-8">
-        <h3 className="text-xl font-black text-white flex items-center gap-2">
+        <h3 className="text-xl font-black text-[#111827] flex items-center gap-2">
           <MapPin className="w-6 h-6 text-orange-500" /> Location Insights
         </h3>
       </div>
@@ -20,7 +20,7 @@ export default function LocationInsights({ data }: LocationInsightsProps) {
       <div className="flex flex-col xl:flex-row gap-8 flex-1">
         
         {/* Heatmap Placeholder */}
-        <div className="flex-1 min-h-[200px] bg-[#111] rounded-2xl border border-white/5 relative overflow-hidden group">
+        <div className="flex-1 min-h-[200px] bg-[#F8FAFC] rounded-2xl border border-[#E5E7EB] relative overflow-hidden group">
           {/* Abstract map pattern simulation */}
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent bg-[length:20px_20px]"></div>
           
@@ -42,13 +42,13 @@ export default function LocationInsights({ data }: LocationInsightsProps) {
           />
 
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity">
-            <span className="bg-primary px-4 py-2 rounded-xl text-white font-bold text-sm">Interactive Map Coming Soon</span>
+            <span className="bg-[#FC8019] px-4 py-2 rounded-xl text-white font-bold text-sm">Interactive Map Coming Soon</span>
           </div>
         </div>
 
         {/* Top Areas List */}
         <div className="w-full xl:w-64 flex flex-col justify-center space-y-4">
-          <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Top Delivery Areas</h4>
+          <h4 className="text-sm font-bold text-[#6B7280] uppercase tracking-wider mb-2">Top Delivery Areas</h4>
           {data.map((loc, idx) => (
             <motion.div 
               key={loc.area}
@@ -57,10 +57,10 @@ export default function LocationInsights({ data }: LocationInsightsProps) {
               transition={{ duration: 0.5, delay: idx * 0.1 }}
             >
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-white font-bold">{loc.area}</span>
-                <span className="text-gray-400 font-bold">{loc.percentage}%</span>
+                <span className="text-[#111827] font-bold">{loc.area}</span>
+                <span className="text-[#6B7280] font-bold">{loc.percentage}%</span>
               </div>
-              <div className="w-full h-1.5 bg-[#111] rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-[#F8FAFC] rounded-full overflow-hidden">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${loc.percentage}%` }}

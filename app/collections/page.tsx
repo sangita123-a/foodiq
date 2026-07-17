@@ -69,13 +69,13 @@ function CollectionSection({
         )}
       </div>
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="food-grid">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-[280px] bg-white/5 rounded-2xl animate-pulse border border-white/10" />
+            <div key={i} className="h-[280px] bg-[#F8FAFC] rounded-2xl animate-pulse border border-[#E5E7EB]" />
           ))}
         </div>
       ) : restaurants.length === 0 ? (
-        <div className="text-center py-12 bg-[#121212] rounded-2xl border border-white/10 text-gray-400">
+        <div className="text-center py-12 bg-[#FFFFFF] rounded-2xl border border-[#E5E7EB] text-[#6B7280]">
           No restaurants in this collection yet.
           {fallback && (
             <div className="mt-4">
@@ -86,7 +86,7 @@ function CollectionSection({
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="food-grid">
           {restaurants.map((restaurant: any, idx: number) => (
             <RestaurantCard key={restaurant.id} {...restaurant} delay={idx * 0.05} />
           ))}
@@ -98,11 +98,11 @@ function CollectionSection({
 
 export default function CollectionsPage() {
   return (
-    <main className="min-h-screen bg-[#0B0B0B] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12">
-        <div className="mb-10 text-center md:text-left border-b border-white/5 pb-8">
+        <div className="mb-10 text-center md:text-left border-b border-[#E5E7EB] pb-8">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3">Collections</h1>
           <p className="text-[var(--color-gray-text)] text-lg">
             Curated restaurant lists to help you discover your next meal.

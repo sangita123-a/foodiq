@@ -34,9 +34,19 @@ export const OFFER_SLUG_MAP: Record<string, string> = {
   WELCOME50: "welcome50",
   FREEDEL: "freedelivery",
   BOGO: "bogo",
+  PIZZABOGO: "pizza-bogo",
+  BIRYANI150: "biryani150",
+  FREEDESSERT: "free-dessert",
 };
 
-export const OFFER_IDS = ["welcome50", "freedelivery", "bogo"] as const;
+export const OFFER_IDS = [
+  "welcome50",
+  "freedelivery",
+  "bogo",
+  "pizza-bogo",
+  "biryani150",
+  "free-dessert",
+] as const;
 
 export type OfferId = (typeof OFFER_IDS)[number];
 
@@ -51,7 +61,7 @@ export const STATIC_OFFER_STYLES = [
     subtitle: "On your first order",
     code: "WELCOME50",
     color: "from-rose-500 to-red-600",
-    image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=600",
+    image: "/images/catalog/cuisines/pizza.webp",
   },
   {
     slug: "freedelivery",
@@ -59,7 +69,7 @@ export const STATIC_OFFER_STYLES = [
     subtitle: "On orders above ₹500",
     code: "FREEDEL",
     color: "from-indigo-500 to-blue-600",
-    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=600",
+    image: "/images/catalog/cuisines/biryani.webp",
   },
   {
     slug: "bogo",
@@ -67,6 +77,22 @@ export const STATIC_OFFER_STYLES = [
     subtitle: "On selected desserts",
     code: "BOGO",
     color: "from-amber-500 to-orange-600",
-    image: "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&q=80&w=600",
+    image: "/images/catalog/cuisines/desserts.webp",
+  },
+  {
+    slug: "pizza-bogo",
+    title: "Buy 1 Get 1 Free Pizza",
+    subtitle: "50% OFF · Valid Today",
+    code: "PIZZABOGO",
+    color: "from-red-500 to-orange-500",
+    image: "/images/catalog/dishes/pizza/cheese-burst-pizza.webp",
+  },
+  {
+    slug: "biryani150",
+    title: "Flat ₹150 OFF on Biryani",
+    subtitle: "Minimum order ₹499",
+    code: "BIRYANI150",
+    color: "from-emerald-500 to-teal-600",
+    image: "/images/catalog/dishes/biryani/hyderabadi-biryani.webp",
   },
 ];

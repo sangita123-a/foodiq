@@ -11,6 +11,7 @@ import useSWR, { mutate as globalMutate } from "swr";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
 import { Trash2 } from "lucide-react";
+import { getFoodImage } from "@/lib/images";
 
 export default function CartPage() {
   const { data, mutate, isLoading, error } = useSWR('/api/cart');
@@ -77,7 +78,7 @@ export default function CartPage() {
     id: item.cart_item_id,
     name: item.name,
     restaurant: item.restaurant_name || "Foodiq Kitchen",
-    image: item.image_url || "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8",
+    image: getFoodImage(item.image_url),
     price: item.discount_price ? parseFloat(item.discount_price) : parseFloat(item.price),
     quantity: item.quantity,
     isVeg: item.is_vegetarian || false,
@@ -85,21 +86,21 @@ export default function CartPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-[#0B0B0B] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+      <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 md:px-8 py-12">
-          <div className="mb-10 border-b border-white/5 pb-8">
-            <div className="w-64 h-12 bg-white/5 animate-pulse rounded-lg mb-3"></div>
-            <div className="w-96 h-6 bg-white/5 animate-pulse rounded-lg"></div>
+          <div className="mb-10 border-b border-[#E5E7EB] pb-8">
+            <div className="w-64 h-12 bg-[#F8FAFC] animate-pulse rounded-lg mb-3"></div>
+            <div className="w-96 h-6 bg-[#F8FAFC] animate-pulse rounded-lg"></div>
           </div>
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="w-full lg:w-[65%] xl:w-[70%] flex flex-col gap-6">
               {[1, 2].map((i) => (
-                <div key={i} className="h-32 bg-white/5 animate-pulse rounded-2xl border border-white/10"></div>
+                <div key={i} className="h-32 bg-[#F8FAFC] animate-pulse rounded-2xl border border-[#E5E7EB]"></div>
               ))}
             </div>
             <div className="w-full lg:w-[35%] xl:w-[30%]">
-              <div className="h-80 bg-white/5 animate-pulse rounded-2xl border border-white/10"></div>
+              <div className="h-80 bg-[#F8FAFC] animate-pulse rounded-2xl border border-[#E5E7EB]"></div>
             </div>
           </div>
         </div>
@@ -109,7 +110,7 @@ export default function CartPage() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[#0B0B0B] flex flex-col items-center justify-center gap-4 pt-[90px]">
+      <main className="min-h-screen bg-[#FFFFFF] flex flex-col items-center justify-center gap-4 pt-[90px]">
         <Navbar />
         <div className="text-white text-xl">Failed to load cart</div>
         <button onClick={() => mutate()} className="px-6 py-2 bg-primary text-white rounded-lg">Retry</button>
@@ -118,13 +119,13 @@ export default function CartPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0B0B0B] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12">
         
         {/* Page Header */}
-        <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between border-b border-white/5 pb-8 gap-4">
+        <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between border-b border-[#E5E7EB] pb-8 gap-4">
           <div>
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3">
               🛒 Your Cart
@@ -137,7 +138,7 @@ export default function CartPage() {
             <button 
               onClick={handleClearCart}
               disabled={isUpdating}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 hover:border-white/20 transition-all font-medium disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#E5E7EB] text-[#6B7280] hover:text-[#111827] hover:bg-[#F8FAFC] hover:border-[#E5E7EB] transition-all font-medium disabled:opacity-50"
             >
               <Trash2 className="w-4 h-4" />
               Clear Cart

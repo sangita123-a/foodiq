@@ -2,8 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Star, Plus, Minus, Clock, Heart } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Star, Plus, Minus, Clock, Heart, Share2, Eye } from "lucide-react";
 import { getFoodImage } from "@/lib/images";
+import { shareContent } from "@/lib/share";
+import { useToast } from "@/contexts/ToastContext";
 
 export type CuisineFoodItem = {
   menu_item_id: string;
@@ -26,6 +29,7 @@ type Props = {
   isFavorite?: boolean;
   onUpdateQuantity: (menuItemId: string, delta: number) => void;
   onToggleFavorite?: (menuItemId: string) => void;
+  onBuyNow?: (menuItemId: string) => void;
 };
 
 export default function CuisineFoodCard({
@@ -35,18 +39,33 @@ export default function CuisineFoodCard({
   isFavorite = false,
   onUpdateQuantity,
   onToggleFavorite,
+  onBuyNow,
 }: Props) {
+  const router = useRouter();
+  const { showToast } = useToast();
   const rating = typeof item.rating === "number" ? item.rating.toFixed(1) : item.rating || "4.5";
   const hasDiscount = item.discounted_price < item.original_price;
+  const foodHref = `/food/${item.menu_item_id}`;
+
+  const handleShare = async (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    await shareContent({
+      title: item.name,
+      text: item.description,
+      url: `${window.location.origin}${foodHref}`,
+      onCopied: () => showToast("Dish link copied", "success"),
+    });
+  };
 
   return (
-    <div className="bg-[#111] rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-colors group flex flex-col">
-      <div className="relative h-52 w-full overflow-hidden">
+    <div className="food-card group flex flex-col">
+      <Link href={foodHref} className="food-card-image block">
         <Image
           src={getFoodImage(item.image_url)}
           alt={item.name}
           fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
+          className="object-cover"
           sizes="(max-width: 768px) 100vw, 320px"
         />
         <div
@@ -61,8 +80,12 @@ export default function CuisineFoodCard({
         {onToggleFavorite && (
           <button
             type="button"
-            onClick={() => onToggleFavorite(item.menu_item_id)}
-            className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-colors"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onToggleFavorite(item.menu_item_id);
+            }}
+            className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-[#F8FAFC] transition-colors"
             aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
           >
             <Heart
@@ -70,18 +93,20 @@ export default function CuisineFoodCard({
             />
           </button>
         )}
-      </div>
+      </Link>
 
-      <div className="p-5 flex-1 flex flex-col">
-        <h3 className="text-lg font-bold text-white mb-1 line-clamp-1">{item.name}</h3>
+      <div className="food-card-body flex-1 flex flex-col">
+        <Link href={foodHref} className="food-card-title text-white mb-1 line-clamp-1 hover:text-[#FC8019] transition-colors">
+          {item.name}
+        </Link>
         <Link
           href={`/restaurant/${item.restaurant_id}`}
-          className="text-gray-400 text-sm mb-2 line-clamp-1 hover:text-[#FF2D3B] transition-colors"
+          className="text-[#6B7280] text-sm mb-2 line-clamp-1 hover:text-[#FC8019] transition-colors"
         >
           {item.restaurant_name}
         </Link>
         {item.description && (
-          <p className="text-gray-500 text-xs mb-3 line-clamp-2">{item.description}</p>
+          <p className="food-card-description text-xs mb-3 line-clamp-2">{item.description}</p>
         )}
 
         <div className="flex items-center gap-3 mb-4 text-sm">
@@ -89,17 +114,17 @@ export default function CuisineFoodCard({
             <Star className="w-4 h-4 fill-yellow-400" />
             <span className="text-white font-medium">{rating}</span>
           </div>
-          <div className="flex items-center gap-1 text-gray-400">
+          <div className="flex items-center gap-1 text-[#6B7280]">
             <Clock className="w-3.5 h-3.5" />
             <span>{item.delivery_time || "30 min"}</span>
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-3 mt-auto">
+        <div className="flex items-center justify-between gap-3 mt-auto mb-4">
           <div className="flex items-baseline gap-2">
-            <span className="text-xl font-bold text-[#FF2D3B]">₹{item.discounted_price}</span>
+            <span className="food-price text-[#FC8019]">₹{item.discounted_price}</span>
             {hasDiscount && (
-              <span className="text-sm text-gray-500 line-through">₹{item.original_price}</span>
+              <span className="text-sm text-[#9CA3AF] line-through">₹{item.original_price}</span>
             )}
           </div>
 
@@ -107,17 +132,17 @@ export default function CuisineFoodCard({
             <button
               onClick={() => onUpdateQuantity(item.menu_item_id, 1)}
               disabled={isUpdating}
-              className="flex items-center gap-1.5 bg-[#FF2D3B] hover:bg-[#e02633] disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+              className="food-button min-h-0 flex items-center gap-1.5 bg-[#FC8019] hover:bg-[#E76F0B] disabled:opacity-50 text-white px-3 py-2 rounded-xl text-sm font-bold"
             >
               <Plus className="w-4 h-4" />
               Add
             </button>
           ) : (
-            <div className="flex items-center gap-3 bg-white/10 rounded-xl px-2 py-1.5">
+            <div className="flex items-center gap-3 bg-[#F8FAFC] rounded-xl px-2 py-1.5">
               <button
                 onClick={() => onUpdateQuantity(item.menu_item_id, -1)}
                 disabled={isUpdating}
-                className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50"
+                className="w-8 h-8 flex items-center justify-center text-white hover:bg-[#F8FAFC] rounded-lg transition-colors disabled:opacity-50"
               >
                 <Minus className="w-4 h-4" />
               </button>
@@ -125,12 +150,38 @@ export default function CuisineFoodCard({
               <button
                 onClick={() => onUpdateQuantity(item.menu_item_id, 1)}
                 disabled={isUpdating}
-                className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50"
+                className="w-8 h-8 flex items-center justify-center text-white hover:bg-[#F8FAFC] rounded-lg transition-colors disabled:opacity-50"
               >
                 <Plus className="w-4 h-4" />
               </button>
             </div>
           )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[#E5E7EB]">
+          <Link
+            href={foodHref}
+            className="inline-flex items-center justify-center gap-1 text-[11px] font-bold text-[#6B7280] hover:text-[#111827] px-2 py-2 rounded-lg bg-[#F8FAFC] hover:bg-[#F8FAFC] transition-colors"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            View Details
+          </Link>
+          <button
+            type="button"
+            onClick={() => (onBuyNow ? onBuyNow(item.menu_item_id) : router.push(foodHref))}
+            disabled={isUpdating}
+            className="inline-flex items-center justify-center gap-1 text-[11px] font-bold text-primary px-2 py-2 rounded-lg bg-primary/10 hover:bg-primary hover:text-[#111827] transition-colors disabled:opacity-50"
+          >
+            Order Now
+          </button>
+          <button
+            type="button"
+            onClick={handleShare}
+            className="col-span-2 inline-flex items-center justify-center gap-1 text-[11px] font-bold text-[#6B7280] hover:text-[#111827] px-2 py-2 rounded-lg bg-[#F8FAFC] hover:bg-[#F8FAFC] transition-colors"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            Share
+          </button>
         </div>
       </div>
     </div>

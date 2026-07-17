@@ -12,16 +12,16 @@ export default function SettingsHeader() {
       transition={{ duration: 0.5 }}
       className="mb-8"
     >
-      <div className="flex items-center gap-2 text-sm text-gray-500 font-bold uppercase tracking-wider mb-4">
-        <Link href="/partner/dashboard" className="hover:text-primary transition-colors">Dashboard</Link>
+      <div className="flex items-center gap-2 text-sm text-[#9CA3AF] font-bold uppercase tracking-wider mb-4">
+        <Link href="/partner/dashboard" className="hover:text-[#FC8019] transition-colors">Dashboard</Link>
         <ChevronRight className="w-4 h-4" />
-        <span className="text-white">Settings</span>
+        <span className="text-[#111827]">Settings</span>
       </div>
       
-      <h1 className="text-3xl md:text-4xl font-black text-white mb-2 flex items-center gap-3">
+      <h1 className="text-3xl md:text-4xl font-black text-[#111827] mb-2 flex items-center gap-3">
         ⚙️ Restaurant Settings
       </h1>
-      <p className="text-gray-400">
+      <p className="text-[#6B7280]">
         Manage your restaurant profile, business information, delivery preferences, and account settings.
       </p>
     </motion.div>

@@ -20,7 +20,7 @@ function OrderSuccessContent() {
 
   if (!orderId) {
     return (
-      <div className="container mx-auto px-4 py-20 text-center text-white">
+      <div className="container mx-auto px-4 py-20 text-center text-[#111827]">
         <p className="text-xl mb-4">No order found.</p>
         <a href="/restaurants" className="text-[var(--color-primary)] hover:underline">
           Continue Shopping
@@ -38,9 +38,9 @@ function OrderSuccessContent() {
 
 export default function OrderSuccessPage() {
   return (
-    <main className="min-h-screen bg-[#0B0B0B] relative pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative pt-[90px]">
       <Navbar />
-      <Suspense fallback={<div className="text-white text-center py-20">Loading...</div>}>
+      <Suspense fallback={<div className="text-[#111827] text-center py-20">Loading...</div>}>
         <OrderSuccessContent />
       </Suspense>
       <Footer />

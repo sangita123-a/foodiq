@@ -35,7 +35,7 @@ export default function Hero() {
   };
 
   return (
-    <div className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden">
+    <div className="relative w-full h-[calc(100vh-80px)] min-h-[640px] flex flex-col items-center justify-center overflow-hidden bg-[#F8F9FA]">
       {/* Background Video */}
       <div className="absolute top-0 left-0 w-full h-full z-0">
         <video 
@@ -43,18 +43,20 @@ export default function Hero() {
           loop 
           muted 
           playsInline
-          className="w-full h-full object-cover"
+          preload="auto"
+          className="w-full h-full object-cover object-center contrast-[1.02] saturate-[1.04] transform-gpu"
         >
           <source src="/hero-video.mp4" type="video/mp4" />
         </video>
-        {/* Dark Overlay with Blur */}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
+        {/* Light readability overlay without softening the video */}
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.52)_0%,rgba(255,255,255,0.34)_48%,rgba(255,255,255,0.7)_100%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),rgba(255,255,255,0.3))]"></div>
       </div>
 
       {/* Hero Content */}
-      <div className="relative z-10 flex flex-col items-center w-full px-4 pt-16">
+      <div className="relative z-10 flex flex-col items-center w-full px-4 sm:px-6">
         <motion.h1 
-          className="text-white font-black text-center flex flex-col items-center justify-center m-0 p-0 tracking-[-1px] leading-none"
+          className="text-[#1C1C1C] font-extrabold text-center flex flex-col items-center justify-center m-0 p-0 tracking-[-0.055em] leading-none drop-shadow-[0_2px_18px_rgba(255,255,255,0.5)]"
         >
           <span className="block text-[clamp(40px,5vw,72px)]">Find the Best</span>
           <span className="block text-[var(--color-primary)] text-[clamp(46px,6vw,78px)] relative overflow-hidden w-full h-[1.1em]">
@@ -75,7 +77,7 @@ export default function Hero() {
         </motion.h1>
 
         <motion.p 
-          className="text-white/90 text-lg md:text-xl text-center max-w-[700px] mt-6 mb-12 font-medium"
+          className="text-[#424242] text-base sm:text-lg md:text-xl text-center max-w-[700px] mt-6 mb-9 sm:mb-12 font-medium leading-relaxed"
         >
           Discover amazing restaurants and delicious food delivered straight to your doorstep.
         </motion.p>
@@ -89,16 +91,16 @@ export default function Hero() {
           animate={{ 
             y: [0, -10, 0],
             boxShadow: [
-              "0 0 15px rgba(255, 45, 59, 0.4)", 
-              "0 0 25px rgba(255, 45, 59, 0.7)", 
-              "0 0 15px rgba(255, 45, 59, 0.4)"
+              "0 0 15px rgba(252, 128, 25, 0.35)", 
+              "0 0 25px rgba(252, 128, 25, 0.6)", 
+              "0 0 15px rgba(252, 128, 25, 0.35)"
             ]
           }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          whileHover={{ scale: 1.1, boxShadow: "0 0 40px rgba(255, 45, 59, 0.9)" }}
-          className="mt-16 flex items-center justify-center w-[90px] h-[90px] rounded-full bg-black border border-[var(--color-primary)] cursor-pointer z-20 shrink-0"
+          whileHover={{ scale: 1.1, boxShadow: "0 0 40px rgba(252, 128, 25, 0.65)" }}
+          className="mt-12 sm:mt-16 flex items-center justify-center w-10 h-10 rounded-full bg-white/95 backdrop-blur-md border border-[var(--color-primary)] cursor-pointer z-20 shrink-0"
         >
-          <ArrowDown className="text-white w-8 h-8" />
+          <ArrowDown className="text-[var(--color-primary)] w-4 h-4" />
         </motion.button>
       </div>
     </div>

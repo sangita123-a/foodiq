@@ -21,22 +21,22 @@ export default function UpiItem({ upi, onEdit, onRemove }: Props) {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="bg-[#111] border border-white/5 hover:border-white/20 transition-all duration-300 rounded-2xl p-4 md:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 group"
+      className="group flex flex-col items-center justify-between gap-4 rounded-2xl border border-[#ECECEC] bg-white p-4 shadow-[0_6px_18px_rgba(28,28,28,0.05)] transition-all duration-300 hover:border-[#FC8019]/30 hover:shadow-[0_10px_26px_rgba(28,28,28,0.08)] sm:flex-row md:p-6"
     >
       <div className="flex items-center gap-4 w-full sm:w-auto">
-        <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-primary/50 transition-colors">
-          <Smartphone className="w-6 h-6 text-gray-400 group-hover:text-primary transition-colors" />
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#ECECEC] bg-[#F8F9FA] transition-colors group-hover:border-primary/50">
+          <Smartphone className="h-6 w-6 text-[#686B78] transition-colors group-hover:text-primary" />
         </div>
         <div>
-          <h4 className="text-white font-bold text-lg">{upi.upiId}</h4>
-          <p className="text-gray-500 text-xs uppercase tracking-widest mt-0.5">Verified UPI ID</p>
+          <h4 className="text-lg font-bold text-[#1C1C1C]">{upi.upiId}</h4>
+          <p className="mt-0.5 text-xs uppercase tracking-widest text-[#686B78]">Verified UPI ID</p>
         </div>
       </div>
 
       <div className="flex items-center gap-3 w-full sm:w-auto">
         <button 
           onClick={() => onEdit(upi)}
-          className="flex-1 sm:flex-none bg-white/5 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors border border-white/5"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-4 py-2.5 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#FC8019]/30 hover:bg-white sm:flex-none"
         >
           <Edit2 className="w-4 h-4" /> Edit
         </button>

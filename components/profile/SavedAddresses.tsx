@@ -96,11 +96,11 @@ export default function SavedAddresses() {
 
   if (isLoading) {
     return (
-      <div className="bg-[#171717] rounded-[24px] p-6 md:p-8 border border-white/5">
-        <div className="h-8 w-48 bg-white/5 animate-pulse rounded mb-8" />
+      <div className="bg-[#F8FAFC] rounded-[24px] p-6 md:p-8 border border-[#E5E7EB]">
+        <div className="h-8 w-48 bg-[#F8FAFC] animate-pulse rounded mb-8" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[1, 2].map((i) => (
-            <div key={i} className="h-40 bg-white/5 animate-pulse rounded-2xl" />
+            <div key={i} className="h-40 bg-[#F8FAFC] animate-pulse rounded-2xl" />
           ))}
         </div>
       </div>
@@ -113,16 +113,16 @@ export default function SavedAddresses() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3 }}
-      className="bg-[#171717] rounded-[24px] p-6 md:p-8 border border-white/5"
+      className="bg-[#F8FAFC] rounded-[24px] p-6 md:p-8 border border-[#E5E7EB]"
     >
-      <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/10">
+      <div className="flex items-center justify-between mb-8 pb-6 border-b border-[#E5E7EB]">
         <div className="flex items-center gap-3">
           <MapPin className="w-6 h-6 text-primary" />
-          <h2 className="text-2xl font-bold text-white">Saved Addresses</h2>
+          <h2 className="text-2xl font-bold text-[#111827]">Saved Addresses</h2>
         </div>
         <button
           onClick={openAdd}
-          className="bg-primary hover:bg-[#e02633] text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5 transition-colors"
+          className="bg-primary hover:bg-[#E76F0B] text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5 transition-colors"
         >
           <Plus className="w-4 h-4" /> Add New
         </button>
@@ -131,58 +131,58 @@ export default function SavedAddresses() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div
           onClick={openAdd}
-          className="border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center p-8 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors group h-full min-h-[160px]"
+          className="border-2 border-dashed border-[#E5E7EB] rounded-2xl flex flex-col items-center justify-center p-8 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors group h-full min-h-[160px]"
         >
-          <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3 group-hover:bg-primary/20 group-hover:text-primary transition-colors">
-            <Plus className="w-6 h-6 text-gray-400 group-hover:text-primary" />
+          <div className="w-12 h-12 rounded-full bg-[#F8FAFC] flex items-center justify-center mb-3 group-hover:bg-primary/20 group-hover:text-primary transition-colors">
+            <Plus className="w-6 h-6 text-[#6B7280] group-hover:text-primary" />
           </div>
-          <p className="text-gray-400 font-bold group-hover:text-white transition-colors">Add New Address</p>
+          <p className="text-[#6B7280] font-bold group-hover:text-[#111827] transition-colors">Add New Address</p>
         </div>
 
         {addresses.map((addr) => (
           <div
             key={addr.id}
-            className="bg-[#111] rounded-2xl p-6 border border-white/5 hover:border-white/10 transition-colors relative group flex flex-col h-full min-h-[160px]"
+            className="bg-white rounded-2xl p-6 border border-[#E5E7EB] hover:border-[#E5E7EB] transition-colors relative group flex flex-col h-full min-h-[160px]"
           >
             {addr.isDefault && (
-              <span className="absolute top-4 right-4 bg-white/10 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+              <span className="absolute top-4 right-4 bg-[#F8FAFC] text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
                 Default
               </span>
             )}
 
             <div className="flex items-center gap-2 mb-3">
               {addr.type === "Home" ? (
-                <Home className="w-5 h-5 text-gray-400" />
+                <Home className="w-5 h-5 text-[#6B7280]" />
               ) : (
-                <Briefcase className="w-5 h-5 text-gray-400" />
+                <Briefcase className="w-5 h-5 text-[#6B7280]" />
               )}
-              <h3 className="text-lg font-bold text-white">{addr.type}</h3>
+              <h3 className="text-lg font-bold text-[#111827]">{addr.type}</h3>
             </div>
 
-            <p className="text-gray-400 text-sm leading-relaxed mb-6 flex-1">
+            <p className="text-[#6B7280] text-sm leading-relaxed mb-6 flex-1">
               {[addr.flat, addr.street, addr.city, addr.state, addr.pincode].filter(Boolean).join(", ")}
             </p>
 
-            <div className="flex gap-4 border-t border-white/5 pt-4 flex-wrap">
+            <div className="flex gap-4 border-t border-[#E5E7EB] pt-4 flex-wrap">
               <button
                 onClick={() => {
                   setEditing(addr);
                   setIsModalOpen(true);
                 }}
-                className="text-gray-400 hover:text-white text-sm font-bold flex items-center gap-1.5 transition-colors"
+                className="text-[#6B7280] hover:text-[#111827] text-sm font-bold flex items-center gap-1.5 transition-colors"
               >
                 <Edit2 className="w-4 h-4" /> Edit
               </button>
               <button
                 onClick={() => handleDelete(addr.id)}
-                className="text-gray-400 hover:text-red-500 text-sm font-bold flex items-center gap-1.5 transition-colors"
+                className="text-[#6B7280] hover:text-red-500 text-sm font-bold flex items-center gap-1.5 transition-colors"
               >
                 <Trash2 className="w-4 h-4" /> Delete
               </button>
               {!addr.isDefault && (
                 <button
                   onClick={() => handleSetDefault(addr)}
-                  className="text-gray-400 hover:text-yellow-400 text-sm font-bold flex items-center gap-1.5 transition-colors"
+                  className="text-[#6B7280] hover:text-yellow-400 text-sm font-bold flex items-center gap-1.5 transition-colors"
                 >
                   <Star className="w-4 h-4" /> Set Default
                 </button>

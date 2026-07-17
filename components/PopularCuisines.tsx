@@ -1,96 +1,137 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ChevronRight, UtensilsCrossed } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import useSWR from "swr";
-import SafeImage from "@/components/ui/SafeImage";
-import { RESTAURANT_FALLBACK } from "@/lib/images";
+import CuisineCard, { CuisineCardData } from "@/components/cuisines/CuisineCard";
+
+const cuisineCategories = [
+  {
+    name: "Indian",
+    slug: "indian",
+    description: "Rich curries, fragrant spices and comforting classics.",
+    image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400",
+  },
+  {
+    name: "Chinese",
+    slug: "chinese",
+    description: "Wok-tossed noodles, dim sum and bold Asian flavors.",
+    image: "https://images.unsplash.com/photo-1525755662778-989d0524087e?w=400",
+  },
+  {
+    name: "North Indian",
+    slug: "north-indian",
+    description: "Tandoori favorites, creamy curries and fresh breads.",
+    image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400",
+  },
+  {
+    name: "South Indian",
+    slug: "south-indian",
+    description: "Crispy dosas, fluffy idlis and wholesome meals.",
+    image: "https://images.unsplash.com/photo-1630383249896-424e482df921?w=400",
+  },
+  {
+    name: "Pizza",
+    slug: "pizza",
+    description: "Cheesy, oven-fresh pizzas made for every craving.",
+    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400",
+  },
+  {
+    name: "Burger",
+    slug: "burger",
+    description: "Juicy burgers stacked with fresh, flavorful fillings.",
+    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",
+  },
+  {
+    name: "Biryani",
+    slug: "biryani",
+    description: "Aromatic rice, tender bites and royal Indian spices.",
+    image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400",
+  },
+  {
+    name: "Italian",
+    slug: "italian",
+    description: "Classic pastas, rustic sauces and Italian favorites.",
+    image: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400",
+  },
+  {
+    name: "Street Food",
+    slug: "street-food",
+    description: "Chaat, rolls and irresistible local street favorites.",
+    image: "https://images.unsplash.com/photo-1606491956689-2ea866880f44?w=400",
+  },
+  {
+    name: "Healthy",
+    slug: "healthy",
+    description: "Fresh, balanced meals packed with feel-good flavor.",
+    image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400",
+  },
+  {
+    name: "Desserts",
+    slug: "desserts",
+    description: "Cakes, ice creams and treats for your sweet tooth.",
+    image: "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400",
+  },
+  {
+    name: "Beverages",
+    slug: "beverages",
+    description: "Coolers, coffees and refreshing drinks for every mood.",
+    image: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400",
+  },
+] as const;
 
 export default function PopularCuisines() {
-  const { data } = useSWR("/api/cuisines");
-  const cuisines = data || [];
+  const { data } = useSWR<CuisineCardData[]>("/api/cuisines");
+  const cuisineBySlug = new Map(
+    (data ?? []).map((cuisine) => [cuisine.slug, cuisine])
+  );
 
   return (
-    <section className="bg-black w-full py-[100px] overflow-hidden border-t border-white/5">
-      <div className="w-[90%] max-w-7xl mx-auto">
+    <section className="relative w-full overflow-hidden border-y border-[#E5E7EB] bg-[radial-gradient(circle_at_50%_0%,rgba(252,128,25,0.08),transparent_34%),linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_50%,#FFFFFF_100%)]">
+      <div className="food-section">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-14 text-center md:text-left"
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="mb-7 flex items-end justify-between gap-4"
         >
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-4">
-            <div className="flex items-center justify-center md:justify-start gap-3">
-              <span className="text-3xl md:text-4xl">🍽️</span>
-              <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight">
-                Popular Cuisines Around You
-              </h2>
-            </div>
-            <Link
-              href="/popular-cuisines"
-              className="hidden sm:inline-flex px-5 py-2.5 rounded-xl border border-white/20 text-white text-sm font-medium hover:bg-white/10 transition-colors"
-            >
-              View All
-            </Link>
+          <div className="min-w-0">
+            <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#111827] sm:text-2xl md:text-[28px]">
+              <span aria-hidden="true">🍽️ </span>
+              Popular Cuisines Around You
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6B7280]">
+              Discover delicious cuisines loved by food lovers near your location.
+            </p>
           </div>
-          <p className="text-gray-400 text-lg md:text-xl font-light">
-            Discover delicious cuisines loved by food lovers near your location.
-          </p>
+          <Link
+            href="/popular-cuisines"
+            className="group/view-all inline-flex shrink-0 items-center gap-1 rounded-full border border-[#E5E7EB] bg-white px-3.5 py-2 text-xs font-semibold text-[#111827] shadow-sm transition-[color,border-color,background-color] duration-300 hover:border-[#FC8019]/50 hover:bg-[#FFF7ED] hover:text-[#FC8019] sm:px-4 sm:text-sm"
+          >
+            View All
+            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/view-all:translate-x-0.5" />
+          </Link>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {cuisines.map((cuisine: any, index: number) => {
-            const href = cuisine.slug ? `/cuisine/${cuisine.slug}` : null;
-            const restaurantCount = cuisine.restaurant_count ?? 0;
+        <div className="grid grid-cols-2 justify-center gap-3 sm:gap-4 md:grid-cols-[repeat(4,minmax(0,190px))] lg:grid-cols-[repeat(5,minmax(0,190px))] 2xl:grid-cols-[repeat(6,minmax(0,190px))]">
+          {cuisineCategories.map((category, index) => {
+            const cuisine = cuisineBySlug.get(category.slug);
 
-            const card = (
-              <motion.div
-                key={cuisine.id}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.1 }}
-                className="bg-[#171717] rounded-[22px] overflow-hidden flex flex-col border border-white/5 shadow-lg hover:shadow-[0_15px_30px_rgba(255,45,59,0.15)] hover:-translate-y-2 transition-all duration-300 group h-full"
-              >
-                <div className="relative h-48 w-full overflow-hidden">
-                  <SafeImage
-                    src={cuisine.image_url}
-                    fallback={RESTAURANT_FALLBACK}
-                    alt={cuisine.name}
-                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-in-out"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#171717] via-transparent to-transparent"></div>
-
-                  <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1.5 border border-white/10">
-                    <UtensilsCrossed className="w-3.5 h-3.5 text-primary" />
-                    {restaurantCount > 0 ? `${restaurantCount}` : "150+"} Locations
-                  </div>
-                </div>
-
-                <div className="p-6 flex-1 flex flex-col">
-                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-primary transition-colors">
-                    {cuisine.name}
-                  </h3>
-                  <p className="text-gray-400 text-sm mb-6 flex-1 leading-relaxed">
-                    {cuisine.description || "Discover delicious food from this category."}
-                  </p>
-
-                  <span className="w-full bg-white/5 border border-white/10 group-hover:bg-[#FF2D3B] group-hover:border-[#FF2D3B] text-white py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 group/btn">
-                    Explore {cuisine.name}
-                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover/btn:text-white transition-colors group-hover/btn:translate-x-1 duration-300" />
-                  </span>
-                </div>
-              </motion.div>
-            );
-
-            return href ? (
-              <Link key={cuisine.id} href={href} className="block h-full">
-                {card}
-              </Link>
-            ) : (
-              <div key={cuisine.id}>{card}</div>
+            return (
+              <CuisineCard
+                key={category.slug}
+                cuisine={{
+                  ...cuisine,
+                  name: category.name,
+                  slug: category.slug,
+                  description: cuisine?.description || category.description,
+                }}
+                fallbackImage={category.image}
+                fallbackDescription={category.description}
+                index={index}
+              />
             );
           })}
         </div>

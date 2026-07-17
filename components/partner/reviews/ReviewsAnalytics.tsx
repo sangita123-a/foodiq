@@ -32,16 +32,16 @@ export default function ReviewsAnalytics({ data }: ReviewsAnalyticsProps) {
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
       
       {/* 1. Rating Distribution */}
-      <div className="bg-[#171717] rounded-3xl p-6 border border-white/5 shadow-xl flex flex-col">
-        <h3 className="text-xl font-black text-white flex items-center gap-2 mb-6">
+      <div className="bg-[#FFFFFF] rounded-3xl p-6 border border-[#E5E7EB] shadow-xl flex flex-col">
+        <h3 className="text-xl font-black text-[#111827] flex items-center gap-2 mb-6">
           <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" /> Rating Distribution
         </h3>
         
         <div className="space-y-4 flex-1 flex flex-col justify-center">
           {starDistribution.map((dist, idx) => (
             <div key={dist.stars} className="flex items-center gap-4 group">
-              <span className="text-gray-400 font-bold w-12 text-sm">{dist.stars} Stars</span>
-              <div className="flex-1 h-3 bg-[#111] rounded-full overflow-hidden border border-white/5 relative">
+              <span className="text-[#6B7280] font-bold w-12 text-sm">{dist.stars} Stars</span>
+              <div className="flex-1 h-3 bg-[#F8FAFC] rounded-full overflow-hidden border border-[#E5E7EB] relative">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${dist.percentage}%` }}
@@ -49,16 +49,16 @@ export default function ReviewsAnalytics({ data }: ReviewsAnalyticsProps) {
                   className="absolute left-0 top-0 h-full bg-gradient-to-r from-yellow-600 to-yellow-400 rounded-full"
                 />
               </div>
-              <span className="text-white font-bold w-8 text-right text-sm">{dist.percentage}%</span>
+              <span className="text-[#111827] font-bold w-8 text-right text-sm">{dist.percentage}%</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* 2. Satisfaction Metrics */}
-      <div className="bg-[#171717] rounded-3xl p-6 border border-white/5 shadow-xl flex flex-col">
-        <h3 className="text-xl font-black text-white flex items-center gap-2 mb-6">
-          <Heart className="w-5 h-5 text-primary" /> Customer Satisfaction
+      <div className="bg-[#FFFFFF] rounded-3xl p-6 border border-[#E5E7EB] shadow-xl flex flex-col">
+        <h3 className="text-xl font-black text-[#111827] flex items-center gap-2 mb-6">
+          <Heart className="w-5 h-5 text-[#FC8019]" /> Customer Satisfaction
         </h3>
         
         <div className="space-y-5 flex-1 flex flex-col justify-center">
@@ -70,10 +70,10 @@ export default function ReviewsAnalytics({ data }: ReviewsAnalyticsProps) {
           ].map((metric, idx) => (
             <div key={metric.label}>
               <div className="flex justify-between text-sm mb-1.5">
-                <span className="text-gray-400 font-bold">{metric.label}</span>
-                <span className="text-white font-black">{metric.value}%</span>
+                <span className="text-[#6B7280] font-bold">{metric.label}</span>
+                <span className="text-[#111827] font-black">{metric.value}%</span>
               </div>
-              <div className="w-full h-2 bg-[#111] rounded-full overflow-hidden border border-white/5 relative">
+              <div className="w-full h-2 bg-[#F8FAFC] rounded-full overflow-hidden border border-[#E5E7EB] relative">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${metric.value}%` }}
@@ -87,26 +87,26 @@ export default function ReviewsAnalytics({ data }: ReviewsAnalyticsProps) {
       </div>
 
       {/* 3. Dish Performance & Trend */}
-      <div className="bg-[#171717] rounded-3xl p-6 border border-white/5 shadow-xl flex flex-col justify-between">
+      <div className="bg-[#FFFFFF] rounded-3xl p-6 border border-[#E5E7EB] shadow-xl flex flex-col justify-between">
         
         <div className="mb-6">
-          <h3 className="text-xl font-black text-white flex items-center gap-2 mb-4">
+          <h3 className="text-xl font-black text-[#111827] flex items-center gap-2 mb-4">
             <ThumbsUp className="w-5 h-5 text-green-500" /> Top Rated Dish
           </h3>
-          <div className="bg-[#111] p-3 rounded-xl border border-white/5">
-            <p className="text-white font-bold">Hyderabadi Chicken Dum Biryani</p>
+          <div className="bg-[#F8FAFC] p-3 rounded-xl border border-[#E5E7EB]">
+            <p className="text-[#111827] font-bold">Hyderabadi Chicken Dum Biryani</p>
             <p className="text-yellow-500 text-sm font-bold flex items-center gap-1 mt-1">4.9 <Star className="w-3 h-3 fill-yellow-500"/></p>
           </div>
         </div>
 
         <div className="mb-6">
-          <h3 className="text-xl font-black text-white flex items-center gap-2 mb-4">
+          <h3 className="text-xl font-black text-[#111827] flex items-center gap-2 mb-4">
             <ThumbsDown className="w-5 h-5 text-red-500" /> Needs Improvement
           </h3>
-          <div className="bg-[#111] p-3 rounded-xl border border-white/5">
-            <p className="text-white font-bold">Cold Coffee with Ice Cream</p>
+          <div className="bg-[#F8FAFC] p-3 rounded-xl border border-[#E5E7EB]">
+            <p className="text-[#111827] font-bold">Cold Coffee with Ice Cream</p>
             <p className="text-red-400 text-sm font-bold flex items-center gap-1 mt-1">3.1 <Star className="w-3 h-3 fill-red-400"/></p>
-            <p className="text-xs text-gray-500 mt-1">Common complaint: Ice cream melted during delivery.</p>
+            <p className="text-xs text-[#9CA3AF] mt-1">Common complaint: Ice cream melted during delivery.</p>
           </div>
         </div>
 

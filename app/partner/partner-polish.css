@@ -1,0 +1,210 @@
+/*
+ * Partner workspace visual system.
+ * The data attribute keeps these refinements isolated from the customer app.
+ */
+[data-partner-surface] {
+  --partner-canvas: #f8f9fa;
+  --partner-surface: #ffffff;
+  --partner-surface-subtle: #f8f9fa;
+  --partner-surface-warm: #fffaf6;
+  --partner-primary: #fc8019;
+  --partner-primary-hover: #e96f0b;
+  --partner-secondary: #ef4f5f;
+  --partner-ink: #1c1c1c;
+  --partner-muted: #686b78;
+  --partner-line: #ececec;
+  --partner-focus: rgba(252, 128, 25, 0.24);
+  --partner-shadow-sm: 0 1px 2px rgba(28, 28, 28, 0.04),
+    0 4px 14px rgba(28, 28, 28, 0.035);
+  --partner-shadow-md: 0 2px 5px rgba(28, 28, 28, 0.045),
+    0 10px 28px rgba(28, 28, 28, 0.06);
+  color: var(--partner-ink);
+  font-feature-settings: "kern" 1, "liga" 1;
+  text-rendering: optimizeLegibility;
+}
+
+[data-partner-surface] :where(h1, h2, h3) {
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+[data-partner-surface] :where(p, label, li) {
+  line-height: 1.55;
+}
+
+/* Normalize the legacy neutral palette without touching semantic chart/status colors. */
+[data-partner-surface] .bg-\[\#F8FAFC\],
+[data-partner-surface] .bg-\[\#F9FAFB\],
+[data-partner-surface] .bg-\[\#F3F4F6\] {
+  background-color: var(--partner-surface-subtle);
+}
+
+[data-partner-surface] .bg-\[\#FFFFFF\],
+[data-partner-surface] .bg-white {
+  background-color: var(--partner-surface);
+}
+
+[data-partner-surface] .text-\[\#111827\],
+[data-partner-surface] .text-\[\#0F172A\],
+[data-partner-surface] .text-\[\#1F2937\] {
+  color: var(--partner-ink);
+}
+
+[data-partner-surface] .text-\[\#6B7280\],
+[data-partner-surface] .text-\[\#9CA3AF\],
+[data-partner-surface] .text-\[\#4B5563\] {
+  color: var(--partner-muted);
+}
+
+[data-partner-surface] .border-\[\#E5E7EB\],
+[data-partner-surface] .border-\[\#D1D5DB\] {
+  border-color: var(--partner-line);
+}
+
+[data-partner-surface] .hover\:bg-\[\#F8FAFC\]:hover,
+[data-partner-surface] .hover\:bg-\[\#F9FAFB\]:hover,
+[data-partner-surface] .hover\:bg-\[\#F3F4F6\]:hover {
+  background-color: var(--partner-surface-subtle);
+}
+
+[data-partner-surface] .hover\:text-\[\#111827\]:hover,
+[data-partner-surface] .group:hover .group-hover\:text-\[\#111827\] {
+  color: var(--partner-ink);
+}
+
+/* Replace hard elevations with quiet, layered depth. */
+[data-partner-surface] .shadow-lg {
+  box-shadow: var(--partner-shadow-sm);
+}
+
+[data-partner-surface] .shadow-xl,
+[data-partner-surface] .shadow-2xl {
+  box-shadow: var(--partner-shadow-md);
+}
+
+[data-partner-surface] .shadow-\[0_0_15px_rgba\(252\,128\,25\,0\.3\)\] {
+  box-shadow: 0 6px 18px rgba(252, 128, 25, 0.18);
+}
+
+/* Consistent control feedback across every partner workflow. */
+[data-partner-surface] :where(button, a, input, select, textarea) {
+  transition-property: color, background-color, border-color, box-shadow, opacity,
+    transform;
+  transition-duration: 180ms;
+  transition-timing-function: ease-out;
+}
+
+[data-partner-surface] :where(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid var(--partner-primary);
+  outline-offset: 2px;
+}
+
+[data-partner-surface] :where(input, select, textarea) {
+  accent-color: var(--partner-primary);
+  border-radius: 0.75rem;
+}
+
+[data-partner-surface] :where(input, select, textarea):focus {
+  border-color: var(--partner-primary);
+  box-shadow: 0 0 0 3px var(--partner-focus);
+}
+
+[data-partner-surface] :where(input, textarea)::placeholder {
+  color: var(--partner-muted);
+  opacity: 0.72;
+}
+
+[data-partner-surface] :where(button, [role="button"]):disabled {
+  box-shadow: none;
+}
+
+/* Keep branded actions crisp and consistent. */
+[data-partner-surface] .bg-\[\#FC8019\] {
+  background-color: var(--partner-primary);
+}
+
+[data-partner-surface] .text-\[\#FC8019\] {
+  color: var(--partner-primary);
+}
+
+[data-partner-surface] .border-\[\#FC8019\] {
+  border-color: var(--partner-primary);
+}
+
+[data-partner-surface] .hover\:bg-\[\#E66F0D\]:hover {
+  background-color: var(--partner-primary-hover);
+}
+
+[data-partner-surface] :where(.bg-red-400, .bg-red-500, .bg-red-600) {
+  background-color: var(--partner-secondary);
+}
+
+[data-partner-surface] :where(.text-red-400, .text-red-500, .text-red-600) {
+  color: var(--partner-secondary);
+}
+
+[data-partner-surface] :where(.border-red-400, .border-red-500, .border-red-600) {
+  border-color: var(--partner-secondary);
+}
+
+/* Refined surface interaction for existing cards, tables, and filter bars. */
+[data-partner-surface]
+  :where(.shadow-lg, .shadow-xl, .shadow-2xl):is(
+    .border,
+    [class*="border-[#E5E7EB]"]
+  ) {
+  transition: border-color 180ms ease-out, box-shadow 180ms ease-out,
+    transform 180ms ease-out;
+}
+
+[data-partner-surface]
+  :where(.shadow-lg, .shadow-xl, .shadow-2xl):is(
+    .border,
+    [class*="border-[#E5E7EB]"]
+  ):hover {
+  border-color: rgba(252, 128, 25, 0.2);
+  box-shadow: var(--partner-shadow-md);
+}
+
+/* Native selection and scrollbars match the partner brand. */
+[data-partner-surface] ::selection {
+  color: #ffffff;
+  background: var(--partner-primary);
+}
+
+[data-partner-surface] .custom-scrollbar {
+  scrollbar-color: #d7d7d7 transparent;
+  scrollbar-width: thin;
+}
+
+[data-partner-surface] .custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+[data-partner-surface] .custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-partner-surface] .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #d7d7d7;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+[data-partner-surface] .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--partner-muted);
+  background-clip: padding-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-partner-surface] :where(button, a, input, select, textarea),
+  [data-partner-surface]
+    :where(.shadow-lg, .shadow-xl, .shadow-2xl):is(
+      .border,
+      [class*="border-[#E5E7EB]"]
+    ) {
+    transition-duration: 0.01ms;
+  }
+}

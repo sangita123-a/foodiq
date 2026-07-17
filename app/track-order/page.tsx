@@ -132,9 +132,9 @@ function TrackOrderContent() {
 
 export default function TrackOrderPage() {
   return (
-    <main className="min-h-screen bg-[#0B0B0B] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
-      <Suspense fallback={<div className="text-white p-10 text-center">Loading...</div>}>
+      <Suspense fallback={<div className="text-[#111827] p-10 text-center">Loading...</div>}>
         <TrackOrderContent />
       </Suspense>
       <Footer />

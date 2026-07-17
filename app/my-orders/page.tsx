@@ -9,6 +9,7 @@ import OrderCard, { OrderType } from "@/components/orders/OrderCard";
 import OrderEmptyState from "@/components/orders/OrderEmptyState";
 import useSWR from "swr";
 import api from "@/services/api";
+import { getRestaurantImage } from "@/lib/images";
 import { useToast } from "@/contexts/ToastContext";
 
 const FILTERS: OrderFilter[] = ["All Orders", "Active", "Delivered", "Cancelled"];
@@ -34,7 +35,7 @@ export default function MyOrdersPage() {
   const mappedOrders: OrderType[] = backendOrders.map((o: any) => ({
     id: o.id,
     restaurant: o.restaurant_name,
-    image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&q=80&w=200",
+    image: getRestaurantImage(o.restaurant_image_url || o.image_url),
     date: new Date(o.created_at).toLocaleString(),
     items: (o.items || []).map((i: any) => ({
       name: i.name,
@@ -59,18 +60,18 @@ export default function MyOrdersPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-[#0B0B0B] relative pt-[90px]">
+      <main className="min-h-screen bg-[#FFFFFF] relative pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 md:px-8 py-12 max-w-5xl">
-          <div className="w-48 h-10 bg-white/5 animate-pulse rounded-lg mb-8"></div>
+          <div className="w-48 h-10 bg-[#F8FAFC] animate-pulse rounded-lg mb-8"></div>
           <div className="flex gap-4 mb-10">
-            <div className="w-24 h-10 bg-white/5 animate-pulse rounded-full"></div>
-            <div className="w-24 h-10 bg-white/5 animate-pulse rounded-full"></div>
-            <div className="w-24 h-10 bg-white/5 animate-pulse rounded-full"></div>
+            <div className="w-24 h-10 bg-[#F8FAFC] animate-pulse rounded-full"></div>
+            <div className="w-24 h-10 bg-[#F8FAFC] animate-pulse rounded-full"></div>
+            <div className="w-24 h-10 bg-[#F8FAFC] animate-pulse rounded-full"></div>
           </div>
           <div className="flex flex-col gap-6">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-64 bg-white/5 animate-pulse rounded-3xl border border-white/10"></div>
+              <div key={i} className="h-64 bg-[#F8FAFC] animate-pulse rounded-3xl border border-[#E5E7EB]"></div>
             ))}
           </div>
         </div>
@@ -80,7 +81,7 @@ export default function MyOrdersPage() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[#0B0B0B] flex flex-col items-center justify-center gap-4 pt-[90px]">
+      <main className="min-h-screen bg-[#FFFFFF] flex flex-col items-center justify-center gap-4 pt-[90px]">
         <Navbar />
         <div className="text-white text-xl">Failed to load orders</div>
         <button onClick={() => mutate()} className="px-6 py-2 bg-primary text-white rounded-lg">Retry</button>
@@ -89,7 +90,7 @@ export default function MyOrdersPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0B0B0B] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-5xl">

@@ -20,20 +20,20 @@ export default function NotificationsHeader({ activeFilter, setActiveFilter, onM
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   return (
-    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-white/5 pb-8">
+    <div className="mb-12 flex flex-col justify-between gap-6 border-b border-[#ECECEC] pb-8 md:flex-row md:items-end">
       
       {/* Title */}
       <div>
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 flex items-center gap-4 relative">
+        <h1 className="relative mb-3 flex items-center gap-4 text-3xl font-black tracking-[-0.04em] text-[#1C1C1C] md:text-4xl lg:text-5xl">
           <div className="relative">
-            <Bell className="w-10 h-10 md:w-12 md:h-12 text-[#FF2D3B] fill-[#FF2D3B]/20" />
+            <Bell className="w-10 h-10 md:w-12 md:h-12 text-[#FC8019] fill-[#FC8019]/20" />
             {hasUnread && (
-              <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-[#FF2D3B] border-2 border-[#0B0B0B] rounded-full"></span>
+              <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-[#FC8019] border-2 border-[#FFFFFF] rounded-full"></span>
             )}
           </div>
           Notifications
         </h1>
-        <p className="text-[#A1A1A1] text-lg">
+        <p className="text-lg text-[#686B78]">
           Stay updated with your orders, offers, and account activity.
         </p>
       </div>
@@ -43,7 +43,7 @@ export default function NotificationsHeader({ activeFilter, setActiveFilter, onM
         
         <button 
           onClick={onMarkAllAsRead}
-          className="bg-white/5 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors border border-white/5"
+          className="flex items-center gap-2 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-4 py-2.5 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#FC8019]/30 hover:bg-white"
         >
           <CheckCircle2 className="w-4 h-4 text-green-400" />
           Mark all as read
@@ -61,14 +61,14 @@ export default function NotificationsHeader({ activeFilter, setActiveFilter, onM
         <div className="relative">
           <button 
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="bg-[#111] hover:bg-[#1a1a1a] text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors border border-white/10 w-[140px] justify-between"
+            className="flex w-[140px] items-center justify-between gap-2 rounded-xl border border-[#ECECEC] bg-white px-4 py-2.5 text-sm font-bold text-[#1C1C1C] transition-colors hover:bg-[#F8F9FA]"
           >
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-primary" />
               {activeFilter}
             </div>
             <motion.div animate={{ rotate: isFilterOpen ? 180 : 0 }}>
-              <ChevronDown className="w-4 h-4 text-gray-500" />
+              <ChevronDown className="h-4 w-4 text-[#686B78]" />
             </motion.div>
           </button>
 
@@ -79,7 +79,7 @@ export default function NotificationsHeader({ activeFilter, setActiveFilter, onM
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-48 bg-[#171717] border border-white/10 rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.5)] overflow-hidden z-50 py-2"
+                className="absolute right-0 top-full z-50 mt-2 w-48 overflow-hidden rounded-2xl border border-[#ECECEC] bg-white py-2 shadow-[0_16px_36px_rgba(28,28,28,0.12)]"
               >
                 {filterOptions.map(option => (
                   <button
@@ -91,7 +91,7 @@ export default function NotificationsHeader({ activeFilter, setActiveFilter, onM
                     className={`w-full text-left px-5 py-3 text-sm font-bold transition-colors ${
                       activeFilter === option 
                         ? "bg-primary/10 text-primary border-l-2 border-primary pl-[18px]" 
-                        : "text-gray-300 hover:bg-white/5 hover:text-white border-l-2 border-transparent"
+                        : "border-l-2 border-transparent text-[#686B78] hover:bg-[#F8F9FA] hover:text-[#1C1C1C]"
                     }`}
                   >
                     {option}

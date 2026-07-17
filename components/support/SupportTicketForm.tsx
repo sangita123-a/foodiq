@@ -31,15 +31,15 @@ export default function SupportTicketForm() {
     }
   };
   return (
-    <div className="bg-[#171717] rounded-3xl p-6 md:p-8 border border-white/5 h-full">
+    <div className="bg-[#F8FAFC] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] h-full">
       <h2 className="text-2xl font-bold text-white mb-2">Submit a Ticket</h2>
-      <p className="text-gray-400 text-sm mb-8">For complex issues, open a support ticket. We usually respond within 24 hours.</p>
+      <p className="text-[#6B7280] text-sm mb-8">For complex issues, open a support ticket. We usually respond within 24 hours.</p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         
         <div>
-          <label className="block text-sm font-bold text-gray-400 mb-2">Category</label>
-          <select name="category" required className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer">
+          <label className="block text-sm font-bold text-[#6B7280] mb-2">Category</label>
+          <select name="category" required className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer">
             <option>Order Issue</option>
             <option>Payment / Refund</option>
             <option>Account Management</option>
@@ -49,33 +49,33 @@ export default function SupportTicketForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-400 mb-2">Subject</label>
+          <label className="block text-sm font-bold text-[#6B7280] mb-2">Subject</label>
           <input 
             type="text" 
             name="subject"
             required
             placeholder="Briefly describe the issue..."
-            className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-400 mb-2">Description</label>
+          <label className="block text-sm font-bold text-[#6B7280] mb-2">Description</label>
           <textarea 
             name="description"
             required
             rows={4}
             placeholder="Please provide as much detail as possible..."
-            className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
+            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
           ></textarea>
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-400 mb-2">Attachments (Optional)</label>
-          <div className="w-full bg-[#111] border-2 border-dashed border-white/10 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors group">
-            <Paperclip className="w-6 h-6 text-gray-500 mb-2 group-hover:text-primary transition-colors" />
+          <label className="block text-sm font-bold text-[#6B7280] mb-2">Attachments (Optional)</label>
+          <div className="w-full bg-white border-2 border-dashed border-[#E5E7EB] rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors group">
+            <Paperclip className="w-6 h-6 text-[#9CA3AF] mb-2 group-hover:text-primary transition-colors" />
             <p className="text-white text-sm font-bold">Click to upload screenshot</p>
-            <p className="text-gray-500 text-xs mt-1">PNG, JPG up to 5MB</p>
+            <p className="text-[#9CA3AF] text-xs mt-1">PNG, JPG up to 5MB</p>
           </div>
         </div>
 

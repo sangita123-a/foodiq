@@ -9,9 +9,9 @@ export default function ContactHero() {
       {/* Premium Background with Dark Overlay */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&q=80&w=2070')" }}
+        style={{ backgroundImage: "url('/images/catalog/restaurants/indian.webp')" }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0B0B0B]/90 via-[#0B0B0B]/80 to-[#0B0B0B]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FFFFFF]/90 via-[#FFFFFF]/80 to-[#FFFFFF]"></div>
       </div>
 
       <div className="container mx-auto px-4 md:px-8 relative z-10 text-center mt-10">
@@ -28,7 +28,7 @@ export default function ContactHero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
+          className="text-lg md:text-xl text-[#6B7280] max-w-3xl mx-auto leading-relaxed"
         >
           We're here to help. Reach out to us anytime for support, feedback, partnerships, or business inquiries.
         </motion.p>

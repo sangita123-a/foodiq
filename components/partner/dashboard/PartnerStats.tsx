@@ -34,7 +34,7 @@ export default function PartnerStats() {
     { title: "Pending Orders", value: 12, icon: Clock, color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20" },
     { title: "Completed Orders", value: 128, icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20" },
     { title: "Average Rating", value: 4.8, decimals: 1, icon: Star, color: "text-purple-400", bg: "bg-purple-400/10", border: "border-purple-400/20" },
-    { title: "Active Menu Items", value: 64, icon: UtensilsCrossed, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" }
+    { title: "Active Menu Items", value: 64, icon: UtensilsCrossed, color: "text-[#FC8019]", bg: "bg-[#FC8019]/10", border: "border-[#FC8019]/20" }
   ];
 
   return (
@@ -46,15 +46,15 @@ export default function PartnerStats() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: idx * 0.1 }}
           whileHover={{ y: -5 }}
-          className="bg-[#171717] rounded-2xl p-6 border border-white/5 shadow-lg group hover:border-white/20 transition-all cursor-pointer relative overflow-hidden"
+          className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#E5E7EB] shadow-lg group hover:border-[#E5E7EB] transition-all cursor-pointer relative overflow-hidden"
         >
           {/* subtle background glow on hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFC] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           
           <div className="flex items-center justify-between relative z-10">
             <div>
-              <p className="text-gray-400 text-sm font-bold mb-1">{stat.title}</p>
-              <h3 className="text-3xl font-black text-white">
+              <p className="text-[#6B7280] text-sm font-bold mb-1">{stat.title}</p>
+              <h3 className="text-3xl font-black text-[#111827]">
                 <Counter 
                   from={0} 
                   to={stat.value} 

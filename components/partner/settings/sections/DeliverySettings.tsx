@@ -14,59 +14,59 @@ export default function DeliverySettings({ data, onChange }: DeliverySettingsPro
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-black text-white flex items-center gap-2 mb-2">
-          <Bike className="w-6 h-6 text-primary" /> Delivery Settings
+        <h2 className="text-2xl font-black text-[#111827] flex items-center gap-2 mb-2">
+          <Bike className="w-6 h-6 text-[#FC8019]" /> Delivery Settings
         </h2>
-        <p className="text-gray-400 text-sm mb-6">Configure your delivery radius, minimums, and order types.</p>
+        <p className="text-[#6B7280] text-sm mb-6">Configure your delivery radius, minimums, and order types.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div>
-          <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Delivery Radius (km)</label>
+          <label className="block text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-2">Delivery Radius (km)</label>
           <input 
             type="number" 
             value={data.radius}
             onChange={(e) => onChange({ radius: Number(e.target.value) })}
-            className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors text-sm"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
           />
         </div>
         <div>
-          <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Minimum Order Amount (₹)</label>
+          <label className="block text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-2">Minimum Order Amount (₹)</label>
           <input 
             type="number" 
             value={data.minOrderAmount}
             onChange={(e) => onChange({ minOrderAmount: Number(e.target.value) })}
-            className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors text-sm"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
           />
         </div>
         <div className="md:col-span-2 lg:col-span-1">
-          <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Est. Delivery Time (Mins)</label>
+          <label className="block text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-2">Est. Delivery Time (Mins)</label>
           <input 
             type="number" 
             value={data.estimatedTime}
             onChange={(e) => onChange({ estimatedTime: Number(e.target.value) })}
-            className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors text-sm"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
           />
         </div>
       </div>
 
-      <div className="w-full h-px bg-white/5 my-8"></div>
+      <div className="w-full h-px bg-[#F8FAFC] my-8"></div>
 
       <div className="space-y-4">
         
         {/* Accept Online Orders Toggle */}
-        <div className="bg-[#111] border border-white/5 rounded-2xl p-5 flex items-center justify-between cursor-pointer group hover:border-white/20 transition-colors" onClick={() => onChange({ acceptOnlineOrders: !data.acceptOnlineOrders })}>
+        <div className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-2xl p-5 flex items-center justify-between cursor-pointer group hover:border-[#E5E7EB] transition-colors" onClick={() => onChange({ acceptOnlineOrders: !data.acceptOnlineOrders })}>
           <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${data.acceptOnlineOrders ? 'bg-primary/20 border border-primary/30' : 'bg-[#171717] border border-white/10'}`}>
-              <Bike className={`w-6 h-6 ${data.acceptOnlineOrders ? 'text-primary' : 'text-gray-500'}`} />
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${data.acceptOnlineOrders ? 'bg-[#FC8019]/20 border border-[#FC8019]/30' : 'bg-[#FFFFFF] border border-[#E5E7EB]'}`}>
+              <Bike className={`w-6 h-6 ${data.acceptOnlineOrders ? 'text-[#FC8019]' : 'text-[#9CA3AF]'}`} />
             </div>
             <div>
-              <h4 className="text-white font-bold mb-1">Accept Delivery Orders</h4>
-              <p className="text-gray-400 text-xs">Allow customers to place orders for home delivery.</p>
+              <h4 className="text-[#111827] font-bold mb-1">Accept Delivery Orders</h4>
+              <p className="text-[#6B7280] text-xs">Allow customers to place orders for home delivery.</p>
             </div>
           </div>
           
-          <div className={`w-12 h-6 rounded-full p-1 transition-colors ${data.acceptOnlineOrders ? 'bg-primary' : 'bg-[#171717] border border-white/10'}`}>
+          <div className={`w-12 h-6 rounded-full p-1 transition-colors ${data.acceptOnlineOrders ? 'bg-[#FC8019]' : 'bg-[#FFFFFF] border border-[#E5E7EB]'}`}>
             <motion.div 
               layout
               className="w-4 h-4 rounded-full bg-white shadow-md"
@@ -77,18 +77,18 @@ export default function DeliverySettings({ data, onChange }: DeliverySettingsPro
         </div>
 
         {/* Accept Pickup Orders Toggle */}
-        <div className="bg-[#111] border border-white/5 rounded-2xl p-5 flex items-center justify-between cursor-pointer group hover:border-white/20 transition-colors" onClick={() => onChange({ acceptPickupOrders: !data.acceptPickupOrders })}>
+        <div className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-2xl p-5 flex items-center justify-between cursor-pointer group hover:border-[#E5E7EB] transition-colors" onClick={() => onChange({ acceptPickupOrders: !data.acceptPickupOrders })}>
           <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${data.acceptPickupOrders ? 'bg-orange-500/20 border border-orange-500/30' : 'bg-[#171717] border border-white/10'}`}>
-              <ShoppingBag className={`w-6 h-6 ${data.acceptPickupOrders ? 'text-orange-500' : 'text-gray-500'}`} />
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${data.acceptPickupOrders ? 'bg-orange-500/20 border border-orange-500/30' : 'bg-[#FFFFFF] border border-[#E5E7EB]'}`}>
+              <ShoppingBag className={`w-6 h-6 ${data.acceptPickupOrders ? 'text-orange-500' : 'text-[#9CA3AF]'}`} />
             </div>
             <div>
-              <h4 className="text-white font-bold mb-1">Accept Pickup Orders</h4>
-              <p className="text-gray-400 text-xs">Allow customers to order online and pick up in store.</p>
+              <h4 className="text-[#111827] font-bold mb-1">Accept Pickup Orders</h4>
+              <p className="text-[#6B7280] text-xs">Allow customers to order online and pick up in store.</p>
             </div>
           </div>
           
-          <div className={`w-12 h-6 rounded-full p-1 transition-colors ${data.acceptPickupOrders ? 'bg-orange-500' : 'bg-[#171717] border border-white/10'}`}>
+          <div className={`w-12 h-6 rounded-full p-1 transition-colors ${data.acceptPickupOrders ? 'bg-orange-500' : 'bg-[#FFFFFF] border border-[#E5E7EB]'}`}>
             <motion.div 
               layout
               className="w-4 h-4 rounded-full bg-white shadow-md"

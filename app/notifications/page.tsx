@@ -102,13 +102,13 @@ export default function NotificationsPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-[#0B0B0B] relative pt-[90px]">
+      <main className="min-h-screen bg-[#FFFFFF] relative pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 md:px-8 py-12 max-w-4xl">
-          <div className="w-48 h-10 bg-white/5 animate-pulse rounded-lg mb-8"></div>
+          <div className="w-48 h-10 bg-[#F8FAFC] animate-pulse rounded-lg mb-8"></div>
           <div className="flex flex-col gap-6">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-24 bg-white/5 animate-pulse rounded-2xl border border-white/10"></div>
+              <div key={i} className="h-24 bg-[#F8FAFC] animate-pulse rounded-2xl border border-[#E5E7EB]"></div>
             ))}
           </div>
         </div>
@@ -118,7 +118,7 @@ export default function NotificationsPage() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[#0B0B0B] flex flex-col items-center justify-center gap-4 pt-[90px]">
+      <main className="min-h-screen bg-[#FFFFFF] flex flex-col items-center justify-center gap-4 pt-[90px]">
         <Navbar />
         <div className="text-white text-xl">Failed to load notifications</div>
         <button onClick={() => mutate()} className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg">Retry</button>
@@ -127,7 +127,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0B0B0B] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-4xl">

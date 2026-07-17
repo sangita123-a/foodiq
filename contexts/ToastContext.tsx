@@ -40,7 +40,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       
       {/* Toast Container */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-3 pointer-events-none w-full max-w-sm px-4">
+      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-3 pointer-events-none w-full max-w-sm px-4">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
@@ -49,10 +49,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.9 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl border pointer-events-auto ${
+              role="status"
+              aria-live="polite"
+              className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white/95 backdrop-blur-xl shadow-[0_18px_50px_rgba(28,28,28,0.16)] border pointer-events-auto ${
                 toast.type === "success" 
-                  ? "bg-green-500/10 border-green-500/20 text-green-400 backdrop-blur-md" 
-                  : "bg-red-500/10 border-red-500/20 text-red-400 backdrop-blur-md"
+                  ? "border-[#FC8019]/30 text-[#FC8019]" 
+                  : "border-[#EF4F5F]/30 text-[#EF4F5F]"
               }`}
             >
               {toast.type === "success" ? (
@@ -60,10 +62,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               ) : (
                 <XCircle className="w-5 h-5 shrink-0" />
               )}
-              <span className="flex-1 text-sm font-medium">{toast.message}</span>
+              <span className="flex-1 text-sm font-semibold text-[#1C1C1C]">{toast.message}</span>
               <button 
                 onClick={() => removeToast(toast.id)}
-                className="opacity-70 hover:opacity-100 transition-opacity"
+                aria-label="Dismiss notification"
+                className="flex h-8 w-8 items-center justify-center rounded-xl text-[#686B78] opacity-70 hover:bg-[#F8F9FA] hover:opacity-100 transition-all"
               >
                 <X className="w-4 h-4" />
               </button>

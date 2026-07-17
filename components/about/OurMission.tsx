@@ -29,7 +29,7 @@ export default function OurMission() {
   ];
 
   return (
-    <div className="py-24 bg-[#111]">
+    <div className="py-24 bg-white">
       <div className="container mx-auto px-4 md:px-8">
         
         <div className="text-center mb-16">
@@ -46,13 +46,13 @@ export default function OurMission() {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6, delay: idx * 0.2 }}
               whileHover={{ y: -10 }}
-              className="bg-[#171717] rounded-3xl p-8 border border-white/5 hover:border-white/20 transition-all duration-300 shadow-xl group text-center"
+              className="bg-[#F8FAFC] rounded-3xl p-8 border border-[#E5E7EB] hover:border-[#E5E7EB] transition-all duration-300 shadow-xl group text-center"
             >
-              <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-8 border transition-colors ${mission.bg} group-hover:bg-white/10 group-hover:border-white/20`}>
+              <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-8 border transition-colors ${mission.bg} group-hover:bg-[#F8FAFC] group-hover:border-[#E5E7EB]`}>
                 <mission.icon className={`w-10 h-10 ${mission.color}`} />
               </div>
               <h3 className="text-2xl font-bold text-white mb-4">{mission.title}</h3>
-              <p className="text-gray-400 leading-relaxed">{mission.desc}</p>
+              <p className="text-[#6B7280] leading-relaxed">{mission.desc}</p>
             </motion.div>
           ))}
         </div>

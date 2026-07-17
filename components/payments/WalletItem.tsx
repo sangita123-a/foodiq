@@ -15,18 +15,18 @@ type Props = {
 
 export default function WalletItem({ wallet, onToggleConnect }: Props) {
   return (
-    <div className="bg-[#111] border border-white/5 hover:border-white/10 transition-all duration-300 rounded-2xl p-4 md:p-6 flex items-center justify-between gap-4">
+    <div className="flex items-center justify-between gap-4 rounded-2xl border border-[#ECECEC] bg-white p-4 shadow-[0_6px_18px_rgba(28,28,28,0.05)] transition-all duration-300 hover:border-[#FC8019]/30 hover:shadow-[0_10px_26px_rgba(28,28,28,0.08)] md:p-6">
       
       <div className="flex items-center gap-4">
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center border transition-colors ${
-          wallet.isConnected ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-white/5 border-white/10 text-gray-400'
+          wallet.isConnected ? 'bg-primary/10 border-primary/20 text-primary' : 'border-[#ECECEC] bg-[#F8F9FA] text-[#686B78]'
         }`}>
           <Wallet className="w-6 h-6" />
         </div>
         <div>
-          <h4 className="text-white font-bold text-lg">{wallet.name}</h4>
+          <h4 className="text-lg font-bold text-[#1C1C1C]">{wallet.name}</h4>
           <p className={`text-xs uppercase tracking-widest mt-0.5 font-bold ${
-            wallet.isConnected ? 'text-green-400' : 'text-gray-500'
+            wallet.isConnected ? 'text-green-600' : 'text-[#686B78]'
           }`}>
             {wallet.isConnected ? 'Connected' : 'Not Connected'}
           </p>
@@ -38,7 +38,7 @@ export default function WalletItem({ wallet, onToggleConnect }: Props) {
         className={`px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors ${
           wallet.isConnected 
             ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/10' 
-            : 'bg-white/5 hover:bg-white/10 text-white border border-white/5'
+            : 'border border-[#ECECEC] bg-[#F8F9FA] text-[#1C1C1C] hover:border-[#FC8019]/30 hover:bg-white'
         }`}
       >
         {wallet.isConnected ? (

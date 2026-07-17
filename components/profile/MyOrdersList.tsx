@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
 import Link from "next/link";
+import SafeImage from "@/components/ui/SafeImage";
+import { RESTAURANT_FALLBACK } from "@/lib/images";
 
 export default function MyOrdersList() {
   const router = useRouter();
@@ -54,10 +56,10 @@ export default function MyOrdersList() {
 
   if (isLoading) {
     return (
-      <div className="bg-[#171717] rounded-[24px] p-6 md:p-8 border border-white/5">
-        <div className="h-8 w-48 bg-white/5 animate-pulse rounded mb-8" />
+      <div className="bg-[#F8FAFC] rounded-[24px] p-6 md:p-8 border border-[#E5E7EB]">
+        <div className="h-8 w-48 bg-[#F8FAFC] animate-pulse rounded mb-8" />
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-32 bg-white/5 animate-pulse rounded-2xl mb-4" />
+          <div key={i} className="h-32 bg-[#F8FAFC] animate-pulse rounded-2xl mb-4" />
         ))}
       </div>
     );
@@ -69,20 +71,20 @@ export default function MyOrdersList() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3 }}
-      className="bg-[#171717] rounded-[24px] p-6 md:p-8 border border-white/5"
+      className="bg-[#F8FAFC] rounded-[24px] p-6 md:p-8 border border-[#E5E7EB]"
     >
-      <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/10">
+      <div className="flex items-center justify-between mb-8 pb-6 border-b border-[#E5E7EB]">
         <div className="flex items-center gap-3">
           <Package className="w-6 h-6 text-primary" />
-          <h2 className="text-2xl font-bold text-white">Order History</h2>
+          <h2 className="text-2xl font-bold text-[#111827]">Order History</h2>
         </div>
-        <Link href="/my-orders" className="text-primary text-sm font-bold hover:text-white transition-colors">
+        <Link href="/my-orders" className="text-primary text-sm font-bold hover:text-[#111827] transition-colors">
           View All
         </Link>
       </div>
 
       {orders.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-[#6B7280]">
           <Package className="w-12 h-12 mx-auto mb-4 opacity-40" />
           <p className="font-bold text-white mb-2">No orders yet</p>
           <Link href="/restaurants" className="text-primary text-sm font-bold">
@@ -101,11 +103,12 @@ export default function MyOrdersList() {
             return (
               <div
                 key={order.id}
-                className="bg-[#111] border border-white/5 rounded-2xl p-4 md:p-6 flex flex-col md:flex-row gap-6 hover:border-white/10 transition-colors"
+                className="bg-white border border-[#E5E7EB] rounded-2xl p-4 md:p-6 flex flex-col md:flex-row gap-6 hover:border-[#E5E7EB] transition-colors"
               >
-                <div className="w-full md:w-24 h-32 md:h-24 rounded-xl overflow-hidden flex-shrink-0 bg-white/5">
-                  <img
-                    src="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&q=80&w=200"
+                <div className="w-full md:w-24 h-32 md:h-24 rounded-xl overflow-hidden flex-shrink-0 bg-[#F8FAFC]">
+                  <SafeImage
+                    src={order.restaurant_image_url}
+                    fallback={RESTAURANT_FALLBACK}
                     alt={order.restaurant_name || "Order"}
                     className="w-full h-full object-cover"
                   />
@@ -114,7 +117,7 @@ export default function MyOrdersList() {
                 <div className="flex-1 flex flex-col justify-between">
                   <div>
                     <div className="flex justify-between items-start mb-1">
-                      <h3 className="text-lg font-bold text-white">
+                      <h3 className="text-lg font-bold text-[#111827]">
                         {order.restaurant_name || "Restaurant"}
                       </h3>
                       <span
@@ -129,10 +132,10 @@ export default function MyOrdersList() {
                         {status}
                       </span>
                     </div>
-                    <p className="text-gray-400 text-sm mb-2">
+                    <p className="text-[#6B7280] text-sm mb-2">
                       {new Date(order.created_at).toLocaleString()} • {order.id.slice(0, 8)}…
                     </p>
-                    <p className="text-gray-300 text-sm line-clamp-1">
+                    <p className="text-[#6B7280] text-sm line-clamp-1">
                       {itemNames || "Order items"}
                     </p>
                   </div>
@@ -145,14 +148,14 @@ export default function MyOrdersList() {
                       {isActive(order.status) && (
                         <button
                           onClick={() => router.push(`/track-order?id=${order.id}`)}
-                          className="text-gray-400 hover:text-white text-sm font-bold flex items-center gap-1 transition-colors"
+                          className="text-[#6B7280] hover:text-[#111827] text-sm font-bold flex items-center gap-1 transition-colors"
                         >
                           <MapPin className="w-4 h-4" /> Track
                         </button>
                       )}
                       <button
                         onClick={() => router.push(`/track-order?id=${order.id}`)}
-                        className="text-gray-400 hover:text-white text-sm font-bold flex items-center gap-1 transition-colors"
+                        className="text-[#6B7280] hover:text-[#111827] text-sm font-bold flex items-center gap-1 transition-colors"
                       >
                         Details <ChevronRight className="w-4 h-4" />
                       </button>

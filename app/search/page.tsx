@@ -7,130 +7,140 @@ import RestaurantCard from "@/components/RestaurantCard";
 import MenuItemCard from "@/components/restaurant/MenuItemCard";
 import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
-import { useState, Suspense } from "react";
+import Link from "next/link";
+import { Suspense } from "react";
+import { getFoodImage, mapRestaurantCard } from "@/lib/images";
+import { useCartActions } from "@/hooks/useCartActions";
 
 function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
+  const { quantities, updatingId, updateQuantity } = useCartActions();
 
-  // The global search API
   const { data, isLoading } = useSWR(query ? `/api/search?q=${encodeURIComponent(query)}` : null);
 
   const results = Array.isArray(data) ? data : [];
-  const restaurants = results.filter((r: any) => r.type === 'restaurant');
-  const menuItems = results.filter((r: any) => r.type === 'menu_item');
-
-  const [cart, setCart] = useState<Record<string, { quantity: number; price: number }>>({});
-  
-  const handleUpdateQuantity = (itemId: string, delta: number, price: number = 0) => {
-    setCart((prev) => {
-      const newCart = { ...prev };
-      const currentQty = newCart[itemId]?.quantity || 0;
-      const newQty = currentQty + delta;
-      if (newQty <= 0) {
-        delete newCart[itemId];
-      } else {
-        newCart[itemId] = { quantity: newQty, price };
-      }
-      return newCart;
-    });
-  };
+  const restaurants = results.filter((r: any) => r.type === "restaurant");
+  const menuItems = results.filter((r: any) => r.type === "menu_item");
+  const cuisines = results.filter((r: any) => r.type === "cuisine");
 
   return (
-    <main className="min-h-screen bg-[#0B0B0B] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
-      
-      {/* Top Search Section */}
-      <div className="w-full bg-[#121212] py-8 border-b border-white/10">
+
+      <div className="w-full bg-[#FFFFFF] py-8 border-b border-[#E5E7EB]">
         <div className="container mx-auto px-4 md:px-8">
           <CompactSearchBar />
         </div>
       </div>
 
-      <div className="container mx-auto px-4 md:px-8 py-12">
-        <div className="mb-10 text-center md:text-left">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3">
-            Search Results for "{query}"
+      <div className="container mx-auto max-w-[1600px] px-4 md:px-8 py-10">
+        <div className="food-section-heading text-center md:text-left">
+          <h1 className="text-3xl md:text-4xl font-black text-white mb-2">
+            Search Results for &quot;{query}&quot;
           </h1>
-          <p className="text-[var(--color-gray-text)] text-lg">
-            {!query ? "Enter a search term above." : 
-             isLoading ? "Searching..." :
-             `Found ${restaurants.length} restaurants and ${menuItems.length} dishes.`}
+          <p>
+            {!query
+              ? "Enter a search term above."
+              : isLoading
+                ? "Searching..."
+                : `Found ${restaurants.length} restaurants, ${menuItems.length} dishes, and ${cuisines.length} cuisines.`}
           </p>
         </div>
 
-        {/* Loading Skeletons */}
         {isLoading && query && (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-64 bg-white/5 rounded-2xl animate-pulse border border-white/10"></div>
+          <div className="food-grid">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-64 bg-[#F8FAFC] rounded-2xl animate-pulse border border-[#E5E7EB]" />
             ))}
           </div>
         )}
 
         {!isLoading && query && (
           <>
-            {/* Restaurants */}
+            {cuisines.length > 0 && (
+              <div className="mb-16">
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-8">Cuisines</h2>
+                <div className="food-grid">
+                  {cuisines.map((cuisine: any) => (
+                    <Link
+                      key={cuisine.id || cuisine.slug}
+                      href={`/cuisine/${cuisine.slug}`}
+                      className="food-card p-4 hover:border-primary/40"
+                    >
+                      <h3 className="text-lg font-bold text-[#111827]">{cuisine.name}</h3>
+                      <p className="mt-2 text-sm text-[#6B7280] line-clamp-2">{cuisine.description}</p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {restaurants.length > 0 && (
               <div className="mb-16">
                 <h2 className="text-2xl md:text-3xl font-bold text-white mb-8">Restaurants</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {restaurants.map((restaurant: any, idx: number) => {
-                    const mapped = {
-                      id: restaurant.id,
-                      name: restaurant.name,
-                      image: restaurant.image_url || "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&q=80&w=600&h=400",
-                      rating: restaurant.rating || "4.5",
-                      time: "30 min",
-                      cuisine: restaurant.description || "Various Cuisines",
-                      priceForTwo: "₹400 for two"
+                <div className="food-grid">
+                  {restaurants.map((restaurant: any, idx: number) => (
+                    <RestaurantCard
+                      key={restaurant.id}
+                      {...mapRestaurantCard({
+                        id: restaurant.id,
+                        name: restaurant.name,
+                        image_url: restaurant.image_url,
+                        rating: restaurant.rating,
+                        estimated_delivery_time: restaurant.estimated_delivery_time,
+                        description: restaurant.description,
+                        category_name: restaurant.category_name,
+                        price_range: restaurant.price_range,
+                      })}
+                      delay={idx * 0.1}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {menuItems.length > 0 && (
+              <div className="mb-16">
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-8">Dishes</h2>
+                <div className="food-grid">
+                  {menuItems.map((item: any) => {
+                    const mappedItem = {
+                      id: item.id,
+                      name: item.name,
+                      description: item.description,
+                      image: getFoodImage(item.image_url),
+                      price: item.discount_price ? parseFloat(item.discount_price) : parseFloat(item.price),
+                      rating: String(item.rating || "4.5"),
+                      isVeg: item.is_vegetarian,
+                      prepTime: item.preparation_time || "15 min",
                     };
                     return (
-                      <RestaurantCard key={mapped.id} {...mapped} delay={idx * 0.1} />
+                      <div key={item.id} className="min-w-0">
+                        <MenuItemCard
+                          item={mappedItem}
+                          quantity={quantities.get(item.id) || 0}
+                          isUpdating={updatingId === item.id}
+                          onUpdateQuantity={updateQuantity}
+                        />
+                        <div className="px-4 pb-3 flex items-center justify-between text-xs">
+                          <span className="text-primary font-bold">From: {item.restaurant_name}</span>
+                          <Link href={`/food/${item.id}`} className="font-bold text-[#6B7280] hover:text-[#111827]">
+                            View Details
+                          </Link>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
               </div>
             )}
 
-            {/* Dishes */}
-            {menuItems.length > 0 && (
-              <div className="mb-16">
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-8">Dishes</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {menuItems.map((item: any) => {
-                     const mappedItem = {
-                        id: item.id,
-                        name: item.name,
-                        description: item.description,
-                        image: item.image_url || "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=400",
-                        price: item.price,
-                        rating: "4.5",
-                        isVeg: item.is_vegetarian,
-                        prepTime: item.preparation_time || "15 min",
-                      };
-                      return (
-                        <div key={item.id} className="bg-[#171717] rounded-xl p-1">
-                           <MenuItemCard 
-                             item={mappedItem} 
-                             quantity={cart[item.id]?.quantity || 0}
-                             onUpdateQuantity={(id, delta) => handleUpdateQuantity(id, delta, item.price)}
-                           />
-                           <div className="px-4 pb-3 text-xs text-primary font-bold">
-                             From: {item.restaurant_name}
-                           </div>
-                        </div>
-                      );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {restaurants.length === 0 && menuItems.length === 0 && (
-              <div className="text-center py-20 bg-[#121212] rounded-2xl border border-white/10">
+            {restaurants.length === 0 && menuItems.length === 0 && cuisines.length === 0 && (
+              <div className="text-center py-20 bg-[#FFFFFF] rounded-2xl border border-[#E5E7EB]">
                 <div className="text-6xl mb-4">🍽️</div>
                 <h3 className="text-2xl font-bold text-white mb-2">No results found</h3>
-                <p className="text-gray-400">Try searching for something else like "Biryani" or "Pizza".</p>
+                <p className="text-[#6B7280]">Try searching for something else like &quot;Biryani&quot; or &quot;Pizza&quot;.</p>
               </div>
             )}
           </>
@@ -144,7 +154,7 @@ function SearchContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0B0B0B] flex items-center justify-center text-white">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center text-[#111827]">Loading...</div>}>
       <SearchContent />
     </Suspense>
   );

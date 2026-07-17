@@ -29,7 +29,7 @@ export default function NotificationCard({ notification, onMarkAsRead, onDelete 
       case "Offers": return <Tag className="w-5 h-5 text-yellow-400" />;
       case "Payments": return <CreditCard className="w-5 h-5 text-green-400" />;
       case "Account": return <User className="w-5 h-5 text-purple-400" />;
-      default: return <Bell className="w-5 h-5 text-gray-400" />;
+      default: return <Bell className="w-5 h-5 text-[#6B7280]" />;
     }
   };
 
@@ -49,9 +49,9 @@ export default function NotificationCard({ notification, onMarkAsRead, onDelete 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-      className={`relative bg-[#171717] rounded-2xl p-5 md:p-6 border flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all duration-300 hover:bg-[#1a1a1a] group ${
+      className={`relative bg-[#F8FAFC] rounded-2xl p-5 md:p-6 border flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all duration-300 hover:bg-[#F8FAFC] group ${
         !notification.isRead 
-          ? "border-l-4 border-l-[#FF2D3B] border-y-white/5 border-r-white/5 shadow-lg" 
+          ? "border-l-4 border-l-[#FC8019] border-y-white/5 border-r-white/5 shadow-lg" 
           : "border-l-4 border-l-transparent border-y-white/5 border-r-white/5 opacity-80"
       }`}
     >
@@ -64,29 +64,29 @@ export default function NotificationCard({ notification, onMarkAsRead, onDelete 
         
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <h3 className={`text-lg font-bold ${!notification.isRead ? "text-white" : "text-gray-300"}`}>
+            <h3 className={`text-lg font-bold ${!notification.isRead ? "text-[#111827]" : "text-[#6B7280]"}`}>
               {notification.title}
             </h3>
             {!notification.isRead && (
-              <span className="w-2 h-2 bg-primary rounded-full shadow-[0_0_8px_rgba(255,45,59,0.8)]"></span>
+              <span className="w-2 h-2 bg-primary rounded-full shadow-[0_0_8px_rgba(252,128,25,0.8)]"></span>
             )}
           </div>
-          <p className="text-gray-400 text-sm leading-relaxed mb-2 max-w-2xl">
+          <p className="text-[#6B7280] text-sm leading-relaxed mb-2 max-w-2xl">
             {notification.description}
           </p>
-          <span className="text-xs font-bold text-gray-500 tracking-wider">
+          <span className="text-xs font-bold text-[#9CA3AF] tracking-wider">
             {notification.time}
           </span>
         </div>
       </div>
 
       {/* Hover Actions */}
-      <div className="flex items-center gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 self-end md:self-center bg-[#171717]/80 backdrop-blur-sm p-1 rounded-xl">
+      <div className="flex items-center gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 self-end md:self-center bg-[#F8FAFC]/80 backdrop-blur-sm p-1 rounded-xl">
         
         {!notification.isRead && (
           <button 
             onClick={() => onMarkAsRead(notification.id)}
-            className="p-2 bg-white/5 hover:bg-green-500/20 text-gray-400 hover:text-green-400 rounded-lg transition-colors"
+            className="p-2 bg-[#F8FAFC] hover:bg-green-500/20 text-[#6B7280] hover:text-green-400 rounded-lg transition-colors"
             title="Mark as Read"
           >
             <CheckCircle2 className="w-5 h-5" />
@@ -95,14 +95,14 @@ export default function NotificationCard({ notification, onMarkAsRead, onDelete 
 
         <button 
           onClick={() => onDelete(notification.id)}
-          className="p-2 bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded-lg transition-colors"
+          className="p-2 bg-[#F8FAFC] hover:bg-red-500/20 text-[#6B7280] hover:text-red-400 rounded-lg transition-colors"
           title="Delete"
         >
           <Trash2 className="w-5 h-5" />
         </button>
 
         <button 
-          className="p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-colors"
+          className="p-2 bg-[#F8FAFC] hover:bg-[#F8FAFC] text-[#6B7280] hover:text-[#111827] rounded-lg transition-colors"
           title="Open Details"
         >
           <ChevronRight className="w-5 h-5" />

@@ -49,10 +49,10 @@ export default function OrdersSummary({ orders }: OrdersSummaryProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: idx * 0.1 }}
           whileHover={{ y: -5 }}
-          className="bg-[#171717] rounded-2xl p-5 border border-white/5 shadow-lg group hover:border-white/20 transition-all cursor-pointer relative overflow-hidden"
+          className="bg-[#FFFFFF] rounded-2xl p-5 border border-[#E5E7EB] shadow-lg group hover:border-[#E5E7EB] transition-all cursor-pointer relative overflow-hidden"
         >
           {/* subtle background glow on hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFC] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           
           <div className="relative z-10">
             <div className="flex items-start justify-between mb-3">
@@ -60,16 +60,16 @@ export default function OrdersSummary({ orders }: OrdersSummaryProps) {
                 <stat.icon className={`w-5 h-5 ${stat.color}`} />
               </div>
               
-              <div className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md bg-[#111] border border-white/5 ${stat.isUp ? 'text-green-400' : 'text-red-400'}`}>
+              <div className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md bg-[#F8FAFC] border border-[#E5E7EB] ${stat.isUp ? 'text-green-400' : 'text-red-400'}`}>
                 {stat.isUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                 {stat.trend}
               </div>
             </div>
 
-            <h3 className="text-3xl font-black text-white mb-1">
+            <h3 className="text-3xl font-black text-[#111827] mb-1">
               <Counter from={0} to={stat.value} />
             </h3>
-            <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">{stat.title}</p>
+            <p className="text-[#6B7280] text-xs font-bold uppercase tracking-wider">{stat.title}</p>
           </div>
         </motion.div>
       ))}

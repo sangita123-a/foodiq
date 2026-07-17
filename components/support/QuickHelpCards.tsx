@@ -19,13 +19,13 @@ export default function QuickHelpCards() {
         <motion.div 
           key={idx}
           whileHover={{ y: -8 }}
-          className="bg-[#171717] rounded-3xl p-6 border border-white/5 hover:border-white/20 transition-all duration-300 shadow-lg cursor-pointer group"
+          className="bg-[#F8FAFC] rounded-3xl p-6 border border-[#E5E7EB] hover:border-[#E5E7EB] transition-all duration-300 shadow-lg cursor-pointer group"
         >
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border transition-colors ${card.bg} group-hover:bg-white/10 group-hover:border-white/20`}>
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border transition-colors ${card.bg} group-hover:bg-[#F8FAFC] group-hover:border-[#E5E7EB]`}>
             <card.icon className={`w-7 h-7 ${card.color}`} />
           </div>
           <h3 className="text-xl font-bold text-white mb-2 group-hover:text-primary transition-colors">{card.title}</h3>
-          <p className="text-gray-400 text-sm leading-relaxed">{card.desc}</p>
+          <p className="text-[#6B7280] text-sm leading-relaxed">{card.desc}</p>
         </motion.div>
       ))}
     </div>

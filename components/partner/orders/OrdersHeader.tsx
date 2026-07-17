@@ -12,18 +12,18 @@ export default function OrdersHeader() {
       transition={{ duration: 0.5 }}
       className="mb-8"
     >
-      <div className="flex items-center gap-2 text-sm text-gray-500 font-bold uppercase tracking-wider mb-4">
-        <Link href="/partner/dashboard" className="hover:text-primary transition-colors">Dashboard</Link>
+      <div className="flex items-center gap-2 text-sm text-[#9CA3AF] font-bold uppercase tracking-wider mb-4">
+        <Link href="/partner/dashboard" className="hover:text-[#FC8019] transition-colors">Dashboard</Link>
         <ChevronRight className="w-4 h-4" />
-        <span className="hover:text-white transition-colors cursor-default">Orders</span>
+        <span className="hover:text-[#111827] transition-colors cursor-default">Orders</span>
         <ChevronRight className="w-4 h-4" />
-        <span className="text-white">Incoming Orders</span>
+        <span className="text-[#111827]">Incoming Orders</span>
       </div>
       
-      <h1 className="text-3xl md:text-4xl font-black text-white mb-2 flex items-center gap-3">
+      <h1 className="text-3xl md:text-4xl font-black text-[#111827] mb-2 flex items-center gap-3">
         📦 Incoming Orders
       </h1>
-      <p className="text-gray-400">
+      <p className="text-[#6B7280]">
         Manage all live customer orders in real time.
       </p>
     </motion.div>

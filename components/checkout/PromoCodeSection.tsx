@@ -64,7 +64,7 @@ export default function PromoCodeSection({ appliedDiscount, onApply, autoApplyCo
   };
 
   return (
-    <div className="bg-[#171717] rounded-2xl p-6 border border-white/5 mb-6">
+    <div className="bg-[#F8FAFC] rounded-2xl p-6 border border-[#E5E7EB] mb-6">
       <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
         <Tag className="w-5 h-5 text-primary" />
         Promo Code
@@ -82,13 +82,13 @@ export default function PromoCodeSection({ appliedDiscount, onApply, autoApplyCo
                   setCode(e.target.value);
                   setError("");
                 }}
-                className="w-full bg-[#111] text-white border border-white/10 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-primary transition-colors uppercase"
+                className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-primary transition-colors uppercase"
               />
             </div>
             <button
               onClick={handleApply}
               disabled={!code || isApplying}
-              className="bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:hover:bg-white/10 text-white px-6 rounded-xl text-sm font-bold transition-colors"
+              className="bg-[#F8FAFC] hover:bg-[#F8FAFC] disabled:opacity-50 disabled:hover:bg-[#F8FAFC] text-white px-6 rounded-xl text-sm font-bold transition-colors"
             >
               {isApplying ? "..." : "Apply"}
             </button>
@@ -107,7 +107,7 @@ export default function PromoCodeSection({ appliedDiscount, onApply, autoApplyCo
           </div>
           <button
             onClick={handleRemove}
-            className="text-gray-400 hover:text-white text-sm font-bold transition-colors"
+            className="text-[#6B7280] hover:text-[#111827] text-sm font-bold transition-colors"
           >
             Remove
           </button>

@@ -47,7 +47,7 @@ const INITIAL_REVIEWS: Review[] = [
     title: "Disappointed",
     description: "The coffee was warm and the ice cream had completely melted by the time it reached me. Very poor packaging.",
     date: "1 week ago",
-    photos: ["https://images.unsplash.com/photo-1579992357154-faf4bde95b3d?q=80&w=200&auto=format&fit=crop"]
+    photos: ["/images/catalog/food/beverages.webp"]
   },
   {
     id: "REV-004",
@@ -126,7 +126,7 @@ export default function PartnerReviewsPage() {
   }, [reviews, search, ratingFilter, sortBy]);
 
   return (
-    <div className="min-h-screen bg-[#0B0B0B] flex selection:bg-[var(--color-primary)] selection:text-white">
+    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#FC8019] selection:text-white">
       
       {/* Sidebar - Fixed on left for desktop */}
       <div className="hidden lg:block w-64 flex-shrink-0">

@@ -128,21 +128,21 @@ export default function SavedAddressesPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-[#0B0B0B] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+      <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 md:px-8 py-12 max-w-6xl">
           {/* Header Skeleton */}
           <div className="flex justify-between items-center mb-10">
             <div>
-              <div className="w-48 h-8 bg-white/5 animate-pulse rounded-lg mb-2"></div>
-              <div className="w-64 h-5 bg-white/5 animate-pulse rounded-lg"></div>
+              <div className="w-48 h-8 bg-[#F8FAFC] animate-pulse rounded-lg mb-2"></div>
+              <div className="w-64 h-5 bg-[#F8FAFC] animate-pulse rounded-lg"></div>
             </div>
-            <div className="w-32 h-10 bg-white/5 animate-pulse rounded-lg"></div>
+            <div className="w-32 h-10 bg-[#F8FAFC] animate-pulse rounded-lg"></div>
           </div>
           {/* Grid Skeleton */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-56 bg-white/5 animate-pulse rounded-2xl border border-white/10"></div>
+              <div key={i} className="h-56 bg-[#F8FAFC] animate-pulse rounded-2xl border border-[#E5E7EB]"></div>
             ))}
           </div>
         </div>
@@ -152,7 +152,7 @@ export default function SavedAddressesPage() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[#0B0B0B] flex flex-col items-center justify-center gap-4 pt-[90px]">
+      <main className="min-h-screen bg-[#FFFFFF] flex flex-col items-center justify-center gap-4 pt-[90px]">
         <Navbar />
         <div className="text-white text-xl">Failed to load addresses</div>
         <button onClick={() => mutate()} className="px-6 py-2 bg-primary text-white rounded-lg">Retry</button>
@@ -161,7 +161,7 @@ export default function SavedAddressesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0B0B0B] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-6xl">

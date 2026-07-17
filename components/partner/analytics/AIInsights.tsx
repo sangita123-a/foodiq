@@ -18,14 +18,14 @@ export default function AIInsights({ insights }: AIInsightsProps) {
   };
 
   return (
-    <div className="bg-gradient-to-br from-[#171717] to-primary/5 rounded-3xl p-6 md:p-8 border border-primary/20 shadow-[0_0_30px_rgba(224,38,51,0.05)] mb-8">
+    <div className="bg-gradient-to-br from-[#FFFFFF] to-[#FC8019]/5 rounded-3xl p-6 md:p-8 border border-[#FC8019]/20 shadow-[0_0_30px_rgba(252,128,25,0.05)] mb-8">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30">
-          <Sparkles className="w-5 h-5 text-primary" />
+        <div className="w-10 h-10 rounded-xl bg-[#FC8019]/20 flex items-center justify-center border border-[#FC8019]/30">
+          <Sparkles className="w-5 h-5 text-[#FC8019]" />
         </div>
         <div>
-          <h3 className="text-xl font-black text-white">AI Business Insights</h3>
-          <p className="text-primary text-xs font-bold uppercase tracking-wider">Generated from your real-time data</p>
+          <h3 className="text-xl font-black text-[#111827]">AI Business Insights</h3>
+          <p className="text-[#FC8019] text-xs font-bold uppercase tracking-wider">Generated from your real-time data</p>
         </div>
       </div>
 
@@ -36,12 +36,12 @@ export default function AIInsights({ insights }: AIInsightsProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: idx * 0.1 }}
-            className="bg-[#111] border border-white/5 rounded-2xl p-5 hover:border-primary/30 transition-colors group"
+            className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-2xl p-5 hover:border-[#FC8019]/30 transition-colors group"
           >
-            <div className="w-8 h-8 rounded-lg bg-[#171717] border border-white/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="w-8 h-8 rounded-lg bg-[#FFFFFF] border border-[#E5E7EB] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               {getIcon(insight)}
             </div>
-            <p className="text-gray-300 text-sm font-bold leading-relaxed">
+            <p className="text-[#6B7280] text-sm font-bold leading-relaxed">
               {insight}
             </p>
           </motion.div>

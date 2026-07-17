@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { Star, Plus, Minus, Flame, Heart } from "lucide-react";
+import SafeImage from "@/components/ui/SafeImage";
+import { FOOD_FALLBACK } from "@/lib/images";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
 import { useState } from "react";
@@ -23,11 +26,20 @@ export type MenuItem = {
 type MenuItemCardProps = {
   item: MenuItem;
   quantity: number;
+  isUpdating?: boolean;
   onUpdateQuantity: (id: string, delta: number) => void;
+  onOrderNow?: (id: string) => void;
   onFavoriteToggle?: () => void;
 };
 
-export default function MenuItemCard({ item, quantity, onUpdateQuantity, onFavoriteToggle }: MenuItemCardProps) {
+export default function MenuItemCard({
+  item,
+  quantity,
+  isUpdating = false,
+  onUpdateQuantity,
+  onOrderNow,
+  onFavoriteToggle,
+}: MenuItemCardProps) {
   const { showToast } = useToast();
   const [isFav, setIsFav] = useState(item.isFavorite || false);
   const [isTogglingFav, setIsTogglingFav] = useState(false);
@@ -59,13 +71,13 @@ export default function MenuItemCard({ item, quantity, onUpdateQuantity, onFavor
   };
 
   return (
-    <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 md:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 hover:border-white/10 transition-colors duration-300 group shadow-lg">
+    <article className="food-card group flex h-full flex-col rounded-[14px]">
       
       {/* Item Info */}
-      <div className="flex-1 flex flex-col justify-between">
+      <div className="order-2 flex flex-1 flex-col justify-between p-3">
         <div>
           {/* Veg/Non-Veg Badge & Tags */}
-          <div className="flex items-center gap-3 mb-2">
+          <div className="mb-2 flex min-h-5 items-center gap-2">
             <div className={`w-4 h-4 flex items-center justify-center border-2 rounded-sm ${item.isVeg ? 'border-green-600' : 'border-red-600'}`}>
               <div className={`w-2 h-2 rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'}`}></div>
             </div>
@@ -78,68 +90,85 @@ export default function MenuItemCard({ item, quantity, onUpdateQuantity, onFavor
             
             {item.tags?.includes("Chef's Special") && (
               <span className="flex items-center gap-1 text-[10px] uppercase font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20 tracking-wider">
-                <Star className="w-3 h-3 fill-purple-400" /> Chef's Special
+                <Star className="w-3 h-3 fill-purple-400" /> Chef&apos;s Special
               </span>
             )}
           </div>
 
           <div className="flex justify-between items-start gap-2">
-            <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[#FF2D3B] transition-colors">
+            <Link href={`/food/${item.id}`} className="mb-1 line-clamp-1 text-[15px] font-semibold leading-5 text-[#1C1C1C] transition-colors group-hover:text-[#FC8019]">
               {item.name}
-            </h3>
+            </Link>
             <button 
               onClick={toggleFavorite}
               disabled={isTogglingFav}
-              className="p-1.5 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+              className="rounded-full border border-transparent bg-[#F8F9FA] p-1.5 transition-all hover:border-[#FC8019]/25 hover:bg-white"
+              aria-label={isFav ? `Remove ${item.name} from favorites` : `Add ${item.name} to favorites`}
             >
-              <Heart className={`w-5 h-5 ${isFav ? 'fill-[#FF2D3B] text-[#FF2D3B]' : 'text-gray-400 hover:text-white'}`} />
+              <Heart className={`w-5 h-5 ${isFav ? 'fill-[#EF4F5F] text-[#EF4F5F]' : 'text-[#686B78] hover:text-[#1C1C1C]'}`} />
             </button>
           </div>
 
-          <div className="flex items-center gap-3 text-sm mb-3">
+          <div className="mb-2.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs">
             <div className="flex items-baseline gap-2">
-              <span className="font-semibold text-white">₹{item.price}</span>
+              <span className="text-base font-bold text-[#1C1C1C]">₹{item.price}</span>
               {item.originalPrice && item.originalPrice > item.price && (
-                <span className="text-gray-500 line-through text-xs">₹{item.originalPrice}</span>
+                <span className="text-xs text-[#686B78] line-through">₹{item.originalPrice}</span>
               )}
             </div>
-            <span className="flex items-center gap-1 text-gray-400">
-              <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" /> 
+            <span className="food-rating">
+              <Star className="h-3 w-3 fill-current" /> 
               {item.rating}
             </span>
-            <span className="text-gray-500">• {item.prepTime}</span>
-            {item.calories && <span className="text-gray-500">• {item.calories}</span>}
+            <span className="text-[#686B78]">• {item.prepTime}</span>
+            {item.calories && <span className="text-[#686B78]">• {item.calories}</span>}
           </div>
-          <p className="text-gray-400 text-sm line-clamp-2 leading-relaxed mb-4">
+          <p className="mb-2.5 line-clamp-2 min-h-9 text-xs leading-[18px] text-[#686B78]">
             {item.description}
           </p>
         </div>
+
+        {onOrderNow && (
+          <button
+            type="button"
+            onClick={() => onOrderNow(item.id)}
+            disabled={isUpdating}
+            className="food-button inline-flex min-h-9 w-full items-center justify-center rounded-[9px] bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Order Now
+          </button>
+        )}
       </div>
 
       {/* Item Image & Controls */}
-      <div className="relative flex-shrink-0 flex flex-col items-center">
-        <div className="w-full sm:w-[130px] h-[130px] rounded-xl overflow-hidden shadow-lg bg-[#1A1A1A]">
-          <img 
-            src={item.image} 
-            alt={item.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
-          />
+      <div className="relative order-1 h-[132px] w-full flex-shrink-0 overflow-hidden bg-[#F8F9FA]">
+        <div className="h-full w-full overflow-hidden bg-[#F8F9FA]">
+          <Link href={`/food/${item.id}`} className="block h-full w-full">
+            <SafeImage 
+              src={item.image} 
+              fallback={FOOD_FALLBACK}
+              alt={item.name}
+              className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.055]"
+            />
+          </Link>
         </div>
         
         {/* Add/Quantity Button */}
-        <div className="absolute -bottom-4 w-28 bg-[#1A1A1A] border border-white/10 rounded-lg shadow-xl overflow-hidden flex items-center justify-between text-white font-bold h-9">
+        <div className="absolute bottom-3 right-3 flex h-9 w-28 items-center justify-between overflow-hidden rounded-lg border border-[#ECECEC] bg-white/95 font-bold text-[#1C1C1C] shadow-[0_8px_22px_rgba(28,28,28,0.12)] backdrop-blur-sm">
           {quantity > 0 ? (
             <>
               <button 
                 onClick={() => onUpdateQuantity(item.id, -1)}
-                className="w-1/3 h-full flex items-center justify-center hover:bg-white/10 transition-colors text-[#FF2D3B]"
+                disabled={isUpdating}
+                className="flex h-full w-1/3 items-center justify-center text-[#FC8019] transition-colors hover:bg-[#F8F9FA] disabled:opacity-50"
               >
                 <Minus className="w-4 h-4" />
               </button>
               <span className="w-1/3 text-center text-sm">{quantity}</span>
               <button 
                 onClick={() => onUpdateQuantity(item.id, 1)}
-                className="w-1/3 h-full flex items-center justify-center hover:bg-white/10 transition-colors text-green-500"
+                disabled={isUpdating}
+                className="flex h-full w-1/3 items-center justify-center text-[#FC8019] transition-colors hover:bg-[#F8F9FA] disabled:opacity-50"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -147,7 +176,8 @@ export default function MenuItemCard({ item, quantity, onUpdateQuantity, onFavor
           ) : (
             <button 
               onClick={() => onUpdateQuantity(item.id, 1)}
-              className="w-full h-full text-center text-sm font-bold hover:bg-white/10 transition-colors text-[#FF2D3B] tracking-wider"
+              disabled={isUpdating}
+              className="h-full w-full text-center text-sm font-bold tracking-wider text-[#FC8019] transition-colors hover:bg-[#F8F9FA] disabled:opacity-50"
             >
               ADD
             </button>
@@ -155,6 +185,6 @@ export default function MenuItemCard({ item, quantity, onUpdateQuantity, onFavor
         </div>
       </div>
 
-    </div>
+    </article>
   );
 }

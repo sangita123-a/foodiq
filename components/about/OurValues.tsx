@@ -29,16 +29,16 @@ export default function OurValues() {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6, delay: idx * 0.15 }}
               whileHover={{ y: -10 }}
-              className="bg-[#111] rounded-3xl p-8 border border-white/5 hover:border-primary/40 transition-all duration-300 shadow-xl group text-center relative overflow-hidden"
+              className="bg-white rounded-3xl p-8 border border-[#E5E7EB] hover:border-primary/40 transition-all duration-300 shadow-xl group text-center relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               
               <div className="relative z-10">
-                <div className="w-16 h-16 mx-auto rounded-full bg-[#171717] border border-white/10 flex items-center justify-center mb-6 group-hover:border-primary/50 transition-colors">
+                <div className="w-16 h-16 mx-auto rounded-full bg-[#F8FAFC] border border-[#E5E7EB] flex items-center justify-center mb-6 group-hover:border-primary/50 transition-colors">
                   <value.icon className={`w-8 h-8 ${value.color}`} />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">{value.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{value.desc}</p>
+                <p className="text-[#6B7280] text-sm leading-relaxed">{value.desc}</p>
               </div>
             </motion.div>
           ))}

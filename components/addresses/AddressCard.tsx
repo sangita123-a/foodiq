@@ -33,17 +33,17 @@ export default function AddressCard({ address, onEdit, onDelete, onSetDefault }:
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className={`bg-[#171717] rounded-[24px] p-6 md:p-8 border hover:border-white/20 transition-all duration-300 relative flex flex-col h-full group shadow-lg ${
-        address.isDefault ? "border-primary/50 shadow-[0_0_15px_rgba(255,45,59,0.1)]" : "border-white/5"
+      className={`group relative flex h-full flex-col rounded-2xl border bg-white p-6 shadow-[0_8px_24px_rgba(28,28,28,0.07)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#FC8019]/35 hover:shadow-[0_14px_32px_rgba(28,28,28,0.10)] md:p-8 ${
+        address.isDefault ? "border-primary/50 shadow-[0_10px_26px_rgba(252,128,25,0.10)]" : "border-[#ECECEC]"
       }`}
     >
       {/* Top Badges */}
       <div className="flex items-start justify-between mb-6">
-        <div className="flex items-center gap-2 bg-[#111] px-3 py-1.5 rounded-lg border border-white/10">
+        <div className="flex items-center gap-2 rounded-lg border border-[#ECECEC] bg-[#F8F9FA] px-3 py-1.5">
           {address.type === "Home" && <Home className="w-4 h-4 text-primary" />}
           {address.type === "Work" && <Briefcase className="w-4 h-4 text-blue-400" />}
           {address.type === "Other" && <MapPin className="w-4 h-4 text-green-400" />}
-          <span className="text-white text-sm font-bold">{address.type}</span>
+          <span className="text-sm font-bold text-[#1C1C1C]">{address.type}</span>
         </div>
 
         {address.isDefault && (
@@ -56,20 +56,20 @@ export default function AddressCard({ address, onEdit, onDelete, onSetDefault }:
 
       {/* Contact Info */}
       <div className="mb-4">
-        <h3 className="text-xl font-bold text-white mb-1">{address.name}</h3>
-        <p className="text-gray-400 text-sm font-medium">{address.phone}</p>
+        <h3 className="mb-1 text-xl font-bold text-[#1C1C1C]">{address.name}</h3>
+        <p className="text-sm font-medium text-[#686B78]">{address.phone}</p>
       </div>
 
       {/* Address String */}
-      <p className="text-gray-300 text-sm leading-relaxed mb-8 flex-1">
+      <p className="mb-8 flex-1 text-sm leading-relaxed text-[#686B78]">
         {fullAddress}
       </p>
 
       {/* Action Buttons */}
-      <div className="flex flex-wrap items-center gap-3 pt-6 border-t border-white/5">
+      <div className="flex flex-wrap items-center gap-3 border-t border-[#ECECEC] pt-6">
         <button 
           onClick={() => onEdit(address)}
-          className="flex-1 bg-white/5 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors border border-white/5 hover:border-white/10"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-4 py-2.5 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#FC8019]/30 hover:bg-white"
         >
           <Edit2 className="w-4 h-4" /> Edit
         </button>

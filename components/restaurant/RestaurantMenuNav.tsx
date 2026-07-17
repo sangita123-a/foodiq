@@ -18,7 +18,7 @@ export default function RestaurantMenuNav({
   onSearchChange
 }: RestaurantMenuNavProps) {
   return (
-    <div className="sticky top-[80px] z-40 bg-[#0B0B0B]/90 backdrop-blur-md border-b border-white/10 pt-4 pb-0 w-full shadow-lg">
+    <div className="sticky top-[80px] z-40 bg-[#FFFFFF]/90 backdrop-blur-md border-b border-[#E5E7EB] pt-4 pb-0 w-full shadow-lg">
       <div className="container mx-auto px-4 md:px-8">
         
         {/* Search Bar - Mobile: Top, Desktop: Right aligned with nav */}
@@ -34,8 +34,8 @@ export default function RestaurantMenuNav({
                   onClick={() => onCategoryClick(category)}
                   className={`whitespace-nowrap pb-4 px-1 text-sm md:text-base font-semibold border-b-2 transition-colors duration-300 ${
                     isActive 
-                    ? 'border-[#FF2D3B] text-[#FF2D3B]' 
-                    : 'border-transparent text-gray-400 hover:text-white'
+                    ? 'border-[#FC8019] text-[#FC8019]' 
+                    : 'border-transparent text-[#6B7280] hover:text-[#111827]'
                   }`}
                 >
                   {category}
@@ -51,9 +51,9 @@ export default function RestaurantMenuNav({
               placeholder="Search dishes..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full bg-[#1A1A1A] text-white border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-[#FF2D3B]/50 focus:ring-1 focus:ring-[#FF2D3B]/50 transition-all placeholder-gray-500"
+              className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-[#FC8019]/50 focus:ring-1 focus:ring-[#FC8019]/50 transition-all placeholder-gray-500"
             />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
           </div>
 
         </div>

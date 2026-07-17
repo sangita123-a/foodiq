@@ -11,8 +11,8 @@ type Props = {
 export default function NotificationGroup({ title, children }: Props) {
   return (
     <div className="mb-10 relative">
-      <div className="sticky top-[90px] z-20 py-2 bg-[#0B0B0B]/90 backdrop-blur-md mb-4 border-b border-white/5">
-        <h2 className="text-lg font-bold text-gray-400 tracking-wider uppercase">
+      <div className="sticky top-[90px] z-20 py-2 bg-[#FFFFFF]/90 backdrop-blur-md mb-4 border-b border-[#E5E7EB]">
+        <h2 className="text-lg font-bold text-[#6B7280] tracking-wider uppercase">
           {title}
         </h2>
       </div>

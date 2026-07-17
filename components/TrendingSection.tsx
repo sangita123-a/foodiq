@@ -9,7 +9,7 @@ const trendingItems = [
     title: "Most Ordered",
     subtitle: "Local favorites",
     icon: Flame,
-    color: "from-orange-500/20 to-red-500/20",
+    color: "from-orange-100 to-orange-50",
     iconColor: "text-orange-500",
   },
   {
@@ -17,16 +17,16 @@ const trendingItems = [
     title: "Fast Delivery",
     subtitle: "Under 30 mins",
     icon: Zap,
-    color: "from-blue-500/20 to-purple-500/20",
-    iconColor: "text-blue-500",
+    color: "from-orange-50 to-white",
+    iconColor: "text-[#FC8019]",
   },
   {
     id: 3,
     title: "Best Offers",
     subtitle: "Up to 50% off",
     icon: Gift,
-    color: "from-green-500/20 to-emerald-500/20",
-    iconColor: "text-green-500",
+    color: "from-orange-100 to-white",
+    iconColor: "text-[#FC8019]",
   }
 ];
 
@@ -34,7 +34,7 @@ export default function TrendingSection() {
   return (
     <div className="mb-16">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-white">Trending Near You</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-[#111827]">Trending Near You</h2>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -45,13 +45,13 @@ export default function TrendingSection() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: idx * 0.1, duration: 0.5 }}
             whileHover={{ y: -5, scale: 1.02 }}
-            className={`bg-gradient-to-br ${item.color} border border-white/10 rounded-2xl p-6 flex items-center gap-5 cursor-pointer`}
+            className={`bg-gradient-to-br ${item.color} border border-[#E5E7EB] rounded-2xl p-6 flex items-center gap-5 cursor-pointer`}
           >
-            <div className={`w-14 h-14 rounded-full bg-white/10 flex items-center justify-center shrink-0 ${item.iconColor}`}>
+            <div className={`w-14 h-14 rounded-full bg-white flex items-center justify-center shrink-0 ${item.iconColor}`}>
               <item.icon className="w-7 h-7" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-white mb-1">{item.title}</h3>
+              <h3 className="text-xl font-bold text-[#111827] mb-1">{item.title}</h3>
               <p className="text-[var(--color-gray-text)] text-sm">{item.subtitle}</p>
             </div>
           </motion.div>

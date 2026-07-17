@@ -7,17 +7,19 @@ import {
   Eye, Edit2, Copy, Trash2, CheckCircle2, XCircle, EyeOff,
   ChevronLeft, ChevronRight
 } from "lucide-react";
+import SafeImage from "@/components/ui/SafeImage";
+import { FOOD_FALLBACK } from "@/lib/images";
 
 // --- Mock Dataset ---
 const MOCK_DISHES = [
-  { id: "d1", name: "Chicken Dum Biryani", category: "Main Course", price: 300, rating: 4.8, status: "Available", orders: 1245, updated: "2 hrs ago", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=100&q=80" },
-  { id: "d2", name: "Paneer Butter Masala", category: "Main Course", price: 250, rating: 4.6, status: "Available", orders: 1102, updated: "1 day ago", image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=100&q=80" },
-  { id: "d3", name: "Mutton Rogan Josh", category: "Main Course", price: 450, rating: 4.9, status: "Out of Stock", orders: 890, updated: "5 hrs ago", image: "https://images.unsplash.com/photo-1544025162-811114215b01?w=100&q=80" },
-  { id: "d4", name: "Garlic Naan", category: "Breads", price: 50, rating: 4.7, status: "Available", orders: 3450, updated: "3 days ago", image: "https://images.unsplash.com/photo-1626200419199-391ae4be7a41?w=100&q=80" },
-  { id: "d5", name: "Tandoori Roti", category: "Breads", price: 30, rating: 4.5, status: "Available", orders: 2800, updated: "1 week ago", image: "https://images.unsplash.com/photo-1626200419199-391ae4be7a41?w=100&q=80" }, // Using same image for mock
-  { id: "d6", name: "Gulab Jamun", category: "Desserts", price: 80, rating: 4.9, status: "Hidden", orders: 1560, updated: "2 weeks ago", image: "https://images.unsplash.com/photo-1598514982205-f36b96d1e8d4?w=100&q=80" },
-  { id: "d7", name: "Chicken Tikka", category: "Starters", price: 280, rating: 4.7, status: "Available", orders: 980, updated: "4 hrs ago", image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=100&q=80" },
-  { id: "d8", name: "Diet Coke", category: "Beverages", price: 60, rating: 4.2, status: "Out of Stock", orders: 450, updated: "1 hr ago", image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=100&q=80" },
+  { id: "d1", name: "Chicken Dum Biryani", category: "Main Course", price: 300, rating: 4.8, status: "Available", orders: 1245, updated: "2 hrs ago", image: "/images/catalog/food/biryani.webp" },
+  { id: "d2", name: "Paneer Butter Masala", category: "Main Course", price: 250, rating: 4.6, status: "Available", orders: 1102, updated: "1 day ago", image: "/images/catalog/food/north-indian.webp" },
+  { id: "d3", name: "Mutton Rogan Josh", category: "Main Course", price: 450, rating: 4.9, status: "Out of Stock", orders: 890, updated: "5 hrs ago", image: "/images/catalog/food/indian.webp" },
+  { id: "d4", name: "Garlic Naan", category: "Breads", price: 50, rating: 4.7, status: "Available", orders: 3450, updated: "3 days ago", image: "/images/catalog/food/north-indian.webp" },
+  { id: "d5", name: "Tandoori Roti", category: "Breads", price: 30, rating: 4.5, status: "Available", orders: 2800, updated: "1 week ago", image: "/images/catalog/food/north-indian.webp" },
+  { id: "d6", name: "Gulab Jamun", category: "Desserts", price: 80, rating: 4.9, status: "Hidden", orders: 1560, updated: "2 weeks ago", image: "/images/catalog/food/desserts.webp" },
+  { id: "d7", name: "Chicken Tikka", category: "Starters", price: 280, rating: 4.7, status: "Available", orders: 980, updated: "4 hrs ago", image: "/images/catalog/food/north-indian.webp" },
+  { id: "d8", name: "Diet Coke", category: "Beverages", price: 60, rating: 4.2, status: "Out of Stock", orders: 450, updated: "1 hr ago", image: "/images/catalog/food/beverages.webp" },
 ];
 
 export default function MenuTable() {
@@ -76,28 +78,28 @@ export default function MenuTable() {
   };
 
   return (
-    <div className="bg-[#171717] rounded-3xl border border-white/5 shadow-2xl overflow-hidden relative">
+    <div className="bg-[#FFFFFF] rounded-3xl border border-[#E5E7EB] shadow-2xl overflow-hidden relative">
       
       {/* Top Action Bar */}
-      <div className="p-6 border-b border-white/5 flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-[#1a1a1a]">
+      <div className="p-6 border-b border-[#E5E7EB] flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-[#F8FAFC]">
         
         {/* Search & Filters */}
         <div className="flex flex-col md:flex-row items-center gap-4 flex-1">
           <div className="relative w-full md:max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9CA3AF]" />
             <input 
               type="text" 
               placeholder="Search dishes..." 
               value={search}
               onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-              className="w-full bg-[#111] border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:outline-none focus:border-primary transition-colors"
+              className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors"
             />
           </div>
           
           <select 
             value={categoryFilter}
             onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
-            className="w-full md:w-auto bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors appearance-none cursor-pointer"
+            className="w-full md:w-auto bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors appearance-none cursor-pointer"
           >
             <option value="All">All Categories</option>
             <option value="Main Course">Main Course</option>
@@ -110,7 +112,7 @@ export default function MenuTable() {
           <select 
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            className="w-full md:w-auto bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors appearance-none cursor-pointer"
+            className="w-full md:w-auto bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors appearance-none cursor-pointer"
           >
             <option value="All">All Statuses</option>
             <option value="Available">Available</option>
@@ -120,7 +122,7 @@ export default function MenuTable() {
         </div>
 
         {/* Primary Action */}
-        <button className="w-full xl:w-auto bg-primary hover:bg-[#e02633] text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-lg flex items-center justify-center gap-2 flex-shrink-0">
+        <button className="w-full xl:w-auto bg-[#FC8019] hover:bg-[#E66F0D] text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-lg flex items-center justify-center gap-2 flex-shrink-0">
           <PlusCircle className="w-5 h-5" /> Add New Dish
         </button>
 
@@ -133,14 +135,14 @@ export default function MenuTable() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="bg-primary/10 border-b border-primary/20 px-6 py-3 flex items-center justify-between overflow-hidden"
+            className="bg-[#FC8019]/10 border-b border-[#FC8019]/20 px-6 py-3 flex items-center justify-between overflow-hidden"
           >
-            <span className="text-primary font-bold text-sm">
+            <span className="text-[#FC8019] font-bold text-sm">
               {selectedIds.size} {selectedIds.size === 1 ? 'dish' : 'dishes'} selected
             </span>
             <div className="flex items-center gap-2">
-              <button onClick={() => handleBulkStatus("Available")} className="bg-[#111] hover:bg-white/5 border border-white/10 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Mark Available</button>
-              <button onClick={() => handleBulkStatus("Out of Stock")} className="bg-[#111] hover:bg-white/5 border border-white/10 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Mark Out of Stock</button>
+              <button onClick={() => handleBulkStatus("Available")} className="bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] text-[#111827] px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Mark Available</button>
+              <button onClick={() => handleBulkStatus("Out of Stock")} className="bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] text-[#111827] px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Mark Out of Stock</button>
               <button onClick={handleBulkDelete} className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Delete Selected</button>
             </div>
           </motion.div>
@@ -151,21 +153,21 @@ export default function MenuTable() {
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[1000px]">
           <thead>
-            <tr className="bg-[#111] border-b border-white/5">
+            <tr className="bg-[#F8FAFC] border-b border-[#E5E7EB]">
               <th className="p-4 pl-6 w-12">
                 <input 
                   type="checkbox" 
                   checked={paginatedDishes.length > 0 && selectedIds.size === paginatedDishes.length}
                   onChange={handleSelectAll}
-                  className="w-4 h-4 rounded border-gray-600 bg-transparent text-primary focus:ring-primary focus:ring-offset-[#111]"
+                  className="w-4 h-4 rounded border-[#E5E7EB] bg-transparent text-[#FC8019] focus:ring-[#FC8019] focus:ring-offset-[#FFFFFF]"
                 />
               </th>
-              <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Dish</th>
-              <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Category</th>
-              <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Price</th>
-              <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Orders</th>
-              <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right pr-6">Actions</th>
+              <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">Dish</th>
+              <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">Category</th>
+              <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">Price</th>
+              <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">Status</th>
+              <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">Orders</th>
+              <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase tracking-wider text-right pr-6">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -178,32 +180,32 @@ export default function MenuTable() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                   key={dish.id} 
-                  className={`border-b border-white/5 group transition-colors ${selectedIds.has(dish.id) ? 'bg-primary/5' : 'hover:bg-white/5'}`}
+                  className={`border-b border-[#E5E7EB] group transition-colors ${selectedIds.has(dish.id) ? 'bg-[#FC8019]/5' : 'hover:bg-[#F8FAFC]'}`}
                 >
                   <td className="p-4 pl-6">
                     <input 
                       type="checkbox" 
                       checked={selectedIds.has(dish.id)}
                       onChange={() => handleSelectRow(dish.id)}
-                      className="w-4 h-4 rounded border-gray-600 bg-transparent text-primary focus:ring-primary focus:ring-offset-[#171717]"
+                      className="w-4 h-4 rounded border-[#E5E7EB] bg-transparent text-[#FC8019] focus:ring-[#FC8019] focus:ring-offset-[#FFFFFF]"
                     />
                   </td>
                   <td className="p-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl overflow-hidden border border-white/10 flex-shrink-0">
-                        <img src={dish.image} alt={dish.name} className="w-full h-full object-cover" />
+                      <div className="w-12 h-12 rounded-xl overflow-hidden border border-[#E5E7EB] flex-shrink-0">
+                        <SafeImage src={dish.image} fallback={FOOD_FALLBACK} alt={dish.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <p className="text-white font-bold text-sm">{dish.name}</p>
-                        <p className="text-gray-500 text-xs mt-0.5">Rating: ⭐ {dish.rating}</p>
+                        <p className="text-[#111827] font-bold text-sm">{dish.name}</p>
+                        <p className="text-[#9CA3AF] text-xs mt-0.5">Rating: ⭐ {dish.rating}</p>
                       </div>
                     </div>
                   </td>
                   <td className="p-4">
-                    <span className="bg-[#111] border border-white/10 px-3 py-1 rounded-full text-xs text-gray-300">{dish.category}</span>
+                    <span className="bg-[#F8FAFC] border border-[#E5E7EB] px-3 py-1 rounded-full text-xs text-[#6B7280]">{dish.category}</span>
                   </td>
                   <td className="p-4">
-                    <span className="text-white font-bold">₹{dish.price}</span>
+                    <span className="text-[#111827] font-bold">₹{dish.price}</span>
                   </td>
                   <td className="p-4">
                     {/* Status Toggle Dropdown (Simulated via hover or click) */}
@@ -220,29 +222,29 @@ export default function MenuTable() {
                       </button>
                       
                       {/* Simple Hover Menu for Status Change */}
-                      <div className="absolute top-full left-0 mt-2 w-36 bg-[#111] border border-white/10 rounded-xl shadow-2xl opacity-0 invisible group-hover/status:opacity-100 group-hover/status:visible transition-all z-20 py-1">
-                        <button onClick={() => changeStatus(dish.id, "Available")} className="w-full text-left px-4 py-2 text-xs text-gray-300 hover:bg-white/5 hover:text-white transition-colors">Available</button>
-                        <button onClick={() => changeStatus(dish.id, "Out of Stock")} className="w-full text-left px-4 py-2 text-xs text-gray-300 hover:bg-white/5 hover:text-white transition-colors">Out of Stock</button>
-                        <button onClick={() => changeStatus(dish.id, "Hidden")} className="w-full text-left px-4 py-2 text-xs text-gray-300 hover:bg-white/5 hover:text-white transition-colors">Hidden</button>
+                      <div className="absolute top-full left-0 mt-2 w-36 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl shadow-2xl opacity-0 invisible group-hover/status:opacity-100 group-hover/status:visible transition-all z-20 py-1">
+                        <button onClick={() => changeStatus(dish.id, "Available")} className="w-full text-left px-4 py-2 text-xs text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827] transition-colors">Available</button>
+                        <button onClick={() => changeStatus(dish.id, "Out of Stock")} className="w-full text-left px-4 py-2 text-xs text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827] transition-colors">Out of Stock</button>
+                        <button onClick={() => changeStatus(dish.id, "Hidden")} className="w-full text-left px-4 py-2 text-xs text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827] transition-colors">Hidden</button>
                       </div>
                     </div>
                   </td>
                   <td className="p-4">
-                    <p className="text-gray-300 text-sm">{dish.orders}</p>
-                    <p className="text-gray-600 text-xs">Updated {dish.updated}</p>
+                    <p className="text-[#6B7280] text-sm">{dish.orders}</p>
+                    <p className="text-[#9CA3AF] text-xs">Updated {dish.updated}</p>
                   </td>
                   <td className="p-4 pr-6 text-right">
                     <div className="flex items-center justify-end gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
-                      <button className="w-8 h-8 rounded-lg bg-[#111] hover:bg-white/10 border border-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors" title="View">
+                      <button className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:text-[#111827] transition-colors" title="View">
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button className="w-8 h-8 rounded-lg bg-[#111] hover:bg-primary/20 border border-white/5 hover:border-primary/30 flex items-center justify-center text-gray-400 hover:text-primary transition-colors" title="Edit">
+                      <button className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-[#FC8019]/20 border border-[#E5E7EB] hover:border-[#FC8019]/30 flex items-center justify-center text-[#6B7280] hover:text-[#FC8019] transition-colors" title="Edit">
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button className="w-8 h-8 rounded-lg bg-[#111] hover:bg-white/10 border border-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors" title="Duplicate">
+                      <button className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:text-[#111827] transition-colors" title="Duplicate">
                         <Copy className="w-4 h-4" />
                       </button>
-                      <button className="w-8 h-8 rounded-lg bg-[#111] hover:bg-red-500/20 border border-white/5 hover:border-red-500/30 flex items-center justify-center text-gray-400 hover:text-red-400 transition-colors" title="Delete">
+                      <button className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-red-500/20 border border-[#E5E7EB] hover:border-red-500/30 flex items-center justify-center text-[#6B7280] hover:text-red-400 transition-colors" title="Delete">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -254,15 +256,15 @@ export default function MenuTable() {
         </table>
         
         {paginatedDishes.length === 0 && (
-          <div className="py-20 text-center text-gray-500">
+          <div className="py-20 text-center text-[#9CA3AF]">
             No dishes found matching your criteria.
           </div>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="p-4 border-t border-white/5 bg-[#111] flex items-center justify-between">
-        <p className="text-xs text-gray-500">
+      <div className="p-4 border-t border-[#E5E7EB] bg-[#F8FAFC] flex items-center justify-between">
+        <p className="text-xs text-[#9CA3AF]">
           Showing {Math.min(filteredDishes.length, (currentPage - 1) * itemsPerPage + 1)} to {Math.min(filteredDishes.length, currentPage * itemsPerPage)} of {filteredDishes.length} dishes
         </p>
         
@@ -270,14 +272,14 @@ export default function MenuTable() {
           <button 
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            className="p-2 rounded-lg bg-[#171717] border border-white/10 text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="p-2 rounded-lg bg-[#FFFFFF] border border-[#E5E7EB] text-[#6B7280] hover:text-[#111827] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button 
             disabled={currentPage === totalPages || totalPages === 0}
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            className="p-2 rounded-lg bg-[#171717] border border-white/10 text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="p-2 rounded-lg bg-[#FFFFFF] border border-[#E5E7EB] text-[#6B7280] hover:text-[#111827] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

@@ -23,8 +23,8 @@ import BrandingSettings from "@/components/partner/settings/sections/BrandingSet
 // --- Mock Dataset ---
 const INITIAL_SETTINGS: SettingsState = {
   profile: {
-    logo: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=200&auto=format&fit=crop",
-    cover: "https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=1200&auto=format&fit=crop",
+    logo: "/images/catalog/logos/biryani.webp",
+    cover: "/images/catalog/restaurants/indian.webp",
     restaurantName: "The Spice Symphony",
     ownerName: "Rahul Sharma",
     email: "contact@spicesymphony.com",
@@ -77,7 +77,7 @@ const INITIAL_SETTINGS: SettingsState = {
     twoFactorAuth: false
   },
   branding: {
-    themeColor: "#e02633", // Foodiq Red
+    themeColor: "#E66F0D", // Foodiq Red
     primaryBanner: "",
     promoBanner: ""
   }
@@ -137,7 +137,7 @@ export default function PartnerSettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0B0B] flex selection:bg-[var(--color-primary)] selection:text-white">
+    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#FC8019] selection:text-white">
       
       {/* Sidebar - Fixed on left for desktop */}
       <div className="hidden lg:block w-64 flex-shrink-0">
@@ -164,10 +164,10 @@ export default function PartnerSettingsPage() {
               </div>
 
               {/* Right Settings Content Area */}
-              <div className="flex-1 w-full bg-[#171717] rounded-3xl p-6 md:p-8 border border-white/5 shadow-2xl relative overflow-hidden min-h-[600px]">
+              <div className="flex-1 w-full bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-2xl relative overflow-hidden min-h-[600px]">
                 
                 {/* Background Decor */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#FC8019]/5 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
 
                 <AnimatePresence mode="wait">
                   <motion.div

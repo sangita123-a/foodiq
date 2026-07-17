@@ -40,7 +40,7 @@ export default function LanguageRegionSettings() {
   };
 
   if (isLoading) {
-    return <div className="h-64 bg-white/5 animate-pulse rounded-3xl" />;
+    return <div className="h-64 bg-[#F8FAFC] animate-pulse rounded-3xl" />;
   }
 
   return (
@@ -48,20 +48,20 @@ export default function LanguageRegionSettings() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="bg-[#171717] rounded-3xl p-6 md:p-10 border border-white/5 shadow-2xl"
+      className="bg-[#F8FAFC] rounded-3xl p-6 md:p-10 border border-[#E5E7EB] shadow-2xl"
     >
       <h2 className="text-2xl font-bold text-white mb-8">Language & Region</h2>
 
       <form id="settings-form" onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <Globe className="w-5 h-5 text-gray-400" />
+            <Globe className="w-5 h-5 text-[#6B7280]" />
             <h3 className="text-white font-bold">Language</h3>
           </div>
           <select
             value={form.language}
             onChange={(e) => setForm({ ...form, language: e.target.value })}
-            className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary appearance-none cursor-pointer"
+            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary appearance-none cursor-pointer"
           >
             <option value="en">English (US)</option>
             <option value="en-gb">English (UK)</option>
@@ -73,13 +73,13 @@ export default function LanguageRegionSettings() {
 
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <MapPin className="w-5 h-5 text-gray-400" />
+            <MapPin className="w-5 h-5 text-[#6B7280]" />
             <h3 className="text-white font-bold">Country / Region</h3>
           </div>
           <select
             value={form.country}
             onChange={(e) => setForm({ ...form, country: e.target.value })}
-            className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary appearance-none cursor-pointer"
+            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary appearance-none cursor-pointer"
           >
             <option value="in">India</option>
             <option value="us">United States</option>
@@ -91,13 +91,13 @@ export default function LanguageRegionSettings() {
 
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <DollarSign className="w-5 h-5 text-gray-400" />
+            <DollarSign className="w-5 h-5 text-[#6B7280]" />
             <h3 className="text-white font-bold">Currency</h3>
           </div>
           <select
             value={form.currency}
             onChange={(e) => setForm({ ...form, currency: e.target.value })}
-            className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary appearance-none cursor-pointer"
+            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary appearance-none cursor-pointer"
           >
             <option value="inr">INR (₹)</option>
             <option value="usd">USD ($)</option>
@@ -108,13 +108,13 @@ export default function LanguageRegionSettings() {
 
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <Clock className="w-5 h-5 text-gray-400" />
+            <Clock className="w-5 h-5 text-[#6B7280]" />
             <h3 className="text-white font-bold">Timezone</h3>
           </div>
           <select
             value={form.timezone}
             onChange={(e) => setForm({ ...form, timezone: e.target.value })}
-            className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary appearance-none cursor-pointer"
+            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary appearance-none cursor-pointer"
           >
             <option value="ist">(UTC+05:30) Indian Standard Time</option>
             <option value="pst">(UTC-08:00) Pacific Time</option>

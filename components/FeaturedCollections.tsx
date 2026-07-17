@@ -4,6 +4,8 @@ import { useRef } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import SafeImage from "@/components/ui/SafeImage";
+import { RESTAURANT_FALLBACK } from "@/lib/images";
 
 // Reusable data structure for collections
 type CollectionData = {
@@ -21,42 +23,42 @@ const collectionsData: CollectionData[] = [
     title: "Best Biryani Near You",
     description: "Authentic, rich, and aromatic biryanis.",
     places: "24 Places",
-    image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&q=80&w=800"
+    image: "/images/catalog/restaurants/biryani.webp"
   },
   {
     id: "c2",
     title: "Top Rated Restaurants",
     description: "The absolute best rated spots in the city.",
     places: "32 Places",
-    image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800"
+    image: "/images/catalog/restaurants/north-indian.webp"
   },
   {
     id: "c3",
     title: "Newly Opened",
     description: "Explore the newest flavors in your area.",
     places: "15 Places",
-    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=800"
+    image: "/images/catalog/restaurants/italian.webp"
   },
   {
     id: "c4",
     title: "Budget Meals",
     description: "Delicious food that doesn't break the bank.",
     places: "45 Places",
-    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=800"
+    image: "/images/catalog/restaurants/burger.webp"
   },
   {
     id: "c5",
     title: "Pure Veg Specials",
     description: "Exquisite vegetarian delicacies for everyone.",
     places: "28 Places",
-    image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=800"
+    image: "/images/catalog/restaurants/healthy.webp"
   },
   {
     id: "c6",
     title: "Late Night Delivery",
     description: "Satisfy your midnight cravings right now.",
     places: "18 Places",
-    image: "https://images.unsplash.com/photo-1618426685890-a3e74b126a11?auto=format&fit=crop&q=80&w=800"
+    image: "/images/catalog/restaurants/street-food.webp"
   }
 ];
 
@@ -71,21 +73,21 @@ export default function FeaturedCollections() {
   };
 
   return (
-    <section className="bg-black w-full py-[100px] overflow-hidden">
-      <div className="w-[90%] max-w-7xl mx-auto">
+    <section className="bg-white w-full overflow-hidden">
+      <div className="food-section">
         
         {/* Header & Controls */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+        <div className="food-section-heading flex flex-col md:flex-row md:items-end justify-between gap-6">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-3">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#111827] tracking-tight mb-2">
               Featured Collections
             </h2>
-            <p className="text-gray-400 text-lg md:text-xl font-light">
+            <p>
               Curated restaurant collections for every mood.
             </p>
           </motion.div>
@@ -93,14 +95,14 @@ export default function FeaturedCollections() {
           <div className="flex gap-3 hidden sm:flex">
             <button 
               onClick={() => scroll('left')}
-              className="w-12 h-12 rounded-full border border-white/20 bg-black flex items-center justify-center text-white hover:bg-[#FF2D3B] hover:border-[#FF2D3B] transition-colors duration-300"
+              className="food-button w-10 h-10 min-h-0 rounded-full border border-[#E5E7EB] bg-white flex items-center justify-center text-[#111827] hover:bg-[#FC8019] hover:border-[#FC8019] hover:text-[#111827]"
               aria-label="Scroll left"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
             <button 
               onClick={() => scroll('right')}
-              className="w-12 h-12 rounded-full border border-white/20 bg-black flex items-center justify-center text-white hover:bg-[#FF2D3B] hover:border-[#FF2D3B] transition-colors duration-300"
+              className="food-button w-10 h-10 min-h-0 rounded-full border border-[#E5E7EB] bg-white flex items-center justify-center text-[#111827] hover:bg-[#FC8019] hover:border-[#FC8019] hover:text-[#111827]"
               aria-label="Scroll right"
             >
               <ChevronRight className="w-6 h-6" />
@@ -112,7 +114,7 @@ export default function FeaturedCollections() {
         <div className="relative group">
           <div 
             ref={scrollRef}
-            className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory custom-scrollbar-hide"
+            className="flex overflow-x-auto gap-4 pb-6 snap-x snap-mandatory custom-scrollbar-hide"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {collectionsData.map((collection, index) => (
@@ -122,34 +124,35 @@ export default function FeaturedCollections() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.1 }}
-                className="snap-start flex-shrink-0 w-[280px] md:w-[320px] h-[400px] relative rounded-[24px] overflow-hidden group/card cursor-pointer shadow-xl"
+                className="food-card snap-start flex-shrink-0 w-[240px] md:w-[250px] h-[320px] relative group/card cursor-pointer"
               >
                 {/* Background Image */}
                 <div className="absolute inset-0 w-full h-full">
-                  <img 
+                  <SafeImage 
                     src={collection.image} 
+                    fallback={RESTAURANT_FALLBACK}
                     alt={collection.title}
                     className="w-full h-full object-cover transform group-hover/card:scale-110 transition-transform duration-700 ease-in-out"
                   />
                   {/* Dark Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90 group-hover/card:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/75 via-[#111827]/30/50 to-transparent opacity-90 group-hover/card:opacity-100 transition-opacity duration-300"></div>
                 </div>
 
                 {/* Content Overlay */}
-                <div className="absolute inset-0 p-6 flex flex-col justify-end z-10">
-                  <span className="text-sm font-semibold text-gray-300 mb-2 bg-black/40 backdrop-blur-sm w-fit px-3 py-1 rounded-full border border-white/10">
+                <div className="absolute inset-0 p-4 flex flex-col justify-end z-10">
+                  <span className="text-sm font-semibold text-[#6B7280] mb-2 bg-black/40 backdrop-blur-sm w-fit px-3 py-1 rounded-full border border-[#E5E7EB]">
                     {collection.places}
                   </span>
-                  <h3 className="text-2xl font-bold text-white mb-2 leading-tight">
+                  <h3 className="text-lg font-semibold text-white mb-1 leading-tight">
                     {collection.title}
                   </h3>
-                  <p className="text-gray-400 text-sm mb-6 line-clamp-2">
+                  <p className="text-[#6B7280] text-sm mb-4 line-clamp-2">
                     {collection.description}
                   </p>
 
                   <Link
                 href="/collections"
-                className="flex items-center gap-2 text-white font-medium text-sm group-hover/card:text-[#FF2D3B] transition-colors w-fit"
+                className="flex items-center gap-2 text-white font-medium text-sm group-hover/card:text-[#FC8019] transition-colors w-fit"
               >
                 Explore Collection
                 <ArrowRight className="w-4 h-4 transform group-hover/card:translate-x-1 transition-transform" />

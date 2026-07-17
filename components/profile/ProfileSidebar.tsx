@@ -5,6 +5,8 @@ import useSWR from "swr";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import api from "@/services/api";
+import SafeImage from "@/components/ui/SafeImage";
+import { AVATAR_FALLBACK } from "@/lib/images";
 
 export type ProfileTab =
   | "Dashboard"
@@ -32,8 +34,7 @@ const menuItems: { id: ProfileTab; label: string; icon: React.ReactNode }[] = [
   { id: "Settings", label: "Settings", icon: <Settings className="w-5 h-5" /> },
 ];
 
-const DEFAULT_AVATAR =
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200";
+const DEFAULT_AVATAR = AVATAR_FALLBACK;
 
 export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
   const router = useRouter();
@@ -49,13 +50,14 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
   };
 
   return (
-    <div className="bg-[#171717] rounded-[24px] border border-white/5 overflow-hidden sticky top-[100px]">
-      <div className="p-6 md:p-8 flex flex-col items-center border-b border-white/10 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[#FF2D3B]/5 blur-3xl pointer-events-none"></div>
+    <div className="bg-[#F8FAFC] rounded-[24px] border border-[#E5E7EB] overflow-hidden sticky top-[100px]">
+      <div className="p-6 md:p-8 flex flex-col items-center border-b border-[#E5E7EB] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[#FC8019]/5 blur-3xl pointer-events-none"></div>
 
-        <div className="w-24 h-24 rounded-full border-2 border-primary overflow-hidden relative z-10 mb-4 shadow-[0_0_20px_rgba(255,45,59,0.2)]">
-          <img
-            src={user?.profile_image_url || DEFAULT_AVATAR}
+        <div className="w-24 h-24 rounded-full border-2 border-primary overflow-hidden relative z-10 mb-4 shadow-[0_0_20px_rgba(252,128,25,0.2)]">
+          <SafeImage
+            src={user?.profile_image_url}
+            fallback={DEFAULT_AVATAR}
             alt={user?.full_name || "User"}
             className="w-full h-full object-cover"
           />
@@ -64,7 +66,7 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
         <h2 className="text-xl font-bold text-white relative z-10 mb-1">
           {user?.full_name || "Loading..."}
         </h2>
-        <p className="text-sm text-gray-400 relative z-10 mb-4">{user?.email || ""}</p>
+        <p className="text-sm text-[#6B7280] relative z-10 mb-4">{user?.email || ""}</p>
 
         <div className="flex items-center gap-1.5 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs font-bold px-3 py-1.5 rounded-full relative z-10 mb-4">
           <Award className="w-4 h-4 fill-yellow-500" />
@@ -73,7 +75,7 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
 
         <button
           onClick={() => setActiveTab("Settings")}
-          className="relative z-10 w-full bg-white/5 hover:bg-white/10 text-white text-sm font-bold py-2 rounded-xl border border-white/10 transition-colors"
+          className="relative z-10 w-full bg-[#F8FAFC] hover:bg-[#F8FAFC] text-white text-sm font-bold py-2 rounded-xl border border-[#E5E7EB] transition-colors"
         >
           Edit Profile
         </button>
@@ -88,8 +90,8 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
               onClick={() => setActiveTab(item.id)}
               className={`flex items-center gap-3 px-6 md:px-8 py-3.5 transition-colors relative ${
                 isActive
-                  ? "text-white font-bold bg-white/5"
-                  : "text-gray-400 font-medium hover:text-white hover:bg-white/5"
+                  ? "text-white font-bold bg-[#F8FAFC]"
+                  : "text-[#6B7280] font-medium hover:text-[#111827] hover:bg-[#F8FAFC]"
               }`}
             >
               {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-md"></div>}
@@ -100,7 +102,7 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
         })}
       </div>
 
-      <div className="p-4 border-t border-white/10">
+      <div className="p-4 border-t border-[#E5E7EB]">
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-4 md:px-4 py-3.5 w-full text-red-500 hover:bg-red-500/10 rounded-xl transition-colors font-bold"

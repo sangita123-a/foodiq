@@ -59,27 +59,27 @@ export default function Navbar() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="absolute top-0 left-0 w-full h-[90px] z-50 flex items-center justify-between px-4 sm:px-8 lg:px-16 bg-black/50 backdrop-blur-sm border-b border-white/10"
+      className="sticky top-0 left-0 w-full h-[80px] z-50 flex items-center justify-between px-4 sm:px-8 lg:px-16 bg-white/90 backdrop-blur-xl border-b border-[#ECECEC]/90 shadow-[0_8px_30px_rgba(28,28,28,0.06)] supports-[backdrop-filter]:bg-white/80"
     >
-      <Link href="/" className="flex items-center text-2xl sm:text-3xl font-bold tracking-tight">
-        <span className="text-white">Food</span>
+      <Link href="/" className="flex items-center text-2xl sm:text-3xl font-extrabold tracking-[-0.045em] transition-opacity hover:opacity-80">
+        <span className="text-[#1C1C1C]">Food</span>
         <span className="text-[var(--color-primary)]">iq</span>
       </Link>
 
-      <div className="hidden md:flex items-center space-x-8">
+      <div className="hidden md:flex items-center space-x-7">
         {NAV_LINKS.map((link) => {
           const active = link.isActive(pathname);
           return (
             <Link
               key={link.href}
               href={link.href}
-              className={`font-medium relative transition-colors ${
-                active ? "text-white" : "text-gray-300 hover:text-white"
+              className={`font-medium text-sm relative py-2 transition-colors ${
+                active ? "text-[var(--color-primary)]" : "text-[#686B78] hover:text-[#1C1C1C]"
               }`}
             >
               {link.label}
               {active && (
-                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-[var(--color-primary)]" />
+                <span className="absolute bottom-0 left-0 w-full h-0.5 rounded-full bg-[var(--color-primary)]" />
               )}
             </Link>
           );
@@ -89,7 +89,7 @@ export default function Navbar() {
       <div className="hidden md:flex items-center space-x-3">
         <Link
           href="/search"
-          className="h-10 w-10 rounded-full border border-white/20 hover:bg-white/10 text-white flex items-center justify-center transition-colors"
+          className="h-10 w-10 rounded-xl border border-[#ECECEC] bg-white hover:border-[#FC8019]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] flex items-center justify-center transition-all hover:-translate-y-0.5"
           aria-label="Search"
         >
           <Search className="w-4 h-4" />
@@ -99,7 +99,7 @@ export default function Navbar() {
           <>
             <Link
               href="/cart"
-              className="relative h-10 w-10 rounded-full border border-white/20 hover:bg-white/10 text-white flex items-center justify-center transition-colors"
+              className="relative h-10 w-10 rounded-xl border border-[#ECECEC] bg-white hover:border-[#FC8019]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] flex items-center justify-center transition-all hover:-translate-y-0.5"
               aria-label={`Cart with ${cartCount} items`}
             >
               <ShoppingCart className="w-4 h-4" />
@@ -111,7 +111,7 @@ export default function Navbar() {
             </Link>
             <Link
               href="/notifications"
-              className="relative h-10 w-10 rounded-full border border-white/20 hover:bg-white/10 text-white flex items-center justify-center transition-colors"
+              className="relative h-10 w-10 rounded-xl border border-[#ECECEC] bg-white hover:border-[#FC8019]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] flex items-center justify-center transition-all hover:-translate-y-0.5"
               aria-label="Notifications"
             >
               <Bell className="w-4 h-4" />
@@ -126,39 +126,40 @@ export default function Navbar() {
 
         <Link
           href="/restaurants"
-          className="h-10 px-5 rounded-full bg-green-600 hover:bg-green-700 text-white font-medium text-sm transition-transform hover:scale-105 active:scale-95 inline-flex items-center"
+          className="h-10 px-5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm shadow-[0_6px_16px_rgba(252,128,25,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_9px_22px_rgba(252,128,25,0.28)] active:translate-y-0 inline-flex items-center"
         >
           Order Online
         </Link>
 
-        <div className="h-6 w-px bg-white/20 mx-1" />
+        <div className="h-6 w-px bg-[#ECECEC] mx-1" />
 
         {user ? (
           <div className="flex items-center space-x-3">
             <Link
               href="/profile"
-              className="text-white hover:text-[var(--color-primary)] font-medium text-sm transition-colors max-w-[120px] truncate"
+              className="text-[#1C1C1C] hover:text-[var(--color-primary)] font-medium text-sm transition-colors max-w-[120px] truncate"
             >
               {user.full_name}
             </Link>
             <button
               onClick={handleLogout}
-              className="h-10 px-5 rounded-full border border-white/20 hover:bg-white/10 text-white font-medium text-sm transition-transform hover:scale-105 active:scale-95"
+              className="h-10 px-5 rounded-xl border border-[#ECECEC] hover:border-[#FC8019]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] font-medium text-sm transition-all hover:-translate-y-0.5 active:translate-y-0"
             >
               Logout
             </button>
           </div>
         ) : (
-          <Link href="/login">
-            <button className="h-10 px-6 rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-medium text-sm transition-transform hover:scale-105 active:scale-95">
-              Login
-            </button>
+          <Link
+            href="/login"
+            className="h-10 px-6 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm shadow-[0_6px_16px_rgba(252,128,25,0.2)] transition-all hover:-translate-y-0.5 active:translate-y-0 inline-flex items-center"
+          >
+            Login
           </Link>
         )}
       </div>
 
       <button
-        className="md:hidden text-white p-2"
+        className="md:hidden text-[#1C1C1C] p-2.5 rounded-xl border border-[#ECECEC] bg-white hover:bg-[#F8F9FA] transition-colors"
         onClick={() => setMobileOpen(!mobileOpen)}
         aria-label={mobileOpen ? "Close menu" : "Open menu"}
       >
@@ -171,7 +172,7 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute top-[90px] left-0 w-full bg-black/95 backdrop-blur-md border-b border-white/10 md:hidden"
+            className="absolute top-[80px] left-0 w-full bg-white/95 backdrop-blur-xl border-b border-[#ECECEC] shadow-[0_20px_40px_rgba(28,28,28,0.1)] md:hidden"
           >
             <div className="flex flex-col p-4 gap-1">
               {NAV_LINKS.map((link) => (
@@ -179,39 +180,39 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   className={`px-4 py-3 rounded-xl font-medium ${
-                    link.isActive(pathname) ? "bg-white/10 text-white" : "text-gray-300 hover:bg-white/5"
+                    link.isActive(pathname) ? "bg-[#FC8019]/10 text-[var(--color-primary)]" : "text-[#686B78] hover:bg-[#F8F9FA] hover:text-[#1C1C1C]"
                   }`}
                 >
                   {link.label}
                 </Link>
               ))}
-              <Link href="/search" className="px-4 py-3 rounded-xl text-gray-300 hover:bg-white/5 font-medium">
+              <Link href="/search" className="px-4 py-3 rounded-xl text-[#686B78] hover:bg-[#F8F9FA] font-medium">
                 Search
               </Link>
               {isLoggedIn && (
                 <>
-                  <Link href="/cart" className="px-4 py-3 rounded-xl text-gray-300 hover:bg-white/5 font-medium flex items-center justify-between">
+                  <Link href="/cart" className="px-4 py-3 rounded-xl text-[#686B78] hover:bg-[#F8F9FA] font-medium flex items-center justify-between">
                     Cart
                     {cartCount > 0 && (
                       <span className="bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-full">{cartCount}</span>
                     )}
                   </Link>
-                  <Link href="/my-orders" className="px-4 py-3 rounded-xl text-gray-300 hover:bg-white/5 font-medium">
+                  <Link href="/my-orders" className="px-4 py-3 rounded-xl text-[#686B78] hover:bg-[#F8F9FA] font-medium">
                     My Orders
                   </Link>
-                  <Link href="/favorites" className="px-4 py-3 rounded-xl text-gray-300 hover:bg-white/5 font-medium">
+                  <Link href="/favorites" className="px-4 py-3 rounded-xl text-[#686B78] hover:bg-[#F8F9FA] font-medium">
                     Favorites
                   </Link>
-                  <Link href="/profile" className="px-4 py-3 rounded-xl text-gray-300 hover:bg-white/5 font-medium">
+                  <Link href="/profile" className="px-4 py-3 rounded-xl text-[#686B78] hover:bg-[#F8F9FA] font-medium">
                     Profile
                   </Link>
                 </>
               )}
-              <div className="border-t border-white/10 mt-2 pt-2">
+              <div className="border-t border-[#ECECEC] mt-2 pt-2">
                 {user ? (
                   <button
                     onClick={handleLogout}
-                    className="w-full px-4 py-3 rounded-xl bg-white/10 text-white font-medium"
+                    className="w-full px-4 py-3 rounded-xl bg-[#F8F9FA] text-[#1C1C1C] font-medium"
                   >
                     Logout
                   </button>

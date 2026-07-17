@@ -18,7 +18,7 @@ export default function RestaurantGallery({ images }: RestaurantGalleryProps) {
         {galleryImages.map((image, index) => (
           <div
             key={`${image}-${index}`}
-            className="relative aspect-[4/3] rounded-xl overflow-hidden border border-white/10"
+            className="relative aspect-[4/3] rounded-xl overflow-hidden border border-[#E5E7EB]"
           >
             <SafeImage
               src={image}

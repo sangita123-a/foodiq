@@ -1,22 +1,28 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import PopularCuisines from "@/components/PopularCuisines";
 import FloatingCart from "@/components/FloatingCart";
+import AllCuisinesExplorer from "@/components/cuisines/AllCuisinesExplorer";
 
 export default function PopularCuisinesPage() {
   return (
-    <main className="min-h-screen bg-black relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="relative min-h-screen bg-[radial-gradient(circle_at_50%_0%,rgba(252,128,25,0.09),transparent_28%),#FFFFFF] pt-[90px] selection:bg-[var(--color-primary)] selection:text-white">
       <Navbar />
       <FloatingCart />
-      <div className="container mx-auto px-4 md:px-8 pt-12">
-        <div className="mb-4 border-b border-white/5 pb-8">
-          <h1 className="text-3xl md:text-5xl font-black text-white mb-3">Popular Cuisines</h1>
-          <p className="text-gray-400 text-lg">
-            Explore every cuisine category and order your favorite dishes.
+      <header className="mx-auto w-[calc(100%_-_32px)] max-w-[1600px] pb-8 pt-12 md:w-[calc(100%_-_48px)] md:pb-10 md:pt-16">
+        <div className="max-w-3xl">
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#FC8019]">
+            Find your next favorite
+          </p>
+          <h1 className="text-3xl font-black tracking-[-0.04em] text-[#111827] md:text-5xl">
+            All Cuisines
+          </h1>
+          <p className="mt-3 text-base leading-7 text-[#6B7280] md:text-lg">
+            Explore every cuisine available near you, compare local restaurant
+            choices and jump straight to the dishes you love.
           </p>
         </div>
-      </div>
-      <PopularCuisines />
+      </header>
+      <AllCuisinesExplorer />
       <Footer />
     </main>
   );

@@ -82,13 +82,13 @@ const MOCK_ANALYTICS_DATA: FullAnalyticsData = {
   },
   menu: {
     topSelling: [
-      { id: "M1", name: "Hyderabadi Dum Biryani", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=800&auto=format&fit=crop", metricLabel: "Orders", metricValue: "4.2K" }
+      { id: "M1", name: "Hyderabadi Dum Biryani", image: "/images/catalog/food/biryani.webp", metricLabel: "Orders", metricValue: "4.2K" }
     ],
     leastOrdered: [
-      { id: "M2", name: "Tofu Salad", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop", metricLabel: "Orders", metricValue: "120" }
+      { id: "M2", name: "Tofu Salad", image: "/images/catalog/food/healthy.webp", metricLabel: "Orders", metricValue: "120" }
     ],
-    highestRevenue: { id: "M3", name: "Family Combo Pack", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=800&auto=format&fit=crop", metricLabel: "Revenue", metricValue: "₹4.5L" },
-    fastestPrep: { id: "M4", name: "Cold Coffee", image: "https://images.unsplash.com/photo-1579992357154-faf4bde95b3d?q=80&w=800&auto=format&fit=crop", metricLabel: "Prep Time", metricValue: "3m" }
+    highestRevenue: { id: "M3", name: "Family Combo Pack", image: "/images/catalog/food/fast-food.webp", metricLabel: "Revenue", metricValue: "₹4.5L" },
+    fastestPrep: { id: "M4", name: "Cold Coffee", image: "/images/catalog/food/beverages.webp", metricLabel: "Prep Time", metricValue: "3m" }
   },
   customers: {
     newPercentage: 35,
@@ -123,7 +123,7 @@ export default function PartnerAnalyticsPage() {
   const [comparePeriod, setComparePeriod] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0B0B0B] flex selection:bg-[var(--color-primary)] selection:text-white">
+    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#FC8019] selection:text-white">
       
       {/* Sidebar - Fixed on left for desktop */}
       <div className="hidden lg:block w-64 flex-shrink-0">

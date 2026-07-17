@@ -55,20 +55,20 @@ export default function HistorySummary({ orders }: HistorySummaryProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: idx * 0.1 }}
           whileHover={{ y: -5 }}
-          className="bg-[#171717] rounded-2xl p-5 border border-white/5 shadow-lg group hover:border-white/20 transition-all cursor-pointer relative overflow-hidden"
+          className="bg-[#FFFFFF] rounded-2xl p-5 border border-[#E5E7EB] shadow-lg group hover:border-[#E5E7EB] transition-all cursor-pointer relative overflow-hidden"
         >
           {/* subtle background glow on hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFC] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           
           <div className="relative z-10">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${stat.bg} ${stat.border} border`}>
               <stat.icon className={`w-5 h-5 ${stat.color}`} />
             </div>
 
-            <h3 className="text-3xl font-black text-white mb-1">
+            <h3 className="text-3xl font-black text-[#111827] mb-1">
               <Counter from={0} to={stat.value} prefix={stat.prefix} />
             </h3>
-            <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">{stat.title}</p>
+            <p className="text-[#6B7280] text-xs font-bold uppercase tracking-wider">{stat.title}</p>
           </div>
         </motion.div>
       ))}

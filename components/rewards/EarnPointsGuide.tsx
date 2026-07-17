@@ -44,13 +44,13 @@ export default function EarnPointsGuide() {
           <motion.div 
             key={idx}
             whileHover={{ y: -5 }}
-            className="bg-[#171717] rounded-3xl p-6 border border-white/5 hover:border-white/10 transition-colors shadow-lg"
+            className="bg-[#F8FAFC] rounded-3xl p-6 border border-[#E5E7EB] hover:border-[#E5E7EB] transition-colors shadow-lg"
           >
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-6 ${item.bg}`}>
               <item.icon className={`w-6 h-6 ${item.color}`} />
             </div>
             <h4 className="text-lg font-bold text-white mb-2">{item.title}</h4>
-            <p className="text-sm text-gray-400 leading-relaxed">{item.desc}</p>
+            <p className="text-sm text-[#6B7280] leading-relaxed">{item.desc}</p>
           </motion.div>
         ))}
       </div>

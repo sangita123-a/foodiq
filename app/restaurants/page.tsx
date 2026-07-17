@@ -62,61 +62,61 @@ function RestaurantsContent() {
   const hasMore = page < totalPages;
 
   return (
-    <main className="min-h-screen bg-[#0B0B0B] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
 
-      <div className="w-full bg-[#121212] py-8 border-b border-white/10">
+      <div className="w-full border-b border-[#ECECEC] bg-[#F8F9FA] py-8">
         <div className="container mx-auto px-4 md:px-8">
           <CompactSearchBar />
         </div>
       </div>
 
-      <div className="container mx-auto px-4 md:px-8 py-12">
-        <div className="mb-10 text-center md:text-left">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3">
+      <div className="container mx-auto max-w-[1600px] px-4 md:px-8 py-10">
+        <div className="food-section-heading text-center md:text-left">
+          <h1 className="mb-2 text-3xl font-black tracking-[-0.04em] text-[#1C1C1C] md:text-4xl">
             Restaurants Near You
           </h1>
-          <p className="text-[var(--color-gray-text)] text-lg">
+          <p>
             Discover the best restaurants and delicious food around you
           </p>
         </div>
 
         <CategoryFilter />
 
-        <div className="flex flex-col lg:flex-row gap-8 mt-12">
+        <div className="flex flex-col lg:flex-row gap-6 mt-8">
           <FilterSidebar />
 
           <div className="flex-1">
             <TrendingSection />
 
-            <div className="mb-16">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl md:text-3xl font-bold text-white">All Restaurants</h2>
+            <div className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl md:text-3xl font-bold text-[#111827]">All Restaurants</h2>
                 <div className="text-[var(--color-gray-text)] text-sm">
                   {isLoading ? "Loading..." : `${restaurants.length} places`}
                 </div>
               </div>
 
               {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="food-grid">
                   {[1, 2, 3, 4, 5, 6].map((i) => (
                     <div
                       key={i}
-                      className="h-[300px] bg-white/5 rounded-2xl animate-pulse border border-white/10"
+                    className="h-[300px] animate-pulse rounded-2xl border border-[#ECECEC] bg-[#F8F9FA]"
                     />
                   ))}
                 </div>
               ) : restaurants.length === 0 ? (
-                <div className="text-center py-20 bg-[#121212] rounded-2xl border border-white/10">
+                <div className="rounded-2xl border border-[#ECECEC] bg-white py-20 text-center shadow-[0_8px_24px_rgba(28,28,28,0.06)]">
                   <div className="text-6xl mb-4">🍽️</div>
-                  <h3 className="text-2xl font-bold text-white mb-2">No restaurants found</h3>
-                  <p className="text-gray-400">
+                  <h3 className="mb-2 text-2xl font-bold text-[#1C1C1C]">No restaurants found</h3>
+                  <p className="text-[#686B78]">
                     Try adjusting your filters or searching for something else.
                   </p>
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  <div className="food-grid">
                     {restaurants.map((restaurant: any, idx: number) => (
                       <RestaurantCard
                         key={`${restaurant.id}-${idx}`}
@@ -131,7 +131,7 @@ function RestaurantsContent() {
                       <button
                         onClick={handleViewMore}
                         disabled={isLoadingMore}
-                        className="px-8 py-3 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="food-button px-7 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         {isLoadingMore ? "Loading..." : "View More"}
                       </button>
@@ -155,7 +155,7 @@ export default function RestaurantsPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#0B0B0B] flex items-center justify-center text-white">
+        <div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center text-[#111827]">
           Loading...
         </div>
       }

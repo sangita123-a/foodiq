@@ -37,7 +37,7 @@ function DecimalCounter({ from, to }: { from: number, to: number }) {
 
 export default function Achievements() {
   return (
-    <div className="py-24 bg-gradient-to-br from-primary to-[#b31420] text-white">
+    <div className="py-24 bg-gradient-to-br from-primary to-[#E76F0B] text-white">
       <div className="container mx-auto px-4 md:px-8">
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 text-center">
@@ -46,21 +46,21 @@ export default function Achievements() {
             <div className="text-4xl md:text-6xl font-black mb-2 drop-shadow-lg">
               <Counter from={0} to={50} />K+
             </div>
-            <p className="text-white/80 font-bold uppercase tracking-widest text-sm">Happy Customers</p>
+            <p className="text-[#111827]/80 font-bold uppercase tracking-widest text-sm">Happy Customers</p>
           </div>
 
           <div>
             <div className="text-4xl md:text-6xl font-black mb-2 drop-shadow-lg">
               <Counter from={0} to={1000} duration={2.5} />+
             </div>
-            <p className="text-white/80 font-bold uppercase tracking-widest text-sm">Partner Restaurants</p>
+            <p className="text-[#111827]/80 font-bold uppercase tracking-widest text-sm">Partner Restaurants</p>
           </div>
 
           <div>
             <div className="text-4xl md:text-6xl font-black mb-2 drop-shadow-lg">
               <Counter from={0} to={1} />M+
             </div>
-            <p className="text-white/80 font-bold uppercase tracking-widest text-sm">Orders Delivered</p>
+            <p className="text-[#111827]/80 font-bold uppercase tracking-widest text-sm">Orders Delivered</p>
           </div>
 
           <div>
@@ -68,7 +68,7 @@ export default function Achievements() {
               <DecimalCounter from={0} to={4.9} />
               <span className="text-3xl md:text-5xl">★</span>
             </div>
-            <p className="text-white/80 font-bold uppercase tracking-widest text-sm">Customer Rating</p>
+            <p className="text-[#111827]/80 font-bold uppercase tracking-widest text-sm">Customer Rating</p>
           </div>
 
         </div>

@@ -9,15 +9,15 @@ type Props = {
 
 export default function CuisineNotFound({ slug }: Props) {
   return (
-    <main className="min-h-screen bg-[#0B0B0B] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
       <div className="container mx-auto px-4 md:px-8 py-20 max-w-lg text-center">
-        <div className="bg-[#171717] border border-white/10 rounded-3xl p-10">
+        <div className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-3xl p-10">
           <div className="w-16 h-16 rounded-2xl bg-[var(--color-primary)]/15 flex items-center justify-center mx-auto mb-6">
             <UtensilsCrossed className="w-8 h-8 text-[var(--color-primary)]" />
           </div>
           <h1 className="text-3xl font-black text-white mb-3">Cuisine Not Found</h1>
-          <p className="text-gray-400 mb-8">
+          <p className="text-[#6B7280] mb-8">
             {slug
               ? `We couldn't find a cuisine matching "${slug}".`
               : "We couldn't find the cuisine you're looking for."}
@@ -25,7 +25,7 @@ export default function CuisineNotFound({ slug }: Props) {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/"
-              className="inline-flex items-center justify-center gap-2 bg-[#FF2D3B] hover:bg-[#e02633] text-white px-6 py-3 rounded-xl font-bold transition-colors"
+              className="inline-flex items-center justify-center gap-2 bg-[#FC8019] hover:bg-[#E76F0B] text-white px-6 py-3 rounded-xl font-bold transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Home

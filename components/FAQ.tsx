@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Minus } from "lucide-react";
+import { Mail, MessageCircle, Minus, Plus, Search } from "lucide-react";
 
 type FAQItem = {
   id: string;
@@ -14,111 +14,218 @@ const faqData: FAQItem[] = [
   {
     id: "faq1",
     question: "How do I place an order?",
-    answer: "Simply browse through our restaurant partners or search for your favorite dish. Add items to your cart, proceed to checkout, enter your delivery address, and choose your preferred payment method."
+    answer:
+      "Browse restaurants, add your preferred dishes to the cart, enter your delivery details, and complete payment at checkout.",
   },
   {
     id: "faq2",
-    question: "How can I track my delivery?",
-    answer: "Once your order is confirmed, you can track its status in real-time on the 'My Orders' page. You will also receive live updates and the delivery partner's contact details when the order is picked up."
+    question: "How can I track my order?",
+    answer:
+      "Open My Orders and select your active order to view live preparation and delivery updates.",
   },
   {
     id: "faq3",
-    question: "Which payment methods are accepted?",
-    answer: "We accept all major credit and debit cards, UPI, net banking, and popular mobile wallets. Cash on Delivery (COD) is also available for selected locations and restaurants."
+    question: "Which payment methods are supported?",
+    answer:
+      "We support UPI, credit and debit cards, net banking, wallets, and Cash on Delivery where available.",
   },
   {
     id: "faq4",
-    question: "Can I cancel or modify my order?",
-    answer: "Orders can only be cancelled or modified within 60 seconds of placing them. Once the restaurant accepts and starts preparing your food, cancellations are no longer possible."
+    question: "How do I apply coupons?",
+    answer:
+      "Enter a valid coupon code in the cart or at checkout and select Apply to update your order total.",
   },
   {
     id: "faq5",
-    question: "Is contactless delivery available?",
-    answer: "Yes! You can select the 'Contactless Delivery' option at checkout. Our delivery partner will securely place your order at your doorstep and notify you once it's delivered."
+    question: "Can I cancel my order?",
+    answer:
+      "You can cancel before the restaurant starts preparing your order from the active order details page.",
   },
   {
     id: "faq6",
-    question: "How do I apply coupon codes?",
-    answer: "During checkout, you will see an 'Apply Promo Code' section. Enter your valid coupon code there and click 'Apply' to see the updated discounted total before making the payment."
-  }
+    question: "How do I update my profile?",
+    answer:
+      "Open Profile, select Edit Profile, update your details, and save the changes.",
+  },
+  {
+    id: "faq7",
+    question: "How do I contact customer support?",
+    answer:
+      "Visit Help & Support or email support@foodiq.com for assistance with your order or account.",
+  },
 ];
 
 export default function FAQ() {
   const [openId, setOpenId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
 
   const toggleAccordion = (id: string) => {
-    setOpenId(openId === id ? null : id);
+    setOpenId((currentId) => (currentId === id ? null : id));
   };
 
+  const filteredFaqs = useMemo(() => {
+    const searchTerm = query.trim().toLowerCase();
+    if (!searchTerm) return faqData;
+    return faqData.filter(
+      ({ question, answer }) =>
+        question.toLowerCase().includes(searchTerm) ||
+        answer.toLowerCase().includes(searchTerm),
+    );
+  }, [query]);
+
   return (
-    <section className="bg-black w-full py-[100px] border-t border-white/5">
-      <div className="w-[90%] max-w-7xl mx-auto">
-        
-        {/* Header */}
-        <motion.div 
+    <section className="w-full border-t border-[#ECECEC] bg-[radial-gradient(circle_at_top,rgba(252,128,25,0.07),transparent_34%),#FFFFFF] py-16 md:py-24">
+      <div className="mx-auto w-[calc(100%-32px)] max-w-5xl md:w-[calc(100%-64px)]">
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-14 text-center md:text-left"
+          className="mb-8 text-center"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-3">
+          <span className="mb-3 inline-flex rounded-full border border-[#FC8019]/20 bg-[#FC8019]/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#FC8019]">
+            Help Center
+          </span>
+          <h2 className="mb-3 text-3xl font-bold tracking-[-0.045em] text-[#1C1C1C] md:text-5xl">
             Frequently Asked Questions
           </h2>
-          <p className="text-gray-400 text-lg md:text-xl font-light">
+          <p className="mx-auto max-w-2xl text-sm leading-6 text-[#686B78] md:text-base">
             Everything you need to know before placing your order.
           </p>
         </motion.div>
 
-        {/* FAQ Grid (Two columns on Desktop) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-4">
-          {faqData.map((faq, index) => {
+        <div className="relative mx-auto mb-8 max-w-2xl">
+          <Search
+            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]"
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setOpenId(null);
+            }}
+            placeholder="Search questions, payments, refunds..."
+            aria-label="Search frequently asked questions"
+            className="h-13 w-full rounded-[14px] border border-[#ECECEC] bg-white py-3 pl-12 pr-4 text-sm text-[#1C1C1C] shadow-[0_10px_32px_rgba(28,28,28,0.07)] outline-none transition-all duration-300 placeholder:text-[#686B78] focus:border-[#FC8019]/60 focus:ring-4 focus:ring-[#FC8019]/10"
+          />
+        </div>
+
+        <div className="space-y-3">
+          {filteredFaqs.map((faq, index) => {
             const isOpen = openId === faq.id;
+            const answerId = `${faq.id}-answer`;
 
             return (
-              <motion.div 
+              <motion.article
                 key={faq.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className={`bg-[#171717] border border-white/5 rounded-2xl overflow-hidden transition-all duration-300 hover:border-white/10 ${
-                  isOpen ? 'shadow-[0_10px_30px_rgba(255,45,59,0.1)]' : 'shadow-sm'
+                transition={{ duration: 0.35, delay: Math.min(index * 0.025, 0.25) }}
+                className={`overflow-hidden rounded-2xl border bg-white transition-all duration-300 ${
+                  isOpen
+                    ? "border-[#FC8019]/35 shadow-[0_14px_36px_rgba(252,128,25,0.1)]"
+                    : "border-[#E5E7EB] shadow-[0_8px_24px_rgba(15,23,42,0.06)] hover:-translate-y-0.5 hover:border-[#FC8019]/25 hover:shadow-[0_14px_32px_rgba(15,23,42,0.1)]"
                 }`}
               >
                 <button
+                  type="button"
                   onClick={() => toggleAccordion(faq.id)}
-                  className="w-full flex items-center justify-between p-6 text-left focus:outline-none"
+                  aria-expanded={isOpen}
+                  aria-controls={answerId}
+                  className="flex w-full items-center justify-between gap-4 p-4 text-left outline-none sm:p-5"
                 >
-                  <span className={`font-semibold text-lg transition-colors duration-300 ${isOpen ? 'text-[#FF2D3B]' : 'text-white'}`}>
+                  <span
+                    className={`text-sm font-semibold leading-6 transition-colors duration-300 sm:text-base ${
+                      isOpen ? "text-[#FC8019]" : "text-[#111827]"
+                    }`}
+                  >
                     {faq.question}
                   </span>
-                  <div className={`flex-shrink-0 ml-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 ${
-                    isOpen ? 'bg-[#FF2D3B] text-white' : 'bg-white/5 text-gray-400'
-                  }`}>
-                    {isOpen ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                  </div>
+                  <motion.span
+                    animate={{ rotate: isOpen ? 180 : 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors duration-300 ${
+                      isOpen
+                        ? "border-[#FC8019] bg-[#FC8019] text-white"
+                        : "border-[#E5E7EB] bg-[#F8FAFC] text-[#6B7280]"
+                    }`}
+                    aria-hidden="true"
+                  >
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.span
+                        key={isOpen ? "minus" : "plus"}
+                        initial={{ opacity: 0, scale: 0.5, rotate: -90 }}
+                        animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                        exit={{ opacity: 0, scale: 0.5, rotate: 90 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        {isOpen ? (
+                          <Minus className="h-4 w-4" />
+                        ) : (
+                          <Plus className="h-4 w-4" />
+                        )}
+                      </motion.span>
+                    </AnimatePresence>
+                  </motion.span>
                 </button>
-                
-                <AnimatePresence>
+
+                <AnimatePresence initial={false}>
                   {isOpen && (
                     <motion.div
+                      id={answerId}
+                      role="region"
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                     >
-                      <div className="px-6 pb-6 text-gray-400 leading-relaxed">
+                      <div className="mx-4 border-t border-[#E5E7EB] pb-5 pt-4 text-sm leading-6 text-[#6B7280] sm:mx-5">
                         {faq.answer}
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </motion.div>
+              </motion.article>
             );
           })}
         </div>
 
+        {filteredFaqs.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F8FAFC] px-6 py-14 text-center"
+          >
+            <Search className="mx-auto mb-3 h-8 w-8 text-[#9CA3AF]" />
+            <p className="font-medium text-[#6B7280]">No matching questions found.</p>
+          </motion.div>
+        )}
+
+        <div className="mt-10 rounded-[20px] border border-[#ECECEC] bg-[#F8F9FA] p-6 text-center shadow-[0_18px_48px_rgba(28,28,28,0.07)] sm:p-8">
+          <h3 className="text-xl font-bold text-[#1C1C1C]">Still need help?</h3>
+          <p className="mt-1 text-sm text-[#686B78]">
+            Our support team is ready to help.
+          </p>
+          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+            <a
+              href="/help-support"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#FC8019] px-5 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#E76F0B] hover:shadow-[0_8px_24px_rgba(252,128,25,0.3)]"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Contact Support
+            </a>
+            <a
+              href="mailto:support@foodiq.com"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-5 text-sm font-bold text-[#111827] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#FC8019]/30 hover:bg-[#FFF7ED]"
+            >
+              <Mail className="h-4 w-4" />
+              Email Us
+            </a>
+          </div>
+        </div>
       </div>
     </section>
   );

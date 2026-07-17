@@ -19,13 +19,13 @@ import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-black relative selection:bg-[var(--color-primary)] selection:text-white">
+    <main className="min-h-screen bg-white text-[#1C1C1C] relative selection:bg-[#FC8019]/20 selection:text-[#1C1C1C]">
       <Navbar />
       <Hero />
       <ScrollButton />
       <FloatingCart />
       
-      <div className="relative z-10 bg-black pt-8">
+      <div className="relative z-10 bg-white pt-4 sm:pt-6">
         <PopularRestaurants />
         <TrendingDishes />
         <BestOffers />

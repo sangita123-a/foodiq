@@ -171,17 +171,17 @@ export default function PaymentMethodsPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-[#0B0B0B] pt-[90px]">
+      <main className="min-h-screen bg-[#FFFFFF] pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 py-12 max-w-5xl">
-          <div className="h-64 bg-white/5 animate-pulse rounded-3xl" />
+          <div className="h-64 bg-[#F8FAFC] animate-pulse rounded-3xl" />
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#0B0B0B] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-5xl">
@@ -237,16 +237,16 @@ export default function PaymentMethodsPage() {
         <div className="mt-16 mb-12">
           <h3 className="text-2xl font-bold text-white mb-6">Payment History</h3>
           {isLoadingHistory ? (
-            <div className="h-64 bg-white/5 animate-pulse rounded-2xl border border-white/10"></div>
+            <div className="h-64 bg-[#F8FAFC] animate-pulse rounded-2xl border border-[#E5E7EB]"></div>
           ) : historyError ? (
             <div className="p-6 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl text-center">
               Failed to load payment history
             </div>
           ) : paymentHistory.length > 0 ? (
-            <div className="bg-[#171717] rounded-3xl border border-white/5 overflow-hidden">
+            <div className="bg-[#F8FAFC] rounded-3xl border border-[#E5E7EB] overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-gray-400">
-                  <thead className="bg-white/5 text-white uppercase font-bold text-xs">
+                <table className="w-full text-left text-sm text-[#6B7280]">
+                  <thead className="bg-[#F8FAFC] text-white uppercase font-bold text-xs">
                     <tr>
                       <th className="px-6 py-4">Transaction ID</th>
                       <th className="px-6 py-4">Date</th>
@@ -257,7 +257,7 @@ export default function PaymentMethodsPage() {
                   </thead>
                   <tbody>
                     {paymentHistory.map((payment: any) => (
-                      <tr key={payment.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <tr key={payment.id} className="border-b border-[#E5E7EB] hover:bg-[#F8FAFC] transition-colors">
                         <td className="px-6 py-4 font-mono text-xs">
                           {payment.provider_transaction_id || "Pending..."}
                         </td>
@@ -290,7 +290,7 @@ export default function PaymentMethodsPage() {
               </div>
             </div>
           ) : (
-            <div className="text-center text-gray-500 py-10 bg-[#171717] rounded-3xl border border-white/5">
+            <div className="text-center text-[#9CA3AF] py-10 bg-[#F8FAFC] rounded-3xl border border-[#E5E7EB]">
               No recent transactions found.
             </div>
           )}

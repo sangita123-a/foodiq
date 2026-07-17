@@ -69,18 +69,18 @@ export default function CouponsRewardsPage() {
 
   if (isLoadingCoupons || isLoadingRewards) {
     return (
-      <main className="min-h-screen bg-[#0B0B0B] relative pt-[90px]">
+      <main className="min-h-screen bg-[#FFFFFF] relative pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 md:px-8 py-12 max-w-6xl">
-          <div className="w-full h-64 bg-white/5 animate-pulse rounded-3xl border border-white/10 mb-12"></div>
-          <div className="w-full h-48 bg-white/5 animate-pulse rounded-3xl border border-white/10 mb-12"></div>
+          <div className="w-full h-64 bg-[#F8FAFC] animate-pulse rounded-3xl border border-[#E5E7EB] mb-12"></div>
+          <div className="w-full h-48 bg-[#F8FAFC] animate-pulse rounded-3xl border border-[#E5E7EB] mb-12"></div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#0B0B0B] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-6xl">
@@ -115,7 +115,7 @@ export default function CouponsRewardsPage() {
 
             {/* Expired Coupons */}
             <section>
-              <h2 className="text-2xl font-bold text-gray-500 mb-6">Expired Coupons</h2>
+              <h2 className="text-2xl font-bold text-[#9CA3AF] mb-6">Expired Coupons</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {expiredCoupons.map(coupon => (
                   <CouponCard key={coupon.id} coupon={coupon} />

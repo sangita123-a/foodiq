@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
+import SafeImage from "@/components/ui/SafeImage";
+import { FOOD_FALLBACK } from "@/lib/images";
 
 export default function EmptyCart() {
   return (
@@ -12,11 +14,12 @@ export default function EmptyCart() {
       className="flex flex-col items-center justify-center py-20 px-4 text-center"
     >
       <div className="w-48 h-48 mb-8 relative">
-        <div className="absolute inset-0 bg-[#FF2D3B]/20 rounded-full blur-3xl"></div>
-        <img 
-          src="https://illustrations.popsy.co/amber/surreal-hourglass.svg" 
+        <div className="absolute inset-0 bg-[#FC8019]/20 rounded-full blur-3xl"></div>
+        <SafeImage 
+          src={FOOD_FALLBACK}
+          fallback={FOOD_FALLBACK}
           alt="Empty Cart Illustration"
-          className="w-full h-full object-contain relative z-10 opacity-70 drop-shadow-2xl"
+          className="w-full h-full object-cover rounded-full relative z-10 opacity-70 drop-shadow-2xl"
         />
       </div>
       
@@ -25,7 +28,7 @@ export default function EmptyCart() {
         Looks like you haven't added anything to your cart yet. Discover delicious food around you and satisfy your cravings!
       </p>
       
-      <Link href="/" className="bg-[#FF2D3B] hover:bg-[#e02633] text-white px-8 py-3.5 rounded-xl font-bold transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,45,59,0.4)] hover:-translate-y-1 flex items-center gap-2">
+      <Link href="/" className="bg-[#FC8019] hover:bg-[#E76F0B] text-white px-8 py-3.5 rounded-xl font-bold transition-all duration-300 hover:shadow-[0_0_20px_rgba(252,128,25,0.4)] hover:-translate-y-1 flex items-center gap-2">
         <ShoppingBag className="w-5 h-5" />
         Explore Restaurants
       </Link>

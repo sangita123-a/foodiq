@@ -67,56 +67,56 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black/95 px-4 pt-24 pb-12">
-      <div className="max-w-md w-full bg-white/5 border border-white/10 p-8 rounded-2xl backdrop-blur-md">
-        <h2 className="text-3xl font-bold text-white text-center mb-6">Create Account</h2>
+    <div className="min-h-screen flex items-center justify-center bg-white px-4 pt-24 pb-12">
+      <div className="max-w-md w-full bg-[#F8FAFC] border border-[#E5E7EB] p-8 rounded-2xl backdrop-blur-md">
+        <h2 className="text-3xl font-bold text-[#111827] text-center mb-6">Create Account</h2>
         {error && <div className="bg-red-500/20 border border-red-500 text-red-100 p-3 rounded-lg mb-6 text-sm">{error}</div>}
         <form onSubmit={handleRegister} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+            <label className="block text-sm font-medium text-[#6B7280] mb-2">Full Name</label>
             <input 
               type="text" 
               name="full_name"
               required
               value={formData.full_name}
               onChange={handleChange}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[var(--color-primary)] transition-colors"
+              className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[var(--color-primary)] transition-colors"
               placeholder="John Doe"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+            <label className="block text-sm font-medium text-[#6B7280] mb-2">Email Address</label>
             <input 
               type="email" 
               name="email"
               required
               value={formData.email}
               onChange={handleChange}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[var(--color-primary)] transition-colors"
+              className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[var(--color-primary)] transition-colors"
               placeholder="john@example.com"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
+            <label className="block text-sm font-medium text-[#6B7280] mb-2">Phone Number</label>
             <input 
               type="tel" 
               name="phone"
               required
               value={formData.phone}
               onChange={handleChange}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[var(--color-primary)] transition-colors"
+              className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[var(--color-primary)] transition-colors"
               placeholder="+1 234 567 8900"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+            <label className="block text-sm font-medium text-[#6B7280] mb-2">Password</label>
             <input 
               type="password" 
               name="password"
               required
               value={formData.password}
               onChange={handleChange}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[var(--color-primary)] transition-colors"
+              className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[var(--color-primary)] transition-colors"
               placeholder="Create a password"
             />
           </div>
@@ -128,7 +128,7 @@ export default function RegisterPage() {
             {loading ? "Creating account..." : "Register"}
           </button>
         </form>
-        <div className="mt-6 text-center text-gray-400 text-sm">
+        <div className="mt-6 text-center text-[#6B7280] text-sm">
           Already have an account? <Link href="/login" className="text-[var(--color-primary)] hover:underline">Login here</Link>
         </div>
       </div>

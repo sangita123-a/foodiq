@@ -11,7 +11,7 @@ type Props = {
 
 export default function TrackingHeader({ orderId, restaurantName, eta, address }: Props) {
   return (
-    <div className="bg-[#171717] rounded-3xl p-6 md:p-8 border border-white/5 mb-8 text-center md:text-left relative overflow-hidden">
+    <div className="bg-[#F8FAFC] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] mb-8 text-center md:text-left relative overflow-hidden">
       
       {/* Background glow */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/10 rounded-full blur-[80px] pointer-events-none -translate-y-1/2 translate-x-1/4"></div>
@@ -31,20 +31,20 @@ export default function TrackingHeader({ orderId, restaurantName, eta, address }
 
         {/* Details Section */}
         <div className="flex flex-wrap justify-center md:justify-end gap-4 text-sm">
-          <div className="bg-[#111] px-4 py-3 rounded-xl border border-white/10 flex flex-col items-center md:items-start min-w-[120px]">
-            <span className="text-gray-500 font-medium mb-1">Order ID</span>
+          <div className="bg-white px-4 py-3 rounded-xl border border-[#E5E7EB] flex flex-col items-center md:items-start min-w-[120px]">
+            <span className="text-[#9CA3AF] font-medium mb-1">Order ID</span>
             <span className="text-white font-bold">{orderId}</span>
           </div>
-          <div className="bg-[#111] px-4 py-3 rounded-xl border border-white/10 flex flex-col items-center md:items-start min-w-[120px]">
-            <span className="text-gray-500 font-medium mb-1 flex items-center gap-1"><Store className="w-3.5 h-3.5"/> Restaurant</span>
+          <div className="bg-white px-4 py-3 rounded-xl border border-[#E5E7EB] flex flex-col items-center md:items-start min-w-[120px]">
+            <span className="text-[#9CA3AF] font-medium mb-1 flex items-center gap-1"><Store className="w-3.5 h-3.5"/> Restaurant</span>
             <span className="text-white font-bold">{restaurantName}</span>
           </div>
-          <div className="bg-[#111] px-4 py-3 rounded-xl border border-white/10 flex flex-col items-center md:items-start min-w-[120px]">
-            <span className="text-gray-500 font-medium mb-1 flex items-center gap-1"><Clock className="w-3.5 h-3.5"/> ETA</span>
+          <div className="bg-white px-4 py-3 rounded-xl border border-[#E5E7EB] flex flex-col items-center md:items-start min-w-[120px]">
+            <span className="text-[#9CA3AF] font-medium mb-1 flex items-center gap-1"><Clock className="w-3.5 h-3.5"/> ETA</span>
             <span className="text-green-400 font-bold">{eta}</span>
           </div>
-          <div className="bg-[#111] px-4 py-3 rounded-xl border border-white/10 flex flex-col items-center md:items-start min-w-[120px]">
-            <span className="text-gray-500 font-medium mb-1 flex items-center gap-1"><MapPin className="w-3.5 h-3.5"/> Delivery to</span>
+          <div className="bg-white px-4 py-3 rounded-xl border border-[#E5E7EB] flex flex-col items-center md:items-start min-w-[120px]">
+            <span className="text-[#9CA3AF] font-medium mb-1 flex items-center gap-1"><MapPin className="w-3.5 h-3.5"/> Delivery to</span>
             <span className="text-white font-bold">{address}</span>
           </div>
         </div>

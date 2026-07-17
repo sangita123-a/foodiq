@@ -6,9 +6,10 @@ import useSWR from "swr";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
 import { FormEvent, useRef } from "react";
+import SafeImage from "@/components/ui/SafeImage";
+import { AVATAR_FALLBACK } from "@/lib/images";
 
-const DEFAULT_AVATAR =
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200";
+const DEFAULT_AVATAR = AVATAR_FALLBACK;
 
 export default function ProfileSettings() {
   const { data, isLoading, mutate } = useSWR("/api/profile");
@@ -67,7 +68,7 @@ export default function ProfileSettings() {
   };
 
   if (isLoading) {
-    return <div className="text-white animate-pulse h-64 bg-white/5 rounded-3xl"></div>;
+    return <div className="text-[#111827] animate-pulse h-64 bg-[#F8FAFC] rounded-3xl"></div>;
   }
 
   const dob = user.date_of_birth
@@ -79,31 +80,32 @@ export default function ProfileSettings() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="bg-[#171717] rounded-3xl p-6 md:p-10 border border-white/5 shadow-2xl"
+      className="bg-[#F8FAFC] rounded-3xl p-6 md:p-10 border border-[#E5E7EB] shadow-2xl"
     >
       <h2 className="text-2xl font-bold text-white mb-8">Profile Settings</h2>
 
       <div className="flex items-center gap-6 mb-10">
         <div className="relative group cursor-pointer" onClick={() => fileRef.current?.click()}>
-          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white/10 group-hover:border-primary transition-colors">
-            <img
-              src={user.profile_image_url || DEFAULT_AVATAR}
+          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#E5E7EB] group-hover:border-primary transition-colors">
+            <SafeImage
+              src={user.profile_image_url}
+              fallback={DEFAULT_AVATAR}
               alt="Profile"
               className="w-full h-full object-cover"
             />
           </div>
           <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <Camera className="w-6 h-6 text-white" />
+            <Camera className="w-6 h-6 text-[#111827]" />
           </div>
         </div>
         <div>
           <h3 className="text-white font-bold text-lg">Profile Photo</h3>
-          <p className="text-gray-400 text-sm mb-3">PNG, JPG up to 5MB</p>
+          <p className="text-[#6B7280] text-sm mb-3">PNG, JPG up to 5MB</p>
           <div className="flex gap-3">
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
+              className="bg-[#F8FAFC] hover:bg-[#F8FAFC] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
             >
               Upload New
             </button>
@@ -129,54 +131,54 @@ export default function ProfileSettings() {
         <input type="hidden" name="profile_image_url" value={user.profile_image_url || ""} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-bold text-gray-400 mb-2">Full Name</label>
+            <label className="block text-sm font-bold text-[#6B7280] mb-2">Full Name</label>
             <input
               type="text"
               name="full_name"
               defaultValue={user.full_name}
               required
-              className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-400 mb-2">Email Address</label>
+            <label className="block text-sm font-bold text-[#6B7280] mb-2">Email Address</label>
             <input
               type="email"
               name="email"
               defaultValue={user.email}
               required
-              className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-bold text-gray-400 mb-2">Mobile Number</label>
+            <label className="block text-sm font-bold text-[#6B7280] mb-2">Mobile Number</label>
             <input
               type="tel"
               name="phone_number"
               defaultValue={user.phone_number || ""}
-              className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-400 mb-2">Date of Birth</label>
+            <label className="block text-sm font-bold text-[#6B7280] mb-2">Date of Birth</label>
             <input
               type="date"
               name="dob"
               defaultValue={dob}
-              className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors [color-scheme:dark]"
+              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors "
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-400 mb-2">Gender</label>
+          <label className="block text-sm font-bold text-[#6B7280] mb-2">Gender</label>
           <select
             name="gender"
             defaultValue={user.gender || ""}
-            className="w-full bg-[#111] text-white border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary appearance-none cursor-pointer"
+            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary appearance-none cursor-pointer"
           >
             <option value="">Prefer not to say</option>
             <option value="female">Female</option>

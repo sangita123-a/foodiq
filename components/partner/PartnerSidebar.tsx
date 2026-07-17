@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  ShoppingBag, 
-  UtensilsCrossed, 
-  PlusCircle, 
-  Users, 
-  Star, 
-  Tag, 
-  DollarSign, 
-  BarChart3, 
-  Settings, 
-  LogOut 
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  UtensilsCrossed,
+  PlusCircle,
+  Users,
+  Star,
+  Tag,
+  DollarSign,
+  BarChart3,
+  Settings,
+  LogOut
 } from "lucide-react";
 
 export default function PartnerSidebar() {
@@ -32,15 +32,15 @@ export default function PartnerSidebar() {
   ];
 
   return (
-    <div className="w-64 bg-[#171717] h-screen border-r border-white/5 flex flex-col fixed left-0 top-0 z-40">
-      
+    <div className="w-64 bg-[#FFFFFF] h-screen border-r border-[#E5E7EB] flex flex-col fixed left-0 top-0 z-40">
+
       {/* Logo */}
-      <div className="h-20 flex items-center px-6 border-b border-white/5">
+      <div className="h-20 flex items-center px-6 border-b border-[#E5E7EB]">
         <Link href="/partner/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-black text-white text-xl">
+          <div className="w-8 h-8 bg-[#FC8019] rounded-lg flex items-center justify-center font-black text-white text-xl">
             F
           </div>
-          <span className="text-xl font-black text-white tracking-tight">Foodiq <span className="text-primary text-sm uppercase tracking-widest font-bold ml-1 border border-primary/30 px-1.5 py-0.5 rounded">Partner</span></span>
+          <span className="text-xl font-black text-[#111827] tracking-tight">Foodiq <span className="text-[#FC8019] text-sm uppercase tracking-widest font-bold ml-1 border border-[#FC8019]/30 px-1.5 py-0.5 rounded">Partner</span></span>
         </Link>
       </div>
 
@@ -53,26 +53,26 @@ export default function PartnerSidebar() {
               key={item.name}
               href={item.href}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-                isActive 
-                  ? "bg-primary text-white shadow-[0_0_15px_rgba(255,45,59,0.3)]" 
-                  : "text-gray-400 hover:text-white hover:bg-white/5"
+                isActive
+                  ? "bg-[#FC8019] text-white shadow-[0_0_15px_rgba(252,128,25,0.3)]"
+                  : "text-[#6B7280] hover:text-[#111827] hover:bg-[#F8FAFC]"
               }`}
             >
-              <item.icon className={`w-5 h-5 ${isActive ? "text-white" : "text-gray-500 group-hover:text-white"}`} />
+              <item.icon className={`w-5 h-5 ${isActive ? "text-[#111827]" : "text-[#9CA3AF] group-hover:text-[#111827]"}`} />
               <span className="font-bold text-sm">{item.name}</span>
             </Link>
           );
         })}
 
-        <div className="pt-6 mt-6 border-t border-white/5 space-y-1">
+        <div className="pt-6 mt-6 border-t border-[#E5E7EB] space-y-1">
           <Link
             href="/partner/settings"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-gray-400 hover:text-white hover:bg-white/5 group"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#6B7280] hover:text-[#111827] hover:bg-[#F8FAFC] group"
           >
-            <Settings className="w-5 h-5 text-gray-500 group-hover:text-white" />
+            <Settings className="w-5 h-5 text-[#9CA3AF] group-hover:text-[#111827]" />
             <span className="font-bold text-sm">Restaurant Settings</span>
           </Link>
-          
+
           <Link
             href="/partner/login"
             className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-red-500 hover:bg-red-500/10 group mt-2"

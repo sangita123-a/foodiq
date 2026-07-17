@@ -2,14 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Star, Clock } from "lucide-react";
+import { ArrowRight, Clock, Star } from "lucide-react";
 import SafeImage from "@/components/ui/SafeImage";
 import { fetchRestaurantsPage } from "@/lib/restaurants";
 import { RESTAURANT_FALLBACK } from "@/lib/images";
-import useSWR from "swr";
-
-const INITIAL_LIMIT = 8;
-const LOAD_MORE_LIMIT = 12;
+const PAGE_LIMIT = 8;
 
 type PopularRestaurant = {
   id: string | number;
@@ -20,12 +17,11 @@ type PopularRestaurant = {
   cuisine: string;
   priceForTwo: string;
   is_veg?: boolean;
+  distance?: string;
+  offer?: string | null;
 };
 
 export default function PopularRestaurants() {
-  const { data: coupons } = useSWR("/api/coupons");
-  const activeOffer = coupons?.[0];
-
   const [restaurants, setRestaurants] = useState<PopularRestaurant[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -37,10 +33,9 @@ export default function PopularRestaurants() {
     else setIsLoading(true);
 
     try {
-      const limit = pageNum === 1 ? INITIAL_LIMIT : LOAD_MORE_LIMIT;
       const { restaurants: items, pagination } = await fetchRestaurantsPage(
         pageNum,
-        limit,
+        PAGE_LIMIT,
         "sort=popular"
       );
       setRestaurants((prev) => (append ? [...prev, ...items] : items));
@@ -65,60 +60,61 @@ export default function PopularRestaurants() {
   };
 
   const hasMore = page < totalPages;
-  const offerLabel = activeOffer
-    ? activeOffer.discount_type === "percentage"
-      ? `${activeOffer.discount_amount}% OFF`
-      : `₹${activeOffer.discount_amount} OFF`
-    : null;
-
   return (
-    <section className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
-      <div className="mb-10 flex items-end justify-between gap-4">
+    <section className="food-section" aria-labelledby="popular-restaurants-heading">
+      <div className="mb-6 flex items-end justify-between gap-4 md:mb-7">
         <div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 tracking-tight">
+          <h2
+            id="popular-restaurants-heading"
+            className="mb-2 text-[32px] font-bold leading-tight tracking-[-0.045em] text-[#1C1C1C] sm:text-[34px] lg:text-[36px]"
+          >
             Popular Restaurants Near You
           </h2>
-          <p className="text-gray-400 text-lg">
+          <p className="max-w-2xl text-sm leading-6 text-[#686B78] sm:text-[15px]">
             Handpicked restaurants with the best ratings and fastest delivery.
           </p>
         </div>
         <Link
           href="/popular-restaurants"
-          className="hidden sm:inline-flex flex-shrink-0 px-5 py-2.5 rounded-xl border border-white/20 text-white text-sm font-medium hover:bg-white/10 transition-colors"
+          className="food-button hidden sm:inline-flex flex-shrink-0 items-center px-5 rounded-xl border border-[#E5E7EB] text-[#111827] text-sm font-medium hover:bg-[#F8FAFC]"
         >
           View All
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="popular-restaurants-grid">
         {isLoading
           ? [1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div
                 key={i}
-                className="h-[320px] bg-[#111] rounded-2xl animate-pulse border border-white/10"
+                className="h-[292px] animate-pulse rounded-[18px] border border-[#ECECEC] bg-[#F8F9FA]"
               />
             ))
-          : restaurants.map((restaurant) => (
+          : restaurants.map((restaurant, index) => (
               <div
-                key={restaurant.id}
-                className="group relative bg-[#111] rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(255,45,59,0.15)] transition-all duration-300 flex flex-col"
+                key={`${restaurant.id}-${index}`}
+                className="food-card group relative flex h-full flex-col rounded-[18px]"
               >
-                <div className="relative h-48 w-full overflow-hidden">
+                <Link
+                  href={`/restaurant/${restaurant.id}`}
+                  className="relative block h-[138px] w-full overflow-hidden"
+                  aria-label={`View ${restaurant.name} menu`}
+                >
                   <SafeImage
                     src={restaurant.image}
                     fallback={RESTAURANT_FALLBACK}
                     alt={restaurant.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.055]"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1C]/65 via-transparent to-white/10" />
 
-                  {offerLabel && (
-                    <div className="absolute top-3 left-3 bg-[#FF2D3B] text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg">
-                      {offerLabel}
+                  {restaurant.offer && (
+                    <div className="absolute left-3 top-3 rounded-lg bg-[#FC8019] px-2.5 py-1 text-[11px] font-bold text-white shadow-[0_6px_18px_rgba(252,128,25,0.3)]">
+                      {restaurant.offer}
                     </div>
                   )}
 
-                  <div className="absolute top-3 right-3 bg-white/10 backdrop-blur-md p-1.5 rounded-md">
+                  <div className="absolute right-3 top-3 rounded-md border border-[#E5E7EB] bg-black/45 p-1.5 backdrop-blur-md">
                     <div
                       className={`w-4 h-4 border-2 flex items-center justify-center ${restaurant.is_veg ? "border-green-500" : "border-red-500"}`}
                     >
@@ -127,35 +123,39 @@ export default function PopularRestaurants() {
                       />
                     </div>
                   </div>
-                </div>
+                </Link>
 
-                <div className="p-5 flex-1 flex flex-col">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-bold text-white group-hover:text-primary transition-colors line-clamp-1">
+                <div className="flex flex-1 flex-col p-3">
+                  <div className="mb-1.5 flex items-start justify-between gap-2">
+                    <h3 className="line-clamp-1 text-[15px] font-semibold leading-5 tracking-[-0.02em] text-[#1C1C1C] transition-colors group-hover:text-primary">
                       {restaurant.name}
                     </h3>
-                    <div className="flex items-center gap-1 bg-green-600/20 text-green-500 px-2 py-1 rounded-lg text-sm font-semibold">
-                      <Star className="w-3.5 h-3.5 fill-current" />
+                    <div className="food-rating shrink-0">
+                      <Star className="h-3 w-3 fill-current" />
                       {restaurant.rating}
                     </div>
                   </div>
 
-                  <p className="text-gray-400 text-sm mb-4 line-clamp-1">{restaurant.cuisine}</p>
+                  <p className="mb-2.5 line-clamp-1 text-xs leading-5 text-[#6B7280]">
+                    {restaurant.cuisine}
+                  </p>
 
-                  <div className="flex items-center justify-between text-sm text-gray-300 mt-auto">
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="w-4 h-4 text-primary" />
+                  <div className="mt-auto flex items-center justify-between gap-2 border-t border-[#E5E7EB] pt-2.5 text-[11px] text-[#6B7280]">
+                    <div className="flex min-w-0 items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 shrink-0 text-primary" />
                       <span>{restaurant.time}</span>
                     </div>
-                    <div className="text-gray-400 text-xs">•</div>
-                    <span>{restaurant.priceForTwo}</span>
+                    <span className="truncate font-semibold text-[#111827]">
+                      {restaurant.priceForTwo}
+                    </span>
                   </div>
 
                   <Link
                     href={`/restaurant/${restaurant.id}`}
-                    className="w-full mt-5 bg-white/5 hover:bg-primary text-white py-2.5 rounded-xl font-medium transition-colors duration-300 text-center block"
+                    className="food-button mt-2.5 inline-flex min-h-9 w-full items-center justify-center gap-1.5 border border-[#ECECEC] bg-[#F8F9FA] px-3 text-center text-xs font-semibold text-[#1C1C1C] hover:border-primary hover:bg-primary hover:text-white"
                   >
                     View Menu
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                   </Link>
                 </div>
               </div>
@@ -163,11 +163,11 @@ export default function PopularRestaurants() {
       </div>
 
       {!isLoading && hasMore && (
-        <div className="flex justify-center mt-10">
+        <div className="flex justify-center mt-8">
           <button
             onClick={handleViewMore}
             disabled={isLoadingMore}
-            className="px-8 py-3 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold transition-all disabled:opacity-60"
+            className="food-button px-7 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-semibold disabled:opacity-60"
           >
             {isLoadingMore ? "Loading..." : "View More"}
           </button>
