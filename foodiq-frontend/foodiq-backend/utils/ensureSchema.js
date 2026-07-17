@@ -13,15 +13,35 @@ async function ensureSchema() {
     `);
     await client.query(`
       ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS offer_id UUID
+        ADD COLUMN IF NOT EXISTS offer_id UUID,
+        ADD COLUMN IF NOT EXISTS delivery_mode VARCHAR(20) DEFAULT 'Now',
+        ADD COLUMN IF NOT EXISTS scheduled_for TIMESTAMP WITH TIME ZONE
     `);
     await client.query(`
       ALTER TABLE restaurant_categories
         ADD COLUMN IF NOT EXISTS slug VARCHAR(100),
         ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0
     `);
+    await client.query(`
+      ALTER TABLE restaurants
+        ADD COLUMN IF NOT EXISTS slug VARCHAR(160),
+        ADD COLUMN IF NOT EXISTS logo_url TEXT,
+        ADD COLUMN IF NOT EXISTS banner_url TEXT,
+        ADD COLUMN IF NOT EXISTS distance_km NUMERIC(5,2) DEFAULT 2.5,
+        ADD COLUMN IF NOT EXISTS offer_text VARCHAR(160)
+    `);
+    await client.query(`
+      ALTER TABLE menu_items
+        ADD COLUMN IF NOT EXISTS slug VARCHAR(180),
+        ADD COLUMN IF NOT EXISTS rating NUMERIC(2,1) DEFAULT 4.5,
+        ADD COLUMN IF NOT EXISTS is_trending BOOLEAN DEFAULT FALSE,
+        ADD COLUMN IF NOT EXISTS trending_score INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS ingredients TEXT,
+        ADD COLUMN IF NOT EXISTS gallery_urls JSONB DEFAULT '[]'::jsonb
+    `);
 
-    // Burger cuisine alias (shares Fast Food dishes when present)
+    // Ensure the Burger cuisine exists. Dish membership is owned by the
+    // idempotent catalog sync so cuisines never leak items into each other.
     const fastFood = await client.query(
       `SELECT id FROM restaurant_categories WHERE slug = 'fast-food' LIMIT 1`
     );
@@ -29,33 +49,10 @@ async function ensureSchema() {
       await client.query(
         `INSERT INTO restaurant_categories (name, slug, description, image_url, sort_order)
          SELECT 'Burger', 'burger', 'Juicy burgers, fries and loaded sandwiches',
-                'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800', 16
+                '/images/catalog/cuisines/burger.webp', 16
          WHERE NOT EXISTS (SELECT 1 FROM restaurant_categories WHERE slug = 'burger')`
       );
 
-      const burger = await client.query(
-        `SELECT id FROM restaurant_categories WHERE slug = 'burger' LIMIT 1`
-      );
-      if (burger.rows[0]) {
-        await client.query(`
-          CREATE TABLE IF NOT EXISTS cuisine_items (
-            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            cuisine_id UUID NOT NULL REFERENCES restaurant_categories(id) ON DELETE CASCADE,
-            menu_item_id UUID NOT NULL REFERENCES menu_items(id) ON DELETE CASCADE,
-            display_order INTEGER DEFAULT 0,
-            UNIQUE(cuisine_id, menu_item_id)
-          )
-        `);
-
-        await client.query(
-          `INSERT INTO cuisine_items (cuisine_id, menu_item_id, display_order)
-           SELECT $1, mi.id, ROW_NUMBER() OVER (ORDER BY mi.name)
-           FROM menu_items mi
-           WHERE LOWER(mi.name) LIKE '%burger%'
-           ON CONFLICT DO NOTHING`,
-          [burger.rows[0].id]
-        );
-      }
     }
 
     console.log('[SCHEMA] Critical schema checks completed');

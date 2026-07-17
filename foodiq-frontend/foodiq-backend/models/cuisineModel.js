@@ -9,6 +9,15 @@ const getAllCuisines = async () => {
       rc.description,
       rc.image_url,
       rc.sort_order,
+      ARRAY(
+        SELECT m2.image_url
+        FROM cuisine_items ci2
+        JOIN menu_items m2 ON m2.id = ci2.menu_item_id
+        WHERE ci2.cuisine_id = rc.id
+          AND (m2.is_available IS NULL OR m2.is_available = TRUE)
+        ORDER BY ci2.display_order ASC
+        LIMIT 4
+      ) AS preview_images,
       COUNT(DISTINCT rest.id) FILTER (WHERE rest.is_active = TRUE) AS restaurant_count,
       COUNT(DISTINCT ci.menu_item_id) AS item_count
     FROM restaurant_categories rc
@@ -43,6 +52,15 @@ const getCuisineBySlug = async (slug) => {
       rc.slug,
       rc.description,
       rc.image_url,
+      ARRAY(
+        SELECT m2.image_url
+        FROM cuisine_items ci2
+        JOIN menu_items m2 ON m2.id = ci2.menu_item_id
+        WHERE ci2.cuisine_id = rc.id
+          AND (m2.is_available IS NULL OR m2.is_available = TRUE)
+        ORDER BY ci2.display_order ASC
+        LIMIT 4
+      ) AS preview_images,
       COUNT(DISTINCT rest.id) FILTER (WHERE rest.is_active = TRUE) AS restaurant_count,
       COUNT(DISTINCT ci.menu_item_id) AS item_count
     FROM restaurant_categories rc

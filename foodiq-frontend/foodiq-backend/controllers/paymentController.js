@@ -46,6 +46,20 @@ const createPayment = async (req, res) => {
       });
     }
 
+    const order = await pool.query(
+      'SELECT id, total_amount, status FROM orders WHERE id = $1 AND user_id = $2',
+      [order_id, req.user.id]
+    );
+    if (!order.rows[0]) {
+      return res.status(404).json({ success: false, message: 'Order not found', error: {} });
+    }
+    if (order.rows[0].status === 'Cancelled' || order.rows[0].status === 'cancelled') {
+      return res.status(409).json({ success: false, message: 'Cancelled orders cannot be paid', error: {} });
+    }
+    if (Math.abs(Number(order.rows[0].total_amount) - Number(amount)) > 0.01) {
+      return res.status(400).json({ success: false, message: 'Payment amount does not match the order total', error: {} });
+    }
+
     const payment = await createPaymentRecord(order_id, req.user.id, amount, normalizedMethod);
 
     res.status(201).json({ 
@@ -64,15 +78,22 @@ const createPayment = async (req, res) => {
 const verifyPayment = async (req, res) => {
   const client = await pool.connect();
   try {
-    const { payment_id, transaction_id, status } = req.body; // status e.g., 'completed', 'failed'
+    const { payment_id, transaction_id, status } = req.body;
     
     if (!payment_id || !transaction_id || !status) {
       return res.status(400).json({ success: false, message: 'Payment ID, transaction ID, and status required', error: {} });
     }
+    if (!['completed', 'failed', 'pending'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid payment status', error: {} });
+    }
 
     await client.query('BEGIN');
 
-    const updatedPayment = await updatePaymentStatus(payment_id, status, transaction_id, client);
+    const updatedPayment = await updatePaymentStatus(payment_id, req.user.id, status, transaction_id, client);
+    if (!updatedPayment) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ success: false, message: 'Payment not found', error: {} });
+    }
     
     if (status === 'completed') {
       await client.query('UPDATE orders SET status = $1 WHERE id = $2', ['Accepted', updatedPayment.order_id]);
@@ -85,8 +106,9 @@ const verifyPayment = async (req, res) => {
            updated_at = CURRENT_TIMESTAMP`,
         [updatedPayment.order_id]
       );
-    } else {
-      await client.query('UPDATE orders SET status = $1 WHERE id = $2', ['cancelled', updatedPayment.order_id]);
+    } else if (status === 'failed') {
+      // Keep the order pending so the customer can retry with another method.
+      await client.query('UPDATE orders SET status = $1 WHERE id = $2', ['pending', updatedPayment.order_id]);
     }
 
     await client.query('COMMIT');

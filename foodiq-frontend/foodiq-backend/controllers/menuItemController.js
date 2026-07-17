@@ -1,6 +1,7 @@
 const {
   getMenuItems,
   getMenuItemById,
+  getMenuItemDetailsById,
   getMenuItemsByRestaurant,
   createMenuItem,
   updateMenuItem,
@@ -9,7 +10,11 @@ const {
 
 const getAll = async (req, res) => {
   try {
-    const items = await getMenuItems();
+    const items = await getMenuItems({
+      trending: req.query.trending,
+      limit: req.query.limit,
+      search: req.query.search || '',
+    });
     res.json({ success: true, message: 'Menu items retrieved', data: items });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -19,7 +24,7 @@ const getAll = async (req, res) => {
 const getById = async (req, res) => {
   try {
     const { id } = req.params;
-    const item = await getMenuItemById(id);
+    const item = await getMenuItemDetailsById(id);
     if (!item) return res.status(404).json({ success: false, message: 'Menu item not found', error: {} });
     res.json({ success: true, message: 'Menu item retrieved', data: item });
   } catch (error) {

@@ -13,7 +13,13 @@ const { validateRestaurantCoupon } = require('../models/liveDealModel');
 const checkout = async (req, res) => {
   const client = await pool.connect();
   try {
-    const { address_id, coupon_code, delivery_instructions } = req.body;
+    const {
+      address_id,
+      coupon_code,
+      delivery_instructions,
+      delivery_mode,
+      scheduled_for,
+    } = req.body;
     if (!address_id) {
       return res.status(400).json({ success: false, message: 'Address ID is required', error: {} });
     }
@@ -29,7 +35,16 @@ const checkout = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Cart is empty', error: {} });
     }
 
-    // We assume all items belong to the same restaurant_id for the order
+    const restaurantIds = new Set(items.map((item) => item.restaurant_id));
+    if (restaurantIds.size !== 1) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({
+        success: false,
+        message: 'An order can contain items from only one restaurant',
+        error: { code: 'MULTIPLE_RESTAURANTS' },
+      });
+    }
+
     const restaurantId = items[0].restaurant_id;
 
     let subtotal = 0;
@@ -122,8 +137,12 @@ const checkout = async (req, res) => {
 
     // 5. Create Order
     const orderQuery = `
-      INSERT INTO orders (user_id, restaurant_id, delivery_address_id, coupon_id, offer_id, status, subtotal, discount_amount, delivery_fee, total_amount, delivery_instructions)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      INSERT INTO orders (
+        user_id, restaurant_id, delivery_address_id, coupon_id, offer_id, status,
+        subtotal, discount_amount, delivery_fee, total_amount, delivery_instructions,
+        delivery_mode, scheduled_for
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *
     `;
     const orderValues = [
@@ -138,6 +157,8 @@ const checkout = async (req, res) => {
       deliveryCharge,
       totalAmount,
       delivery_instructions || null,
+      delivery_mode === 'Schedule' ? 'Schedule' : 'Now',
+      delivery_mode === 'Schedule' && scheduled_for ? new Date(scheduled_for) : null,
     ];
     
     const { rows: orderRows } = await client.query(orderQuery, orderValues);

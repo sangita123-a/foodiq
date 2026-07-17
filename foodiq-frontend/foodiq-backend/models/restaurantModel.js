@@ -3,55 +3,73 @@ const { pool } = require('../config/db');
 const buildGetRestaurantsQuery = (filters) => {
   const { search, category, rating, deliveryTime, priceRange, sort, page, limit } = filters;
   
-  let query = 'SELECT * FROM restaurants WHERE is_active = true';
+  let query = `
+    SELECT
+      r.*,
+      rc.name AS category_name,
+      rc.slug AS category_slug,
+      (SELECT COUNT(*)::int FROM reviews rv WHERE rv.restaurant_id = r.id) AS review_count
+    FROM restaurants r
+    LEFT JOIN restaurant_categories rc ON rc.id = r.category_id
+    WHERE r.is_active = true`;
   const values = [];
   let valueIndex = 1;
 
   if (search) {
-    query += ` AND name ILIKE $${valueIndex}`;
+    query += ` AND (r.name ILIKE $${valueIndex} OR r.description ILIKE $${valueIndex})`;
     values.push(`%${search}%`);
     valueIndex++;
   }
 
   if (category) {
-    query += ` AND category_id = $${valueIndex}`;
-    values.push(category);
-    valueIndex++;
+    const categories = String(category)
+      .split(",")
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+    if (categories.length === 1) {
+      query += ` AND (rc.slug = $${valueIndex} OR rc.id::text = $${valueIndex})`;
+      values.push(categories[0]);
+      valueIndex++;
+    } else if (categories.length > 1) {
+      query += ` AND rc.slug = ANY($${valueIndex}::text[])`;
+      values.push(categories);
+      valueIndex++;
+    }
   }
 
   if (rating) {
-    query += ` AND rating >= $${valueIndex}`;
+    query += ` AND r.rating >= $${valueIndex}`;
     values.push(parseFloat(rating));
     valueIndex++;
   }
 
   if (deliveryTime) {
-    query += ` AND estimated_delivery_time <= $${valueIndex}`;
+    query += ` AND r.estimated_delivery_time <= $${valueIndex}`;
     values.push(parseInt(deliveryTime));
     valueIndex++;
   }
 
   if (priceRange) {
-    query += ` AND price_range = $${valueIndex}`;
+    query += ` AND r.price_range = $${valueIndex}`;
     values.push(parseInt(priceRange));
     valueIndex++;
   }
 
   switch (sort) {
     case 'popular':
-      query += ' ORDER BY rating DESC';
+      query += ' ORDER BY r.rating DESC, review_count DESC';
       break;
     case 'rating':
-      query += ' ORDER BY rating DESC';
+      query += ' ORDER BY r.rating DESC';
       break;
     case 'deliveryTime':
-      query += ' ORDER BY estimated_delivery_time ASC';
+      query += ' ORDER BY r.estimated_delivery_time ASC';
       break;
     case 'price':
-      query += ' ORDER BY price_range ASC';
+      query += ' ORDER BY r.price_range ASC';
       break;
     default:
-      query += ' ORDER BY created_at DESC';
+      query += ' ORDER BY r.created_at DESC';
   }
 
   const limitVal = parseInt(limit) || 10;
@@ -69,7 +87,7 @@ const getRestaurants = async (filters) => {
   const { rows } = await pool.query(query, values);
   
   // Get total count for pagination
-  const countQuery = query.split('ORDER BY')[0].replace('SELECT *', 'SELECT COUNT(*)');
+  const countQuery = `SELECT COUNT(*) FROM (${query.split('ORDER BY')[0]}) filtered`;
   const countValues = values.slice(0, values.length - 2); // Remove limit and offset
   const { rows: countRows } = await pool.query(countQuery, countValues);
   
@@ -85,7 +103,17 @@ const getRestaurants = async (filters) => {
 };
 
 const getRestaurantById = async (id) => {
-  const { rows } = await pool.query('SELECT * FROM restaurants WHERE id = $1', [id]);
+  const { rows } = await pool.query(
+    `SELECT
+       r.*,
+       rc.name AS category_name,
+       rc.slug AS category_slug,
+       (SELECT COUNT(*)::int FROM reviews rv WHERE rv.restaurant_id = r.id) AS review_count
+     FROM restaurants r
+     LEFT JOIN restaurant_categories rc ON rc.id = r.category_id
+     WHERE r.id = $1 AND r.is_active = TRUE`,
+    [id]
+  );
   return rows[0];
 };
 

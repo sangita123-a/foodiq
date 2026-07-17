@@ -6,6 +6,7 @@ const {
   removeCartItem,
   clearCart
 } = require('../models/cartModel');
+const { pool } = require('../config/db');
 
 const calculateCartTotals = (items) => {
   let subtotal = 0;
@@ -48,10 +49,36 @@ const addToCart = async (req, res) => {
   try {
     const { menu_item_id, quantity = 1 } = req.body;
     if (!menu_item_id) return res.status(400).json({ success: false, message: 'Menu item ID required', error: {} });
+    const parsedQuantity = Number(quantity);
+    if (!Number.isInteger(parsedQuantity) || parsedQuantity < 1 || parsedQuantity > 20) {
+      return res.status(400).json({ success: false, message: 'Quantity must be between 1 and 20', error: {} });
+    }
 
     const cart = await getCartByUserId(req.user.id);
-    await addCartItem(cart.id, menu_item_id, quantity);
-    
+    const [currentItems, target] = await Promise.all([
+      getCartItems(cart.id),
+      pool.query(
+        `SELECT id, restaurant_id FROM menu_items
+         WHERE id = $1 AND is_available = TRUE`,
+        [menu_item_id]
+      ),
+    ]);
+    if (!target.rows[0]) {
+      return res.status(404).json({ success: false, message: 'Menu item is unavailable', error: {} });
+    }
+    if (
+      currentItems.length > 0 &&
+      currentItems[0].restaurant_id !== target.rows[0].restaurant_id
+    ) {
+      return res.status(409).json({
+        success: false,
+        message: 'Your cart contains items from another restaurant. Clear it before starting a new order.',
+        error: { code: 'DIFFERENT_RESTAURANT' },
+      });
+    }
+
+    await addCartItem(cart.id, menu_item_id, parsedQuantity);
+
     const items = await getCartItems(cart.id);
     const totals = calculateCartTotals(items);
 
