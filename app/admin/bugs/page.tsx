@@ -154,11 +154,12 @@ export default function AdminBugsPage() {
                   setStatus("");
                   setSeverity("");
                 }}
-                className={`px-3 py-1.5 rounded-xl text-sm font-bold border transition-colors ${
+                className={[
+                  "px-3 py-1.5 rounded-xl text-sm font-bold border transition-colors",
                   active
                     ? "bg-[#FC8019] text-white border-[#FC8019]"
-                    : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#FC8019]"
-                }`}
+                    : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#FC8019]",
+                ].join(" ")}
               >
                 {chip.label}
                 {typeof n === "number" ? (
