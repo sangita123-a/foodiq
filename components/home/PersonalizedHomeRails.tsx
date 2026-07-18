@@ -95,6 +95,7 @@ export default function PersonalizedHomeRails() {
                 <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[#F8F9FA]">
                   <SafeImage
                     src={String(r.image_url || RESTAURANT_FALLBACK)}
+                    fallback={RESTAURANT_FALLBACK}
                     alt={String(r.name)}
                     fill
                     className="object-cover"
@@ -123,6 +124,7 @@ export default function PersonalizedHomeRails() {
                 <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#F8F9FA]">
                   <SafeImage
                     src={String(d.image_url || RESTAURANT_FALLBACK)}
+                    fallback={RESTAURANT_FALLBACK}
                     alt={String(d.name)}
                     fill
                     className="object-cover"
@@ -159,6 +161,7 @@ export default function PersonalizedHomeRails() {
                 <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#F8F9FA]">
                   <SafeImage
                     src={String(item.image_url || RESTAURANT_FALLBACK)}
+                    fallback={RESTAURANT_FALLBACK}
                     alt={String(item.name)}
                     fill
                     className="object-cover"

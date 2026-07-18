@@ -79,7 +79,7 @@ export default function WishlistPage() {
                   </p>
                   <div className="flex items-center justify-between mt-3">
                     <span className="font-bold text-[#111827]">
-                      ₹{item.discount_price || item.price}
+                      ₹{String(item.discount_price || item.price)}
                     </span>
                     <button
                       type="button"

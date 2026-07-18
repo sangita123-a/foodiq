@@ -61,6 +61,7 @@ export function BiLineChart({
 }: {
   data: Point[];
   height?: number;
+  color?: string;
 }) {
   const [hover, setHover] = useState<number | null>(null);
   const w = 400;

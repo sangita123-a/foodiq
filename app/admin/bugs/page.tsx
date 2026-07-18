@@ -157,7 +157,7 @@ export default function AdminBugsPage() {
                 className={`px-3 py-1.5 rounded-xl text-sm font-bold border transition-colors ${
                   active
                     ? "bg-[#FC8019] text-white border-[#FC8019]"
-                    : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#FC8019]/
+                    : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#FC8019]"
                 }`}
               >
                 {chip.label}
@@ -307,9 +307,11 @@ export default function AdminBugsPage() {
                 <p className="text-sm text-[#6B7280] whitespace-pre-wrap">
                   {String(selected.description)}
                 </p>
-                {(selected.api_endpoint ||
-                  selected.stack_trace ||
-                  selected.browser) && (
+                {Boolean(
+                  selected.api_endpoint ||
+                    selected.stack_trace ||
+                    selected.browser
+                ) && (
                   <div className="rounded-xl bg-[#F8FAFC] p-3 text-xs text-[#6B7280] space-y-1 break-all">
                     {selected.api_endpoint ? (
                       <p>
