@@ -6,23 +6,31 @@ const { pool } = require('../config/db');
  */
 async function ensureSchema() {
   const client = await pool.connect();
+  const q = async (sql, params) => {
+    try {
+      return await client.query(sql, params);
+    } catch (err) {
+      console.warn('[SCHEMA] statement skipped:', err.message);
+      return null;
+    }
+  };
   try {
-    await client.query(`
+    await q(`
       ALTER TABLE orders
       ADD COLUMN IF NOT EXISTS delivery_instructions TEXT
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE orders
         ADD COLUMN IF NOT EXISTS offer_id UUID,
         ADD COLUMN IF NOT EXISTS delivery_mode VARCHAR(20) DEFAULT 'Now',
         ADD COLUMN IF NOT EXISTS scheduled_for TIMESTAMP WITH TIME ZONE
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE restaurant_categories
         ADD COLUMN IF NOT EXISTS slug VARCHAR(100),
         ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE restaurants
         ADD COLUMN IF NOT EXISTS slug VARCHAR(160),
         ADD COLUMN IF NOT EXISTS logo_url TEXT,
@@ -34,7 +42,7 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS cuisine_types JSONB DEFAULT '[]'::jsonb,
         ADD COLUMN IF NOT EXISTS min_order_amount NUMERIC(10,2) DEFAULT 0
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE menu_items
         ADD COLUMN IF NOT EXISTS slug VARCHAR(180),
         ADD COLUMN IF NOT EXISTS rating NUMERIC(2,1) DEFAULT 4.5,
@@ -44,13 +52,13 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS ingredients TEXT,
         ADD COLUMN IF NOT EXISTS gallery_urls JSONB DEFAULT '[]'::jsonb
     `);
-    await client.query(`
+    await q(`
       CREATE UNIQUE INDEX IF NOT EXISTS uq_menu_categories_restaurant_name
         ON menu_categories(restaurant_id, name)
     `);
 
     // Expand payments.method / status for Razorpay + refunds.
-    await client.query(`
+    await q(`
       DO $$
       DECLARE
         constraint_name text;
@@ -70,7 +78,7 @@ async function ensureSchema() {
         NULL;
       END $$;
     `);
-    await client.query(`
+    await q(`
       DO $$
       DECLARE
         constraint_name text;
@@ -90,7 +98,7 @@ async function ensureSchema() {
         NULL;
       END $$;
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE payments
         ADD COLUMN IF NOT EXISTS razorpay_order_id VARCHAR(100),
         ADD COLUMN IF NOT EXISTS razorpay_payment_id VARCHAR(100),
@@ -98,7 +106,7 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'INR',
         ADD COLUMN IF NOT EXISTS transaction_time TIMESTAMP WITH TIME ZONE
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS payment_transactions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -118,11 +126,11 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_payment_transactions_user
         ON payment_transactions(user_id)
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS refunds (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         payment_id UUID NOT NULL REFERENCES payments(id) ON DELETE CASCADE,
@@ -139,11 +147,11 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_refunds_order ON refunds(order_id)
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS addresses (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -163,7 +171,7 @@ async function ensureSchema() {
       )
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS orders (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID REFERENCES users(id),
@@ -184,7 +192,7 @@ async function ensureSchema() {
       )
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS order_items (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
@@ -197,11 +205,11 @@ async function ensureSchema() {
 
     // Ensure the Burger cuisine exists. Dish membership is owned by the
     // idempotent catalog sync so cuisines never leak items into each other.
-    const fastFood = await client.query(
+    const fastFood = await q(
       `SELECT id FROM restaurant_categories WHERE slug = 'fast-food' LIMIT 1`
     );
     if (fastFood.rows[0]) {
-      await client.query(
+      await q(
         `INSERT INTO restaurant_categories (name, slug, description, image_url, sort_order)
          SELECT 'Burger', 'burger', 'Juicy burgers, fries and loaded sandwiches',
                 '/images/catalog/cuisines/burger.webp', 16
@@ -210,39 +218,39 @@ async function ensureSchema() {
 
     }
 
-    await client.query(`
+    await q(`
       ALTER TABLE menu_items
         ALTER COLUMN image_url TYPE TEXT
     `).catch(() => {});
-    await client.query(`
+    await q(`
       ALTER TABLE restaurants
         ALTER COLUMN image_url TYPE TEXT
     `).catch(() => {});
 
-    await client.query(`
+    await q(`
       ALTER TABLE users
         ADD COLUMN IF NOT EXISTS is_suspended BOOLEAN DEFAULT FALSE
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE restaurants
         ADD COLUMN IF NOT EXISTS approval_status VARCHAR(20) DEFAULT 'approved'
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE delivery_partners
         ADD COLUMN IF NOT EXISTS approval_status VARCHAR(20) DEFAULT 'approved'
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE restaurants
         ADD COLUMN IF NOT EXISTS current_lat NUMERIC(10,7),
         ADD COLUMN IF NOT EXISTS current_lng NUMERIC(10,7)
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE addresses
         ADD COLUMN IF NOT EXISTS lat NUMERIC(10,7),
         ADD COLUMN IF NOT EXISTS lng NUMERIC(10,7)
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS delivery_assignments (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
@@ -255,16 +263,16 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_delivery_assignments_partner_status
         ON delivery_assignments(delivery_partner_id, status)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_delivery_assignments_order
         ON delivery_assignments(order_id)
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS delivery_status_history (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         assignment_id UUID REFERENCES delivery_assignments(id) ON DELETE SET NULL,
@@ -276,7 +284,7 @@ async function ensureSchema() {
       )
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS delivery_earnings (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         delivery_partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
@@ -290,12 +298,12 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_earnings_order_partner
         ON delivery_earnings(order_id, delivery_partner_id)
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS admin_settings (
         id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
         delivery_charge NUMERIC(10,2) DEFAULT 50,
@@ -313,12 +321,12 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       INSERT INTO admin_settings (id) VALUES (1)
       ON CONFLICT (id) DO NOTHING
     `);
 
-    await client.query(`
+    await q(`
       ALTER TABLE notifications
         ADD COLUMN IF NOT EXISTS type VARCHAR(60) DEFAULT 'alert',
         ADD COLUMN IF NOT EXISTS category VARCHAR(40) DEFAULT 'Orders',
@@ -327,15 +335,15 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
         ADD COLUMN IF NOT EXISTS dedupe_key VARCHAR(180)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_notifications_user_created
         ON notifications(user_id, created_at DESC)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_notifications_user_unread
         ON notifications(user_id) WHERE is_read = FALSE
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS device_tokens (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -348,11 +356,11 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_device_tokens_user
         ON device_tokens(user_id) WHERE is_active = TRUE
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS notification_queue (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -368,13 +376,13 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_notification_queue_pending
         ON notification_queue(status, next_attempt_at)
     `);
 
     // Email / SMS preference columns + logging / OTP
-    await client.query(`
+    await q(`
       ALTER TABLE user_settings
         ADD COLUMN IF NOT EXISTS notify_orders BOOLEAN DEFAULT TRUE,
         ADD COLUMN IF NOT EXISTS notify_offers BOOLEAN DEFAULT TRUE,
@@ -390,7 +398,7 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS notify_order_updates BOOLEAN DEFAULT TRUE
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS email_logs (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -407,16 +415,16 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_email_logs_user_created
         ON email_logs(user_id, created_at DESC)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_email_logs_status
         ON email_logs(status, created_at DESC)
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS sms_logs (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -433,16 +441,16 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_sms_logs_user_created
         ON sms_logs(user_id, created_at DESC)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_sms_logs_status
         ON sms_logs(status, created_at DESC)
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS otp_codes (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -457,18 +465,18 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_otp_destination_purpose
         ON otp_codes(destination, purpose, created_at DESC)
     `);
 
     // Cloud media library + delivery document URLs
-    await client.query(`
+    await q(`
       ALTER TABLE users
         ALTER COLUMN profile_image_url TYPE TEXT
     `).catch(() => {});
 
-    await client.query(`
+    await q(`
       ALTER TABLE delivery_partners
         ADD COLUMN IF NOT EXISTS profile_photo_url TEXT,
         ADD COLUMN IF NOT EXISTS vehicle_photo_url TEXT,
@@ -477,7 +485,7 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS insurance_doc_url TEXT
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS media_assets (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -503,44 +511,44 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_media_user_created
         ON media_assets(user_id, created_at DESC)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_media_purpose_status
         ON media_assets(purpose, status)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_media_public_id
         ON media_assets(public_id)
     `);
 
     // Performance indexes (catalog / search / orders)
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_restaurants_active_rating
         ON restaurants(is_active, rating DESC NULLS LAST)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_restaurants_category_active
         ON restaurants(category_id, is_active)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_menu_items_restaurant_available
         ON menu_items(restaurant_id, is_available)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_menu_items_trending
         ON menu_items(is_trending, trending_score DESC NULLS LAST)
       WHERE is_trending = TRUE
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_reviews_restaurant
         ON reviews(restaurant_id)
     `);
 
     // Maintenance phase: reviews moderation + feedback / bugs
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS reviews (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -555,14 +563,14 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE reviews
         ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'visible',
         ADD COLUMN IF NOT EXISTS admin_reply TEXT,
         ADD COLUMN IF NOT EXISTS replied_at TIMESTAMP WITH TIME ZONE
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS contact_messages (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name VARCHAR(255) NOT NULL,
@@ -575,7 +583,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS support_tickets (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -588,15 +596,15 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE UNIQUE INDEX IF NOT EXISTS idx_reviews_user_order
         ON reviews(user_id, order_id) WHERE order_id IS NOT NULL
     `).catch(() => {});
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_reviews_order ON reviews(order_id)
     `).catch(() => {});
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS delivery_reviews (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -609,12 +617,12 @@ async function ensureSchema() {
         UNIQUE(order_id)
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_delivery_reviews_partner
         ON delivery_reviews(delivery_partner_id, created_at DESC)
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS order_feedback (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE UNIQUE,
@@ -627,7 +635,7 @@ async function ensureSchema() {
       )
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS user_feedback (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -640,12 +648,12 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_user_feedback_status
         ON user_feedback(status, created_at DESC)
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS bug_reports (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         reporter_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -669,7 +677,7 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE bug_reports
         ADD COLUMN IF NOT EXISTS stack_trace TEXT,
         ADD COLUMN IF NOT EXISTS api_endpoint TEXT,
@@ -679,30 +687,30 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS occurrence_count INTEGER DEFAULT 1,
         ADD COLUMN IF NOT EXISTS duplicate_of_id UUID
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_bug_reports_status_created
         ON bug_reports(status, created_at DESC)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_bug_reports_severity_status
         ON bug_reports(severity, status, created_at DESC)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_bug_reports_fingerprint
         ON bug_reports(fingerprint)
         WHERE fingerprint IS NOT NULL AND duplicate_of_id IS NULL
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_bug_reports_error_event
         ON bug_reports(error_event_id)
         WHERE error_event_id IS NOT NULL
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_bug_reports_created
         ON bug_reports(created_at DESC)
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS maintenance_reports (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         period VARCHAR(20) NOT NULL,
@@ -713,86 +721,86 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_maintenance_reports_period
         ON maintenance_reports(period, created_at DESC)
     `);
 
-    await client.query(`
+    await q(`
       ALTER TABLE contact_messages
         ADD COLUMN IF NOT EXISTS phone VARCHAR(40),
         ADD COLUMN IF NOT EXISTS reason VARCHAR(80),
         ADD COLUMN IF NOT EXISTS status VARCHAR(40) DEFAULT 'open'
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE support_tickets
         ADD COLUMN IF NOT EXISTS admin_notes TEXT,
         ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_orders_user_created
         ON orders(user_id, created_at DESC)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_orders_restaurant_status
         ON orders(restaurant_id, status)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_offers_active_valid
         ON offers(is_active, valid_until)
     `).catch(() => {});
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_order_items_order
         ON order_items(order_id)
     `).catch(() => {});
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_order_items_menu
         ON order_items(menu_item_id)
     `).catch(() => {});
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_offers_slug
         ON offers(slug)
     `).catch(() => {});
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_offer_items_offer
         ON offer_items(offer_id)
     `).catch(() => {});
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_offer_restaurants_offer
         ON offer_restaurants(offer_id)
     `).catch(() => {});
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_addresses_user
         ON addresses(user_id)
     `).catch(() => {});
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_coupons_code
         ON coupons(code)
     `).catch(() => {});
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_delivery_partners_user
         ON delivery_partners(user_id)
     `).catch(() => {});
     try {
-      await client.query(`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
-      await client.query(`
+      await q(`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
+      await q(`
         CREATE INDEX IF NOT EXISTS idx_restaurants_name_trgm
           ON restaurants USING gin (name gin_trgm_ops)
       `);
-      await client.query(`
+      await q(`
         CREATE INDEX IF NOT EXISTS idx_menu_items_name_trgm
           ON menu_items USING gin (name gin_trgm_ops)
       `);
     } catch {
       /* extension may be restricted on some hosts */
     }
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_payments_user_created
         ON payments(user_id, created_at DESC)
     `).catch(() => {});
 
     // Monitoring / security tables
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS audit_logs (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -811,14 +819,14 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at DESC)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_logs(action, created_at DESC)
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS error_events (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         source VARCHAR(40) DEFAULT 'backend',
@@ -834,11 +842,11 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_error_events_created ON error_events(created_at DESC)
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS system_metrics (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         payload JSONB NOT NULL DEFAULT '{}'::jsonb,
@@ -850,7 +858,7 @@ async function ensureSchema() {
       )
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS security_alerts (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         severity VARCHAR(20) DEFAULT 'warning',
@@ -865,7 +873,7 @@ async function ensureSchema() {
       )
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS refresh_tokens (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -877,12 +885,12 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user
         ON refresh_tokens(user_id) WHERE revoked_at IS NULL
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS backup_runs (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         type VARCHAR(40) NOT NULL DEFAULT 'database',
@@ -895,7 +903,7 @@ async function ensureSchema() {
       )
     `);
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS user_sessions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -911,7 +919,7 @@ async function ensureSchema() {
       )
     `).catch(() => {});
 
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS login_history (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -924,7 +932,7 @@ async function ensureSchema() {
     `).catch(() => {});
 
     // ========== Foodiq 3.0 — Business Scaling foundation ==========
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS organizations (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name VARCHAR(255) NOT NULL,
@@ -935,7 +943,7 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS currencies (
         code VARCHAR(10) PRIMARY KEY,
         name VARCHAR(80) NOT NULL,
@@ -943,7 +951,7 @@ async function ensureSchema() {
         decimal_places INTEGER DEFAULT 2
       )
     `);
-    await client.query(`
+    await q(`
       INSERT INTO currencies (code, name, symbol) VALUES
         ('INR', 'Indian Rupee', '₹'),
         ('USD', 'US Dollar', '$'),
@@ -952,7 +960,7 @@ async function ensureSchema() {
         ('GBP', 'British Pound', '£')
       ON CONFLICT (code) DO NOTHING
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS markets (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         code VARCHAR(40) NOT NULL UNIQUE,
@@ -967,14 +975,14 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS organization_markets (
         organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
         market_id UUID NOT NULL REFERENCES markets(id) ON DELETE CASCADE,
         PRIMARY KEY (organization_id, market_id)
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS franchises (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
@@ -986,7 +994,7 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS restaurant_chains (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
@@ -998,7 +1006,7 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS white_label_configs (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
@@ -1012,7 +1020,7 @@ async function ensureSchema() {
         UNIQUE(host)
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS fx_rates (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         base_currency VARCHAR(10) NOT NULL REFERENCES currencies(code),
@@ -1022,7 +1030,7 @@ async function ensureSchema() {
         UNIQUE(base_currency, quote_currency, effective_at)
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS api_keys (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
@@ -1035,7 +1043,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS warehouses (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
@@ -1047,7 +1055,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS inventory_items (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         menu_item_id UUID REFERENCES menu_items(id) ON DELETE CASCADE,
@@ -1060,7 +1068,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS integration_connectors (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
@@ -1074,7 +1082,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS pricing_rules (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
@@ -1087,7 +1095,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS surge_events (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         market_id UUID NOT NULL REFERENCES markets(id) ON DELETE CASCADE,
@@ -1099,7 +1107,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS ai_forecast_runs (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
@@ -1111,25 +1119,25 @@ async function ensureSchema() {
       )
     `);
 
-    await client.query(`
+    await q(`
       ALTER TABLE restaurants
         ADD COLUMN IF NOT EXISTS organization_id UUID,
         ADD COLUMN IF NOT EXISTS chain_id UUID,
         ADD COLUMN IF NOT EXISTS franchise_id UUID,
         ADD COLUMN IF NOT EXISTS market_id UUID
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE orders
         ADD COLUMN IF NOT EXISTS market_id UUID,
         ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'INR'
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE payments
         ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'INR'
     `);
 
     // Seed default org + Bengaluru market (backward compatible)
-    const orgIns = await client.query(
+    const orgIns = await q(
       `INSERT INTO organizations (name, slug, status)
        VALUES ('Foodiq Default', 'foodiq-default', 'active')
        ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name
@@ -1137,12 +1145,12 @@ async function ensureSchema() {
     );
     let defaultOrgId = orgIns.rows[0]?.id;
     if (!defaultOrgId) {
-      const o = await client.query(
+      const o = await q(
         `SELECT id FROM organizations WHERE slug = 'foodiq-default' LIMIT 1`
       );
       defaultOrgId = o.rows[0]?.id;
     }
-    const mktIns = await client.query(
+    const mktIns = await q(
       `INSERT INTO markets (code, name, country_code, state_code, city, currency_code, timezone)
        VALUES ('IN-KA-BLR', 'Bengaluru', 'IN', 'KA', 'Bengaluru', 'INR', 'Asia/Kolkata')
        ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name
@@ -1150,29 +1158,29 @@ async function ensureSchema() {
     );
     let defaultMarketId = mktIns.rows[0]?.id;
     if (!defaultMarketId) {
-      const m = await client.query(
+      const m = await q(
         `SELECT id FROM markets WHERE code = 'IN-KA-BLR' LIMIT 1`
       );
       defaultMarketId = m.rows[0]?.id;
     }
     if (defaultOrgId && defaultMarketId) {
-      await client.query(
+      await q(
         `INSERT INTO organization_markets (organization_id, market_id)
          VALUES ($1, $2) ON CONFLICT DO NOTHING`,
         [defaultOrgId, defaultMarketId]
       );
-      await client.query(
+      await q(
         `INSERT INTO white_label_configs (organization_id, host, brand_name, primary_color)
          VALUES ($1, 'localhost', 'Foodiq', '#FC8019')
          ON CONFLICT (host) DO NOTHING`,
         [defaultOrgId]
       );
-      await client.query(
+      await q(
         `UPDATE restaurants SET organization_id = $1
          WHERE organization_id IS NULL`,
         [defaultOrgId]
       );
-      await client.query(
+      await q(
         `UPDATE restaurants SET market_id = $1
          WHERE market_id IS NULL`,
         [defaultMarketId]
@@ -1181,7 +1189,7 @@ async function ensureSchema() {
     console.log('[SCHEMA] V3.0 tenancy foundation ensured');
 
     // ========== Foodiq 4.0 — Enterprise & Global Expansion foundation ==========
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS locales (
         code VARCHAR(16) PRIMARY KEY,
         name VARCHAR(80) NOT NULL,
@@ -1189,14 +1197,14 @@ async function ensureSchema() {
         is_active BOOLEAN DEFAULT TRUE
       )
     `);
-    await client.query(`
+    await q(`
       INSERT INTO locales (code, name, direction) VALUES
         ('en', 'English', 'ltr'),
         ('hi', 'Hindi', 'ltr'),
         ('ar', 'Arabic', 'rtl')
       ON CONFLICT (code) DO NOTHING
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS tax_rules (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         country_code VARCHAR(8) NOT NULL DEFAULT 'IN',
@@ -1208,12 +1216,12 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       INSERT INTO tax_rules (country_code, state_code, tax_type, rate, name, is_active)
       SELECT 'IN', NULL, 'GST', 0.05, 'India GST 5%', FALSE
       WHERE NOT EXISTS (SELECT 1 FROM tax_rules WHERE country_code = 'IN' AND tax_type = 'GST' AND name = 'India GST 5%')
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS sso_providers (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         provider VARCHAR(40) NOT NULL UNIQUE,
@@ -1223,12 +1231,12 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       INSERT INTO sso_providers (provider, is_enabled) VALUES
         ('google', FALSE), ('microsoft', FALSE), ('apple', FALSE)
       ON CONFLICT (provider) DO NOTHING
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS sso_identities (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -1239,7 +1247,7 @@ async function ensureSchema() {
         UNIQUE(provider, provider_subject)
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS enterprise_roles (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         code VARCHAR(40) NOT NULL UNIQUE,
@@ -1247,7 +1255,7 @@ async function ensureSchema() {
         permissions JSONB DEFAULT '[]'::jsonb
       )
     `);
-    await client.query(`
+    await q(`
       INSERT INTO enterprise_roles (code, name, permissions) VALUES
         ('org_admin', 'Organization Admin', '["*"]'::jsonb),
         ('buyer', 'Corporate Buyer', '["order.create","order.read"]'::jsonb),
@@ -1255,7 +1263,7 @@ async function ensureSchema() {
         ('viewer', 'Viewer', '["order.read","report.read"]'::jsonb)
       ON CONFLICT (code) DO NOTHING
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS organization_memberships (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
@@ -1266,7 +1274,7 @@ async function ensureSchema() {
         UNIQUE(organization_id, user_id)
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS corporate_accounts (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
@@ -1277,7 +1285,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS corporate_orders (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         corporate_account_id UUID NOT NULL REFERENCES corporate_accounts(id) ON DELETE CASCADE,
@@ -1290,7 +1298,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS recurring_order_schedules (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         corporate_account_id UUID NOT NULL REFERENCES corporate_accounts(id) ON DELETE CASCADE,
@@ -1303,7 +1311,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS ai_chat_sessions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -1314,7 +1322,7 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS fleet_vehicles (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
@@ -1326,7 +1334,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS fleet_assignments (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         vehicle_id UUID NOT NULL REFERENCES fleet_vehicles(id) ON DELETE CASCADE,
@@ -1336,7 +1344,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS iot_devices (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         restaurant_id UUID REFERENCES restaurants(id) ON DELETE SET NULL,
@@ -1349,7 +1357,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS iot_telemetry (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         device_id UUID NOT NULL REFERENCES iot_devices(id) ON DELETE CASCADE,
@@ -1359,7 +1367,7 @@ async function ensureSchema() {
         recorded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS inventory_reorder_suggestions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         inventory_item_id UUID REFERENCES inventory_items(id) ON DELETE CASCADE,
@@ -1369,7 +1377,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS api_marketplace_listings (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         slug VARCHAR(120) NOT NULL UNIQUE,
@@ -1381,14 +1389,14 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       INSERT INTO api_marketplace_listings (slug, name, description, listing_type)
       VALUES
         ('orders-webhook', 'Orders Webhook', 'Receive order lifecycle events', 'webhook'),
         ('oauth-partner-app', 'Partner OAuth App', 'OAuth-style partner integration', 'oauth_app')
       ON CONFLICT (slug) DO NOTHING
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS api_marketplace_subscriptions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         listing_id UUID NOT NULL REFERENCES api_marketplace_listings(id) ON DELETE CASCADE,
@@ -1398,7 +1406,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS privacy_requests (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -1409,7 +1417,7 @@ async function ensureSchema() {
         completed_at TIMESTAMP WITH TIME ZONE
       )
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE audit_logs
         ADD COLUMN IF NOT EXISTS organization_id UUID,
         ADD COLUMN IF NOT EXISTS actor_type VARCHAR(40) DEFAULT 'user'
@@ -1417,7 +1425,7 @@ async function ensureSchema() {
     console.log('[SCHEMA] V4.0 enterprise foundation ensured');
 
     // ========== CPI Task 3 — New Features ==========
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS wishlists (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -1427,10 +1435,10 @@ async function ensureSchema() {
         UNIQUE(user_id, menu_item_id)
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_wishlists_user ON wishlists(user_id, created_at DESC)
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS recently_viewed (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -1440,11 +1448,11 @@ async function ensureSchema() {
         viewed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_recently_viewed_user
         ON recently_viewed(user_id, viewed_at DESC)
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS referral_codes (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
@@ -1453,7 +1461,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS referral_redemptions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         referral_code_id UUID NOT NULL REFERENCES referral_codes(id) ON DELETE CASCADE,
@@ -1464,7 +1472,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS gift_cards (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         code VARCHAR(40) NOT NULL UNIQUE,
@@ -1479,7 +1487,7 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS gift_card_transactions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         gift_card_id UUID NOT NULL REFERENCES gift_cards(id) ON DELETE CASCADE,
@@ -1490,7 +1498,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS restaurant_collections (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         slug VARCHAR(120) NOT NULL UNIQUE,
@@ -1503,7 +1511,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS collection_restaurants (
         collection_id UUID NOT NULL REFERENCES restaurant_collections(id) ON DELETE CASCADE,
         restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
@@ -1511,7 +1519,7 @@ async function ensureSchema() {
         PRIMARY KEY (collection_id, restaurant_id)
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS seasonal_campaigns (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         slug VARCHAR(120) NOT NULL UNIQUE,
@@ -1526,7 +1534,7 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS product_feature_flags (
         key VARCHAR(80) PRIMARY KEY,
         enabled BOOLEAN NOT NULL DEFAULT FALSE,
@@ -1536,19 +1544,19 @@ async function ensureSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE addresses
         ADD COLUMN IF NOT EXISTS lat NUMERIC(10,7),
         ADD COLUMN IF NOT EXISTS lng NUMERIC(10,7)
     `);
-    await client.query(`
+    await q(`
       ALTER TABLE order_tracking
         ADD COLUMN IF NOT EXISTS eta_minutes INTEGER,
         ADD COLUMN IF NOT EXISTS eta_source VARCHAR(40) DEFAULT 'haversine'
     `);
 
     // Seed default CPI feature flags (idempotent)
-    await client.query(`
+    await q(`
       INSERT INTO product_feature_flags (key, enabled, rollout_percent, description) VALUES
         ('wishlist', TRUE, 100, 'Wishlist module'),
         ('scheduled_orders', TRUE, 100, 'Scheduled delivery at checkout'),
@@ -1567,11 +1575,11 @@ async function ensureSchema() {
     `);
 
     // Seed sample collections if empty
-    const colCount = await client.query(
+    const colCount = await q(
       `SELECT COUNT(*)::int AS c FROM restaurant_collections`
     );
     if ((colCount.rows[0]?.c || 0) === 0) {
-      await client.query(`
+      await q(`
         INSERT INTO restaurant_collections (slug, title, description, image_url, filter_query, sort_order) VALUES
           ('best-biryani', 'Best Biryani Near You', 'Authentic, rich, and aromatic biryanis.',
            '/images/catalog/restaurants/biryani.webp', '{"cuisine":"biryani","sort":"rating"}'::jsonb, 1),
@@ -1587,38 +1595,38 @@ async function ensureSchema() {
     console.log('[SCHEMA] CPI Task 3 new features foundation ensured');
 
     // ========== CPI Task 4 — Analytics query indexes ==========
-    await client.query(`
+    await q(`
       ALTER TABLE orders
         ADD COLUMN IF NOT EXISTS delivery_partner_id UUID REFERENCES delivery_partners(id) ON DELETE SET NULL
     `).catch(() => {});
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_orders_status_created
         ON orders(status, created_at DESC)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_orders_restaurant_created
         ON orders(restaurant_id, created_at DESC)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_orders_user_created
         ON orders(user_id, created_at DESC)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_orders_partner_created
         ON orders(delivery_partner_id, created_at DESC)
         WHERE delivery_partner_id IS NOT NULL
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_order_items_menu ON order_items(menu_item_id)
     `);
-    await client.query(`
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_users_role_created
         ON users(role, created_at DESC)
     `);
-    await client.query(`
+    await q(`
       CREATE TABLE IF NOT EXISTS analytics_report_runs (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         report_type VARCHAR(60) NOT NULL DEFAULT 'bi_daily',
@@ -1640,47 +1648,51 @@ async function ensureSchema() {
     // Ensure a default admin account exists for local/prod bootstrap.
     const bcrypt = require('bcrypt');
     const adminEmail = 'admin@foodiq.com';
-    const existing = await client.query(
+    const existing = await q(
       `SELECT id FROM users WHERE email = $1 LIMIT 1`,
       [adminEmail]
     );
-    if (!existing.rows[0]) {
+    if (!existing?.rows?.[0]) {
       const hash = await bcrypt.hash('Password123', 12);
-      const inserted = await client.query(
+      const inserted = await q(
         `INSERT INTO users (email, password_hash, full_name, phone_number, role)
          VALUES ($1, $2, $3, $4, 'admin') RETURNING id`,
         [adminEmail, hash, 'Foodiq Admin', '9999999999']
       );
-      await client.query(
-        `INSERT INTO user_settings (user_id) VALUES ($1) ON CONFLICT DO NOTHING`,
-        [inserted.rows[0].id]
-      ).catch(() => {});
-      console.log('[SCHEMA] Seeded admin@foodiq.com (dev bootstrap)');
+      if (inserted?.rows?.[0]) {
+        await q(
+          `INSERT INTO user_settings (user_id) VALUES ($1) ON CONFLICT DO NOTHING`,
+          [inserted.rows[0].id]
+        );
+        console.log('[SCHEMA] Seeded admin@foodiq.com (dev bootstrap)');
+      }
     }
 
     const riderEmail = 'rider@foodiq.com';
-    const riderExisting = await client.query(
+    const riderExisting = await q(
       `SELECT id FROM users WHERE email = $1 LIMIT 1`,
       [riderEmail]
     );
-    if (!riderExisting.rows[0]) {
+    if (!riderExisting?.rows?.[0]) {
       const hash = await bcrypt.hash('Password123', 12);
-      const inserted = await client.query(
+      const inserted = await q(
         `INSERT INTO users (email, password_hash, full_name, phone_number, role)
          VALUES ($1, $2, $3, $4, 'delivery_partner') RETURNING id`,
         [riderEmail, hash, 'Ravi Rider', '9888888888']
       );
-      await client.query(
-        `INSERT INTO user_settings (user_id) VALUES ($1) ON CONFLICT DO NOTHING`,
-        [inserted.rows[0].id]
-      ).catch(() => {});
-      await client.query(
-        `INSERT INTO delivery_partners (user_id, vehicle_details, vehicle_type, license_number, is_available, approval_status, current_lat, current_lng, rating)
-         VALUES ($1, 'KA-01-AB-1234', 'Bike', 'DL-FOODIQ-001', TRUE, 'approved', 12.9716, 77.5946, 4.8)
-         ON CONFLICT (user_id) DO NOTHING`,
-        [inserted.rows[0].id]
-      );
-      console.log('[SCHEMA] Seeded rider@foodiq.com (dev bootstrap)');
+      if (inserted?.rows?.[0]) {
+        await q(
+          `INSERT INTO user_settings (user_id) VALUES ($1) ON CONFLICT DO NOTHING`,
+          [inserted.rows[0].id]
+        );
+        await q(
+          `INSERT INTO delivery_partners (user_id, vehicle_details, vehicle_type, license_number, is_available, approval_status, current_lat, current_lng, rating)
+           VALUES ($1, 'KA-01-AB-1234', 'Bike', 'DL-FOODIQ-001', TRUE, 'approved', 12.9716, 77.5946, 4.8)
+           ON CONFLICT (user_id) DO NOTHING`,
+          [inserted.rows[0].id]
+        );
+        console.log('[SCHEMA] Seeded rider@foodiq.com (dev bootstrap)');
+      }
     }
     } else {
       console.log('[SCHEMA] Bootstrap users skipped (production hardening)');

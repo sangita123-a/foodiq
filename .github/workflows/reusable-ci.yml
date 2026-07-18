@@ -112,6 +112,8 @@ jobs:
       STORAGE_PROVIDER: mock
       REDIS_ENABLED: "false"
       PORT: "4000"
+      AUTO_SEED_CATALOG: "true"
+      ALLOW_PAYMENT_MOCK: "true"
     steps:
       - uses: actions/checkout@v4
 
