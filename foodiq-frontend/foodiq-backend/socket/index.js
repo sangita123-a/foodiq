@@ -84,19 +84,27 @@ const initSocket = (httpServer, { allowedOrigins = [], isOriginAllowed, corsStri
 
   setIO(io);
 
-  // JWT auth on handshake
+  // JWT auth on handshake (Bearer / auth.token / httpOnly cookie)
   io.use(async (socket, next) => {
     try {
+      const cookieHeader = socket.handshake.headers?.cookie || '';
+      const cookieToken = (() => {
+        const m = String(cookieHeader).match(/(?:^|;\s*)(?:token|access_token)=([^;]+)/i);
+        return m ? decodeURIComponent(m[1]) : null;
+      })();
+
       const token =
         socket.handshake.auth?.token ||
         (socket.handshake.headers?.authorization || '').replace(/^Bearer\s+/i, '') ||
-        socket.handshake.query?.token;
+        socket.handshake.query?.token ||
+        cookieToken;
 
       if (!token) {
         return next(new Error('UNAUTHORIZED'));
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+      const { getJwtSecret } = require('../utils/generateToken');
+      const decoded = jwt.verify(token, getJwtSecret());
       const user = await findUserById(decoded.id);
       if (!user) return next(new Error('UNAUTHORIZED'));
 

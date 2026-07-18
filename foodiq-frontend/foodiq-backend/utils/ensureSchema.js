@@ -538,6 +538,120 @@ async function ensureSchema() {
       CREATE INDEX IF NOT EXISTS idx_reviews_restaurant
         ON reviews(restaurant_id)
     `);
+
+    // Maintenance phase: reviews moderation + feedback / bugs
+    await client.query(`
+      ALTER TABLE reviews
+        ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'visible',
+        ADD COLUMN IF NOT EXISTS admin_reply TEXT,
+        ADD COLUMN IF NOT EXISTS replied_at TIMESTAMP WITH TIME ZONE
+    `).catch(() => {});
+    await client.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_reviews_user_order
+        ON reviews(user_id, order_id) WHERE order_id IS NOT NULL
+    `).catch(() => {});
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_reviews_order ON reviews(order_id)
+    `).catch(() => {});
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS delivery_reviews (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        delivery_partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+        comment TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(order_id)
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_delivery_reviews_partner
+        ON delivery_reviews(delivery_partner_id, created_at DESC)
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS order_feedback (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE UNIQUE,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        overall_rating INTEGER CHECK (overall_rating IS NULL OR (overall_rating >= 1 AND overall_rating <= 5)),
+        comment TEXT,
+        tags TEXT[] DEFAULT '{}',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS user_feedback (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        category VARCHAR(80) NOT NULL DEFAULT 'general',
+        message TEXT NOT NULL,
+        page_url TEXT,
+        status VARCHAR(40) NOT NULL DEFAULT 'open',
+        admin_notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_user_feedback_status
+        ON user_feedback(status, created_at DESC)
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS bug_reports (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        reporter_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        title VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        severity VARCHAR(20) NOT NULL DEFAULT 'medium',
+        status VARCHAR(30) NOT NULL DEFAULT 'open',
+        page_url TEXT,
+        user_agent TEXT,
+        error_event_id UUID,
+        assignee_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        admin_notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_bug_reports_status_created
+        ON bug_reports(status, created_at DESC)
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS maintenance_reports (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        period VARCHAR(20) NOT NULL,
+        period_start DATE NOT NULL,
+        period_end DATE NOT NULL,
+        payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+        created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_maintenance_reports_period
+        ON maintenance_reports(period, created_at DESC)
+    `);
+
+    await client.query(`
+      ALTER TABLE contact_messages
+        ADD COLUMN IF NOT EXISTS phone VARCHAR(40),
+        ADD COLUMN IF NOT EXISTS reason VARCHAR(80),
+        ADD COLUMN IF NOT EXISTS status VARCHAR(40) DEFAULT 'open'
+    `).catch(() => {});
+    await client.query(`
+      ALTER TABLE support_tickets
+        ADD COLUMN IF NOT EXISTS admin_notes TEXT,
+        ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    `).catch(() => {});
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_orders_user_created
         ON orders(user_id, created_at DESC)
@@ -550,6 +664,51 @@ async function ensureSchema() {
       CREATE INDEX IF NOT EXISTS idx_offers_active_valid
         ON offers(is_active, valid_until)
     `).catch(() => {});
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_order_items_order
+        ON order_items(order_id)
+    `).catch(() => {});
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_order_items_menu
+        ON order_items(menu_item_id)
+    `).catch(() => {});
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_offers_slug
+        ON offers(slug)
+    `).catch(() => {});
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_offer_items_offer
+        ON offer_items(offer_id)
+    `).catch(() => {});
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_offer_restaurants_offer
+        ON offer_restaurants(offer_id)
+    `).catch(() => {});
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_addresses_user
+        ON addresses(user_id)
+    `).catch(() => {});
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_coupons_code
+        ON coupons(code)
+    `).catch(() => {});
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_delivery_partners_user
+        ON delivery_partners(user_id)
+    `).catch(() => {});
+    try {
+      await client.query(`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_restaurants_name_trgm
+          ON restaurants USING gin (name gin_trgm_ops)
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_menu_items_name_trgm
+          ON menu_items USING gin (name gin_trgm_ops)
+      `);
+    } catch {
+      /* extension may be restricted on some hosts */
+    }
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_payments_user_created
         ON payments(user_id, created_at DESC)
@@ -687,6 +846,13 @@ async function ensureSchema() {
       )
     `).catch(() => {});
 
+    // Bootstrap demo users ONLY when explicitly allowed (never default in production).
+    const allowBootstrap =
+      String(process.env.ALLOW_BOOTSTRAP_USERS || '').toLowerCase() === 'true' ||
+      (process.env.NODE_ENV !== 'production' &&
+        String(process.env.ALLOW_BOOTSTRAP_USERS || 'true').toLowerCase() !== 'false');
+
+    if (allowBootstrap) {
     // Ensure a default admin account exists for local/prod bootstrap.
     const bcrypt = require('bcrypt');
     const adminEmail = 'admin@foodiq.com';
@@ -695,7 +861,7 @@ async function ensureSchema() {
       [adminEmail]
     );
     if (!existing.rows[0]) {
-      const hash = await bcrypt.hash('Password123', 10);
+      const hash = await bcrypt.hash('Password123', 12);
       const inserted = await client.query(
         `INSERT INTO users (email, password_hash, full_name, phone_number, role)
          VALUES ($1, $2, $3, $4, 'admin') RETURNING id`,
@@ -705,7 +871,7 @@ async function ensureSchema() {
         `INSERT INTO user_settings (user_id) VALUES ($1) ON CONFLICT DO NOTHING`,
         [inserted.rows[0].id]
       ).catch(() => {});
-      console.log('[SCHEMA] Seeded admin@foodiq.com / Password123');
+      console.log('[SCHEMA] Seeded admin@foodiq.com (dev bootstrap)');
     }
 
     const riderEmail = 'rider@foodiq.com';
@@ -714,7 +880,7 @@ async function ensureSchema() {
       [riderEmail]
     );
     if (!riderExisting.rows[0]) {
-      const hash = await bcrypt.hash('Password123', 10);
+      const hash = await bcrypt.hash('Password123', 12);
       const inserted = await client.query(
         `INSERT INTO users (email, password_hash, full_name, phone_number, role)
          VALUES ($1, $2, $3, $4, 'delivery_partner') RETURNING id`,
@@ -730,7 +896,10 @@ async function ensureSchema() {
          ON CONFLICT (user_id) DO NOTHING`,
         [inserted.rows[0].id]
       );
-      console.log('[SCHEMA] Seeded rider@foodiq.com / Password123');
+      console.log('[SCHEMA] Seeded rider@foodiq.com (dev bootstrap)');
+    }
+    } else {
+      console.log('[SCHEMA] Bootstrap users skipped (production hardening)');
     }
 
     console.log('[SCHEMA] Critical schema checks completed');

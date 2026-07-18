@@ -7,7 +7,11 @@ const crypto = require('crypto');
 const CSRF_COOKIE = 'foodiq_csrf';
 const CSRF_HEADER = 'x-csrf-token';
 
-const enabled = () => String(process.env.CSRF_ENABLED || 'false').toLowerCase() === 'true';
+const enabled = () =>
+  String(
+    process.env.CSRF_ENABLED ||
+      (process.env.NODE_ENV === 'production' ? 'true' : 'false')
+  ).toLowerCase() === 'true';
 
 const issueToken = () => crypto.randomBytes(24).toString('hex');
 
@@ -20,7 +24,7 @@ const csrfProtection = (req, res, next) => {
       const token = issueToken();
       res.cookie(CSRF_COOKIE, token, {
         httpOnly: false,
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         secure: process.env.NODE_ENV === 'production',
         maxAge: 24 * 60 * 60 * 1000,
       });
@@ -38,7 +42,13 @@ const csrfProtection = (req, res, next) => {
 
   const cookieToken = req.cookies?.[CSRF_COOKIE];
   const headerToken = req.headers[CSRF_HEADER];
-  if (!cookieToken || !headerToken || cookieToken !== headerToken) {
+  const a = Buffer.from(String(cookieToken || ''), 'utf8');
+  const b = Buffer.from(String(headerToken || ''), 'utf8');
+  const match =
+    a.length > 0 &&
+    a.length === b.length &&
+    crypto.timingSafeEqual(a, b);
+  if (!match) {
     return res.status(403).json({
       success: false,
       message: 'Invalid CSRF token',

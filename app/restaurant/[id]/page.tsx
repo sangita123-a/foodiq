@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
-import Cookies from "js-cookie";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import RestaurantHeader from "@/components/restaurant/RestaurantHeader";
@@ -23,6 +22,8 @@ import LiveDealBanner from "@/components/restaurant/LiveDealBanner";
 import { setActiveOffer } from "@/lib/offers";
 import { useFavoriteActions } from "@/hooks/useFavoriteActions";
 import { shareContent } from "@/lib/share";
+import CatalogViewTracker from "@/components/analytics/CatalogViewTracker";
+import { isClientAuthenticated } from "@/lib/authSession";
 
 function computeDealDisplayPrice(
   basePrice: number,
@@ -50,7 +51,10 @@ export default function RestaurantPage() {
   const { restaurantIds, toggleRestaurant } = useFavoriteActions();
 
   useEffect(() => {
-    setIsLoggedIn(!!Cookies.get("token"));
+    setIsLoggedIn(isClientAuthenticated());
+    const onAuth = () => setIsLoggedIn(isClientAuthenticated());
+    window.addEventListener("foodiq:auth", onAuth);
+    return () => window.removeEventListener("foodiq:auth", onAuth);
   }, []);
 
   const isValidId = Boolean(id && id.length >= 8);
@@ -146,9 +150,9 @@ export default function RestaurantPage() {
         image: getFoodImage(item.image_url),
         price: dealPricing.displayPrice,
         originalPrice: dealPricing.originalPrice,
-        rating: "4.5",
+        rating: Number(item.rating || 4.5).toFixed(1),
         isVeg: item.is_vegetarian,
-        prepTime: item.preparation_time || "15 min",
+        prepTime: item.preparation_time ? `${item.preparation_time} min` : "15 min",
         calories: item.calories ? `${item.calories} kcal` : undefined,
         isFavorite: favoriteItemIds.has(item.id),
       });
@@ -219,7 +223,7 @@ export default function RestaurantPage() {
   };
 
   const handleUpdateQuantity = async (itemId: string, delta: number) => {
-    if (!Cookies.get("token")) {
+    if (!isClientAuthenticated()) {
       showToast("Please login to add items to cart", "error");
       return false;
     }
@@ -235,13 +239,34 @@ export default function RestaurantPage() {
       if (newQty <= 0) {
         if (cartItem) {
           await api.delete(`/api/cart/remove/${cartItem.cart_item_id}`);
+          void import("@/lib/analytics/events").then(({ AnalyticsEvents, trackEvent }) => {
+            trackEvent(AnalyticsEvents.removeFromCart, {
+              item_id: itemId,
+              quantity: currentQty,
+            });
+          });
         }
       } else if (!cartItem) {
         await api.post(`/api/cart/add`, { menu_item_id: itemId, quantity: newQty });
         showToast("Added to cart", "success");
+        void import("@/lib/analytics/events").then(({ AnalyticsEvents, trackEvent }) => {
+          trackEvent(AnalyticsEvents.addToCart, {
+            item_id: itemId,
+            quantity: newQty,
+          });
+        });
       } else {
         await api.put(`/api/cart/update/${cartItem.cart_item_id}`, { quantity: newQty });
-        if (delta > 0) showToast("Cart updated", "success");
+        if (delta > 0) {
+          showToast("Cart updated", "success");
+          void import("@/lib/analytics/events").then(({ AnalyticsEvents, trackEvent }) => {
+            trackEvent(AnalyticsEvents.addToCart, { item_id: itemId, quantity: delta });
+          });
+        } else if (delta < 0) {
+          void import("@/lib/analytics/events").then(({ AnalyticsEvents, trackEvent }) => {
+            trackEvent(AnalyticsEvents.removeFromCart, { item_id: itemId, quantity: 1 });
+          });
+        }
       }
       mutateCart();
       globalMutate("/api/cart");
@@ -333,6 +358,12 @@ export default function RestaurantPage() {
 
   return (
     <main className="min-h-screen bg-white relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+      <CatalogViewTracker
+        type="restaurant"
+        ready={Boolean(restaurant?.id)}
+        id={restaurant?.id}
+        name={restaurant?.name}
+      />
       <Navbar />
 
       <RestaurantHeader

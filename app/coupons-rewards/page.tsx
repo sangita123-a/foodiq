@@ -12,6 +12,7 @@ import ReferBanner from "@/components/rewards/ReferBanner";
 import useSWR from "swr";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
+import { useAuthToken } from "@/hooks/useAuthToken";
 
 const expiredCoupons: CouponType[] = [
   { id: "c5", code: "DIWALI500", title: "Festive Special", discountValue: "₹500", minOrder: "₹999", expiry: "Expired", terms: "Valid only during Diwali week.", isExpired: true },
@@ -27,11 +28,12 @@ const historyData: RewardHistoryType[] = [
 
 export default function CouponsRewardsPage() {
   const { showToast } = useToast();
+  const hasToken = useAuthToken();
   
-  const { data: couponsData, isLoading: isLoadingCoupons } = useSWR('/api/coupons');
+  const { data: couponsData, isLoading: isLoadingCoupons } = useSWR(hasToken ? '/api/coupons' : null);
   const backendCoupons = couponsData || [];
 
-  const { data: rewardsData, isLoading: isLoadingRewards, mutate: mutateRewards } = useSWR('/api/rewards');
+  const { data: rewardsData, isLoading: isLoadingRewards, mutate: mutateRewards } = useSWR(hasToken ? '/api/rewards' : null);
   const rewards = rewardsData || {};
   const pointsBalance = rewards.points_balance || 0;
   const totalRedeemed = rewards.total_redeemed || 0;

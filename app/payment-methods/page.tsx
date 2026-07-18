@@ -15,9 +15,11 @@ import useSWR from "swr";
 import { format } from "date-fns";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
+import { useAuthToken } from "@/hooks/useAuthToken";
 
 export default function PaymentMethodsPage() {
-  const { data, mutate, isLoading } = useSWR("/api/payment-methods");
+  const hasToken = useAuthToken();
+  const { data, mutate, isLoading } = useSWR(hasToken ? "/api/payment-methods" : null);
   const methods = data || [];
   const { showToast } = useToast();
 
@@ -25,7 +27,9 @@ export default function PaymentMethodsPage() {
   const [editingItem, setEditingItem] = useState<any>(null);
   const [initialModalType, setInitialModalType] = useState<"Card" | "UPI">("Card");
 
-  const { data: historyData, isLoading: isLoadingHistory, error: historyError } = useSWR("/api/payments/history");
+  const { data: historyData, isLoading: isLoadingHistory, error: historyError } = useSWR(
+    hasToken ? "/api/payments/history" : null
+  );
   const paymentHistory = historyData || [];
 
   const cards: CardType[] = useMemo(
@@ -243,45 +247,96 @@ export default function PaymentMethodsPage() {
               Failed to load payment history
             </div>
           ) : paymentHistory.length > 0 ? (
-            <div className="bg-[#F8FAFC] rounded-3xl border border-[#E5E7EB] overflow-hidden">
+            <div className="bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm text-[#6B7280]">
-                  <thead className="bg-[#F8FAFC] text-white uppercase font-bold text-xs">
+                  <thead className="bg-[#F8FAFC] text-[#6B7280] uppercase font-bold text-xs tracking-wide">
                     <tr>
                       <th className="px-6 py-4">Transaction ID</th>
+                      <th className="px-6 py-4">Restaurant</th>
                       <th className="px-6 py-4">Date</th>
                       <th className="px-6 py-4">Method</th>
                       <th className="px-6 py-4">Amount</th>
                       <th className="px-6 py-4">Status</th>
+                      <th className="px-6 py-4">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {paymentHistory.map((payment: any) => (
                       <tr key={payment.id} className="border-b border-[#E5E7EB] hover:bg-[#F8FAFC] transition-colors">
-                        <td className="px-6 py-4 font-mono text-xs">
-                          {payment.provider_transaction_id || "Pending..."}
+                        <td className="px-6 py-4 font-mono text-xs text-[#111827]">
+                          {payment.razorpay_payment_id ||
+                            payment.provider_transaction_id ||
+                            "Pending..."}
+                        </td>
+                        <td className="px-6 py-4 text-[#111827]">
+                          {payment.restaurant_name || "—"}
                         </td>
                         <td className="px-6 py-4">
-                          {format(new Date(payment.created_at), "dd MMM yyyy, p")}
+                          {format(
+                            new Date(payment.transaction_time || payment.created_at),
+                            "dd MMM yyyy, p"
+                          )}
                         </td>
                         <td className="px-6 py-4 capitalize">
                           {(payment.method || "").replace(/_/g, " ")}
                         </td>
-                        <td className="px-6 py-4 text-white font-bold">
+                        <td className="px-6 py-4 text-[#111827] font-bold">
                           ₹{parseFloat(payment.amount).toFixed(2)}
                         </td>
                         <td className="px-6 py-4">
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-bold border ${
                               payment.status === "completed"
-                                ? "bg-green-500/10 text-green-400 border-green-500/20"
+                                ? "bg-green-50 text-green-700 border-green-200"
                                 : payment.status === "pending"
-                                  ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
-                                  : "bg-red-500/10 text-red-400 border-red-500/20"
+                                  ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+                                  : payment.status === "refunded" ||
+                                      payment.status === "partially_refunded"
+                                    ? "bg-blue-50 text-blue-700 border-blue-200"
+                                    : "bg-red-50 text-red-700 border-red-200"
                             }`}
                           >
-                            {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                            {String(payment.status || "")
+                              .replace(/_/g, " ")
+                              .replace(/^\w/, (c: string) => c.toUpperCase())}
                           </span>
+                        </td>
+                        <td className="px-6 py-4 space-x-2 whitespace-nowrap">
+                          {(payment.status === "completed" ||
+                            payment.status === "refunded" ||
+                            payment.status === "partially_refunded") && (
+                            <button
+                              type="button"
+                              className="text-xs font-bold text-[#FC8019] hover:underline"
+                              onClick={async () => {
+                                try {
+                                  const { downloadInvoice } = await import("@/services/paymentApi");
+                                  const blob = await downloadInvoice(payment.id);
+                                  const url = URL.createObjectURL(blob);
+                                  const a = document.createElement("a");
+                                  a.href = url;
+                                  a.download = `foodiq-invoice-${String(payment.order_id || payment.id).slice(0, 8)}.pdf`;
+                                  a.click();
+                                  URL.revokeObjectURL(url);
+                                } catch {
+                                  /* ignore */
+                                }
+                              }}
+                            >
+                              Invoice
+                            </button>
+                          )}
+                          {(payment.status === "failed" || payment.status === "pending") &&
+                            payment.method !== "cod" &&
+                            payment.order_id && (
+                              <a
+                                href={`/payment?orderId=${payment.order_id}&amount=${payment.amount}&method=${payment.method}`}
+                                className="text-xs font-bold text-[#111827] hover:underline"
+                              >
+                                Retry
+                              </a>
+                            )}
                         </td>
                       </tr>
                     ))}

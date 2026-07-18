@@ -71,6 +71,7 @@ export function mapRestaurantCard(r: {
   price_range?: number | null;
   distance_km?: number | string | null;
   offer_text?: string | null;
+  is_veg?: boolean | null;
 }) {
   return {
     id: r.id,
@@ -82,5 +83,6 @@ export function mapRestaurantCard(r: {
     priceForTwo: getPriceForTwo(r.price_range),
     distance: r.distance_km ? `${Number(r.distance_km).toFixed(1)} km` : "Nearby",
     offer: r.offer_text || null,
+    is_veg: Boolean(r.is_veg),
   };
 }

@@ -1,5 +1,6 @@
 /**
  * API smoke / integration checks against a running Foodiq API.
+ * Includes V1 catalog checks + V2.0 auth-gated surface compatibility.
  * Usage: BASE_URL=http://localhost:4000 node scripts/ci/api-smoke.js
  */
 const http = require('http');
@@ -14,19 +15,34 @@ const CHECKS = [
   { path: '/api/restaurant-categories', expectStatus: [200, 500], name: 'categories' },
   { path: '/api/offers', expectStatus: [200, 500], name: 'offers' },
   { path: '/api/cuisines', expectStatus: [200, 500], name: 'cuisines' },
+  // V2.0 — unauthenticated must not 404 (route must exist)
+  { path: '/api/feedback', method: 'POST', expectStatus: [201, 400, 401, 429], name: 'v2_feedback_post' },
+  { path: '/api/bugs', method: 'POST', expectStatus: [201, 400, 401, 429], name: 'v2_bugs_post' },
+  { path: '/api/admin/feedback', expectStatus: [401, 403], name: 'v2_admin_feedback_auth' },
+  { path: '/api/admin/bugs', expectStatus: [401, 403], name: 'v2_admin_bugs_auth' },
+  { path: '/api/admin/maintenance/health', expectStatus: [401, 403], name: 'v2_admin_maintenance_auth' },
+  { path: '/api/admin/analytics/reviews', expectStatus: [401, 403], name: 'v2_admin_review_analytics_auth' },
+  { path: '/api/admin/analytics/v2-adoption', expectStatus: [401, 403], name: 'v2_adoption_auth' },
+  { path: '/api/partner/reviews', expectStatus: [401, 403], name: 'v2_partner_reviews_auth' },
+  { path: '/api/delivery/me/reviews', expectStatus: [401, 403], name: 'v2_delivery_reviews_auth' },
 ];
 
-const get = (path) =>
+const request = (path, method = 'GET') =>
   new Promise((resolve, reject) => {
     const url = new URL(path, BASE);
     const lib = url.protocol === 'https:' ? https : http;
-    const req = lib.get(
+    const req = lib.request(
       {
         hostname: url.hostname,
         port: url.port || (url.protocol === 'https:' ? 443 : 80),
         path: url.pathname + url.search,
+        method,
         timeout: 15000,
-        headers: { Accept: 'application/json', 'User-Agent': 'foodiq-ci-smoke/1.0' },
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'User-Agent': 'foodiq-ci-smoke/2.0',
+        },
       },
       (res) => {
         let body = '';
@@ -41,19 +57,22 @@ const get = (path) =>
       req.destroy();
       reject(new Error('timeout'));
     });
+    if (method === 'POST') {
+      req.write(JSON.stringify({}));
+    }
+    req.end();
   });
 
 async function main() {
-  console.log(`[api-smoke] BASE_URL=${BASE}`);
+  console.log(`[api-smoke] BASE_URL=${BASE} (Foodiq 2.0)`);
   let failed = 0;
   for (const check of CHECKS) {
     const allowed = Array.isArray(check.expectStatus)
       ? check.expectStatus
       : [check.expectStatus];
     try {
-      const res = await get(check.path);
+      const res = await request(check.path, check.method || 'GET');
       const ok = allowed.includes(res.status);
-      // Health must always be 200 with success when API is up
       if (check.name === 'health') {
         let json = {};
         try {

@@ -16,7 +16,7 @@ const createUser = async (userData) => {
 
 const findUserByEmail = async (email) => {
   const normalizedEmail = normalizeEmail(email);
-  const query = `SELECT * FROM users WHERE LOWER(TRIM(email)) = $1`;
+  const query = `SELECT * FROM users WHERE LOWER(TRIM(email)) = $1 AND COALESCE(is_deleted, false) = false`;
   const { rows } = await pool.query(query, [normalizedEmail]);
   return rows[0];
 };

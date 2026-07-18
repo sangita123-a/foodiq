@@ -91,6 +91,7 @@ export default function TopBrands() {
                   src={brand.foodImage}
                   fallback={RESTAURANT_FALLBACK}
                   alt={brand.name}
+                  sizes="160px"
                   className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-in-out"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/75/40 to-transparent"></div>
@@ -102,6 +103,7 @@ export default function TopBrands() {
                   src={brand.logo}
                   fallback={RESTAURANT_FALLBACK}
                   alt={`${brand.name} logo`}
+                  sizes="56px"
                   className="w-full h-full object-contain"
                 />
               </div>

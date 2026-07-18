@@ -116,10 +116,10 @@ export default function OrderCard({ order }: Props) {
 
           {order.status === "Delivered" && (
             <Link
-              href={`/my-orders/${order.id}`}
+              href={`/my-orders/${order.id}#feedback`}
               className="bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/20 text-yellow-500 px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors"
             >
-              <Star className="w-4 h-4 fill-yellow-500" /> Rate Restaurant
+              <Star className="w-4 h-4 fill-yellow-500" /> Rate Order
             </Link>
           )}
 

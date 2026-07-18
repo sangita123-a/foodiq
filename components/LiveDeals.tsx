@@ -328,7 +328,7 @@ export default function LiveDeals() {
                   <SafeImage
                     src={deal.image}
                     fallback={RESTAURANT_FALLBACK}
-                    alt=""
+                    alt={`${deal.restaurant} — ${deal.offer}`}
                     className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                   />
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#111827]/75/35 via-transparent to-[#F8FAFC]/5" />

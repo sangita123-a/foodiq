@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -13,11 +13,14 @@ import {
   DollarSign,
   BarChart3,
   Settings,
-  LogOut
+  LogOut,
+  Bell,
 } from "lucide-react";
+import { clearClientAuth } from "@/lib/authSession";
 
 export default function PartnerSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard, href: "/partner/dashboard" },
@@ -29,12 +32,17 @@ export default function PartnerSidebar() {
     { name: "Offers & Discounts", icon: Tag, href: "/partner/offers" },
     { name: "Earnings", icon: DollarSign, href: "/partner/earnings" },
     { name: "Analytics", icon: BarChart3, href: "/partner/analytics" },
+    { name: "Notifications", icon: Bell, href: "/partner/notifications" },
   ];
+
+  const handleLogout = () => {
+    clearClientAuth();
+    router.push("/partner/login");
+  };
 
   return (
     <div className="w-64 bg-[#FFFFFF] h-screen border-r border-[#E5E7EB] flex flex-col fixed left-0 top-0 z-40">
 
-      {/* Logo */}
       <div className="h-20 flex items-center px-6 border-b border-[#E5E7EB]">
         <Link href="/partner/dashboard" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-[#FC8019] rounded-lg flex items-center justify-center font-black text-white text-xl">
@@ -44,7 +52,6 @@ export default function PartnerSidebar() {
         </Link>
       </div>
 
-      {/* Menu Items */}
       <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scrollbar">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
@@ -73,13 +80,14 @@ export default function PartnerSidebar() {
             <span className="font-bold text-sm">Restaurant Settings</span>
           </Link>
 
-          <Link
-            href="/partner/login"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-red-500 hover:bg-red-500/10 group mt-2"
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-red-500 hover:bg-red-500/10 group mt-2 text-left"
           >
             <LogOut className="w-5 h-5" />
             <span className="font-bold text-sm">Logout</span>
-          </Link>
+          </button>
         </div>
       </div>
 

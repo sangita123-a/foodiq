@@ -6,13 +6,14 @@ import Link from "next/link";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
 
-import Cookies from 'js-cookie';
+import { persistAuthUser } from "@/lib/authUser";
+import { markAuthenticated } from "@/lib/authSession";
 
 function getAuthErrorMessage(err: any, fallback: string) {
   if (err?.response?.data?.message) return err.response.data.message;
   if (typeof err?.response?.data?.error === 'string') return err.response.data.error;
   if (err?.message === 'Network Error') {
-    return 'Cannot reach the server. Make sure the backend is running on port 4000.';
+    return 'Cannot reach the server. Please check your backend connection.';
   }
   return fallback;
 }
@@ -38,8 +39,14 @@ export default function LoginPage() {
         password,
       });
       if (res.data.success) {
-        Cookies.set('token', res.data.data.token, { expires: 7, sameSite: 'lax' });
-        localStorage.setItem("user", JSON.stringify(res.data.data));
+        markAuthenticated(res.data.data.token);
+        persistAuthUser(res.data.data);
+        void import("@/lib/analytics/events").then(({ AnalyticsEvents, trackEvent }) => {
+          trackEvent(AnalyticsEvents.login, {
+            method: "email",
+            role: res.data.data?.role || "customer",
+          });
+        });
         try {
           await api.post("/api/sessions/register");
         } catch (_) {}

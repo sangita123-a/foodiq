@@ -5,13 +5,18 @@ import { TrendingUp } from "lucide-react";
 import SafeImage from "@/components/ui/SafeImage";
 import { FOOD_FALLBACK } from "@/lib/images";
 
-export default function MenuBestSellers() {
-  const bestSellers = [
-    { name: "Chicken Dum Biryani", orders: 1245, revenue: "₹3,73,500", image: "/images/catalog/food/biryani.webp" },
-    { name: "Mutton Rogan Josh", orders: 890, revenue: "₹4,00,500", image: "/images/catalog/food/north-indian.webp" },
-    { name: "Paneer Butter Masala", orders: 1102, revenue: "₹2,75,500", image: "/images/catalog/food/indian.webp" },
-    { name: "Garlic Naan", orders: 3450, revenue: "₹1,72,500", image: "/images/catalog/food/bakery.webp" },
-  ];
+type BestSeller = {
+  name: string;
+  orders: number;
+  revenue: string;
+  image: string;
+};
+
+type MenuBestSellersProps = {
+  bestSellers?: BestSeller[];
+};
+
+export default function MenuBestSellers({ bestSellers = [] }: MenuBestSellersProps) {
 
   return (
     <div className="mb-10">
@@ -20,6 +25,9 @@ export default function MenuBestSellers() {
       </h2>
 
       <div className="flex gap-6 overflow-x-auto custom-scrollbar pb-4 -mx-4 px-4 md:mx-0 md:px-0">
+        {bestSellers.length === 0 && (
+          <p className="text-[#6B7280] text-sm py-4">No best sellers yet.</p>
+        )}
         {bestSellers.map((item, idx) => (
           <motion.div
             key={idx}

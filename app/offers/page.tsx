@@ -26,7 +26,7 @@ export default function OffersPage() {
 
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-5xl">
         <div className="mb-10 text-center md:text-left border-b border-[#E5E7EB] pb-8">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3">Offers & Deals</h1>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-[#111827] mb-3">Offers & Deals</h1>
           <p className="text-[var(--color-gray-text)] text-lg">
             Save more on every order with active Foodiq coupons.
           </p>
@@ -41,7 +41,7 @@ export default function OffersPage() {
         ) : offers.length === 0 ? (
           <div className="text-center py-20 bg-[#FFFFFF] rounded-2xl border border-[#E5E7EB]">
             <Percent className="w-12 h-12 text-[#9CA3AF] mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-white mb-2">No offers available</h3>
+            <h3 className="text-2xl font-bold text-[#111827] mb-2">No offers available</h3>
             <p className="text-[#6B7280] mb-6">Check back soon for new deals.</p>
             <Link
               href="/restaurants"

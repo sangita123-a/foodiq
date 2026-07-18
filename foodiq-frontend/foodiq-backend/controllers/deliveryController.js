@@ -400,6 +400,24 @@ const updateProfile = async (req, res) => {
   }
 };
 
+const getMyReviews = async (req, res) => {
+  try {
+    const partner = await requirePartner(req, res);
+    if (!partner) return;
+    const { listForPartner } = require('../models/deliveryReviewModel');
+    const rows = await listForPartner(partner.id, {
+      limit: req.query.limit,
+      offset: req.query.offset,
+    });
+    ok(res, 'Delivery reviews', {
+      rating: partner.rating,
+      reviews: rows,
+    });
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
 module.exports = {
   register,
   getMe,
@@ -416,4 +434,5 @@ module.exports = {
   getNotifications,
   updateProfile,
   getRoute,
+  getMyReviews,
 };

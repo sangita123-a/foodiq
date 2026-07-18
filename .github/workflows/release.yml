@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Semver tag (e.g. 1.2.0). Leave empty for date-based tag.
+        required: false
+        type: string
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release-notes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [[ -n "${{ inputs.version }}" ]]; then
+            echo "tag=v${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=v$(date -u +%Y.%m.%d).${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate notes from commits
+        id: notes
+        run: |
+          PREV=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          {
+            echo "## Foodiq ${{ steps.ver.outputs.tag }}"
+            echo ""
+            echo "### Changes"
+            if [[ -n "$PREV" ]]; then
+              git log --pretty=format:'- %s (%h)' "$PREV"..HEAD
+            else
+              git log --pretty=format:'- %s (%h)' -n 30
+            fi
+            echo ""
+            echo ""
+            echo "### Modules"
+            echo "- Customer App, Checkout, Payments, Tracking"
+            echo "- Restaurant / Admin / Delivery dashboards"
+            echo "- Notifications, Cloud Storage, Monitoring"
+          } > RELEASE_NOTES.md
+          cat RELEASE_NOTES.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: Foodiq ${{ steps.ver.outputs.tag }}
+          body_path: RELEASE_NOTES.md
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Append CHANGELOG
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          {
+            echo ""
+            echo "## ${{ steps.ver.outputs.tag }} — $(date -u +%Y-%m-%d)"
+            cat RELEASE_NOTES.md
+          } >> CHANGELOG.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "chore: changelog ${{ steps.ver.outputs.tag }}" || true
+          git push || true

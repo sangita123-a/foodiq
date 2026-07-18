@@ -1,21 +1,28 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Camera } from "lucide-react";
 import useSWR from "swr";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
-import { FormEvent, useRef } from "react";
-import SafeImage from "@/components/ui/SafeImage";
+import { FormEvent, useState } from "react";
+import MediaUploader from "@/components/media/MediaUploader";
 import { AVATAR_FALLBACK } from "@/lib/images";
-
-const DEFAULT_AVATAR = AVATAR_FALLBACK;
+import type { MediaAsset } from "@/services/mediaApi";
 
 export default function ProfileSettings() {
   const { data, isLoading, mutate } = useSWR("/api/profile");
-  const user = data || { full_name: "", email: "", phone_number: "", date_of_birth: "", gender: "", profile_image_url: "" };
+  const user = data || {
+    full_name: "",
+    email: "",
+    phone_number: "",
+    date_of_birth: "",
+    gender: "",
+    profile_image_url: "",
+  };
   const { showToast } = useToast();
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+
+  const currentPhoto = photoUrl ?? user.profile_image_url ?? null;
 
   const handleSave = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,11 +33,14 @@ export default function ProfileSettings() {
       phone_number: formData.get("phone_number"),
       date_of_birth: formData.get("dob") || null,
       gender: formData.get("gender") || null,
-      profile_image_url: formData.get("profile_image_url") || user.profile_image_url || null,
+      profile_image_url: currentPhoto || null,
     };
     try {
       const res = await api.put("/api/profile", payload);
-      localStorage.setItem("user", JSON.stringify({ ...JSON.parse(localStorage.getItem("user") || "{}"), ...res.data.data }));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ ...JSON.parse(localStorage.getItem("user") || "{}"), ...res.data.data })
+      );
       showToast("Profile updated successfully", "success");
       mutate();
     } catch (err: any) {
@@ -38,28 +48,15 @@ export default function ProfileSettings() {
     }
   };
 
-  const handlePhoto = (file: File | null) => {
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      showToast("Image must be under 5MB", "error");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = async () => {
-      try {
-        await api.put("/api/profile", { profile_image_url: reader.result });
-        showToast("Profile photo updated", "success");
-        mutate();
-      } catch (err: any) {
-        showToast(err.response?.data?.message || "Failed to upload photo", "error");
-      }
-    };
-    reader.readAsDataURL(file);
+  const onUploaded = (asset: MediaAsset) => {
+    setPhotoUrl(asset.url);
+    mutate();
   };
 
   const removePhoto = async () => {
     try {
-      await api.put("/api/profile", { profile_image_url: DEFAULT_AVATAR });
+      await api.put("/api/profile", { profile_image_url: AVATAR_FALLBACK });
+      setPhotoUrl(AVATAR_FALLBACK);
       showToast("Photo removed", "success");
       mutate();
     } catch (err: any) {
@@ -71,9 +68,7 @@ export default function ProfileSettings() {
     return <div className="text-[#111827] animate-pulse h-64 bg-[#F8FAFC] rounded-3xl"></div>;
   }
 
-  const dob = user.date_of_birth
-    ? String(user.date_of_birth).slice(0, 10)
-    : "";
+  const dob = user.date_of_birth ? String(user.date_of_birth).slice(0, 10) : "";
 
   return (
     <motion.div
@@ -82,53 +77,29 @@ export default function ProfileSettings() {
       exit={{ opacity: 0, x: -20 }}
       className="bg-[#F8FAFC] rounded-3xl p-6 md:p-10 border border-[#E5E7EB] shadow-2xl"
     >
-      <h2 className="text-2xl font-bold text-white mb-8">Profile Settings</h2>
+      <h2 className="text-2xl font-bold text-[#111827] mb-8">Profile Settings</h2>
 
-      <div className="flex items-center gap-6 mb-10">
-        <div className="relative group cursor-pointer" onClick={() => fileRef.current?.click()}>
-          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#E5E7EB] group-hover:border-primary transition-colors">
-            <SafeImage
-              src={user.profile_image_url}
-              fallback={DEFAULT_AVATAR}
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <Camera className="w-6 h-6 text-[#111827]" />
-          </div>
-        </div>
-        <div>
-          <h3 className="text-white font-bold text-lg">Profile Photo</h3>
-          <p className="text-[#6B7280] text-sm mb-3">PNG, JPG up to 5MB</p>
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className="bg-[#F8FAFC] hover:bg-[#F8FAFC] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
-            >
-              Upload New
-            </button>
-            <button
-              type="button"
-              onClick={removePhoto}
-              className="bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold px-4 py-2 rounded-lg transition-colors"
-            >
-              Remove
-            </button>
-          </div>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => handlePhoto(e.target.files?.[0] || null)}
-          />
+      <div className="flex flex-col sm:flex-row items-start gap-6 mb-10">
+        <MediaUploader
+          purpose="user_profile"
+          value={currentPhoto}
+          aspect="avatar"
+          label="Profile Photo"
+          hint="PNG, JPG, WEBP up to 3MB"
+          fallback={AVATAR_FALLBACK}
+          onUploaded={onUploaded}
+          onClear={removePhoto}
+        />
+        <div className="pt-2">
+          <h3 className="text-[#111827] font-bold text-lg">Your photo</h3>
+          <p className="text-[#6B7280] text-sm">
+            Uploaded to secure cloud storage with CDN delivery.
+          </p>
         </div>
       </div>
 
       <form id="settings-form" onSubmit={handleSave} className="space-y-6">
-        <input type="hidden" name="profile_image_url" value={user.profile_image_url || ""} />
+        <input type="hidden" name="profile_image_url" value={currentPhoto || ""} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-bold text-[#6B7280] mb-2">Full Name</label>

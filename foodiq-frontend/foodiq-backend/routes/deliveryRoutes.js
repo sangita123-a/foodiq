@@ -9,6 +9,7 @@ router.use(protect);
 router.use(authorize('delivery_partner', 'admin'));
 
 router.get('/me', c.getMe);
+router.get('/me/reviews', c.getMyReviews);
 router.put('/profile', c.updateProfile);
 router.get('/dashboard', c.getDashboard);
 router.put('/availability', c.setAvailability);

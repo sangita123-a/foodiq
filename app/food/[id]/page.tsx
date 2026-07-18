@@ -1,6 +1,75 @@
+import type { Metadata } from "next";
 import FoodDetailView from "@/components/food/FoodDetailView";
+import JsonLd from "@/components/seo/JsonLd";
+import {
+  ApiEnvelope,
+  breadcrumbJsonLd,
+  fetchApiJson,
+  menuItemJsonLd,
+} from "@/lib/seo/jsonld";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export default async function FoodPage({ params }: { params: Promise<{ id: string }> }) {
+type MenuItem = {
+  id: string;
+  name: string;
+  description?: string | null;
+  price?: number | string | null;
+  image_url?: string | null;
+  restaurant_id?: string | null;
+  restaurant_name?: string | null;
+};
+
+type PageProps = {
+  params: Promise<{ id: string }>;
+};
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { id } = await params;
-  return <FoodDetailView id={id} />;
+  const res = await fetchApiJson<ApiEnvelope<MenuItem>>(`/api/menu-items/${id}`);
+  const item = res?.data;
+
+  if (!item?.name) {
+    return buildPageMetadata({
+      title: "Dish",
+      description: "View dish details and order online on Foodiq.",
+      path: `/food/${id}`,
+    });
+  }
+
+  const description =
+    item.description?.trim() ||
+    `Order ${item.name}${item.restaurant_name ? ` from ${item.restaurant_name}` : ""} on Foodiq.`;
+
+  return buildPageMetadata({
+    title: item.name,
+    description: description.slice(0, 160),
+    path: `/food/${item.id}`,
+    image: item.image_url,
+  });
+}
+
+export default async function FoodPage({ params }: PageProps) {
+  const { id } = await params;
+  const res = await fetchApiJson<ApiEnvelope<MenuItem>>(`/api/menu-items/${id}`);
+  const item = res?.data;
+
+  return (
+    <>
+      {item?.name ? (
+        <JsonLd
+          data={[
+            breadcrumbJsonLd([
+              { name: "Home", path: "/" },
+              { name: "Trending Dishes", path: "/trending-dishes" },
+              { name: item.name, path: `/food/${item.id}` },
+            ]),
+            menuItemJsonLd(item),
+          ]}
+        />
+      ) : null}
+      <FoodDetailView id={id} />
+    </>
+  );
 }

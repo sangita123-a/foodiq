@@ -50,4 +50,28 @@ router.get('/reports/orders', c.getOrderReports);
 router.get('/reports/users', c.getUserReports);
 router.get('/reports/restaurants', c.getRestaurantReports);
 
+const feedbackAdmin = require('../controllers/feedbackController');
+const bugAdmin = require('../controllers/bugController');
+const maintenance = require('../controllers/maintenanceController');
+
+router.get('/feedback', feedbackAdmin.adminListFeedback);
+router.put('/feedback/product/:id', feedbackAdmin.adminPatchProductFeedback);
+router.put('/feedback/support/:id', feedbackAdmin.adminPatchSupport);
+router.put('/feedback/contact/:id', feedbackAdmin.adminPatchContact);
+
+router.get('/reviews', feedbackAdmin.adminListReviews);
+router.put('/reviews/:id', feedbackAdmin.adminPatchReview);
+
+router.get('/bugs', bugAdmin.adminListBugs);
+router.get('/bugs/:id', bugAdmin.adminGetBug);
+router.put('/bugs/:id', bugAdmin.adminPatchBug);
+router.post('/bugs/from-error', bugAdmin.adminCreateBugFromError);
+
+router.get('/analytics/reviews', maintenance.getReviewAnalytics);
+router.get('/analytics/v2-adoption', maintenance.getV2Adoption);
+router.get('/maintenance/health', maintenance.healthSummary);
+router.get('/maintenance/report', maintenance.getOrGenerateReport);
+router.get('/maintenance/reports', maintenance.listReports);
+router.post('/maintenance/send-weekly', maintenance.sendWeekly);
+
 module.exports = router;

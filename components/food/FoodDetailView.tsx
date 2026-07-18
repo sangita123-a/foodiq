@@ -1,17 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { ChevronLeft, Clock, Heart, Minus, Plus, Share2, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { FOOD_FALLBACK } from "@/lib/images";
+import SafeImage from "@/components/ui/SafeImage";
+import { FOOD_FALLBACK, getFoodImage } from "@/lib/images";
 import { useCartActions } from "@/hooks/useCartActions";
 import { useFavoriteActions } from "@/hooks/useFavoriteActions";
 import { useToast } from "@/contexts/ToastContext";
+import CatalogViewTracker from "@/components/analytics/CatalogViewTracker";
 
 type FoodDetails = {
   id: string;
@@ -83,9 +84,10 @@ export default function FoodDetailView({ id }: { id: string }) {
     );
   }
 
-  const gallery = food.gallery_urls?.filter(Boolean).length
+  const gallery = (food.gallery_urls?.filter(Boolean).length
     ? food.gallery_urls.filter(Boolean)
-    : [food.image_url || FOOD_FALLBACK];
+    : [food.image_url || FOOD_FALLBACK]
+  ).map((url) => getFoodImage(url));
   const quantity = quantities.get(food.id) || 0;
   const price = Number(food.discount_price || food.price);
   const originalPrice = Number(food.price);
@@ -107,6 +109,14 @@ export default function FoodDetailView({ id }: { id: string }) {
 
   return (
     <main className="min-h-screen bg-white pt-[90px] text-[#111827]">
+      <CatalogViewTracker
+        type="menu_item"
+        ready
+        id={food.id}
+        name={food.name}
+        restaurantId={food.restaurant_id}
+        price={price}
+      />
       <Navbar />
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-8">
         <Link href="/trending-dishes" className="mb-8 inline-flex items-center gap-2 text-[#6B7280] hover:text-[#111827]">
@@ -116,12 +126,13 @@ export default function FoodDetailView({ id }: { id: string }) {
         <section className="grid gap-10 lg:grid-cols-2">
           <div>
             <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-[#E5E7EB]">
-              <Image
-                src={gallery[activeImage]}
+              <SafeImage
+                src={gallery[activeImage] || FOOD_FALLBACK}
+                fallback={FOOD_FALLBACK}
                 alt={food.name}
-                fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
+                priority
+                className="absolute inset-0 h-full w-full object-cover"
               />
             </div>
             <div className="mt-4 grid grid-cols-3 gap-3">
@@ -134,12 +145,11 @@ export default function FoodDetailView({ id }: { id: string }) {
                   }`}
                   aria-label={`View ${food.name} image ${index + 1}`}
                 >
-                  <Image
+                  <SafeImage
                     src={image || FOOD_FALLBACK}
-                    alt=""
-                    fill
-                    sizes="(max-width: 1024px) 33vw, 220px"
-                    className="object-cover"
+                    fallback={FOOD_FALLBACK}
+                    alt={`${food.name} gallery image ${index + 1}`}
+                    className="absolute inset-0 h-full w-full object-cover"
                   />
                 </button>
               ))}
@@ -260,26 +270,31 @@ export default function FoodDetailView({ id }: { id: string }) {
 
         <section className="mt-16">
           <h2 className="mb-6 text-2xl font-black">Related Foods</h2>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {food.related_items?.map((item) => (
-              <Link key={item.id} href={`/food/${item.id}`} className="group overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white">
-                <div className="relative h-44 overflow-hidden">
-                  <Image
-                    src={item.image_url || FOOD_FALLBACK}
-                    alt={item.name}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover transition-transform group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-bold group-hover:text-primary">{item.name}</h3>
-                  <p className="mt-1 text-sm text-[#9CA3AF]">{item.restaurant_name}</p>
-                  <p className="mt-3 font-black">₹{Number(item.discount_price || item.price)}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
+          {food.related_items?.length ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {food.related_items.map((item) => (
+                <Link key={item.id} href={`/food/${item.id}`} className="group overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white">
+                  <div className="relative h-44 overflow-hidden">
+                    <SafeImage
+                      src={getFoodImage(item.image_url)}
+                      fallback={FOOD_FALLBACK}
+                      alt={item.name}
+                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold group-hover:text-primary">{item.name}</h3>
+                    <p className="mt-1 text-sm text-[#9CA3AF]">{item.restaurant_name}</p>
+                    <p className="mt-3 font-black">₹{Number(item.discount_price || item.price)}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-8 text-[#6B7280]">
+              No related dishes available right now.
+            </div>
+          )}
         </section>
       </div>
       <Footer />

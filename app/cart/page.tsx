@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CartItemCard, { CartItemType } from "@/components/cart/CartItemCard";
@@ -12,9 +12,11 @@ import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
 import { Trash2 } from "lucide-react";
 import { getFoodImage } from "@/lib/images";
+import { useAuthToken } from "@/hooks/useAuthToken";
 
 export default function CartPage() {
-  const { data, mutate, isLoading, error } = useSWR('/api/cart');
+  const authenticated = useAuthToken();
+  const { data, mutate, isLoading, error } = useSWR(authenticated ? '/api/cart' : null);
   const cartItems = data?.items || [];
   const totals = data?.totals || { subtotal: 0, deliveryCharge: 0, tax: 0, discount: 0, grandTotal: 0 };
   const [isUpdating, setIsUpdating] = useState(false);
@@ -36,6 +38,12 @@ export default function CartPage() {
       await api.put(`/api/cart/update/${id}`, { quantity: newQty });
       mutate();
       globalMutate("/api/cart");
+      void import("@/lib/analytics/events").then(({ AnalyticsEvents, trackEvent }) => {
+        trackEvent(delta > 0 ? AnalyticsEvents.addToCart : AnalyticsEvents.removeFromCart, {
+          item_id: item.menu_item_id || id,
+          quantity: Math.abs(delta),
+        });
+      });
     } catch (error) {
       console.error("Failed to update cart", error);
       showToast("Failed to update quantity", "error");
@@ -47,10 +55,17 @@ export default function CartPage() {
   const handleRemoveItem = async (id: string) => {
     try {
       setIsUpdating(true);
+      const item = cartItems.find((i: any) => i.cart_item_id === id || i.id === id);
       await api.delete(`/api/cart/remove/${id}`);
       mutate();
       globalMutate("/api/cart");
       showToast("Item removed from cart", "success");
+      void import("@/lib/analytics/events").then(({ AnalyticsEvents, trackEvent }) => {
+        trackEvent(AnalyticsEvents.removeFromCart, {
+          item_id: item?.menu_item_id || id,
+          quantity: item?.quantity || 1,
+        });
+      });
     } catch (error) {
       console.error("Failed to remove item", error);
       showToast("Failed to remove item", "error");
@@ -84,7 +99,7 @@ export default function CartPage() {
     isVeg: item.is_vegetarian || false,
   }));
 
-  if (isLoading) {
+  if (authenticated && isLoading) {
     return (
       <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
         <Navbar />
@@ -108,7 +123,7 @@ export default function CartPage() {
     );
   }
 
-  if (error) {
+  if (authenticated && error) {
     return (
       <main className="min-h-screen bg-[#FFFFFF] flex flex-col items-center justify-center gap-4 pt-[90px]">
         <Navbar />
@@ -127,15 +142,16 @@ export default function CartPage() {
         {/* Page Header */}
         <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between border-b border-[#E5E7EB] pb-8 gap-4">
           <div>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-[#111827] mb-3">
               🛒 Your Cart
             </h1>
-            <p className="text-[#A1A1A1] text-lg">
+            <p className="text-[#6B7280] text-lg">
               Review your selected items before checkout.
             </p>
           </div>
           {mappedCartItems.length > 0 && (
             <button 
+              type="button"
               onClick={handleClearCart}
               disabled={isUpdating}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#E5E7EB] text-[#6B7280] hover:text-[#111827] hover:bg-[#F8FAFC] hover:border-[#E5E7EB] transition-all font-medium disabled:opacity-50"

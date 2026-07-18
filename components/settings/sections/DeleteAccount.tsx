@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
+import { clearClientAuth } from "@/lib/authSession";
 
 export default function DeleteAccount() {
   const [confirmText, setConfirmText] = useState("");
@@ -22,8 +22,7 @@ export default function DeleteAccount() {
     setLoading(true);
     try {
       await api.delete("/api/profile", { data: { confirmation: "DELETE MY ACCOUNT" } });
-      Cookies.remove("token");
-      localStorage.removeItem("user");
+      clearClientAuth();
       showToast("Account deleted", "success");
       router.push("/");
     } catch (err: any) {

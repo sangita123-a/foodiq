@@ -1,39 +1,64 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Search, Filter, PlusCircle, MoreHorizontal, 
+  Search, PlusCircle, 
   Eye, Edit2, Copy, Trash2, CheckCircle2, XCircle, EyeOff,
   ChevronLeft, ChevronRight
 } from "lucide-react";
 import SafeImage from "@/components/ui/SafeImage";
 import { FOOD_FALLBACK } from "@/lib/images";
+import { formatRelativeTime } from "@/services/partnerApi";
 
-// --- Mock Dataset ---
-const MOCK_DISHES = [
-  { id: "d1", name: "Chicken Dum Biryani", category: "Main Course", price: 300, rating: 4.8, status: "Available", orders: 1245, updated: "2 hrs ago", image: "/images/catalog/food/biryani.webp" },
-  { id: "d2", name: "Paneer Butter Masala", category: "Main Course", price: 250, rating: 4.6, status: "Available", orders: 1102, updated: "1 day ago", image: "/images/catalog/food/north-indian.webp" },
-  { id: "d3", name: "Mutton Rogan Josh", category: "Main Course", price: 450, rating: 4.9, status: "Out of Stock", orders: 890, updated: "5 hrs ago", image: "/images/catalog/food/indian.webp" },
-  { id: "d4", name: "Garlic Naan", category: "Breads", price: 50, rating: 4.7, status: "Available", orders: 3450, updated: "3 days ago", image: "/images/catalog/food/north-indian.webp" },
-  { id: "d5", name: "Tandoori Roti", category: "Breads", price: 30, rating: 4.5, status: "Available", orders: 2800, updated: "1 week ago", image: "/images/catalog/food/north-indian.webp" },
-  { id: "d6", name: "Gulab Jamun", category: "Desserts", price: 80, rating: 4.9, status: "Hidden", orders: 1560, updated: "2 weeks ago", image: "/images/catalog/food/desserts.webp" },
-  { id: "d7", name: "Chicken Tikka", category: "Starters", price: 280, rating: 4.7, status: "Available", orders: 980, updated: "4 hrs ago", image: "/images/catalog/food/north-indian.webp" },
-  { id: "d8", name: "Diet Coke", category: "Beverages", price: 60, rating: 4.2, status: "Out of Stock", orders: 450, updated: "1 hr ago", image: "/images/catalog/food/beverages.webp" },
-];
+export type MenuTableDish = {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  rating: number;
+  status: string;
+  orders: number;
+  updated: string;
+  image: string;
+};
 
-export default function MenuTable() {
-  const [dishes, setDishes] = useState(MOCK_DISHES);
+type MenuTableProps = {
+  dishes?: MenuTableDish[];
+  categories?: string[];
+  onStatusChange?: (id: string, status: string) => void;
+  onDelete?: (id: string) => void;
+  onBulkDelete?: (ids: string[]) => void;
+  onBulkStatus?: (ids: string[], status: string) => void;
+};
+
+export default function MenuTable({
+  dishes: dishesProp,
+  categories = [],
+  onStatusChange,
+  onDelete,
+  onBulkDelete,
+  onBulkStatus,
+}: MenuTableProps) {
+  const [dishes, setDishes] = useState<MenuTableDish[]>(dishesProp || []);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  // Pagination (Mocked fixed limit for demo)
   const itemsPerPage = 6;
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Derived Data
+  useEffect(() => {
+    if (dishesProp) setDishes(dishesProp);
+  }, [dishesProp]);
+
+  const categoryOptions = useMemo(() => {
+    const fromData = Array.from(new Set(dishes.map((d) => d.category).filter(Boolean)));
+    return categories.length ? categories : fromData;
+  }, [dishes, categories]);
+
   const filteredDishes = useMemo(() => {
     return dishes.filter(dish => {
       const matchesSearch = dish.name.toLowerCase().includes(search.toLowerCase());
@@ -44,9 +69,8 @@ export default function MenuTable() {
   }, [dishes, search, categoryFilter, statusFilter]);
 
   const paginatedDishes = filteredDishes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-  const totalPages = Math.ceil(filteredDishes.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredDishes.length / itemsPerPage) || 1;
 
-  // Handlers
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
       setSelectedIds(new Set(paginatedDishes.map(d => d.id)));
@@ -64,26 +88,33 @@ export default function MenuTable() {
 
   const changeStatus = (id: string, newStatus: string) => {
     setDishes(prev => prev.map(d => d.id === id ? { ...d, status: newStatus } : d));
+    onStatusChange?.(id, newStatus);
   };
 
-  // Bulk Actions
   const handleBulkDelete = () => {
+    const ids = Array.from(selectedIds);
     setDishes(prev => prev.filter(d => !selectedIds.has(d.id)));
     setSelectedIds(new Set());
+    onBulkDelete?.(ids);
   };
 
   const handleBulkStatus = (newStatus: string) => {
+    const ids = Array.from(selectedIds);
     setDishes(prev => prev.map(d => selectedIds.has(d.id) ? { ...d, status: newStatus } : d));
     setSelectedIds(new Set());
+    onBulkStatus?.(ids, newStatus);
+  };
+
+  const handleDelete = (id: string) => {
+    setDishes(prev => prev.filter(d => d.id !== id));
+    onDelete?.(id);
   };
 
   return (
     <div className="bg-[#FFFFFF] rounded-3xl border border-[#E5E7EB] shadow-2xl overflow-hidden relative">
       
-      {/* Top Action Bar */}
       <div className="p-6 border-b border-[#E5E7EB] flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-[#F8FAFC]">
         
-        {/* Search & Filters */}
         <div className="flex flex-col md:flex-row items-center gap-4 flex-1">
           <div className="relative w-full md:max-w-md">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9CA3AF]" />
@@ -102,11 +133,9 @@ export default function MenuTable() {
             className="w-full md:w-auto bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors appearance-none cursor-pointer"
           >
             <option value="All">All Categories</option>
-            <option value="Main Course">Main Course</option>
-            <option value="Breads">Breads</option>
-            <option value="Starters">Starters</option>
-            <option value="Desserts">Desserts</option>
-            <option value="Beverages">Beverages</option>
+            {categoryOptions.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
           </select>
 
           <select 
@@ -121,14 +150,15 @@ export default function MenuTable() {
           </select>
         </div>
 
-        {/* Primary Action */}
-        <button className="w-full xl:w-auto bg-[#FC8019] hover:bg-[#E66F0D] text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-lg flex items-center justify-center gap-2 flex-shrink-0">
+        <Link
+          href="/partner/menu/add-dish"
+          className="w-full xl:w-auto bg-[#FC8019] hover:bg-[#E66F0D] text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-lg flex items-center justify-center gap-2 flex-shrink-0"
+        >
           <PlusCircle className="w-5 h-5" /> Add New Dish
-        </button>
+        </Link>
 
       </div>
 
-      {/* Bulk Actions Bar (Sliding Panel) */}
       <AnimatePresence>
         {selectedIds.size > 0 && (
           <motion.div 
@@ -141,15 +171,14 @@ export default function MenuTable() {
               {selectedIds.size} {selectedIds.size === 1 ? 'dish' : 'dishes'} selected
             </span>
             <div className="flex items-center gap-2">
-              <button onClick={() => handleBulkStatus("Available")} className="bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] text-[#111827] px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Mark Available</button>
-              <button onClick={() => handleBulkStatus("Out of Stock")} className="bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] text-[#111827] px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Mark Out of Stock</button>
-              <button onClick={handleBulkDelete} className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Delete Selected</button>
+              <button type="button" onClick={() => handleBulkStatus("Available")} className="bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] text-[#111827] px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Mark Available</button>
+              <button type="button" onClick={() => handleBulkStatus("Out of Stock")} className="bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] text-[#111827] px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Mark Out of Stock</button>
+              <button type="button" onClick={handleBulkDelete} className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Delete Selected</button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Table Container */}
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[1000px]">
           <thead>
@@ -202,15 +231,14 @@ export default function MenuTable() {
                     </div>
                   </td>
                   <td className="p-4">
-                    <span className="bg-[#F8FAFC] border border-[#E5E7EB] px-3 py-1 rounded-full text-xs text-[#6B7280]">{dish.category}</span>
+                    <span className="bg-[#F8FAFC] border border-[#E5E7EB] px-3 py-1 rounded-full text-xs text-[#6B7280]">{dish.category || "Uncategorized"}</span>
                   </td>
                   <td className="p-4">
                     <span className="text-[#111827] font-bold">₹{dish.price}</span>
                   </td>
                   <td className="p-4">
-                    {/* Status Toggle Dropdown (Simulated via hover or click) */}
                     <div className="relative group/status inline-block">
-                      <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors
+                      <button type="button" className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors
                         ${dish.status === 'Available' ? 'bg-green-500/10 text-green-400 border-green-500/20' : ''}
                         ${dish.status === 'Out of Stock' ? 'bg-red-500/10 text-red-400 border-red-500/20' : ''}
                         ${dish.status === 'Hidden' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : ''}
@@ -221,11 +249,10 @@ export default function MenuTable() {
                         {dish.status}
                       </button>
                       
-                      {/* Simple Hover Menu for Status Change */}
                       <div className="absolute top-full left-0 mt-2 w-36 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl shadow-2xl opacity-0 invisible group-hover/status:opacity-100 group-hover/status:visible transition-all z-20 py-1">
-                        <button onClick={() => changeStatus(dish.id, "Available")} className="w-full text-left px-4 py-2 text-xs text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827] transition-colors">Available</button>
-                        <button onClick={() => changeStatus(dish.id, "Out of Stock")} className="w-full text-left px-4 py-2 text-xs text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827] transition-colors">Out of Stock</button>
-                        <button onClick={() => changeStatus(dish.id, "Hidden")} className="w-full text-left px-4 py-2 text-xs text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827] transition-colors">Hidden</button>
+                        <button type="button" onClick={() => changeStatus(dish.id, "Available")} className="w-full text-left px-4 py-2 text-xs text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827] transition-colors">Available</button>
+                        <button type="button" onClick={() => changeStatus(dish.id, "Out of Stock")} className="w-full text-left px-4 py-2 text-xs text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827] transition-colors">Out of Stock</button>
+                        <button type="button" onClick={() => changeStatus(dish.id, "Hidden")} className="w-full text-left px-4 py-2 text-xs text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827] transition-colors">Hidden</button>
                       </div>
                     </div>
                   </td>
@@ -235,16 +262,16 @@ export default function MenuTable() {
                   </td>
                   <td className="p-4 pr-6 text-right">
                     <div className="flex items-center justify-end gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
-                      <button className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:text-[#111827] transition-colors" title="View">
+                      <Link href={`/partner/menu/add-dish?edit=${dish.id}`} className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:text-[#111827] transition-colors" title="View">
                         <Eye className="w-4 h-4" />
-                      </button>
-                      <button className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-[#FC8019]/20 border border-[#E5E7EB] hover:border-[#FC8019]/30 flex items-center justify-center text-[#6B7280] hover:text-[#FC8019] transition-colors" title="Edit">
+                      </Link>
+                      <Link href={`/partner/menu/add-dish?edit=${dish.id}`} className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-[#FC8019]/20 border border-[#E5E7EB] hover:border-[#FC8019]/30 flex items-center justify-center text-[#6B7280] hover:text-[#FC8019] transition-colors" title="Edit">
                         <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:text-[#111827] transition-colors" title="Duplicate">
+                      </Link>
+                      <button type="button" className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:text-[#111827] transition-colors" title="Duplicate">
                         <Copy className="w-4 h-4" />
                       </button>
-                      <button className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-red-500/20 border border-[#E5E7EB] hover:border-red-500/30 flex items-center justify-center text-[#6B7280] hover:text-red-400 transition-colors" title="Delete">
+                      <button type="button" onClick={() => handleDelete(dish.id)} className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-red-500/20 border border-[#E5E7EB] hover:border-red-500/30 flex items-center justify-center text-[#6B7280] hover:text-red-400 transition-colors" title="Delete">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -262,14 +289,14 @@ export default function MenuTable() {
         )}
       </div>
 
-      {/* Pagination */}
       <div className="p-4 border-t border-[#E5E7EB] bg-[#F8FAFC] flex items-center justify-between">
         <p className="text-xs text-[#9CA3AF]">
-          Showing {Math.min(filteredDishes.length, (currentPage - 1) * itemsPerPage + 1)} to {Math.min(filteredDishes.length, currentPage * itemsPerPage)} of {filteredDishes.length} dishes
+          Showing {filteredDishes.length === 0 ? 0 : Math.min(filteredDishes.length, (currentPage - 1) * itemsPerPage + 1)} to {Math.min(filteredDishes.length, currentPage * itemsPerPage)} of {filteredDishes.length} dishes
         </p>
         
         <div className="flex gap-2">
           <button 
+            type="button"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             className="p-2 rounded-lg bg-[#FFFFFF] border border-[#E5E7EB] text-[#6B7280] hover:text-[#111827] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -277,7 +304,8 @@ export default function MenuTable() {
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button 
-            disabled={currentPage === totalPages || totalPages === 0}
+            type="button"
+            disabled={currentPage === totalPages || filteredDishes.length === 0}
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
             className="p-2 rounded-lg bg-[#FFFFFF] border border-[#E5E7EB] text-[#6B7280] hover:text-[#111827] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >

@@ -17,21 +17,23 @@ const {
   isValidPassword,
   isValidPhone,
 } = require('../utils/validation');
+const { setAuthCookies, clearAuthCookies } = require('../utils/authCookies');
+const { fail } = require('../utils/respond');
+const { log } = require('../utils/logger');
+
+const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS || 12);
 
 // @desc    Register new user
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
   try {
-    console.log('[AUTH] Register request received');
-
     const full_name = String(req.body.full_name || '').trim();
     const email = normalizeEmail(req.body.email);
     const password = req.body.password;
     const phone = String(req.body.phone || req.body.phone_number || '').trim();
 
     if (!full_name || !email || !password || !phone) {
-      console.log('[AUTH] Register failed: missing fields');
       return res.status(400).json({
         success: false,
         message: 'Please include all fields (full_name, email, password, phone)',
@@ -40,7 +42,6 @@ const registerUser = async (req, res) => {
     }
 
     if (!isValidEmail(email)) {
-      console.log('[AUTH] Register failed: invalid email format', email);
       return res.status(400).json({
         success: false,
         message: 'Invalid email format',
@@ -49,16 +50,15 @@ const registerUser = async (req, res) => {
     }
 
     if (!isValidPassword(password)) {
-      console.log('[AUTH] Register failed: password too short');
       return res.status(400).json({
         success: false,
-        message: 'Password must be at least 8 characters long',
+        message:
+          'Password must be at least 8 characters and include a letter and a number',
         error: {},
       });
     }
 
     if (!isValidPhone(phone)) {
-      console.log('[AUTH] Register failed: invalid phone', phone);
       return res.status(400).json({
         success: false,
         message: 'Invalid phone number format',
@@ -69,7 +69,6 @@ const registerUser = async (req, res) => {
     const userExists = await findUserByEmail(email);
 
     if (userExists) {
-      console.log('[AUTH] Register failed: user already exists', email);
       return res.status(400).json({
         success: false,
         message: 'User already exists with this email',
@@ -77,9 +76,8 @@ const registerUser = async (req, res) => {
       });
     }
 
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
     const password_hash = await bcrypt.hash(password, salt);
-    console.log('[AUTH] Password hashed with bcrypt for new user');
 
     const user = await createUser({
       full_name,
@@ -114,11 +112,10 @@ const registerUser = async (req, res) => {
           forceEmail: true,
         });
       } catch (err) {
-        console.warn('[AUTH] welcome email skipped', err.message);
+        log.warn('welcome email skipped', { error: err.message });
       }
 
       const token = generateToken(user.id);
-      console.log('[AUTH] Register successful, JWT generated for user', user.id);
 
       let refresh_token = null;
       try {
@@ -136,15 +133,8 @@ const registerUser = async (req, res) => {
         req,
       }).catch(() => {});
 
-      // Secure cookie optional (SPA still uses Bearer in localStorage/cookie token)
-      if (String(process.env.AUTH_SECURE_COOKIES || '').toLowerCase() === 'true') {
-        res.cookie('token', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 30 * 24 * 60 * 60 * 1000,
-        });
-      }
+      // Secure httpOnly cookies (also returns Bearer token for SPA)
+      setAuthCookies(res, { accessToken: token, refreshToken: refresh_token });
 
       res.status(201).json({
         success: true,
@@ -167,12 +157,7 @@ const registerUser = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('[AUTH] Register error:', error.message);
-    res.status(500).json({
-      success: false,
-      message: 'Server Error during registration',
-      error: error.message,
-    });
+    return fail(res, 500, 'Server Error during registration', error);
   }
 };
 
@@ -181,13 +166,10 @@ const registerUser = async (req, res) => {
 // @access  Public
 const loginUser = async (req, res) => {
   try {
-    console.log('[AUTH] Login request received');
-
     const email = normalizeEmail(req.body.email);
     const password = req.body.password;
 
     if (!email || !password) {
-      console.log('[AUTH] Login failed: missing email or password');
       return res.status(400).json({
         success: false,
         message: 'Please include email and password',
@@ -203,25 +185,21 @@ const loginUser = async (req, res) => {
         action: 'failed_login',
         category: 'auth',
         status: 'failure',
-        message: `No account for ${email}`,
+        message: 'Login failed',
         req,
       }).catch(() => {});
-      console.log('[AUTH] Login failed: user not found for email', email);
       return res.status(401).json({
         success: false,
-        message: 'No account found for this email address.',
+        message: 'Invalid email or password.',
         error: {},
       });
     }
 
-    console.log('[AUTH] User found:', user.id, user.email);
-
     if (!user.password_hash || !user.password_hash.startsWith('$2')) {
       bump('auth_failed');
-      console.log('[AUTH] Login failed: invalid password hash stored for user', user.id);
       return res.status(401).json({
         success: false,
-        message: 'Account password is invalid. Please reset your password or contact support.',
+        message: 'Invalid email or password.',
         error: {},
       });
     }
@@ -247,15 +225,12 @@ const loginUser = async (req, res) => {
           message: 'Multiple failed login attempts detected',
         }).catch(() => {});
       }
-      console.log('[AUTH] Login failed: password did not match for user', user.id);
       return res.status(401).json({
         success: false,
-        message: 'Incorrect password. Please try again.',
+        message: 'Invalid email or password.',
         error: {},
       });
     }
-
-    console.log('[AUTH] Password matched for user', user.id);
 
     const token = generateToken(user.id);
     let refresh_token = null;
@@ -264,7 +239,6 @@ const loginUser = async (req, res) => {
     } catch {
       /* optional */
     }
-    console.log('[AUTH] JWT generated for user', user.id);
 
     writeAudit({
       userId: user.id,
@@ -275,14 +249,7 @@ const loginUser = async (req, res) => {
       req,
     }).catch(() => {});
 
-    if (String(process.env.AUTH_SECURE_COOKIES || '').toLowerCase() === 'true') {
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-      });
-    }
+    setAuthCookies(res, { accessToken: token, refreshToken: refresh_token });
 
     res.json({
       success: true,
@@ -298,12 +265,7 @@ const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('[AUTH] Login error:', error.message);
-    res.status(500).json({
-      success: false,
-      message: 'Server Error during login',
-      error: error.message,
-    });
+    return fail(res, 500, 'Server Error during login', error);
   }
 };
 
@@ -334,11 +296,7 @@ const getUserProfile = async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server Error retrieving profile',
-      error: error.message,
-    });
+    return fail(res, 500, 'Server Error retrieving profile', error);
   }
 };
 
@@ -376,11 +334,7 @@ const updateUserProfile = async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server Error updating profile',
-      error: error.message,
-    });
+    return fail(res, 500, 'Server Error updating profile', error);
   }
 };
 
@@ -396,11 +350,12 @@ const forgotPassword = async (req, res) => {
 
     const user = await findUserByEmail(email);
     if (!user) {
-      // Do not reveal whether email exists in production; keep friendly message for UX.
-      return res.status(404).json({
-        success: false,
-        message: 'No account found for this email address.',
-        error: {},
+      // Same response as success — avoid account enumeration
+      return res.json({
+        success: true,
+        message:
+          'If an account exists for this email, a password reset code has been sent.',
+        data: { email },
       });
     }
 
@@ -415,22 +370,30 @@ const forgotPassword = async (req, res) => {
     });
 
     const payload = { email, expires_at: otpResult.expires_at };
-    if (otpResult.debug_code) payload.debug_code = otpResult.debug_code;
+    // Never expose OTP codes outside non-production + explicit OTP_EXPOSE_CODE
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      otpResult.debug_code &&
+      String(process.env.OTP_EXPOSE_CODE || '').toLowerCase() === 'true'
+    ) {
+      payload.debug_code = otpResult.debug_code;
+    }
 
     res.json({
       success: true,
-      message: 'Password reset code sent to your email' +
-        (channel === 'both' ? ' and phone' : '') +
-        '. Enter the code to set a new password.',
+      message:
+        'If an account exists for this email, a password reset code has been sent.',
       data: payload,
     });
   } catch (error) {
-    const status = error.status || 500;
-    res.status(status).json({
-      success: false,
-      message: error.message || 'Server Error during password reset request',
-      error: error.message,
-    });
+    return fail(
+      res,
+      error.status || 500,
+      error.status && error.status < 500
+        ? error.message
+        : 'Unable to process password reset request',
+      error
+    );
   }
 };
 
@@ -454,24 +417,29 @@ const resetPassword = async (req, res) => {
     if (!isValidPassword(newPassword)) {
       return res.status(400).json({
         success: false,
-        message: 'Password must be at least 8 characters long',
+        message:
+          'Password must be at least 8 characters and include a letter and a number',
         error: {},
       });
     }
 
     const user = await findUserByEmail(email);
     if (!user) {
-      return res.status(404).json({
+      return res.status(400).json({
         success: false,
-        message: 'No account found for this email address.',
+        message: 'Invalid or expired reset code',
         error: {},
       });
     }
 
     const { verifyOtp } = require('../services/otpService');
-    // Allow legacy demo code FOODIQ only when EMAIL_PROVIDER=mock
+    // Legacy demo code FOODIQ only in non-production mock email mode
     const isMockEmail = String(process.env.EMAIL_PROVIDER || 'mock').toLowerCase() === 'mock';
-    if (!(isMockEmail && resetCode.toUpperCase() === 'FOODIQ')) {
+    const allowDemoReset =
+      process.env.NODE_ENV !== 'production' &&
+      isMockEmail &&
+      resetCode.toUpperCase() === 'FOODIQ';
+    if (!allowDemoReset) {
       await verifyOtp({
         destination: email,
         purpose: 'password_reset',
@@ -479,7 +447,7 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
     const password_hash = await bcrypt.hash(newPassword, salt);
     await updateUserPassword(user.id, password_hash);
 
@@ -498,12 +466,14 @@ const resetPassword = async (req, res) => {
       data: {},
     });
   } catch (error) {
-    const status = error.status || 500;
-    res.status(status).json({
-      success: false,
-      message: error.message || 'Server Error during password reset',
-      error: error.message,
-    });
+    return fail(
+      res,
+      error.status || 500,
+      error.status && error.status < 500
+        ? error.message
+        : 'Unable to reset password',
+      error
+    );
   }
 };
 
@@ -512,7 +482,7 @@ const resetPassword = async (req, res) => {
 // @access  Public
 const logoutUser = async (req, res) => {
   try {
-    const refresh = req.body?.refresh_token;
+    const refresh = req.body?.refresh_token || req.cookies?.refresh_token;
     if (refresh) await revokeRefreshToken(refresh);
     if (req.user?.id) {
       writeAudit({
@@ -523,18 +493,14 @@ const logoutUser = async (req, res) => {
         req,
       }).catch(() => {});
     }
-    res.clearCookie('token');
+    clearAuthCookies(res);
     res.json({
       success: true,
       message: 'Logged out successfully. Please remove token on the client.',
       data: {},
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Logout failed',
-      error: error.message,
-    });
+    return fail(res, 500, 'Logout failed', error);
   }
 };
 
@@ -555,6 +521,10 @@ const refreshAccessToken = async (req, res) => {
       category: 'auth',
       req,
     }).catch(() => {});
+    setAuthCookies(res, {
+      accessToken: rotated.access,
+      refreshToken: rotated.refresh,
+    });
     res.json({
       success: true,
       message: 'Token refreshed',
@@ -564,11 +534,7 @@ const refreshAccessToken = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(error.status || 401).json({
-      success: false,
-      message: error.message || 'Refresh failed',
-      error: {},
-    });
+    return fail(res, error.status || 401, error.message || 'Refresh failed', error);
   }
 };
 

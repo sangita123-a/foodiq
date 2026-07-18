@@ -25,6 +25,7 @@ export interface DishState {
   customizations: DishCustomization[];
   badges: {
     bestseller: boolean;
+    trending: boolean;
     chefsSpecial: boolean;
     healthyChoice: boolean;
     newArrival: boolean;
@@ -53,6 +54,7 @@ export const initialDishState: DishState = {
   customizations: [],
   badges: {
     bestseller: false,
+    trending: false,
     chefsSpecial: false,
     healthyChoice: false,
     newArrival: false,

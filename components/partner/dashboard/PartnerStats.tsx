@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { motion, useInView, useSpring, useTransform } from "framer-motion";
-import { ShoppingBag, DollarSign, Clock, CheckCircle2, Star, UtensilsCrossed } from "lucide-react";
+import { ShoppingBag, DollarSign, Clock, CheckCircle2, UtensilsCrossed } from "lucide-react";
 
 function Counter({ from, to, duration = 2, prefix = "", suffix = "", decimals = 0 }: { from: number, to: number, duration?: number, prefix?: string, suffix?: string, decimals?: number }) {
   const ref = useRef(null);
@@ -12,7 +12,6 @@ function Counter({ from, to, duration = 2, prefix = "", suffix = "", decimals = 
   
   const formatted = useTransform(spring, (latest) => {
     const num = latest.toFixed(decimals);
-    // Add commas for thousands
     const parts = num.split(".");
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     return `${prefix}${parts.join(".")}${suffix}`;
@@ -27,14 +26,39 @@ function Counter({ from, to, duration = 2, prefix = "", suffix = "", decimals = 
   return <motion.span ref={ref}>{formatted}</motion.span>;
 }
 
-export default function PartnerStats() {
-  const stats = [
-    { title: "Today's Orders", value: 142, icon: ShoppingBag, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20" },
-    { title: "Today's Revenue", value: 45280, prefix: "₹", icon: DollarSign, color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20" },
-    { title: "Pending Orders", value: 12, icon: Clock, color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20" },
-    { title: "Completed Orders", value: 128, icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20" },
-    { title: "Average Rating", value: 4.8, decimals: 1, icon: Star, color: "text-purple-400", bg: "bg-purple-400/10", border: "border-purple-400/20" },
-    { title: "Active Menu Items", value: 64, icon: UtensilsCrossed, color: "text-[#FC8019]", bg: "bg-[#FC8019]/10", border: "border-[#FC8019]/20" }
+type PartnerStatsProps = {
+  totalOrders?: number;
+  todaysOrders?: number;
+  todaysRevenue?: number;
+  pendingOrders?: number;
+  completedOrders?: number;
+  activeMenuItems?: number;
+};
+
+export default function PartnerStats({
+  totalOrders = 0,
+  todaysOrders = 0,
+  todaysRevenue = 0,
+  pendingOrders = 0,
+  completedOrders = 0,
+  activeMenuItems = 0,
+}: PartnerStatsProps) {
+  const stats: Array<{
+    title: string;
+    value: number;
+    icon: typeof ShoppingBag;
+    color: string;
+    bg: string;
+    border: string;
+    prefix?: string;
+    decimals?: number;
+  }> = [
+    { title: "Total Orders", value: totalOrders, icon: ShoppingBag, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20" },
+    { title: "Today's Orders", value: todaysOrders, icon: ShoppingBag, color: "text-sky-400", bg: "bg-sky-400/10", border: "border-sky-400/20" },
+    { title: "Today's Revenue", value: todaysRevenue, prefix: "₹", icon: DollarSign, color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20" },
+    { title: "Pending Orders", value: pendingOrders, icon: Clock, color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20" },
+    { title: "Completed Orders", value: completedOrders, icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20" },
+    { title: "Active Menu Items", value: activeMenuItems, icon: UtensilsCrossed, color: "text-[#FC8019]", bg: "bg-[#FC8019]/10", border: "border-[#FC8019]/20" },
   ];
 
   return (
@@ -48,7 +72,6 @@ export default function PartnerStats() {
           whileHover={{ y: -5 }}
           className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#E5E7EB] shadow-lg group hover:border-[#E5E7EB] transition-all cursor-pointer relative overflow-hidden"
         >
-          {/* subtle background glow on hover */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFC] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           
           <div className="flex items-center justify-between relative z-10">

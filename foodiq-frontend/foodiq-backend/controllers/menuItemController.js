@@ -7,14 +7,22 @@ const {
   updateMenuItem,
   deleteMenuItem,
 } = require('../models/menuItemModel');
+const cache = require('../services/cacheService');
+const { invalidateCatalog } = require('../middleware/cacheMiddleware');
 
 const getAll = async (req, res) => {
   try {
-    const items = await getMenuItems({
+    const filters = {
       trending: req.query.trending,
       limit: req.query.limit,
       search: req.query.search || '',
-    });
+    };
+    const key = cache.cacheKey('menu:list', filters);
+    const ttl = Number(process.env.CACHE_TTL_MENU || 60);
+    const { data: items, cache: status } = await cache.wrap(key, ttl, () =>
+      getMenuItems(filters)
+    );
+    res.setHeader('X-Cache', status);
     res.json({ success: true, message: 'Menu items retrieved', data: items });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -24,8 +32,14 @@ const getAll = async (req, res) => {
 const getById = async (req, res) => {
   try {
     const { id } = req.params;
-    const item = await getMenuItemDetailsById(id);
+    const key = cache.cacheKey('menu:id', { id });
+    const { data: item, cache: status } = await cache.wrap(
+      key,
+      Number(process.env.CACHE_TTL_MENU || 60),
+      () => getMenuItemDetailsById(id)
+    );
     if (!item) return res.status(404).json({ success: false, message: 'Menu item not found', error: {} });
+    res.setHeader('X-Cache', status);
     res.json({ success: true, message: 'Menu item retrieved', data: item });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -35,7 +49,13 @@ const getById = async (req, res) => {
 const getByRestaurant = async (req, res) => {
   try {
     const { restaurantId } = req.params;
-    const items = await getMenuItemsByRestaurant(restaurantId);
+    const key = cache.cacheKey('menu:restaurant', { id: restaurantId });
+    const { data: items, cache: status } = await cache.wrap(
+      key,
+      Number(process.env.CACHE_TTL_MENU || 60),
+      () => getMenuItemsByRestaurant(restaurantId)
+    );
+    res.setHeader('X-Cache', status);
     res.json({ success: true, message: 'Restaurant menu retrieved', data: items });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -50,6 +70,7 @@ const create = async (req, res) => {
     }
 
     const newItem = await createMenuItem(req.body);
+    await invalidateCatalog();
     res.status(201).json({ success: true, message: 'Menu item created', data: newItem });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -63,6 +84,7 @@ const update = async (req, res) => {
     if (!item) return res.status(404).json({ success: false, message: 'Menu item not found', error: {} });
 
     const updatedItem = await updateMenuItem(id, req.body);
+    await invalidateCatalog();
     res.json({ success: true, message: 'Menu item updated', data: updatedItem });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -76,6 +98,7 @@ const remove = async (req, res) => {
     if (!item) return res.status(404).json({ success: false, message: 'Menu item not found', error: {} });
 
     await deleteMenuItem(id);
+    await invalidateCatalog();
     res.json({ success: true, message: 'Menu item deleted', data: {} });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });

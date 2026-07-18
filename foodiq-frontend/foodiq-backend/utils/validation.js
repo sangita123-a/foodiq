@@ -4,7 +4,12 @@ const isValidEmail = (email) => {
 };
 
 const isValidPassword = (password) => {
-  return password && password.length >= 8;
+  if (!password || password.length < 8) return false;
+  // Require at least one letter and one number in production-hardened mode
+  if (String(process.env.STRICT_PASSWORD_POLICY || 'true').toLowerCase() === 'true') {
+    return /[A-Za-z]/.test(password) && /[0-9]/.test(password);
+  }
+  return true;
 };
 
 const isValidPhone = (phone) => {

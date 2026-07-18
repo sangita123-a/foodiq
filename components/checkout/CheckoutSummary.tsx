@@ -12,6 +12,7 @@ type Props = {
   onPlaceOrder: () => void;
   isSubmitting?: boolean;
   buttonLabel?: string;
+  estimatedDeliveryMinutes?: number;
 };
 
 export default function CheckoutSummary({
@@ -24,9 +25,12 @@ export default function CheckoutSummary({
   onPlaceOrder,
   isSubmitting,
   buttonLabel = "Place Order",
+  estimatedDeliveryMinutes = 30,
 }: Props) {
   const taxes = tax !== undefined ? tax : Math.round(subtotal * 0.05);
-  const grandTotal = subtotal + deliveryCharge + taxes - discount;
+  const grandTotal = Math.max(0, subtotal + deliveryCharge + taxes - discount);
+  const etaLow = Math.max(10, estimatedDeliveryMinutes - 5);
+  const etaHigh = estimatedDeliveryMinutes + 5;
 
   return (
     <div className="sticky top-[100px] rounded-2xl border border-[#ECECEC] bg-white p-6 shadow-[0_12px_32px_rgba(28,28,28,0.08)] md:p-8">
@@ -38,7 +42,7 @@ export default function CheckoutSummary({
           <h3 className="mb-1 text-xl font-bold tracking-[-0.025em] text-[#1C1C1C]">{restaurantName}</h3>
           <div className="flex items-center gap-1.5 text-xs text-[#686B78]">
             <Clock className="w-3.5 h-3.5" />
-            Estimated Delivery: 20-25 mins
+            Estimated Delivery: {etaLow}-{etaHigh} mins
           </div>
         </div>
       </div>
@@ -87,8 +91,9 @@ export default function CheckoutSummary({
       </div>
 
       <button
+        type="button"
         onClick={onPlaceOrder}
-        disabled={isSubmitting}
+        disabled={isSubmitting || items.length === 0}
         className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FC8019] py-4 font-bold text-white shadow-[0_8px_20px_rgba(252,128,25,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#EF4F5F] hover:shadow-[0_12px_26px_rgba(239,79,95,0.22)] disabled:opacity-50"
       >
         {buttonLabel}

@@ -6,37 +6,60 @@ const {
   deleteReview,
 } = require('../models/reviewModel');
 const { updateRestaurantRating } = require('../models/restaurantModel');
+const { getOrderById } = require('../models/orderModel');
+const { ok, fail } = require('../utils/respond');
 
 const getForRestaurant = async (req, res) => {
   try {
     const restaurantId = req.params.restaurantId;
     const reviews = await getReviewsByRestaurant(restaurantId);
-    res.json({ success: true, message: 'Reviews retrieved', data: reviews });
+    return ok(res, 'Reviews retrieved', reviews);
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    return fail(res, 500, 'Server Error', error);
   }
 };
 
 const create = async (req, res) => {
   try {
     const restaurantId = req.params.restaurantId;
-    // Always derive the reviewer from the authenticated user, never from the body.
     const user_id = req.user.id;
     const rating = Number(req.body.rating);
     const comment = req.body.comment;
+    const order_id = req.body.order_id || null;
 
     if (!rating || rating < 1 || rating > 5) {
-      return res.status(400).json({ success: false, message: 'A rating between 1 and 5 is required', error: {} });
+      return fail(res, 400, 'A rating between 1 and 5 is required');
     }
 
-    const newReview = await createReview({ user_id, restaurant_id: restaurantId, rating, comment });
-    
-    // Update the average rating for the restaurant
-    await updateRestaurantRating(restaurantId);
+    if (order_id) {
+      const order = await getOrderById(order_id);
+      if (!order) return fail(res, 404, 'Order not found');
+      if (order.user_id !== user_id) return fail(res, 403, 'Not authorized for this order');
+      if (String(order.restaurant_id) !== String(restaurantId)) {
+        return fail(res, 400, 'Order does not belong to this restaurant');
+      }
+      const delivered =
+        String(order.status || '').toLowerCase() === 'delivered';
+      if (!delivered) {
+        return fail(res, 400, 'Order must be delivered before reviewing');
+      }
+    }
 
-    res.status(201).json({ success: true, message: 'Review created', data: newReview });
+    const newReview = await createReview({
+      user_id,
+      restaurant_id: restaurantId,
+      rating,
+      comment,
+      order_id,
+    });
+
+    await updateRestaurantRating(restaurantId);
+    return ok(res, 'Review created', newReview, 201);
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    if (error.code === '23505') {
+      return fail(res, 409, 'You already reviewed this order');
+    }
+    return fail(res, 500, 'Server Error', error);
   }
 };
 
@@ -44,19 +67,16 @@ const update = async (req, res) => {
   try {
     const { id } = req.params;
     const review = await getReviewById(id);
-    if (!review) return res.status(404).json({ success: false, message: 'Review not found', error: {} });
+    if (!review) return fail(res, 404, 'Review not found');
     if (review.user_id !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ success: false, message: 'Not authorized to modify this review', error: {} });
+      return fail(res, 403, 'Not authorized to modify this review');
     }
 
     const updatedReview = await updateReview(id, req.body);
-    
-    // Update the average rating
     await updateRestaurantRating(updatedReview.restaurant_id);
-
-    res.json({ success: true, message: 'Review updated', data: updatedReview });
+    return ok(res, 'Review updated', updatedReview);
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    return fail(res, 500, 'Server Error', error);
   }
 };
 
@@ -64,19 +84,16 @@ const remove = async (req, res) => {
   try {
     const { id } = req.params;
     const review = await getReviewById(id);
-    if (!review) return res.status(404).json({ success: false, message: 'Review not found', error: {} });
+    if (!review) return fail(res, 404, 'Review not found');
     if (review.user_id !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ success: false, message: 'Not authorized to delete this review', error: {} });
+      return fail(res, 403, 'Not authorized to delete this review');
     }
 
     const deletedReview = await deleteReview(id);
-    
-    // Update the average rating
     await updateRestaurantRating(deletedReview.restaurant_id);
-
-    res.json({ success: true, message: 'Review deleted', data: {} });
+    return ok(res, 'Review deleted', {});
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    return fail(res, 500, 'Server Error', error);
   }
 };
 

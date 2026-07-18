@@ -3,8 +3,19 @@ const crypto = require('crypto');
 let razorpayInstance = null;
 
 const isMockMode = () => {
-  if (process.env.RAZORPAY_MOCK === 'true') return true;
-  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) return true;
+  const explicit = String(process.env.RAZORPAY_MOCK || '').toLowerCase();
+  if (explicit === 'true') {
+    // Production requires explicit ALLOW_PAYMENT_MOCK=true to use mock payments
+    if (process.env.NODE_ENV === 'production') {
+      return String(process.env.ALLOW_PAYMENT_MOCK || '').toLowerCase() === 'true';
+    }
+    return true;
+  }
+  if (explicit === 'false') return false;
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    if (process.env.NODE_ENV === 'production') return false;
+    return true;
+  }
   return false;
 };
 
@@ -89,7 +100,13 @@ const verifyPaymentSignature = ({ razorpay_order_id, razorpay_payment_id, razorp
     .createHmac('sha256', getSecret())
     .update(body)
     .digest('hex');
-  const valid = expected === razorpay_signature;
+  const expectedBuf = Buffer.from(expected, 'utf8');
+  const signatureBuf = Buffer.from(String(razorpay_signature || ''), 'utf8');
+  if (expectedBuf.length !== signatureBuf.length) {
+    console.warn('[razorpay] signature mismatch', { razorpay_order_id, razorpay_payment_id });
+    return false;
+  }
+  const valid = crypto.timingSafeEqual(expectedBuf, signatureBuf);
   if (!valid) {
     console.warn('[razorpay] signature mismatch', { razorpay_order_id, razorpay_payment_id });
   }

@@ -7,6 +7,7 @@ import { FOOD_FALLBACK } from "@/lib/images";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
 import { useState } from "react";
+import { isClientAuthenticated } from "@/lib/authSession";
 
 export type MenuItem = {
   id: string;
@@ -46,6 +47,10 @@ export default function MenuItemCard({
 
   const toggleFavorite = async () => {
     if (isTogglingFav) return;
+    if (!isClientAuthenticated()) {
+      showToast("Please login to save favorites", "error");
+      return;
+    }
     setIsTogglingFav(true);
     try {
       if (isFav) {
@@ -60,10 +65,6 @@ export default function MenuItemCard({
       onFavoriteToggle?.();
     } catch (error) {
       console.error(error);
-      // Toast is handled by global SWR but for manual API calls we can show it here if not caught
-      // Actually global SWR only catches SWR fetch errors. For manual API we should show toast:
-      // showToast("Failed to update favorite", "error"); 
-      // (The global interceptor doesn't show toast, the SWRConfig does)
       showToast("Failed to update favorites. Please try again.", "error");
     } finally {
       setIsTogglingFav(false);

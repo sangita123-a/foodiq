@@ -11,14 +11,16 @@ import useSWR from "swr";
 import api from "@/services/api";
 import { getRestaurantImage } from "@/lib/images";
 import { useToast } from "@/contexts/ToastContext";
+import { useAuthToken } from "@/hooks/useAuthToken";
 
 const FILTERS: OrderFilter[] = ["All Orders", "Active", "Delivered", "Cancelled"];
 
 export default function MyOrdersPage() {
   const [activeFilter, setActiveFilter] = useState<OrderFilter>("All Orders");
   const { showToast } = useToast();
+  const hasToken = useAuthToken();
   
-  const { data, isLoading, error, mutate } = useSWR('/api/orders', { refreshInterval: 10000 });
+  const { data, isLoading, error, mutate } = useSWR(hasToken ? '/api/orders' : null, { refreshInterval: 10000 });
   const backendOrders = data || [];
 
   const handleCancelOrder = async (orderId: string) => {

@@ -50,6 +50,11 @@ export default function DishPreviewCard({ dish }: DishPreviewCardProps) {
                 <Award className="w-3 h-3" /> Bestseller
               </span>
             )}
+            {dish.badges.trending && (
+              <span className="bg-[#FC8019] text-white text-xs font-black px-3 py-1 rounded-full shadow-lg">
+                Trending
+              </span>
+            )}
             {dish.badges.chefsSpecial && (
               <span className="bg-red-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
                 <Flame className="w-3 h-3" /> Chef's Special

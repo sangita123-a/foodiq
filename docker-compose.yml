@@ -1,0 +1,55 @@
+# Local / staging multi-service stack (optional). Secrets via .env — never commit real values.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: foodiq
+      POSTGRES_PASSWORD: foodiq
+      POSTGRES_DB: foodiq
+    ports:
+      - "5432:5432"
+    volumes:
+      - foodiq_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U foodiq -d foodiq"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: ./foodiq-frontend/foodiq-backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./foodiq-frontend/foodiq-backend/.env
+    environment:
+      DB_HOST: postgres
+      REDIS_URL: redis://redis:6379
+      REDIS_ENABLED: "true"
+      PORT: "4000"
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:4000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  foodiq_pg:

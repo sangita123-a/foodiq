@@ -1,0 +1,26 @@
+name: Continuous Integration
+
+# Lint, typecheck, unit tests, build, API smoke — every push & PR.
+# Must succeed before Development / Production deploy workflows run.
+
+on:
+  push:
+    branches: [main, master, develop, development, staging, production]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    uses: ./.github/workflows/reusable-ci.yml
+    with:
+      environment_label: ${{ github.ref_name }}
+      run_api_smoke: true
+      run_ui_smoke: ${{ github.ref_name == 'staging' || github.ref_name == 'production' || github.ref_name == 'main' || github.ref_name == 'master' }}
+      upload_artifacts: true
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+      NOTIFY_EMAIL_WEBHOOK: ${{ secrets.NOTIFY_EMAIL_WEBHOOK }}

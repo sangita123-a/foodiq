@@ -3,10 +3,10 @@
 import { Home, Package, Heart, MapPin, CreditCard, Ticket, Bell, Settings, LogOut, Award } from "lucide-react";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import api from "@/services/api";
 import SafeImage from "@/components/ui/SafeImage";
 import { AVATAR_FALLBACK } from "@/lib/images";
+import { clearClientAuth } from "@/lib/authSession";
 
 export type ProfileTab =
   | "Dashboard"
@@ -44,8 +44,7 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
     try {
       await api.post("/api/auth/logout");
     } catch (_) {}
-    Cookies.remove("token");
-    localStorage.removeItem("user");
+    clearClientAuth();
     router.push("/login");
   };
 

@@ -113,8 +113,11 @@ const issueOtp = async ({
     channel,
   };
 
-  // Expose code only in mock/dev for easier testing
-  if (process.env.OTP_EXPOSE_CODE === 'true' || process.env.EMAIL_PROVIDER === 'mock') {
+  // Expose OTP only when explicitly enabled and never in production
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    String(process.env.OTP_EXPOSE_CODE || '').toLowerCase() === 'true'
+  ) {
     response.debug_code = code;
   }
 

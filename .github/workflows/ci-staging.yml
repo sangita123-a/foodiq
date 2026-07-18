@@ -1,0 +1,105 @@
+name: Staging Deploy
+
+on:
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    types: [completed]
+    branches: [staging]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy Staging (Vercel + Render)
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: ${{ vars.APP_URL }}
+    steps:
+      - name: Resolve SHA
+        id: sha
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.sha.outputs.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - run: npm ci
+
+      - name: Deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID_STAGING }}
+          RENDER_OWNER_ID: ${{ secrets.RENDER_OWNER_ID }}
+          RENDER_BRANCH: staging
+          FRONTEND_URL: ${{ vars.APP_URL }}
+          DEPLOY_SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST_STAGING }}
+          DEPLOY_SSH_USER: ${{ secrets.DEPLOY_SSH_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_BACKEND_PATH: ${{ secrets.DEPLOY_BACKEND_PATH_STAGING }}
+          REQUIRE_DEPLOY: "false"
+          DEPLOY_LOG_FILE: deploy.log
+          GITHUB_SHA: ${{ steps.sha.outputs.sha }}
+        run: |
+          if [ -z "${RENDER_SERVICE_ID}" ] && [ -n "${{ secrets.RENDER_SERVICE_ID }}" ]; then
+            export RENDER_SERVICE_ID="${{ secrets.RENDER_SERVICE_ID }}"
+          fi
+          bash scripts/ci/deploy.sh staging all
+
+      - name: Live API smoke
+        env:
+          BASE_URL: ${{ vars.STAGING_API_URL }}
+          FRONTEND_URL: ${{ vars.APP_URL }}
+        working-directory: foodiq-frontend/foodiq-backend
+        run: |
+          if [ -z "$BASE_URL" ]; then
+            echo "STAGING_API_URL not set — skipping"
+            exit 0
+          fi
+          npm ci
+          npm run test:api
+          npm run test:modules
+
+      - name: Upload deployment logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-logs-staging-${{ steps.sha.outputs.sha }}
+          path: |
+            deploy.log
+            render-deploy.log
+            vercel-deploy-url.txt
+          if-no-files-found: ignore
+          retention-days: 45
+
+      - name: Notify
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          NOTIFY_EMAIL_WEBHOOK: ${{ secrets.NOTIFY_EMAIL_WEBHOOK }}
+          STATUS: ${{ job.status }}
+          TITLE: "Foodiq Deploy — Staging"
+          DETAILS: "sha=${{ steps.sha.outputs.sha }}"
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: bash scripts/ci/notify.sh

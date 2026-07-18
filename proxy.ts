@@ -2,10 +2,51 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Define which routes require authentication
-const protectedRoutes = ['/profile', '/checkout', '/payment', '/order-success', '/cart', '/my-orders', '/settings', '/notifications', '/saved-addresses', '/payment-methods', '/favorites', '/coupons-rewards', '/track-order'];
+const protectedRoutes = [
+  '/profile',
+  '/checkout',
+  '/payment',
+  '/order-success',
+  '/cart',
+  '/my-orders',
+  '/settings',
+  '/notifications',
+  '/saved-addresses',
+  '/payment-methods',
+  '/favorites',
+  '/coupons-rewards',
+  '/track-order',
+  '/partner/dashboard',
+  '/partner/menu',
+  '/partner/orders',
+  '/partner/order-history',
+  '/partner/earnings',
+  '/partner/analytics',
+  '/partner/customers',
+  '/partner/reviews',
+  '/partner/offers',
+  '/partner/settings',
+  '/admin/dashboard',
+  '/admin/restaurants',
+  '/admin/users',
+  '/admin/delivery-partners',
+  '/admin/orders',
+  '/admin/menu',
+  '/admin/coupons',
+  '/admin/payments',
+  '/admin/analytics',
+  '/admin/notifications',
+  '/admin/settings',
+  '/payment/failed',
+  '/delivery/dashboard',
+  '/delivery/orders',
+  '/delivery/map',
+  '/delivery/earnings',
+  '/delivery/notifications',
+];
 
 // Define which routes should redirect away if already authenticated
-const authRoutes = ['/login', '/register', '/forgot-password'];
+const authRoutes = ['/login', '/register', '/forgot-password', '/partner/login', '/admin/login', '/delivery/login', '/delivery/register'];
 
 export function proxy(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
@@ -15,16 +56,28 @@ export function proxy(request: NextRequest) {
   const isProtected = protectedRoutes.some(route => pathname.startsWith(route));
   
   if (isProtected && !token) {
-    // Redirect unauthenticated users to login
-    return NextResponse.redirect(new URL('/login', request.url));
+    const loginPath = pathname.startsWith('/admin')
+      ? '/admin/login'
+      : pathname.startsWith('/delivery')
+        ? '/delivery/login'
+        : pathname.startsWith('/partner')
+          ? '/partner/login'
+          : '/login';
+    return NextResponse.redirect(new URL(loginPath, request.url));
   }
 
   // Check if it's an auth route (login/register)
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
   
   if (isAuthRoute && token) {
-    // Redirect authenticated users away from login/register to home
-    return NextResponse.redirect(new URL('/', request.url));
+    const homePath = pathname.startsWith('/admin')
+      ? '/admin/dashboard'
+      : pathname.startsWith('/delivery')
+        ? '/delivery/dashboard'
+        : pathname.startsWith('/partner')
+          ? '/partner/dashboard'
+          : '/';
+    return NextResponse.redirect(new URL(homePath, request.url));
   }
 
   return NextResponse.next();

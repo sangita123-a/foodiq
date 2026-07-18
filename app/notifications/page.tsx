@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import NotificationsHeader, { NotificationFilter } from "@/components/notifications/NotificationsHeader";
@@ -10,10 +10,33 @@ import NotificationsEmptyState from "@/components/notifications/NotificationsEmp
 import useSWR from "swr";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
+import { useAuthToken } from "@/hooks/useAuthToken";
+import {
+  cleanNotificationMessage,
+  mapTypeToCategory,
+} from "@/lib/notificationTypes";
+import { enablePushNotifications } from "@/components/notifications/PushNotificationProvider";
+import { Search } from "lucide-react";
 
 export default function NotificationsPage() {
-  const { data, mutate, isLoading, error } = useSWR('/api/notifications');
-  const backendNotifs = data || [];
+  const hasToken = useAuthToken();
+  const [search, setSearch] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [activeFilter, setActiveFilter] = useState<NotificationFilter>("All");
+
+  const query = useMemo(() => {
+    const params = new URLSearchParams();
+    if (search) params.set("q", search);
+    if (fromDate) params.set("from", fromDate);
+    if (toDate) params.set("to", toDate);
+    if (activeFilter !== "All") params.set("category", activeFilter);
+    const qs = params.toString();
+    return hasToken ? `/api/notifications${qs ? `?${qs}` : ""}` : null;
+  }, [hasToken, search, fromDate, toDate, activeFilter]);
+
+  const { data, mutate, isLoading, error } = useSWR(query);
+  const backendNotifs = Array.isArray(data) ? data : [];
   const { showToast } = useToast();
 
   const mapTimeGroup = (date: Date) => {
@@ -21,36 +44,33 @@ export default function NotificationsPage() {
     const diff = today.getTime() - date.getTime();
     const days = diff / (1000 * 3600 * 24);
     if (days < 1 && today.getDate() === date.getDate()) return "Today";
-    if (days < 2 && today.getDate() !== date.getDate()) return "Yesterday";
+    if (days < 2) return "Yesterday";
     if (days < 7) return "This Week";
     return "Earlier";
   };
 
-  const notifications: NotificationType[] = backendNotifs.map((n: any) => {
-    const d = new Date(n.created_at);
+  const notifications: NotificationType[] = backendNotifs.map((n: Record<string, unknown>) => {
+    const d = new Date(String(n.created_at));
     return {
-      id: n.id,
-      type: "Orders", // Or map based on title/type if present
-      title: n.title,
-      description: n.message,
+      id: String(n.id),
+      type: (n.category as NotificationFilter) || mapTypeToCategory(String(n.type || ""), String(n.message || "")),
+      title: String(n.title || ""),
+      description: cleanNotificationMessage(String(n.message || "")),
       time: d.toLocaleString(),
-      isRead: n.is_read,
-      timeGroup: mapTimeGroup(d)
+      isRead: Boolean(n.is_read),
+      timeGroup: mapTimeGroup(d) as NotificationType["timeGroup"],
     };
   });
 
-  const [activeFilter, setActiveFilter] = useState<NotificationFilter>("All");
+  const hasUnread = notifications.some((n) => !n.isRead);
 
-  const hasUnread = notifications.some(n => !n.isRead);
-
-  // Handlers
   const handleMarkAsRead = async (id: string) => {
     try {
       await api.put(`/api/notifications/${id}/read`);
       mutate();
-    } catch (e: any) {
-      console.error(e);
-      showToast(e.response?.data?.message || "Failed to mark as read", "error");
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { message?: string } } };
+      showToast(err.response?.data?.message || "Failed to mark as read", "error");
     }
   };
 
@@ -59,9 +79,9 @@ export default function NotificationsPage() {
       await api.delete(`/api/notifications/${id}`);
       mutate();
       showToast("Notification deleted", "success");
-    } catch (e: any) {
-      console.error(e);
-      showToast(e.response?.data?.message || "Failed to delete notification", "error");
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { message?: string } } };
+      showToast(err.response?.data?.message || "Failed to delete", "error");
     }
   };
 
@@ -69,34 +89,30 @@ export default function NotificationsPage() {
     try {
       await api.put(`/api/notifications/read-all`);
       mutate();
-    } catch (e) {
-      console.error(e);
+    } catch {
+      /* ignore */
     }
   };
 
   const handleClearAll = async () => {
     try {
-      await api.delete('/api/notifications');
+      await api.delete("/api/notifications");
       mutate();
       showToast("All notifications cleared", "success");
-    } catch (e: any) {
-      console.error(e);
-      showToast(e.response?.data?.message || "Failed to clear notifications", "error");
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { message?: string } } };
+      showToast(err.response?.data?.message || "Failed to clear", "error");
     }
   };
 
-  // Filter Logic
-  const filteredNotifications = notifications.filter(n => {
-    if (activeFilter === "All") return true;
-    return n.type === activeFilter;
-  });
-
-  // Grouping Logic
-  const grouped = filteredNotifications.reduce((acc, curr) => {
-    if (!acc[curr.timeGroup]) acc[curr.timeGroup] = [];
-    acc[curr.timeGroup].push(curr);
-    return acc;
-  }, {} as Record<string, NotificationType[]>);
+  const grouped = notifications.reduce(
+    (acc, curr) => {
+      if (!acc[curr.timeGroup]) acc[curr.timeGroup] = [];
+      acc[curr.timeGroup].push(curr);
+      return acc;
+    },
+    {} as Record<string, NotificationType[]>
+  );
 
   const groupOrder = ["Today", "Yesterday", "This Week", "Earlier"];
 
@@ -105,10 +121,10 @@ export default function NotificationsPage() {
       <main className="min-h-screen bg-[#FFFFFF] relative pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 md:px-8 py-12 max-w-4xl">
-          <div className="w-48 h-10 bg-[#F8FAFC] animate-pulse rounded-lg mb-8"></div>
+          <div className="w-48 h-10 bg-[#F8FAFC] animate-pulse rounded-lg mb-8" />
           <div className="flex flex-col gap-6">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-24 bg-[#F8FAFC] animate-pulse rounded-2xl border border-[#E5E7EB]"></div>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-24 bg-[#F8FAFC] animate-pulse rounded-2xl border border-[#E5E7EB]" />
             ))}
           </div>
         </div>
@@ -120,8 +136,10 @@ export default function NotificationsPage() {
     return (
       <main className="min-h-screen bg-[#FFFFFF] flex flex-col items-center justify-center gap-4 pt-[90px]">
         <Navbar />
-        <div className="text-white text-xl">Failed to load notifications</div>
-        <button onClick={() => mutate()} className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg">Retry</button>
+        <div className="text-[#111827] text-xl">Failed to load notifications</div>
+        <button type="button" onClick={() => mutate()} className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg">
+          Retry
+        </button>
       </main>
     );
   }
@@ -131,8 +149,7 @@ export default function NotificationsPage() {
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-4xl">
-        
-        <NotificationsHeader 
+        <NotificationsHeader
           activeFilter={activeFilter}
           setActiveFilter={setActiveFilter}
           onMarkAllAsRead={handleMarkAllAsRead}
@@ -140,18 +157,55 @@ export default function NotificationsPage() {
           hasUnread={hasUnread}
         />
 
-        {filteredNotifications.length > 0 ? (
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="relative md:col-span-1">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search notifications…"
+              className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2.5 text-sm"
+            />
+          </div>
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="border border-[#E5E7EB] rounded-xl px-3 py-2.5 text-sm"
+          />
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            className="border border-[#E5E7EB] rounded-xl px-3 py-2.5 text-sm"
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={async () => {
+            const r = await enablePushNotifications();
+            showToast(
+              r.ok ? "Push notifications enabled" : `Push not enabled: ${r.reason || "failed"}`,
+              r.ok ? "success" : "error"
+            );
+          }}
+          className="mb-8 text-sm font-bold text-[#FC8019] hover:underline"
+        >
+          Enable browser push notifications
+        </button>
+
+        {notifications.length > 0 ? (
           <div className="flex flex-col">
-            {groupOrder.map(groupName => {
+            {groupOrder.map((groupName) => {
               const groupItems = grouped[groupName];
               if (!groupItems || groupItems.length === 0) return null;
-
               return (
                 <NotificationGroup key={groupName} title={groupName}>
-                  {groupItems.map(notification => (
-                    <NotificationCard 
-                      key={notification.id} 
-                      notification={notification} 
+                  {groupItems.map((notification) => (
+                    <NotificationCard
+                      key={notification.id}
+                      notification={notification}
                       onMarkAsRead={handleMarkAsRead}
                       onDelete={handleDelete}
                     />
@@ -163,7 +217,6 @@ export default function NotificationsPage() {
         ) : (
           <NotificationsEmptyState />
         )}
-
       </div>
 
       <Footer />

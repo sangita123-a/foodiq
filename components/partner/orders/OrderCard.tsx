@@ -57,6 +57,12 @@ export default function OrderCard({ order, onUpdateStatus, onViewDetails, isComp
             <Bike className="w-4 h-4" /> Handover to Rider
           </button>
         );
+      case "Picked Up":
+        return (
+          <button onClick={() => onUpdateStatus(order.id, "Delivered")} className="w-full mt-4 bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-1 shadow-lg shadow-green-500/20">
+            <CheckCircle2 className="w-4 h-4" /> Mark Delivered
+          </button>
+        );
       default:
         return null;
     }

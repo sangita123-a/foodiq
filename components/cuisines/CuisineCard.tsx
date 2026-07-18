@@ -2,8 +2,8 @@
 
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import SafeImage from "@/components/ui/SafeImage";
 
 export type CuisineCardData = {
   id?: number | string;
@@ -52,13 +52,11 @@ export default function CuisineCard({
         className="group flex h-[232px] flex-col items-center overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white px-3.5 py-4 text-center shadow-[0_10px_28px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow,background-color] duration-300 hover:border-[#FC8019]/60 hover:shadow-[0_16px_34px_rgba(15,23,42,0.12),0_8px_24px_rgba(252,128,25,0.12)]"
       >
         <div className="relative mb-3 h-[76px] w-[76px] shrink-0 overflow-hidden rounded-full bg-[#F8FAFC] shadow-[0_6px_18px_rgba(0,0,0,0.35)] ring-2 ring-[#E5E7EB]">
-          <Image
+          <SafeImage
             src={image}
+            fallback={fallbackImage}
             alt={cuisine.name}
-            fill
-            sizes="76px"
-            loading="lazy"
-            className="object-cover transition-transform duration-300 ease-out group-hover:scale-110"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-110"
           />
         </div>
 

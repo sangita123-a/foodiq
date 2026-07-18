@@ -20,12 +20,24 @@ function Counter({ from, to, duration = 2 }: { from: number, to: number, duratio
   return <motion.span ref={ref}>{rounded}</motion.span>;
 }
 
-export default function MenuSummary() {
+type MenuSummaryProps = {
+  total?: number;
+  available?: number;
+  outOfStock?: number;
+  hidden?: number;
+};
+
+export default function MenuSummary({
+  total = 0,
+  available = 0,
+  outOfStock = 0,
+  hidden = 0,
+}: MenuSummaryProps) {
   const stats = [
-    { title: "Total Dishes", value: 124, icon: Utensils, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20" },
-    { title: "Available", value: 112, icon: CheckCircle, color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20" },
-    { title: "Out of Stock", value: 8, icon: XCircle, color: "text-red-400", bg: "bg-red-400/10", border: "border-red-400/20" },
-    { title: "Hidden / Draft", value: 4, icon: TrendingUp, color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20" }
+    { title: "Total Dishes", value: total, icon: Utensils, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20" },
+    { title: "Available", value: available, icon: CheckCircle, color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20" },
+    { title: "Out of Stock", value: outOfStock, icon: XCircle, color: "text-red-400", bg: "bg-red-400/10", border: "border-red-400/20" },
+    { title: "Hidden / Draft", value: hidden, icon: TrendingUp, color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20" }
   ];
 
   return (

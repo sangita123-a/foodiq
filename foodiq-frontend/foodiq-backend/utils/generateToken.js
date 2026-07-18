@@ -8,17 +8,27 @@ const { pool } = require('../config/db');
 const getJwtSecret = () => {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET is required in production');
+    }
     console.warn('[AUTH] WARNING: JWT_SECRET is not set. Using fallback secret (not safe for production).');
     return 'fallback_secret';
   }
   return secret;
 };
 
-const getRefreshSecret = () =>
-  process.env.JWT_REFRESH_SECRET || `${getJwtSecret()}_refresh`;
+const getRefreshSecret = () => {
+  if (process.env.JWT_REFRESH_SECRET) return process.env.JWT_REFRESH_SECRET;
+  if (process.env.NODE_ENV === 'production') {
+    // Derive a distinct secret rather than reusing access secret verbatim
+    const crypto = require('crypto');
+    return crypto.createHmac('sha256', getJwtSecret()).update('foodiq-refresh').digest('hex');
+  }
+  return `${getJwtSecret()}_refresh`;
+};
 
-const accessTtl = () => process.env.JWT_ACCESS_TTL || '30d';
-const refreshTtl = () => process.env.JWT_REFRESH_TTL || '30d';
+const accessTtl = () => process.env.JWT_ACCESS_TTL || (process.env.NODE_ENV === 'production' ? '1h' : '30d');
+const refreshTtl = () => process.env.JWT_REFRESH_TTL || (process.env.NODE_ENV === 'production' ? '7d' : '30d');
 
 const generateToken = (id, extras = {}) => {
   return jwt.sign({ id, ...extras }, getJwtSecret(), {

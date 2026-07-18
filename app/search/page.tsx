@@ -88,10 +88,13 @@ function SearchContent() {
                         name: restaurant.name,
                         image_url: restaurant.image_url,
                         rating: restaurant.rating,
-                        estimated_delivery_time: restaurant.estimated_delivery_time,
+                        estimated_delivery_time: restaurant.estimated_delivery_time || restaurant.preparation_time,
                         description: restaurant.description,
                         category_name: restaurant.category_name,
                         price_range: restaurant.price_range,
+                        distance_km: restaurant.distance_km,
+                        offer_text: restaurant.offer_text,
+                        is_veg: restaurant.is_veg,
                       })}
                       delay={idx * 0.1}
                     />
@@ -113,7 +116,7 @@ function SearchContent() {
                       price: item.discount_price ? parseFloat(item.discount_price) : parseFloat(item.price),
                       rating: String(item.rating || "4.5"),
                       isVeg: item.is_vegetarian,
-                      prepTime: item.preparation_time || "15 min",
+                      prepTime: item.preparation_time ? `${item.preparation_time} min` : "15 min",
                     };
                     return (
                       <div key={item.id} className="min-w-0">

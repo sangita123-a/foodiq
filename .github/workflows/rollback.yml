@@ -1,0 +1,124 @@
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        type: choice
+        options:
+          - staging
+          - production
+          - development
+        default: production
+      ref:
+        description: Git tag or SHA to roll back to
+        required: true
+        type: string
+      component:
+        description: What to roll back
+        type: choice
+        options:
+          - all
+          - frontend
+          - backend
+        default: all
+      confirm:
+        description: Type ROLLBACK to confirm
+        required: true
+        type: string
+
+jobs:
+  rollback:
+    if: inputs.confirm == 'ROLLBACK'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - run: npm ci
+
+      - name: Resolve Render service for environment
+        id: envmap
+        env:
+          ENV_NAME: ${{ inputs.environment }}
+        run: |
+          case "$ENV_NAME" in
+            production) echo "hint=RENDER_SERVICE_ID" >> "$GITHUB_OUTPUT" ;;
+            staging) echo "hint=RENDER_SERVICE_ID_STAGING" >> "$GITHUB_OUTPUT" ;;
+            *) echo "hint=RENDER_SERVICE_ID_DEV" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Deploy rollback ref
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          RENDER_OWNER_ID: ${{ secrets.RENDER_OWNER_ID }}
+          DEPLOY_SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST_PROD }}
+          DEPLOY_SSH_USER: ${{ secrets.DEPLOY_SSH_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_BACKEND_PATH: ${{ secrets.DEPLOY_BACKEND_PATH_PROD }}
+          ROLLBACK_REF: ${{ inputs.ref }}
+          REQUIRE_DEPLOY: "true"
+          DEPLOY_LOG_FILE: rollback.log
+          GITHUB_SHA: ${{ inputs.ref }}
+        run: |
+          case "${{ inputs.environment }}" in
+            staging)
+              export RENDER_SERVICE_ID="${{ secrets.RENDER_SERVICE_ID_STAGING }}"
+              export DEPLOY_SSH_HOST="${{ secrets.DEPLOY_SSH_HOST_STAGING }}"
+              export DEPLOY_BACKEND_PATH="${{ secrets.DEPLOY_BACKEND_PATH_STAGING }}"
+              ;;
+            development)
+              export RENDER_SERVICE_ID="${{ secrets.RENDER_SERVICE_ID_DEV }}"
+              export DEPLOY_SSH_HOST="${{ secrets.DEPLOY_SSH_HOST_DEV }}"
+              export DEPLOY_BACKEND_PATH="${{ secrets.DEPLOY_BACKEND_PATH_DEV }}"
+              ;;
+          esac
+          # Fall back to production Render service id if env-specific unset
+          if [ -z "$RENDER_SERVICE_ID" ]; then
+            export RENDER_SERVICE_ID="${{ secrets.RENDER_SERVICE_ID }}"
+          fi
+          bash scripts/ci/deploy.sh ${{ inputs.environment }} ${{ inputs.component }}
+
+      - name: Upload rollback logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-logs-${{ inputs.environment }}-${{ inputs.ref }}
+          path: |
+            rollback.log
+            deploy.log
+            render-deploy.log
+            vercel-deploy-url.txt
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: DB note
+        run: |
+          echo "Database rollback is NOT automatic (ensureSchema is additive/idempotent)."
+          echo "See docs/ROLLBACK.md for backup restore steps."
+
+      - name: Notify
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          NOTIFY_EMAIL_WEBHOOK: ${{ secrets.NOTIFY_EMAIL_WEBHOOK }}
+          STATUS: ${{ job.status }}
+          TITLE: "Foodiq Rollback — ${{ inputs.environment }}"
+          DETAILS: "ref=${{ inputs.ref }} component=${{ inputs.component }}"
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: bash scripts/ci/notify.sh

@@ -25,6 +25,19 @@ const requestContext = (req, res, next) => {
       user_id: req.user?.id || null,
       ip: req.headers['x-forwarded-for'] || req.ip,
     });
+
+    // Suspicious activity: auth failures, forbidden, CSRF
+    if (res.statusCode === 401 || res.statusCode === 403) {
+      log.warn('suspicious_activity', {
+        request_id: req.requestId,
+        method: req.method,
+        path,
+        status: res.statusCode,
+        user_id: req.user?.id || null,
+        ip: req.headers['x-forwarded-for'] || req.ip,
+        ua: req.headers['user-agent'] || null,
+      });
+    }
   });
 
   next();

@@ -18,9 +18,11 @@ export type FavDishType = {
 type Props = {
   dish: FavDishType;
   onRemove: (id: string) => void;
+  onAdd?: (id: string) => void;
+  isAdding?: boolean;
 };
 
-export default function FavDishCard({ dish, onRemove }: Props) {
+export default function FavDishCard({ dish, onRemove, onAdd, isAdding = false }: Props) {
   return (
     <motion.div
       layout
@@ -64,7 +66,12 @@ export default function FavDishCard({ dish, onRemove }: Props) {
 
         <div className="flex items-center justify-between mt-auto">
           <span className="food-price text-[#111827]">₹{dish.price}</span>
-          <button className="food-button min-h-0 bg-primary hover:bg-[#E76F0B] text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => onAdd?.(dish.id)}
+            disabled={!onAdd || isAdding}
+            className="food-button min-h-0 bg-primary hover:bg-[#E76F0B] text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 disabled:opacity-50"
+          >
             <Plus className="w-3.5 h-3.5" /> Add
           </button>
         </div>

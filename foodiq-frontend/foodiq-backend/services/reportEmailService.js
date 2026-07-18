@@ -204,4 +204,11 @@ module.exports = {
   sendDeliveryMonthlyEarnings,
   sendRestaurantStatusEmail,
   sendDeliveryApprovalEmail,
+  sendWeeklyReviewReport: (...args) =>
+    require('./maintenanceReportService').sendWeeklyReviewReport(...args),
+  generateMonthlyMaintenanceReport: () =>
+    require('./maintenanceReportService').generateMaintenanceReport({
+      period: 'monthly',
+      persist: true,
+    }),
 };

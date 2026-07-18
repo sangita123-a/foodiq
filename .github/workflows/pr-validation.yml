@@ -1,0 +1,26 @@
+name: PR Validation
+
+# Alias for PR checks — Continuous Integration also runs on pull_request.
+# Kept so branch protection can require this workflow name if already configured.
+
+on:
+  pull_request:
+    branches: [main, master, develop, staging, production]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    uses: ./.github/workflows/reusable-ci.yml
+    with:
+      environment_label: pr
+      run_api_smoke: true
+      run_ui_smoke: false
+      upload_artifacts: false
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+      NOTIFY_EMAIL_WEBHOOK: ${{ secrets.NOTIFY_EMAIL_WEBHOOK }}

@@ -320,11 +320,98 @@ CREATE TABLE IF NOT EXISTS reviews (
     order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
     comment TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'visible' CHECK (status IN ('visible', 'hidden')),
+    admin_reply TEXT,
+    replied_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 DROP TRIGGER IF EXISTS update_reviews_modtime ON reviews;
 CREATE TRIGGER update_reviews_modtime BEFORE UPDATE ON reviews FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+CREATE UNIQUE INDEX IF NOT EXISTS idx_reviews_user_order
+  ON reviews(user_id, order_id) WHERE order_id IS NOT NULL;
+
+-- 18b. delivery_reviews
+CREATE TABLE IF NOT EXISTS delivery_reviews (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    delivery_partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    comment TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(order_id)
+);
+DROP TRIGGER IF EXISTS update_delivery_reviews_modtime ON delivery_reviews;
+CREATE TRIGGER update_delivery_reviews_modtime BEFORE UPDATE ON delivery_reviews FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+CREATE INDEX IF NOT EXISTS idx_delivery_reviews_partner
+  ON delivery_reviews(delivery_partner_id, created_at DESC);
+
+-- 18c. order_feedback
+CREATE TABLE IF NOT EXISTS order_feedback (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE UNIQUE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    overall_rating INTEGER CHECK (overall_rating IS NULL OR (overall_rating >= 1 AND overall_rating <= 5)),
+    comment TEXT,
+    tags TEXT[] DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+DROP TRIGGER IF EXISTS update_order_feedback_modtime ON order_feedback;
+CREATE TRIGGER update_order_feedback_modtime BEFORE UPDATE ON order_feedback FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+-- 18d. user_feedback (general product feedback)
+CREATE TABLE IF NOT EXISTS user_feedback (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    category VARCHAR(80) NOT NULL DEFAULT 'general',
+    message TEXT NOT NULL,
+    page_url TEXT,
+    status VARCHAR(40) NOT NULL DEFAULT 'open',
+    admin_notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+DROP TRIGGER IF EXISTS update_user_feedback_modtime ON user_feedback;
+CREATE TRIGGER update_user_feedback_modtime BEFORE UPDATE ON user_feedback FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+-- 18e. bug_reports
+CREATE TABLE IF NOT EXISTS bug_reports (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    reporter_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    severity VARCHAR(20) NOT NULL DEFAULT 'medium'
+      CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+    status VARCHAR(30) NOT NULL DEFAULT 'open'
+      CHECK (status IN ('open', 'triaging', 'in_progress', 'resolved', 'wont_fix')),
+    page_url TEXT,
+    user_agent TEXT,
+    error_event_id UUID,
+    assignee_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    admin_notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+DROP TRIGGER IF EXISTS update_bug_reports_modtime ON bug_reports;
+CREATE TRIGGER update_bug_reports_modtime BEFORE UPDATE ON bug_reports FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+CREATE INDEX IF NOT EXISTS idx_bug_reports_status_created
+  ON bug_reports(status, created_at DESC);
+
+-- 18f. maintenance_reports
+CREATE TABLE IF NOT EXISTS maintenance_reports (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    period VARCHAR(20) NOT NULL CHECK (period IN ('weekly', 'monthly')),
+    period_start DATE NOT NULL,
+    period_end DATE NOT NULL,
+    payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_maintenance_reports_period
+  ON maintenance_reports(period, created_at DESC);
 
 -- 19. notifications
 CREATE TABLE IF NOT EXISTS notifications (
@@ -414,8 +501,11 @@ CREATE TABLE IF NOT EXISTS contact_messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
+    phone VARCHAR(40),
+    reason VARCHAR(80),
     subject VARCHAR(255) NOT NULL,
     message TEXT NOT NULL,
+    status VARCHAR(40) NOT NULL DEFAULT 'open',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -430,6 +520,7 @@ CREATE INDEX IF NOT EXISTS idx_orders_restaurant ON orders(restaurant_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_menu_item ON order_items(menu_item_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_restaurant ON reviews(restaurant_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_order ON reviews(order_id);
 CREATE INDEX IF NOT EXISTS idx_support_tickets_user ON support_tickets(user_id);
 CREATE INDEX IF NOT EXISTS idx_contact_messages_email ON contact_messages(email);
 

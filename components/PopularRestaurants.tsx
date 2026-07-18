@@ -104,6 +104,8 @@ export default function PopularRestaurants() {
                     src={restaurant.image}
                     fallback={RESTAURANT_FALLBACK}
                     alt={restaurant.name}
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 280px"
+                    priority={index < 4}
                     className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.055]"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1C]/65 via-transparent to-white/10" />

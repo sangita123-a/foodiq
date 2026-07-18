@@ -6,20 +6,24 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FavoritesHeader from "@/components/favorites/FavoritesHeader";
 import FavoritesFilterTabs, { FavoriteTab } from "@/components/favorites/FavoritesFilterTabs";
-import FavRestaurantCard, { FavRestaurantType } from "@/components/favorites/FavRestaurantCard";
-import FavDishCard, { FavDishType } from "@/components/favorites/FavDishCard";
+import FavRestaurantCard from "@/components/favorites/FavRestaurantCard";
+import FavDishCard from "@/components/favorites/FavDishCard";
 import FavoritesEmptyState from "@/components/favorites/FavoritesEmptyState";
 import useSWR from "swr";
 import api from "@/services/api";
 import { getFoodImage, getRestaurantImage } from "@/lib/images";
 import { useToast } from "@/contexts/ToastContext";
+import { useCartActions } from "@/hooks/useCartActions";
+import { useAuthToken } from "@/hooks/useAuthToken";
 
 export default function FavoritesPage() {
   const [activeTab, setActiveTab] = useState<FavoriteTab>("All Favorites");
   const [searchQuery, setSearchQuery] = useState("");
+  const authenticated = useAuthToken();
   const { showToast } = useToast();
+  const { updateQuantity, updatingId } = useCartActions();
   
-  const { data: favsData, mutate, isLoading, error } = useSWR('/api/favorites');
+  const { data: favsData, mutate, isLoading, error } = useSWR(authenticated ? '/api/favorites' : null);
   const favItems = favsData?.items || (Array.isArray(favsData) ? favsData : []);
   const favRestaurantsRaw = favsData?.restaurants || [];
   
@@ -29,7 +33,7 @@ export default function FavoritesPage() {
     restaurant: item.restaurant_name,
     image: getFoodImage(item.image_url),
     price: item.discount_price ? parseFloat(item.discount_price) : parseFloat(item.price),
-    rating: "4.5",
+    rating: Number(item.rating || item.restaurant_rating || 4.5).toFixed(1),
     isVeg: item.is_vegetarian
   }));
   
@@ -37,7 +41,7 @@ export default function FavoritesPage() {
     id: r.id,
     name: r.name,
     image: getRestaurantImage(r.image_url),
-    cuisine: r.description || "Various",
+    cuisine: r.category_name || r.description || "Various",
     rating: String(r.rating || "4.5"),
     eta: `${r.estimated_delivery_time || 30} min`,
     priceForTwo: "₹400 for two",
@@ -65,6 +69,10 @@ export default function FavoritesPage() {
     }
   };
 
+  const handleAddDish = async (id: string) => {
+    await updateQuantity(id, 1);
+  };
+
   // Filter by Tab and Search Query
   const q = searchQuery.toLowerCase();
   
@@ -74,9 +82,9 @@ export default function FavoritesPage() {
   const showRestaurants = activeTab === "All Favorites" || activeTab === "Restaurants";
   const showDishes = activeTab === "All Favorites" || activeTab === "Dishes";
 
-  const isEmpty = (showRestaurants ? filteredRestaurants.length : 0) + (showDishes ? filteredDishes.length : 0) === 0;
+  const isEmpty = !authenticated || (showRestaurants ? filteredRestaurants.length : 0) + (showDishes ? filteredDishes.length : 0) === 0;
 
-  if (isLoading) {
+  if (authenticated && isLoading) {
     return (
       <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
         <Navbar />
@@ -103,7 +111,7 @@ export default function FavoritesPage() {
     );
   }
 
-  if (error) {
+  if (authenticated && error) {
     return (
       <main className="min-h-screen bg-[#FFFFFF] flex flex-col items-center justify-center gap-4 pt-[90px]">
         <Navbar />
@@ -147,7 +155,13 @@ export default function FavoritesPage() {
                 <div className="food-grid">
                   <AnimatePresence>
                     {filteredDishes.map((d: any) => (
-                      <FavDishCard key={d.id} dish={d} onRemove={handleRemoveDish} />
+                      <FavDishCard
+                        key={d.id}
+                        dish={d}
+                        onRemove={handleRemoveDish}
+                        onAdd={handleAddDish}
+                        isAdding={updatingId === d.id}
+                      />
                     ))}
                   </AnimatePresence>
                 </div>

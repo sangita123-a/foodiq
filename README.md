@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Foodiq
 
-## Getting Started
+Full-stack food delivery platform — Next.js frontend (Vercel) + Express/PostgreSQL API (Render).
 
-First, run the development server:
+## Getting started
 
 ```bash
+# Frontend
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Backend (separate terminal)
+cd foodiq-frontend/foodiq-backend
+npm install
+cp .env.example .env   # configure DB + JWT_SECRET
+npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). API defaults to [http://localhost:4000](http://localhost:4000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Description |
+|---------|-------------|
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript (`tsc --noEmit`) |
+| `npm run test:unit` | Unit tests |
+| `npm run build` | Production Next.js build |
+| `npm run ci` | lint + typecheck + unit + build |
 
-## Learn More
+Backend: see `foodiq-frontend/foodiq-backend/package.json` (`test:unit`, `db:migrate`, `test:api`).
 
-To learn more about Next.js, take a look at the following resources:
+## CI/CD
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Automated GitHub Actions pipeline:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Every PR** — lint, typecheck, unit tests, API smoke (fails on any error)
+2. **Push to `develop`** — CI → Development deploy (Vercel + Render)
+3. **Push to `main`** — CI → Production deploy (Vercel + Render, Environment approval)
+4. **Rollback** — manual workflow with confirmation
+5. **Deployment logs** — uploaded as Actions artifacts
 
-## Deploy on Vercel
+| Doc | Contents |
+|-----|----------|
+| [docs/CICD.md](./docs/CICD.md) | Full pipeline, workflows, troubleshooting |
+| [docs/SECRETS.md](./docs/SECRETS.md) | GitHub Secrets & environment variables |
+| [docs/ROLLBACK.md](./docs/ROLLBACK.md) | Rollback & database restore |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Deploy targets
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| App | Platform |
+|-----|----------|
+| Frontend | [Vercel](https://vercel.com) |
+| Backend | [Render](https://render.com) (`render.yaml`) |
+
+Deployments run **only after CI succeeds**. Production uses GitHub Environment protection + optional auto-rollback on smoke failure.
+
+### Required GitHub secrets (production)
+
+`VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `RENDER_API_KEY`, `RENDER_SERVICE_ID`
+
+See [docs/SECRETS.md](./docs/SECRETS.md) for the complete list.
+
+## License
+
+Private / project use.

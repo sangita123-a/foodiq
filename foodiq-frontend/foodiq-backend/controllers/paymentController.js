@@ -548,6 +548,9 @@ const markPaymentFailed = async (req, res) => {
 /** Local/test helper: complete mock Razorpay checkout with a valid HMAC. */
 const mockCompletePayment = async (req, res) => {
   try {
+    if (process.env.NODE_ENV === 'production') {
+      return fail(res, 403, 'Mock payment completion is disabled in production');
+    }
     if (!isMockMode()) {
       return fail(res, 403, 'Mock complete is only available in Razorpay mock/test mode');
     }

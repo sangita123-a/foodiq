@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, Heart, Minus, Plus, Star } from "lucide-react";
 import useSWR from "swr";
 import { useMemo } from "react";
+import SafeImage from "@/components/ui/SafeImage";
 import { FOOD_FALLBACK, getFoodImage } from "@/lib/images";
 import { useCartActions } from "@/hooks/useCartActions";
 import { useFavoriteActions } from "@/hooks/useFavoriteActions";
@@ -17,6 +17,7 @@ type TrendingDish = {
   rating: string;
   price: number;
   image: string;
+  description?: string;
 };
 
 export default function TrendingDishes() {
@@ -33,6 +34,7 @@ export default function TrendingDishes() {
       rating: Number(item.rating || item.restaurant_rating || 4.5).toFixed(1),
       price: item.discount_price ? parseFloat(item.discount_price) : parseFloat(item.price),
       image: getFoodImage(item.image_url),
+      description: item.description as string | undefined,
     }));
   }, [menuItems]);
 
@@ -69,12 +71,12 @@ export default function TrendingDishes() {
                   className="food-card relative snap-start min-w-[240px] w-[240px] sm:min-w-[250px] sm:w-[250px] group flex-shrink-0"
                 >
                   <Link href={`/food/${dish.id}`} className="food-card-image block">
-                    <Image
+                    <SafeImage
                       src={dish.image || FOOD_FALLBACK}
+                      fallback={FOOD_FALLBACK}
                       alt={dish.name}
-                      fill
-                      sizes="(max-width: 768px) 280px, 320px"
-                      className="object-cover"
+                      sizes="250px"
+                      className="h-full w-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/75/60 to-transparent" />
 
@@ -97,7 +99,10 @@ export default function TrendingDishes() {
                     <Link href={`/food/${dish.id}`} className="food-card-title text-[#111827] mb-1 line-clamp-1 hover:text-primary transition-colors block">
                       {dish.name}
                     </Link>
-                    <p className="text-[#6B7280] text-sm mb-4 line-clamp-1">by {dish.restaurant}</p>
+                    <p className="text-[#6B7280] text-sm mb-1 line-clamp-1">by {dish.restaurant}</p>
+                    {dish.description && (
+                      <p className="food-card-description text-xs mb-3 line-clamp-2">{dish.description}</p>
+                    )}
 
                     <div className="flex items-center justify-between mt-auto">
                       <span className="food-price text-[#111827]">₹{dish.price}</span>

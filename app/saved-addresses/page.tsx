@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -11,34 +12,44 @@ import AddressesEmptyState from "@/components/addresses/AddressesEmptyState";
 import useSWR from "swr";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
+import { useAuthToken } from "@/hooks/useAuthToken";
 
-export default function SavedAddressesPage() {
-  const { data, mutate, isLoading, error } = useSWR('/api/addresses');
+function SavedAddressesContent() {
+  const hasToken = useAuthToken();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("edit");
+  const { data, mutate, isLoading, error } = useSWR(hasToken ? "/api/addresses" : null);
   const addressesData = data || [];
   const { showToast } = useToast();
-  
-  // Map backend model to frontend model
-  const addresses: AddressType[] = addressesData.map((addr: any) => ({
-    id: addr.id,
-    name: addr.full_name || "User",
-    phone: addr.phone_number || "",
-    flat: addr.house_no || "",
-    street: addr.street || "",
-    landmark: addr.landmark || "",
-    city: addr.city,
-    state: addr.state,
-    pincode: addr.zip_code,
-    type: addr.address_type,
-    isDefault: addr.is_default
+
+  const addresses: AddressType[] = addressesData.map((addr: Record<string, unknown>) => ({
+    id: String(addr.id),
+    name: String(addr.full_name || "User"),
+    phone: String(addr.phone_number || ""),
+    flat: String(addr.house_no || ""),
+    street: String(addr.street || ""),
+    landmark: String(addr.landmark || ""),
+    city: String(addr.city || ""),
+    state: String(addr.state || ""),
+    pincode: String(addr.zip_code || ""),
+    type: (addr.address_type as AddressType["type"]) || "Home",
+    isDefault: Boolean(addr.is_default),
   }));
 
   const [searchQuery, setSearchQuery] = useState("");
-  
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<AddressType | null>(null);
 
-  // Handlers
+  useEffect(() => {
+    if (!editId || !data || !Array.isArray(data) || data.length === 0) return;
+    const match = addresses.find((a) => a.id === editId);
+    if (match) {
+      setEditingAddress(match);
+      setIsModalOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- open once when edit id + data arrive
+  }, [editId, data]);
+
   const handleAddNew = () => {
     setEditingAddress(null);
     setIsModalOpen(true);
@@ -54,16 +65,14 @@ export default function SavedAddressesPage() {
       await api.delete(`/api/addresses/${id}`);
       mutate();
       showToast("Address deleted", "success");
-    } catch (err) {
-      console.error(err);
+    } catch {
       showToast("Failed to delete address", "error");
     }
   };
 
   const handleSetDefault = async (id: string) => {
     try {
-      // Find the address
-      const addr = addresses.find(a => a.id === id);
+      const addr = addresses.find((a) => a.id === id);
       if (!addr) return;
       await api.put(`/api/addresses/${id}`, {
         address_type: addr.type,
@@ -75,13 +84,12 @@ export default function SavedAddressesPage() {
         city: addr.city,
         state: addr.state,
         zip_code: addr.pincode,
-        is_default: true
+        is_default: true,
       });
       mutate();
       showToast("Default address updated", "success");
-    } catch (err) {
-      console.error(err);
-      showToast("Failed to set default address", "error");
+    } catch {
+      showToast("Failed to update default address", "error");
     }
   };
 
@@ -97,9 +105,9 @@ export default function SavedAddressesPage() {
         city: address.city,
         state: address.state,
         zip_code: address.pincode,
-        is_default: address.isDefault
+        is_default: address.isDefault,
       };
-      
+
       if (editingAddress) {
         await api.put(`/api/addresses/${editingAddress.id}`, payload);
         showToast("Address updated", "success");
@@ -109,14 +117,12 @@ export default function SavedAddressesPage() {
       }
       mutate();
       setIsModalOpen(false);
-    } catch (err) {
-      console.error("Failed to save address", err);
+    } catch {
       showToast("Failed to save address", "error");
     }
   };
 
-  // Filter Logic
-  const filteredAddresses = addresses.filter(a => {
+  const filteredAddresses = addresses.filter((a) => {
     const q = searchQuery.toLowerCase();
     return (
       a.name.toLowerCase().includes(q) ||
@@ -128,57 +134,46 @@ export default function SavedAddressesPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
-        <Navbar />
-        <div className="container mx-auto px-4 md:px-8 py-12 max-w-6xl">
-          {/* Header Skeleton */}
-          <div className="flex justify-between items-center mb-10">
-            <div>
-              <div className="w-48 h-8 bg-[#F8FAFC] animate-pulse rounded-lg mb-2"></div>
-              <div className="w-64 h-5 bg-[#F8FAFC] animate-pulse rounded-lg"></div>
-            </div>
-            <div className="w-32 h-10 bg-[#F8FAFC] animate-pulse rounded-lg"></div>
+      <div className="container mx-auto px-4 md:px-8 py-12 max-w-6xl">
+        <div className="flex justify-between items-center mb-10">
+          <div>
+            <div className="w-48 h-8 bg-[#F8FAFC] animate-pulse rounded-lg mb-2" />
+            <div className="w-64 h-5 bg-[#F8FAFC] animate-pulse rounded-lg" />
           </div>
-          {/* Grid Skeleton */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-56 bg-[#F8FAFC] animate-pulse rounded-2xl border border-[#E5E7EB]"></div>
-            ))}
-          </div>
+          <div className="w-32 h-10 bg-[#F8FAFC] animate-pulse rounded-lg" />
         </div>
-      </main>
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-56 bg-[#F8FAFC] animate-pulse rounded-2xl border border-[#E5E7EB]" />
+          ))}
+        </div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] flex flex-col items-center justify-center gap-4 pt-[90px]">
-        <Navbar />
-        <div className="text-white text-xl">Failed to load addresses</div>
-        <button onClick={() => mutate()} className="px-6 py-2 bg-primary text-white rounded-lg">Retry</button>
-      </main>
+      <div className="container mx-auto px-4 py-20 flex flex-col items-center gap-4">
+        <div className="text-[#111827] text-xl">Failed to load addresses</div>
+        <button type="button" onClick={() => mutate()} className="px-6 py-2 bg-primary text-white rounded-lg">
+          Retry
+        </button>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
-      <Navbar />
-
+    <>
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-6xl">
-        
-        <AddressesHeader 
-          searchQuery={searchQuery} 
-          setSearchQuery={setSearchQuery} 
-          onAddNew={handleAddNew}
-        />
+        <AddressesHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery} onAddNew={handleAddNew} />
 
         {filteredAddresses.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             <AnimatePresence>
-              {filteredAddresses.map(address => (
-                <AddressCard 
-                  key={address.id} 
-                  address={address} 
+              {filteredAddresses.map((address) => (
+                <AddressCard
+                  key={address.id}
+                  address={address}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                   onSetDefault={handleSetDefault}
@@ -189,15 +184,11 @@ export default function SavedAddressesPage() {
         ) : (
           <AddressesEmptyState onAddNew={handleAddNew} />
         )}
-
       </div>
 
-      <Footer />
-
-      {/* Reusable Modal for Add & Edit */}
       <AnimatePresence>
         {isModalOpen && (
-          <AddressFormModal 
+          <AddressFormModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             onSave={handleSave}
@@ -205,6 +196,18 @@ export default function SavedAddressesPage() {
           />
         )}
       </AnimatePresence>
+    </>
+  );
+}
+
+export default function SavedAddressesPage() {
+  return (
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+      <Navbar />
+      <Suspense fallback={<div className="text-[#111827] text-center py-20">Loading addresses...</div>}>
+        <SavedAddressesContent />
+      </Suspense>
+      <Footer />
     </main>
   );
 }

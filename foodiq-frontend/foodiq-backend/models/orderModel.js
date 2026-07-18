@@ -1,6 +1,28 @@
 const { pool } = require('../config/db');
 
-const getOrders = async (userId, role) => {
+const attachOrderItems = async (orders) => {
+  if (!orders?.length) return orders;
+  const ids = orders.map((o) => o.id);
+  const { rows: items } = await pool.query(
+    `SELECT oi.*, m.name
+     FROM order_items oi
+     JOIN menu_items m ON oi.menu_item_id = m.id
+     WHERE oi.order_id = ANY($1::uuid[])`,
+    [ids]
+  );
+  const byOrder = new Map();
+  for (const item of items) {
+    const list = byOrder.get(item.order_id) || [];
+    list.push(item);
+    byOrder.set(item.order_id, list);
+  }
+  for (const order of orders) {
+    order.items = byOrder.get(order.id) || [];
+  }
+  return orders;
+};
+
+const getOrders = async (userId, role, { limit = 50, offset = 0 } = {}) => {
   let query = `
     SELECT o.*, r.name as restaurant_name, a.street, a.city
     FROM orders o
@@ -8,32 +30,32 @@ const getOrders = async (userId, role) => {
     LEFT JOIN addresses a ON o.delivery_address_id = a.id
   `;
   const values = [];
-  
+
   if (role === 'customer') {
     query += ' WHERE o.user_id = $1';
     values.push(userId);
   } else if (role === 'restaurant_owner') {
     query += ' WHERE r.owner_id = $1';
     values.push(userId);
-  }
-  
-  query += ' ORDER BY o.created_at DESC';
-  
-  const { rows } = await pool.query(query, values);
-  
-  // Fetch items for each order
-  for (const order of rows) {
-    const itemsQuery = `
-      SELECT oi.*, m.name
-      FROM order_items oi
-      JOIN menu_items m ON oi.menu_item_id = m.id
-      WHERE oi.order_id = $1
-    `;
-    const items = await pool.query(itemsQuery, [order.id]);
-    order.items = items.rows;
+  } else if (role === 'delivery_partner') {
+    query += ` WHERE o.delivery_partner_id IN (
+      SELECT id FROM delivery_partners WHERE user_id = $1
+    )`;
+    values.push(userId);
+  } else if (role === 'admin') {
+    // full list for admins via this endpoint (prefer /api/admin/orders)
+  } else {
+    query += ' WHERE o.user_id = $1';
+    values.push(userId);
   }
 
-  return rows;
+  const safeLimit = Math.min(Math.max(Number(limit) || 50, 1), 200);
+  const safeOffset = Math.max(Number(offset) || 0, 0);
+  values.push(safeLimit, safeOffset);
+  query += ` ORDER BY o.created_at DESC LIMIT $${values.length - 1} OFFSET $${values.length}`;
+
+  const { rows } = await pool.query(query, values);
+  return attachOrderItems(rows);
 };
 
 const getOrderById = async (orderId) => {
@@ -41,6 +63,7 @@ const getOrderById = async (orderId) => {
     SELECT
       o.*,
       r.name as restaurant_name,
+      r.owner_id as restaurant_owner_id,
       r.estimated_delivery_time,
       a.street,
       a.city,
@@ -56,30 +79,30 @@ const getOrderById = async (orderId) => {
     LEFT JOIN addresses a ON o.delivery_address_id = a.id
     WHERE o.id = $1
   `;
-  const { rows } = await pool.query(query, [orderId]);
-  
-  if (rows.length === 0) return null;
-  
-  const order = rows[0];
-  
-  const itemsQuery = `
-    SELECT oi.*, m.name, m.image_url
-    FROM order_items oi
-    JOIN menu_items m ON oi.menu_item_id = m.id
-    WHERE oi.order_id = $1
-  `;
-  const items = await pool.query(itemsQuery, [orderId]);
-  order.items = items.rows;
+  const [{ rows }, itemsRes, paymentRes] = await Promise.all([
+    pool.query(query, [orderId]),
+    pool.query(
+      `SELECT oi.*, m.name, m.image_url
+       FROM order_items oi
+       JOIN menu_items m ON oi.menu_item_id = m.id
+       WHERE oi.order_id = $1`,
+      [orderId]
+    ),
+    pool.query(
+      'SELECT method, status FROM payments WHERE order_id = $1 ORDER BY created_at DESC LIMIT 1',
+      [orderId]
+    ),
+  ]);
 
-  const paymentRes = await pool.query(
-    'SELECT method, status FROM payments WHERE order_id = $1 ORDER BY created_at DESC LIMIT 1',
-    [orderId]
-  );
+  if (rows.length === 0) return null;
+
+  const order = rows[0];
+  order.items = itemsRes.rows;
   if (paymentRes.rows[0]) {
     order.payment_method = paymentRes.rows[0].method;
     order.payment_status = paymentRes.rows[0].status;
   }
-  
+
   return order;
 };
 

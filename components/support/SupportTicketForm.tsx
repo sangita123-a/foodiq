@@ -1,88 +1,187 @@
 "use client";
 
-import { Send, Paperclip } from "lucide-react";
+import { Send } from "lucide-react";
 import { FormEvent, useState } from "react";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
 
+type Mode = "support" | "bug" | "feedback";
+
 export default function SupportTicketForm() {
   const { showToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mode, setMode] = useState<Mode>("support");
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const payload = {
-      category: formData.get("category"),
-      subject: formData.get("subject"),
-      description: formData.get("description"),
-    };
+    const form = e.currentTarget;
+    const formData = new FormData(form);
 
     try {
       setIsSubmitting(true);
-      await api.post('/api/support', payload);
-      showToast("Support ticket submitted successfully. We will get back to you soon.", "success");
-      (e.target as HTMLFormElement).reset();
-    } catch (err: any) {
-      console.error(err);
-      showToast(err.response?.data?.message || "Failed to submit ticket", "error");
+      if (mode === "bug") {
+        await api.post("/api/bugs", {
+          title: formData.get("subject"),
+          description: formData.get("description"),
+          severity: formData.get("severity") || "medium",
+          page_url:
+            typeof window !== "undefined" ? window.location.href : undefined,
+        });
+        showToast("Bug report submitted. Our team will investigate.", "success");
+      } else if (mode === "feedback") {
+        await api.post("/api/feedback", {
+          category: formData.get("category") || "general",
+          message: formData.get("description"),
+          page_url:
+            typeof window !== "undefined" ? window.location.href : undefined,
+        });
+        showToast("Thanks for your feedback!", "success");
+      } else {
+        await api.post("/api/support", {
+          category: formData.get("category"),
+          subject: formData.get("subject"),
+          description: formData.get("description"),
+        });
+        showToast(
+          "Support ticket submitted successfully. We will get back to you soon.",
+          "success"
+        );
+      }
+      form.reset();
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Failed to submit";
+      showToast(msg, "error");
     } finally {
       setIsSubmitting(false);
     }
   };
+
   return (
     <div className="bg-[#F8FAFC] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] h-full">
-      <h2 className="text-2xl font-bold text-white mb-2">Submit a Ticket</h2>
-      <p className="text-[#6B7280] text-sm mb-8">For complex issues, open a support ticket. We usually respond within 24 hours.</p>
+      <h2 className="text-2xl font-bold text-[#111827] mb-2">Get help</h2>
+      <p className="text-[#6B7280] text-sm mb-6">
+        Submit a support ticket, report a bug, or share product feedback.
+      </p>
+
+      <div className="flex flex-wrap gap-2 mb-6">
+        {(
+          [
+            ["support", "Support ticket"],
+            ["bug", "Report a bug"],
+            ["feedback", "Product feedback"],
+          ] as const
+        ).map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setMode(key)}
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
+              mode === key
+                ? "bg-[#FC8019] text-white"
+                : "bg-white border border-[#E5E7EB] text-[#6B7280] hover:text-[#111827]"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        
-        <div>
-          <label className="block text-sm font-bold text-[#6B7280] mb-2">Category</label>
-          <select name="category" required className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer">
-            <option>Order Issue</option>
-            <option>Payment / Refund</option>
-            <option>Account Management</option>
-            <option>Feedback / Suggestion</option>
-            <option>Other</option>
-          </select>
-        </div>
+        {mode !== "feedback" && (
+          <div>
+            <label className="block text-sm font-bold text-[#6B7280] mb-2">
+              {mode === "bug" ? "Title" : "Subject"}
+            </label>
+            <input
+              type="text"
+              name="subject"
+              required
+              placeholder={
+                mode === "bug"
+                  ? "Short bug title…"
+                  : "Briefly describe the issue…"
+              }
+              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+            />
+          </div>
+        )}
+
+        {mode === "support" && (
+          <div>
+            <label className="block text-sm font-bold text-[#6B7280] mb-2">
+              Category
+            </label>
+            <select
+              name="category"
+              required
+              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer"
+            >
+              <option>Order Issue</option>
+              <option>Payment / Refund</option>
+              <option>Account Management</option>
+              <option>Feedback / Suggestion</option>
+              <option>Other</option>
+            </select>
+          </div>
+        )}
+
+        {mode === "feedback" && (
+          <div>
+            <label className="block text-sm font-bold text-[#6B7280] mb-2">
+              Category
+            </label>
+            <select
+              name="category"
+              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer"
+            >
+              <option value="general">General</option>
+              <option value="feature">Feature idea</option>
+              <option value="ux">App experience</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        )}
+
+        {mode === "bug" && (
+          <div>
+            <label className="block text-sm font-bold text-[#6B7280] mb-2">
+              Severity
+            </label>
+            <select
+              name="severity"
+              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer"
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </div>
+        )}
 
         <div>
-          <label className="block text-sm font-bold text-[#6B7280] mb-2">Subject</label>
-          <input 
-            type="text" 
-            name="subject"
-            required
-            placeholder="Briefly describe the issue..."
-            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-bold text-[#6B7280] mb-2">Description</label>
-          <textarea 
+          <label className="block text-sm font-bold text-[#6B7280] mb-2">
+            Description
+          </label>
+          <textarea
             name="description"
             required
             rows={4}
-            placeholder="Please provide as much detail as possible..."
+            placeholder="Please provide as much detail as possible…"
             className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
-          ></textarea>
+          />
         </div>
 
-        <div>
-          <label className="block text-sm font-bold text-[#6B7280] mb-2">Attachments (Optional)</label>
-          <div className="w-full bg-white border-2 border-dashed border-[#E5E7EB] rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors group">
-            <Paperclip className="w-6 h-6 text-[#9CA3AF] mb-2 group-hover:text-primary transition-colors" />
-            <p className="text-white text-sm font-bold">Click to upload screenshot</p>
-            <p className="text-[#9CA3AF] text-xs mt-1">PNG, JPG up to 5MB</p>
-          </div>
-        </div>
-
-        <button type="submit" disabled={isSubmitting} className="w-full bg-white text-black hover:bg-gray-200 px-6 py-4 rounded-xl font-black transition-colors shadow-xl flex items-center justify-center gap-2 disabled:opacity-50">
-          {isSubmitting ? "Submitting..." : "Submit Ticket"} <Send className="w-4 h-4" />
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-[#FC8019] hover:bg-[#E76F0B] disabled:opacity-60 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors"
+        >
+          <Send className="w-4 h-4" />
+          {isSubmitting ? "Submitting…" : "Submit"}
         </button>
-
       </form>
     </div>
   );

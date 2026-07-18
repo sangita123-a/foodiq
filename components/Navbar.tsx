@@ -5,9 +5,10 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
 import useSWR from "swr";
-import { Bell, ShoppingCart, Search, Menu, X } from "lucide-react";
-import Cookies from "js-cookie";
+import { ShoppingCart, Search, Menu, X } from "lucide-react";
 import api from "@/services/api";
+import NotificationBell from "@/components/notifications/NotificationBell";
+import { clearClientAuth } from "@/lib/authSession";
 
 const NAV_LINKS = [
   { href: "/", label: "Home", isActive: (path: string) => path === "/" },
@@ -39,16 +40,12 @@ export default function Navbar() {
     try {
       await api.post("/api/auth/logout");
     } catch (_) {}
-    Cookies.remove("token");
-    localStorage.removeItem("user");
+    clearClientAuth();
     setUser(null);
     router.push("/login");
   };
 
-  const { data: notifData } = useSWR(isLoggedIn ? "/api/notifications" : null, { refreshInterval: 30000 });
   const { data: cartData } = useSWR(isLoggedIn ? "/api/cart" : null);
-  const notifications = notifData || [];
-  const unreadCount = notifications.filter((n: any) => !n.is_read).length;
   const cartCount = (cartData?.items || []).reduce(
     (sum: number, item: { quantity: number }) => sum + item.quantity,
     0
@@ -109,18 +106,7 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
-            <Link
-              href="/notifications"
-              className="relative h-10 w-10 rounded-xl border border-[#ECECEC] bg-white hover:border-[#FC8019]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] flex items-center justify-center transition-all hover:-translate-y-0.5"
-              aria-label="Notifications"
-            >
-              <Bell className="w-4 h-4" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[var(--color-primary)] text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </Link>
+            <NotificationBell endpoint="/api/notifications" inboxHref="/notifications" />
           </>
         )}
 

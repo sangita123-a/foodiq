@@ -71,9 +71,35 @@ const apiLimiter = rateLimit({
   },
 });
 
+const contactLimiter = rateLimit({
+  windowMs: Number(process.env.RATE_LIMIT_CONTACT_WINDOW_MS || 15 * 60 * 1000),
+  max: Number(process.env.RATE_LIMIT_CONTACT_MAX || 8),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many contact submissions. Please try again later.',
+    error: { code: 'RATE_LIMIT' },
+  },
+});
+
+const feedbackLimiter = rateLimit({
+  windowMs: Number(process.env.RATE_LIMIT_FEEDBACK_WINDOW_MS || 15 * 60 * 1000),
+  max: Number(process.env.RATE_LIMIT_FEEDBACK_MAX || 20),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many feedback submissions. Please try again later.',
+    error: { code: 'RATE_LIMIT' },
+  },
+});
+
 module.exports = {
   authLimiter,
   otpLimiter,
   uploadLimiter,
   apiLimiter,
+  contactLimiter,
+  feedbackLimiter,
 };

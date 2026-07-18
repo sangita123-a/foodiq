@@ -1,21 +1,64 @@
+import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import ScrollButton from "@/components/ScrollButton";
-import FloatingCart from "@/components/FloatingCart";
-import PopularRestaurants from "@/components/PopularRestaurants";
-import TrendingDishes from "@/components/TrendingDishes";
-import BestOffers from "@/components/BestOffers";
-import TopBrands from "@/components/TopBrands";
-import FeaturedRestaurant from "@/components/FeaturedRestaurant";
-import LiveDeals from "@/components/LiveDeals";
-import PopularCuisines from "@/components/PopularCuisines";
-import FeaturedCollections from "@/components/FeaturedCollections";
-import LovedByFoodLovers from "@/components/LovedByFoodLovers";
-import Features from "@/components/Features";
-import Reviews from "@/components/Reviews";
-import AppBanner from "@/components/AppBanner";
-import FAQ from "@/components/FAQ";
-import Footer from "@/components/Footer";
+import { publicMetadata } from "@/lib/seo/pages";
+
+export const metadata: Metadata = publicMetadata("home");
+
+function SectionSkeleton({ height = "h-64" }: { height?: string }) {
+  return (
+    <div
+      className={`mx-auto my-8 max-w-7xl animate-pulse rounded-2xl bg-[#F8F9FA] ${height}`}
+      aria-hidden
+    />
+  );
+}
+
+const ScrollButton = dynamic(() => import("@/components/ScrollButton"));
+const FloatingCart = dynamic(() => import("@/components/FloatingCart"));
+const PopularRestaurants = dynamic(() => import("@/components/PopularRestaurants"), {
+  loading: () => <SectionSkeleton height="h-80" />,
+});
+const TrendingDishes = dynamic(() => import("@/components/TrendingDishes"), {
+  loading: () => <SectionSkeleton />,
+});
+const BestOffers = dynamic(() => import("@/components/BestOffers"), {
+  loading: () => <SectionSkeleton />,
+});
+const TopBrands = dynamic(() => import("@/components/TopBrands"), {
+  loading: () => <SectionSkeleton height="h-40" />,
+});
+const FeaturedRestaurant = dynamic(() => import("@/components/FeaturedRestaurant"), {
+  loading: () => <SectionSkeleton height="h-72" />,
+});
+const LiveDeals = dynamic(() => import("@/components/LiveDeals"), {
+  loading: () => <SectionSkeleton />,
+});
+const PopularCuisines = dynamic(() => import("@/components/PopularCuisines"), {
+  loading: () => <SectionSkeleton height="h-48" />,
+});
+const FeaturedCollections = dynamic(() => import("@/components/FeaturedCollections"), {
+  loading: () => <SectionSkeleton />,
+});
+const LovedByFoodLovers = dynamic(() => import("@/components/LovedByFoodLovers"), {
+  loading: () => <SectionSkeleton />,
+});
+const Features = dynamic(() => import("@/components/Features"), {
+  loading: () => <SectionSkeleton height="h-56" />,
+});
+const Reviews = dynamic(() => import("@/components/Reviews"), {
+  loading: () => <SectionSkeleton />,
+});
+const AppBanner = dynamic(() => import("@/components/AppBanner"), {
+  loading: () => <SectionSkeleton height="h-48" />,
+});
+const FAQ = dynamic(() => import("@/components/FAQ"), {
+  loading: () => <SectionSkeleton height="h-72" />,
+});
+const Footer = dynamic(() => import("@/components/Footer"), {
+  loading: () => <SectionSkeleton height="h-40" />,
+});
 
 export default function Home() {
   return (
@@ -24,7 +67,7 @@ export default function Home() {
       <Hero />
       <ScrollButton />
       <FloatingCart />
-      
+
       <div className="relative z-10 bg-white pt-4 sm:pt-6">
         <PopularRestaurants />
         <TrendingDishes />
@@ -40,7 +83,7 @@ export default function Home() {
         <AppBanner />
         <FAQ />
       </div>
-      
+
       <Footer />
     </main>
   );

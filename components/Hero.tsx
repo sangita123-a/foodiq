@@ -19,12 +19,37 @@ const words = [
 
 export default function Hero() {
   const [index, setIndex] = useState(0);
+  const [videoReady, setVideoReady] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % words.length);
     }, 2500); // 2 seconds pause + 500ms transition
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const prefersReduced =
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (prefersReduced) return;
+
+    const enable = () => setVideoReady(true);
+    let idleId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    if ("requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(enable, { timeout: 2500 });
+    } else {
+      timeoutId = setTimeout(enable, 1200);
+    }
+
+    return () => {
+      if (idleId != null && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   const scrollToContent = () => {
@@ -36,18 +61,31 @@ export default function Hero() {
 
   return (
     <div className="relative w-full h-[calc(100vh-80px)] min-h-[640px] flex flex-col items-center justify-center overflow-hidden bg-[#F8F9FA]">
-      {/* Background Video */}
+      {/* Background Video — deferred until idle to improve LCP */}
       <div className="absolute top-0 left-0 w-full h-full z-0">
-        <video 
-          autoPlay 
-          loop 
-          muted 
-          playsInline
-          preload="auto"
-          className="w-full h-full object-cover object-center contrast-[1.02] saturate-[1.04] transform-gpu"
-        >
-          <source src="/hero-video.mp4" type="video/mp4" />
-        </video>
+        {videoReady ? (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="none"
+            poster="/icons/og-default.png"
+            aria-label="Foodiq hero background showing food delivery atmosphere"
+            className="w-full h-full object-cover object-center contrast-[1.02] saturate-[1.04] transform-gpu"
+          >
+            <source src="/hero-video.mp4" type="video/mp4" />
+          </video>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element -- static LCP poster before video hydrates
+          <img
+            src="/icons/og-default.png"
+            alt=""
+            fetchPriority="high"
+            decoding="async"
+            className="w-full h-full object-cover object-center"
+          />
+        )}
         {/* Light readability overlay without softening the video */}
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.52)_0%,rgba(255,255,255,0.34)_48%,rgba(255,255,255,0.7)_100%)]"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),rgba(255,255,255,0.3))]"></div>

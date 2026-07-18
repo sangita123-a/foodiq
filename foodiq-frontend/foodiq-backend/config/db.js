@@ -51,7 +51,10 @@ function buildPoolConfig() {
 
 const pool = new Pool(buildPoolConfig());
 
-const stmtTimeout = Number(process.env.DB_STATEMENT_TIMEOUT_MS || 0);
+const stmtTimeout = Number(
+  process.env.DB_STATEMENT_TIMEOUT_MS ||
+    (process.env.NODE_ENV === 'production' ? 15000 : 0)
+);
 if (stmtTimeout > 0) {
   pool.on('connect', (client) => {
     client.query(`SET statement_timeout TO ${stmtTimeout}`).catch(() => {});

@@ -15,6 +15,8 @@ const {
   getPartnerAnalytics,
   getNotifications,
   getSettlements,
+  getPartnerReviews,
+  replyPartnerReview,
 } = require('../controllers/partnerController');
 
 router.use(protect);
@@ -33,5 +35,7 @@ router.put('/profile', updateProfile);
 router.get('/analytics', getPartnerAnalytics);
 router.get('/notifications', getNotifications);
 router.get('/settlements', getSettlements);
+router.get('/reviews', getPartnerReviews);
+router.put('/reviews/:id', replyPartnerReview);
 
 module.exports = router;

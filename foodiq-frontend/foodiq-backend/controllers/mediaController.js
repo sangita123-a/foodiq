@@ -37,13 +37,54 @@ const linkToEntity = async ({ user, purpose, url, entity_type, entity_id }) => {
       return { entity_type: 'user', entity_id: user.id };
     }
 
+    if (purpose === 'food' && entity_id) {
+      // Only admin or restaurant owner of the item's restaurant may link
+      if (user.role === 'admin') {
+        await pool.query(
+          `UPDATE menu_items SET image_url = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
+          [url, entity_id]
+        );
+        return { entity_type: 'menu_item', entity_id };
+      }
+      const owned = await pool.query(
+        `SELECT m.id FROM menu_items m
+         JOIN restaurants r ON r.id = m.restaurant_id
+         WHERE m.id = $1 AND r.owner_id = $2`,
+        [entity_id, user.id]
+      );
+      if (!owned.rows[0]) return null;
+      await pool.query(
+        `UPDATE menu_items SET image_url = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
+        [url, entity_id]
+      );
+      return { entity_type: 'menu_item', entity_id };
+    }
+
+    if (purpose === 'category' && entity_id) {
+      if (user.role !== 'admin') return null;
+      await pool.query(
+        `UPDATE restaurant_categories SET image_url = $1 WHERE id = $2`,
+        [url, entity_id]
+      );
+      return { entity_type: 'category', entity_id };
+    }
+
     if (purpose === 'restaurant_logo' || purpose === 'restaurant_banner' || purpose === 'restaurant_cover') {
       const rest = await pool.query(
         `SELECT id FROM restaurants WHERE owner_id = $1 ORDER BY created_at ASC LIMIT 1`,
         [user.id]
       );
-      const rid = entity_id || rest.rows[0]?.id;
+      let rid = entity_id || rest.rows[0]?.id;
+      if (entity_id && user.role !== 'admin') {
+        const owned = await pool.query(
+          `SELECT id FROM restaurants WHERE id = $1 AND owner_id = $2`,
+          [entity_id, user.id]
+        );
+        if (!owned.rows[0]) return null;
+        rid = entity_id;
+      }
       if (!rid) return null;
+      if (user.role === 'admin' && entity_id) rid = entity_id;
       if (purpose === 'restaurant_logo') {
         await pool.query(
           `UPDATE restaurants SET logo_url = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
@@ -56,22 +97,6 @@ const linkToEntity = async ({ user, purpose, url, entity_type, entity_id }) => {
         );
       }
       return { entity_type: 'restaurant', entity_id: rid };
-    }
-
-    if (purpose === 'food' && entity_id) {
-      await pool.query(
-        `UPDATE menu_items SET image_url = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
-        [url, entity_id]
-      );
-      return { entity_type: 'menu_item', entity_id };
-    }
-
-    if (purpose === 'category' && entity_id) {
-      await pool.query(
-        `UPDATE restaurant_categories SET image_url = $1 WHERE id = $2`,
-        [url, entity_id]
-      );
-      return { entity_type: 'category', entity_id };
     }
 
     if (

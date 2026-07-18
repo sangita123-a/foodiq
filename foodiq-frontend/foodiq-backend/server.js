@@ -33,16 +33,17 @@ const allowedOrigins = [
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
+  ...(isProduction
+    ? []
+    : ['http://localhost:3000', 'http://127.0.0.1:3000']),
 ].filter(Boolean);
 
 const corsStrict =
   String(process.env.CORS_STRICT || (isProduction ? 'true' : 'false')).toLowerCase() ===
   'true';
+// Production: only allow *.vercel.app when explicitly enabled
 const allowVercelPreviews =
-  String(process.env.CORS_ALLOW_VERCEL || (isProduction ? 'true' : 'false')).toLowerCase() ===
-  'true';
+  String(process.env.CORS_ALLOW_VERCEL || 'false').toLowerCase() === 'true';
 
 const isOriginAllowed = (origin) => {
   if (!origin) return true;
@@ -119,6 +120,23 @@ if (!process.env.JWT_SECRET) {
   log.warn('JWT_SECRET is not configured — tokens will use an insecure fallback.');
 }
 
+// Refuse insecure payment mock in production unless explicitly allowed
+try {
+  const { isMockMode } = require('./utils/razorpayClient');
+  if (
+    isProduction &&
+    isMockMode() &&
+    String(process.env.ALLOW_PAYMENT_MOCK || '').toLowerCase() !== 'true'
+  ) {
+    log.error(
+      'Razorpay is in mock mode in production. Set RAZORPAY_KEY_ID/SECRET and RAZORPAY_MOCK=false, or ALLOW_PAYMENT_MOCK=true to override.'
+    );
+    process.exit(1);
+  }
+} catch (err) {
+  log.warn('Payment mode check skipped', { error: err.message });
+}
+
 const authRoutes = require('./routes/authRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const restaurantRoutes = require('./routes/restaurantRoutes');
@@ -174,6 +192,8 @@ app.use('/api/sessions', sessionRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api/feedback', require('./routes/feedbackRoutes'));
+app.use('/api/bugs', require('./routes/bugRoutes'));
 app.use('/api/partner', partnerRoutes);
 app.use('/api/delivery', deliveryRoutes);
 app.use('/api/messaging', require('./routes/messagingRoutes'));
@@ -222,6 +242,8 @@ pool
       const cache = require('./services/cacheService');
       const { getCategories } = require('./models/restaurantCategoryModel');
       const { getAllOffers } = require('./models/offerModel');
+      const { getAllLiveDeals } = require('./models/liveDealModel');
+      const { getMenuItems } = require('./models/menuItemModel');
       cache
         .warm([
           {
@@ -233,6 +255,16 @@ pool
             key: cache.cacheKey('offers:all', {}),
             ttl: Number(process.env.CACHE_TTL_OFFERS || 120),
             producer: getAllOffers,
+          },
+          {
+            key: cache.cacheKey('live_deals:all', {}),
+            ttl: Number(process.env.CACHE_TTL_OFFERS || 120),
+            producer: getAllLiveDeals,
+          },
+          {
+            key: cache.cacheKey('menu:list', { trending: 'true', limit: '8', search: '' }),
+            ttl: Number(process.env.CACHE_TTL_MENU || 60),
+            producer: () => getMenuItems({ trending: 'true', limit: '8', search: '' }),
           },
         ])
         .catch(() => {});

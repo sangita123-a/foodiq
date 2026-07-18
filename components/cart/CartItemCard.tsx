@@ -57,8 +57,10 @@ export default function CartItemCard({ item, onUpdateQuantity, onRemove }: CartI
         {/* Quantity Selector */}
         <div className="flex items-center bg-[#FFFFFF] border border-[#E5E7EB] rounded-lg overflow-hidden h-10 w-28">
           <button 
+            type="button"
             onClick={() => onUpdateQuantity(item.id, -1)}
             disabled={item.quantity <= 1}
+            aria-label={`Decrease quantity of ${item.name}`}
             className="w-1/3 h-full flex items-center justify-center text-[#FC8019] hover:bg-[#F8FAFC] transition-colors disabled:opacity-50 disabled:hover:bg-transparent"
           >
             <Minus className="w-4 h-4" />
@@ -67,7 +69,9 @@ export default function CartItemCard({ item, onUpdateQuantity, onRemove }: CartI
             {item.quantity}
           </span>
           <button 
+            type="button"
             onClick={() => onUpdateQuantity(item.id, 1)}
+            aria-label={`Increase quantity of ${item.name}`}
             className="w-1/3 h-full flex items-center justify-center text-green-500 hover:bg-[#F8FAFC] transition-colors"
           >
             <Plus className="w-4 h-4" />
@@ -82,9 +86,11 @@ export default function CartItemCard({ item, onUpdateQuantity, onRemove }: CartI
           </div>
           
           <button 
+            type="button"
             onClick={() => onRemove(item.id)}
             className="w-10 h-10 rounded-full bg-[#F8FAFC] flex items-center justify-center text-[#6B7280] hover:text-[#FC8019] hover:bg-[#FC8019]/10 transition-colors"
             title="Remove Item"
+            aria-label={`Remove ${item.name} from cart`}
           >
             <Trash2 className="w-5 h-5" />
           </button>

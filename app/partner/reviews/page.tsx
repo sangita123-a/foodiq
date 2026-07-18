@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import PartnerSidebar from "@/components/partner/PartnerSidebar";
 import PartnerHeader from "@/components/partner/PartnerHeader";
 import ReviewsHeader from "@/components/partner/reviews/ReviewsHeader";
@@ -10,116 +10,161 @@ import ReviewsList from "@/components/partner/reviews/ReviewsList";
 import ReviewsEmptyState from "@/components/partner/reviews/ReviewsEmptyState";
 import ReviewsAnalytics from "@/components/partner/reviews/ReviewsAnalytics";
 import { Review, ReviewsAnalyticsData } from "@/components/partner/reviews/types";
+import api from "@/services/api";
 
-// --- Mock Dataset ---
-const INITIAL_REVIEWS: Review[] = [
-  {
-    id: "REV-001",
-    customerName: "Rahul Sharma",
-    orderId: "#ORD-9021",
-    orderedDish: "Hyderabadi Chicken Dum Biryani",
-    rating: 5,
-    title: "Absolutely delicious!",
-    description: "The biryani was perfectly cooked. The chicken was tender and the spices were spot on. Will definitely order again.",
-    date: "2 days ago",
-    isFeatured: true
-  },
-  {
-    id: "REV-002",
-    customerName: "Priya Patel",
-    orderId: "#ORD-9022",
-    orderedDish: "Paneer Butter Masala",
-    rating: 4,
-    title: "Great taste, slightly oily",
-    description: "The paneer was very soft and the gravy was rich. However, it felt a bit too oily for my liking. Good overall.",
-    date: "3 days ago",
-    reply: {
-      text: "Hi Priya, thank you for your feedback! We are glad you liked the taste. We have noted your feedback regarding the oil and will inform our chefs.",
-      date: "2 days ago"
-    }
-  },
-  {
-    id: "REV-003",
-    customerName: "Amit Kumar",
-    orderId: "#ORD-9023",
-    orderedDish: "Cold Coffee with Ice Cream",
-    rating: 2,
-    title: "Disappointed",
-    description: "The coffee was warm and the ice cream had completely melted by the time it reached me. Very poor packaging.",
-    date: "1 week ago",
-    photos: ["/images/catalog/food/beverages.webp"]
-  },
-  {
-    id: "REV-004",
-    customerName: "Sneha Reddy",
-    orderId: "#ORD-9024",
-    orderedDish: "Veg Hakka Noodles",
-    rating: 5,
-    title: "Best Chinese in town",
-    description: "Perfectly seasoned noodles with lots of fresh veggies. The portion size was also very generous. Loved it!",
-    date: "2 weeks ago"
-  }
-];
+function relativeDate(iso?: string) {
+  if (!iso) return "";
+  const d = new Date(iso).getTime();
+  const days = Math.floor((Date.now() - d) / (1000 * 60 * 60 * 24));
+  if (days <= 0) return "Today";
+  if (days === 1) return "1 day ago";
+  if (days < 14) return `${days} days ago`;
+  return new Date(iso).toLocaleDateString("en-IN");
+}
 
-const ANALYTICS_DATA: ReviewsAnalyticsData = {
-  averageRating: 4.2,
-  totalReviews: 1254,
-  positiveReviews: 890,
-  neutralReviews: 210,
-  negativeReviews: 154,
+function mapReview(row: Record<string, unknown>): Review {
+  return {
+    id: String(row.id),
+    customerName: String(row.full_name || "Customer"),
+    customerImage: row.profile_image_url
+      ? String(row.profile_image_url)
+      : undefined,
+    orderId: row.order_id
+      ? `#${String(row.order_id).slice(0, 8)}`
+      : "—",
+    orderedDish: String(row.ordered_dish || "Order"),
+    rating: Number(row.rating) || 0,
+    title: Number(row.rating) >= 4 ? "Great experience" : "Feedback",
+    description: String(row.comment || "No comment provided."),
+    date: relativeDate(String(row.created_at || "")),
+    reply: row.admin_reply
+      ? {
+          text: String(row.admin_reply),
+          date: relativeDate(String(row.replied_at || row.updated_at || "")),
+        }
+      : undefined,
+    isHidden: String(row.status || "visible") === "hidden",
+  };
+}
+
+const EMPTY_ANALYTICS: ReviewsAnalyticsData = {
+  averageRating: 0,
+  totalReviews: 0,
+  positiveReviews: 0,
+  neutralReviews: 0,
+  negativeReviews: 0,
   satisfaction: {
-    foodQuality: 92,
-    deliveryExperience: 78,
-    packaging: 85,
-    restaurantService: 95
-  }
+    foodQuality: 0,
+    deliveryExperience: 0,
+    packaging: 0,
+    restaurantService: 0,
+  },
 };
 
 export default function PartnerReviewsPage() {
-  const [reviews, setReviews] = useState<Review[]>(INITIAL_REVIEWS);
-  
-  // Filter States
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [analytics, setAnalytics] =
+    useState<ReviewsAnalyticsData>(EMPTY_ANALYTICS);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [ratingFilter, setRatingFilter] = useState("All");
   const [dateRange, setDateRange] = useState("All Time");
   const [sortBy, setSortBy] = useState("Newest First");
 
-  // Handlers
-  const handleUpdateReply = (id: string, text: string | null) => {
-    setReviews(prev => prev.map(rev => {
-      if (rev.id === id) {
-        if (text === null) {
-          const { reply, ...rest } = rev;
-          return rest;
-        } else {
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await api.get("/api/partner/reviews");
+      const data = res.data?.data || {};
+      const rows = (data.reviews || []) as Array<Record<string, unknown>>;
+      setReviews(rows.map(mapReview));
+      const a = data.analytics || {};
+      setAnalytics({
+        ...EMPTY_ANALYTICS,
+        averageRating: Number(a.averageRating) || 0,
+        totalReviews: Number(a.totalReviews) || rows.length,
+        positiveReviews: Number(a.positiveReviews) || 0,
+        neutralReviews: Number(a.neutralReviews) || 0,
+        negativeReviews: Number(a.negativeReviews) || 0,
+        satisfaction: {
+          foodQuality: Math.min(
+            100,
+            Math.round((Number(a.averageRating) || 0) * 20)
+          ),
+          deliveryExperience: 0,
+          packaging: 0,
+          restaurantService: Math.min(
+            100,
+            Math.round((Number(a.averageRating) || 0) * 20)
+          ),
+        },
+      });
+    } catch (e) {
+      console.error(e);
+      setReviews([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const handleUpdateReply = async (id: string, text: string | null) => {
+    try {
+      await api.put(`/api/partner/reviews/${id}`, {
+        reply: text,
+      });
+      setReviews((prev) =>
+        prev.map((rev) => {
+          if (rev.id !== id) return rev;
+          if (text === null) {
+            const { reply: _r, ...rest } = rev;
+            return rest;
+          }
           return { ...rev, reply: { text, date: "Just now" } };
-        }
+        })
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleUpdateStatus = async (
+    id: string,
+    field: "isFeatured" | "isHidden",
+    value: boolean
+  ) => {
+    if (field === "isHidden") {
+      try {
+        await api.put(`/api/partner/reviews/${id}`, {
+          status: value ? "hidden" : "visible",
+        });
+      } catch (e) {
+        console.error(e);
+        return;
       }
-      return rev;
-    }));
+    }
+    setReviews((prev) =>
+      prev.map((rev) => (rev.id === id ? { ...rev, [field]: value } : rev))
+    );
   };
 
-  const handleUpdateStatus = (id: string, field: "isFeatured" | "isHidden", value: boolean) => {
-    setReviews(prev => prev.map(rev => rev.id === id ? { ...rev, [field]: value } : rev));
-  };
-
-  // Derived Data
   const filteredReviews = useMemo(() => {
-    const result = reviews.filter(rev => {
-      const matchesSearch = rev.customerName.toLowerCase().includes(search.toLowerCase()) || 
-                            rev.orderedDish.toLowerCase().includes(search.toLowerCase());
-      const matchesRating = ratingFilter === "All" || rev.rating.toString() === ratingFilter;
-      return matchesSearch && matchesRating;
+    const result = reviews.filter((rev) => {
+      const matchesSearch =
+        rev.customerName.toLowerCase().includes(search.toLowerCase()) ||
+        rev.orderedDish.toLowerCase().includes(search.toLowerCase());
+      const matchesRating =
+        ratingFilter === "All" || rev.rating.toString() === ratingFilter;
+      return matchesSearch && matchesRating && !rev.isHidden;
     });
 
-    // Sort Logic (Simplified for mock data)
     result.sort((a, b) => {
-      if (sortBy === "Highest Rated") {
-        return b.rating - a.rating;
-      } else if (sortBy === "Lowest Rated") {
-        return a.rating - b.rating;
-      }
-      return 0; // Keeping default mock order for newest/oldest for demo
+      if (sortBy === "Highest Rated") return b.rating - a.rating;
+      if (sortBy === "Lowest Rated") return a.rating - b.rating;
+      return 0;
     });
 
     return result;
@@ -127,36 +172,34 @@ export default function PartnerReviewsPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#FC8019] selection:text-white">
-      
-      {/* Sidebar - Fixed on left for desktop */}
       <div className="hidden lg:block w-64 flex-shrink-0">
         <PartnerSidebar />
       </div>
 
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        
-        {/* Sticky Header */}
         <PartnerHeader />
 
-        {/* Scrollable Dashboard Content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
           <div className="max-w-7xl mx-auto">
-            
             <ReviewsHeader />
-            
-            <ReviewsSummary data={ANALYTICS_DATA} />
+            <ReviewsSummary data={analytics} />
 
-            <ReviewsFilterBar 
-              search={search} setSearch={setSearch}
-              ratingFilter={ratingFilter} setRatingFilter={setRatingFilter}
-              dateRange={dateRange} setDateRange={setDateRange}
-              sortBy={sortBy} setSortBy={setSortBy}
+            <ReviewsFilterBar
+              search={search}
+              setSearch={setSearch}
+              ratingFilter={ratingFilter}
+              setRatingFilter={setRatingFilter}
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
             />
 
-            {filteredReviews.length > 0 ? (
-              <ReviewsList 
-                reviews={filteredReviews} 
+            {loading ? (
+              <div className="h-40 bg-white rounded-3xl border border-[#E5E7EB] animate-pulse" />
+            ) : filteredReviews.length > 0 ? (
+              <ReviewsList
+                reviews={filteredReviews}
                 onUpdateReply={handleUpdateReply}
                 onUpdateStatus={handleUpdateStatus}
               />
@@ -164,8 +207,7 @@ export default function PartnerReviewsPage() {
               <ReviewsEmptyState />
             )}
 
-            <ReviewsAnalytics data={ANALYTICS_DATA} />
-
+            <ReviewsAnalytics data={analytics} />
           </div>
         </main>
       </div>

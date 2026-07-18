@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect, FormEvent } from "react";
-import { BellRing, Mail, MessageSquare } from "lucide-react";
+import { BellRing, Mail, MessageSquare, Megaphone, Package } from "lucide-react";
 import useSWR from "swr";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
@@ -24,17 +24,30 @@ function ToggleSwitch({ checked, onClick }: { checked: boolean; onClick: () => v
   );
 }
 
+type PrefToggles = {
+  orders: boolean;
+  offers: boolean;
+  rewards: boolean;
+  orderUpdates: boolean;
+  email: boolean;
+  sms: boolean;
+  marketing: boolean;
+  push: boolean;
+};
+
 export default function NotificationSettings() {
   const { data, isLoading, mutate } = useSWR("/api/settings");
-  const settings = data || {};
   const { showToast } = useToast();
 
-  const [toggles, setToggles] = useState({
+  const [toggles, setToggles] = useState<PrefToggles>({
     orders: true,
     offers: true,
     rewards: false,
+    orderUpdates: true,
     email: true,
-    sms: false,
+    sms: true,
+    marketing: false,
+    push: true,
   });
 
   useEffect(() => {
@@ -43,8 +56,11 @@ export default function NotificationSettings() {
         orders: data.notify_orders ?? true,
         offers: data.notify_offers ?? true,
         rewards: data.notify_rewards ?? false,
+        orderUpdates: data.notify_order_updates ?? true,
         email: data.email_notifications ?? true,
-        sms: data.push_notifications ?? false,
+        sms: data.sms_notifications ?? true,
+        marketing: data.marketing_emails ?? false,
+        push: data.push_notifications ?? true,
       });
     }
   }, [data]);
@@ -56,8 +72,11 @@ export default function NotificationSettings() {
         notify_orders: toggles.orders,
         notify_offers: toggles.offers,
         notify_rewards: toggles.rewards,
+        notify_order_updates: toggles.orderUpdates,
         email_notifications: toggles.email,
-        push_notifications: toggles.sms,
+        sms_notifications: toggles.sms,
+        marketing_emails: toggles.marketing,
+        push_notifications: toggles.push,
       });
       showToast("Notification settings updated successfully", "success");
       mutate();
@@ -66,7 +85,7 @@ export default function NotificationSettings() {
     }
   };
 
-  const toggle = (key: keyof typeof toggles) => {
+  const toggle = (key: keyof PrefToggles) => {
     setToggles((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
@@ -81,36 +100,55 @@ export default function NotificationSettings() {
       exit={{ opacity: 0, x: -20 }}
       className="bg-[#F8FAFC] rounded-3xl p-6 md:p-10 border border-[#E5E7EB] shadow-2xl"
     >
-      <h2 className="text-2xl font-bold text-white mb-8">Notification Preferences</h2>
+      <h2 className="text-2xl font-bold text-[#111827] mb-2">Notification Preferences</h2>
+      <p className="text-sm text-[#6B7280] mb-8">
+        Control email, SMS, push, and marketing messages. Transactional security emails (OTP, password reset) always send.
+      </p>
 
       <form id="settings-form" onSubmit={handleSave}>
         <div className="mb-10 pb-8 border-b border-[#E5E7EB]">
           <div className="flex items-center gap-3 mb-6">
             <BellRing className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-bold text-[#111827]">Push Notifications</h3>
+            <h3 className="text-lg font-bold text-[#111827]">In-app &amp; Push</h3>
           </div>
 
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-white font-bold mb-1">Order Updates</h4>
-                <p className="text-[#9CA3AF] text-sm">Get real-time tracking updates for active orders.</p>
+                <h4 className="text-[#111827] font-bold mb-1">Push Notifications</h4>
+                <p className="text-[#9CA3AF] text-sm">Browser and device push alerts.</p>
+              </div>
+              <ToggleSwitch checked={toggles.push} onClick={() => toggle("push")} />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-[#111827] font-bold mb-1">Order Updates</h4>
+                <p className="text-[#9CA3AF] text-sm">Tracking, delivery, and status changes.</p>
+              </div>
+              <ToggleSwitch checked={toggles.orderUpdates} onClick={() => toggle("orderUpdates")} />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-[#111827] font-bold mb-1">Order Alerts</h4>
+                <p className="text-[#9CA3AF] text-sm">New orders and confirmation summaries.</p>
               </div>
               <ToggleSwitch checked={toggles.orders} onClick={() => toggle("orders")} />
             </div>
 
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-white font-bold mb-1">Offers & Promotions</h4>
-                <p className="text-[#9CA3AF] text-sm">Receive alerts for flash sales and daily discounts.</p>
+                <h4 className="text-[#111827] font-bold mb-1">Offers &amp; Promotions</h4>
+                <p className="text-[#9CA3AF] text-sm">Flash sales and daily discounts (in-app).</p>
               </div>
               <ToggleSwitch checked={toggles.offers} onClick={() => toggle("offers")} />
             </div>
 
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-white font-bold mb-1">Reward Notifications</h4>
-                <p className="text-[#9CA3AF] text-sm">Know when you earn points or level up.</p>
+                <h4 className="text-[#111827] font-bold mb-1">Reward Notifications</h4>
+                <p className="text-[#9CA3AF] text-sm">Points and loyalty updates.</p>
               </div>
               <ToggleSwitch checked={toggles.rewards} onClick={() => toggle("rewards")} />
             </div>
@@ -118,16 +156,16 @@ export default function NotificationSettings() {
         </div>
 
         <div>
-          <h3 className="text-lg font-bold text-white mb-6">External Channels</h3>
+          <h3 className="text-lg font-bold text-[#111827] mb-6">Email &amp; SMS</h3>
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-[#F8FAFC] rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-[#E5E7EB]">
                   <Mail className="w-5 h-5 text-[#6B7280]" />
                 </div>
                 <div>
-                  <h4 className="text-white font-bold mb-1">Email Newsletters</h4>
-                  <p className="text-[#9CA3AF] text-sm">Weekly summaries and special event invites.</p>
+                  <h4 className="text-[#111827] font-bold mb-1">Email Notifications</h4>
+                  <p className="text-[#9CA3AF] text-sm">Order, payment, and account emails.</p>
                 </div>
               </div>
               <ToggleSwitch checked={toggles.email} onClick={() => toggle("email")} />
@@ -135,15 +173,36 @@ export default function NotificationSettings() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-[#F8FAFC] rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-[#E5E7EB]">
                   <MessageSquare className="w-5 h-5 text-[#6B7280]" />
                 </div>
                 <div>
-                  <h4 className="text-white font-bold mb-1">SMS Notifications</h4>
-                  <p className="text-[#9CA3AF] text-sm">Critical order updates only via text message.</p>
+                  <h4 className="text-[#111827] font-bold mb-1">SMS Notifications</h4>
+                  <p className="text-[#9CA3AF] text-sm">OTP and critical order updates by text.</p>
                 </div>
               </div>
               <ToggleSwitch checked={toggles.sms} onClick={() => toggle("sms")} />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-[#E5E7EB]">
+                  <Megaphone className="w-5 h-5 text-[#6B7280]" />
+                </div>
+                <div>
+                  <h4 className="text-[#111827] font-bold mb-1">Marketing Emails</h4>
+                  <p className="text-[#9CA3AF] text-sm">Promotional campaigns and newsletters.</p>
+                </div>
+              </div>
+              <ToggleSwitch checked={toggles.marketing} onClick={() => toggle("marketing")} />
+            </div>
+
+            <div className="flex items-start gap-3 p-4 rounded-2xl bg-white border border-[#E5E7EB]">
+              <Package className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-[#6B7280]">
+                PDF invoices are emailed after successful payment when email notifications are on.
+                You can also download invoices from Payment Methods.
+              </p>
             </div>
           </div>
         </div>

@@ -1,0 +1,172 @@
+name: Production Deploy
+
+# Runs only after Continuous Integration succeeds on main / master / production.
+# Configure Environment "production" with required reviewers for approval.
+
+on:
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    types: [completed]
+    branches: [main, master, production]
+  workflow_dispatch:
+    inputs:
+      skip_deploy:
+        description: Skip deploy (dry run / logs only)
+        type: boolean
+        default: false
+      ref:
+        description: Optional git SHA/tag to deploy (default: current branch tip)
+        required: false
+        type: string
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  deploy:
+    name: Deploy Production (Vercel + Render)
+    if: >
+      (github.event_name == 'workflow_dispatch' && !inputs.skip_deploy) ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.APP_URL }}
+    steps:
+      - name: Resolve SHA
+        id: sha
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          elif [ -n "${{ inputs.ref }}" ]; then
+            echo "sha=${{ inputs.ref }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.sha.outputs.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install root deps
+        run: npm ci
+
+      - name: Record pre-deploy SHA for rollback
+        run: |
+          PREV=$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)
+          echo "PREVIOUS_SHA=$PREV" >> "$GITHUB_ENV"
+          echo "CURRENT_SHA=${{ steps.sha.outputs.sha }}" >> "$GITHUB_ENV"
+          {
+            echo "=== Production deploy $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
+            echo "CURRENT_SHA=${{ steps.sha.outputs.sha }}"
+            echo "PREVIOUS_SHA=$PREV"
+          } | tee deploy.log
+
+      - name: Deploy
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          RENDER_OWNER_ID: ${{ secrets.RENDER_OWNER_ID }}
+          RENDER_BRANCH: main
+          FRONTEND_URL: ${{ vars.APP_URL }}
+          DEPLOY_SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST_PROD }}
+          DEPLOY_SSH_USER: ${{ secrets.DEPLOY_SSH_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_BACKEND_PATH: ${{ secrets.DEPLOY_BACKEND_PATH_PROD }}
+          REQUIRE_DEPLOY: "true"
+          DEPLOY_LOG_FILE: deploy.log
+          GITHUB_SHA: ${{ steps.sha.outputs.sha }}
+        run: bash scripts/ci/deploy.sh production all
+
+      - name: Post-deploy smoke
+        id: validate
+        continue-on-error: true
+        env:
+          BASE_URL: ${{ vars.PROD_API_URL }}
+          FRONTEND_URL: ${{ vars.APP_URL }}
+        working-directory: foodiq-frontend/foodiq-backend
+        run: |
+          {
+            echo "=== Post-deploy validation $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
+            if [ -z "$BASE_URL" ]; then
+              echo "PROD_API_URL not set — skipping live validation"
+              exit 0
+            fi
+            npm ci
+            npm run test:api
+            npm run test:modules
+          } | tee -a ../../post-deploy-smoke.log
+
+      - name: Auto-rollback on validation failure
+        if: steps.validate.outcome == 'failure'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          ROLLBACK_REF: ${{ env.PREVIOUS_SHA }}
+          REQUIRE_DEPLOY: "true"
+          DEPLOY_LOG_FILE: rollback.log
+          GITHUB_SHA: ${{ env.PREVIOUS_SHA }}
+        run: |
+          echo "Validation failed — rolling back to ${ROLLBACK_REF}" | tee -a rollback.log
+          git checkout "$ROLLBACK_REF"
+          bash scripts/ci/deploy.sh production all
+          exit 1
+
+      - name: Tag release
+        if: success()
+        run: |
+          SHORT="${GITHUB_SHA::7}"
+          TAG="v$(date -u +%Y.%m.%d)-${SHORT}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Production deploy ${{ steps.sha.outputs.sha }}" || true
+          git push origin "$TAG" || true
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+          echo "Tagged $TAG" | tee -a deploy.log
+        env:
+          GITHUB_SHA: ${{ steps.sha.outputs.sha }}
+
+      - name: Upload deployment logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-logs-production-${{ steps.sha.outputs.sha }}
+          path: |
+            deploy.log
+            rollback.log
+            render-deploy.log
+            post-deploy-smoke.log
+            vercel-deploy-url.txt
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Notify
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          NOTIFY_EMAIL_WEBHOOK: ${{ secrets.NOTIFY_EMAIL_WEBHOOK }}
+          STATUS: ${{ job.status }}
+          TITLE: "Foodiq Deploy — Production"
+          DETAILS: "sha=${{ steps.sha.outputs.sha }} tag=${{ env.TAG }}"
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: bash scripts/ci/notify.sh

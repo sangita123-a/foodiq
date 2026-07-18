@@ -705,6 +705,78 @@ const getSettlements = async (req, res) => {
   }
 };
 
+const getPartnerReviews = async (req, res) => {
+  try {
+    const restaurant = await getRestaurantByOwnerId(req.user.id);
+    if (!restaurant && req.user.role !== 'admin') {
+      return res.status(404).json({ success: false, message: 'Restaurant not found', error: {} });
+    }
+    const restaurantId = restaurant?.id || req.query.restaurant_id;
+    if (!restaurantId) {
+      return res.status(400).json({ success: false, message: 'restaurant_id required', error: {} });
+    }
+    const { listPartnerReviews } = require('../models/reviewModel');
+    const rows = await listPartnerReviews(restaurantId, {
+      limit: req.query.limit,
+      offset: req.query.offset,
+    });
+    const avg =
+      rows.length > 0
+        ? Math.round(
+            (rows.reduce((s, r) => s + Number(r.rating || 0), 0) / rows.length) * 10
+          ) / 10
+        : Number(restaurant?.rating || 0);
+    const positive = rows.filter((r) => r.rating >= 4).length;
+    const neutral = rows.filter((r) => r.rating === 3).length;
+    const negative = rows.filter((r) => r.rating <= 2).length;
+    res.json({
+      success: true,
+      message: 'Partner reviews',
+      data: {
+        reviews: rows,
+        analytics: {
+          averageRating: avg,
+          totalReviews: rows.length,
+          positiveReviews: positive,
+          neutralReviews: neutral,
+          negativeReviews: negative,
+        },
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message,
+    });
+  }
+};
+
+const replyPartnerReview = async (req, res) => {
+  try {
+    const restaurant = await getRestaurantByOwnerId(req.user.id);
+    const { getReviewById, updateReview } = require('../models/reviewModel');
+    const review = await getReviewById(req.params.id);
+    if (!review) {
+      return res.status(404).json({ success: false, message: 'Review not found', error: {} });
+    }
+    if (restaurant && String(review.restaurant_id) !== String(restaurant.id) && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Not authorized', error: {} });
+    }
+    const updated = await updateReview(req.params.id, {
+      admin_reply: req.body.reply ?? req.body.admin_reply ?? null,
+      status: req.body.status,
+    });
+    res.json({ success: true, message: 'Review updated', data: updated });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getMe,
   getDashboard,
@@ -719,4 +791,6 @@ module.exports = {
   getPartnerAnalytics,
   getNotifications,
   getSettlements,
+  getPartnerReviews,
+  replyPartnerReview,
 };

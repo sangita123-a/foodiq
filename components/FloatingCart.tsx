@@ -1,18 +1,25 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ShoppingCart } from "lucide-react";
+import dynamic from "next/dynamic";
 import useSWR from "swr";
-import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
-import CartDrawer from "@/components/cart/CartDrawer";
+import { isClientAuthenticated } from "@/lib/authSession";
+
+const CartDrawer = dynamic(() => import("@/components/cart/CartDrawer"), {
+  ssr: false,
+});
 
 export default function FloatingCart() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
-    setIsLoggedIn(!!Cookies.get("token"));
+    setIsLoggedIn(isClientAuthenticated());
+    const onAuth = () => setIsLoggedIn(isClientAuthenticated());
+    window.addEventListener("foodiq:auth", onAuth);
+    return () => window.removeEventListener("foodiq:auth", onAuth);
   }, []);
 
   const { data } = useSWR(isLoggedIn ? "/api/cart" : null);
@@ -42,7 +49,9 @@ export default function FloatingCart() {
         )}
       </motion.button>
 
-      <CartDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      {drawerOpen ? (
+        <CartDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      ) : null}
     </>
   );
 }

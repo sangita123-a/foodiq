@@ -1,19 +1,67 @@
-import axios from 'axios';
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import { getAccessToken, setAccessToken } from '@/lib/accessToken';
+import { clearClientAuth, markAuthenticated } from '@/lib/authSession';
+
+const apiBaseUrl =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000');
+
+if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL) {
+  console.error(
+    '[Foodiq] NEXT_PUBLIC_API_URL is not set. API requests will fail in production.'
+  );
+}
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
+  baseURL: apiBaseUrl || undefined,
   timeout: 10000,
+  withCredentials: true,
 });
 
-import Cookies from 'js-cookie';
+const CSRF_COOKIE = 'foodiq_csrf';
 
-// Request interceptor to add the JWT token
+function readCookie(name: string): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
+type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
+
+let refreshPromise: Promise<string | null> | null = null;
+
+async function refreshAccessToken(): Promise<string | null> {
+  if (!refreshPromise) {
+    refreshPromise = api
+      .post('/api/auth/refresh', {})
+      .then((res) => {
+        const token = res.data?.data?.token as string | undefined;
+        if (token) {
+          setAccessToken(token);
+          markAuthenticated(token);
+          return token;
+        }
+        return null;
+      })
+      .catch(() => null)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+}
+
+// Request interceptor: Bearer from memory + CSRF for cookie sessions
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
-      const token = Cookies.get('token');
+      const token = getAccessToken();
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
+      }
+      const csrf = readCookie(CSRF_COOKIE);
+      if (csrf && config.headers) {
+        config.headers['X-CSRF-Token'] = csrf;
       }
     }
     return config;
@@ -21,33 +69,86 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle errors globally
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error: AxiosError) => {
     if (error.code === 'ECONNABORTED') {
       error.message = 'Request timed out. Please try again.';
     } else if (!error.response && error.message === 'Network Error') {
-      error.message = 'Cannot reach the server. Make sure the backend is running on port 4000.';
+      error.message = 'Cannot reach the server. Please check your backend connection.';
     }
 
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
-      const path = window.location.pathname;
-      const isAuthPage = path.startsWith('/login') || path.startsWith('/register') || path.startsWith('/partner/login');
-      const requestUrl = error.config?.url || '';
-      const isAuthRequest = requestUrl.includes('/api/auth/login') || requestUrl.includes('/api/auth/register');
+    const original = error.config as RetryConfig | undefined;
+    const status = error.response?.status;
+    const requestUrl = original?.url || '';
+    const isRefreshCall = requestUrl.includes('/api/auth/refresh');
+    const isAuthCredentialCall =
+      requestUrl.includes('/api/auth/login') ||
+      requestUrl.includes('/api/auth/register') ||
+      requestUrl.includes('/api/delivery/register');
 
-      if (!isAuthPage && !isAuthRequest) {
-        Cookies.remove('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+    if (
+      status === 401 &&
+      original &&
+      !original._retry &&
+      !isRefreshCall &&
+      !isAuthCredentialCall &&
+      typeof window !== 'undefined'
+    ) {
+      original._retry = true;
+      const newToken = await refreshAccessToken();
+      if (newToken) {
+        original.headers = original.headers || {};
+        original.headers.Authorization = `Bearer ${newToken}`;
+        return api(original);
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      const url = error.config?.url || '';
+      const skipNoise =
+        status === 401 ||
+        status === 403 ||
+        url.includes('/api/monitoring/client-error');
+      if (!skipNoise) {
+        void import('@/lib/monitoring/client').then(({ trackApiFailure }) => {
+          trackApiFailure({
+            url,
+            method: error.config?.method,
+            status,
+            message: error.message,
+            code: error.code,
+          });
+        });
+      }
+    }
+
+    if (status === 401 && typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      const isAuthPage =
+        path.startsWith('/login') ||
+        path.startsWith('/register') ||
+        path.startsWith('/partner/login') ||
+        path.startsWith('/admin/login') ||
+        path.startsWith('/delivery/login') ||
+        path.startsWith('/delivery/register');
+
+      if (!isAuthPage && !isAuthCredentialCall && !isRefreshCall) {
+        clearClientAuth();
+        const loginPath = path.startsWith('/admin')
+          ? '/admin/login'
+          : path.startsWith('/delivery')
+            ? '/delivery/login'
+            : path.startsWith('/partner')
+              ? '/partner/login'
+              : '/login';
+        window.location.href = loginPath;
       }
     }
     return Promise.reject(error);
   }
 );
 
-// Generic SWR fetcher function
 export const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
 
 export default api;

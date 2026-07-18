@@ -96,13 +96,14 @@ const buildGetRestaurantsQuery = (filters) => {
 
 const getRestaurants = async (filters) => {
   const { query, values, limit, page } = buildGetRestaurantsQuery(filters);
-  const { rows } = await pool.query(query, values);
-  
-  // Get total count for pagination
   const countQuery = `SELECT COUNT(*) FROM (${query.split('ORDER BY')[0]}) filtered`;
   const countValues = values.slice(0, values.length - 2); // Remove limit and offset
-  const { rows: countRows } = await pool.query(countQuery, countValues);
-  
+
+  const [{ rows }, { rows: countRows }] = await Promise.all([
+    pool.query(query, values),
+    pool.query(countQuery, countValues),
+  ]);
+
   return {
     restaurants: rows,
     pagination: {

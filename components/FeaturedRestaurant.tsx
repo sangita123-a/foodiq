@@ -49,6 +49,7 @@ export default function FeaturedRestaurant() {
                 src={getRestaurantImage(restaurant.image_url)}
                 fallback={RESTAURANT_FALLBACK}
                 alt={restaurant.name}
+                sizes="(max-width: 1024px) 100vw, 55vw"
                 className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-in-out"
               />
               {/* Dark overlay gradient */}

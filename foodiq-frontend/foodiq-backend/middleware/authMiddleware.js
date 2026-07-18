@@ -51,7 +51,7 @@ const protect = async (req, res, next) => {
     return res.status(401).json({
       success: false,
       message: 'Not authorized, token failed',
-      error: error.message,
+      error: {},
     });
   }
 };
@@ -67,4 +67,28 @@ const authorize = (...roles) => (req, res, next) => {
   next();
 };
 
-module.exports = { protect, authorize, invalidateUserSession, resolveUser };
+/** Attach req.user when a valid token is present; otherwise continue anonymously. */
+const optionalProtect = async (req, res, next) => {
+  let token;
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies?.token) {
+    token = req.cookies.token;
+  }
+  if (!token) return next();
+  try {
+    const decoded = jwt.verify(token, getJwtSecret());
+    req.user = await resolveUser(decoded.id);
+  } catch {
+    /* ignore invalid token for optional auth */
+  }
+  return next();
+};
+
+module.exports = {
+  protect,
+  authorize,
+  optionalProtect,
+  invalidateUserSession,
+  resolveUser,
+};

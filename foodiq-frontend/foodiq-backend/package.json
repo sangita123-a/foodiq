@@ -1,6 +1,6 @@
 {
   "name": "foodiq-backend",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -20,6 +20,7 @@
     "test:api": "node scripts/ci/api-smoke.js",
     "test:prod": "node scripts/ci/prod-smoke.js",
     "test:modules": "node scripts/ci/validate-modules.js",
+    "test:v2": "node scripts/ci/v2-regression.js",
     "ci": "npm run test:unit"
   },
   "keywords": [],

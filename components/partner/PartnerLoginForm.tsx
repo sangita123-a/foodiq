@@ -5,8 +5,9 @@ import { Mail, Lock, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import api from "@/services/api";
+import { persistAuthUser } from "@/lib/authUser";
+import { markAuthenticated } from "@/lib/authSession";
 
 export default function PartnerLoginForm() {
   const router = useRouter();
@@ -30,8 +31,8 @@ export default function PartnerLoginForm() {
           setError("This account is not a restaurant partner. Use the customer login.");
           return;
         }
-        Cookies.set("token", user.token, { expires: 7, sameSite: "lax" });
-        localStorage.setItem("user", JSON.stringify(user));
+        markAuthenticated(user.token);
+        persistAuthUser(user);
         router.push("/partner/dashboard");
       }
     } catch (err: any) {

@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, Heart, Minus, Plus, Star } from "lucide-react";
 import useSWR from "swr";
 import { useMemo } from "react";
+import SafeImage from "@/components/ui/SafeImage";
 import { FOOD_FALLBACK, getFoodImage } from "@/lib/images";
 import { useCartActions } from "@/hooks/useCartActions";
 import { useFavoriteActions } from "@/hooks/useFavoriteActions";
@@ -69,12 +69,11 @@ export default function TrendingDishesPage() {
                 className="food-card relative group"
               >
                 <Link href={`/food/${dish.id}`} className="food-card-image block">
-                  <Image
+                  <SafeImage
                     src={dish.image || FOOD_FALLBACK}
+                    fallback={FOOD_FALLBACK}
                     alt={dish.name}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                    className="object-cover"
+                    className="h-full w-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/75/60 to-transparent" />
                   <div className="absolute top-3 left-3 bg-primary/90 text-white text-xs font-black px-2.5 py-1 rounded-lg">

@@ -2,17 +2,33 @@
 
 import { motion } from "framer-motion";
 import { BarChart3 } from "lucide-react";
+import { formatCurrency } from "@/services/partnerApi";
 
-export default function RevenueChart() {
-  const chartData = [
-    { day: "Mon", height: "40%", amount: "₹12k" },
-    { day: "Tue", height: "60%", amount: "₹18k" },
-    { day: "Wed", height: "35%", amount: "₹10k" },
-    { day: "Thu", height: "75%", amount: "₹22k" },
-    { day: "Fri", height: "90%", amount: "₹28k" },
-    { day: "Sat", height: "100%", amount: "₹32k" },
-    { day: "Sun", height: "85%", amount: "₹26k" }
-  ];
+type ChartPoint = { day: string; height: string; amount: string };
+
+type RevenueChartProps = {
+  chartData?: ChartPoint[];
+  totalRevenue?: number;
+  avgOrder?: number;
+};
+
+export default function RevenueChart({
+  chartData,
+  totalRevenue = 0,
+  avgOrder = 0,
+}: RevenueChartProps) {
+  const data =
+    chartData && chartData.length > 0
+      ? chartData
+      : [
+          { day: "Mon", height: "10%", amount: "₹0" },
+          { day: "Tue", height: "10%", amount: "₹0" },
+          { day: "Wed", height: "10%", amount: "₹0" },
+          { day: "Thu", height: "10%", amount: "₹0" },
+          { day: "Fri", height: "10%", amount: "₹0" },
+          { day: "Sat", height: "10%", amount: "₹0" },
+          { day: "Sun", height: "10%", amount: "₹0" },
+        ];
 
   return (
     <div className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-xl">
@@ -25,31 +41,31 @@ export default function RevenueChart() {
         <div className="flex gap-4">
           <div className="bg-[#F8FAFC] px-4 py-2 rounded-lg border border-[#E5E7EB]">
             <p className="text-[#9CA3AF] text-xs font-bold uppercase">Total Revenue</p>
-            <p className="text-[#111827] font-bold text-lg">₹1,48,000</p>
+            <p className="text-[#111827] font-bold text-lg">{formatCurrency(totalRevenue)}</p>
           </div>
           <div className="bg-[#F8FAFC] px-4 py-2 rounded-lg border border-[#E5E7EB]">
             <p className="text-[#9CA3AF] text-xs font-bold uppercase">Avg Order</p>
-            <p className="text-[#111827] font-bold text-lg">₹320</p>
+            <p className="text-[#111827] font-bold text-lg">{formatCurrency(avgOrder)}</p>
           </div>
         </div>
       </div>
 
       <div className="h-64 mt-4 flex items-end justify-between gap-2 pb-6 border-b border-[#E5E7EB] relative">
-        {chartData.map((data, idx) => (
+        {data.map((point, idx) => (
           <div key={idx} className="flex flex-col items-center flex-1 group">
             <div className="opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold text-[#FC8019] mb-2">
-              {data.amount}
+              {point.amount}
             </div>
             <motion.div 
               initial={{ height: 0 }}
-              whileInView={{ height: data.height }}
+              whileInView={{ height: point.height }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: idx * 0.1, type: "spring", bounce: 0.2 }}
               className="w-full max-w-[40px] bg-[#FC8019]/20 border border-[#FC8019]/50 rounded-t-lg group-hover:bg-[#FC8019] transition-colors cursor-pointer relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/20"></div>
             </motion.div>
-            <span className="text-[#6B7280] text-xs mt-3 font-bold">{data.day}</span>
+            <span className="text-[#6B7280] text-xs mt-3 font-bold">{point.day}</span>
           </div>
         ))}
       </div>

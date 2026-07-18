@@ -14,47 +14,44 @@ const getRestaurantByOwnerId = async (ownerId) => {
 };
 
 const getDashboardStats = async (restaurantId) => {
-  const { rows } = await pool.query(
-    `SELECT
-       COUNT(*)::int AS total_orders,
-       COUNT(*) FILTER (
-         WHERE created_at::date = CURRENT_DATE
-       )::int AS todays_orders,
-       COALESCE(SUM(total_amount) FILTER (
-         WHERE created_at::date = CURRENT_DATE
-           AND LOWER(status) NOT IN ('cancelled', 'rejected', 'pending')
-       ), 0)::float AS todays_revenue,
-       COALESCE(SUM(total_amount) FILTER (
-         WHERE LOWER(status) NOT IN ('cancelled', 'rejected', 'pending')
-       ), 0)::float AS total_revenue,
-       COUNT(*) FILTER (
-         WHERE LOWER(status) IN ('pending', 'accepted', 'preparing', 'ready for pickup')
-       )::int AS pending_orders,
-       COUNT(*) FILTER (
-         WHERE LOWER(status) = 'delivered'
-       )::int AS completed_orders
-     FROM orders
-     WHERE restaurant_id = $1`,
-    [restaurantId]
-  );
-
-  const menu = await pool.query(
-    `SELECT COUNT(*)::int AS active_menu_items
-     FROM menu_items
-     WHERE restaurant_id = $1
-       AND (is_available IS NULL OR is_available = TRUE)`,
-    [restaurantId]
-  );
-
-  const restaurant = await pool.query(
-    `SELECT rating FROM restaurants WHERE id = $1`,
-    [restaurantId]
-  );
+  const [ordersRes, menuRes, restaurantRes] = await Promise.all([
+    pool.query(
+      `SELECT
+         COUNT(*)::int AS total_orders,
+         COUNT(*) FILTER (
+           WHERE created_at::date = CURRENT_DATE
+         )::int AS todays_orders,
+         COALESCE(SUM(total_amount) FILTER (
+           WHERE created_at::date = CURRENT_DATE
+             AND LOWER(status) NOT IN ('cancelled', 'rejected', 'pending')
+         ), 0)::float AS todays_revenue,
+         COALESCE(SUM(total_amount) FILTER (
+           WHERE LOWER(status) NOT IN ('cancelled', 'rejected', 'pending')
+         ), 0)::float AS total_revenue,
+         COUNT(*) FILTER (
+           WHERE LOWER(status) IN ('pending', 'accepted', 'preparing', 'ready for pickup')
+         )::int AS pending_orders,
+         COUNT(*) FILTER (
+           WHERE LOWER(status) = 'delivered'
+         )::int AS completed_orders
+       FROM orders
+       WHERE restaurant_id = $1`,
+      [restaurantId]
+    ),
+    pool.query(
+      `SELECT COUNT(*)::int AS active_menu_items
+       FROM menu_items
+       WHERE restaurant_id = $1
+         AND (is_available IS NULL OR is_available = TRUE)`,
+      [restaurantId]
+    ),
+    pool.query(`SELECT rating FROM restaurants WHERE id = $1`, [restaurantId]),
+  ]);
 
   return {
-    ...rows[0],
-    active_menu_items: menu.rows[0]?.active_menu_items || 0,
-    average_rating: Number(restaurant.rows[0]?.rating || 0),
+    ...ordersRes.rows[0],
+    active_menu_items: menuRes.rows[0]?.active_menu_items || 0,
+    average_rating: Number(restaurantRes.rows[0]?.rating || 0),
   };
 };
 
@@ -110,15 +107,24 @@ const getRecentOrders = async (restaurantId, limit = 10) => {
     [restaurantId, limit]
   );
 
+  if (!rows.length) return rows;
+
+  const ids = rows.map((o) => o.id);
+  const { rows: items } = await pool.query(
+    `SELECT oi.id, oi.order_id, oi.quantity, oi.price_at_time, m.name
+     FROM order_items oi
+     JOIN menu_items m ON m.id = oi.menu_item_id
+     WHERE oi.order_id = ANY($1::uuid[])`,
+    [ids]
+  );
+  const byOrder = new Map();
+  for (const item of items) {
+    const list = byOrder.get(item.order_id) || [];
+    list.push(item);
+    byOrder.set(item.order_id, list);
+  }
   for (const order of rows) {
-    const items = await pool.query(
-      `SELECT oi.id, oi.quantity, oi.price_at_time, m.name
-       FROM order_items oi
-       JOIN menu_items m ON m.id = oi.menu_item_id
-       WHERE oi.order_id = $1`,
-      [order.id]
-    );
-    order.items = items.rows;
+    order.items = byOrder.get(order.id) || [];
   }
 
   return rows;

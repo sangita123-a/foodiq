@@ -10,9 +10,11 @@ import { FOOD_FALLBACK } from "@/lib/images";
 interface AddDishFormProps {
   dish: DishState;
   setDish: React.Dispatch<React.SetStateAction<DishState>>;
+  onPublish?: (dish: DishState) => void | Promise<void>;
+  saving?: boolean;
 }
 
-export default function AddDishForm({ dish, setDish }: AddDishFormProps) {
+export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDishFormProps) {
   const [dragActive, setDragActive] = useState(false);
   const [showValidation, setShowValidation] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -62,13 +64,21 @@ export default function AddDishForm({ dish, setDish }: AddDishFormProps) {
     }
   };
 
-  const processFile = (file: File) => {
+  const processFile = async (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
       alert("File size exceeds 5MB limit.");
       return;
     }
-    const url = URL.createObjectURL(file);
-    handleChange("image", url);
+    try {
+      const { uploadMediaWithRetry } = await import("@/services/mediaApi");
+      // Optimistic local preview
+      const local = URL.createObjectURL(file);
+      handleChange("image", local);
+      const asset = await uploadMediaWithRetry(file, { purpose: "food", link: false });
+      handleChange("image", asset.url);
+    } catch (err: any) {
+      alert(err?.response?.data?.message || err?.message || "Image upload failed");
+    }
   };
 
   // Customization Handlers
@@ -89,12 +99,11 @@ export default function AddDishForm({ dish, setDish }: AddDishFormProps) {
   // Validation
   const isFormValid = dish.name.trim() !== "" && dish.shortDesc.trim() !== "" && dish.category !== "";
 
-  const handlePublish = (e: React.FormEvent) => {
+  const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault();
     setShowValidation(true);
     if (isFormValid) {
-      // API call would go here
-      alert("Dish Published Successfully!");
+      await onPublish?.(dish);
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -363,6 +372,7 @@ export default function AddDishForm({ dish, setDish }: AddDishFormProps) {
           <div className="flex flex-wrap gap-3">
             {[
               { key: 'bestseller', label: "Bestseller", color: "hover:border-yellow-500 hover:text-yellow-500", active: "border-yellow-500 bg-yellow-500/10 text-yellow-500" },
+              { key: 'trending', label: "Trending", color: "hover:border-[#FC8019] hover:text-[#FC8019]", active: "border-[#FC8019] bg-[#FC8019]/10 text-[#FC8019]" },
               { key: 'chefsSpecial', label: "Chef's Special", color: "hover:border-red-500 hover:text-red-500", active: "border-red-500 bg-red-500/10 text-red-500" },
               { key: 'healthyChoice', label: "Healthy Choice", color: "hover:border-green-500 hover:text-green-500", active: "border-green-500 bg-green-500/10 text-green-500" },
               { key: 'newArrival', label: "New Arrival", color: "hover:border-blue-500 hover:text-blue-500", active: "border-blue-500 bg-blue-500/10 text-blue-500" }
@@ -413,10 +423,10 @@ export default function AddDishForm({ dish, setDish }: AddDishFormProps) {
         </button>
         <button 
           type="submit" 
-          disabled={showValidation && !isFormValid}
+          disabled={saving || (showValidation && !isFormValid)}
           className="w-full sm:w-auto px-8 py-4 rounded-xl font-black text-white bg-[#FC8019] hover:bg-[#E66F0D] transition-colors shadow-[0_0_20px_rgba(252,128,25,0.3)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
         >
-          Publish Dish <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          {saving ? "Saving..." : "Publish Dish"} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
 

@@ -53,6 +53,7 @@ export function buildPlaceOrderPayload(draft: {
   instructions?: string;
   deliveryMode?: string;
   scheduledFor?: string | null;
+  paymentMethod?: string | null;
 }) {
   const payload: {
     address_id: string;
@@ -60,10 +61,12 @@ export function buildPlaceOrderPayload(draft: {
     delivery_instructions?: string | null;
     delivery_mode?: string;
     scheduled_for?: string;
+    payment_method?: string;
   } = {
     address_id: draft.addressId,
     delivery_instructions: draft.instructions || null,
     delivery_mode: draft.deliveryMode === "Schedule" ? "Schedule" : "Now",
+    payment_method: draft.paymentMethod || "cod",
   };
 
   if (draft.couponCode?.trim()) {
