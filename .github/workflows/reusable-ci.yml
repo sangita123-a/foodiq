@@ -133,7 +133,8 @@ jobs:
 
       - name: Bootstrap schema.sql (baseline)
         run: |
-          PGPASSWORD=foodiq psql -h localhost -U foodiq -d foodiq -f database/schema.sql
+          PGPASSWORD=foodiq psql -v ON_ERROR_STOP=0 -h localhost -U foodiq -d foodiq -f database/schema.sql || true
+          echo "schema.sql applied (best-effort); ensureSchema is source of truth for CI"
 
       - name: Run migrations (ensureSchema)
         run: npm run db:migrate

@@ -85,16 +85,18 @@ Render `preDeployCommand` runs migrate before start.
 
 ## 6. Deployment status
 
-| Step | Action |
+| Step | Status |
 |------|--------|
-| Version bump | `package.json` (root + backend) → 2.0.0 |
-| CI gate | Push/merge to `main` → CI → `cd-production.yml` |
-| Frontend | Vercel production |
-| Backend | Render + migrate |
-| Tag | Prefer `v2.0.0` via Release workflow |
+| Version bump | Done — `2.0.0` |
+| Commit | `d58127f` on `main` |
+| Push to origin | Done |
+| Tag | `v2.0.0` pushed (triggers Release workflow) |
+| CI → CD production | Triggered by push to `main` (approve GitHub Environment if required) |
+| Frontend | Vercel via `cd-production.yml` |
+| Backend | Render + `db:migrate` |
 | Rollback | `docs/ROLLBACK.md` / `rollback.yml` |
 
-**Live blockers (from prior launch audit, if still present):** disable Vercel Deployment Protection; ensure Render `/api/health` returns 200 before declaring public GO.
+**Live note:** Confirm Render `/api/health` and disable Vercel Deployment Protection if still SSO-gated.
 
 ---
 

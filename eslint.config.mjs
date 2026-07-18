@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local Node tooling scripts (CommonJS) — not Next app source
+    "scripts/**",
     // The Express/PostgreSQL backend is a separate CommonJS project with its
     // own runtime and dependencies; it must not be linted with Next.js rules.
     "foodiq-frontend/**",

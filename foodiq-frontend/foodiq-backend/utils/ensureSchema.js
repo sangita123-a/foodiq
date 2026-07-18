@@ -541,11 +541,53 @@ async function ensureSchema() {
 
     // Maintenance phase: reviews moderation + feedback / bugs
     await client.query(`
+      CREATE TABLE IF NOT EXISTS reviews (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+        rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+        comment TEXT,
+        status VARCHAR(20) NOT NULL DEFAULT 'visible',
+        admin_reply TEXT,
+        replied_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
       ALTER TABLE reviews
         ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'visible',
         ADD COLUMN IF NOT EXISTS admin_reply TEXT,
         ADD COLUMN IF NOT EXISTS replied_at TIMESTAMP WITH TIME ZONE
-    `).catch(() => {});
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS contact_messages (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        phone VARCHAR(40),
+        reason VARCHAR(80),
+        subject VARCHAR(255) NOT NULL,
+        message TEXT NOT NULL,
+        status VARCHAR(40) NOT NULL DEFAULT 'open',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS support_tickets (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        category VARCHAR(255) NOT NULL,
+        subject VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        status VARCHAR(50) DEFAULT 'Open',
+        admin_notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
     await client.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS idx_reviews_user_order
         ON reviews(user_id, order_id) WHERE order_id IS NOT NULL
@@ -646,12 +688,12 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS phone VARCHAR(40),
         ADD COLUMN IF NOT EXISTS reason VARCHAR(80),
         ADD COLUMN IF NOT EXISTS status VARCHAR(40) DEFAULT 'open'
-    `).catch(() => {});
+    `);
     await client.query(`
       ALTER TABLE support_tickets
         ADD COLUMN IF NOT EXISTS admin_notes TEXT,
         ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    `).catch(() => {});
+    `);
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_orders_user_created
         ON orders(user_id, created_at DESC)
