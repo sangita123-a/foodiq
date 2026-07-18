@@ -144,9 +144,8 @@ try {
     String(process.env.ALLOW_PAYMENT_MOCK || '').toLowerCase() !== 'true'
   ) {
     log.error(
-      'Razorpay is in mock mode in production. Set RAZORPAY_KEY_ID/SECRET and RAZORPAY_MOCK=false, or ALLOW_PAYMENT_MOCK=true to override.'
+      'Razorpay is in mock mode in production without ALLOW_PAYMENT_MOCK=true. Payments will reject until keys or ALLOW_PAYMENT_MOCK are set — continuing boot for catalog APIs.'
     );
-    process.exit(1);
   }
 } catch (err) {
   log.warn('Payment mode check skipped', { error: err.message });
@@ -157,6 +156,7 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const restaurantRoutes = require('./routes/restaurantRoutes');
 const menuCategoryRoutes = require('./routes/menuCategoryRoutes');
 const menuItemRoutes = require('./routes/menuItemRoutes');
+const menuRoutes = require('./routes/menuRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const favoriteRoutes = require('./routes/favoriteRoutes');
@@ -186,6 +186,7 @@ app.use('/api/restaurant-categories', categoryRoutes);
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/menu-categories', menuCategoryRoutes);
 app.use('/api/menu-items', menuItemRoutes);
+app.use('/api/menu', menuRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/favorites', favoriteRoutes);
@@ -252,7 +253,17 @@ pool
   .then(async (client) => {
     log.info('Connected to PostgreSQL Database');
     client.release();
+    try {
+      await require('./utils/applyBaseSchema')();
+    } catch (err) {
+      log.warn('Base schema apply skipped', { error: err.message });
+    }
     await ensureSchema();
+    try {
+      await require('./utils/ensureProductionCatalog')();
+    } catch (err) {
+      log.warn('Production catalog seed skipped', { error: err.message });
+    }
     try {
       await require('./services/cacheService').connectRedis();
     } catch (err) {

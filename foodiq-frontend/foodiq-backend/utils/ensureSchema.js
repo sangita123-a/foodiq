@@ -1588,6 +1588,10 @@ async function ensureSchema() {
 
     // ========== CPI Task 4 — Analytics query indexes ==========
     await client.query(`
+      ALTER TABLE orders
+        ADD COLUMN IF NOT EXISTS delivery_partner_id UUID REFERENCES delivery_partners(id) ON DELETE SET NULL
+    `).catch(() => {});
+    await client.query(`
       CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC)
     `);
     await client.query(`

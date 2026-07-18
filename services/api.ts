@@ -2,19 +2,25 @@ import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { getAccessToken, setAccessToken } from '@/lib/accessToken';
 import { clearClientAuth, markAuthenticated } from '@/lib/authSession';
 
+/** Known production API — used when Vercel env is missing at build time. */
+const PRODUCTION_API_FALLBACK = 'https://foodiq-backend-api.onrender.com';
+
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000');
+  (process.env.NODE_ENV === 'production'
+    ? PRODUCTION_API_FALLBACK
+    : 'http://localhost:4000');
 
 if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL) {
-  console.error(
-    '[Foodiq] NEXT_PUBLIC_API_URL is not set. API requests will fail in production.'
+  console.warn(
+    `[Foodiq] NEXT_PUBLIC_API_URL is not set. Using fallback ${PRODUCTION_API_FALLBACK}.`
   );
 }
 
 const api = axios.create({
   baseURL: apiBaseUrl || undefined,
-  timeout: 10000,
+  // Render free tier cold-starts can exceed 10s
+  timeout: 45000,
   withCredentials: true,
 });
 

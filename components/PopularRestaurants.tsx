@@ -90,6 +90,12 @@ export default function PopularRestaurants() {
                 className="h-[292px] animate-pulse rounded-[18px] border border-[#ECECEC] bg-[#F8F9FA]"
               />
             ))
+          : restaurants.length === 0
+            ? (
+              <p className="col-span-full py-8 text-center text-sm text-[#686B78]">
+                No restaurants available right now. Please try again shortly.
+              </p>
+            )
           : restaurants.map((restaurant, index) => (
               <div
                 key={`${restaurant.id}-${index}`}

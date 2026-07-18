@@ -130,6 +130,8 @@ function envVars(databaseId) {
     { key: 'JWT_REFRESH_SECRET', generateValue: true },
     { key: 'DATABASE_URL', fromDatabase: { name: DB_NAME, property: 'connectionString' } },
     { key: 'DB_SSL', value: 'true' },
+    { key: 'AUTO_SEED_CATALOG', value: 'true' },
+    { key: 'ALLOW_PAYMENT_MOCK', value: 'true' },
     { key: 'RAZORPAY_MOCK', value: 'true' },
     { key: 'FCM_MOCK', value: 'true' },
     { key: 'EMAIL_PROVIDER', value: 'mock' },

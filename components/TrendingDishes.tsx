@@ -61,6 +61,12 @@ export default function TrendingDishes() {
                 className="snap-start min-w-[240px] w-[240px] sm:min-w-[250px] sm:w-[250px] h-[316px] bg-[#F8FAFC] rounded-2xl animate-pulse border border-[#E5E7EB] flex-shrink-0"
               />
             ))
+          : dishes.length === 0
+            ? (
+              <p className="w-full py-8 text-center text-sm text-[#6B7280]">
+                No trending dishes available yet. Please check back soon.
+              </p>
+            )
           : dishes.map((dish) => {
               const qty = quantities.get(dish.id) || 0;
               const isUpdating = updatingId === dish.id;

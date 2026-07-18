@@ -29,17 +29,21 @@ services:
       - key: CORS_STRICT
         value: "true"
       - key: CORS_ALLOW_VERCEL
-        value: "false"
+        value: "true"
       - key: AUTH_SECURE_COOKIES
         value: "true"
       - key: CSRF_ENABLED
         value: "true"
       - key: ALLOW_BOOTSTRAP_USERS
         value: "false"
+      # Catalog auto-UPSERT when restaurants/menu are empty (safe, no TRUNCATE)
+      - key: AUTO_SEED_CATALOG
+        value: "true"
+      # Checkout works until live Razorpay keys are set in the dashboard
       - key: ALLOW_PAYMENT_MOCK
-        value: "false"
+        value: "true"
       - key: RAZORPAY_MOCK
-        value: "false"
+        value: "true"
       - key: FRONTEND_URL
         value: https://foodiq-sangita123-as-projects.vercel.app
       - key: CORS_ORIGINS

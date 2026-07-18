@@ -404,6 +404,16 @@ CREATE TABLE IF NOT EXISTS bug_reports (
 );
 DROP TRIGGER IF EXISTS update_bug_reports_modtime ON bug_reports;
 CREATE TRIGGER update_bug_reports_modtime BEFORE UPDATE ON bug_reports FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+ALTER TABLE bug_reports
+  ADD COLUMN IF NOT EXISTS fingerprint VARCHAR(64),
+  ADD COLUMN IF NOT EXISTS occurrence_count INTEGER NOT NULL DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS duplicate_of_id UUID REFERENCES bug_reports(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS stack_trace TEXT,
+  ADD COLUMN IF NOT EXISTS api_endpoint TEXT,
+  ADD COLUMN IF NOT EXISTS browser VARCHAR(120),
+  ADD COLUMN IF NOT EXISTS device VARCHAR(120),
+  ADD COLUMN IF NOT EXISTS error_event_id UUID,
+  ADD COLUMN IF NOT EXISTS assignee_id UUID REFERENCES users(id) ON DELETE SET NULL;
 CREATE INDEX IF NOT EXISTS idx_bug_reports_status_created
   ON bug_reports(status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_bug_reports_severity_status

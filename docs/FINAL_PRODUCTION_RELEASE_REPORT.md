@@ -12,12 +12,15 @@
 
 | Decision | Status |
 |----------|--------|
-| **Code freeze & tag** | **COMPLETE** — `release/4.1.0` frozen, `v4.1.0` tagged |
-| **Release notes published** | **COMPLETE** — `docs/RELEASE_NOTES_v4.1.0.md` |
-| **Live production cutover** | **BLOCKED / PENDING OPS** — public Vercel SSO + Render API 404 |
-| **48-hour production monitor** | **ARMED** — checklist below; start clock after live health is green |
+| **Code freeze & tag** | **COMPLETE** — `release/4.1.0` frozen, `v4.1.0` tagged & pushed |
+| **Merge to main** | **COMPLETE** — `main` @ `840b6b1` |
+| **GitHub Release notes** | **COMPLETE** — Release workflow succeeded ([run](https://github.com/sangita123-a/foodiq/actions/runs/29652928461)) |
+| **CI on main** | **QUEUED / IN PROGRESS** — Continuous Integration after main push ([run](https://github.com/sangita123-a/foodiq/actions/runs/29652970027)) |
+| **CD production auto-deploy** | **FAILED / NEEDS RETRY** — Production Deploy on `release/4.1.0` concluded failure ([run](https://github.com/sangita123-a/foodiq/actions/runs/29652969665)); re-run after CI green via `workflow_dispatch` with `ref=v4.1.0` |
+| **Live production cutover** | **BLOCKED / PENDING OPS** — Vercel SSO + Render API 404 (unchanged at probe time) |
+| **48-hour production monitor** | **ARMED** — start clock after live health is green |
 
-**Release readiness (code):** Ready (aligned with CPI Tasks 1–6)  
+**Release readiness (code):** Ready  
 **Release readiness (live hosting):** **Not green** until hosting blockers are cleared
 
 ---
@@ -26,20 +29,20 @@
 
 | # | Activity | Result | Evidence |
 |---|----------|--------|----------|
-| 1 | Freeze release branch | Done | Branch `release/4.1.0` |
-| 2 | Tag release `v4.1.0` | Done | Git tag `v4.1.0` |
-| 3 | Deploy frontend | Pending ops | Vercel Production still returns **302 SSO** + `X-Robots-Tag: noindex` |
-| 4 | Deploy backend | Pending ops | `https://foodiq-backend-api.onrender.com/api/health` → **404** |
-| 5 | Database migrations | Ready in pipeline | Render `preDeployCommand: npm run db:migrate`; runs on successful API deploy |
-| 6 | Production health checks | **FAIL (live)** | See §3 |
-| 7 | Monitoring dashboards | Code ready / live N/A | `/admin/monitoring` + `/api/monitoring/health` once API is up |
-| 8 | Backups | Process ready / live N/A | `backupService` + managed Postgres; see DR doc |
-| 9 | Analytics | Code ready / live N/A | `/admin/bi` + analytics APIs after API deploy |
-| 10 | Payment gateway | Config gate | Razorpay keys `sync: false` in blueprint — set in Render before paid traffic |
-| 11 | SEO | Code ready / live blocked | robots/sitemap exist; **SSO blocks crawlers** |
-| 12 | Google indexing | Blocked | Cannot index while Deployment Protection + noindex |
-| 13 | Publish Release Notes | Done | `docs/RELEASE_NOTES_v4.1.0.md` |
-| 14 | Monitor 48 hours | Armed | §5 runbook — start when §3 all green |
+| 1 | Freeze release branch | Done | `origin/release/4.1.0` |
+| 2 | Tag release `v4.1.0` | Done | Tag pushed; Release Action success |
+| 3 | Deploy frontend | Pending | Fix Vercel Protection; approve/re-run Production Deploy after CI |
+| 4 | Deploy backend | Pending | Fix Render service; migrate runs on preDeploy |
+| 5 | Database migrations | Ready in pipeline | `render.yaml` `preDeployCommand: npm run db:migrate` |
+| 6 | Production health checks | **FAIL (live)** | §3 |
+| 7 | Monitoring dashboards | Code ready / live N/A | After API up |
+| 8 | Backups | Process ready / live N/A | DR + backupService |
+| 9 | Analytics | Code ready / live N/A | `/admin/bi` after API up |
+| 10 | Payment gateway | Config gate | Set Razorpay live keys on Render |
+| 11 | SEO | Code ready / live blocked | SSO + noindex |
+| 12 | Google indexing | Blocked | Until Protection off |
+| 13 | Publish Release Notes | Done | `docs/RELEASE_NOTES_v4.1.0.md` + GitHub Release |
+| 14 | Monitor 48 hours | Armed | §5 |
 | 15 | This Final Report | Done | This document |
 
 ---
