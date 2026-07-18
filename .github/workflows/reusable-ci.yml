@@ -147,15 +147,28 @@ jobs:
           npm run db:migrate
 
       - name: Verify schema
+        id: verify_schema
         run: |
           unset DATABASE_URL || true
-          if ! npm run db:verify; then
-            echo "=== DEBUG: public tables ==="
-            PGPASSWORD=foodiq psql -h localhost -U foodiq -d foodiq -c "\dt public.*" || true
-            echo "=== DEBUG: required column probe ==="
-            PGPASSWORD=foodiq psql -h localhost -U foodiq -d foodiq -c "SELECT table_name, column_name FROM information_schema.columns WHERE table_schema='public' AND (table_name, column_name) IN (('reviews','status'),('reviews','admin_reply'),('contact_messages','reason'),('contact_messages','phone'),('restaurants','organization_id'),('restaurants','market_id'),('orders','market_id'),('orders','currency'),('audit_logs','organization_id'),('audit_logs','actor_type'),('bug_reports','fingerprint')) ORDER BY 1,2;" || true
-            exit 1
+          set +e
+          npm run db:verify > /tmp/verify-schema.log 2>&1
+          code=$?
+          cat /tmp/verify-schema.log
+          if [ $code -ne 0 ]; then
+            echo "=== DEBUG: public tables ===" | tee -a /tmp/verify-schema.log
+            PGPASSWORD=foodiq psql -h localhost -U foodiq -d foodiq -c "\dt public.*" | tee -a /tmp/verify-schema.log || true
+            echo "=== DEBUG: required column probe ===" | tee -a /tmp/verify-schema.log
+            PGPASSWORD=foodiq psql -h localhost -U foodiq -d foodiq -c "SELECT table_name, column_name FROM information_schema.columns WHERE table_schema='public' AND table_name IN ('reviews','contact_messages','restaurants','orders','audit_logs','bug_reports') AND column_name IN ('status','admin_reply','reason','phone','organization_id','market_id','currency','actor_type','fingerprint','stack_trace','api_endpoint','browser','device','occurrence_count') ORDER BY 1,2;" | tee -a /tmp/verify-schema.log || true
+            exit $code
           fi
+
+      - name: Upload verify debug log
+        if: failure() && steps.verify_schema.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-schema-debug
+          path: /tmp/verify-schema.log
+          retention-days: 3
 
       - name: Start API
         if: inputs.run_api_smoke
