@@ -41,6 +41,10 @@ const PopularCuisines = dynamic(() => import("@/components/PopularCuisines"), {
 const FeaturedCollections = dynamic(() => import("@/components/FeaturedCollections"), {
   loading: () => <SectionSkeleton />,
 });
+const PersonalizedHomeRails = dynamic(
+  () => import("@/components/home/PersonalizedHomeRails"),
+  { loading: () => <SectionSkeleton height="h-48" /> }
+);
 const LovedByFoodLovers = dynamic(() => import("@/components/LovedByFoodLovers"), {
   loading: () => <SectionSkeleton />,
 });
@@ -69,6 +73,7 @@ export default function Home() {
       <FloatingCart />
 
       <div className="relative z-10 bg-white pt-4 sm:pt-6">
+        <PersonalizedHomeRails />
         <PopularRestaurants />
         <TrendingDishes />
         <BestOffers />

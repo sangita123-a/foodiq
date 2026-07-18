@@ -1,0 +1,80 @@
+openapi: 3.0.3
+info:
+  title: Foodiq Public API
+  version: 1.0.0
+  description: |
+    Versioned developer API for Foodiq 3.0 foundation.
+    Authenticate with `X-Api-Key: fq_...` or `Authorization: Bearer fq_...`.
+servers:
+  - url: /api/v1
+paths:
+  /health:
+    get:
+      summary: API health
+      responses:
+        "200":
+          description: OK
+  /branding:
+    get:
+      summary: White-label branding by host
+      parameters:
+        - in: query
+          name: host
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Branding config
+  /markets:
+    get:
+      summary: List active markets
+      responses:
+        "200":
+          description: Markets
+  /restaurants:
+    get:
+      summary: List restaurants (optional market filter)
+      parameters:
+        - in: query
+          name: market_id
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Restaurants
+  /partner/summary:
+    get:
+      summary: Partner org summary
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: Summary
+        "401":
+          description: Missing/invalid key
+  /integrations/{type}/sync:
+    post:
+      summary: Stub sync for pos|erp|crm|warehouse
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: type
+          required: true
+          schema:
+            type: string
+            enum: [pos, erp, crm, warehouse]
+      responses:
+        "200":
+          description: Sync accepted
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Key

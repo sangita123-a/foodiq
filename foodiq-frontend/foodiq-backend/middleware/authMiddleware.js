@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 const { findUserById } = require('../models/userModel');
-const { getJwtSecret } = require('../utils/generateToken');
+const {
+  getJwtSecret,
+  VERIFY_OPTS,
+  verifyAccessToken,
+} = require('../utils/generateToken');
 const cache = require('../services/cacheService');
 
 const SESSION_TTL = Number(process.env.CACHE_TTL_SESSION || 30);
@@ -11,7 +15,6 @@ const resolveUser = async (userId) => {
   return data;
 };
 
-/** Drop cached user row (call after profile/role changes). */
 const invalidateUserSession = async (userId) => {
   if (!userId) return;
   await cache.del(cache.cacheKey('session:user', { id: userId }));
@@ -35,13 +38,21 @@ const protect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, getJwtSecret());
+    const decoded = verifyAccessToken(token);
     req.user = await resolveUser(decoded.id);
 
     if (!req.user) {
       return res.status(401).json({
         success: false,
         message: 'Not authorized, user not found',
+        error: {},
+      });
+    }
+
+    if (req.user.is_deleted) {
+      return res.status(401).json({
+        success: false,
+        message: 'Account deactivated',
         error: {},
       });
     }
@@ -67,7 +78,6 @@ const authorize = (...roles) => (req, res, next) => {
   next();
 };
 
-/** Attach req.user when a valid token is present; otherwise continue anonymously. */
 const optionalProtect = async (req, res, next) => {
   let token;
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -77,10 +87,11 @@ const optionalProtect = async (req, res, next) => {
   }
   if (!token) return next();
   try {
-    const decoded = jwt.verify(token, getJwtSecret());
+    const decoded = verifyAccessToken(token);
     req.user = await resolveUser(decoded.id);
+    if (req.user?.is_deleted) req.user = null;
   } catch {
-    /* ignore invalid token for optional auth */
+    /* ignore */
   }
   return next();
 };

@@ -73,7 +73,20 @@ services:
         value: "true"
       - key: STORAGE_PROVIDER
         value: auto
+      # Redis: set true + REDIS_URL with add-on (see docs/V3_CDN_REDIS.md)
       - key: REDIS_ENABLED
+        value: "false"
+      - key: SEARCH_PROVIDER
+        value: "pg"
+      - key: PRICING_ENGINE_ENABLED
+        value: "false"
+      - key: TAX_ENGINE_ENABLED
+        value: "false"
+      - key: MULTI_CURRENCY_PAYMENTS
+        value: "false"
+      - key: SSO_ENABLED
+        value: "false"
+      - key: AI_ASSISTANTS_ENABLED
         value: "false"
       - key: LOG_LEVEL
         value: info

@@ -6,9 +6,11 @@ import useSWR from "swr";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
 import Link from "next/link";
+import { useVisibleRefreshInterval } from "@/hooks/useVisibleRefreshInterval";
 
 export default function NotificationsPanel() {
-  const { data, mutate, isLoading } = useSWR("/api/notifications", { refreshInterval: 30000 });
+  const refreshInterval = useVisibleRefreshInterval(45000);
+  const { data, mutate, isLoading } = useSWR("/api/notifications", { refreshInterval });
   const notifications = data || [];
   const { showToast } = useToast();
   const unread = notifications.filter((n: any) => !n.is_read).length;

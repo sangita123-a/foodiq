@@ -1,5 +1,6 @@
 const { getAllCuisines, getCuisineBySlug, getCuisineItems } = require('../models/cuisineModel');
 const cache = require('../services/cacheService');
+const { setCatalogHttpCache } = require('../middleware/cacheMiddleware');
 
 const listCuisines = async (req, res) => {
   try {
@@ -9,7 +10,7 @@ const listCuisines = async (req, res) => {
       Number(process.env.CACHE_TTL_CUISINES || 300),
       () => getAllCuisines()
     );
-    res.setHeader('X-Cache', status);
+    setCatalogHttpCache(res, status);
     res.json({ success: true, message: 'Cuisines retrieved', data: cuisines });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -18,10 +19,16 @@ const listCuisines = async (req, res) => {
 
 const getCuisine = async (req, res) => {
   try {
-    const cuisine = await getCuisineBySlug(req.params.slug);
+    const key = cache.cacheKey('cuisines:slug', { slug: req.params.slug });
+    const { data: cuisine, cache: status } = await cache.wrap(
+      key,
+      Number(process.env.CACHE_TTL_CUISINES || 300),
+      () => getCuisineBySlug(req.params.slug)
+    );
     if (!cuisine) {
       return res.status(404).json({ success: false, message: 'Cuisine not found', error: {} });
     }
+    setCatalogHttpCache(res, status);
     res.json({ success: true, message: 'Cuisine retrieved', data: cuisine });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -30,11 +37,20 @@ const getCuisine = async (req, res) => {
 
 const getItems = async (req, res) => {
   try {
-    const cuisine = await getCuisineBySlug(req.params.slug);
-    if (!cuisine) {
+    const key = cache.cacheKey('cuisines:items', { slug: req.params.slug });
+    const { data: items, cache: status } = await cache.wrap(
+      key,
+      Number(process.env.CACHE_TTL_CUISINES || 180),
+      async () => {
+        const cuisine = await getCuisineBySlug(req.params.slug);
+        if (!cuisine) return null;
+        return getCuisineItems(req.params.slug);
+      }
+    );
+    if (!items) {
       return res.status(404).json({ success: false, message: 'Cuisine not found', error: {} });
     }
-    const items = await getCuisineItems(req.params.slug);
+    setCatalogHttpCache(res, status);
     res.json({ success: true, message: 'Cuisine items retrieved', data: items });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });

@@ -54,7 +54,10 @@ const register = async (req, res) => {
       return fail(res, 400, 'User already exists with this email');
     }
 
-    const password_hash = await bcrypt.hash(password, 10);
+    const password_hash = await bcrypt.hash(
+      password,
+      Number(process.env.BCRYPT_ROUNDS || 12)
+    );
     const user = await createUser({
       full_name,
       email,
@@ -405,13 +408,17 @@ const getMyReviews = async (req, res) => {
     const partner = await requirePartner(req, res);
     if (!partner) return;
     const { listForPartner } = require('../models/deliveryReviewModel');
-    const rows = await listForPartner(partner.id, {
+    const data = await listForPartner(partner.id, {
       limit: req.query.limit,
       offset: req.query.offset,
     });
     ok(res, 'Delivery reviews', {
-      rating: partner.rating,
-      reviews: rows,
+      rating: partner.rating ?? data.avg_rating,
+      avg_rating: data.avg_rating,
+      reviews: data.rows,
+      total: data.total,
+      limit: data.limit,
+      offset: data.offset,
     });
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);

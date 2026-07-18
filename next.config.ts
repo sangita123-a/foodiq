@@ -58,6 +58,10 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
+  // Optional CDN for static assets (Foodiq 3.0) — leave unset for same-origin
+  ...(process.env.CDN_ASSET_PREFIX
+    ? { assetPrefix: process.env.CDN_ASSET_PREFIX }
+    : {}),
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60 * 60 * 24 * 30,
@@ -158,6 +162,34 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // Public marketing / SEO pages — short CDN cache (auth cookies still vary)
+      {
+        source: "/",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, s-maxage=30, stale-while-revalidate=120",
+          },
+        ],
+      },
+      {
+        source: "/popular-restaurants",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, s-maxage=60, stale-while-revalidate=300",
+          },
+        ],
+      },
+      {
+        source: "/offers",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, s-maxage=60, stale-while-revalidate=300",
+          },
+        ],
+      },
       {
         source: "/(.*)",
         headers: [
@@ -194,4 +226,20 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+let exportedConfig: NextConfig = nextConfig;
+if (process.env.ANALYZE === "true") {
+  try {
+    // Optional: npm i -D @next/bundle-analyzer
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const withBundleAnalyzer = require("@next/bundle-analyzer")({
+      enabled: true,
+    });
+    exportedConfig = withBundleAnalyzer(nextConfig);
+  } catch {
+    console.warn(
+      "[foodiq] ANALYZE=true but @next/bundle-analyzer is not installed"
+    );
+  }
+}
+
+export default exportedConfig;

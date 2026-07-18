@@ -21,6 +21,46 @@ const REQUIRED_TABLES = [
   'user_feedback',
   'bug_reports',
   'maintenance_reports',
+  // V3.0 tenancy foundation
+  'organizations',
+  'markets',
+  'currencies',
+  'franchises',
+  'restaurant_chains',
+  'white_label_configs',
+  'api_keys',
+  'warehouses',
+  'inventory_items',
+  'integration_connectors',
+  'pricing_rules',
+  'surge_events',
+  'ai_forecast_runs',
+  // V4.0 enterprise foundation
+  'locales',
+  'tax_rules',
+  'sso_providers',
+  'organization_memberships',
+  'corporate_accounts',
+  'corporate_orders',
+  'recurring_order_schedules',
+  'ai_chat_sessions',
+  'fleet_vehicles',
+  'iot_devices',
+  'iot_telemetry',
+  'inventory_reorder_suggestions',
+  'api_marketplace_listings',
+  'privacy_requests',
+  // CPI Task 3
+  'wishlists',
+  'recently_viewed',
+  'referral_codes',
+  'referral_redemptions',
+  'gift_cards',
+  'gift_card_transactions',
+  'restaurant_collections',
+  'collection_restaurants',
+  'seasonal_campaigns',
+  'product_feature_flags',
 ];
 
 const REQUIRED_COLUMNS = [
@@ -28,6 +68,18 @@ const REQUIRED_COLUMNS = [
   { table: 'reviews', column: 'admin_reply' },
   { table: 'contact_messages', column: 'reason' },
   { table: 'contact_messages', column: 'phone' },
+  { table: 'restaurants', column: 'organization_id' },
+  { table: 'restaurants', column: 'market_id' },
+  { table: 'orders', column: 'market_id' },
+  { table: 'orders', column: 'currency' },
+  { table: 'audit_logs', column: 'organization_id' },
+  { table: 'audit_logs', column: 'actor_type' },
+  { table: 'bug_reports', column: 'stack_trace' },
+  { table: 'bug_reports', column: 'api_endpoint' },
+  { table: 'bug_reports', column: 'browser' },
+  { table: 'bug_reports', column: 'device' },
+  { table: 'bug_reports', column: 'fingerprint' },
+  { table: 'bug_reports', column: 'occurrence_count' },
 ];
 
 async function main() {
@@ -64,7 +116,7 @@ async function main() {
       REQUIRED_TABLES.join(', ')
     );
     console.log(
-      '[verify-schema] OK — V2 columns:',
+      '[verify-schema] OK — V2/V3 columns:',
       REQUIRED_COLUMNS.map((c) => `${c.table}.${c.column}`).join(', ')
     );
   } finally {

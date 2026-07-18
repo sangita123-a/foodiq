@@ -2,15 +2,23 @@
 
 import { useState, useEffect } from "react";
 import { Tag, CheckCircle2, XCircle } from "lucide-react";
+import useSWR from "swr";
 import api from "@/services/api";
+import { fetchCouponRecommendations } from "@/services/featuresApi";
 
 type Props = {
   appliedDiscount: number;
   onApply: (discount: number, code: string | null) => void;
   autoApplyCode?: string | null;
+  cartTotal?: number;
 };
 
-export default function PromoCodeSection({ appliedDiscount, onApply, autoApplyCode }: Props) {
+export default function PromoCodeSection({
+  appliedDiscount,
+  onApply,
+  autoApplyCode,
+  cartTotal = 0,
+}: Props) {
   const [code, setCode] = useState("");
   const [appliedCode, setAppliedCode] = useState("");
   const [error, setError] = useState("");
@@ -18,26 +26,35 @@ export default function PromoCodeSection({ appliedDiscount, onApply, autoApplyCo
   const [isApplying, setIsApplying] = useState(false);
   const [autoApplied, setAutoApplied] = useState(false);
 
+  const { data: couponRecs } = useSWR(
+    !success ? ["coupon-recs", cartTotal] : null,
+    () => fetchCouponRecommendations(cartTotal)
+  );
+  const suggestions =
+    (couponRecs?.recommendations as Array<Record<string, unknown>>) || [];
+
   const applyCode = async (codeToApply: string) => {
     if (!codeToApply.trim()) return;
     setIsApplying(true);
     setError("");
 
     try {
-      const res = await api.post("/api/coupons/apply", { code: codeToApply.trim() });
-      const { discount: discountAmount, code: applied, free_delivery } = res.data.data;
+      const res = await api.post("/api/coupons/apply", {
+        code: codeToApply.trim(),
+      });
+      const { discount: discountAmount, code: applied } = res.data.data;
 
       setAppliedCode(applied);
       setCode(applied);
       onApply(parseFloat(discountAmount), applied);
       setSuccess(true);
-      if (free_delivery) {
-        setError("");
-      }
-    } catch (err: any) {
+    } catch (err: unknown) {
       onApply(0, null);
       setSuccess(false);
-      setError(err.response?.data?.message || "Invalid or expired coupon code.");
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Invalid or expired coupon code.";
+      setError(msg);
     } finally {
       setIsApplying(false);
     }
@@ -46,7 +63,7 @@ export default function PromoCodeSection({ appliedDiscount, onApply, autoApplyCo
   useEffect(() => {
     if (autoApplyCode && !autoApplied && !success) {
       setAutoApplied(true);
-      applyCode(autoApplyCode);
+      void applyCode(autoApplyCode);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoApplyCode]);
@@ -65,8 +82,8 @@ export default function PromoCodeSection({ appliedDiscount, onApply, autoApplyCo
 
   return (
     <div className="bg-[#F8FAFC] rounded-2xl p-6 border border-[#E5E7EB] mb-6">
-      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-        <Tag className="w-5 h-5 text-primary" />
+      <h3 className="text-xl font-bold text-[#111827] mb-4 flex items-center gap-2">
+        <Tag className="w-5 h-5 text-[#FC8019]" />
         Promo Code
       </h3>
 
@@ -82,13 +99,14 @@ export default function PromoCodeSection({ appliedDiscount, onApply, autoApplyCo
                   setCode(e.target.value);
                   setError("");
                 }}
-                className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-primary transition-colors uppercase"
+                className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-[#FC8019] transition-colors uppercase"
               />
             </div>
             <button
               onClick={handleApply}
               disabled={!code || isApplying}
-              className="bg-[#F8FAFC] hover:bg-[#F8FAFC] disabled:opacity-50 disabled:hover:bg-[#F8FAFC] text-white px-6 rounded-xl text-sm font-bold transition-colors"
+              type="button"
+              className="bg-[#FC8019] hover:bg-[#E76F0B] disabled:opacity-50 text-white px-6 rounded-xl text-sm font-bold transition-colors"
             >
               {isApplying ? "..." : "Apply"}
             </button>
@@ -98,15 +116,34 @@ export default function PromoCodeSection({ appliedDiscount, onApply, autoApplyCo
               <XCircle className="w-4 h-4" /> {error}
             </div>
           )}
+          {suggestions.length > 0 ? (
+            <div className="mt-4 flex flex-wrap gap-2">
+              <p className="w-full text-xs font-bold text-[#6B7280] mb-1">
+                Recommended for your cart
+              </p>
+              {suggestions.slice(0, 3).map((s) => (
+                <button
+                  key={String(s.code)}
+                  type="button"
+                  onClick={() => void applyCode(String(s.code))}
+                  className="text-xs font-bold px-3 py-1.5 rounded-xl border border-[#E5E7EB] bg-white text-[#111827] hover:border-[#FC8019]"
+                >
+                  {String(s.code)}
+                  {s.eligible === false ? " (add more)" : ""}
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
       ) : (
         <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-green-400 font-bold">
+          <div className="flex items-center gap-2 text-green-600 font-bold">
             <CheckCircle2 className="w-5 h-5" />
             &apos;{appliedCode}&apos; applied!
           </div>
           <button
             onClick={handleRemove}
+            type="button"
             className="text-[#6B7280] hover:text-[#111827] text-sm font-bold transition-colors"
           >
             Remove

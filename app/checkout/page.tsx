@@ -401,6 +401,7 @@ export default function CheckoutPage() {
             <PromoCodeSection
               appliedDiscount={discount}
               autoApplyCode={activeOfferCoupon}
+              cartTotal={totals.subtotal}
               onApply={(amount, code) => {
                 setDiscount(amount);
                 setCouponCode(code);

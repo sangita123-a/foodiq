@@ -133,12 +133,16 @@ const adminPatchContact = async (req, res) => {
 
 const adminListReviews = async (req, res) => {
   try {
-    const rows = await listAdminReviews({
+    const data = await listAdminReviews({
       status: req.query.status || null,
+      restaurantId: req.query.restaurant_id || null,
+      rating: req.query.rating || null,
+      from: req.query.from || null,
+      to: req.query.to || null,
       limit: req.query.limit,
       offset: req.query.offset,
     });
-    return ok(res, 'Reviews', rows);
+    return ok(res, 'Reviews', data);
   } catch (err) {
     return fail(res, 500, 'Server Error', err);
   }
@@ -148,6 +152,12 @@ const adminPatchReview = async (req, res) => {
   try {
     const existing = await getReviewById(req.params.id);
     if (!existing) return fail(res, 404, 'Review not found');
+    if (req.body.rating != null) {
+      const n = Number(req.body.rating);
+      if (!Number.isFinite(n) || n < 1 || n > 5) {
+        return fail(res, 400, 'rating must be between 1 and 5');
+      }
+    }
     const updated = await updateReview(req.params.id, {
       status: req.body.status,
       admin_reply: req.body.admin_reply,
@@ -158,6 +168,35 @@ const adminPatchReview = async (req, res) => {
       await updateRestaurantRating(updated.restaurant_id);
     }
     return ok(res, 'Review updated', updated);
+  } catch (err) {
+    if (err.status === 400) return fail(res, 400, err.message);
+    return fail(res, 500, 'Server Error', err);
+  }
+};
+
+const adminListOrderFeedback = async (req, res) => {
+  try {
+    const { listAdminOrderFeedback } = require('../models/orderFeedbackModel');
+    const data = await listAdminOrderFeedback({
+      restaurantId: req.query.restaurant_id || null,
+      deliveryPartnerId: req.query.delivery_partner_id || null,
+      rating: req.query.rating || null,
+      from: req.query.from || null,
+      to: req.query.to || null,
+      limit: req.query.limit,
+      offset: req.query.offset,
+    });
+    return ok(res, 'Order feedback', data);
+  } catch (err) {
+    return fail(res, 500, 'Server Error', err);
+  }
+};
+
+const adminFeedbackAnalytics = async (req, res) => {
+  try {
+    const { buildReviewAnalytics } = require('../services/maintenanceReportService');
+    const data = await buildReviewAnalytics(req.query.days);
+    return ok(res, 'Feedback analytics', data);
   } catch (err) {
     return fail(res, 500, 'Server Error', err);
   }
@@ -171,4 +210,6 @@ module.exports = {
   adminPatchContact,
   adminListReviews,
   adminPatchReview,
+  adminListOrderFeedback,
+  adminFeedbackAnalytics,
 };

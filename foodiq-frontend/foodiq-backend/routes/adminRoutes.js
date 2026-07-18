@@ -62,7 +62,12 @@ router.put('/feedback/contact/:id', feedbackAdmin.adminPatchContact);
 router.get('/reviews', feedbackAdmin.adminListReviews);
 router.put('/reviews/:id', feedbackAdmin.adminPatchReview);
 
+router.get('/order-feedback', feedbackAdmin.adminListOrderFeedback);
+router.get('/analytics/feedback', feedbackAdmin.adminFeedbackAnalytics);
+
 router.get('/bugs', bugAdmin.adminListBugs);
+router.get('/bugs/weekly-report', bugAdmin.adminWeeklyBugReport);
+router.post('/bugs/weekly-report', bugAdmin.adminWeeklyBugReport);
 router.get('/bugs/:id', bugAdmin.adminGetBug);
 router.put('/bugs/:id', bugAdmin.adminPatchBug);
 router.post('/bugs/from-error', bugAdmin.adminCreateBugFromError);
@@ -73,5 +78,12 @@ router.get('/maintenance/health', maintenance.healthSummary);
 router.get('/maintenance/report', maintenance.getOrGenerateReport);
 router.get('/maintenance/reports', maintenance.listReports);
 router.post('/maintenance/send-weekly', maintenance.sendWeekly);
+
+const featuresAdmin = require('../controllers/featuresController');
+router.get('/feature-flags', featuresAdmin.adminListFlags);
+router.put('/feature-flags/:key', (req, res) => {
+  req.body.key = req.params.key;
+  return featuresAdmin.adminUpsertFlag(req, res);
+});
 
 module.exports = router;

@@ -7,6 +7,7 @@ const {
 } = require('../models/offerModel');
 const { getCartByUserId, getCartItems } = require('../models/cartModel');
 const cache = require('../services/cacheService');
+const { setCatalogHttpCache } = require('../middleware/cacheMiddleware');
 
 const listOffers = async (req, res) => {
   try {
@@ -16,7 +17,7 @@ const listOffers = async (req, res) => {
       Number(process.env.CACHE_TTL_OFFERS || 120),
       () => getAllOffers()
     );
-    res.setHeader('X-Cache', status);
+    setCatalogHttpCache(res, status);
     res.json({ success: true, message: 'Offers retrieved', data: offers });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -37,7 +38,7 @@ const getOffer = async (req, res) => {
     if (!data) {
       return res.status(404).json({ success: false, message: 'Offer not found', error: {} });
     }
-    res.setHeader('X-Cache', status);
+    setCatalogHttpCache(res, status);
     res.json({
       success: true,
       message: 'Offer retrieved',
@@ -78,7 +79,7 @@ const getItems = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Offer not found', error: {} });
     }
 
-    res.setHeader('X-Cache', status);
+    setCatalogHttpCache(res, status);
     res.json({ success: true, message: 'Offer items retrieved', data: mapped });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });

@@ -1,8 +1,30 @@
 const { pool } = require('../config/db');
 
 const buildGetRestaurantsQuery = (filters) => {
-  const { search, category, rating, deliveryTime, priceRange, sort, page, limit } = filters;
-  
+  // Accept both camelCase and snake_case query params from UI
+  const search = filters.search;
+  const category = filters.category || filters.cuisine;
+  const rating = filters.rating;
+  const deliveryTime =
+    filters.deliveryTime || filters.delivery_time || filters.max_delivery_time;
+  const priceRange = filters.priceRange || filters.price_range;
+  const sort = filters.sort;
+  const page = filters.page;
+  const limit = filters.limit;
+  const isVeg =
+    filters.is_veg === true ||
+    filters.is_veg === 'true' ||
+    filters.is_veg === '1' ||
+    filters.pure_veg === 'true';
+  const offersOnly =
+    filters.offers_only === true ||
+    filters.offers_only === 'true' ||
+    filters.offersOnly === true;
+  const openNow =
+    filters.open_now === true ||
+    filters.open_now === 'true' ||
+    filters.openNow === true;
+
   let query = `
     SELECT
       r.*,
@@ -39,11 +61,11 @@ const buildGetRestaurantsQuery = (filters) => {
       .map((entry) => entry.trim())
       .filter(Boolean);
     if (categories.length === 1) {
-      query += ` AND (rc.slug = $${valueIndex} OR rc.id::text = $${valueIndex})`;
+      query += ` AND (rc.slug = $${valueIndex} OR rc.id::text = $${valueIndex} OR rc.name ILIKE $${valueIndex})`;
       values.push(categories[0]);
       valueIndex++;
     } else if (categories.length > 1) {
-      query += ` AND rc.slug = ANY($${valueIndex}::text[])`;
+      query += ` AND (rc.slug = ANY($${valueIndex}::text[]) OR rc.name ILIKE ANY($${valueIndex}::text[]))`;
       values.push(categories);
       valueIndex++;
     }
@@ -57,17 +79,41 @@ const buildGetRestaurantsQuery = (filters) => {
 
   if (deliveryTime) {
     query += ` AND r.estimated_delivery_time <= $${valueIndex}`;
-    values.push(parseInt(deliveryTime));
+    values.push(parseInt(deliveryTime, 10));
     valueIndex++;
   }
 
   if (priceRange) {
     query += ` AND r.price_range = $${valueIndex}`;
-    values.push(parseInt(priceRange));
+    values.push(parseInt(priceRange, 10));
     valueIndex++;
   }
 
-  switch (sort) {
+  if (isVeg) {
+    query += ` AND NOT EXISTS (
+      SELECT 1 FROM menu_items m
+      WHERE m.restaurant_id = r.id
+        AND COALESCE(m.is_vegetarian, FALSE) = FALSE
+        AND (m.is_available IS NULL OR m.is_available = TRUE)
+    )`;
+  }
+
+  if (offersOnly) {
+    query += ` AND (r.offer_text IS NOT NULL AND TRIM(r.offer_text) <> '')`;
+  }
+
+  // open_now reserved for future hours table — keep backward compatible (no hard filter)
+
+  const normalizedSort =
+    sort === 'price_low' || sort === 'price'
+      ? 'price'
+      : sort === 'delivery_time' || sort === 'deliveryTime'
+        ? 'deliveryTime'
+        : sort === 'newest'
+          ? 'newest'
+          : sort;
+
+  switch (normalizedSort) {
     case 'popular':
       query += ' ORDER BY r.rating DESC, review_count DESC';
       break;
@@ -80,12 +126,15 @@ const buildGetRestaurantsQuery = (filters) => {
     case 'price':
       query += ' ORDER BY r.price_range ASC';
       break;
+    case 'newest':
+      query += ' ORDER BY r.created_at DESC';
+      break;
     default:
       query += ' ORDER BY r.created_at DESC';
   }
 
-  const limitVal = parseInt(limit) || 10;
-  const pageVal = parseInt(page) || 1;
+  const limitVal = parseInt(limit, 10) || 10;
+  const pageVal = parseInt(page, 10) || 1;
   const offset = (pageVal - 1) * limitVal;
 
   query += ` LIMIT $${valueIndex} OFFSET $${valueIndex + 1}`;
@@ -121,9 +170,14 @@ const getRestaurantById = async (id) => {
        r.*,
        rc.name AS category_name,
        rc.slug AS category_slug,
-       (SELECT COUNT(*)::int FROM reviews rv WHERE rv.restaurant_id = r.id) AS review_count
+       COALESCE(rv.review_count, 0)::int AS review_count
      FROM restaurants r
      LEFT JOIN restaurant_categories rc ON rc.id = r.category_id
+     LEFT JOIN (
+       SELECT restaurant_id, COUNT(*)::int AS review_count
+       FROM reviews
+       GROUP BY restaurant_id
+     ) rv ON rv.restaurant_id = r.id
      WHERE r.id = $1 AND r.is_active = TRUE`,
     [id]
   );

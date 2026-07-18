@@ -11,6 +11,9 @@ const BASE = process.env.BASE_URL || 'http://127.0.0.1:4000';
 
 const CHECKS = [
   { path: '/api/health', expectStatus: 200, name: 'health' },
+  { path: '/api/v1/health', expectStatus: 200, name: 'v1_api_health' },
+  { path: '/api/v4/health', expectStatus: 200, name: 'v4_api_health' },
+  { path: '/api/v1/markets', expectStatus: 200, name: 'v1_markets' },
   { path: '/api/restaurants?page=1&limit=5', expectStatus: [200, 500], name: 'restaurants' },
   { path: '/api/restaurant-categories', expectStatus: [200, 500], name: 'categories' },
   { path: '/api/offers', expectStatus: [200, 500], name: 'offers' },
@@ -20,11 +23,25 @@ const CHECKS = [
   { path: '/api/bugs', method: 'POST', expectStatus: [201, 400, 401, 429], name: 'v2_bugs_post' },
   { path: '/api/admin/feedback', expectStatus: [401, 403], name: 'v2_admin_feedback_auth' },
   { path: '/api/admin/bugs', expectStatus: [401, 403], name: 'v2_admin_bugs_auth' },
+  { path: '/api/admin/bugs/weekly-report', expectStatus: [401, 403], name: 'v2_admin_bugs_weekly_auth' },
   { path: '/api/admin/maintenance/health', expectStatus: [401, 403], name: 'v2_admin_maintenance_auth' },
+  { path: '/api/admin/order-feedback', expectStatus: [401, 403], name: 'feedback_admin_orders_auth' },
+  { path: '/api/admin/analytics/feedback', expectStatus: [401, 403], name: 'feedback_analytics_auth' },
   { path: '/api/admin/analytics/reviews', expectStatus: [401, 403], name: 'v2_admin_review_analytics_auth' },
   { path: '/api/admin/analytics/v2-adoption', expectStatus: [401, 403], name: 'v2_adoption_auth' },
   { path: '/api/partner/reviews', expectStatus: [401, 403], name: 'v2_partner_reviews_auth' },
   { path: '/api/delivery/me/reviews', expectStatus: [401, 403], name: 'v2_delivery_reviews_auth' },
+  // CPI Task 3 features
+  { path: '/api/features/flags', expectStatus: 200, name: 'cpi_feature_flags' },
+  { path: '/api/features/collections', expectStatus: [200, 500], name: 'cpi_collections' },
+  { path: '/api/features/home', expectStatus: [200, 500], name: 'cpi_personalized_home' },
+  { path: '/api/search/suggest?q=bi', expectStatus: [200, 500], name: 'cpi_search_suggest' },
+  { path: '/api/features/wishlist', expectStatus: [401, 403], name: 'cpi_wishlist_auth' },
+  { path: '/api/admin/feature-flags', expectStatus: [401, 403], name: 'cpi_admin_flags_auth' },
+  // CPI Task 4 analytics
+  { path: '/api/analytics/admin/dashboard', expectStatus: [401, 403], name: 'cpi_analytics_admin_auth' },
+  { path: '/api/analytics/customer', expectStatus: [401, 403], name: 'cpi_analytics_customer_auth' },
+  { path: '/api/analytics/delivery', expectStatus: [401, 403], name: 'cpi_analytics_delivery_auth' },
 ];
 
 const request = (path, method = 'GET') =>

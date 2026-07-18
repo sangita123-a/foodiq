@@ -20,12 +20,29 @@ export default function SupportTicketForm() {
     try {
       setIsSubmitting(true);
       if (mode === "bug") {
+        const ua =
+          typeof navigator !== "undefined" ? navigator.userAgent : undefined;
+        let browser: string | undefined;
+        let device: string | undefined;
+        if (ua) {
+          if (/Edg\//i.test(ua)) browser = "Edge";
+          else if (/Chrome\//i.test(ua) && !/Edg\//i.test(ua)) browser = "Chrome";
+          else if (/Firefox\//i.test(ua)) browser = "Firefox";
+          else if (/Safari\//i.test(ua) && !/Chrome\//i.test(ua))
+            browser = "Safari";
+          else browser = "Other";
+          if (/iPad|Tablet/i.test(ua)) device = "Tablet";
+          else if (/Mobile|Android|iPhone/i.test(ua)) device = "Mobile";
+          else device = "Desktop";
+        }
         await api.post("/api/bugs", {
           title: formData.get("subject"),
           description: formData.get("description"),
           severity: formData.get("severity") || "medium",
           page_url:
             typeof window !== "undefined" ? window.location.href : undefined,
+          browser,
+          device,
         });
         showToast("Bug report submitted. Our team will investigate.", "success");
       } else if (mode === "feedback") {

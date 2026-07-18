@@ -658,13 +658,48 @@ async function ensureSchema() {
         error_event_id UUID,
         assignee_id UUID REFERENCES users(id) ON DELETE SET NULL,
         admin_notes TEXT,
+        stack_trace TEXT,
+        api_endpoint TEXT,
+        browser VARCHAR(120),
+        device VARCHAR(120),
+        fingerprint VARCHAR(64),
+        occurrence_count INTEGER NOT NULL DEFAULT 1,
+        duplicate_of_id UUID,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
     await client.query(`
+      ALTER TABLE bug_reports
+        ADD COLUMN IF NOT EXISTS stack_trace TEXT,
+        ADD COLUMN IF NOT EXISTS api_endpoint TEXT,
+        ADD COLUMN IF NOT EXISTS browser VARCHAR(120),
+        ADD COLUMN IF NOT EXISTS device VARCHAR(120),
+        ADD COLUMN IF NOT EXISTS fingerprint VARCHAR(64),
+        ADD COLUMN IF NOT EXISTS occurrence_count INTEGER DEFAULT 1,
+        ADD COLUMN IF NOT EXISTS duplicate_of_id UUID
+    `);
+    await client.query(`
       CREATE INDEX IF NOT EXISTS idx_bug_reports_status_created
         ON bug_reports(status, created_at DESC)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_bug_reports_severity_status
+        ON bug_reports(severity, status, created_at DESC)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_bug_reports_fingerprint
+        ON bug_reports(fingerprint)
+        WHERE fingerprint IS NOT NULL AND duplicate_of_id IS NULL
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_bug_reports_error_event
+        ON bug_reports(error_event_id)
+        WHERE error_event_id IS NOT NULL
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_bug_reports_created
+        ON bug_reports(created_at DESC)
     `);
 
     await client.query(`
@@ -887,6 +922,709 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `).catch(() => {});
+
+    // ========== Foodiq 3.0 — Business Scaling foundation ==========
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS organizations (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255) NOT NULL,
+        slug VARCHAR(120) UNIQUE,
+        status VARCHAR(40) NOT NULL DEFAULT 'active',
+        meta JSONB DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS currencies (
+        code VARCHAR(10) PRIMARY KEY,
+        name VARCHAR(80) NOT NULL,
+        symbol VARCHAR(8) DEFAULT '',
+        decimal_places INTEGER DEFAULT 2
+      )
+    `);
+    await client.query(`
+      INSERT INTO currencies (code, name, symbol) VALUES
+        ('INR', 'Indian Rupee', '₹'),
+        ('USD', 'US Dollar', '$'),
+        ('AED', 'UAE Dirham', 'د.إ'),
+        ('EUR', 'Euro', '€'),
+        ('GBP', 'British Pound', '£')
+      ON CONFLICT (code) DO NOTHING
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS markets (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        code VARCHAR(40) NOT NULL UNIQUE,
+        name VARCHAR(160) NOT NULL,
+        country_code VARCHAR(8) NOT NULL DEFAULT 'IN',
+        state_code VARCHAR(40),
+        city VARCHAR(120),
+        currency_code VARCHAR(10) NOT NULL DEFAULT 'INR' REFERENCES currencies(code),
+        timezone VARCHAR(64) DEFAULT 'Asia/Kolkata',
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS organization_markets (
+        organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+        market_id UUID NOT NULL REFERENCES markets(id) ON DELETE CASCADE,
+        PRIMARY KEY (organization_id, market_id)
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS franchises (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+        market_id UUID REFERENCES markets(id) ON DELETE SET NULL,
+        name VARCHAR(255) NOT NULL,
+        code VARCHAR(80),
+        status VARCHAR(40) DEFAULT 'active',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS restaurant_chains (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+        name VARCHAR(255) NOT NULL,
+        slug VARCHAR(160),
+        logo_url TEXT,
+        status VARCHAR(40) DEFAULT 'active',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS white_label_configs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+        host VARCHAR(255) NOT NULL,
+        brand_name VARCHAR(160),
+        logo_url TEXT,
+        primary_color VARCHAR(32) DEFAULT '#FC8019',
+        feature_flags JSONB DEFAULT '{}'::jsonb,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(host)
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS fx_rates (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        base_currency VARCHAR(10) NOT NULL REFERENCES currencies(code),
+        quote_currency VARCHAR(10) NOT NULL REFERENCES currencies(code),
+        rate NUMERIC(18,8) NOT NULL,
+        effective_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(base_currency, quote_currency, effective_at)
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS api_keys (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+        name VARCHAR(120) NOT NULL,
+        key_prefix VARCHAR(16) NOT NULL,
+        key_hash VARCHAR(128) NOT NULL UNIQUE,
+        scopes TEXT[] DEFAULT ARRAY['public'],
+        is_active BOOLEAN DEFAULT TRUE,
+        last_used_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS warehouses (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+        market_id UUID REFERENCES markets(id) ON DELETE SET NULL,
+        name VARCHAR(160) NOT NULL,
+        code VARCHAR(80),
+        address TEXT,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS inventory_items (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        menu_item_id UUID REFERENCES menu_items(id) ON DELETE CASCADE,
+        warehouse_id UUID REFERENCES warehouses(id) ON DELETE SET NULL,
+        restaurant_id UUID REFERENCES restaurants(id) ON DELETE CASCADE,
+        quantity NUMERIC(12,2) NOT NULL DEFAULT 0,
+        reorder_level NUMERIC(12,2) DEFAULT 0,
+        unit VARCHAR(40) DEFAULT 'unit',
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS integration_connectors (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+        type VARCHAR(40) NOT NULL,
+        name VARCHAR(160) NOT NULL,
+        webhook_url TEXT,
+        status VARCHAR(40) DEFAULT 'inactive',
+        config JSONB DEFAULT '{}'::jsonb,
+        last_sync_at TIMESTAMP WITH TIME ZONE,
+        last_error TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS pricing_rules (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+        market_id UUID REFERENCES markets(id) ON DELETE CASCADE,
+        name VARCHAR(160) NOT NULL,
+        rule_type VARCHAR(40) DEFAULT 'multiplier',
+        multiplier NUMERIC(8,4) DEFAULT 1,
+        is_active BOOLEAN DEFAULT TRUE,
+        meta JSONB DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS surge_events (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        market_id UUID NOT NULL REFERENCES markets(id) ON DELETE CASCADE,
+        multiplier NUMERIC(8,4) NOT NULL DEFAULT 1.2,
+        reason VARCHAR(255),
+        starts_at TIMESTAMP WITH TIME ZONE NOT NULL,
+        ends_at TIMESTAMP WITH TIME ZONE NOT NULL,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS ai_forecast_runs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+        market_id UUID REFERENCES markets(id) ON DELETE SET NULL,
+        forecast_type VARCHAR(40) NOT NULL DEFAULT 'sales',
+        horizon_days INTEGER DEFAULT 7,
+        payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await client.query(`
+      ALTER TABLE restaurants
+        ADD COLUMN IF NOT EXISTS organization_id UUID,
+        ADD COLUMN IF NOT EXISTS chain_id UUID,
+        ADD COLUMN IF NOT EXISTS franchise_id UUID,
+        ADD COLUMN IF NOT EXISTS market_id UUID
+    `);
+    await client.query(`
+      ALTER TABLE orders
+        ADD COLUMN IF NOT EXISTS market_id UUID,
+        ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'INR'
+    `);
+    await client.query(`
+      ALTER TABLE payments
+        ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'INR'
+    `);
+
+    // Seed default org + Bengaluru market (backward compatible)
+    const orgIns = await client.query(
+      `INSERT INTO organizations (name, slug, status)
+       VALUES ('Foodiq Default', 'foodiq-default', 'active')
+       ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name
+       RETURNING id`
+    );
+    let defaultOrgId = orgIns.rows[0]?.id;
+    if (!defaultOrgId) {
+      const o = await client.query(
+        `SELECT id FROM organizations WHERE slug = 'foodiq-default' LIMIT 1`
+      );
+      defaultOrgId = o.rows[0]?.id;
+    }
+    const mktIns = await client.query(
+      `INSERT INTO markets (code, name, country_code, state_code, city, currency_code, timezone)
+       VALUES ('IN-KA-BLR', 'Bengaluru', 'IN', 'KA', 'Bengaluru', 'INR', 'Asia/Kolkata')
+       ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name
+       RETURNING id`
+    );
+    let defaultMarketId = mktIns.rows[0]?.id;
+    if (!defaultMarketId) {
+      const m = await client.query(
+        `SELECT id FROM markets WHERE code = 'IN-KA-BLR' LIMIT 1`
+      );
+      defaultMarketId = m.rows[0]?.id;
+    }
+    if (defaultOrgId && defaultMarketId) {
+      await client.query(
+        `INSERT INTO organization_markets (organization_id, market_id)
+         VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+        [defaultOrgId, defaultMarketId]
+      );
+      await client.query(
+        `INSERT INTO white_label_configs (organization_id, host, brand_name, primary_color)
+         VALUES ($1, 'localhost', 'Foodiq', '#FC8019')
+         ON CONFLICT (host) DO NOTHING`,
+        [defaultOrgId]
+      );
+      await client.query(
+        `UPDATE restaurants SET organization_id = $1
+         WHERE organization_id IS NULL`,
+        [defaultOrgId]
+      );
+      await client.query(
+        `UPDATE restaurants SET market_id = $1
+         WHERE market_id IS NULL`,
+        [defaultMarketId]
+      );
+    }
+    console.log('[SCHEMA] V3.0 tenancy foundation ensured');
+
+    // ========== Foodiq 4.0 — Enterprise & Global Expansion foundation ==========
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS locales (
+        code VARCHAR(16) PRIMARY KEY,
+        name VARCHAR(80) NOT NULL,
+        direction VARCHAR(8) DEFAULT 'ltr',
+        is_active BOOLEAN DEFAULT TRUE
+      )
+    `);
+    await client.query(`
+      INSERT INTO locales (code, name, direction) VALUES
+        ('en', 'English', 'ltr'),
+        ('hi', 'Hindi', 'ltr'),
+        ('ar', 'Arabic', 'rtl')
+      ON CONFLICT (code) DO NOTHING
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS tax_rules (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        country_code VARCHAR(8) NOT NULL DEFAULT 'IN',
+        state_code VARCHAR(40),
+        tax_type VARCHAR(40) NOT NULL DEFAULT 'GST',
+        rate NUMERIC(8,4) NOT NULL DEFAULT 0.05,
+        name VARCHAR(120),
+        is_active BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      INSERT INTO tax_rules (country_code, state_code, tax_type, rate, name, is_active)
+      SELECT 'IN', NULL, 'GST', 0.05, 'India GST 5%', FALSE
+      WHERE NOT EXISTS (SELECT 1 FROM tax_rules WHERE country_code = 'IN' AND tax_type = 'GST' AND name = 'India GST 5%')
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS sso_providers (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        provider VARCHAR(40) NOT NULL UNIQUE,
+        client_id VARCHAR(255),
+        is_enabled BOOLEAN DEFAULT FALSE,
+        meta JSONB DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      INSERT INTO sso_providers (provider, is_enabled) VALUES
+        ('google', FALSE), ('microsoft', FALSE), ('apple', FALSE)
+      ON CONFLICT (provider) DO NOTHING
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS sso_identities (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        provider VARCHAR(40) NOT NULL,
+        provider_subject VARCHAR(255) NOT NULL,
+        email VARCHAR(255),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(provider, provider_subject)
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS enterprise_roles (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        code VARCHAR(40) NOT NULL UNIQUE,
+        name VARCHAR(80) NOT NULL,
+        permissions JSONB DEFAULT '[]'::jsonb
+      )
+    `);
+    await client.query(`
+      INSERT INTO enterprise_roles (code, name, permissions) VALUES
+        ('org_admin', 'Organization Admin', '["*"]'::jsonb),
+        ('buyer', 'Corporate Buyer', '["order.create","order.read"]'::jsonb),
+        ('approver', 'Approver', '["order.approve","order.read"]'::jsonb),
+        ('viewer', 'Viewer', '["order.read","report.read"]'::jsonb)
+      ON CONFLICT (code) DO NOTHING
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS organization_memberships (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        role_code VARCHAR(40) NOT NULL DEFAULT 'viewer',
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(organization_id, user_id)
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS corporate_accounts (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+        name VARCHAR(160) NOT NULL,
+        billing_email VARCHAR(255),
+        credit_limit NUMERIC(12,2) DEFAULT 0,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS corporate_orders (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        corporate_account_id UUID NOT NULL REFERENCES corporate_accounts(id) ON DELETE CASCADE,
+        organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+        placed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        status VARCHAR(40) NOT NULL DEFAULT 'draft',
+        total_amount NUMERIC(12,2) DEFAULT 0,
+        currency VARCHAR(10) DEFAULT 'INR',
+        payload JSONB DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS recurring_order_schedules (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        corporate_account_id UUID NOT NULL REFERENCES corporate_accounts(id) ON DELETE CASCADE,
+        organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+        cron_expr VARCHAR(80) DEFAULT '0 10 * * 1-5',
+        timezone VARCHAR(64) DEFAULT 'Asia/Kolkata',
+        template JSONB NOT NULL DEFAULT '{}'::jsonb,
+        next_run_at TIMESTAMP WITH TIME ZONE,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS ai_chat_sessions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        channel VARCHAR(40) DEFAULT 'support',
+        messages JSONB NOT NULL DEFAULT '[]'::jsonb,
+        status VARCHAR(40) DEFAULT 'open',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS fleet_vehicles (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+        market_id UUID REFERENCES markets(id) ON DELETE SET NULL,
+        label VARCHAR(120) NOT NULL,
+        vehicle_type VARCHAR(40) DEFAULT 'bike',
+        capacity INTEGER DEFAULT 4,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS fleet_assignments (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        vehicle_id UUID NOT NULL REFERENCES fleet_vehicles(id) ON DELETE CASCADE,
+        delivery_partner_id UUID,
+        order_id UUID,
+        status VARCHAR(40) DEFAULT 'assigned',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS iot_devices (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        restaurant_id UUID REFERENCES restaurants(id) ON DELETE SET NULL,
+        organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+        device_key VARCHAR(120) NOT NULL UNIQUE,
+        name VARCHAR(160) NOT NULL,
+        device_type VARCHAR(40) DEFAULT 'sensor',
+        is_active BOOLEAN DEFAULT TRUE,
+        last_seen_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS iot_telemetry (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        device_id UUID NOT NULL REFERENCES iot_devices(id) ON DELETE CASCADE,
+        metric VARCHAR(80) NOT NULL,
+        value NUMERIC(18,6),
+        payload JSONB DEFAULT '{}'::jsonb,
+        recorded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS inventory_reorder_suggestions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        inventory_item_id UUID REFERENCES inventory_items(id) ON DELETE CASCADE,
+        suggested_qty NUMERIC(12,2) NOT NULL DEFAULT 0,
+        reason VARCHAR(255),
+        status VARCHAR(40) DEFAULT 'pending',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS api_marketplace_listings (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        slug VARCHAR(120) NOT NULL UNIQUE,
+        name VARCHAR(160) NOT NULL,
+        description TEXT,
+        listing_type VARCHAR(40) NOT NULL DEFAULT 'webhook',
+        is_published BOOLEAN DEFAULT TRUE,
+        meta JSONB DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      INSERT INTO api_marketplace_listings (slug, name, description, listing_type)
+      VALUES
+        ('orders-webhook', 'Orders Webhook', 'Receive order lifecycle events', 'webhook'),
+        ('oauth-partner-app', 'Partner OAuth App', 'OAuth-style partner integration', 'oauth_app')
+      ON CONFLICT (slug) DO NOTHING
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS api_marketplace_subscriptions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        listing_id UUID NOT NULL REFERENCES api_marketplace_listings(id) ON DELETE CASCADE,
+        organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+        api_key_id UUID REFERENCES api_keys(id) ON DELETE SET NULL,
+        status VARCHAR(40) DEFAULT 'active',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS privacy_requests (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        request_type VARCHAR(40) NOT NULL,
+        status VARCHAR(40) NOT NULL DEFAULT 'queued',
+        payload JSONB DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        completed_at TIMESTAMP WITH TIME ZONE
+      )
+    `);
+    await client.query(`
+      ALTER TABLE audit_logs
+        ADD COLUMN IF NOT EXISTS organization_id UUID,
+        ADD COLUMN IF NOT EXISTS actor_type VARCHAR(40) DEFAULT 'user'
+    `);
+    console.log('[SCHEMA] V4.0 enterprise foundation ensured');
+
+    // ========== CPI Task 3 — New Features ==========
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS wishlists (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        menu_item_id UUID NOT NULL REFERENCES menu_items(id) ON DELETE CASCADE,
+        note TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, menu_item_id)
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_wishlists_user ON wishlists(user_id, created_at DESC)
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS recently_viewed (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        session_key VARCHAR(80),
+        item_type VARCHAR(40) NOT NULL,
+        item_id UUID NOT NULL,
+        viewed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_recently_viewed_user
+        ON recently_viewed(user_id, viewed_at DESC)
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS referral_codes (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+        code VARCHAR(40) NOT NULL UNIQUE,
+        reward_points INTEGER NOT NULL DEFAULT 100,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS referral_redemptions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        referral_code_id UUID NOT NULL REFERENCES referral_codes(id) ON DELETE CASCADE,
+        referrer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        referee_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+        status VARCHAR(40) NOT NULL DEFAULT 'credited',
+        points_awarded INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS gift_cards (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        code VARCHAR(40) NOT NULL UNIQUE,
+        initial_balance NUMERIC(12,2) NOT NULL,
+        balance NUMERIC(12,2) NOT NULL,
+        currency VARCHAR(10) NOT NULL DEFAULT 'INR',
+        purchaser_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        recipient_email VARCHAR(255),
+        status VARCHAR(40) NOT NULL DEFAULT 'active',
+        expires_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS gift_card_transactions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        gift_card_id UUID NOT NULL REFERENCES gift_cards(id) ON DELETE CASCADE,
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        order_id UUID,
+        amount NUMERIC(12,2) NOT NULL,
+        tx_type VARCHAR(40) NOT NULL DEFAULT 'redeem',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS restaurant_collections (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        slug VARCHAR(120) NOT NULL UNIQUE,
+        title VARCHAR(160) NOT NULL,
+        description TEXT,
+        image_url TEXT,
+        filter_query JSONB DEFAULT '{}'::jsonb,
+        is_active BOOLEAN DEFAULT TRUE,
+        sort_order INTEGER DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS collection_restaurants (
+        collection_id UUID NOT NULL REFERENCES restaurant_collections(id) ON DELETE CASCADE,
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        sort_order INTEGER DEFAULT 0,
+        PRIMARY KEY (collection_id, restaurant_id)
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS seasonal_campaigns (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        slug VARCHAR(120) NOT NULL UNIQUE,
+        title VARCHAR(160) NOT NULL,
+        subtitle TEXT,
+        banner_url TEXT,
+        offer_code VARCHAR(60),
+        starts_at TIMESTAMP WITH TIME ZONE NOT NULL,
+        ends_at TIMESTAMP WITH TIME ZONE NOT NULL,
+        is_active BOOLEAN DEFAULT TRUE,
+        meta JSONB DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS product_feature_flags (
+        key VARCHAR(80) PRIMARY KEY,
+        enabled BOOLEAN NOT NULL DEFAULT FALSE,
+        rollout_percent INTEGER NOT NULL DEFAULT 100,
+        description TEXT,
+        meta JSONB DEFAULT '{}'::jsonb,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query(`
+      ALTER TABLE addresses
+        ADD COLUMN IF NOT EXISTS lat NUMERIC(10,7),
+        ADD COLUMN IF NOT EXISTS lng NUMERIC(10,7)
+    `);
+    await client.query(`
+      ALTER TABLE order_tracking
+        ADD COLUMN IF NOT EXISTS eta_minutes INTEGER,
+        ADD COLUMN IF NOT EXISTS eta_source VARCHAR(40) DEFAULT 'haversine'
+    `);
+
+    // Seed default CPI feature flags (idempotent)
+    await client.query(`
+      INSERT INTO product_feature_flags (key, enabled, rollout_percent, description) VALUES
+        ('wishlist', TRUE, 100, 'Wishlist module'),
+        ('scheduled_orders', TRUE, 100, 'Scheduled delivery at checkout'),
+        ('smart_search', TRUE, 100, 'Search autosuggest'),
+        ('personalized_home', TRUE, 100, 'Personalized home rails'),
+        ('ai_recommendations', TRUE, 100, 'AI food recommendations'),
+        ('coupon_recommendations', TRUE, 100, 'Coupon recommendation engine'),
+        ('referrals', TRUE, 100, 'Referral & invite friends'),
+        ('gift_cards', TRUE, 50, 'Gift cards purchase & redeem'),
+        ('recently_viewed', TRUE, 100, 'Recently viewed items'),
+        ('trending_near_you', TRUE, 100, 'Geo-aware trending'),
+        ('collections', TRUE, 100, 'Restaurant collections'),
+        ('seasonal_campaigns', TRUE, 100, 'Seasonal campaign banners'),
+        ('advanced_filters', TRUE, 100, 'Advanced restaurant filters')
+      ON CONFLICT (key) DO NOTHING
+    `);
+
+    // Seed sample collections if empty
+    const colCount = await client.query(
+      `SELECT COUNT(*)::int AS c FROM restaurant_collections`
+    );
+    if ((colCount.rows[0]?.c || 0) === 0) {
+      await client.query(`
+        INSERT INTO restaurant_collections (slug, title, description, image_url, filter_query, sort_order) VALUES
+          ('best-biryani', 'Best Biryani Near You', 'Authentic, rich, and aromatic biryanis.',
+           '/images/catalog/restaurants/biryani.webp', '{"cuisine":"biryani","sort":"rating"}'::jsonb, 1),
+          ('top-rated', 'Top Rated Restaurants', 'The absolute best rated spots in the city.',
+           '/images/catalog/restaurants/north-indian.webp', '{"rating":"4.5","sort":"rating"}'::jsonb, 2),
+          ('newly-opened', 'Newly Opened', 'Explore the newest flavors in your area.',
+           '/images/catalog/restaurants/italian.webp', '{"sort":"newest"}'::jsonb, 3),
+          ('pure-veg', 'Pure Veg Delights', 'Wholesome vegetarian favourites.',
+           '/images/catalog/restaurants/south-indian.webp', '{"is_veg":"true","sort":"rating"}'::jsonb, 4)
+      `);
+    }
+
+    console.log('[SCHEMA] CPI Task 3 new features foundation ensured');
+
+    // ========== CPI Task 4 — Analytics query indexes ==========
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_orders_status_created
+        ON orders(status, created_at DESC)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_orders_restaurant_created
+        ON orders(restaurant_id, created_at DESC)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_orders_user_created
+        ON orders(user_id, created_at DESC)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_orders_partner_created
+        ON orders(delivery_partner_id, created_at DESC)
+        WHERE delivery_partner_id IS NOT NULL
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_order_items_menu ON order_items(menu_item_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_users_role_created
+        ON users(role, created_at DESC)
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS analytics_report_runs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        report_type VARCHAR(60) NOT NULL DEFAULT 'bi_daily',
+        format VARCHAR(20) DEFAULT 'email',
+        payload JSONB DEFAULT '{}'::jsonb,
+        created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('[SCHEMA] CPI Task 4 analytics indexes ensured');
 
     // Bootstrap demo users ONLY when explicitly allowed (never default in production).
     const allowBootstrap =

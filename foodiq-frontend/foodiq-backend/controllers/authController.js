@@ -7,7 +7,12 @@ const {
   updateUserPassword,
 } = require('../models/userModel');
 const generateToken = require('../utils/generateToken');
-const { generateRefreshToken, rotateRefreshToken, revokeRefreshToken } = require('../utils/generateToken');
+const {
+  generateRefreshToken,
+  rotateRefreshToken,
+  revokeRefreshToken,
+  revokeAllForUser,
+} = require('../utils/generateToken');
 const { writeAudit, clientMeta } = require('../services/auditService');
 const { bump } = require('../services/metricsService');
 const { createAlert } = require('../services/alertService');
@@ -100,6 +105,20 @@ const registerUser = async (req, res) => {
         'INSERT INTO notifications (user_id, title, message) VALUES ($1, $2, $3)',
         [user.id, 'Welcome to Foodiq!', 'Thanks for joining. Explore restaurants and place your first order.']
       );
+
+      // Referral invite code (optional)
+      try {
+        const referralCode = req.body.referral_code || req.body.invite_code;
+        if (referralCode) {
+          const { applyReferralOnSignup, getOrCreateReferralCode } = require('../models/referralModel');
+          await applyReferralOnSignup({ refereeId: user.id, code: referralCode });
+        } else {
+          const { getOrCreateReferralCode } = require('../models/referralModel');
+          await getOrCreateReferralCode(user.id, full_name);
+        }
+      } catch (refErr) {
+        log.warn('referral on signup skipped', { error: refErr.message });
+      }
 
       try {
         const { dispatchEmailSms } = require('../services/commsService');
@@ -450,6 +469,7 @@ const resetPassword = async (req, res) => {
     const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
     const password_hash = await bcrypt.hash(newPassword, salt);
     await updateUserPassword(user.id, password_hash);
+    await revokeAllForUser(user.id).catch(() => {});
 
     writeAudit({
       userId: user.id,

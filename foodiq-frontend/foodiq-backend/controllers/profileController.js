@@ -1,5 +1,9 @@
 const { pool } = require('../config/db');
 const bcrypt = require('bcrypt');
+const { revokeAllForUser } = require('../utils/generateToken');
+const { writeAudit } = require('../services/auditService');
+
+const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS || 12);
 
 const getProfile = async (req, res) => {
   try {
@@ -70,7 +74,7 @@ const updateProfile = async (req, res) => {
       if (!isMatch) {
         return res.status(400).json({ success: false, message: 'Incorrect old password', error: {} });
       }
-      const salt = await bcrypt.genSalt(10);
+      const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
       const newHash = await bcrypt.hash(new_password, salt);
       query += `, password_hash = $${valueIndex}`;
       values.push(newHash);
@@ -84,6 +88,17 @@ const updateProfile = async (req, res) => {
 
     const { rows: updatedRows } = await pool.query(query, values);
     const user = updatedRows[0];
+    if (old_password && new_password) {
+      await revokeAllForUser(req.user.id).catch(() => {});
+      writeAudit({
+        userId: req.user.id,
+        role: req.user.role,
+        action: 'password_change',
+        category: 'auth',
+        message: 'Password changed via profile',
+        req,
+      }).catch(() => {});
+    }
     if (user?.date_of_birth) {
       user.date_of_birth = new Date(user.date_of_birth).toISOString().slice(0, 10);
     }
@@ -106,10 +121,8 @@ const deleteAccount = async (req, res) => {
         error: {},
       });
     }
-    await pool.query('UPDATE users SET is_deleted = true, email = email || \'.deleted.\' || id::text WHERE id = $1', [
-      req.user.id,
-    ]);
-    await pool.query('DELETE FROM user_sessions WHERE user_id = $1', [req.user.id]);
+    const { eraseUserData } = require('../services/privacyEraseService');
+    await eraseUserData(req.user.id, { actorId: req.user.id, req });
     res.json({ success: true, message: 'Account deleted successfully', data: {} });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });

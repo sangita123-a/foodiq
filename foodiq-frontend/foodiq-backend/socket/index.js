@@ -29,9 +29,14 @@ const haversineKm = (lat1, lng1, lat2, lng2) => {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-const estimateEtaMinutes = (distanceKm, avgKmh = 22) => {
+const estimateEtaMinutes = (distanceKm, avgKmh = 22, prepMinutes = 15) => {
   if (distanceKm == null || Number.isNaN(distanceKm)) return null;
-  return Math.max(1, Math.round((distanceKm / avgKmh) * 60));
+  try {
+    const { computeImprovedEta } = require('../services/cpiFeaturesService');
+    return computeImprovedEta({ distanceKm, avgKmh, prepMinutes }).eta_minutes;
+  } catch {
+    return Math.max(1, Math.round((distanceKm / avgKmh) * 60) + prepMinutes);
+  }
 };
 
 /**
@@ -103,8 +108,8 @@ const initSocket = (httpServer, { allowedOrigins = [], isOriginAllowed, corsStri
         return next(new Error('UNAUTHORIZED'));
       }
 
-      const { getJwtSecret } = require('../utils/generateToken');
-      const decoded = jwt.verify(token, getJwtSecret());
+      const { verifyAccessToken } = require('../utils/generateToken');
+      const decoded = verifyAccessToken(token);
       const user = await findUserById(decoded.id);
       if (!user) return next(new Error('UNAUTHORIZED'));
 

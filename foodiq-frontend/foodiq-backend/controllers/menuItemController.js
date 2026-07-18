@@ -8,7 +8,7 @@ const {
   deleteMenuItem,
 } = require('../models/menuItemModel');
 const cache = require('../services/cacheService');
-const { invalidateCatalog } = require('../middleware/cacheMiddleware');
+const { invalidateCatalog, setCatalogHttpCache } = require('../middleware/cacheMiddleware');
 
 const getAll = async (req, res) => {
   try {
@@ -22,7 +22,7 @@ const getAll = async (req, res) => {
     const { data: items, cache: status } = await cache.wrap(key, ttl, () =>
       getMenuItems(filters)
     );
-    res.setHeader('X-Cache', status);
+    setCatalogHttpCache(res, status);
     res.json({ success: true, message: 'Menu items retrieved', data: items });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -39,7 +39,7 @@ const getById = async (req, res) => {
       () => getMenuItemDetailsById(id)
     );
     if (!item) return res.status(404).json({ success: false, message: 'Menu item not found', error: {} });
-    res.setHeader('X-Cache', status);
+    setCatalogHttpCache(res, status);
     res.json({ success: true, message: 'Menu item retrieved', data: item });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -55,7 +55,7 @@ const getByRestaurant = async (req, res) => {
       Number(process.env.CACHE_TTL_MENU || 60),
       () => getMenuItemsByRestaurant(restaurantId)
     );
-    res.setHeader('X-Cache', status);
+    setCatalogHttpCache(res, status);
     res.json({ success: true, message: 'Restaurant menu retrieved', data: items });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -69,39 +69,57 @@ const create = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Restaurant ID, name, and price are required', error: {} });
     }
 
+    const { assertRestaurantOwner } = require('../middleware/ownership');
+    await assertRestaurantOwner(req.user, restaurant_id);
+
     const newItem = await createMenuItem(req.body);
     await invalidateCatalog();
     res.status(201).json({ success: true, message: 'Menu item created', data: newItem });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    const status = error.status || 500;
+    res.status(status).json({
+      success: false,
+      message: status === 500 ? 'Server Error' : error.message,
+      error: {},
+    });
   }
 };
 
 const update = async (req, res) => {
   try {
     const { id } = req.params;
-    const item = await getMenuItemById(id);
-    if (!item) return res.status(404).json({ success: false, message: 'Menu item not found', error: {} });
+    const { assertMenuItemOwner } = require('../middleware/ownership');
+    await assertMenuItemOwner(req.user, id);
 
     const updatedItem = await updateMenuItem(id, req.body);
     await invalidateCatalog();
     res.json({ success: true, message: 'Menu item updated', data: updatedItem });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    const status = error.status || 500;
+    res.status(status).json({
+      success: false,
+      message: status === 500 ? 'Server Error' : error.message,
+      error: {},
+    });
   }
 };
 
 const remove = async (req, res) => {
   try {
     const { id } = req.params;
-    const item = await getMenuItemById(id);
-    if (!item) return res.status(404).json({ success: false, message: 'Menu item not found', error: {} });
+    const { assertMenuItemOwner } = require('../middleware/ownership');
+    await assertMenuItemOwner(req.user, id);
 
     await deleteMenuItem(id);
     await invalidateCatalog();
     res.json({ success: true, message: 'Menu item deleted', data: {} });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    const status = error.status || 500;
+    res.status(status).json({
+      success: false,
+      message: status === 500 ? 'Server Error' : error.message,
+      error: {},
+    });
   }
 };
 

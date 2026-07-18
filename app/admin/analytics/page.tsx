@@ -19,9 +19,16 @@ export default function AdminAnalyticsPage() {
 
   return (
     <AdminShell title="Reports & Analytics">
-      <div className="mb-6">
-        <h1 className="text-3xl font-black text-[#111827]">Analytics</h1>
-        <p className="text-[#6B7280]">Sales, restaurant performance, growth, and peak hours.</p>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-[#111827]">Analytics</h1>
+          <p className="text-[#6B7280]">
+            Sales, restaurant performance, growth, and peak hours.{" "}
+            <a href="/admin/bi" className="text-[#FC8019] font-bold">
+              Open full BI dashboard →
+            </a>
+          </p>
+        </div>
       </div>
 
       {isLoading && <p className="text-sm text-[#6B7280] mb-4">Loading…</p>}

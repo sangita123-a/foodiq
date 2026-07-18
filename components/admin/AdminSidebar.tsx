@@ -21,6 +21,9 @@ import {
   MessageSquare,
   Bug,
   Wrench,
+  LineChart,
+  Bot,
+  Truck,
 } from "lucide-react";
 import { clearClientAuth } from "@/lib/authSession";
 
@@ -28,6 +31,9 @@ const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
   { name: "Live Ops", icon: Radio, href: "/admin/live" },
   { name: "Monitoring", icon: Activity, href: "/admin/monitoring" },
+  { name: "BI", icon: LineChart, href: "/admin/bi" },
+  { name: "AI", icon: Bot, href: "/admin/ai" },
+  { name: "Fleet", icon: Truck, href: "/admin/fleet" },
   { name: "Feedback", icon: MessageSquare, href: "/admin/feedback" },
   { name: "Bugs", icon: Bug, href: "/admin/bugs" },
   { name: "Maintenance", icon: Wrench, href: "/admin/maintenance" },

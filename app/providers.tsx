@@ -7,6 +7,7 @@ import { ToastProvider, useToast } from "@/contexts/ToastContext";
 import ErrorBoundary from "@/components/monitoring/ErrorBoundary";
 import AnalyticsProvider from "@/components/analytics/AnalyticsProvider";
 import AuthBootstrap from "@/components/AuthBootstrap";
+import { FeatureFlagProvider } from "@/lib/featureFlags";
 import React from "react";
 
 const PushNotificationProvider = dynamic(
@@ -49,7 +50,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <AnalyticsProvider>
           <AuthBootstrap />
           <SWRGlobalConfig>
-            <PushNotificationProvider>{children}</PushNotificationProvider>
+            <FeatureFlagProvider>
+              <PushNotificationProvider>{children}</PushNotificationProvider>
+            </FeatureFlagProvider>
           </SWRGlobalConfig>
         </AnalyticsProvider>
       </ErrorBoundary>

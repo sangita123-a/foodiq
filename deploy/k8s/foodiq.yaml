@@ -1,0 +1,187 @@
+# Foodiq API — Kubernetes foundation manifests (client dry-run friendly)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: foodiq
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: foodiq-api-config
+  namespace: foodiq
+data:
+  NODE_ENV: "production"
+  REDIS_ENABLED: "true"
+  SEARCH_PROVIDER: "pg"
+  PRICING_ENGINE_ENABLED: "false"
+  TAX_ENGINE_ENABLED: "false"
+  MULTI_CURRENCY_PAYMENTS: "false"
+  SSO_ENABLED: "false"
+  AI_ASSISTANTS_ENABLED: "false"
+  DEFAULT_MARKET_CODE: "IN-KA-BLR"
+  FOOIQ_REGION: "ap-south-1"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foodiq-api
+  namespace: foodiq
+  labels:
+    app: foodiq-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: foodiq-api
+  template:
+    metadata:
+      labels:
+        app: foodiq-api
+    spec:
+      containers:
+        - name: api
+          image: foodiq/api:3.0.0
+          ports:
+            - containerPort: 4000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: foodiq-api-config
+            - secretRef:
+                name: foodiq-api-secrets
+                optional: true
+          env:
+            - name: PORT
+              value: "4000"
+            - name: REDIS_URL
+              value: redis://foodiq-redis:6379
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/monitoring/health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: foodiq-api
+  namespace: foodiq
+spec:
+  selector:
+    app: foodiq-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: foodiq-api-pdb
+  namespace: foodiq
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: foodiq-api
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: foodiq-api-hpa
+  namespace: foodiq
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: foodiq-api
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: foodiq-api
+  namespace: foodiq
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api.foodiq.example
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: foodiq-api
+                port:
+                  number: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foodiq-redis
+  namespace: foodiq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foodiq-redis
+  template:
+    metadata:
+      labels:
+        app: foodiq-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: foodiq-redis
+  namespace: foodiq
+spec:
+  selector:
+    app: foodiq-redis
+  ports:
+    - port: 6379
+      targetPort: 6379

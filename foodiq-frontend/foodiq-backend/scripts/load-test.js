@@ -1,23 +1,33 @@
 /**
- * Lightweight HTTP load test against Foodiq API.
+ * Lightweight HTTP load / stress test against Foodiq API.
  * Usage:
  *   node scripts/load-test.js
  *   BASE_URL=http://localhost:4000 CONCURRENCY=50 REQUESTS=2000 node scripts/load-test.js
+ *   MODE=stress CONCURRENCY=100 REQUESTS=5000 node scripts/load-test.js
  */
 const http = require('http');
 const https = require('https');
 const { URL } = require('url');
 
 const BASE = process.env.BASE_URL || 'http://localhost:4000';
-const CONCURRENCY = Number(process.env.CONCURRENCY || 50);
-const REQUESTS = Number(process.env.REQUESTS || 1000);
+const MODE = String(
+  process.env.MODE || (process.argv.includes('--stress') ? 'stress' : 'load')
+).toLowerCase();
+const isStress = MODE === 'stress';
+const CONCURRENCY = Number(
+  process.env.CONCURRENCY || (isStress ? 100 : 50)
+);
+const REQUESTS = Number(process.env.REQUESTS || (isStress ? 5000 : 1000));
 
 const ENDPOINTS = [
   '/api/health',
+  '/api/v1/health',
   '/api/restaurants?page=1&limit=10',
   '/api/restaurant-categories',
   '/api/offers',
   '/api/cuisines',
+  '/api/search?q=pizza',
+  '/api/search/suggest?q=pi',
 ];
 
 const timings = [];
@@ -35,7 +45,7 @@ const requestOnce = (path) =>
         hostname: url.hostname,
         port: url.port || (url.protocol === 'https:' ? 443 : 80),
         path: url.pathname + url.search,
-        timeout: 10000,
+        timeout: isStress ? 15000 : 10000,
         headers: { Accept: 'application/json', 'User-Agent': 'foodiq-load-test/1.0' },
       },
       (res) => {
@@ -71,7 +81,7 @@ const percentile = (arr, p) => {
 };
 
 async function run() {
-  console.log(`Foodiq load test → ${BASE}`);
+  console.log(`Foodiq ${isStress ? 'stress' : 'load'} test → ${BASE}`);
   console.log(`Concurrency=${CONCURRENCY} Requests=${REQUESTS}`);
   const t0 = Date.now();
   let issued = 0;
@@ -85,7 +95,9 @@ async function run() {
   await Promise.all(workers);
   const elapsedSec = (Date.now() - t0) / 1000;
   const avg = timings.reduce((a, b) => a + b, 0) / (timings.length || 1);
+  const p95 = percentile(timings, 95);
   const report = {
+    mode: isStress ? 'stress' : 'load',
     base: BASE,
     concurrency: CONCURRENCY,
     requests: REQUESTS,
@@ -95,15 +107,19 @@ async function run() {
     latency_ms: {
       avg: Number(avg.toFixed(2)),
       p50: Number(percentile(timings, 50).toFixed(2)),
-      p95: Number(percentile(timings, 95).toFixed(2)),
+      p95: Number(p95.toFixed(2)),
       p99: Number(percentile(timings, 99).toFixed(2)),
       max: Number(percentile(timings, 100).toFixed(2)),
     },
     statusCounts,
     elapsed_sec: Number(elapsedSec.toFixed(2)),
-    target_api_p95_under_200ms: percentile(timings, 95) < 200,
+    target_api_p95_under_200ms: p95 < 200,
+    target_error_rate_under_1pct: errors / Math.max(completed, 1) < 0.01,
   };
   console.log(JSON.stringify(report, null, 2));
+  if (isStress && (errors / Math.max(completed, 1) >= 0.05 || p95 > 2000)) {
+    process.exitCode = 2;
+  }
   return report;
 }
 

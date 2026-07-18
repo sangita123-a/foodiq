@@ -11,6 +11,7 @@ import {
   LogOut,
   FileBadge,
   Star,
+  BarChart3,
 } from "lucide-react";
 import { clearClientAuth } from "@/lib/authSession";
 
@@ -21,6 +22,7 @@ export default function DeliverySidebar() {
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard, href: "/delivery/dashboard" },
     { name: "Orders", icon: Package, href: "/delivery/orders" },
+    { name: "Analytics", icon: BarChart3, href: "/delivery/analytics" },
     { name: "Map", icon: Map, href: "/delivery/map" },
     { name: "Earnings", icon: DollarSign, href: "/delivery/earnings" },
     { name: "Ratings", icon: Star, href: "/delivery/reviews" },

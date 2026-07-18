@@ -58,7 +58,9 @@ if (String(process.env.TRUST_PROXY || 'true') === 'true') {
 }
 
 app.use(requestContext);
+app.use(require('./middleware/httpsEnforce'));
 app.use(securityHeaders);
+app.use(require('./middleware/requestTiming').requestTiming);
 
 try {
   const compression = require('compression');
@@ -117,7 +119,20 @@ if (!process.env.JWT_SECRET) {
     log.error('JWT_SECRET is required in production. Refusing to start.');
     process.exit(1);
   }
-  log.warn('JWT_SECRET is not configured — tokens will use an insecure fallback.');
+  log.error(
+    'JWT_SECRET is not configured. Set a 32+ character secret in .env before starting.'
+  );
+  process.exit(1);
+} else {
+  try {
+    require('./utils/generateToken').assertSecretStrength(
+      process.env.JWT_SECRET,
+      'JWT_SECRET'
+    );
+  } catch (err) {
+    log.error(err.message);
+    process.exit(1);
+  }
 }
 
 // Refuse insecure payment mock in production unless explicitly allowed
@@ -190,6 +205,10 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin/v3', require('./routes/v3AdminRoutes'));
+app.use('/api/admin/v4', require('./routes/v4AdminRoutes'));
+app.use('/api/v1', require('./routes/v1Routes'));
+app.use('/api/v4', require('./routes/v4Routes'));
 app.use('/api/contact', contactRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/feedback', require('./routes/feedbackRoutes'));
@@ -199,6 +218,8 @@ app.use('/api/delivery', deliveryRoutes);
 app.use('/api/messaging', require('./routes/messagingRoutes'));
 app.use('/api/media', require('./routes/mediaRoutes'));
 app.use('/api/monitoring', require('./routes/monitoringRoutes'));
+app.use('/api/features', require('./routes/featureRoutes'));
+app.use('/api/analytics', require('./routes/analyticsBiRoutes'));
 
 app.use(
   '/media-files',

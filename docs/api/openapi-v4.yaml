@@ -1,0 +1,111 @@
+openapi: 3.0.3
+info:
+  title: Foodiq Enterprise API v4
+  version: 4.0.0
+  description: |
+    Foodiq 4.0 foundation API. Feature flags default off for tax/SSO/AI.
+servers:
+  - url: /api/v4
+paths:
+  /health:
+    get:
+      summary: API health
+      responses:
+        "200":
+          description: OK
+  /i18n/messages:
+    get:
+      summary: Locale message catalog
+      parameters:
+        - in: query
+          name: locale
+          schema:
+            type: string
+            enum: [en, hi, ar]
+      responses:
+        "200":
+          description: Messages
+  /sso/{provider}/start:
+    get:
+      summary: Start SSO (stub unless configured)
+      parameters:
+        - in: path
+          name: provider
+          required: true
+          schema:
+            type: string
+            enum: [google, microsoft, apple]
+      responses:
+        "200":
+          description: Authorize URL
+        "501":
+          description: SSO disabled or not configured
+  /recommendations:
+    get:
+      summary: Smart restaurant recommendations
+      responses:
+        "200":
+          description: Recommendations
+  /offers/personalized:
+    get:
+      summary: Personalized offers
+      responses:
+        "200":
+          description: Offers
+  /marketplace:
+    get:
+      summary: API marketplace listings
+      responses:
+        "200":
+          description: Listings
+  /privacy/export:
+    post:
+      summary: GDPR data export
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Export payload
+  /privacy/delete-request:
+    post:
+      summary: GDPR delete request (queued)
+      security:
+        - BearerAuth: []
+      responses:
+        "202":
+          description: Queued
+  /fleet/optimize:
+    post:
+      summary: Multi-stop route optimization
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                depot:
+                  type: object
+                stops:
+                  type: array
+      responses:
+        "200":
+          description: Optimized order
+  /iot/telemetry:
+    post:
+      summary: IoT kitchen telemetry ingest
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "201":
+          description: Accepted
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Key

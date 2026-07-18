@@ -14,14 +14,16 @@ type Props = {
 export default function DashboardOverview({ onNavigate }: Props) {
   const { data: dash, isLoading: loadingDash } = useSWR("/api/profile/dashboard");
   const { data: authData, isLoading: isLoadingAuth } = useSWR("/api/profile");
+  const { data: bi } = useSWR("/api/analytics/customer?days=90");
 
   const user = authData || { full_name: "User" };
   const orders = dash?.recent_orders || [];
   const notifications = dash?.recent_notifications || [];
-  const totalOrders = dash?.total_orders ?? 0;
-  const totalSpending = dash?.total_spending ?? 0;
+  const totalOrders = dash?.total_orders ?? bi?.summary?.orders ?? 0;
+  const totalSpending = dash?.total_spending ?? bi?.summary?.clv ?? 0;
   const rewardPoints = dash?.reward_points ?? 0;
-  const favRestaurants = dash?.favorite_restaurants ?? 0;
+  const aov = bi?.summary?.aov ?? 0;
+  const clv = bi?.summary?.clv ?? totalSpending;
 
   const statCards = [
     {
@@ -33,22 +35,22 @@ export default function DashboardOverview({ onNavigate }: Props) {
     },
     {
       id: 2,
-      title: "Total Spending",
-      value: `₹${Number(totalSpending).toFixed(0)}`,
+      title: "Lifetime value (CLV)",
+      value: `₹${Number(clv).toFixed(0)}`,
       icon: <IndianRupee className="w-6 h-6 text-green-400" />,
       color: "bg-green-500/10 border-green-500/20",
     },
     {
       id: 3,
-      title: "Reward Points",
-      value: rewardPoints.toString(),
+      title: "Avg order (AOV)",
+      value: `₹${Number(aov || (totalOrders ? totalSpending / totalOrders : 0)).toFixed(0)}`,
       icon: <Award className="w-6 h-6 text-yellow-400" />,
       color: "bg-yellow-500/10 border-yellow-500/20",
     },
     {
       id: 4,
-      title: "Favorite Restaurants",
-      value: favRestaurants.toString(),
+      title: "Reward Points",
+      value: rewardPoints.toString(),
       icon: <Heart className="w-6 h-6 text-red-400" />,
       color: "bg-red-500/10 border-red-500/20",
     },

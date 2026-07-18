@@ -66,6 +66,7 @@ export default function LanguageRegionSettings() {
             <option value="en">English (US)</option>
             <option value="en-gb">English (UK)</option>
             <option value="hi">Hindi</option>
+            <option value="ar">Arabic</option>
             <option value="es">Spanish</option>
             <option value="fr">French</option>
           </select>

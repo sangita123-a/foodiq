@@ -50,7 +50,32 @@ export async function reportClientError(payload: {
   meta?: Record<string, unknown>;
 }) {
   try {
-    await api.post("/api/monitoring/client-error", payload, { timeout: 5000 });
+    const ua = typeof navigator !== "undefined" ? navigator.userAgent : undefined;
+    let browser: string | undefined;
+    let device: string | undefined;
+    if (ua) {
+      if (/Edg\//i.test(ua)) browser = "Edge";
+      else if (/Chrome\//i.test(ua) && !/Edg\//i.test(ua)) browser = "Chrome";
+      else if (/Firefox\//i.test(ua)) browser = "Firefox";
+      else if (/Safari\//i.test(ua) && !/Chrome\//i.test(ua)) browser = "Safari";
+      else browser = "Other";
+      if (/iPad|Tablet/i.test(ua)) device = "Tablet";
+      else if (/Mobile|Android|iPhone/i.test(ua)) device = "Mobile";
+      else device = "Desktop";
+    }
+    await api.post(
+      "/api/monitoring/client-error",
+      {
+        ...payload,
+        meta: {
+          ...(payload.meta || {}),
+          browser,
+          device,
+          user_agent: ua,
+        },
+      },
+      { timeout: 5000 }
+    );
   } catch {
     /* swallow — never break UI */
   }

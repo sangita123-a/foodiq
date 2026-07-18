@@ -4,6 +4,7 @@ const {
   getLiveDealByCouponCode,
 } = require('../models/liveDealModel');
 const cache = require('../services/cacheService');
+const { setCatalogHttpCache } = require('../middleware/cacheMiddleware');
 
 const listLiveDeals = async (req, res) => {
   try {
@@ -13,7 +14,7 @@ const listLiveDeals = async (req, res) => {
       Number(process.env.CACHE_TTL_OFFERS || 120),
       () => getAllLiveDeals()
     );
-    res.setHeader('X-Cache', status);
+    setCatalogHttpCache(res, status);
     res.json({ success: true, message: 'Live deals retrieved', data: deals });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -41,7 +42,7 @@ const getRestaurantLiveDeal = async (req, res) => {
       return res.status(404).json({ success: false, message: 'No live deal for this restaurant', error: {} });
     }
 
-    res.setHeader('X-Cache', status);
+    setCatalogHttpCache(res, status);
     res.json({ success: true, message: 'Live deal retrieved', data: deal });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });

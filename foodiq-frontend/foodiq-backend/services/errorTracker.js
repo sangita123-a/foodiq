@@ -50,7 +50,29 @@ const trackError = async ({
         JSON.stringify(meta || {}),
       ]
     );
-    return rows[0];
+    const event = rows[0];
+
+    // Promote significant crashes into bug_reports (deduped)
+    try {
+      const { ingestCrashFromError } = require('./bugTrackingService');
+      await ingestCrashFromError({
+        errorEventId: event?.id,
+        source,
+        type,
+        message,
+        stack,
+        statusCode,
+        path,
+        method,
+        userId,
+        userAgent: meta?.user_agent || null,
+        meta: meta || {},
+      });
+    } catch (ingestErr) {
+      log.warn('bug ingest failed', { error: ingestErr.message });
+    }
+
+    return event;
   } catch (err) {
     log.warn('error_events insert failed', { error: err.message });
     return null;

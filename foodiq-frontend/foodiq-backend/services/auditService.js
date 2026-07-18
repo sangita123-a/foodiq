@@ -37,11 +37,18 @@ const writeAudit = async (opts = {}) => {
     message = null,
     meta = {},
     req = null,
+    organizationId = null,
+    actorType = 'user',
   } = opts;
 
   if (!action) return null;
 
   const client = req ? clientMeta(req) : {};
+  const orgId =
+    organizationId ||
+    meta.organization_id ||
+    req?.headers?.['x-organization-id'] ||
+    null;
   const row = {
     user_id: userId,
     role,
@@ -55,6 +62,8 @@ const writeAudit = async (opts = {}) => {
     device: client.device || null,
     browser: client.browser || null,
     user_agent: client.user_agent || null,
+    organization_id: orgId,
+    actor_type: actorType,
     meta: { ...meta, ...(req?.requestId ? { request_id: req.requestId } : {}) },
   };
 
@@ -64,8 +73,9 @@ const writeAudit = async (opts = {}) => {
     const { rows } = await pool.query(
       `INSERT INTO audit_logs (
          user_id, role, action, category, resource_type, resource_id,
-         status, message, ip_address, device, browser, user_agent, meta
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb)
+         status, message, ip_address, device, browser, user_agent, meta,
+         organization_id, actor_type
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb,$14,$15)
        RETURNING id, created_at`,
       [
         row.user_id,
@@ -81,12 +91,41 @@ const writeAudit = async (opts = {}) => {
         row.browser,
         row.user_agent,
         JSON.stringify(row.meta || {}),
+        row.organization_id,
+        row.actor_type,
       ]
     );
     return rows[0];
   } catch (err) {
-    log.warn('audit persist failed', { error: err.message });
-    return null;
+    // Fallback without V4 columns if migrate not yet applied
+    try {
+      const { rows } = await pool.query(
+        `INSERT INTO audit_logs (
+           user_id, role, action, category, resource_type, resource_id,
+           status, message, ip_address, device, browser, user_agent, meta
+         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb)
+         RETURNING id, created_at`,
+        [
+          row.user_id,
+          row.role,
+          row.action,
+          row.category,
+          row.resource_type,
+          row.resource_id,
+          row.status,
+          row.message,
+          row.ip_address,
+          row.device,
+          row.browser,
+          row.user_agent,
+          JSON.stringify(row.meta || {}),
+        ]
+      );
+      return rows[0];
+    } catch (e2) {
+      log.warn('audit persist failed', { error: e2.message });
+      return null;
+    }
   }
 };
 

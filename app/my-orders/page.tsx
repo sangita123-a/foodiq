@@ -12,6 +12,7 @@ import api from "@/services/api";
 import { getRestaurantImage } from "@/lib/images";
 import { useToast } from "@/contexts/ToastContext";
 import { useAuthToken } from "@/hooks/useAuthToken";
+import { useVisibleRefreshInterval } from "@/hooks/useVisibleRefreshInterval";
 
 const FILTERS: OrderFilter[] = ["All Orders", "Active", "Delivered", "Cancelled"];
 
@@ -19,8 +20,9 @@ export default function MyOrdersPage() {
   const [activeFilter, setActiveFilter] = useState<OrderFilter>("All Orders");
   const { showToast } = useToast();
   const hasToken = useAuthToken();
-  
-  const { data, isLoading, error, mutate } = useSWR(hasToken ? '/api/orders' : null, { refreshInterval: 10000 });
+  const refreshInterval = useVisibleRefreshInterval(15000);
+
+  const { data, isLoading, error, mutate } = useSWR(hasToken ? '/api/orders' : null, { refreshInterval });
   const backendOrders = data || [];
 
   const handleCancelOrder = async (orderId: string) => {

@@ -1,6 +1,6 @@
 {
   "name": "foodiq",
-  "version": "2.0.0",
+  "version": "4.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -12,7 +12,8 @@
     "test:unit": "node scripts/run-unit-tests.js tests/unit",
     "test:ui": "node scripts/ui-smoke.mjs",
     "ci": "npm run lint && npm run typecheck && npm run test:unit && npm run build",
-    "images:build": "node scripts/buildDishImages.js"
+    "images:build": "node scripts/buildDishImages.js",
+    "analyze": "next build"
   },
   "dependencies": {
     "axios": "^1.18.1",
@@ -28,6 +29,9 @@
     "sharp": "^0.35.3",
     "socket.io-client": "^4.8.3",
     "swr": "^2.4.2"
+  },
+  "overrides": {
+    "postcss": "^8.5.10"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

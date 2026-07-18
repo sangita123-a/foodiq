@@ -10,6 +10,8 @@ const buildReviewAnalytics = async (days = 30) => {
     topRestaurants,
     deliveryAgg,
     volumeByDay,
+    topDishes,
+    overallAgg,
   ] = await Promise.all([
     pool.query(
       `SELECT COUNT(*)::int AS total,
@@ -57,15 +59,51 @@ const buildReviewAnalytics = async (days = 30) => {
        ORDER BY day ASC`,
       [d]
     ),
+    pool.query(
+      `SELECT m.id AS menu_item_id, m.name AS dish_name,
+              COUNT(DISTINCT r.id)::int AS review_count,
+              ROUND(AVG(r.rating)::numeric, 2)::float AS avg_rating
+       FROM reviews r
+       JOIN order_items oi ON oi.order_id = r.order_id
+       JOIN menu_items m ON m.id = oi.menu_item_id
+       WHERE r.created_at >= NOW() - ($1::int * INTERVAL '1 day')
+         AND COALESCE(r.status, 'visible') = 'visible'
+         AND r.order_id IS NOT NULL
+       GROUP BY m.id, m.name
+       ORDER BY review_count DESC, avg_rating DESC
+       LIMIT 10`,
+      [d]
+    ),
+    pool.query(
+      `SELECT COUNT(*)::int AS total,
+              COALESCE(ROUND(AVG(overall_rating)::numeric, 2), 0)::float AS avg_rating,
+              COUNT(*) FILTER (WHERE overall_rating >= 4)::int AS positive
+       FROM order_feedback
+       WHERE created_at >= NOW() - ($1::int * INTERVAL '1 day')
+         AND overall_rating IS NOT NULL`,
+      [d]
+    ),
   ]);
+
+  const rest = restaurantAgg.rows[0] || {};
+  const overall = overallAgg.rows[0] || {};
+  const combinedPositive = (rest.positive || 0) + (overall.positive || 0);
+  const combinedTotal =
+    (rest.total || 0) + (overall.total || 0) || 1;
+  const csat =
+    Math.round((combinedPositive / Math.max(combinedTotal, 1)) * 1000) / 10;
 
   return {
     days: d,
-    restaurant: restaurantAgg.rows[0],
+    restaurant: rest,
     delivery: deliveryAgg.rows[0],
+    overall_order: overall,
     distribution: distribution.rows,
     top_restaurants: topRestaurants.rows,
+    top_dishes: topDishes.rows,
     volume_by_day: volumeByDay.rows,
+    csat_score: csat,
+    average_rating: rest.avg_rating || 0,
   };
 };
 

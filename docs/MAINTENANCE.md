@@ -33,6 +33,8 @@ Post-launch maintenance for feedback, ratings, bugs, health, and reports.
 - `PUT /api/admin/feedback/product|support|contact/:id`
 - `GET|PUT /api/admin/reviews[/:id]`
 - `GET|PUT /api/admin/bugs[/:id]`, `POST /api/admin/bugs/from-error`
+- `GET|POST /api/admin/bugs/weekly-report` (optional `?persist=1`)
+- See `docs/BUG_TRACKING_MODULE_REPORT.md` for the full module report
 - `GET /api/admin/analytics/reviews?days=30`
 - `GET /api/admin/analytics/v2-adoption?days=30`
 - `GET /api/admin/maintenance/health`

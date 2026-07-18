@@ -1,9 +1,33 @@
 /**
- * Access + refresh token helpers (additive — existing 30d JWT still works).
+ * JWT secret validation + HS256-pinned token helpers.
  */
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { pool } = require('../config/db');
+
+const WEAK_SECRETS = new Set([
+  'fallback_secret',
+  'change-me-in-production',
+  'secret',
+  'jwt_secret',
+  'foodiq',
+  'password',
+]);
+
+const assertSecretStrength = (secret, label = 'JWT_SECRET') => {
+  if (!secret || String(secret).length < 32) {
+    const err = new Error(
+      `${label} must be at least 32 characters. Generate with: openssl rand -hex 32`
+    );
+    err.code = 'WEAK_SECRET';
+    throw err;
+  }
+  if (WEAK_SECRETS.has(String(secret).toLowerCase())) {
+    const err = new Error(`${label} is a known weak/default value — refuse to use`);
+    err.code = 'WEAK_SECRET';
+    throw err;
+  }
+};
 
 const getJwtSecret = () => {
   const secret = process.env.JWT_SECRET;
@@ -11,38 +35,48 @@ const getJwtSecret = () => {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('JWT_SECRET is required in production');
     }
-    console.warn('[AUTH] WARNING: JWT_SECRET is not set. Using fallback secret (not safe for production).');
-    return 'fallback_secret';
+    // Dev: require explicit secret — no hardcoded fallback
+    throw new Error(
+      'JWT_SECRET is not set. Add it to .env (min 32 chars). Example: openssl rand -hex 32'
+    );
   }
+  assertSecretStrength(secret, 'JWT_SECRET');
   return secret;
 };
 
 const getRefreshSecret = () => {
-  if (process.env.JWT_REFRESH_SECRET) return process.env.JWT_REFRESH_SECRET;
-  if (process.env.NODE_ENV === 'production') {
-    // Derive a distinct secret rather than reusing access secret verbatim
-    const crypto = require('crypto');
-    return crypto.createHmac('sha256', getJwtSecret()).update('foodiq-refresh').digest('hex');
+  if (process.env.JWT_REFRESH_SECRET) {
+    assertSecretStrength(process.env.JWT_REFRESH_SECRET, 'JWT_REFRESH_SECRET');
+    return process.env.JWT_REFRESH_SECRET;
   }
-  return `${getJwtSecret()}_refresh`;
+  return crypto.createHmac('sha256', getJwtSecret()).update('foodiq-refresh-v1').digest('hex');
 };
 
-const accessTtl = () => process.env.JWT_ACCESS_TTL || (process.env.NODE_ENV === 'production' ? '1h' : '30d');
-const refreshTtl = () => process.env.JWT_REFRESH_TTL || (process.env.NODE_ENV === 'production' ? '7d' : '30d');
+const accessTtl = () =>
+  process.env.JWT_ACCESS_TTL || (process.env.NODE_ENV === 'production' ? '1h' : '7d');
+const refreshTtl = () =>
+  process.env.JWT_REFRESH_TTL || (process.env.NODE_ENV === 'production' ? '7d' : '14d');
+
+const SIGN_OPTS = { algorithm: 'HS256' };
+const VERIFY_OPTS = { algorithms: ['HS256'] };
 
 const generateToken = (id, extras = {}) => {
   return jwt.sign({ id, ...extras }, getJwtSecret(), {
     expiresIn: accessTtl(),
+    ...SIGN_OPTS,
   });
 };
 
 const generateRefreshToken = async (userId, meta = {}) => {
   const token = jwt.sign({ id: userId, typ: 'refresh' }, getRefreshSecret(), {
     expiresIn: refreshTtl(),
+    ...SIGN_OPTS,
   });
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
   const decoded = jwt.decode(token);
-  const expiresAt = decoded?.exp ? new Date(decoded.exp * 1000) : new Date(Date.now() + 30 * 864e5);
+  const expiresAt = decoded?.exp
+    ? new Date(decoded.exp * 1000)
+    : new Date(Date.now() + 14 * 864e5);
 
   try {
     await pool.query(
@@ -59,7 +93,7 @@ const generateRefreshToken = async (userId, meta = {}) => {
 const rotateRefreshToken = async (oldToken, meta = {}) => {
   let payload;
   try {
-    payload = jwt.verify(oldToken, getRefreshSecret());
+    payload = jwt.verify(oldToken, getRefreshSecret(), VERIFY_OPTS);
   } catch {
     const err = new Error('Invalid or expired refresh token');
     err.status = 401;
@@ -110,6 +144,9 @@ const revokeAllForUser = async (userId) => {
   );
 };
 
+const verifyAccessToken = (token) =>
+  jwt.verify(token, getJwtSecret(), VERIFY_OPTS);
+
 module.exports = generateToken;
 module.exports.generateToken = generateToken;
 module.exports.generateRefreshToken = generateRefreshToken;
@@ -117,3 +154,7 @@ module.exports.rotateRefreshToken = rotateRefreshToken;
 module.exports.revokeRefreshToken = revokeRefreshToken;
 module.exports.revokeAllForUser = revokeAllForUser;
 module.exports.getJwtSecret = getJwtSecret;
+module.exports.getRefreshSecret = getRefreshSecret;
+module.exports.assertSecretStrength = assertSecretStrength;
+module.exports.verifyAccessToken = verifyAccessToken;
+module.exports.VERIFY_OPTS = VERIFY_OPTS;

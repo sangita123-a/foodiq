@@ -24,7 +24,7 @@ function StarRow({
   return (
     <div>
       <p className="text-sm font-bold text-[#6B7280] mb-2">{label}</p>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 flex-wrap">
         {[1, 2, 3, 4, 5].map((n) => (
           <button
             key={n}
@@ -55,6 +55,7 @@ export default function OrderFeedbackForm({
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [restaurantRating, setRestaurantRating] = useState(5);
   const [deliveryRating, setDeliveryRating] = useState(5);
@@ -63,29 +64,35 @@ export default function OrderFeedbackForm({
   const [deliveryComment, setDeliveryComment] = useState("");
   const [comment, setComment] = useState("");
 
+  const load = async () => {
+    const res = await api.get(`/api/orders/${orderId}/feedback`);
+    const d = res.data?.data;
+    if (d?.submitted) {
+      setSubmitted(true);
+      if (d.restaurant_review) {
+        setRestaurantRating(Number(d.restaurant_review.rating) || 5);
+        setRestaurantComment(d.restaurant_review.comment || "");
+      }
+      if (d.delivery_review) {
+        setDeliveryRating(Number(d.delivery_review.rating) || 5);
+        setDeliveryComment(d.delivery_review.comment || "");
+      }
+      if (d.order_feedback) {
+        setOverallRating(Number(d.order_feedback.overall_rating) || 5);
+        setComment(d.order_feedback.comment || "");
+      }
+    } else {
+      setSubmitted(false);
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await api.get(`/api/orders/${orderId}/feedback`);
-        if (!cancelled && res.data?.data?.submitted) {
-          setSubmitted(true);
-          const d = res.data.data;
-          if (d.restaurant_review) {
-            setRestaurantRating(Number(d.restaurant_review.rating) || 5);
-            setRestaurantComment(d.restaurant_review.comment || "");
-          }
-          if (d.delivery_review) {
-            setDeliveryRating(Number(d.delivery_review.rating) || 5);
-            setDeliveryComment(d.delivery_review.comment || "");
-          }
-          if (d.order_feedback) {
-            setOverallRating(Number(d.order_feedback.overall_rating) || 5);
-            setComment(d.order_feedback.comment || "");
-          }
-        }
+        await load();
       } catch {
-        /* ignore — form still usable */
+        /* form still usable */
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -93,28 +100,62 @@ export default function OrderFeedbackForm({
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
+
+  const payload = () => ({
+    restaurant_rating: restaurantRating,
+    restaurant_comment: restaurantComment || undefined,
+    delivery_rating: hasDeliveryPartner ? deliveryRating : undefined,
+    delivery_comment: hasDeliveryPartner
+      ? deliveryComment || undefined
+      : undefined,
+    overall_rating: overallRating,
+    comment: comment || undefined,
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setSubmitting(true);
-      await api.post(`/api/orders/${orderId}/feedback`, {
-        restaurant_rating: restaurantRating,
-        restaurant_comment: restaurantComment || undefined,
-        delivery_rating: hasDeliveryPartner ? deliveryRating : undefined,
-        delivery_comment: hasDeliveryPartner
-          ? deliveryComment || undefined
-          : undefined,
-        overall_rating: overallRating,
-        comment: comment || undefined,
-      });
-      setSubmitted(true);
-      showToast("Thanks for your feedback!", "success");
+      if (submitted) {
+        await api.put(`/api/orders/${orderId}/feedback`, payload());
+        showToast("Feedback updated", "success");
+        setEditing(false);
+      } else {
+        await api.post(`/api/orders/${orderId}/feedback`, payload());
+        setSubmitted(true);
+        showToast("Thanks for your feedback!", "success");
+      }
+      await load();
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || "Failed to submit feedback";
+          ?.message || "Failed to save feedback";
+      showToast(msg, "error");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Delete your feedback for this order?")) return;
+    try {
+      setSubmitting(true);
+      await api.delete(`/api/orders/${orderId}/feedback`);
+      setSubmitted(false);
+      setEditing(false);
+      setRestaurantRating(5);
+      setDeliveryRating(5);
+      setOverallRating(5);
+      setRestaurantComment("");
+      setDeliveryComment("");
+      setComment("");
+      showToast("Feedback deleted", "success");
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Failed to delete feedback";
       showToast(msg, "error");
     } finally {
       setSubmitting(false);
@@ -130,6 +171,8 @@ export default function OrderFeedbackForm({
     );
   }
 
+  const showForm = !submitted || editing;
+
   return (
     <div
       id="feedback"
@@ -142,11 +185,34 @@ export default function OrderFeedbackForm({
         Help restaurants and delivery partners improve with your honest rating.
       </p>
 
-      {submitted ? (
-        <div className="rounded-2xl bg-emerald-50 border border-emerald-100 px-4 py-3 text-sm font-bold text-emerald-700">
-          Feedback submitted. Thank you!
+      {submitted && !editing && (
+        <div className="space-y-4">
+          <div className="rounded-2xl bg-emerald-50 border border-emerald-100 px-4 py-3 text-sm font-bold text-emerald-700">
+            Feedback submitted. Restaurant {restaurantRating}★
+            {hasDeliveryPartner ? ` · Delivery ${deliveryRating}★` : ""} · Overall{" "}
+            {overallRating}★
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="bg-[#FC8019] hover:bg-[#E76F0B] text-white px-5 py-2.5 rounded-xl text-sm font-bold"
+            >
+              Edit feedback
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleDelete()}
+              disabled={submitting}
+              className="border border-[#E5E7EB] text-[#6B7280] hover:text-red-600 px-5 py-2.5 rounded-xl text-sm font-bold"
+            >
+              Delete
+            </button>
+          </div>
         </div>
-      ) : (
+      )}
+
+      {showForm && (
         <form onSubmit={handleSubmit} className="space-y-6">
           <StarRow
             label="Restaurant"
@@ -157,6 +223,7 @@ export default function OrderFeedbackForm({
             value={restaurantComment}
             onChange={(e) => setRestaurantComment(e.target.value)}
             rows={2}
+            maxLength={2000}
             placeholder="How was the food and restaurant?"
             className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#FC8019] resize-none"
           />
@@ -172,6 +239,7 @@ export default function OrderFeedbackForm({
                 value={deliveryComment}
                 onChange={(e) => setDeliveryComment(e.target.value)}
                 rows={2}
+                maxLength={2000}
                 placeholder="How was the delivery experience?"
                 className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#FC8019] resize-none"
               />
@@ -187,17 +255,33 @@ export default function OrderFeedbackForm({
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={3}
+            maxLength={2000}
             placeholder="Any other feedback about this order?"
             className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#FC8019] resize-none"
           />
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="bg-[#FC8019] hover:bg-[#E76F0B] disabled:opacity-60 text-white px-6 py-3 rounded-xl text-sm font-bold transition-colors"
-          >
-            {submitting ? "Submitting…" : "Submit feedback"}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="bg-[#FC8019] hover:bg-[#E76F0B] disabled:opacity-60 text-white px-6 py-3 rounded-xl text-sm font-bold transition-colors"
+            >
+              {submitting
+                ? "Saving…"
+                : submitted
+                  ? "Save changes"
+                  : "Submit feedback"}
+            </button>
+            {editing && (
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                className="border border-[#E5E7EB] text-[#6B7280] px-6 py-3 rounded-xl text-sm font-bold"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </form>
       )}
     </div>

@@ -120,6 +120,30 @@ const validateUpload = (file, purpose = 'other') => {
     throw err;
   }
 
+  // Magic-byte sniff when buffer is available (blocks MIME spoofing)
+  if (file.buffer && Buffer.isBuffer(file.buffer) && file.buffer.length >= 4) {
+    const head = file.buffer.subarray(0, 12);
+    const isJpeg = head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff;
+    const isPng =
+      head[0] === 0x89 && head[1] === 0x50 && head[2] === 0x4e && head[3] === 0x47;
+    const isWebp =
+      head.toString('ascii', 0, 4) === 'RIFF' &&
+      head.toString('ascii', 8, 12) === 'WEBP';
+    const isPdf = head.toString('ascii', 0, 5) === '%PDF-';
+    const declared = String(mime || '').toLowerCase();
+    let magicOk = false;
+    if (declared.includes('jpeg') || declared.includes('jpg')) magicOk = isJpeg;
+    else if (declared.includes('png')) magicOk = isPng;
+    else if (declared.includes('webp')) magicOk = isWebp;
+    else if (declared.includes('pdf')) magicOk = isPdf;
+    else magicOk = isJpeg || isPng || isWebp || isPdf;
+    if (!magicOk) {
+      const err = new Error('File content does not match declared type');
+      err.status = 400;
+      throw err;
+    }
+  }
+
   return {
     purpose,
     kind,

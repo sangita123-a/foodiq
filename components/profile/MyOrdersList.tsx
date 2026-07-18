@@ -9,11 +9,13 @@ import { useToast } from "@/contexts/ToastContext";
 import Link from "next/link";
 import SafeImage from "@/components/ui/SafeImage";
 import { RESTAURANT_FALLBACK } from "@/lib/images";
+import { useVisibleRefreshInterval } from "@/hooks/useVisibleRefreshInterval";
 
 export default function MyOrdersList() {
   const router = useRouter();
   const { showToast } = useToast();
-  const { data, isLoading, mutate } = useSWR("/api/orders", { refreshInterval: 10000 });
+  const refreshInterval = useVisibleRefreshInterval(15000);
+  const { data, isLoading, mutate } = useSWR("/api/orders", { refreshInterval });
   const orders = data || [];
 
   const canCancel = (status: string) => {
@@ -38,19 +40,27 @@ export default function MyOrdersList() {
 
   const handleReorder = async (order: any) => {
     try {
-      const items = order.items || [];
-      for (const item of items) {
-        if (item.menu_item_id) {
-          await api.post("/api/cart/add", {
-            menu_item_id: item.menu_item_id,
-            quantity: item.quantity || 1,
-          });
-        }
-      }
+      const { reorderOrder } = await import("@/services/featuresApi");
+      await reorderOrder(order.id);
       showToast("Items added to cart", "success");
       router.push("/cart");
     } catch (err: any) {
-      showToast(err.response?.data?.message || "Failed to reorder", "error");
+      // Fallback to legacy client-side re-add
+      try {
+        const items = order.items || [];
+        for (const item of items) {
+          if (item.menu_item_id) {
+            await api.post("/api/cart/add", {
+              menu_item_id: item.menu_item_id,
+              quantity: item.quantity || 1,
+            });
+          }
+        }
+        showToast("Items added to cart", "success");
+        router.push("/cart");
+      } catch {
+        showToast(err.response?.data?.message || "Failed to reorder", "error");
+      }
     }
   };
 

@@ -377,7 +377,7 @@ CREATE TABLE IF NOT EXISTS user_feedback (
 DROP TRIGGER IF EXISTS update_user_feedback_modtime ON user_feedback;
 CREATE TRIGGER update_user_feedback_modtime BEFORE UPDATE ON user_feedback FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
 
--- 18e. bug_reports
+-- 18e. bug_reports (production crash / bug tracking)
 CREATE TABLE IF NOT EXISTS bug_reports (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     reporter_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -392,6 +392,13 @@ CREATE TABLE IF NOT EXISTS bug_reports (
     error_event_id UUID,
     assignee_id UUID REFERENCES users(id) ON DELETE SET NULL,
     admin_notes TEXT,
+    stack_trace TEXT,
+    api_endpoint TEXT,
+    browser VARCHAR(120),
+    device VARCHAR(120),
+    fingerprint VARCHAR(64),
+    occurrence_count INTEGER NOT NULL DEFAULT 1,
+    duplicate_of_id UUID REFERENCES bug_reports(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -399,6 +406,16 @@ DROP TRIGGER IF EXISTS update_bug_reports_modtime ON bug_reports;
 CREATE TRIGGER update_bug_reports_modtime BEFORE UPDATE ON bug_reports FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
 CREATE INDEX IF NOT EXISTS idx_bug_reports_status_created
   ON bug_reports(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_bug_reports_severity_status
+  ON bug_reports(severity, status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_bug_reports_fingerprint
+  ON bug_reports(fingerprint)
+  WHERE fingerprint IS NOT NULL AND duplicate_of_id IS NULL;
+CREATE INDEX IF NOT EXISTS idx_bug_reports_error_event
+  ON bug_reports(error_event_id)
+  WHERE error_event_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_bug_reports_created
+  ON bug_reports(created_at DESC);
 
 -- 18f. maintenance_reports
 CREATE TABLE IF NOT EXISTS maintenance_reports (
@@ -611,3 +628,438 @@ ALTER TABLE delivery_partners
   ADD COLUMN IF NOT EXISTS license_photo_url TEXT,
   ADD COLUMN IF NOT EXISTS vehicle_rc_url TEXT,
   ADD COLUMN IF NOT EXISTS insurance_doc_url TEXT;
+
+-- ========== Foodiq 3.0 Business Scaling foundation ==========
+CREATE TABLE IF NOT EXISTS organizations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(120) UNIQUE,
+    status VARCHAR(40) NOT NULL DEFAULT 'active',
+    meta JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS currencies (
+    code VARCHAR(10) PRIMARY KEY,
+    name VARCHAR(80) NOT NULL,
+    symbol VARCHAR(8) DEFAULT '',
+    decimal_places INTEGER DEFAULT 2
+);
+CREATE TABLE IF NOT EXISTS markets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code VARCHAR(40) NOT NULL UNIQUE,
+    name VARCHAR(160) NOT NULL,
+    country_code VARCHAR(8) NOT NULL DEFAULT 'IN',
+    state_code VARCHAR(40),
+    city VARCHAR(120),
+    currency_code VARCHAR(10) NOT NULL DEFAULT 'INR',
+    timezone VARCHAR(64) DEFAULT 'Asia/Kolkata',
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS organization_markets (
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    market_id UUID NOT NULL REFERENCES markets(id) ON DELETE CASCADE,
+    PRIMARY KEY (organization_id, market_id)
+);
+CREATE TABLE IF NOT EXISTS franchises (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    market_id UUID REFERENCES markets(id) ON DELETE SET NULL,
+    name VARCHAR(255) NOT NULL,
+    code VARCHAR(80),
+    status VARCHAR(40) DEFAULT 'active',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS restaurant_chains (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(160),
+    logo_url TEXT,
+    status VARCHAR(40) DEFAULT 'active',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS white_label_configs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    host VARCHAR(255) NOT NULL UNIQUE,
+    brand_name VARCHAR(160),
+    logo_url TEXT,
+    primary_color VARCHAR(32) DEFAULT '#FC8019',
+    feature_flags JSONB DEFAULT '{}'::jsonb,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS fx_rates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    base_currency VARCHAR(10) NOT NULL,
+    quote_currency VARCHAR(10) NOT NULL,
+    rate NUMERIC(18,8) NOT NULL,
+    effective_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS api_keys (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+    name VARCHAR(120) NOT NULL,
+    key_prefix VARCHAR(16) NOT NULL,
+    key_hash VARCHAR(128) NOT NULL UNIQUE,
+    scopes TEXT[] DEFAULT ARRAY['public'],
+    is_active BOOLEAN DEFAULT TRUE,
+    last_used_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS warehouses (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+    market_id UUID REFERENCES markets(id) ON DELETE SET NULL,
+    name VARCHAR(160) NOT NULL,
+    code VARCHAR(80),
+    address TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS inventory_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    menu_item_id UUID REFERENCES menu_items(id) ON DELETE CASCADE,
+    warehouse_id UUID REFERENCES warehouses(id) ON DELETE SET NULL,
+    restaurant_id UUID REFERENCES restaurants(id) ON DELETE CASCADE,
+    quantity NUMERIC(12,2) NOT NULL DEFAULT 0,
+    reorder_level NUMERIC(12,2) DEFAULT 0,
+    unit VARCHAR(40) DEFAULT 'unit',
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS integration_connectors (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+    type VARCHAR(40) NOT NULL,
+    name VARCHAR(160) NOT NULL,
+    webhook_url TEXT,
+    status VARCHAR(40) DEFAULT 'inactive',
+    config JSONB DEFAULT '{}'::jsonb,
+    last_sync_at TIMESTAMP WITH TIME ZONE,
+    last_error TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS pricing_rules (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+    market_id UUID REFERENCES markets(id) ON DELETE CASCADE,
+    name VARCHAR(160) NOT NULL,
+    rule_type VARCHAR(40) DEFAULT 'multiplier',
+    multiplier NUMERIC(8,4) DEFAULT 1,
+    is_active BOOLEAN DEFAULT TRUE,
+    meta JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS surge_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    market_id UUID NOT NULL REFERENCES markets(id) ON DELETE CASCADE,
+    multiplier NUMERIC(8,4) NOT NULL DEFAULT 1.2,
+    reason VARCHAR(255),
+    starts_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    ends_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS ai_forecast_runs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+    market_id UUID REFERENCES markets(id) ON DELETE SET NULL,
+    forecast_type VARCHAR(40) NOT NULL DEFAULT 'sales',
+    horizon_days INTEGER DEFAULT 7,
+    payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+ALTER TABLE restaurants
+  ADD COLUMN IF NOT EXISTS organization_id UUID,
+  ADD COLUMN IF NOT EXISTS chain_id UUID,
+  ADD COLUMN IF NOT EXISTS franchise_id UUID,
+  ADD COLUMN IF NOT EXISTS market_id UUID;
+ALTER TABLE orders
+  ADD COLUMN IF NOT EXISTS market_id UUID,
+  ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'INR';
+
+-- ========== Foodiq 4.0 Enterprise foundation ==========
+CREATE TABLE IF NOT EXISTS locales (
+    code VARCHAR(16) PRIMARY KEY,
+    name VARCHAR(80) NOT NULL,
+    direction VARCHAR(8) DEFAULT 'ltr',
+    is_active BOOLEAN DEFAULT TRUE
+);
+CREATE TABLE IF NOT EXISTS tax_rules (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    country_code VARCHAR(8) NOT NULL DEFAULT 'IN',
+    state_code VARCHAR(40),
+    tax_type VARCHAR(40) NOT NULL DEFAULT 'GST',
+    rate NUMERIC(8,4) NOT NULL DEFAULT 0.05,
+    name VARCHAR(120),
+    is_active BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS sso_providers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    provider VARCHAR(40) NOT NULL UNIQUE,
+    client_id VARCHAR(255),
+    is_enabled BOOLEAN DEFAULT FALSE,
+    meta JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS sso_identities (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    provider VARCHAR(40) NOT NULL,
+    provider_subject VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(provider, provider_subject)
+);
+CREATE TABLE IF NOT EXISTS enterprise_roles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code VARCHAR(40) NOT NULL UNIQUE,
+    name VARCHAR(80) NOT NULL,
+    permissions JSONB DEFAULT '[]'::jsonb
+);
+CREATE TABLE IF NOT EXISTS organization_memberships (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role_code VARCHAR(40) NOT NULL DEFAULT 'viewer',
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(organization_id, user_id)
+);
+CREATE TABLE IF NOT EXISTS corporate_accounts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    name VARCHAR(160) NOT NULL,
+    billing_email VARCHAR(255),
+    credit_limit NUMERIC(12,2) DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS corporate_orders (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    corporate_account_id UUID NOT NULL REFERENCES corporate_accounts(id) ON DELETE CASCADE,
+    organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+    placed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    status VARCHAR(40) NOT NULL DEFAULT 'draft',
+    total_amount NUMERIC(12,2) DEFAULT 0,
+    currency VARCHAR(10) DEFAULT 'INR',
+    payload JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS recurring_order_schedules (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    corporate_account_id UUID NOT NULL REFERENCES corporate_accounts(id) ON DELETE CASCADE,
+    organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+    cron_expr VARCHAR(80) DEFAULT '0 10 * * 1-5',
+    timezone VARCHAR(64) DEFAULT 'Asia/Kolkata',
+    template JSONB NOT NULL DEFAULT '{}'::jsonb,
+    next_run_at TIMESTAMP WITH TIME ZONE,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS ai_chat_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    channel VARCHAR(40) DEFAULT 'support',
+    messages JSONB NOT NULL DEFAULT '[]'::jsonb,
+    status VARCHAR(40) DEFAULT 'open',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS fleet_vehicles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+    market_id UUID REFERENCES markets(id) ON DELETE SET NULL,
+    label VARCHAR(120) NOT NULL,
+    vehicle_type VARCHAR(40) DEFAULT 'bike',
+    capacity INTEGER DEFAULT 4,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS fleet_assignments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    vehicle_id UUID NOT NULL REFERENCES fleet_vehicles(id) ON DELETE CASCADE,
+    delivery_partner_id UUID,
+    order_id UUID,
+    status VARCHAR(40) DEFAULT 'assigned',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS iot_devices (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    restaurant_id UUID REFERENCES restaurants(id) ON DELETE SET NULL,
+    organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+    device_key VARCHAR(120) NOT NULL UNIQUE,
+    name VARCHAR(160) NOT NULL,
+    device_type VARCHAR(40) DEFAULT 'sensor',
+    is_active BOOLEAN DEFAULT TRUE,
+    last_seen_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS iot_telemetry (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    device_id UUID NOT NULL REFERENCES iot_devices(id) ON DELETE CASCADE,
+    metric VARCHAR(80) NOT NULL,
+    value NUMERIC(18,6),
+    payload JSONB DEFAULT '{}'::jsonb,
+    recorded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS inventory_reorder_suggestions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    inventory_item_id UUID REFERENCES inventory_items(id) ON DELETE CASCADE,
+    suggested_qty NUMERIC(12,2) NOT NULL DEFAULT 0,
+    reason VARCHAR(255),
+    status VARCHAR(40) DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS api_marketplace_listings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    slug VARCHAR(120) NOT NULL UNIQUE,
+    name VARCHAR(160) NOT NULL,
+    description TEXT,
+    listing_type VARCHAR(40) NOT NULL DEFAULT 'webhook',
+    is_published BOOLEAN DEFAULT TRUE,
+    meta JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS api_marketplace_subscriptions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    listing_id UUID NOT NULL REFERENCES api_marketplace_listings(id) ON DELETE CASCADE,
+    organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+    api_key_id UUID REFERENCES api_keys(id) ON DELETE SET NULL,
+    status VARCHAR(40) DEFAULT 'active',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS privacy_requests (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    request_type VARCHAR(40) NOT NULL,
+    status VARCHAR(40) NOT NULL DEFAULT 'queued',
+    payload JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP WITH TIME ZONE
+);
+ALTER TABLE audit_logs
+  ADD COLUMN IF NOT EXISTS organization_id UUID,
+  ADD COLUMN IF NOT EXISTS actor_type VARCHAR(40) DEFAULT 'user';
+
+-- ========== CPI Task 3 — New Features foundation ==========
+CREATE TABLE IF NOT EXISTS wishlists (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    menu_item_id UUID NOT NULL REFERENCES menu_items(id) ON DELETE CASCADE,
+    note TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, menu_item_id)
+);
+CREATE INDEX IF NOT EXISTS idx_wishlists_user ON wishlists(user_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS recently_viewed (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    session_key VARCHAR(80),
+    item_type VARCHAR(40) NOT NULL CHECK (item_type IN ('restaurant', 'menu_item')),
+    item_id UUID NOT NULL,
+    viewed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_recently_viewed_user ON recently_viewed(user_id, viewed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_recently_viewed_session ON recently_viewed(session_key, viewed_at DESC);
+
+CREATE TABLE IF NOT EXISTS referral_codes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+    code VARCHAR(40) NOT NULL UNIQUE,
+    reward_points INTEGER NOT NULL DEFAULT 100,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS referral_redemptions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    referral_code_id UUID NOT NULL REFERENCES referral_codes(id) ON DELETE CASCADE,
+    referrer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    referee_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+    status VARCHAR(40) NOT NULL DEFAULT 'credited',
+    points_awarded INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS gift_cards (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code VARCHAR(40) NOT NULL UNIQUE,
+    initial_balance NUMERIC(12,2) NOT NULL,
+    balance NUMERIC(12,2) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'INR',
+    purchaser_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    recipient_email VARCHAR(255),
+    status VARCHAR(40) NOT NULL DEFAULT 'active',
+    expires_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS gift_card_transactions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    gift_card_id UUID NOT NULL REFERENCES gift_cards(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    order_id UUID,
+    amount NUMERIC(12,2) NOT NULL,
+    tx_type VARCHAR(40) NOT NULL DEFAULT 'redeem',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS restaurant_collections (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    slug VARCHAR(120) NOT NULL UNIQUE,
+    title VARCHAR(160) NOT NULL,
+    description TEXT,
+    image_url TEXT,
+    filter_query JSONB DEFAULT '{}'::jsonb,
+    is_active BOOLEAN DEFAULT TRUE,
+    sort_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS collection_restaurants (
+    collection_id UUID NOT NULL REFERENCES restaurant_collections(id) ON DELETE CASCADE,
+    restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+    sort_order INTEGER DEFAULT 0,
+    PRIMARY KEY (collection_id, restaurant_id)
+);
+
+CREATE TABLE IF NOT EXISTS seasonal_campaigns (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    slug VARCHAR(120) NOT NULL UNIQUE,
+    title VARCHAR(160) NOT NULL,
+    subtitle TEXT,
+    banner_url TEXT,
+    offer_code VARCHAR(60),
+    starts_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    ends_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    meta JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_seasonal_campaigns_window
+  ON seasonal_campaigns(is_active, starts_at, ends_at);
+
+CREATE TABLE IF NOT EXISTS product_feature_flags (
+    key VARCHAR(80) PRIMARY KEY,
+    enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    rollout_percent INTEGER NOT NULL DEFAULT 100
+      CHECK (rollout_percent >= 0 AND rollout_percent <= 100),
+    description TEXT,
+    meta JSONB DEFAULT '{}'::jsonb,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE addresses
+  ADD COLUMN IF NOT EXISTS lat NUMERIC(10,7),
+  ADD COLUMN IF NOT EXISTS lng NUMERIC(10,7);
+
+ALTER TABLE order_tracking
+  ADD COLUMN IF NOT EXISTS eta_minutes INTEGER,
+  ADD COLUMN IF NOT EXISTS eta_source VARCHAR(40) DEFAULT 'haversine';
+

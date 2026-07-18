@@ -12,6 +12,13 @@ const BASE = process.env.BASE_URL || 'http://127.0.0.1:4000';
 
 const V1 = [
   { path: '/api/health', expect: [200], name: 'v1_health' },
+  { path: '/api/v1/health', expect: [200], name: 'v3_public_api_health' },
+  { path: '/api/v4/health', expect: [200], name: 'v4_public_api_health' },
+  { path: '/api/v4/i18n/messages?locale=en', expect: [200], name: 'v4_i18n' },
+  { path: '/api/v4/marketplace', expect: [200], name: 'v4_marketplace' },
+  { path: '/api/admin/v4/bi/enterprise', expect: [401, 403], name: 'v4_admin_bi_auth' },
+  { path: '/api/v1/branding?host=localhost', expect: [200], name: 'v3_branding' },
+  { path: '/api/admin/v3/bi', expect: [401, 403], name: 'v3_admin_bi_auth' },
   { path: '/api/restaurants?limit=1', expect: [200, 500], name: 'v1_restaurants' },
   { path: '/api/menu-items?limit=1', expect: [200, 400, 404, 500], name: 'v1_menu' },
   { path: '/api/cart', expect: [401, 403], name: 'v1_cart_auth' },
@@ -24,6 +31,7 @@ const V2 = [
   { path: '/api/bugs', method: 'POST', expect: [201, 400, 401, 429], name: 'v2_bugs' },
   { path: '/api/admin/feedback', expect: [401, 403], name: 'v2_admin_feedback' },
   { path: '/api/admin/bugs', expect: [401, 403], name: 'v2_admin_bugs' },
+  { path: '/api/admin/bugs/weekly-report', expect: [401, 403], name: 'v2_admin_bugs_weekly' },
   { path: '/api/admin/reviews', expect: [401, 403], name: 'v2_admin_reviews' },
   { path: '/api/admin/maintenance/health', expect: [401, 403], name: 'v2_maintenance' },
   { path: '/api/admin/analytics/reviews', expect: [401, 403], name: 'v2_review_analytics' },

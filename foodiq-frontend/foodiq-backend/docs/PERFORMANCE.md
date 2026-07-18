@@ -75,11 +75,12 @@ Vacuum: rely on Postgres autovacuum; for large tables schedule weekly `VACUUM (A
 
 ## Frontend
 
-- `next.config.ts`: `compress`, AVIF/WebP, long-cache headers, `optimizePackageImports` for lucide/framer-motion
+- `next.config.ts`: `compress`, AVIF/WebP, long-cache headers, public page `s-maxage`, `optimizePackageImports` for lucide/framer-motion
 - Font `display: "swap"` + preload
 - `SafeImage` responsive `sizes` + lazy loading
 - Push notifications loaded dynamically
-- Helper: `components/perf/DynamicShells.tsx` for optional shell code-splitting
+- Admin/Delivery shells already dynamic-import their heavy inners
+- Orders/notifications SWR polling pauses when the tab is hidden
 
 ## Socket.IO
 
@@ -91,7 +92,8 @@ Vacuum: rely on Postgres autovacuum; for large tables schedule weekly `VACUUM (A
 
 ```bash
 cd foodiq-frontend/foodiq-backend
-node scripts/load-test.js
+npm run perf:load
+npm run perf:stress
 # CONCURRENCY=100 REQUESTS=10000 BASE_URL=http://localhost:4000 node scripts/load-test.js
 ```
 
@@ -105,7 +107,7 @@ PERF_LOADTEST_BYPASS=true RATE_LIMIT_API_MAX=100000 node server.js
 
 Reports JSON: RPS, p50/p95/p99 latency, status codes, pass/fail vs 200ms p95.
 
-Full write-up: [PERFORMANCE_REPORT.md](./PERFORMANCE_REPORT.md).
+Full write-up: [PERFORMANCE_REPORT.md](./PERFORMANCE_REPORT.md) and root `docs/PRODUCTION_PERFORMANCE_REPORT.md`.
 
 ## Memory leak probe
 

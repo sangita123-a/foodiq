@@ -30,6 +30,9 @@ const getPublicHealth = async (_req, res) => {
       database: bundle.services?.database?.status,
       uptime_sec: bundle.process?.uptime_sec,
       timestamp: bundle.timestamp,
+      region: process.env.FOOIQ_REGION || process.env.AWS_REGION || 'local',
+      market_default: process.env.DEFAULT_MARKET_CODE || 'IN-KA-BLR',
+      version: process.env.npm_package_version || '3.0.0',
     });
   } catch (error) {
     return res.status(503).json({
@@ -153,6 +156,7 @@ const getErrors = async (req, res) => {
 const postClientError = async (req, res) => {
   try {
     const { message, stack, path: pagePath, meta } = req.body || {};
+    const ua = req.get('user-agent') || null;
     await trackError({
       source: 'frontend',
       type: 'exception',
@@ -162,7 +166,12 @@ const postClientError = async (req, res) => {
       method: 'CLIENT',
       userId: req.user?.id || null,
       requestId: req.requestId,
-      meta: meta || {},
+      meta: {
+        ...(meta || {}),
+        user_agent: ua,
+        browser: meta?.browser || undefined,
+        device: meta?.device || undefined,
+      },
     });
     return ok(res, 'Error recorded');
   } catch (error) {

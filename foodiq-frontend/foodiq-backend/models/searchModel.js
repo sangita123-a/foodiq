@@ -40,4 +40,53 @@ const globalSearch = async (searchTerm) => {
   return rows;
 };
 
-module.exports = { globalSearch };
+/**
+ * Lightweight autosuggest — prefix-biased, capped.
+ */
+const suggestSearch = async (searchTerm, limit = 8) => {
+  const q = String(searchTerm || '').trim();
+  if (!q || q.length < 2) return [];
+  const lim = Math.min(Number(limit) || 8, 15);
+  const prefix = `${q}%`;
+  const contains = `%${q}%`;
+
+  const { rows } = await pool.query(
+    `
+    (
+      SELECT 'restaurant' AS type, r.id, r.name, r.image_url,
+             r.rating::text AS subtitle, 1 AS rank_group
+      FROM restaurants r
+      WHERE r.is_active = TRUE AND (r.name ILIKE $1 OR r.name ILIKE $2)
+      ORDER BY CASE WHEN r.name ILIKE $1 THEN 0 ELSE 1 END, r.rating DESC NULLS LAST
+      LIMIT $3
+    )
+    UNION ALL
+    (
+      SELECT 'menu_item' AS type, m.id, m.name, m.image_url,
+             r.name AS subtitle, 2 AS rank_group
+      FROM menu_items m
+      JOIN restaurants r ON r.id = m.restaurant_id
+      WHERE r.is_active = TRUE
+        AND (m.is_available IS NULL OR m.is_available = TRUE)
+        AND (m.name ILIKE $1 OR m.name ILIKE $2)
+      ORDER BY CASE WHEN m.name ILIKE $1 THEN 0 ELSE 1 END, m.rating DESC NULLS LAST
+      LIMIT $3
+    )
+    UNION ALL
+    (
+      SELECT 'cuisine' AS type, c.id, c.name, c.image_url,
+             c.slug AS subtitle, 3 AS rank_group
+      FROM restaurant_categories c
+      WHERE c.name ILIKE $1 OR c.name ILIKE $2 OR c.slug ILIKE $1
+      ORDER BY CASE WHEN c.name ILIKE $1 THEN 0 ELSE 1 END
+      LIMIT $3
+    )
+    ORDER BY rank_group, name
+    LIMIT $3
+    `,
+    [prefix, contains, lim]
+  );
+  return rows;
+};
+
+module.exports = { globalSearch, suggestSearch };

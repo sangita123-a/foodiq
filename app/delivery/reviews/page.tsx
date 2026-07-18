@@ -13,23 +13,34 @@ type ReviewRow = {
   created_at?: string;
 };
 
+const PAGE = 20;
+
 export default function DeliveryReviewsPage() {
   const [rating, setRating] = useState<number | null>(null);
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      setLoading(true);
       try {
-        const res = await api.get("/api/delivery/me/reviews");
-        if (cancelled) return;
-        setRating(
-          res.data?.data?.rating != null
-            ? Number(res.data.data.rating)
-            : null
+        const res = await api.get(
+          `/api/delivery/me/reviews?limit=${PAGE}&offset=${page * PAGE}`
         );
-        setReviews(res.data?.data?.reviews || []);
+        if (cancelled) return;
+        const data = res.data?.data;
+        setRating(
+          data?.rating != null
+            ? Number(data.rating)
+            : data?.avg_rating != null
+              ? Number(data.avg_rating)
+              : null
+        );
+        setReviews(data?.reviews || []);
+        setTotal(Number(data?.total) || 0);
       } catch (e) {
         console.error(e);
       } finally {
@@ -39,7 +50,9 @@ export default function DeliveryReviewsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [page]);
+
+  const pages = Math.max(1, Math.ceil(total / PAGE));
 
   return (
     <DeliveryShell>
@@ -60,6 +73,7 @@ export default function DeliveryReviewsPage() {
             <p className="text-3xl font-black text-[#111827]">
               {rating != null ? rating.toFixed(1) : "—"}
             </p>
+            <p className="text-xs text-[#9CA3AF] mt-1">{total} reviews</p>
           </div>
         </div>
 
@@ -92,6 +106,29 @@ export default function DeliveryReviewsPage() {
                 </li>
               ))}
             </ul>
+          )}
+          {total > PAGE && (
+            <div className="flex justify-between gap-2 px-5 py-4 border-t border-[#E5E7EB]">
+              <button
+                type="button"
+                disabled={page <= 0}
+                onClick={() => setPage((p) => p - 1)}
+                className="text-xs font-bold border border-[#E5E7EB] px-3 py-1.5 rounded-lg disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <span className="text-xs text-[#6B7280]">
+                Page {page + 1} / {pages}
+              </span>
+              <button
+                type="button"
+                disabled={page + 1 >= pages}
+                onClick={() => setPage((p) => p + 1)}
+                className="text-xs font-bold border border-[#E5E7EB] px-3 py-1.5 rounded-lg disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
           )}
         </div>
       </div>

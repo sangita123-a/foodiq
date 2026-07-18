@@ -22,6 +22,9 @@ export default function FilterSidebar() {
   const currentRating = searchParams.get("rating") || "";
   const currentTime = searchParams.get("delivery_time") || "";
   const currentPrice = searchParams.get("price_range") || "";
+  const isVeg = searchParams.get("is_veg") === "true";
+  const offersOnly = searchParams.get("offers_only") === "true";
+  const sort = searchParams.get("sort") || "";
 
   const updateFilter = (key: string, value: string, toggle: boolean = false) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -176,7 +179,86 @@ export default function FilterSidebar() {
         </div>
       </div>
 
+      <div className="mb-8">
+        <h4 className="text-[#111827] font-semibold mb-4 text-lg">More</h4>
+        <div className="flex flex-col gap-3">
+          <label
+            className="flex items-center gap-3 cursor-pointer group"
+            onClick={(e) => {
+              e.preventDefault();
+              updateFilter("is_veg", "true");
+            }}
+          >
+            <div
+              className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                isVeg
+                  ? "bg-[var(--color-primary)] border-[var(--color-primary)]"
+                  : "border-[#D1D5DB]"
+              }`}
+            >
+              {isVeg && (
+                <svg className="w-3 h-3 text-[#111827]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </div>
+            <span className={isVeg ? "text-[#111827]" : "text-[var(--color-gray-text)]"}>
+              Pure veg
+            </span>
+          </label>
+          <label
+            className="flex items-center gap-3 cursor-pointer group"
+            onClick={(e) => {
+              e.preventDefault();
+              updateFilter("offers_only", "true");
+            }}
+          >
+            <div
+              className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                offersOnly
+                  ? "bg-[var(--color-primary)] border-[var(--color-primary)]"
+                  : "border-[#D1D5DB]"
+              }`}
+            >
+              {offersOnly && (
+                <svg className="w-3 h-3 text-[#111827]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </div>
+            <span className={offersOnly ? "text-[#111827]" : "text-[var(--color-gray-text)]"}>
+              Offers only
+            </span>
+          </label>
+        </div>
+      </div>
+
       <div className="h-px w-full bg-[#E5E7EB] mb-8" />
+
+      <div className="mb-8">
+        <h4 className="text-[#111827] font-semibold mb-4 text-lg">Sort</h4>
+        <div className="flex flex-col gap-2">
+          {[
+            { label: "Rating", value: "rating" },
+            { label: "Delivery time", value: "delivery_time" },
+            { label: "Price: low to high", value: "price_low" },
+            { label: "Newest", value: "newest" },
+          ].map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => updateFilter("sort", opt.value)}
+              className={`text-left text-sm py-1.5 ${
+                sort === opt.value
+                  ? "text-[var(--color-primary)] font-bold"
+                  : "text-[var(--color-gray-text)]"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div>
         <h4 className="text-[#111827] font-semibold mb-4 text-lg">Price</h4>

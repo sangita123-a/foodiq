@@ -28,7 +28,15 @@ const getKeyId = () => {
 
 const getSecret = () => {
   if (isMockMode()) {
-    return process.env.RAZORPAY_KEY_SECRET || process.env.JWT_SECRET || 'foodiq_razorpay_mock_secret';
+    // Never fall back to a hardcoded secret — use JWT_SECRET only if explicitly mock
+    const secret = process.env.RAZORPAY_KEY_SECRET || process.env.JWT_SECRET;
+    if (!secret && process.env.NODE_ENV === 'production') {
+      throw new Error('RAZORPAY_KEY_SECRET required (or disable mock payments)');
+    }
+    return secret || 'dev_mock_only_not_for_production';
+  }
+  if (!process.env.RAZORPAY_KEY_SECRET) {
+    throw new Error('RAZORPAY_KEY_SECRET is required when Razorpay mock is disabled');
   }
   return process.env.RAZORPAY_KEY_SECRET;
 };

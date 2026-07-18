@@ -6,7 +6,7 @@ const {
   deleteCategory,
 } = require('../models/restaurantCategoryModel');
 const cache = require('../services/cacheService');
-const { invalidateCatalog } = require('../middleware/cacheMiddleware');
+const { invalidateCatalog, setCatalogHttpCache } = require('../middleware/cacheMiddleware');
 
 const getAll = async (req, res) => {
   try {
@@ -16,7 +16,7 @@ const getAll = async (req, res) => {
       Number(process.env.CACHE_TTL_CATEGORIES || 300),
       () => getCategories()
     );
-    res.setHeader('X-Cache', status);
+    setCatalogHttpCache(res, status);
     res.json({ success: true, message: 'Categories retrieved', data: categories });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });

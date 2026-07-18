@@ -3,9 +3,23 @@
  */
 const cache = require('../services/cacheService');
 
-const sendCached = (res, payload, cacheStatus) => {
+/** CDN-friendly defaults for public catalog JSON (no auth cookies required). */
+const PUBLIC_CATALOG_CACHE =
+  process.env.CACHE_CONTROL_PUBLIC ||
+  'public, max-age=30, s-maxage=60, stale-while-revalidate=120';
+
+const setCatalogHttpCache = (res, cacheStatus = 'MISS', { public: isPublic = true } = {}) => {
   res.setHeader('X-Cache', cacheStatus || 'MISS');
-  res.setHeader('Cache-Control', 'private, max-age=0, must-revalidate');
+  if (isPublic) {
+    res.setHeader('Cache-Control', PUBLIC_CATALOG_CACHE);
+    res.setHeader('Vary', 'Accept-Encoding');
+  } else {
+    res.setHeader('Cache-Control', 'private, max-age=0, must-revalidate');
+  }
+};
+
+const sendCached = (res, payload, cacheStatus, opts) => {
+  setCatalogHttpCache(res, cacheStatus, opts);
   return res.json(payload);
 };
 
@@ -30,11 +44,15 @@ const invalidateCatalog = async () => {
     cache.invalidatePattern('offers:'),
     cache.invalidatePattern('cuisines:'),
     cache.invalidatePattern('live_deals:'),
+    cache.invalidatePattern('search:'),
+    cache.invalidatePattern('suggest:'),
+    cache.invalidatePattern('collections:'),
   ]);
 };
 
 module.exports = {
   sendCached,
+  setCatalogHttpCache,
   withCacheHeaders,
   invalidateCatalog,
 };

@@ -71,11 +71,18 @@ const update = async (req, res) => {
     if (review.user_id !== req.user.id && req.user.role !== 'admin') {
       return fail(res, 403, 'Not authorized to modify this review');
     }
+    if (req.body.rating != null) {
+      const n = Number(req.body.rating);
+      if (!Number.isFinite(n) || n < 1 || n > 5) {
+        return fail(res, 400, 'rating must be between 1 and 5');
+      }
+    }
 
     const updatedReview = await updateReview(id, req.body);
     await updateRestaurantRating(updatedReview.restaurant_id);
     return ok(res, 'Review updated', updatedReview);
   } catch (error) {
+    if (error.status === 400) return fail(res, 400, error.message);
     return fail(res, 500, 'Server Error', error);
   }
 };

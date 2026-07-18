@@ -223,8 +223,34 @@ const prepareCheckout = async (userId, body) => {
   if (normalizedCode === 'FREEDEL' && couponId) {
     deliveryCharge = 0;
   }
-  const tax = subtotal * 0.05;
-  const totalAmount = subtotal + deliveryCharge + tax - discount;
+  const taxResult = await require('./taxEngine')
+    .calculateTax(subtotal, { countryCode: 'IN' })
+    .catch(() => ({ tax: subtotal * 0.05, rate: 0.05, enabled: false }));
+  const tax = taxResult.tax;
+  let totalAmount = subtotal + deliveryCharge + tax - discount;
+
+  // V3 pricing engine (off by default — identical to V2 when disabled)
+  let marketId = null;
+  let currency = 'INR';
+  let pricingMultiplier = 1;
+  try {
+    const { resolveMultiplier, applyToAmount } = require('./pricingEngine');
+    const { getCheckoutCurrency } = require('./currencyService');
+    const restRow = await pool.query(
+      `SELECT market_id, organization_id FROM restaurants WHERE id = $1 LIMIT 1`,
+      [restaurantId]
+    );
+    marketId = restRow.rows[0]?.market_id || null;
+    const organizationId = restRow.rows[0]?.organization_id || null;
+    const pricing = await resolveMultiplier({ marketId, organizationId });
+    pricingMultiplier = pricing.multiplier || 1;
+    if (pricing.enabled && pricingMultiplier > 1) {
+      totalAmount = applyToAmount(totalAmount, pricingMultiplier);
+    }
+    currency = await getCheckoutCurrency(marketId);
+  } catch {
+    /* keep V2 totals */
+  }
 
   return {
     cart,
@@ -239,6 +265,9 @@ const prepareCheckout = async (userId, body) => {
     deliveryCharge,
     tax,
     totalAmount,
+    market_id: marketId,
+    currency,
+    pricing_multiplier: pricingMultiplier,
     delivery_instructions: delivery_instructions || null,
     delivery_mode: delivery_mode === 'Schedule' ? 'Schedule' : 'Now',
     scheduled_for:
@@ -269,9 +298,9 @@ const commitCheckoutOrder = async (userId, prepared, paymentMeta = {}, client = 
     INSERT INTO orders (
       user_id, restaurant_id, delivery_address_id, coupon_id, offer_id, status,
       subtotal, discount_amount, delivery_fee, total_amount, delivery_instructions,
-      delivery_mode, scheduled_for
+      delivery_mode, scheduled_for, market_id, currency
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
     RETURNING *
   `;
   const orderValues = [
@@ -288,6 +317,8 @@ const commitCheckoutOrder = async (userId, prepared, paymentMeta = {}, client = 
     prepared.delivery_instructions,
     prepared.delivery_mode,
     prepared.scheduled_for,
+    prepared.market_id || null,
+    prepared.currency || 'INR',
   ];
 
   const { rows: orderRows } = await client.query(orderQuery, orderValues);
@@ -339,7 +370,7 @@ const commitCheckoutOrder = async (userId, prepared, paymentMeta = {}, client = 
       razorpay_order_id: paymentMeta.razorpay_order_id || null,
       razorpay_payment_id: paymentMeta.razorpay_payment_id || null,
       razorpay_signature: paymentMeta.razorpay_signature || null,
-      currency: paymentMeta.currency || 'INR',
+      currency: prepared.currency || paymentMeta.currency || 'INR',
       transaction_time: paymentMeta.transaction_time || new Date(),
     },
     client
