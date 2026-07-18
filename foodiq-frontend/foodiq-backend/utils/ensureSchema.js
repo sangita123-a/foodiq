@@ -221,11 +221,11 @@ async function ensureSchema() {
     await q(`
       ALTER TABLE menu_items
         ALTER COLUMN image_url TYPE TEXT
-    `).catch(() => {});
+    `);
     await q(`
       ALTER TABLE restaurants
         ALTER COLUMN image_url TYPE TEXT
-    `).catch(() => {});
+    `);
 
     await q(`
       ALTER TABLE users
@@ -474,7 +474,7 @@ async function ensureSchema() {
     await q(`
       ALTER TABLE users
         ALTER COLUMN profile_image_url TYPE TEXT
-    `).catch(() => {});
+    `);
 
     await q(`
       ALTER TABLE delivery_partners
@@ -599,10 +599,10 @@ async function ensureSchema() {
     await q(`
       CREATE UNIQUE INDEX IF NOT EXISTS idx_reviews_user_order
         ON reviews(user_id, order_id) WHERE order_id IS NOT NULL
-    `).catch(() => {});
+    `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_reviews_order ON reviews(order_id)
-    `).catch(() => {});
+    `);
 
     await q(`
       CREATE TABLE IF NOT EXISTS delivery_reviews (
@@ -748,39 +748,39 @@ async function ensureSchema() {
     await q(`
       CREATE INDEX IF NOT EXISTS idx_offers_active_valid
         ON offers(is_active, valid_until)
-    `).catch(() => {});
+    `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_order_items_order
         ON order_items(order_id)
-    `).catch(() => {});
+    `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_order_items_menu
         ON order_items(menu_item_id)
-    `).catch(() => {});
+    `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_offers_slug
         ON offers(slug)
-    `).catch(() => {});
+    `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_offer_items_offer
         ON offer_items(offer_id)
-    `).catch(() => {});
+    `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_offer_restaurants_offer
         ON offer_restaurants(offer_id)
-    `).catch(() => {});
+    `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_addresses_user
         ON addresses(user_id)
-    `).catch(() => {});
+    `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_coupons_code
         ON coupons(code)
-    `).catch(() => {});
+    `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_delivery_partners_user
         ON delivery_partners(user_id)
-    `).catch(() => {});
+    `);
     try {
       await q(`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
       await q(`
@@ -797,7 +797,7 @@ async function ensureSchema() {
     await q(`
       CREATE INDEX IF NOT EXISTS idx_payments_user_created
         ON payments(user_id, created_at DESC)
-    `).catch(() => {});
+    `);
 
     // Monitoring / security tables
     await q(`
@@ -917,7 +917,7 @@ async function ensureSchema() {
         last_active TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
-    `).catch(() => {});
+    `);
 
     await q(`
       CREATE TABLE IF NOT EXISTS login_history (
@@ -929,7 +929,7 @@ async function ensureSchema() {
         status VARCHAR(50) DEFAULT 'success',
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
-    `).catch(() => {});
+    `);
 
     // ========== Foodiq 3.0 — Business Scaling foundation ==========
     await q(`
@@ -1598,7 +1598,7 @@ async function ensureSchema() {
     await q(`
       ALTER TABLE orders
         ADD COLUMN IF NOT EXISTS delivery_partner_id UUID REFERENCES delivery_partners(id) ON DELETE SET NULL
-    `).catch(() => {});
+    `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC)
     `);
