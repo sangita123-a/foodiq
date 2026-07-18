@@ -16,24 +16,36 @@ async function ensureProductionCatalog() {
   let restaurants = 0;
   let dishes = 0;
   try {
-    const r = await pool.query(
-      `SELECT COUNT(*)::int AS c FROM restaurants WHERE is_active = TRUE`
-    );
+    const r = await pool.query(`SELECT COUNT(*)::int AS c FROM restaurants`);
     restaurants = r.rows[0]?.c || 0;
-    const m = await pool.query(
-      `SELECT COUNT(*)::int AS c FROM menu_items WHERE is_available = TRUE`
-    );
+    const m = await pool.query(`SELECT COUNT(*)::int AS c FROM menu_items`);
     dishes = m.rows[0]?.c || 0;
   } catch (err) {
     console.warn('[CATALOG] Could not count catalog rows:', err.message);
-    return { seeded: false, reason: 'count_failed', error: err.message };
+    throw new Error(`Catalog count failed: ${err.message}`);
   }
 
-  if (restaurants > 0 && dishes > 0) {
+  const active = await pool.query(
+    `SELECT COUNT(*)::int AS c FROM restaurants WHERE COALESCE(is_active, TRUE) = TRUE`
+  ).catch(() => ({ rows: [{ c: restaurants }] }));
+  const activeRestaurants = active.rows[0]?.c || 0;
+  const availableDishes = await pool
+    .query(
+      `SELECT COUNT(*)::int AS c FROM menu_items WHERE COALESCE(is_available, TRUE) = TRUE`
+    )
+    .catch(() => ({ rows: [{ c: dishes }] }));
+  const activeDishes = availableDishes.rows[0]?.c || 0;
+
+  if (activeRestaurants > 0 && activeDishes > 0) {
     console.log(
-      `[CATALOG] Catalog ready (${restaurants} restaurants, ${dishes} dishes) — skip seed`
+      `[CATALOG] Catalog ready (${activeRestaurants} active restaurants, ${activeDishes} dishes) — skip seed`
     );
-    return { seeded: false, reason: 'already_populated', restaurants, dishes };
+    return {
+      seeded: false,
+      reason: 'already_populated',
+      restaurants: activeRestaurants,
+      dishes: activeDishes,
+    };
   }
 
   console.log(

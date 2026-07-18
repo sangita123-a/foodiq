@@ -94,6 +94,7 @@ async function main() {
     const missing = REQUIRED_TABLES.filter((t) => !present.has(t));
     if (missing.length) {
       console.error('[verify-schema] Missing tables:', missing.join(', '));
+      console.error('[verify-schema] Present table count:', present.size);
       process.exitCode = 1;
       return;
     }
