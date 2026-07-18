@@ -2,6 +2,7 @@ const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
@@ -221,6 +222,33 @@ app.use('/api/media', require('./routes/mediaRoutes'));
 app.use('/api/monitoring', require('./routes/monitoringRoutes'));
 app.use('/api/features', require('./routes/featureRoutes'));
 app.use('/api/analytics', require('./routes/analyticsBiRoutes'));
+
+// ─── Static: catalog images ───────────────────────────────────────────────
+// Path is resolved relative to __dirname so it works regardless of CWD.
+// On Render the service rootDir is foodiq-frontend/foodiq-backend, so
+// __dirname === /opt/render/project/src and the images sit under
+// __dirname/public/images/catalog/{restaurants,dishes,cuisines,logos}.
+const imagesPath = path.resolve(__dirname, 'public', 'images');
+
+log.info('[static] imagesPath resolved', { imagesPath });
+log.info('[static] imagesPath exists', { exists: fs.existsSync(imagesPath) });
+try {
+  log.info('[static] imagesPath contents', { entries: fs.readdirSync(imagesPath) });
+} catch (err) {
+  log.warn('[static] cannot read imagesPath', { error: err.message });
+}
+
+app.use(
+  '/images',
+  express.static(imagesPath, {
+    maxAge: '30d',
+    immutable: false,
+    fallthrough: false,
+    setHeaders(res) {
+      res.setHeader('Cache-Control', 'public, max-age=2592000');
+    },
+  })
+);
 
 app.use(
   '/media-files',
