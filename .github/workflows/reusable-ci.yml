@@ -149,7 +149,13 @@ jobs:
       - name: Verify schema
         run: |
           unset DATABASE_URL || true
-          npm run db:verify
+          if ! npm run db:verify; then
+            echo "=== DEBUG: public tables ==="
+            PGPASSWORD=foodiq psql -h localhost -U foodiq -d foodiq -c "\dt public.*" || true
+            echo "=== DEBUG: required column probe ==="
+            PGPASSWORD=foodiq psql -h localhost -U foodiq -d foodiq -c "SELECT table_name, column_name FROM information_schema.columns WHERE table_schema='public' AND (table_name, column_name) IN (('reviews','status'),('reviews','admin_reply'),('contact_messages','reason'),('contact_messages','phone'),('restaurants','organization_id'),('restaurants','market_id'),('orders','market_id'),('orders','currency'),('audit_logs','organization_id'),('audit_logs','actor_type'),('bug_reports','fingerprint')) ORDER BY 1,2;" || true
+            exit 1
+          fi
 
       - name: Start API
         if: inputs.run_api_smoke
