@@ -95,11 +95,12 @@ async function main() {
     if (missing.length) {
       console.error('[verify-schema] Missing tables:', missing.join(', '));
       console.error('[verify-schema] Present table count:', present.size);
+      console.error(`::error title=Missing tables::${missing.join(', ')}`);
       process.exitCode = 1;
       return;
     }
 
-    const missing = [];
+    const missingCols = [];
     for (const { table, column } of REQUIRED_COLUMNS) {
       const col = await client.query(
         `SELECT 1 FROM information_schema.columns
@@ -107,11 +108,12 @@ async function main() {
         [table, column]
       );
       if (!col.rows[0]) {
-        missing.push(`${table}.${column}`);
+        missingCols.push(`${table}.${column}`);
       }
     }
-    if (missing.length) {
-      console.error('[verify-schema] Missing columns:', missing.join(', '));
+    if (missingCols.length) {
+      console.error('[verify-schema] Missing columns:', missingCols.join(', '));
+      console.error(`::error title=Missing columns::${missingCols.join(', ')}`);
       process.exitCode = 1;
       return;
     }

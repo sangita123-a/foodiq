@@ -34,8 +34,8 @@ function splitSqlStatements(sql) {
 /**
  * Applies database/schema.sql (idempotent CREATE IF NOT EXISTS).
  * Must run before ensureSchema ALTERs on a fresh Postgres.
- * On partially-migrated DBs, falls back to per-statement apply so missing
- * columns don't abort the whole migrate (ensureSchema fills gaps next).
+ * On partially-migrated DBs, falls back to multi-pass per-statement apply
+ * so forward FK dependencies can succeed after parents exist.
  */
 async function applyBaseSchema(client) {
   const schemaPath = path.join(__dirname, '..', 'database', 'schema.sql');
@@ -52,23 +52,26 @@ async function applyBaseSchema(client) {
       console.warn(
         '[SCHEMA] Bulk schema apply failed (' +
           err.message +
-          ') — retrying statement-by-statement'
+          ') — retrying statement-by-statement (3 passes)'
       );
     }
 
     const statements = splitSqlStatements(sql);
     let applied = 0;
     let skipped = 0;
-    for (const statement of statements) {
-      try {
-        await runner.query(statement);
-        applied += 1;
-      } catch (err) {
-        skipped += 1;
-        if (process.env.SCHEMA_VERBOSE === 'true') {
-          console.warn('[SCHEMA] skip:', err.message.slice(0, 160));
+    for (let pass = 1; pass <= 3; pass += 1) {
+      let passApplied = 0;
+      for (const statement of statements) {
+        try {
+          await runner.query(statement);
+          applied += 1;
+          passApplied += 1;
+        } catch {
+          skipped += 1;
         }
       }
+      console.log(`[SCHEMA] Base schema pass ${pass}: ok≈${passApplied}`);
+      if (passApplied === 0) break;
     }
     console.log(
       `[SCHEMA] Base schema partial apply complete (ok=${applied}, skipped=${skipped})`
