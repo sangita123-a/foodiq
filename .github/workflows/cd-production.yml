@@ -1,13 +1,9 @@
 name: Production Deploy
 
-# Runs only after Continuous Integration succeeds on main / master / production.
-# Configure Environment "production" with required reviewers for approval.
+# Manual deploy + auto-deploy after green CI on main.
+# Configure Environment "production" secrets: VERCEL_*, RENDER_*
 
 on:
-  workflow_run:
-    workflows: ["Continuous Integration"]
-    types: [completed]
-    branches: [main, master, production]
   workflow_dispatch:
     inputs:
       skip_deploy:
@@ -18,6 +14,10 @@ on:
         description: Optional git SHA/tag to deploy (default: current branch tip)
         required: false
         type: string
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    types: [completed]
+    branches: [main, master, production]
 
 concurrency:
   group: deploy-production
@@ -31,7 +31,7 @@ jobs:
   deploy:
     name: Deploy Production (Vercel + Render)
     if: >
-      (github.event_name == 'workflow_dispatch' && !inputs.skip_deploy) ||
+      (github.event_name == 'workflow_dispatch' && inputs.skip_deploy != true) ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     environment:
