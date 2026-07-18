@@ -954,6 +954,25 @@ CREATE TABLE IF NOT EXISTS privacy_requests (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP WITH TIME ZONE
 );
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    role VARCHAR(40),
+    action VARCHAR(120) NOT NULL,
+    category VARCHAR(60) DEFAULT 'general',
+    resource_type VARCHAR(60),
+    resource_id VARCHAR(120),
+    status VARCHAR(30) DEFAULT 'success',
+    message TEXT,
+    ip_address VARCHAR(100),
+    device VARCHAR(40),
+    browser VARCHAR(60),
+    user_agent TEXT,
+    meta JSONB DEFAULT '{}'::jsonb,
+    organization_id UUID,
+    actor_type VARCHAR(40) DEFAULT 'user',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
 ALTER TABLE audit_logs
   ADD COLUMN IF NOT EXISTS organization_id UUID,
   ADD COLUMN IF NOT EXISTS actor_type VARCHAR(40) DEFAULT 'user';

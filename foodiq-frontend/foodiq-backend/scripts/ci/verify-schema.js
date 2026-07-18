@@ -98,6 +98,7 @@ async function main() {
       return;
     }
 
+    const missing = [];
     for (const { table, column } of REQUIRED_COLUMNS) {
       const col = await client.query(
         `SELECT 1 FROM information_schema.columns
@@ -105,10 +106,13 @@ async function main() {
         [table, column]
       );
       if (!col.rows[0]) {
-        console.error(`[verify-schema] Missing column ${table}.${column}`);
-        process.exitCode = 1;
-        return;
+        missing.push(`${table}.${column}`);
       }
+    }
+    if (missing.length) {
+      console.error('[verify-schema] Missing columns:', missing.join(', '));
+      process.exitCode = 1;
+      return;
     }
 
     console.log(

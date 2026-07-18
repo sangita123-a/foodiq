@@ -98,6 +98,8 @@ jobs:
       run:
         working-directory: foodiq-frontend/foodiq-backend
     env:
+      # Force CI onto the workflow Postgres service (ignore any repo DATABASE_URL).
+      DATABASE_URL: ""
       DB_HOST: localhost
       DB_PORT: "5432"
       DB_USER: foodiq
@@ -135,14 +137,19 @@ jobs:
 
       - name: Bootstrap schema.sql (baseline)
         run: |
+          unset DATABASE_URL || true
           PGPASSWORD=foodiq psql -v ON_ERROR_STOP=0 -h localhost -U foodiq -d foodiq -f database/schema.sql || true
           echo "schema.sql applied (best-effort); ensureSchema is source of truth for CI"
 
       - name: Run migrations (ensureSchema)
-        run: npm run db:migrate
+        run: |
+          unset DATABASE_URL || true
+          npm run db:migrate
 
       - name: Verify schema
-        run: npm run db:verify
+        run: |
+          unset DATABASE_URL || true
+          npm run db:verify
 
       - name: Start API
         if: inputs.run_api_smoke

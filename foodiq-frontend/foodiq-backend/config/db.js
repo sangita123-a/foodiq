@@ -6,18 +6,18 @@ function buildPoolConfig() {
   const idleTimeoutMillis = Number(process.env.DB_POOL_IDLE_MS || 30000);
   const connectionTimeoutMillis = Number(process.env.DB_POOL_CONNECT_MS || 10000);
 
-  if (process.env.DATABASE_URL) {
+  // Empty DATABASE_URL (e.g. CI override) must fall through to discrete DB_* vars.
+  const databaseUrl = String(process.env.DATABASE_URL || '').trim();
+  if (databaseUrl) {
     const isProd = process.env.NODE_ENV === 'production';
     const needsSsl =
       process.env.DB_SSL === 'true' ||
       (process.env.DB_SSL !== 'false' &&
         (isProd ||
-          /supabase\.co|render\.com|neon\.tech|sslmode=require/i.test(
-            process.env.DATABASE_URL
-          )));
+          /supabase\.co|render\.com|neon\.tech|sslmode=require/i.test(databaseUrl)));
 
     return {
-      connectionString: process.env.DATABASE_URL,
+      connectionString: databaseUrl,
       ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
       max,
       idleTimeoutMillis,
