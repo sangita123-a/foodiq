@@ -28,7 +28,10 @@ async function migrate() {
         ADD COLUMN IF NOT EXISTS timezone VARCHAR(50) DEFAULT 'ist',
         ADD COLUMN IF NOT EXISTS accent_color VARCHAR(20) DEFAULT '#FF2D3B',
         ADD COLUMN IF NOT EXISTS hide_profile BOOLEAN DEFAULT FALSE,
-        ADD COLUMN IF NOT EXISTS data_sharing BOOLEAN DEFAULT TRUE
+        ADD COLUMN IF NOT EXISTS data_sharing BOOLEAN DEFAULT TRUE,
+        ADD COLUMN IF NOT EXISTS sms_notifications BOOLEAN DEFAULT TRUE,
+        ADD COLUMN IF NOT EXISTS marketing_emails BOOLEAN DEFAULT FALSE,
+        ADD COLUMN IF NOT EXISTS notify_order_updates BOOLEAN DEFAULT TRUE
     `);
 
     await client.query(`

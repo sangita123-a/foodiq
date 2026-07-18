@@ -5,10 +5,18 @@ const {
   updateCategory,
   deleteCategory,
 } = require('../models/restaurantCategoryModel');
+const cache = require('../services/cacheService');
+const { invalidateCatalog } = require('../middleware/cacheMiddleware');
 
 const getAll = async (req, res) => {
   try {
-    const categories = await getCategories();
+    const key = cache.cacheKey('categories:all', {});
+    const { data: categories, cache: status } = await cache.wrap(
+      key,
+      Number(process.env.CACHE_TTL_CATEGORIES || 300),
+      () => getCategories()
+    );
+    res.setHeader('X-Cache', status);
     res.json({ success: true, message: 'Categories retrieved', data: categories });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -21,6 +29,7 @@ const create = async (req, res) => {
     if (!name) return res.status(400).json({ success: false, message: 'Name is required', error: {} });
 
     const newCategory = await createCategory({ name, description, image_url });
+    await invalidateCatalog();
     res.status(201).json({ success: true, message: 'Category created', data: newCategory });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -34,6 +43,7 @@ const update = async (req, res) => {
     if (!category) return res.status(404).json({ success: false, message: 'Category not found', error: {} });
 
     const updatedCategory = await updateCategory(id, req.body);
+    await invalidateCatalog();
     res.json({ success: true, message: 'Category updated', data: updatedCategory });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -47,6 +57,7 @@ const remove = async (req, res) => {
     if (!category) return res.status(404).json({ success: false, message: 'Category not found', error: {} });
 
     await deleteCategory(id);
+    await invalidateCatalog();
     res.json({ success: true, message: 'Category deleted', data: {} });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });

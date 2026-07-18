@@ -1,9 +1,9 @@
 const { pool } = require('../config/db');
 
 const SETTINGS_COLUMNS = `
-  user_id, email_notifications, push_notifications, theme, language,
-  notify_orders, notify_offers, notify_rewards, country, currency, timezone,
-  accent_color, hide_profile, data_sharing, created_at, updated_at
+  user_id, email_notifications, push_notifications, sms_notifications, marketing_emails,
+  theme, language, notify_orders, notify_offers, notify_rewards, notify_order_updates,
+  country, currency, timezone, accent_color, hide_profile, data_sharing, created_at, updated_at
 `;
 
 const ensureSettings = async (userId) => {
@@ -33,28 +33,34 @@ const updateSettings = async (req, res) => {
       `UPDATE user_settings SET
         email_notifications = COALESCE($1, email_notifications),
         push_notifications = COALESCE($2, push_notifications),
-        theme = COALESCE($3, theme),
-        language = COALESCE($4, language),
-        notify_orders = COALESCE($5, notify_orders),
-        notify_offers = COALESCE($6, notify_offers),
-        notify_rewards = COALESCE($7, notify_rewards),
-        country = COALESCE($8, country),
-        currency = COALESCE($9, currency),
-        timezone = COALESCE($10, timezone),
-        accent_color = COALESCE($11, accent_color),
-        hide_profile = COALESCE($12, hide_profile),
-        data_sharing = COALESCE($13, data_sharing),
+        sms_notifications = COALESCE($3, sms_notifications),
+        marketing_emails = COALESCE($4, marketing_emails),
+        theme = COALESCE($5, theme),
+        language = COALESCE($6, language),
+        notify_orders = COALESCE($7, notify_orders),
+        notify_offers = COALESCE($8, notify_offers),
+        notify_rewards = COALESCE($9, notify_rewards),
+        notify_order_updates = COALESCE($10, notify_order_updates),
+        country = COALESCE($11, country),
+        currency = COALESCE($12, currency),
+        timezone = COALESCE($13, timezone),
+        accent_color = COALESCE($14, accent_color),
+        hide_profile = COALESCE($15, hide_profile),
+        data_sharing = COALESCE($16, data_sharing),
         updated_at = CURRENT_TIMESTAMP
-       WHERE user_id = $14
+       WHERE user_id = $17
        RETURNING *`,
       [
         typeof b.email_notifications === 'boolean' ? b.email_notifications : null,
         typeof b.push_notifications === 'boolean' ? b.push_notifications : null,
+        typeof b.sms_notifications === 'boolean' ? b.sms_notifications : null,
+        typeof b.marketing_emails === 'boolean' ? b.marketing_emails : null,
         b.theme ?? null,
         b.language ?? null,
         typeof b.notify_orders === 'boolean' ? b.notify_orders : null,
         typeof b.notify_offers === 'boolean' ? b.notify_offers : null,
         typeof b.notify_rewards === 'boolean' ? b.notify_rewards : null,
+        typeof b.notify_order_updates === 'boolean' ? b.notify_order_updates : null,
         b.country ?? null,
         b.currency ?? null,
         b.timezone ?? null,
@@ -70,4 +76,4 @@ const updateSettings = async (req, res) => {
   }
 };
 
-module.exports = { getSettings, updateSettings };
+module.exports = { getSettings, updateSettings, SETTINGS_COLUMNS };

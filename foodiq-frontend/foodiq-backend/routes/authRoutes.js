@@ -8,14 +8,17 @@ const {
   logoutUser,
   forgotPassword,
   resetPassword,
+  refreshAccessToken,
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
+const { authLimiter } = require('../middleware/rateLimiters');
 
-router.post('/register', registerUser);
-router.post('/login', loginUser);
+router.post('/register', authLimiter, registerUser);
+router.post('/login', authLimiter, loginUser);
 router.post('/logout', logoutUser);
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password', resetPassword);
+router.post('/refresh', authLimiter, refreshAccessToken);
+router.post('/forgot-password', authLimiter, forgotPassword);
+router.post('/reset-password', authLimiter, resetPassword);
 router
   .route('/profile')
   .get(protect, getUserProfile)

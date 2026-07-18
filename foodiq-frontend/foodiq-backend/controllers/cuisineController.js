@@ -1,8 +1,15 @@
 const { getAllCuisines, getCuisineBySlug, getCuisineItems } = require('../models/cuisineModel');
+const cache = require('../services/cacheService');
 
 const listCuisines = async (req, res) => {
   try {
-    const cuisines = await getAllCuisines();
+    const key = cache.cacheKey('cuisines:all', {});
+    const { data: cuisines, cache: status } = await cache.wrap(
+      key,
+      Number(process.env.CACHE_TTL_CUISINES || 300),
+      () => getAllCuisines()
+    );
+    res.setHeader('X-Cache', status);
     res.json({ success: true, message: 'Cuisines retrieved', data: cuisines });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });

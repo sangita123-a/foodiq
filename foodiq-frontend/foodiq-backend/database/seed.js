@@ -4,6 +4,7 @@
  * Demo logins (password for all): Password123
  *   - customer@foodiq.com (customer)
  *   - owner@foodiq.com (restaurant_owner)
+ *   - admin@foodiq.com (admin)
  */
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 const bcrypt = require('bcrypt');
@@ -38,12 +39,18 @@ async function seed() {
        VALUES ($1, $2, $3, $4, $5) RETURNING id`,
       ['customer@foodiq.com', passwordHash, 'Jane Customer', '9876543211', 'customer']
     );
+    const adminRes = await client.query(
+      `INSERT INTO users (email, password_hash, full_name, phone_number, role)
+       VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+      ['admin@foodiq.com', passwordHash, 'Foodiq Admin', '9999999999', 'admin']
+    );
     const ownerId = ownerRes.rows[0].id;
     const customerId = customerRes.rows[0].id;
+    const adminId = adminRes.rows[0].id;
 
     await client.query(
-      `INSERT INTO user_settings (user_id) VALUES ($1), ($2)`,
-      [ownerId, customerId]
+      `INSERT INTO user_settings (user_id) VALUES ($1), ($2), ($3)`,
+      [ownerId, customerId, adminId]
     );
 
     await client.query(
@@ -504,6 +511,7 @@ async function seed() {
     await client.query('COMMIT');
     console.log('Seed completed successfully.');
     console.log('Demo accounts (password: Password123):');
+    console.log('  admin@foodiq.com');
     console.log('  customer@foodiq.com');
     console.log('  owner@foodiq.com');
   } catch (err) {

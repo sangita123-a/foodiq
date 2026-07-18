@@ -8,9 +8,21 @@ const buildGetRestaurantsQuery = (filters) => {
       r.*,
       rc.name AS category_name,
       rc.slug AS category_slug,
-      (SELECT COUNT(*)::int FROM reviews rv WHERE rv.restaurant_id = r.id) AS review_count
+      COALESCE(rv.review_count, 0)::int AS review_count,
+      NOT EXISTS (
+        SELECT 1
+        FROM menu_items m
+        WHERE m.restaurant_id = r.id
+          AND COALESCE(m.is_vegetarian, FALSE) = FALSE
+          AND (m.is_available IS NULL OR m.is_available = TRUE)
+      ) AS is_veg
     FROM restaurants r
     LEFT JOIN restaurant_categories rc ON rc.id = r.category_id
+    LEFT JOIN (
+      SELECT restaurant_id, COUNT(*)::int AS review_count
+      FROM reviews
+      GROUP BY restaurant_id
+    ) rv ON rv.restaurant_id = r.id
     WHERE r.is_active = true`;
   const values = [];
   let valueIndex = 1;

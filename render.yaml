@@ -1,0 +1,61 @@
+# Foodiq API + PostgreSQL on Render
+# Dashboard → New → Blueprint → select this repo (or sync existing Blueprint)
+
+databases:
+  - name: foodiq-db
+    databaseName: foodiq
+    user: foodiq
+    plan: basic-256mb
+    region: singapore
+
+services:
+  - type: web
+    name: foodiq-backend-api
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    rootDir: foodiq-frontend/foodiq-backend
+    buildCommand: npm ci --omit=dev
+    preDeployCommand: npm run db:migrate
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    initialDeployHook: node database/seed.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "true"
+      - key: CORS_STRICT
+        value: "true"
+      - key: CORS_ALLOW_VERCEL
+        value: "true"
+      - key: FRONTEND_URL
+        value: https://foodiq-sangita123-as-projects.vercel.app
+      - key: CORS_ORIGINS
+        value: https://foodiq-sangita123-as-projects.vercel.app,https://foodiq.vercel.app
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: foodiq-db
+          property: connectionString
+      - key: DB_SSL
+        value: "true"
+      - key: RAZORPAY_MOCK
+        value: "true"
+      - key: FCM_MOCK
+        value: "true"
+      - key: EMAIL_PROVIDER
+        value: mock
+      - key: SMS_PROVIDER
+        value: mock
+      - key: STORAGE_PROVIDER
+        value: auto
+      - key: REDIS_ENABLED
+        value: "false"
+      - key: LOG_LEVEL
+        value: info

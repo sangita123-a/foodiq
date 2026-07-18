@@ -38,7 +38,19 @@ const getOrders = async (userId, role) => {
 
 const getOrderById = async (orderId) => {
   const query = `
-    SELECT o.*, r.name as restaurant_name, a.street, a.city, a.full_name, a.phone_number
+    SELECT
+      o.*,
+      r.name as restaurant_name,
+      r.estimated_delivery_time,
+      a.street,
+      a.city,
+      a.state,
+      a.zip_code,
+      a.house_no,
+      a.landmark,
+      a.full_name,
+      a.phone_number,
+      a.address_type
     FROM orders o
     JOIN restaurants r ON o.restaurant_id = r.id
     LEFT JOIN addresses a ON o.delivery_address_id = a.id
@@ -51,7 +63,7 @@ const getOrderById = async (orderId) => {
   const order = rows[0];
   
   const itemsQuery = `
-    SELECT oi.*, m.name
+    SELECT oi.*, m.name, m.image_url
     FROM order_items oi
     JOIN menu_items m ON oi.menu_item_id = m.id
     WHERE oi.order_id = $1
@@ -60,11 +72,12 @@ const getOrderById = async (orderId) => {
   order.items = items.rows;
 
   const paymentRes = await pool.query(
-    'SELECT method FROM payments WHERE order_id = $1 ORDER BY created_at DESC LIMIT 1',
+    'SELECT method, status FROM payments WHERE order_id = $1 ORDER BY created_at DESC LIMIT 1',
     [orderId]
   );
   if (paymentRes.rows[0]) {
     order.payment_method = paymentRes.rows[0].method;
+    order.payment_status = paymentRes.rows[0].status;
   }
   
   return order;

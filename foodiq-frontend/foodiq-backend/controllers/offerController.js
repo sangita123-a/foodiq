@@ -6,10 +6,17 @@ const {
   validateOfferEligibility,
 } = require('../models/offerModel');
 const { getCartByUserId, getCartItems } = require('../models/cartModel');
+const cache = require('../services/cacheService');
 
 const listOffers = async (req, res) => {
   try {
-    const offers = await getAllOffers();
+    const key = cache.cacheKey('offers:all', {});
+    const { data: offers, cache: status } = await cache.wrap(
+      key,
+      Number(process.env.CACHE_TTL_OFFERS || 120),
+      () => getAllOffers()
+    );
+    res.setHeader('X-Cache', status);
     res.json({ success: true, message: 'Offers retrieved', data: offers });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });

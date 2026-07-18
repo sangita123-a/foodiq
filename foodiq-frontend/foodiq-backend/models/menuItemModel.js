@@ -112,19 +112,77 @@ const getMenuItemsByRestaurant = async (restaurantId) => {
 };
 
 const createMenuItem = async (itemData) => {
-  const { restaurant_id, category_id, name, description, price, discount_price, preparation_time, calories, is_vegetarian, is_available, image_url } = itemData;
+  const {
+    restaurant_id,
+    category_id,
+    name,
+    description,
+    price,
+    discount_price,
+    preparation_time,
+    calories,
+    is_vegetarian,
+    is_veg,
+    is_available,
+    image_url,
+    is_trending,
+    is_bestseller,
+  } = itemData;
+
+  const vegetarian = is_vegetarian != null ? Boolean(is_vegetarian) : Boolean(is_veg);
+
   const query = `
-    INSERT INTO menu_items (restaurant_id, category_id, name, description, price, discount_price, preparation_time, calories, is_vegetarian, is_available, image_url)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    INSERT INTO menu_items (
+      restaurant_id, category_id, name, description, price, discount_price,
+      preparation_time, calories, is_vegetarian, is_available, image_url,
+      is_trending, is_bestseller
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
     RETURNING *
   `;
-  const values = [restaurant_id, category_id, name, description, price, discount_price, preparation_time, calories, is_vegetarian, is_available, image_url];
+  const values = [
+    restaurant_id,
+    category_id || null,
+    name,
+    description || '',
+    price,
+    discount_price ?? null,
+    preparation_time ?? 15,
+    calories ?? null,
+    vegetarian,
+    is_available !== false,
+    image_url || null,
+    Boolean(is_trending),
+    Boolean(is_bestseller),
+  ];
   const { rows } = await pool.query(query, values);
   return rows[0];
 };
 
 const updateMenuItem = async (id, itemData) => {
-  const { category_id, name, description, price, discount_price, preparation_time, calories, is_vegetarian, is_available, image_url } = itemData;
+  const {
+    category_id,
+    name,
+    description,
+    price,
+    discount_price,
+    preparation_time,
+    calories,
+    is_vegetarian,
+    is_veg,
+    is_available,
+    image_url,
+    is_trending,
+    is_bestseller,
+  } = itemData;
+
+  const vegetarian =
+    is_vegetarian != null
+      ? Boolean(is_vegetarian)
+      : is_veg != null
+        ? Boolean(is_veg)
+        : null;
+
   const query = `
     UPDATE menu_items
     SET category_id = COALESCE($1, category_id),
@@ -136,11 +194,28 @@ const updateMenuItem = async (id, itemData) => {
         calories = COALESCE($7, calories),
         is_vegetarian = COALESCE($8, is_vegetarian),
         is_available = COALESCE($9, is_available),
-        image_url = COALESCE($10, image_url)
-    WHERE id = $11
+        image_url = COALESCE($10, image_url),
+        is_trending = COALESCE($11, is_trending),
+        is_bestseller = COALESCE($12, is_bestseller),
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = $13
     RETURNING *
   `;
-  const values = [category_id, name, description, price, discount_price, preparation_time, calories, is_vegetarian, is_available, image_url, id];
+  const values = [
+    category_id,
+    name,
+    description,
+    price,
+    discount_price,
+    preparation_time,
+    calories,
+    vegetarian,
+    is_available,
+    image_url,
+    is_trending,
+    is_bestseller,
+    id,
+  ];
   const { rows } = await pool.query(query, values);
   return rows[0];
 };

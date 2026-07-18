@@ -7,6 +7,10 @@ const {
   updateUserPassword,
 } = require('../models/userModel');
 const generateToken = require('../utils/generateToken');
+const { generateRefreshToken, rotateRefreshToken, revokeRefreshToken } = require('../utils/generateToken');
+const { writeAudit, clientMeta } = require('../services/auditService');
+const { bump } = require('../services/metricsService');
+const { createAlert } = require('../services/alertService');
 const { normalizeEmail } = require('../utils/normalizeEmail');
 const {
   isValidEmail,
@@ -99,8 +103,48 @@ const registerUser = async (req, res) => {
         [user.id, 'Welcome to Foodiq!', 'Thanks for joining. Explore restaurants and place your first order.']
       );
 
+      try {
+        const { dispatchEmailSms } = require('../services/commsService');
+        await dispatchEmailSms({
+          userId: user.id,
+          type: 'welcome',
+          title: 'Welcome to Foodiq!',
+          message: 'Thanks for joining. Explore restaurants and place your first order.',
+          transactional: true,
+          forceEmail: true,
+        });
+      } catch (err) {
+        console.warn('[AUTH] welcome email skipped', err.message);
+      }
+
       const token = generateToken(user.id);
       console.log('[AUTH] Register successful, JWT generated for user', user.id);
+
+      let refresh_token = null;
+      try {
+        refresh_token = await generateRefreshToken(user.id, clientMeta(req));
+      } catch {
+        /* optional */
+      }
+
+      writeAudit({
+        userId: user.id,
+        role: user.role || 'customer',
+        action: 'signup',
+        category: 'auth',
+        message: 'User registered',
+        req,
+      }).catch(() => {});
+
+      // Secure cookie optional (SPA still uses Bearer in localStorage/cookie token)
+      if (String(process.env.AUTH_SECURE_COOKIES || '').toLowerCase() === 'true') {
+        res.cookie('token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 30 * 24 * 60 * 60 * 1000,
+        });
+      }
 
       res.status(201).json({
         success: true,
@@ -112,6 +156,7 @@ const registerUser = async (req, res) => {
           phone_number: user.phone_number,
           role: user.role,
           token,
+          refresh_token,
         },
       });
     } else {
@@ -153,6 +198,14 @@ const loginUser = async (req, res) => {
     const user = await findUserByEmail(email);
 
     if (!user) {
+      bump('auth_failed');
+      writeAudit({
+        action: 'failed_login',
+        category: 'auth',
+        status: 'failure',
+        message: `No account for ${email}`,
+        req,
+      }).catch(() => {});
       console.log('[AUTH] Login failed: user not found for email', email);
       return res.status(401).json({
         success: false,
@@ -164,6 +217,7 @@ const loginUser = async (req, res) => {
     console.log('[AUTH] User found:', user.id, user.email);
 
     if (!user.password_hash || !user.password_hash.startsWith('$2')) {
+      bump('auth_failed');
       console.log('[AUTH] Login failed: invalid password hash stored for user', user.id);
       return res.status(401).json({
         success: false,
@@ -175,6 +229,24 @@ const loginUser = async (req, res) => {
     const passwordMatched = await bcrypt.compare(password, user.password_hash);
 
     if (!passwordMatched) {
+      bump('auth_failed');
+      writeAudit({
+        userId: user.id,
+        role: user.role,
+        action: 'failed_login',
+        category: 'auth',
+        status: 'failure',
+        message: 'Incorrect password',
+        req,
+      }).catch(() => {});
+      if (require('../services/metricsService').counters.auth_failed % 25 === 0) {
+        createAlert({
+          severity: 'warning',
+          type: 'failed_logins',
+          title: 'Repeated failed logins',
+          message: 'Multiple failed login attempts detected',
+        }).catch(() => {});
+      }
       console.log('[AUTH] Login failed: password did not match for user', user.id);
       return res.status(401).json({
         success: false,
@@ -186,7 +258,31 @@ const loginUser = async (req, res) => {
     console.log('[AUTH] Password matched for user', user.id);
 
     const token = generateToken(user.id);
+    let refresh_token = null;
+    try {
+      refresh_token = await generateRefreshToken(user.id, clientMeta(req));
+    } catch {
+      /* optional */
+    }
     console.log('[AUTH] JWT generated for user', user.id);
+
+    writeAudit({
+      userId: user.id,
+      role: user.role,
+      action: 'login',
+      category: 'auth',
+      message: 'User logged in',
+      req,
+    }).catch(() => {});
+
+    if (String(process.env.AUTH_SECURE_COOKIES || '').toLowerCase() === 'true') {
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+      });
+    }
 
     res.json({
       success: true,
@@ -198,6 +294,7 @@ const loginUser = async (req, res) => {
         phone_number: user.phone_number,
         role: user.role,
         token,
+        refresh_token,
       },
     });
   } catch (error) {
@@ -258,6 +355,8 @@ const updateUserProfile = async (req, res) => {
         phone_number: req.body.phone_number || user.phone_number,
       });
 
+      await require('../middleware/authMiddleware').invalidateUserSession(req.user.id);
+
       res.json({
         success: true,
         message: 'Profile updated',
@@ -285,7 +384,7 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
-// @desc    Request password reset (demo: always succeeds if email exists)
+// @desc    Request password reset OTP via email (and SMS if phone on file)
 // @route   POST /api/auth/forgot-password
 // @access  Public
 const forgotPassword = async (req, res) => {
@@ -297,6 +396,7 @@ const forgotPassword = async (req, res) => {
 
     const user = await findUserByEmail(email);
     if (!user) {
+      // Do not reveal whether email exists in production; keep friendly message for UX.
       return res.status(404).json({
         success: false,
         message: 'No account found for this email address.',
@@ -304,41 +404,49 @@ const forgotPassword = async (req, res) => {
       });
     }
 
+    const { issueOtp } = require('../services/otpService');
+    const channel = user.phone_number ? 'both' : 'email';
+    const otpResult = await issueOtp({
+      userId: user.id,
+      destination: email,
+      channel,
+      purpose: 'password_reset',
+      name: user.full_name,
+    });
+
+    const payload = { email, expires_at: otpResult.expires_at };
+    if (otpResult.debug_code) payload.debug_code = otpResult.debug_code;
+
     res.json({
       success: true,
-      message: 'Password reset instructions sent. Use reset code FOODIQ to set a new password.',
-      data: { email },
+      message: 'Password reset code sent to your email' +
+        (channel === 'both' ? ' and phone' : '') +
+        '. Enter the code to set a new password.',
+      data: payload,
     });
   } catch (error) {
-    res.status(500).json({
+    const status = error.status || 500;
+    res.status(status).json({
       success: false,
-      message: 'Server Error during password reset request',
+      message: error.message || 'Server Error during password reset request',
       error: error.message,
     });
   }
 };
 
-// @desc    Reset password with demo code FOODIQ
+// @desc    Reset password with OTP code
 // @route   POST /api/auth/reset-password
 // @access  Public
 const resetPassword = async (req, res) => {
   try {
     const email = normalizeEmail(req.body.email);
-    const resetCode = String(req.body.reset_code || req.body.code || '').trim().toUpperCase();
+    const resetCode = String(req.body.reset_code || req.body.code || '').trim();
     const newPassword = req.body.new_password || req.body.password;
 
     if (!email || !resetCode || !newPassword) {
       return res.status(400).json({
         success: false,
         message: 'Email, reset code, and new password are required',
-        error: {},
-      });
-    }
-
-    if (resetCode !== 'FOODIQ') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid reset code. Use FOODIQ for demo reset.',
         error: {},
       });
     }
@@ -360,9 +468,29 @@ const resetPassword = async (req, res) => {
       });
     }
 
+    const { verifyOtp } = require('../services/otpService');
+    // Allow legacy demo code FOODIQ only when EMAIL_PROVIDER=mock
+    const isMockEmail = String(process.env.EMAIL_PROVIDER || 'mock').toLowerCase() === 'mock';
+    if (!(isMockEmail && resetCode.toUpperCase() === 'FOODIQ')) {
+      await verifyOtp({
+        destination: email,
+        purpose: 'password_reset',
+        code: resetCode,
+      });
+    }
+
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(newPassword, salt);
     await updateUserPassword(user.id, password_hash);
+
+    writeAudit({
+      userId: user.id,
+      role: user.role,
+      action: 'password_reset',
+      category: 'auth',
+      message: 'Password reset completed',
+      req,
+    }).catch(() => {});
 
     res.json({
       success: true,
@@ -370,9 +498,10 @@ const resetPassword = async (req, res) => {
       data: {},
     });
   } catch (error) {
-    res.status(500).json({
+    const status = error.status || 500;
+    res.status(status).json({
       success: false,
-      message: 'Server Error during password reset',
+      message: error.message || 'Server Error during password reset',
       error: error.message,
     });
   }
@@ -381,12 +510,66 @@ const resetPassword = async (req, res) => {
 // @desc    Logout user / clear token
 // @route   POST /api/auth/logout
 // @access  Public
-const logoutUser = (req, res) => {
-  res.json({
-    success: true,
-    message: 'Logged out successfully. Please remove token on the client.',
-    data: {},
-  });
+const logoutUser = async (req, res) => {
+  try {
+    const refresh = req.body?.refresh_token;
+    if (refresh) await revokeRefreshToken(refresh);
+    if (req.user?.id) {
+      writeAudit({
+        userId: req.user.id,
+        role: req.user.role,
+        action: 'logout',
+        category: 'auth',
+        req,
+      }).catch(() => {});
+    }
+    res.clearCookie('token');
+    res.json({
+      success: true,
+      message: 'Logged out successfully. Please remove token on the client.',
+      data: {},
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Logout failed',
+      error: error.message,
+    });
+  }
+};
+
+const refreshAccessToken = async (req, res) => {
+  try {
+    const refresh_token = req.body.refresh_token || req.cookies?.refresh_token;
+    if (!refresh_token) {
+      return res.status(400).json({
+        success: false,
+        message: 'refresh_token is required',
+        error: {},
+      });
+    }
+    const rotated = await rotateRefreshToken(refresh_token, clientMeta(req));
+    writeAudit({
+      userId: rotated.userId,
+      action: 'token_refresh',
+      category: 'auth',
+      req,
+    }).catch(() => {});
+    res.json({
+      success: true,
+      message: 'Token refreshed',
+      data: {
+        token: rotated.access,
+        refresh_token: rotated.refresh,
+      },
+    });
+  } catch (error) {
+    res.status(error.status || 401).json({
+      success: false,
+      message: error.message || 'Refresh failed',
+      error: {},
+    });
+  }
 };
 
 module.exports = {
@@ -397,4 +580,5 @@ module.exports = {
   logoutUser,
   forgotPassword,
   resetPassword,
+  refreshAccessToken,
 };

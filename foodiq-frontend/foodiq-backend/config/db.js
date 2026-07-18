@@ -2,17 +2,27 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 function buildPoolConfig() {
+  const max = Number(process.env.DB_POOL_MAX || 20);
+  const idleTimeoutMillis = Number(process.env.DB_POOL_IDLE_MS || 30000);
+  const connectionTimeoutMillis = Number(process.env.DB_POOL_CONNECT_MS || 10000);
+
   if (process.env.DATABASE_URL) {
+    const isProd = process.env.NODE_ENV === 'production';
     const needsSsl =
       process.env.DB_SSL === 'true' ||
-      /supabase\.co|sslmode=require/i.test(process.env.DATABASE_URL);
+      (process.env.DB_SSL !== 'false' &&
+        (isProd ||
+          /supabase\.co|render\.com|neon\.tech|sslmode=require/i.test(
+            process.env.DATABASE_URL
+          )));
 
     return {
       connectionString: process.env.DATABASE_URL,
       ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
+      max,
+      idleTimeoutMillis,
+      connectionTimeoutMillis,
+      application_name: 'foodiq-api',
     };
   }
 
@@ -22,12 +32,12 @@ function buildPoolConfig() {
     port: parseInt(process.env.DB_PORT || '5432', 10),
     user: process.env.DB_USER || 'postgres',
     database: process.env.DB_NAME || 'foodiq',
-    max: 20,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000,
+    max,
+    idleTimeoutMillis,
+    connectionTimeoutMillis,
+    application_name: 'foodiq-api',
   };
 
-  // Only set password when provided (supports local trust auth)
   if (password !== undefined && password !== '') {
     config.password = String(password);
   }
@@ -41,6 +51,13 @@ function buildPoolConfig() {
 
 const pool = new Pool(buildPoolConfig());
 
+const stmtTimeout = Number(process.env.DB_STATEMENT_TIMEOUT_MS || 0);
+if (stmtTimeout > 0) {
+  pool.on('connect', (client) => {
+    client.query(`SET statement_timeout TO ${stmtTimeout}`).catch(() => {});
+  });
+}
+
 pool.on('error', (err) => {
   console.error('Unexpected idle client error:', err.message);
 });
@@ -48,4 +65,9 @@ pool.on('error', (err) => {
 module.exports = {
   query: (text, params) => pool.query(text, params),
   pool,
+  getPoolStats: () => ({
+    total: pool.totalCount,
+    idle: pool.idleCount,
+    waiting: pool.waitingCount,
+  }),
 };

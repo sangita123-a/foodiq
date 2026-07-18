@@ -1,39 +1,122 @@
+const http = require('http');
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
+
+// Render injects RENDER_EXTERNAL_URL (https://….onrender.com)
+if (!process.env.API_PUBLIC_URL && process.env.RENDER_EXTERNAL_URL) {
+  process.env.API_PUBLIC_URL = process.env.RENDER_EXTERNAL_URL;
+}
 
 const { pool } = require('./config/db');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
 const ensureSchema = require('./utils/ensureSchema');
+const { initSocket } = require('./socket');
+const requestContext = require('./middleware/requestContext');
+const securityHeaders = require('./middleware/securityHeaders');
+const { apiLimiter } = require('./middleware/rateLimiters');
+const { csrfProtection } = require('./middleware/csrf');
+const { sanitizeBody } = require('./middleware/sanitize');
+const { log } = require('./utils/logger');
 
 const app = express();
+const server = http.createServer(app);
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  ...(process.env.CORS_ORIGINS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
   'http://localhost:3000',
   'http://127.0.0.1:3000',
 ].filter(Boolean);
 
-// Middleware
+const corsStrict =
+  String(process.env.CORS_STRICT || (isProduction ? 'true' : 'false')).toLowerCase() ===
+  'true';
+const allowVercelPreviews =
+  String(process.env.CORS_ALLOW_VERCEL || (isProduction ? 'true' : 'false')).toLowerCase() ===
+  'true';
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  if (allowVercelPreviews && /\.vercel\.app$/i.test(origin)) return true;
+  return false;
+};
+
+// Trust proxy for correct IP / rate-limit behind load balancers
+if (String(process.env.TRUST_PROXY || 'true') === 'true') {
+  app.set('trust proxy', 1);
+}
+
+app.use(requestContext);
+app.use(securityHeaders);
+
+try {
+  const compression = require('compression');
+  app.use(
+    compression({
+      threshold: 1024,
+      filter: (req, res) => {
+        if (req.headers['x-no-compression']) return false;
+        return compression.filter(req, res);
+      },
+    })
+  );
+} catch {
+  /* optional */
+}
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(null, true);
+      if (isOriginAllowed(origin)) {
+        return callback(null, true);
       }
+      if (corsStrict) {
+        return callback(new Error('Not allowed by CORS'));
+      }
+      // Dev / local tooling: allow unknown origins unless CORS_STRICT
+      return callback(null, true);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Request-Id'],
+    exposedHeaders: ['X-Request-Id'],
   })
 );
-app.use(express.json({ limit: '5mb' }));
+
+app.use(cookieParser());
+
+// Preserve raw body for Razorpay webhook HMAC verification.
+app.use(
+  express.json({
+    limit: '5mb',
+    verify: (req, _res, buf) => {
+      if (req.originalUrl && req.originalUrl.startsWith('/api/payments/webhook')) {
+        req.rawBody = buf.toString('utf8');
+      }
+    },
+  })
+);
+
+app.use(sanitizeBody);
+app.use(csrfProtection);
+app.use('/api', apiLimiter);
 
 if (!process.env.JWT_SECRET) {
-  console.warn('[AUTH] JWT_SECRET is not configured in .env — tokens will use an insecure fallback.');
+  if (isProduction) {
+    log.error('JWT_SECRET is required in production. Refusing to start.');
+    process.exit(1);
+  }
+  log.warn('JWT_SECRET is not configured — tokens will use an insecure fallback.');
 }
 
 const authRoutes = require('./routes/authRoutes');
@@ -62,8 +145,9 @@ const supportRoutes = require('./routes/supportRoutes');
 const offerRoutes = require('./routes/offerRoutes');
 const liveDealRoutes = require('./routes/liveDealRoutes');
 const cuisineRoutes = require('./routes/cuisineRoutes');
+const partnerRoutes = require('./routes/partnerRoutes');
+const deliveryRoutes = require('./routes/deliveryRoutes');
 
-// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/restaurant-categories', categoryRoutes);
 app.use('/api/restaurants', restaurantRoutes);
@@ -90,31 +174,90 @@ app.use('/api/sessions', sessionRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api/partner', partnerRoutes);
+app.use('/api/delivery', deliveryRoutes);
+app.use('/api/messaging', require('./routes/messagingRoutes'));
+app.use('/api/media', require('./routes/mediaRoutes'));
+app.use('/api/monitoring', require('./routes/monitoringRoutes'));
 
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'success', message: 'API is running' });
-});
+app.use(
+  '/media-files',
+  express.static(path.join(__dirname, 'uploads'), {
+    maxAge: '7d',
+    fallthrough: true,
+  })
+);
 
-// 404 and Error Handler Middleware
+// Back-compat health + deep health via monitoring
+app.get('/api/health', require('./controllers/monitoringController').getPublicHealth);
+
 app.use(notFound);
 app.use(errorHandler);
 
+initSocket(server, { allowedOrigins, isOriginAllowed, corsStrict });
+
 const PORT = process.env.PORT || 4000;
 
-// Test DB Connection, ensure schema, then start server
-pool.connect()
+const startListening = () => {
+  server.listen(PORT, '0.0.0.0', () => {
+    log.info(
+      `Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT} (HTTP + Socket.IO)`
+    );
+  });
+};
+
+pool
+  .connect()
   .then(async (client) => {
-    console.log('Connected to PostgreSQL Database');
+    log.info('Connected to PostgreSQL Database');
     client.release();
     await ensureSchema();
-    app.listen(PORT, () => {
-      console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-    });
+    try {
+      await require('./services/cacheService').connectRedis();
+    } catch (err) {
+      log.warn('Redis connect skipped', { error: err.message });
+    }
+    // Warm hot catalog keys in background
+    try {
+      const cache = require('./services/cacheService');
+      const { getCategories } = require('./models/restaurantCategoryModel');
+      const { getAllOffers } = require('./models/offerModel');
+      cache
+        .warm([
+          {
+            key: cache.cacheKey('categories:all', {}),
+            ttl: Number(process.env.CACHE_TTL_CATEGORIES || 300),
+            producer: getCategories,
+          },
+          {
+            key: cache.cacheKey('offers:all', {}),
+            ttl: Number(process.env.CACHE_TTL_OFFERS || 120),
+            producer: getAllOffers,
+          },
+        ])
+        .catch(() => {});
+    } catch {
+      /* ignore */
+    }
+    startListening();
   })
-  .catch(err => {
-    console.error('Database connection failed:', err.message);
+  .catch((err) => {
+    log.error('Database connection failed', { error: err.message });
+    if (isProduction) {
+      log.error('Refusing to start without a database in production.');
+      process.exit(1);
+    }
     console.log('Starting server anyway (so it doesnt crash loop during setup)...');
-    app.listen(PORT, () => {
-      console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-    });
+    try {
+      const { createAlert } = require('./services/alertService');
+      createAlert({
+        severity: 'critical',
+        type: 'database_failure',
+        title: 'Database connection failed on boot',
+        message: err.message,
+      }).catch(() => {});
+    } catch {
+      /* ignore */
+    }
+    startListening();
   });

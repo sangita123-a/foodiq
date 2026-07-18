@@ -215,14 +215,58 @@ CREATE TABLE IF NOT EXISTS payments (
     order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE UNIQUE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     amount DECIMAL(10,2) NOT NULL,
-    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed', 'refunded')),
-    method VARCHAR(50) NOT NULL CHECK (method IN ('credit_card', 'debit_card', 'upi', 'wallet', 'cod', 'net_banking')),
+    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed', 'refunded', 'partially_refunded')),
+    method VARCHAR(50) NOT NULL CHECK (method IN ('credit_card', 'debit_card', 'upi', 'wallet', 'cod', 'net_banking', 'razorpay')),
     provider_transaction_id VARCHAR(255),
+    razorpay_order_id VARCHAR(100),
+    razorpay_payment_id VARCHAR(100),
+    razorpay_signature TEXT,
+    currency VARCHAR(10) DEFAULT 'INR',
+    transaction_time TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 DROP TRIGGER IF EXISTS update_payments_modtime ON payments;
 CREATE TRIGGER update_payments_modtime BEFORE UPDATE ON payments FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+-- 14b. payment_transactions (pre-order Razorpay sessions)
+CREATE TABLE IF NOT EXISTS payment_transactions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+    payment_id UUID REFERENCES payments(id) ON DELETE SET NULL,
+    razorpay_order_id VARCHAR(100) NOT NULL UNIQUE,
+    razorpay_payment_id VARCHAR(100),
+    razorpay_signature TEXT,
+    amount NUMERIC(10,2) NOT NULL,
+    currency VARCHAR(10) DEFAULT 'INR',
+    payment_method VARCHAR(40),
+    status VARCHAR(40) NOT NULL DEFAULT 'created',
+    checkout_payload JSONB DEFAULT '{}'::jsonb,
+    receipt VARCHAR(100),
+    failure_reason TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_payment_transactions_user ON payment_transactions(user_id);
+
+-- 14c. refunds
+CREATE TABLE IF NOT EXISTS refunds (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    payment_id UUID NOT NULL REFERENCES payments(id) ON DELETE CASCADE,
+    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    amount NUMERIC(10,2) NOT NULL,
+    type VARCHAR(20) NOT NULL DEFAULT 'full',
+    reason TEXT,
+    status VARCHAR(40) NOT NULL DEFAULT 'processed',
+    razorpay_refund_id VARCHAR(100),
+    initiated_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_refunds_order ON refunds(order_id);
 
 -- 15. delivery_partners
 CREATE TABLE IF NOT EXISTS delivery_partners (
@@ -286,14 +330,50 @@ CREATE TRIGGER update_reviews_modtime BEFORE UPDATE ON reviews FOR EACH ROW EXEC
 CREATE TABLE IF NOT EXISTS notifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role VARCHAR(40),
+    type VARCHAR(60) DEFAULT 'alert',
+    category VARCHAR(40) DEFAULT 'Orders',
     title VARCHAR(255) NOT NULL,
     message TEXT NOT NULL,
+    meta JSONB DEFAULT '{}'::jsonb,
+    order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+    dedupe_key VARCHAR(180),
     is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 DROP TRIGGER IF EXISTS update_notifications_modtime ON notifications;
 CREATE TRIGGER update_notifications_modtime BEFORE UPDATE ON notifications FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+CREATE INDEX IF NOT EXISTS idx_notifications_user_created ON notifications(user_id, created_at DESC);
+
+-- 19b. device_tokens (FCM / Web Push / Android)
+CREATE TABLE IF NOT EXISTS device_tokens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token TEXT NOT NULL UNIQUE,
+    platform VARCHAR(30) NOT NULL DEFAULT 'web',
+    device_info JSONB DEFAULT '{}'::jsonb,
+    is_active BOOLEAN DEFAULT TRUE,
+    last_seen_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 19c. notification_queue (FCM retry)
+CREATE TABLE IF NOT EXISTS notification_queue (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    notification_id UUID REFERENCES notifications(id) ON DELETE SET NULL,
+    title VARCHAR(255) NOT NULL,
+    body TEXT NOT NULL,
+    payload JSONB DEFAULT '{}'::jsonb,
+    status VARCHAR(30) NOT NULL DEFAULT 'pending',
+    attempts INTEGER NOT NULL DEFAULT 0,
+    last_error TEXT,
+    next_attempt_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
 
 -- 20. rewards
 CREATE TABLE IF NOT EXISTS rewards (
@@ -352,3 +432,91 @@ CREATE INDEX IF NOT EXISTS idx_order_items_menu_item ON order_items(menu_item_id
 CREATE INDEX IF NOT EXISTS idx_reviews_restaurant ON reviews(restaurant_id);
 CREATE INDEX IF NOT EXISTS idx_support_tickets_user ON support_tickets(user_id);
 CREATE INDEX IF NOT EXISTS idx_contact_messages_email ON contact_messages(email);
+
+-- Email / SMS / OTP (also applied via ensureSchema on boot)
+ALTER TABLE user_settings
+  ADD COLUMN IF NOT EXISTS sms_notifications BOOLEAN DEFAULT TRUE,
+  ADD COLUMN IF NOT EXISTS marketing_emails BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS notify_order_updates BOOLEAN DEFAULT TRUE,
+  ADD COLUMN IF NOT EXISTS notify_orders BOOLEAN DEFAULT TRUE,
+  ADD COLUMN IF NOT EXISTS notify_offers BOOLEAN DEFAULT TRUE,
+  ADD COLUMN IF NOT EXISTS notify_rewards BOOLEAN DEFAULT FALSE;
+
+CREATE TABLE IF NOT EXISTS email_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    to_email VARCHAR(255) NOT NULL,
+    subject VARCHAR(500) NOT NULL,
+    template VARCHAR(80),
+    status VARCHAR(30) NOT NULL DEFAULT 'pending',
+    provider VARCHAR(40),
+    provider_message_id VARCHAR(255),
+    error TEXT,
+    attempts INTEGER NOT NULL DEFAULT 1,
+    meta JSONB DEFAULT '{}'::jsonb,
+    related_order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sms_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    to_phone VARCHAR(30) NOT NULL,
+    body TEXT NOT NULL,
+    template VARCHAR(80),
+    status VARCHAR(30) NOT NULL DEFAULT 'pending',
+    provider VARCHAR(40),
+    provider_message_id VARCHAR(255),
+    error TEXT,
+    attempts INTEGER NOT NULL DEFAULT 1,
+    meta JSONB DEFAULT '{}'::jsonb,
+    related_order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS otp_codes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    destination VARCHAR(255) NOT NULL,
+    channel VARCHAR(20) NOT NULL DEFAULT 'email',
+    purpose VARCHAR(60) NOT NULL DEFAULT 'verification',
+    code_hash VARCHAR(128) NOT NULL,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    consumed_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Cloud media library
+CREATE TABLE IF NOT EXISTS media_assets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    purpose VARCHAR(60) NOT NULL DEFAULT 'other',
+    folder VARCHAR(255),
+    url TEXT NOT NULL,
+    public_id TEXT NOT NULL,
+    provider VARCHAR(40) NOT NULL DEFAULT 'mock',
+    mime_type VARCHAR(100),
+    file_type VARCHAR(30) NOT NULL DEFAULT 'image',
+    file_size INTEGER DEFAULT 0,
+    width INTEGER,
+    height INTEGER,
+    format VARCHAR(20),
+    status VARCHAR(30) NOT NULL DEFAULT 'approved',
+    entity_type VARCHAR(60),
+    entity_id UUID,
+    variants JSONB DEFAULT '{}'::jsonb,
+    meta JSONB DEFAULT '{}'::jsonb,
+    reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    reviewed_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE delivery_partners
+  ADD COLUMN IF NOT EXISTS profile_photo_url TEXT,
+  ADD COLUMN IF NOT EXISTS vehicle_photo_url TEXT,
+  ADD COLUMN IF NOT EXISTS license_photo_url TEXT,
+  ADD COLUMN IF NOT EXISTS vehicle_rc_url TEXT,
+  ADD COLUMN IF NOT EXISTS insurance_doc_url TEXT;
