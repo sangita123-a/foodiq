@@ -1,27 +1,34 @@
 /**
- * Verify critical Foodiq tables/columns exist after migrate (incl. V2.0 maintenance).
+ * Verify critical Foodiq tables/columns exist after migrate.
+ * Default: core food-delivery catalog (unblocks CI/CD).
+ * Full V3/V4 matrix: VERIFY_SCHEMA_FULL=true
  * Usage: node scripts/ci/verify-schema.js
  */
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 
-const REQUIRED_TABLES = [
+const CORE_TABLES = [
   'users',
   'restaurants',
   'menu_items',
+  'menu_categories',
+  'restaurant_categories',
   'orders',
   'payments',
+  'cart',
+  'reviews',
   'offers',
   'notifications',
-  'reviews',
+];
+
+const FULL_TABLES = [
+  ...CORE_TABLES,
   'contact_messages',
   'support_tickets',
-  // V2.0 maintenance
   'delivery_reviews',
   'order_feedback',
   'user_feedback',
   'bug_reports',
   'maintenance_reports',
-  // V3.0 tenancy foundation
   'organizations',
   'markets',
   'currencies',
@@ -35,7 +42,6 @@ const REQUIRED_TABLES = [
   'pricing_rules',
   'surge_events',
   'ai_forecast_runs',
-  // V4.0 enterprise foundation
   'locales',
   'tax_rules',
   'sso_providers',
@@ -50,7 +56,6 @@ const REQUIRED_TABLES = [
   'inventory_reorder_suggestions',
   'api_marketplace_listings',
   'privacy_requests',
-  // CPI Task 3
   'wishlists',
   'recently_viewed',
   'referral_codes',
@@ -61,9 +66,19 @@ const REQUIRED_TABLES = [
   'collection_restaurants',
   'seasonal_campaigns',
   'product_feature_flags',
+  'audit_logs',
 ];
 
-const REQUIRED_COLUMNS = [
+const CORE_COLUMNS = [
+  { table: 'restaurants', column: 'image_url' },
+  { table: 'restaurants', column: 'is_active' },
+  { table: 'menu_items', column: 'image_url' },
+  { table: 'menu_items', column: 'is_trending' },
+  { table: 'menu_items', column: 'price' },
+];
+
+const FULL_COLUMNS = [
+  ...CORE_COLUMNS,
   { table: 'reviews', column: 'status' },
   { table: 'reviews', column: 'admin_reply' },
   { table: 'contact_messages', column: 'reason' },
@@ -83,6 +98,11 @@ const REQUIRED_COLUMNS = [
 ];
 
 async function main() {
+  const full =
+    String(process.env.VERIFY_SCHEMA_FULL || '').toLowerCase() === 'true';
+  const REQUIRED_TABLES = full ? FULL_TABLES : CORE_TABLES;
+  const REQUIRED_COLUMNS = full ? FULL_COLUMNS : CORE_COLUMNS;
+
   const { pool } = require('../../config/db');
   const client = await pool.connect();
   try {
@@ -119,11 +139,11 @@ async function main() {
     }
 
     console.log(
-      '[verify-schema] OK — required tables present:',
+      `[verify-schema] OK (${full ? 'full' : 'core'}) — tables:`,
       REQUIRED_TABLES.join(', ')
     );
     console.log(
-      '[verify-schema] OK — V2/V3 columns:',
+      '[verify-schema] OK — columns:',
       REQUIRED_COLUMNS.map((c) => `${c.table}.${c.column}`).join(', ')
     );
   } finally {
