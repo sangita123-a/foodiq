@@ -41,12 +41,16 @@ export default function CuisineDetailView({ slug }: Props) {
   const { quantities, updatingId, updateQuantity, addAndCheckout, cart } = useCartActions();
   const { itemIds, restaurantIds, toggleItem, toggleRestaurant } = useFavoriteActions();
 
-  const { data: cuisine, isLoading: loadingCuisine, error: cuisineError } = useSWR(
+  const { data: rawCuisine, isLoading: loadingCuisine, error: cuisineError } = useSWR(
     slug ? `/api/cuisines/${slug}` : null
   );
-  const { data: items, isLoading: loadingItems } = useSWR(
+  const { data: rawItems, isLoading: loadingItems } = useSWR(
     slug ? `/api/cuisines/${slug}/items` : null
   );
+
+  const cuisine = (rawCuisine as any)?.data || rawCuisine;
+  const itemsArray = (rawItems as any)?.data || rawItems;
+  const items = Array.isArray(itemsArray) ? itemsArray : [];
 
   const cartItems = cart?.items || [];
   const cuisineGallery = (items || []).slice(0, 6);

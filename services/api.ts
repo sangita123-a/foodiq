@@ -5,17 +5,15 @@ import { clearClientAuth, markAuthenticated } from '@/lib/authSession';
 /** Known production API — used when Vercel env is missing at build time. */
 const PRODUCTION_API_FALLBACK = 'https://foodiq-2.onrender.com';
 
-const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === 'production'
-    ? PRODUCTION_API_FALLBACK
-    : 'http://localhost:4000');
+const getApiBaseUrl = () => {
+  const envUrl = (process.env.NEXT_PUBLIC_API_URL || '').trim();
+  if (!envUrl || envUrl.includes('foodiq-backend-api.onrender.com') || (process.env.NODE_ENV === 'production' && envUrl.includes('localhost'))) {
+    return PRODUCTION_API_FALLBACK;
+  }
+  return envUrl;
+};
 
-if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL) {
-  console.warn(
-    `[Foodiq] NEXT_PUBLIC_API_URL is not set. Using fallback ${PRODUCTION_API_FALLBACK}.`
-  );
-}
+const apiBaseUrl = getApiBaseUrl();
 
 const api = axios.create({
   baseURL: apiBaseUrl || undefined,
@@ -155,6 +153,13 @@ api.interceptors.response.use(
   }
 );
 
-export const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
+export const fetcher = (url: string) =>
+  api.get(url).then((res) => {
+    const body = res.data;
+    if (body && typeof body === "object" && "data" in body && body.data !== undefined) {
+      return body.data;
+    }
+    return body;
+  });
 
 export default api;

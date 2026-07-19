@@ -17,8 +17,9 @@ import { useAuthToken } from "@/hooks/useAuthToken";
 export default function CartPage() {
   const authenticated = useAuthToken();
   const { data, mutate, isLoading, error } = useSWR(authenticated ? '/api/cart' : null);
-  const cartItems = data?.items || [];
-  const totals = data?.totals || { subtotal: 0, deliveryCharge: 0, tax: 0, discount: 0, grandTotal: 0 };
+  const cartObj = (data as any)?.data || data;
+  const cartItems = cartObj?.items || [];
+  const totals = cartObj?.totals || { subtotal: 0, deliveryCharge: 0, tax: 0, discount: 0, grandTotal: 0 };
   const [isUpdating, setIsUpdating] = useState(false);
   const { showToast } = useToast();
 

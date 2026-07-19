@@ -18,7 +18,8 @@ function getOfferHref(offer: { slug?: string; coupon_code?: string; code?: strin
 
 export default function OffersPage() {
   const { data, isLoading } = useSWR("/api/offers");
-  const offers = data || [];
+  const rawOffers = (data as any)?.data || data;
+  const offers = Array.isArray(rawOffers) ? rawOffers : [];
 
   return (
     <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">

@@ -53,7 +53,16 @@ function CollectionSection({
   fallback?: string;
 }) {
   const { data, isLoading } = useSWR(query);
-  const restaurants = (data || []).map(mapRestaurantCard);
+  const rawArray = Array.isArray(data)
+    ? data
+    : Array.isArray((data as any)?.data)
+      ? (data as any).data
+      : Array.isArray((data as any)?.items)
+        ? (data as any).items
+        : Array.isArray((data as any)?.restaurants)
+          ? (data as any).restaurants
+          : [];
+  const restaurants = rawArray.map(mapRestaurantCard);
 
   return (
     <section className="mb-16">

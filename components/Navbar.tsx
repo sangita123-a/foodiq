@@ -46,7 +46,8 @@ export default function Navbar() {
   };
 
   const { data: cartData } = useSWR(isLoggedIn ? "/api/cart" : null);
-  const cartCount = (cartData?.items || []).reduce(
+  const cartObj = (cartData as any)?.data || cartData;
+  const cartCount = (cartObj?.items || []).reduce(
     (sum: number, item: { quantity: number }) => sum + item.quantity,
     0
   );

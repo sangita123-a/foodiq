@@ -17,8 +17,16 @@ export async function fetchRestaurantsPage(
   const res = await api.get(
     `/api/restaurants?${queryString}${separator}page=${page}&limit=${limit}`
   );
-  const restaurants = (res.data.data || []).map(mapRestaurantCard);
-  const pagination: RestaurantPagination = res.data.pagination || {
+  const rawData = res.data?.data ?? res.data;
+  const rawArray = Array.isArray(rawData)
+    ? rawData
+    : Array.isArray(rawData?.items)
+      ? rawData.items
+      : Array.isArray(rawData?.restaurants)
+        ? rawData.restaurants
+        : [];
+  const restaurants = rawArray.map(mapRestaurantCard);
+  const pagination: RestaurantPagination = res.data?.pagination || {
     total: restaurants.length,
     page,
     limit,

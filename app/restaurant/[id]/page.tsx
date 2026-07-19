@@ -72,8 +72,9 @@ export default function RestaurantPage() {
   const { data: cartResponse, mutate: mutateCart } = useSWR(isLoggedIn ? "/api/cart" : null);
   const { data: favResponse, mutate: mutateFavs } = useSWR(isLoggedIn ? "/api/favorites" : null);
 
-  const restaurant = restaurantResponse;
-  const menuItems = menuResponse || [];
+  const restaurant = restaurantResponse?.data || restaurantResponse;
+  const rawMenu = menuResponse?.data || menuResponse;
+  const menuItems = Array.isArray(rawMenu) ? rawMenu : [];
   const cartItems = cartResponse?.items || [];
   const cartTotals = cartResponse?.totals || { subtotal: 0, deliveryCharge: 0, tax: 0, discount: 0, grandTotal: 0 };
   const favoriteItemIds = new Set(

@@ -18,7 +18,8 @@ export function useCartActions() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const { data: cart, mutate } = useSWR(authenticated ? "/api/cart" : null);
-  const items: CartItem[] = useMemo(() => cart?.items || [], [cart?.items]);
+  const cartObj = (cart as any)?.data || cart;
+  const items: CartItem[] = useMemo(() => cartObj?.items || [], [cartObj?.items]);
   const quantities = useMemo(
     () => new Map(items.map((item) => [item.menu_item_id, item.quantity])),
     [items]

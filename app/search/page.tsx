@@ -19,7 +19,13 @@ function SearchContent() {
 
   const { data, isLoading } = useSWR(query ? `/api/search?q=${encodeURIComponent(query)}` : null);
 
-  const results = Array.isArray(data) ? data : [];
+  const results = Array.isArray(data)
+    ? data
+    : Array.isArray(data?.data)
+      ? data.data
+      : Array.isArray(data?.results)
+        ? data.results
+        : [];
   const restaurants = results.filter((r: any) => r.type === "restaurant");
   const menuItems = results.filter((r: any) => r.type === "menu_item");
   const cuisines = results.filter((r: any) => r.type === "cuisine");

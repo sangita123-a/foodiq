@@ -1,7 +1,15 @@
+/** Known production API origin fallback */
+const PRODUCTION_API_FALLBACK = "https://foodiq-2.onrender.com";
+
 /** Base URL for backend-served images. Relative paths from the API are prefixed with this. */
-const BACKEND_BASE =
-  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL) ||
-  "https://foodiq-2.onrender.com";
+export function getBackendBase(): string {
+  const envUrl = (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL) || "";
+  const trimmed = envUrl.trim();
+  if (!trimmed || trimmed.includes("foodiq-backend-api.onrender.com") || trimmed.includes("localhost")) {
+    return PRODUCTION_API_FALLBACK;
+  }
+  return trimmed.replace(/\/$/, "");
+}
 
 /**
  * Converts a possibly-relative backend image path to an absolute URL.
@@ -16,13 +24,14 @@ export function resolveBackendUrl(path: string | null | undefined): string | nul
   // Already absolute
   if (p.startsWith("http://") || p.startsWith("https://")) return p;
   // Relative path from backend — prefix with backend origin
-  return `${BACKEND_BASE}${p.startsWith("/") ? "" : "/"}${p}`;
+  const base = getBackendBase();
+  return `${base}${p.startsWith("/") ? "" : "/"}${p}`;
 }
 
-export const RESTAURANT_FALLBACK = "/images/catalog/restaurants/indian.webp";
-export const FOOD_FALLBACK = "/images/catalog/food/indian.webp";
-export const OFFER_FALLBACK = "/images/catalog/cuisines/pizza.webp";
-export const AVATAR_FALLBACK = "/images/catalog/cuisines/healthy.webp";
+export const RESTAURANT_FALLBACK = resolveBackendUrl("/images/catalog/restaurants/indian.webp")!;
+export const FOOD_FALLBACK = resolveBackendUrl("/images/catalog/food/indian.webp")!;
+export const OFFER_FALLBACK = resolveBackendUrl("/images/catalog/cuisines/pizza.webp")!;
+export const AVATAR_FALLBACK = resolveBackendUrl("/images/catalog/cuisines/healthy.webp")!;
 
 export const OFFER_IMAGES: Record<string, string> = {
   WELCOME50: "/images/catalog/cuisines/pizza.webp",

@@ -12,21 +12,22 @@ export function useFavoriteActions() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const { data, mutate } = useSWR(authenticated ? "/api/favorites" : null);
+  const dataObj = (data as any)?.data || data;
   const itemIds = useMemo(
     () =>
       new Set<string>(
-        (data?.items || []).map((item: { menu_item_id?: string; id?: string }) => item.menu_item_id || item.id || "")
+        (dataObj?.items || (Array.isArray(dataObj) ? dataObj : [])).map((item: { menu_item_id?: string; id?: string }) => item.menu_item_id || item.id || "")
       ),
-    [data]
+    [dataObj]
   );
   const restaurantIds = useMemo(
     () =>
       new Set<string>(
-        (data?.restaurants || []).map(
+        (dataObj?.restaurants || []).map(
           (item: { restaurant_id?: string; id?: string }) => item.restaurant_id || item.id || ""
         )
       ),
-    [data]
+    [dataObj]
   );
 
   const toggleItem = async (id: string) => {

@@ -52,7 +52,8 @@ type FoodDetails = {
 export default function FoodDetailView({ id }: { id: string }) {
   const router = useRouter();
   const { showToast } = useToast();
-  const { data: food, isLoading, error } = useSWR<FoodDetails>(id ? `/api/menu-items/${id}` : null);
+  const { data: rawFood, isLoading, error } = useSWR<any>(id ? `/api/menu-items/${id}` : null);
+  const food: FoodDetails | undefined = (rawFood as any)?.data || rawFood;
   const { quantities, updatingId, updateQuantity, addAndCheckout } = useCartActions();
   const { itemIds, toggleItem } = useFavoriteActions();
   const [activeImage, setActiveImage] = useState(0);

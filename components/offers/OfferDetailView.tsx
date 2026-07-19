@@ -20,12 +20,16 @@ type Props = {
 export default function OfferDetailView({ offerId }: Props) {
   const { quantities, updatingId, updateQuantity, cart } = useCartActions();
 
-  const { data: offer, isLoading: loadingOffer, error: offerError } = useSWR(
+  const { data: rawOffer, isLoading: loadingOffer, error: offerError } = useSWR(
     offerId ? `/api/offers/${offerId}` : null
   );
-  const { data: items, isLoading: loadingItems } = useSWR(
+  const { data: rawItems, isLoading: loadingItems } = useSWR(
     offerId ? `/api/offers/${offerId}/items` : null
   );
+
+  const offer = (rawOffer as any)?.data || rawOffer;
+  const itemsArray = (rawItems as any)?.data || rawItems;
+  const items = Array.isArray(itemsArray) ? itemsArray : [];
 
   const cartItems = cart?.items || [];
 

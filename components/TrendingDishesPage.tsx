@@ -28,7 +28,14 @@ export default function TrendingDishesPage() {
   const { itemIds, updatingId: favoriteUpdatingId, toggleItem } = useFavoriteActions();
 
   const dishes: TrendingDish[] = useMemo(() => {
-    return (menuItems || []).map((item: any) => ({
+    const rawArray = Array.isArray(menuItems)
+      ? menuItems
+      : Array.isArray(menuItems?.data)
+        ? menuItems.data
+        : Array.isArray(menuItems?.items)
+          ? menuItems.items
+          : [];
+    return rawArray.map((item: any) => ({
       id: item.id,
       name: item.name,
       restaurant: item.restaurant_name || "Foodiq Partner",
