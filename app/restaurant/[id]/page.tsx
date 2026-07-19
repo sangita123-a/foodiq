@@ -61,7 +61,7 @@ export default function RestaurantPage() {
 
   const isValidId = Boolean(id && id.length >= 8);
 
-  const { data: restaurantResponse, isLoading: isLoadingRest } = useSWR(
+  const { data: restaurantResponse, isLoading: isLoadingRest, error: restaurantError } = useSWR(
     id ? `/api/restaurants/${id}` : null
   );
   const { data: menuResponse, isLoading: isLoadingMenu } = useSWR(
