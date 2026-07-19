@@ -130,7 +130,15 @@ export default function TrendingDishesPage() {
                     {qty === 0 ? (
                       <button
                         type="button"
-                        onClick={() => updateQuantity(dish.id, 1)}
+                        onClick={() =>
+                          updateQuantity(dish.id, 1, {
+                            restaurant_id: dish.restaurantId,
+                            name: dish.name,
+                            price: dish.price,
+                            image: dish.image,
+                            isVeg: dish.isVeg,
+                          })
+                        }
                         disabled={isUpdating}
                         className="inline-flex items-center gap-1 bg-primary text-white hover:bg-primary-hover px-3.5 py-1.5 rounded-xl text-xs font-extrabold shadow-sm transition-all disabled:opacity-50"
                       >
@@ -170,7 +178,15 @@ export default function TrendingDishesPage() {
                     </Link>
                     <button
                       type="button"
-                      onClick={() => addAndCheckout(dish.id, router)}
+                      onClick={() =>
+                        addAndCheckout(dish.id, router, {
+                          restaurant_id: dish.restaurantId,
+                          name: dish.name,
+                          price: dish.price,
+                          image: dish.image,
+                          isVeg: dish.isVeg,
+                        })
+                      }
                       disabled={isUpdating}
                       className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#0F172A] text-white hover:bg-primary text-xs font-bold transition-colors disabled:opacity-50"
                     >

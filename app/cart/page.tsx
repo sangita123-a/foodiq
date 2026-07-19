@@ -18,7 +18,7 @@ export default function CartPage() {
 
   const handleClearCart = () => {
     clearLocalCart();
-    showToast("Cart cleared", "info");
+    showToast("Cart cleared", "success");
   };
 
   const deliveryCharge = items.length > 0 ? 35 : 0;
