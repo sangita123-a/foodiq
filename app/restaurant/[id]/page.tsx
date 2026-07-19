@@ -26,6 +26,7 @@ import CatalogViewTracker from "@/components/analytics/CatalogViewTracker";
 import { isClientAuthenticated } from "@/lib/authSession";
 import { useAuthToken } from "@/hooks/useAuthToken";
 import { POPULAR_RESTAURANTS_30, TRENDING_DISHES_60 } from "@/lib/data/30restaurantsData";
+import { getMenuForRestaurant } from "@/lib/data/restaurantMenusData";
 
 function computeDealDisplayPrice(
   basePrice: number,
@@ -89,10 +90,16 @@ export default function RestaurantPage() {
   const apiMenuItems = Array.isArray(rawMenu) ? rawMenu : [];
 
   const menuItems = useMemo(() => {
-    if (apiMenuItems.length > 0) return apiMenuItems;
-    const matchingDishes = TRENDING_DISHES_60.filter((d) => d.restaurantId === id);
-    return matchingDishes.length > 0 ? matchingDishes : TRENDING_DISHES_60.slice(0, 10);
-  }, [apiMenuItems, id]);
+    if (apiMenuItems.length > 0) {
+      const isValid = apiMenuItems.some((item: any) => {
+        const itemCat = String(item.category_name || item.category || "").toLowerCase();
+        const restCat = String(restaurant?.category || restaurant?.cuisine || "").toLowerCase();
+        return itemCat && restCat && (itemCat.includes(restCat) || restCat.includes(itemCat));
+      });
+      if (isValid) return apiMenuItems;
+    }
+    return getMenuForRestaurant(id, restaurant?.category, restaurant?.name);
+  }, [apiMenuItems, id, restaurant]);
   const cartItems = cartResponse?.items || [];
   const cartTotals = cartResponse?.totals || { subtotal: 0, deliveryCharge: 0, tax: 0, discount: 0, grandTotal: 0 };
   const favoriteItemIds = new Set(
