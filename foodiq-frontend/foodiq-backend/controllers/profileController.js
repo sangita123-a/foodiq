@@ -9,7 +9,8 @@ const getProfile = async (req, res) => {
   try {
     const { rows } = await pool.query(
       `SELECT id, email, full_name, phone_number, role, profile_image_url,
-              date_of_birth, gender, two_factor_enabled, created_at
+              date_of_birth, gender, two_factor_enabled, created_at,
+              address_line, city, state, pincode, profile_banner_url
        FROM users WHERE id = $1 AND COALESCE(is_deleted, false) = false`,
       [req.user.id]
     );
@@ -38,6 +39,11 @@ const updateProfile = async (req, res) => {
       two_factor_enabled,
       old_password,
       new_password,
+      address_line,
+      city,
+      state,
+      pincode,
+      profile_banner_url,
     } = req.body;
 
     let query = `
@@ -48,7 +54,12 @@ const updateProfile = async (req, res) => {
         profile_image_url = COALESCE($4, profile_image_url),
         date_of_birth = COALESCE($5, date_of_birth),
         gender = COALESCE($6, gender),
-        two_factor_enabled = COALESCE($7, two_factor_enabled)
+        two_factor_enabled = COALESCE($7, two_factor_enabled),
+        address_line = COALESCE($8, address_line),
+        city = COALESCE($9, city),
+        state = COALESCE($10, state),
+        pincode = COALESCE($11, pincode),
+        profile_banner_url = COALESCE($12, profile_banner_url)
     `;
     const values = [
       full_name ?? null,
@@ -58,8 +69,13 @@ const updateProfile = async (req, res) => {
       date_of_birth || null,
       gender || null,
       typeof two_factor_enabled === 'boolean' ? two_factor_enabled : null,
+      address_line ?? null,
+      city ?? null,
+      state ?? null,
+      pincode ?? null,
+      profile_banner_url ?? null,
     ];
-    let valueIndex = 8;
+    let valueIndex = 13;
 
     if (old_password && new_password) {
       if (String(new_password).length < 8) {
@@ -83,7 +99,8 @@ const updateProfile = async (req, res) => {
 
     query += ` WHERE id = $${valueIndex}
       RETURNING id, email, full_name, phone_number, role, profile_image_url,
-                date_of_birth, gender, two_factor_enabled, created_at`;
+                date_of_birth, gender, two_factor_enabled, created_at,
+                address_line, city, state, pincode, profile_banner_url`;
     values.push(req.user.id);
 
     const { rows: updatedRows } = await pool.query(query, values);

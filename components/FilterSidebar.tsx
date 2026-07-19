@@ -43,11 +43,11 @@ export default function FilterSidebar() {
     }
 
     params.delete("page");
-    router.push(`/restaurants?${params.toString()}`, { scroll: false });
+    router.push(`/order-online?${params.toString()}`, { scroll: false });
   };
 
   const clearFilters = () => {
-    router.push("/restaurants", { scroll: false });
+    router.push("/order-online", { scroll: false });
   };
 
   return (

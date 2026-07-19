@@ -13,6 +13,7 @@ import {
   type FeedbackInbox,
 } from "@/services/adminApi";
 import { MessageSquare, RefreshCw } from "lucide-react";
+import ContactMessagesAdmin from "@/components/admin/ContactMessagesAdmin";
 
 type Tab = "orders" | "analytics" | "product" | "support" | "contact" | "reviews";
 
@@ -379,17 +380,9 @@ export default function AdminFeedbackPage() {
               onStatus={(id, s) => void patchSupport(id, s)}
             />
           ) : tab === "contact" ? (
-            <FeedbackTable
+            <ContactMessagesAdmin
               rows={(inbox?.contact || []) as Array<Record<string, unknown>>}
-              columns={[
-                "name",
-                "email",
-                "reason",
-                "subject",
-                "status",
-                "created_at",
-              ]}
-              onStatus={(id, s) => void patchContact(id, s)}
+              onRefresh={() => void load()}
             />
           ) : (
             <div>

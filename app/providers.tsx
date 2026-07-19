@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { SWRConfig } from "swr";
 import dynamic from "next/dynamic";
 import { fetcher } from "@/services/api";
@@ -8,14 +9,14 @@ import ErrorBoundary from "@/components/monitoring/ErrorBoundary";
 import AnalyticsProvider from "@/components/analytics/AnalyticsProvider";
 import AuthBootstrap from "@/components/AuthBootstrap";
 import { FeatureFlagProvider } from "@/lib/featureFlags";
-import React from "react";
+import { SiteSettingsProvider } from "@/contexts/SiteSettingsContext";
 
 const PushNotificationProvider = dynamic(
   () => import("@/components/notifications/PushNotificationProvider"),
   { ssr: false }
 );
 
-function SWRGlobalConfig({ children }: { children: React.ReactNode }) {
+function SWRGlobalConfig({ children }: { children: ReactNode }) {
   const { showToast } = useToast();
 
   return (
@@ -43,7 +44,7 @@ function SWRGlobalConfig({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ children }: { children: ReactNode }) {
   return (
     <ToastProvider>
       <ErrorBoundary>
@@ -51,7 +52,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <AuthBootstrap />
           <SWRGlobalConfig>
             <FeatureFlagProvider>
-              <PushNotificationProvider>{children}</PushNotificationProvider>
+              <SiteSettingsProvider>
+                <PushNotificationProvider>{children}</PushNotificationProvider>
+              </SiteSettingsProvider>
             </FeatureFlagProvider>
           </SWRGlobalConfig>
         </AnalyticsProvider>

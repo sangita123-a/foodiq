@@ -326,6 +326,39 @@ async function ensureSchema() {
       ON CONFLICT (id) DO NOTHING
     `);
 
+    const siteSettingColumns = [
+      ['logo_url', 'TEXT'],
+      ['website_url', "VARCHAR(500) DEFAULT 'https://foodiq.com'"],
+      ['office_address', 'TEXT'],
+      ['whatsapp_number', 'VARCHAR(30)'],
+      ['google_maps_embed_url', 'TEXT'],
+      ['business_hours', "TEXT DEFAULT 'Mon - Sun: 24/7 Support'"],
+      ['facebook_url', 'VARCHAR(500)'],
+      ['instagram_url', 'VARCHAR(500)'],
+      ['twitter_url', 'VARCHAR(500)'],
+      ['linkedin_url', 'VARCHAR(500)'],
+      ['youtube_url', 'VARCHAR(500)'],
+      ['theme_color', "VARCHAR(20) DEFAULT '#E23744'"],
+      ['footer_content', 'TEXT'],
+      ['privacy_policy_text', 'TEXT'],
+      ['terms_of_service_text', 'TEXT'],
+      ['company_name', "VARCHAR(255) DEFAULT 'Foodiq'"],
+    ];
+    for (const [col, typ] of siteSettingColumns) {
+      await q(`ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS ${col} ${typ}`);
+    }
+
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS address_line VARCHAR(255)`);
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS city VARCHAR(100)`);
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS state VARCHAR(100)`);
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS pincode VARCHAR(20)`);
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_banner_url TEXT`);
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth DATE`);
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS gender VARCHAR(30)`);
+
+    await q(`ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS admin_reply TEXT`);
+    await q(`ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT FALSE`);
+
     await q(`
       ALTER TABLE notifications
         ADD COLUMN IF NOT EXISTS type VARCHAR(60) DEFAULT 'alert',

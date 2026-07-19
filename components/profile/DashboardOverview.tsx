@@ -6,6 +6,7 @@ import useSWR from "swr";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ProfileTab } from "./ProfileSidebar";
+import FavoritesPanel from "./FavoritesPanel";
 
 type Props = {
   onNavigate?: (tab: ProfileTab) => void;
@@ -214,27 +215,32 @@ export default function DashboardOverview({ onNavigate }: Props) {
       </div>
 
       <div className="bg-[#F8FAFC] rounded-[24px] p-6 md:p-8 border border-[#E5E7EB]">
-        <h2 className="text-xl font-bold text-white mb-6">Quick Links</h2>
+        <h2 className="mb-6 text-xl font-bold text-[#222222]">Quick Links</h2>
         <div className="flex flex-wrap gap-3">
           <Link
-            href="/restaurants"
-            className="bg-primary/10 text-primary px-4 py-2 rounded-xl text-sm font-bold hover:bg-primary/20"
+            href="/order-online"
+            className="rounded-xl bg-[#E23744]/10 px-4 py-2 text-sm font-bold text-[#E23744] hover:bg-[#E23744]/20"
           >
             Order Food
           </Link>
           <button
-            onClick={() => onNavigate?.("Favorites")}
-            className="bg-[#F8FAFC] text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-[#F8FAFC]"
+            type="button"
+            onClick={() => onNavigate?.("Wishlist")}
+            className="rounded-xl border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#222222] hover:bg-[#F8F9FA]"
           >
-            Favorites
+            Wishlist
           </button>
           <Link
             href="/coupons-rewards"
-            className="bg-[#F8FAFC] text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-[#F8FAFC]"
+            className="rounded-xl border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#222222] hover:bg-[#F8F9FA]"
           >
             Rewards
           </Link>
         </div>
+      </div>
+
+      <div className="mt-8">
+        <FavoritesPanel />
       </div>
     </motion.div>
   );

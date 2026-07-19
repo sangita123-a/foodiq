@@ -58,6 +58,9 @@ router.get('/feedback', feedbackAdmin.adminListFeedback);
 router.put('/feedback/product/:id', feedbackAdmin.adminPatchProductFeedback);
 router.put('/feedback/support/:id', feedbackAdmin.adminPatchSupport);
 router.put('/feedback/contact/:id', feedbackAdmin.adminPatchContact);
+router.put('/feedback/contact/:id/reply', feedbackAdmin.adminReplyContact);
+router.delete('/feedback/contact/:id', feedbackAdmin.adminDeleteContact);
+router.get('/feedback/contact/export', feedbackAdmin.adminExportContactCsv);
 
 router.get('/reviews', feedbackAdmin.adminListReviews);
 router.put('/reviews/:id', feedbackAdmin.adminPatchReview);

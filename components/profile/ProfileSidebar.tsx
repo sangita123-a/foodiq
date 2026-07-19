@@ -1,6 +1,19 @@
 "use client";
 
-import { Home, Package, Heart, MapPin, CreditCard, Ticket, Bell, Settings, LogOut, Award } from "lucide-react";
+import {
+  Home,
+  Package,
+  Heart,
+  MapPin,
+  CreditCard,
+  Ticket,
+  Bell,
+  Settings,
+  LogOut,
+  Shield,
+  Lock,
+  Award,
+} from "lucide-react";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
 import api from "@/services/api";
@@ -9,14 +22,16 @@ import { AVATAR_FALLBACK } from "@/lib/images";
 import { clearClientAuth } from "@/lib/authSession";
 
 export type ProfileTab =
-  | "Dashboard"
+  | "Overview"
   | "My Orders"
-  | "Favorites"
+  | "Wishlist"
   | "Saved Addresses"
   | "Payment Methods"
   | "Coupons"
   | "Notifications"
-  | "Settings";
+  | "Account Settings"
+  | "Privacy"
+  | "Security";
 
 type Props = {
   activeTab: ProfileTab;
@@ -24,21 +39,22 @@ type Props = {
 };
 
 const menuItems: { id: ProfileTab; label: string; icon: React.ReactNode }[] = [
-  { id: "Dashboard", label: "Dashboard", icon: <Home className="w-5 h-5" /> },
+  { id: "Overview", label: "Overview", icon: <Home className="w-5 h-5" /> },
   { id: "My Orders", label: "My Orders", icon: <Package className="w-5 h-5" /> },
-  { id: "Favorites", label: "Favorites", icon: <Heart className="w-5 h-5" /> },
+  { id: "Wishlist", label: "Wishlist", icon: <Heart className="w-5 h-5" /> },
   { id: "Saved Addresses", label: "Saved Addresses", icon: <MapPin className="w-5 h-5" /> },
   { id: "Payment Methods", label: "Payment Methods", icon: <CreditCard className="w-5 h-5" /> },
   { id: "Coupons", label: "Coupons", icon: <Ticket className="w-5 h-5" /> },
   { id: "Notifications", label: "Notifications", icon: <Bell className="w-5 h-5" /> },
-  { id: "Settings", label: "Settings", icon: <Settings className="w-5 h-5" /> },
+  { id: "Account Settings", label: "Account Settings", icon: <Settings className="w-5 h-5" /> },
+  { id: "Privacy", label: "Privacy", icon: <Shield className="w-5 h-5" /> },
+  { id: "Security", label: "Security", icon: <Lock className="w-5 h-5" /> },
 ];
-
-const DEFAULT_AVATAR = AVATAR_FALLBACK;
 
 export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
   const router = useRouter();
   const { data: user } = useSWR("/api/profile");
+  const profile = user?.data ?? user;
 
   const handleLogout = async () => {
     try {
@@ -49,51 +65,56 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
   };
 
   return (
-    <div className="bg-[#F8FAFC] rounded-[24px] border border-[#E5E7EB] overflow-hidden sticky top-[100px]">
-      <div className="p-6 md:p-8 flex flex-col items-center border-b border-[#E5E7EB] relative overflow-hidden">
-        <div className="absolute inset-0 bg-[#E23744]/5 blur-3xl pointer-events-none"></div>
-
-        <div className="w-24 h-24 rounded-full border-2 border-primary overflow-hidden relative z-10 mb-4 shadow-[0_0_20px_rgba(226, 55, 68,0.2)]">
-          <SafeImage
-            src={user?.profile_image_url}
-            fallback={DEFAULT_AVATAR}
-            alt={user?.full_name || "User"}
-            className="w-full h-full object-cover"
+    <div className="sticky top-[100px] overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="relative overflow-hidden border-b border-[#E5E7EB] p-6 md:p-8">
+        {profile?.profile_banner_url && (
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-20"
+            style={{ backgroundImage: `url('${profile.profile_banner_url}')` }}
           />
+        )}
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="mb-4 h-24 w-24 overflow-hidden rounded-full border-2 border-[#E23744] shadow-md">
+            <SafeImage
+              src={profile?.profile_image_url}
+              fallback={AVATAR_FALLBACK}
+              alt={profile?.full_name || "User"}
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <h2 className="mb-1 text-xl font-bold text-[#222222]">
+            {profile?.full_name || "Loading..."}
+          </h2>
+          <p className="mb-4 text-sm text-[#555555]">{profile?.email || ""}</p>
+          <div className="mb-4 flex items-center gap-1.5 rounded-full border border-yellow-500/20 bg-yellow-500/10 px-3 py-1.5 text-xs font-bold text-yellow-600">
+            <Award className="h-4 w-4 fill-yellow-500" />
+            Premium Member
+          </div>
+          <button
+            onClick={() => setActiveTab("Account Settings")}
+            className="w-full rounded-xl border border-[#E5E7EB] bg-[#F8F9FA] py-2 text-sm font-bold text-[#222222] transition hover:bg-[#ECECEC]"
+          >
+            Edit Profile
+          </button>
         </div>
-
-        <h2 className="text-xl font-bold text-white relative z-10 mb-1">
-          {user?.full_name || "Loading..."}
-        </h2>
-        <p className="text-sm text-[#6B7280] relative z-10 mb-4">{user?.email || ""}</p>
-
-        <div className="flex items-center gap-1.5 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs font-bold px-3 py-1.5 rounded-full relative z-10 mb-4">
-          <Award className="w-4 h-4 fill-yellow-500" />
-          Premium Member
-        </div>
-
-        <button
-          onClick={() => setActiveTab("Settings")}
-          className="relative z-10 w-full bg-[#F8FAFC] hover:bg-[#F8FAFC] text-white text-sm font-bold py-2 rounded-xl border border-[#E5E7EB] transition-colors"
-        >
-          Edit Profile
-        </button>
       </div>
 
-      <div className="flex flex-col py-4">
+      <div className="flex flex-col py-2">
         {menuItems.map((item) => {
           const isActive = activeTab === item.id;
           return (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex items-center gap-3 px-6 md:px-8 py-3.5 transition-colors relative ${
+              className={`relative flex items-center gap-3 px-6 py-3.5 text-left transition-colors md:px-8 ${
                 isActive
-                  ? "text-white font-bold bg-[#F8FAFC]"
-                  : "text-[#6B7280] font-medium hover:text-[#111827] hover:bg-[#F8FAFC]"
+                  ? "bg-[#FFF5F6] font-bold text-[#E23744]"
+                  : "font-medium text-[#555555] hover:bg-[#F8F9FA] hover:text-[#222222]"
               }`}
             >
-              {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-md"></div>}
+              {isActive && (
+                <div className="absolute bottom-0 left-0 top-0 w-1 rounded-r-md bg-[#E23744]" />
+              )}
               {item.icon}
               {item.label}
             </button>
@@ -101,12 +122,12 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
         })}
       </div>
 
-      <div className="p-4 border-t border-[#E5E7EB]">
+      <div className="border-t border-[#E5E7EB] p-4">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 md:px-4 py-3.5 w-full text-red-500 hover:bg-red-500/10 rounded-xl transition-colors font-bold"
+          className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 font-bold text-red-500 transition hover:bg-red-50"
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="h-5 w-5" />
           Logout
         </button>
       </div>

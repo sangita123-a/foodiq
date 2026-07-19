@@ -1,13 +1,15 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { DynamicLegalContent } from "@/components/site/DynamicLegalContent";
 
 export default function TermsOfServicePage() {
   return (
     <main className="min-h-screen bg-[#FFFFFF] pt-[90px]">
       <Navbar />
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-3xl">
-        <h1 className="text-3xl md:text-4xl font-black text-[#111827] mb-6">Terms of Service</h1>
-        <div className="prose space-y-4 text-[#6B7280]">
+        <h1 className="text-3xl md:text-4xl font-black text-[#222222] mb-6">Terms of Service</h1>
+        <DynamicLegalContent type="terms" />
+        <div className="prose space-y-4 text-[#555555] mt-6">
           <p>Last updated: July 2026</p>
           <p>
             By using Foodiq, you agree to these terms. Foodiq connects customers with restaurants and delivery

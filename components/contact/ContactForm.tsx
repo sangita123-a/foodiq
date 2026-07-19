@@ -23,59 +23,41 @@ export default function ContactForm() {
 
     try {
       setIsSubmitting(true);
-      await api.post('/api/contact', payload);
-      showToast("Message sent successfully. We will get back to you soon.", "success");
+      await api.post("/api/contact", payload);
+      showToast("Message sent successfully! We will get back to you soon.", "success");
       (e.target as HTMLFormElement).reset();
-    } catch (err: any) {
-      console.error(err);
-      showToast(err.response?.data?.message || "Failed to send message", "error");
+    } catch (err: unknown) {
+      const message =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      showToast(message || "Failed to send message", "error");
     } finally {
       setIsSubmitting(false);
     }
   };
+
   return (
-    <div className="bg-[#F8FAFC] rounded-3xl p-8 md:p-10 border border-[#E5E7EB] shadow-2xl h-full">
-      <h2 className="text-2xl font-bold text-white mb-2">Send us a Message</h2>
-      <p className="text-[#6B7280] text-sm mb-8">Fill out the form below and we'll get back to you as soon as possible.</p>
+    <div className="h-full rounded-3xl border border-[#E5E7EB] bg-white p-8 shadow-sm md:p-10">
+      <h2 className="mb-2 text-2xl font-bold text-[#222222]">Send us a Message</h2>
+      <p className="mb-8 text-sm text-[#555555]">
+        Fill out the form below and we&apos;ll get back to you as soon as possible.
+      </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Full Name</label>
-            <input 
-              type="text" 
-              name="name"
-              required
-              placeholder="John Doe"
-              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Email Address</label>
-            <input 
-              type="email" 
-              name="email"
-              required
-              placeholder="john@example.com"
-              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-            />
-          </div>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <Field label="Full Name" name="name" required placeholder="John Doe" />
+          <Field label="Email Address" name="email" type="email" required placeholder="john@example.com" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <Field label="Phone Number" name="phone" type="tel" placeholder="+91 9876543210" />
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Phone Number</label>
-            <input 
-              type="tel" 
-              name="phone"
-              placeholder="+91 9876543210"
-              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Reason for Contact</label>
-            <select name="reason" className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer">
+            <label className="mb-2 block text-sm font-bold text-[#555555]">Reason for Contact</label>
+            <select
+              name="reason"
+              className="w-full cursor-pointer appearance-none rounded-xl border border-[#E5E7EB] bg-white px-4 py-3.5 text-[#222222] focus:border-[#E23744] focus:outline-none"
+            >
               <option>General Inquiry</option>
               <option>Order Support</option>
               <option>Partnership</option>
@@ -86,38 +68,61 @@ export default function ContactForm() {
           </div>
         </div>
 
+        <Field label="Subject" name="subject" required placeholder="How can we help?" />
         <div>
-          <label className="block text-sm font-bold text-[#6B7280] mb-2">Subject</label>
-          <input 
-            type="text" 
-            name="subject"
-            required
-            placeholder="How can we help?"
-            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-bold text-[#6B7280] mb-2">Message</label>
-          <textarea 
+          <label className="mb-2 block text-sm font-bold text-[#555555]">Message</label>
+          <textarea
             name="message"
             required
             rows={5}
             placeholder="Write your message here..."
-            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
-          ></textarea>
+            className="w-full resize-none rounded-xl border border-[#E5E7EB] bg-white px-4 py-3.5 text-[#222222] focus:border-[#E23744] focus:outline-none"
+          />
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 pt-4">
-          <button type="submit" disabled={isSubmitting} className="flex-1 bg-primary hover:bg-[#C81E34] text-white px-6 py-4 rounded-xl font-black transition-colors shadow-xl flex items-center justify-center gap-2 disabled:opacity-50">
-            {isSubmitting ? "Sending..." : "Send Message"} <Send className="w-4 h-4" />
+        <div className="flex flex-col gap-4 pt-4 sm:flex-row">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#E23744] px-6 py-4 font-black text-white shadow-md transition hover:bg-[#C81E34] disabled:opacity-50"
+          >
+            {isSubmitting ? "Sending…" : "Send Message"} <Send className="h-4 w-4" />
           </button>
-          <button type="reset" className="w-full sm:w-auto bg-white hover:bg-[#F8FAFC] border border-[#E5E7EB] text-white px-6 py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2">
-            Clear Form <RefreshCcw className="w-4 h-4 text-[#6B7280]" />
+          <button
+            type="reset"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-6 py-4 font-bold text-[#222222] transition hover:bg-[#F8F9FA]"
+          >
+            Clear Form <RefreshCcw className="h-4 w-4 text-[#555555]" />
           </button>
         </div>
-
       </form>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  name,
+  type = "text",
+  required,
+  placeholder,
+}: {
+  label: string;
+  name: string;
+  type?: string;
+  required?: boolean;
+  placeholder?: string;
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-bold text-[#555555]">{label}</label>
+      <input
+        type={type}
+        name={name}
+        required={required}
+        placeholder={placeholder}
+        className="w-full rounded-xl border border-[#E5E7EB] bg-white px-4 py-3.5 text-[#222222] placeholder:text-[#888888] focus:border-[#E23744] focus:outline-none"
+      />
     </div>
   );
 }

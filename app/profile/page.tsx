@@ -11,20 +11,23 @@ import CouponsList from "@/components/profile/CouponsList";
 import FavoritesPanel from "@/components/profile/FavoritesPanel";
 import PaymentMethodsPanel from "@/components/profile/PaymentMethodsPanel";
 import NotificationsPanel from "@/components/profile/NotificationsPanel";
-import ProfileSettingsPanel from "@/components/profile/ProfileSettingsPanel";
+import WishlistPanel from "@/components/profile/WishlistPanel";
+import AccountSettingsPanel from "@/components/profile/AccountSettingsPanel";
+import PrivacyPanel from "@/components/profile/PrivacyPanel";
+import SecurityPanel from "@/components/profile/SecurityPanel";
 import { AnimatePresence } from "framer-motion";
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState<ProfileTab>("Dashboard");
+  const [activeTab, setActiveTab] = useState<ProfileTab>("Overview");
 
   const renderContent = () => {
     switch (activeTab) {
-      case "Dashboard":
-        return <DashboardOverview onNavigate={setActiveTab} />;
+      case "Overview":
+        return <DashboardOverview onNavigate={(tab) => setActiveTab(tab as ProfileTab)} />;
       case "My Orders":
         return <MyOrdersList />;
-      case "Favorites":
-        return <FavoritesPanel />;
+      case "Wishlist":
+        return <WishlistPanel />;
       case "Saved Addresses":
         return <SavedAddresses />;
       case "Payment Methods":
@@ -33,19 +36,23 @@ export default function ProfilePage() {
         return <CouponsList />;
       case "Notifications":
         return <NotificationsPanel />;
-      case "Settings":
-        return <ProfileSettingsPanel />;
+      case "Account Settings":
+        return <AccountSettingsPanel />;
+      case "Privacy":
+        return <PrivacyPanel />;
+      case "Security":
+        return <SecurityPanel />;
       default:
-        return <DashboardOverview onNavigate={setActiveTab} />;
+        return <DashboardOverview onNavigate={(tab) => setActiveTab(tab as ProfileTab)} />;
     }
   };
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="relative min-h-screen bg-[#FFFFFF] pt-[90px] selection:bg-[#E23744]/20">
       <Navbar />
 
-      <div className="container mx-auto px-4 md:px-8 py-12">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <div className="container mx-auto px-4 py-12 md:px-8">
+        <div className="flex flex-col gap-8 lg:flex-row">
           <div className="w-full lg:w-[30%] xl:w-[25%]">
             <ProfileSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
           </div>

@@ -117,15 +117,71 @@ const adminPatchSupport = async (req, res) => {
 
 const adminPatchContact = async (req, res) => {
   try {
+    const isRead = req.body.is_read === true || req.body.status === 'read';
     const { rows } = await pool.query(
       `UPDATE contact_messages
-       SET status = COALESCE($1, status)
-       WHERE id = $2
+       SET status = COALESCE($1, status),
+           admin_reply = COALESCE($2, admin_reply),
+           is_read = CASE WHEN $3 THEN TRUE WHEN $1 = 'open' THEN FALSE ELSE is_read END
+       WHERE id = $4
        RETURNING *`,
-      [req.body.status || null, req.params.id]
+      [req.body.status || null, req.body.admin_reply ?? null, isRead, req.params.id]
     );
     if (!rows[0]) return fail(res, 404, 'Message not found');
     return ok(res, 'Contact updated', rows[0]);
+  } catch (err) {
+    return fail(res, 500, 'Server Error', err);
+  }
+};
+
+const adminDeleteContact = async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'DELETE FROM contact_messages WHERE id = $1 RETURNING id',
+      [req.params.id]
+    );
+    if (!rows[0]) return fail(res, 404, 'Message not found');
+    return ok(res, 'Contact message deleted', { id: rows[0].id });
+  } catch (err) {
+    return fail(res, 500, 'Server Error', err);
+  }
+};
+
+const adminReplyContact = async (req, res) => {
+  try {
+    const reply = sanitizeText(req.body.admin_reply, 4000);
+    if (!reply) return fail(res, 400, 'admin_reply is required');
+    const { rows } = await pool.query(
+      `UPDATE contact_messages
+       SET admin_reply = $1, status = 'replied', is_read = TRUE
+       WHERE id = $2
+       RETURNING *`,
+      [reply, req.params.id]
+    );
+    if (!rows[0]) return fail(res, 404, 'Message not found');
+    return ok(res, 'Reply saved', rows[0]);
+  } catch (err) {
+    return fail(res, 500, 'Server Error', err);
+  }
+};
+
+const adminExportContactCsv = async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT name, email, phone, reason, subject, message, status, is_read, admin_reply, created_at
+       FROM contact_messages ORDER BY created_at DESC LIMIT 5000`
+    );
+    const header = 'name,email,phone,reason,subject,message,status,is_read,admin_reply,created_at';
+    const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const lines = rows.map((r) =>
+      [r.name, r.email, r.phone, r.reason, r.subject, r.message, r.status, r.is_read, r.admin_reply, r.created_at]
+        .map(escape)
+        .join(',')
+    );
+    const csv = [header, ...lines].join('\n');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="contact-messages.csv"');
+    return res.send(csv);
   } catch (err) {
     return fail(res, 500, 'Server Error', err);
   }
@@ -208,6 +264,9 @@ module.exports = {
   adminPatchProductFeedback,
   adminPatchSupport,
   adminPatchContact,
+  adminDeleteContact,
+  adminReplyContact,
+  adminExportContactCsv,
   adminListReviews,
   adminPatchReview,
   adminListOrderFeedback,

@@ -515,6 +515,10 @@ const updateSettings = async (data) => {
     delivery_charge, free_delivery_min, tax_percent, commission_percent,
     app_name, support_email, support_phone, payment_cod_enabled,
     payment_upi_enabled, payment_card_enabled, payment_razorpay_enabled,
+    logo_url, website_url, office_address, whatsapp_number, google_maps_embed_url,
+    business_hours, facebook_url, instagram_url, twitter_url, linkedin_url,
+    youtube_url, theme_color, footer_content, privacy_policy_text,
+    terms_of_service_text, company_name,
   } = data;
   await getSettings();
   const { rows } = await pool.query(
@@ -530,12 +534,32 @@ const updateSettings = async (data) => {
        payment_upi_enabled = COALESCE($9, payment_upi_enabled),
        payment_card_enabled = COALESCE($10, payment_card_enabled),
        payment_razorpay_enabled = COALESCE($11, payment_razorpay_enabled),
+       logo_url = COALESCE($12, logo_url),
+       website_url = COALESCE($13, website_url),
+       office_address = COALESCE($14, office_address),
+       whatsapp_number = COALESCE($15, whatsapp_number),
+       google_maps_embed_url = COALESCE($16, google_maps_embed_url),
+       business_hours = COALESCE($17, business_hours),
+       facebook_url = COALESCE($18, facebook_url),
+       instagram_url = COALESCE($19, instagram_url),
+       twitter_url = COALESCE($20, twitter_url),
+       linkedin_url = COALESCE($21, linkedin_url),
+       youtube_url = COALESCE($22, youtube_url),
+       theme_color = COALESCE($23, theme_color),
+       footer_content = COALESCE($24, footer_content),
+       privacy_policy_text = COALESCE($25, privacy_policy_text),
+       terms_of_service_text = COALESCE($26, terms_of_service_text),
+       company_name = COALESCE($27, company_name),
        updated_at = CURRENT_TIMESTAMP
      WHERE id = 1 RETURNING *`,
     [
       delivery_charge, free_delivery_min, tax_percent, commission_percent,
       app_name, support_email, support_phone, payment_cod_enabled,
       payment_upi_enabled, payment_card_enabled, payment_razorpay_enabled,
+      logo_url, website_url, office_address, whatsapp_number, google_maps_embed_url,
+      business_hours, facebook_url, instagram_url, twitter_url, linkedin_url,
+      youtube_url, theme_color, footer_content, privacy_policy_text,
+      terms_of_service_text, company_name,
     ]
   );
   return rows[0];

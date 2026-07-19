@@ -14,7 +14,7 @@ import { useCartActions } from "@/hooks/useCartActions";
 const NAV_LINKS = [
   { href: "/", label: "Home", isActive: (path: string) => path === "/" },
   { href: "/collections", label: "Collections", isActive: (path: string) => path.startsWith("/collections") },
-  { href: "/restaurants", label: "Restaurants", isActive: (path: string) => path.startsWith("/restaurants") || path.startsWith("/restaurant/") },
+  { href: "/order-online", label: "Restaurants", isActive: (path: string) => path.startsWith("/order-online") || path.startsWith("/restaurant/") || path.startsWith("/restaurants") },
   { href: "/offers", label: "Offers", isActive: (path: string) => path.startsWith("/offers") },
   { href: "/contact", label: "Contact", isActive: (path: string) => path.startsWith("/contact") },
 ];
@@ -108,7 +108,7 @@ export default function Navbar() {
         )}
 
         <Link
-          href="/restaurants"
+          href="/order-online"
           className="h-10 px-5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm shadow-[0_6px_16px_rgba(226, 55, 68,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_9px_22px_rgba(226, 55, 68,0.28)] active:translate-y-0 inline-flex items-center"
         >
           Order Online
