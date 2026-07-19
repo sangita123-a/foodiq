@@ -30,10 +30,14 @@ export function resolveBackendUrl(path: string | null | undefined): string | nul
   return `${base}${p.startsWith("/") ? "" : "/"}${p}`;
 }
 
-export const RESTAURANT_FALLBACK = resolveBackendUrl("/images/catalog/restaurants/indian.webp")!;
-export const FOOD_FALLBACK = resolveBackendUrl("/images/catalog/food/indian.webp")!;
-export const OFFER_FALLBACK = resolveBackendUrl("/images/catalog/cuisines/pizza.webp")!;
-export const AVATAR_FALLBACK = resolveBackendUrl("/images/catalog/cuisines/healthy.webp")!;
+/** Production-safe local fallbacks — always served from frontend / backend public root. */
+export const DEFAULT_RESTAURANT_IMAGE = "/default-restaurant.webp";
+export const DEFAULT_FOOD_IMAGE = "/default-food.webp";
+
+export const RESTAURANT_FALLBACK = DEFAULT_RESTAURANT_IMAGE;
+export const FOOD_FALLBACK = DEFAULT_FOOD_IMAGE;
+export const OFFER_FALLBACK = resolveBackendUrl("/images/catalog/cuisines/pizza.webp") ?? DEFAULT_FOOD_IMAGE;
+export const AVATAR_FALLBACK = resolveBackendUrl("/images/catalog/cuisines/healthy.webp") ?? DEFAULT_FOOD_IMAGE;
 
 export const OFFER_IMAGES: Record<string, string> = {
   WELCOME50: "/images/catalog/cuisines/pizza.webp",
@@ -88,11 +92,11 @@ export const BRAND_LOGOS: Record<string, string> = {
 };
 
 export function getRestaurantImage(url?: string | null): string {
-  return resolveBackendUrl(url) ?? RESTAURANT_FALLBACK;
+  return resolveBackendUrl(url) ?? DEFAULT_RESTAURANT_IMAGE;
 }
 
 export function getFoodImage(url?: string | null): string {
-  return resolveBackendUrl(url) ?? FOOD_FALLBACK;
+  return resolveBackendUrl(url) ?? DEFAULT_FOOD_IMAGE;
 }
 
 export function getBrandFoodImage(name: string, localPath?: string): string {

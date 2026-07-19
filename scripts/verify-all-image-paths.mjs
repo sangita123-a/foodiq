@@ -19,9 +19,9 @@ const filesToAudit = [
   path.join(process.cwd(), 'lib', 'data', 'categoryData.ts'),
   path.join(process.cwd(), 'components', 'TrendingDishes.tsx'),
   path.join(process.cwd(), 'components', 'TrendingDishesPage.tsx'),
+  path.join(process.cwd(), 'lib', 'data', 'collectionsData.ts'),
   path.join(process.cwd(), 'app', 'restaurant', '[id]', 'page.tsx'),
 ];
-
 const allUrls = new Set();
 for (const file of filesToAudit) {
   if (fs.existsSync(file)) {

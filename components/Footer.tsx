@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useSiteSettings } from "@/contexts/SiteSettingsContext";
+import SafeImage from "@/components/ui/SafeImage";
+import { DEFAULT_RESTAURANT_IMAGE } from "@/lib/images";
 
 export default function Footer() {
   const { settings } = useSiteSettings();
@@ -14,8 +16,14 @@ export default function Footer() {
         <div className="mb-6 md:mb-0">
           <div className="flex items-center text-3xl font-bold tracking-tight">
             {settings.logo_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={settings.logo_url} alt={company} className="mr-3 h-10 w-auto" />
+              <SafeImage
+                src={settings.logo_url}
+                fallback={DEFAULT_RESTAURANT_IMAGE}
+                alt={company}
+                width={120}
+                height={40}
+                className="mr-3 h-10 w-auto max-w-[120px] !object-contain"
+              />
             ) : null}
             <span className="text-white">Food</span>
             <span className="text-[#E23744]">iq</span>

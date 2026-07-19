@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import { Star, Quote } from "lucide-react";
 import { AVATAR_FALLBACK } from "@/lib/images";
 
@@ -59,13 +59,13 @@ export default function Reviews() {
             <p className="text-[#686B78] text-sm mb-8 leading-relaxed italic">"{review.review}"</p>
 
             <div className="flex items-center gap-4 mt-auto">
-              <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-[#E5E7EB]">
-                <Image 
+              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-[#E5E7EB]">
+                <SafeImage
                   src={review.image}
+                  fallback={AVATAR_FALLBACK}
                   alt={review.name}
                   fill
                   sizes="48px"
-                  className="object-cover"
                 />
               </div>
               <div>

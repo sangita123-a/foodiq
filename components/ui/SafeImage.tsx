@@ -1,16 +1,22 @@
 "use client";
 
 import Image, { type ImageProps } from "next/image";
-import { useState } from "react";
-import { resolveBackendUrl } from "@/lib/images";
+import { useCallback, useEffect, useState } from "react";
+import {
+  DEFAULT_FOOD_IMAGE,
+  DEFAULT_RESTAURANT_IMAGE,
+  resolveBackendUrl,
+} from "@/lib/images";
 
-type SafeImageProps = Omit<ImageProps, "src" | "alt" | "onError"> & {
+type SafeImageProps = Omit<ImageProps, "src" | "alt" | "onError" | "decoding"> & {
   src?: string | null;
   fallback: string;
   /** Accessible description. Required for meaningful images; use decorative for UI chrome. */
   alt?: string;
   decorative?: boolean;
 };
+
+const DEFAULT_DIMENSIONS = { width: 640, height: 480 } as const;
 
 function resolveSrc(src: string | null | undefined, fallback: string) {
   const value = typeof src === "string" ? src.trim() : "";
@@ -19,6 +25,28 @@ function resolveSrc(src: string | null | undefined, fallback: string) {
     return resolveBackendUrl(value) || fallback;
   }
   return value;
+}
+
+function pickUltimateFallback(fallback: string): string {
+  const lower = fallback.toLowerCase();
+  if (
+    lower.includes("restaurant") ||
+    lower.includes("logo") ||
+    lower.includes("default-restaurant")
+  ) {
+    return DEFAULT_RESTAURANT_IMAGE;
+  }
+  return DEFAULT_FOOD_IMAGE;
+}
+
+function withObjectCover(className?: string) {
+  const base = "object-cover object-center";
+  if (!className) return base;
+  if (className.includes("object-contain") || className.includes("object-fill")) {
+    return className;
+  }
+  if (className.includes("object-cover")) return className;
+  return `${base} ${className}`;
 }
 
 export default function SafeImage({
@@ -36,52 +64,56 @@ export default function SafeImage({
   ...props
 }: SafeImageProps) {
   const resolved = resolveSrc(src, fallback);
-  const [failedFor, setFailedFor] = useState<string | null>(null);
-  const imgSrc = failedFor === resolved ? fallback : resolved;
+  const ultimate = pickUltimateFallback(fallback);
+  const [activeSrc, setActiveSrc] = useState(resolved);
+
+  useEffect(() => {
+    setActiveSrc(resolveSrc(src, fallback));
+  }, [src, fallback]);
+
   const resolvedAlt = decorative
     ? ""
     : (alt && alt.trim()) || "Foodiq food image";
 
   const useFill = fill === true || (width == null && height == null);
+  const imgWidth = width ?? DEFAULT_DIMENSIONS.width;
+  const imgHeight = height ?? DEFAULT_DIMENSIONS.height;
+  const mergedClassName = withObjectCover(className);
+
   const unoptimized =
-    imgSrc.startsWith("data:") ||
-    imgSrc.startsWith("blob:") ||
+    activeSrc.startsWith("data:") ||
+    activeSrc.startsWith("blob:") ||
     props.unoptimized === true;
 
-  const handleError = () => {
-    if (resolved !== fallback) setFailedFor(resolved);
+  const handleError = useCallback(() => {
+    setActiveSrc((current) => {
+      if (current === ultimate) return ultimate;
+      if (current === fallback) return ultimate;
+      if (current === resolved) return fallback;
+      return ultimate;
+    });
+  }, [fallback, resolved, ultimate]);
+
+  const common = {
+    ...props,
+    src: activeSrc,
+    alt: resolvedAlt,
+    sizes,
+    priority,
+    loading: priority ? undefined : loading,
+    decoding: "async" as const,
+    unoptimized,
+    className: mergedClassName,
+    onError: handleError,
+    style: {
+      ...(props.style as object | undefined),
+      backgroundColor: "#F8F8F8",
+    },
   };
 
   if (useFill) {
-    return (
-      <Image
-        {...props}
-        src={imgSrc}
-        alt={resolvedAlt}
-        fill
-        sizes={sizes}
-        priority={priority}
-        loading={priority ? undefined : loading}
-        unoptimized={unoptimized}
-        className={className}
-        onError={handleError}
-      />
-    );
+    return <Image {...common} fill />;
   }
 
-  return (
-    <Image
-      {...props}
-      src={imgSrc}
-      alt={resolvedAlt}
-      width={width}
-      height={height}
-      sizes={sizes}
-      priority={priority}
-      loading={priority ? undefined : loading}
-      unoptimized={unoptimized}
-      className={className}
-      onError={handleError}
-    />
-  );
+  return <Image {...common} width={imgWidth} height={imgHeight} />;
 }

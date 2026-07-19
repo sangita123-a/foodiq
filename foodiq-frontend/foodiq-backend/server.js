@@ -245,12 +245,24 @@ app.use(
   express.static(imagesPath, {
     maxAge: '30d',
     immutable: false,
-    fallthrough: false,
+    fallthrough: true,
     setHeaders(res) {
       res.setHeader('Cache-Control', 'public, max-age=2592000');
     },
   })
 );
+
+app.get('/images/*', (req, res, next) => {
+  if (req.method !== 'GET') return next();
+  const p = req.path.toLowerCase();
+  const defName = /restaurant|logo/.test(p) ? 'default-restaurant.webp' : 'default-food.webp';
+  const defPath = path.join(__dirname, 'public', defName);
+  if (fs.existsSync(defPath)) {
+    res.setHeader('Cache-Control', 'public, max-age=2592000');
+    return res.sendFile(defPath);
+  }
+  return next();
+});
 
 app.use(
   '/media-files',

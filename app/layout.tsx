@@ -88,6 +88,8 @@ export default function RootLayout({
             <link rel="dns-prefetch" href={apiBase} />
           </>
         ) : null}
+        <link rel="preload" as="image" href="/default-restaurant.webp" type="image/webp" />
+        <link rel="preload" as="image" href="/default-food.webp" type="image/webp" />
       </head>
       <body className="min-h-full flex flex-col bg-white text-[#1C1C1C]">
         <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
