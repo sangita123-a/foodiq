@@ -6,7 +6,7 @@ import { Clock, Ticket } from "lucide-react";
 import Link from "next/link";
 import useSWR from "swr";
 import SafeImage from "@/components/ui/SafeImage";
-import { getBrandFoodImage, RESTAURANT_FALLBACK } from "@/lib/images";
+import { getBrandFoodImage, getBrandLogoImage, RESTAURANT_FALLBACK } from "@/lib/images";
 
 const LIVE_DEAL_FOOD_IMAGES: Record<string, string> = {
   "Domino's Pizza": "/images/catalog/dishes/pizza/cheese-burst-pizza.webp",
@@ -230,13 +230,15 @@ const formatTime = (totalSeconds: number) => {
 };
 
 function mapApiDeal(apiDeal: any, index: number): Deal {
-  const fallback = fallbackDeals[index] || fallbackDeals[0];
+  const fallback = ALL_FALLBACKS[index % ALL_FALLBACKS.length];
   const restaurant = apiDeal.restaurant_name || fallback.restaurant;
+
   return {
     id: apiDeal.id || fallback.id,
     restaurant,
-    restaurantId: apiDeal.restaurant_id,
-    logo: apiDeal.logo_url || fallback.logo,
+    restaurantId: apiDeal.restaurant_id || fallback.restaurantId,
+    orderPath: fallback.orderPath,
+    logo: getBrandLogoImage(restaurant),
     image:
       LIVE_DEAL_FOOD_IMAGES[restaurant] ||
       getBrandFoodImage(restaurant, apiDeal.banner_url) ||
@@ -255,8 +257,8 @@ export default function LiveDeals() {
   const deals: Deal[] = useMemo(() => {
     const baseDeals: Deal[] = apiDeals?.length
       ? apiDeals.map((d: any, i: number) => mapApiDeal(d, i))
-      : fallbackDeals;
-    return [...baseDeals, ...extraDeals];
+      : fallbackDeals.map((d) => ({ ...d, logo: getBrandLogoImage(d.restaurant) }));
+    return [...baseDeals, ...extraDeals.map((d) => ({ ...d, logo: getBrandLogoImage(d.restaurant) }))];
   }, [apiDeals]);
 
   const [timers, setTimers] = useState<{ [key: number]: number }>({});

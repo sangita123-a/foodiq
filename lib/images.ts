@@ -78,6 +78,11 @@ export const BRAND_LOGOS: Record<string, string> = {
   "Domino's Pizza": "/images/catalog/logos/pizza.webp",
   KFC: "/images/catalog/logos/fast-food.webp",
   "Burger King": "/images/catalog/logos/burger.webp",
+  "Pizza Hut": "/images/catalog/logos/pizza.webp",
+  "McDonald's": "/images/catalog/logos/burger.webp",
+  "Taco Bell": "/images/catalog/logos/fast-food.webp",
+  Starbucks: "/images/catalog/logos/healthy.webp",
+  "Baskin Robbins": "/images/catalog/logos/desserts.webp",
 };
 
 export function getRestaurantImage(url?: string | null): string {
