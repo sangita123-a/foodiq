@@ -18,7 +18,7 @@ export default function FeaturedCollections() {
             ✨ Featured Collections
           </h2>
           <p className="mt-1 text-sm font-medium text-[#666666] md:text-base">
-            Handpicked collections curated specially for you.
+            Handpicked experiences curated just for you.
           </p>
         </div>
 
@@ -39,16 +39,17 @@ export default function FeaturedCollections() {
                 className="block object-cover object-center transition-transform duration-500 ease-out group-hover/card:scale-110"
               />
 
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10 transition-all duration-300 group-hover/card:from-black/90 group-hover/card:via-black/55" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/50 to-black/15 transition-all duration-300 group-hover/card:from-black/92 group-hover/card:via-black/60" />
 
               <div className="absolute inset-0 z-10 flex flex-col justify-end p-4">
-                <span className="mb-1.5 w-fit rounded-full border border-white/20 bg-black/30 px-2.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
+                <span className="mb-1 text-lg leading-none">{collection.emoji}</span>
+                <span className="mb-1.5 w-fit rounded-full border border-white/20 bg-black/35 px-2.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
                   {collection.itemCount}
                 </span>
                 <h3 className="text-base font-black leading-tight text-white md:text-lg">
                   {collection.title}
                 </h3>
-                <p className="mt-1 line-clamp-1 text-[11px] font-medium text-white/75 md:text-xs">
+                <p className="mt-1 line-clamp-2 text-[11px] font-medium text-white/80 md:text-xs">
                   {collection.description}
                 </p>
                 <span className="mt-2.5 inline-flex items-center gap-1 text-xs font-bold text-white transition-all duration-300 group-hover/card:gap-2 group-hover/card:text-[#FFB4BA]">

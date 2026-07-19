@@ -21,6 +21,7 @@ import {
 import {
   getCollectionDishById,
   getCollectionDishes,
+  getCollectionFeaturedDish,
   isCollectionDishId,
 } from "@/lib/data/collectionsData";
 
@@ -98,12 +99,17 @@ function collectionDishToFoodDetails(id: string): FoodDetails | undefined {
   const dish = getCollectionDishById(id);
   if (!dish) return undefined;
 
+  const featured = getCollectionFeaturedDish(id);
+  const displayName = featured?.name ?? dish.name;
+  const displayImage = featured?.image ?? dish.image;
+  const displayDescription = featured?.description ?? dish.description;
+
   const related = getCollectionDishes(dish.collection)
     .filter((item) => item.id !== dish.id)
     .slice(0, 4)
     .map((item) => ({
       id: item.id,
-      name: item.name,
+      name: item.restaurantName,
       description: item.description,
       image_url: item.image,
       price: item.originalPrice,
@@ -114,9 +120,9 @@ function collectionDishToFoodDetails(id: string): FoodDetails | undefined {
 
   return {
     id: dish.id,
-    name: dish.name,
-    description: dish.description,
-    image_url: dish.image,
+    name: displayName,
+    description: displayDescription,
+    image_url: displayImage,
     price: dish.originalPrice,
     discount_price: dish.price,
     rating: dish.rating,

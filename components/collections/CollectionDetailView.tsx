@@ -7,7 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingCart from "@/components/FloatingCart";
 import SafeImage from "@/components/ui/SafeImage";
-import CollectionFoodCard from "@/components/collections/CollectionFoodCard";
+import CollectionRestaurantCard from "@/components/collections/CollectionRestaurantCard";
 import CollectionNotFound from "@/components/collections/CollectionNotFound";
 import { RESTAURANT_FALLBACK } from "@/lib/images";
 import { useCartActions } from "@/hooks/useCartActions";
@@ -16,6 +16,7 @@ import { useToast } from "@/contexts/ToastContext";
 import {
   getCollectionBySlug,
   getCollectionDishes,
+  getCollectionFeaturedDish,
   type CollectionDishItem,
 } from "@/lib/data/collectionsData";
 
@@ -32,18 +33,17 @@ export default function CollectionDetailView({ slug }: Props) {
   const { itemIds, toggleItem } = useFavoriteActions();
 
   const collection = getCollectionBySlug(slug);
-  const dishes = getCollectionDishes(slug);
+  const items = getCollectionDishes(slug);
 
-  const filteredDishes = useMemo(() => {
+  const filteredItems = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    let list = dishes.filter((dish) => {
+    let list = items.filter((item) => {
       const matchesSearch =
         !query ||
-        dish.name.toLowerCase().includes(query) ||
-        dish.restaurantName.toLowerCase().includes(query);
+        item.restaurantName.toLowerCase().includes(query) ||
+        item.description.toLowerCase().includes(query);
       const matchesDiet =
-        diet === "all" ||
-        (diet === "veg" ? dish.isVeg : !dish.isVeg);
+        diet === "all" || (diet === "veg" ? item.isVeg : !item.isVeg);
       return matchesSearch && matchesDiet;
     });
 
@@ -55,20 +55,21 @@ export default function CollectionDetailView({ slug }: Props) {
     });
 
     return list;
-  }, [dishes, diet, searchQuery, sort]);
+  }, [items, diet, searchQuery, sort]);
 
-  const handleAddToCart = async (dish: CollectionDishItem) => {
-    await updateQuantity(dish.id, 1, {
-      restaurant_id: dish.restaurantId,
-      name: dish.name,
-      price: dish.price,
-      image: dish.image,
-      isVeg: dish.isVeg,
+  const handleAddToCart = async (item: CollectionDishItem) => {
+    const featured = getCollectionFeaturedDish(item.id);
+    await updateQuantity(item.id, 1, {
+      restaurant_id: item.restaurantId,
+      name: featured?.name ?? item.restaurantName,
+      price: featured?.price ?? item.price,
+      image: featured?.image ?? item.image,
+      isVeg: featured?.isVeg ?? item.isVeg,
     });
-    showToast(`🛒 ${dish.name} added to cart!`, "success");
+    showToast(`🛒 Added to cart from ${item.restaurantName}!`, "success");
   };
 
-  if (!collection || dishes.length === 0) {
+  if (!collection || items.length === 0) {
     return <CollectionNotFound slug={slug} />;
   }
 
@@ -98,26 +99,26 @@ export default function CollectionDetailView({ slug }: Props) {
             />
           </div>
           <div className="relative z-10 bg-gradient-to-r from-black/85 via-black/50 to-transparent p-8 md:p-12">
-            <span className="mb-3 inline-block text-2xl">{collection.emoji}</span>
+            <span className="mb-3 inline-block text-3xl">{collection.emoji}</span>
             <h1 className="mb-3 text-3xl font-black text-white md:text-5xl">{collection.title}</h1>
             <p className="mb-4 max-w-2xl text-sm font-medium text-gray-200 md:text-lg">
               {collection.description}
             </p>
             <span className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/15 px-4 py-2 text-xs font-bold text-white backdrop-blur-md">
-              {collection.itemCount} · {dishes.length} dishes available
+              {collection.itemCount} · {items.length} spots listed
             </span>
           </div>
         </div>
 
         <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <label className="relative w-full lg:max-w-md">
-            <span className="sr-only">Search dishes</span>
+            <span className="sr-only">Search restaurants</span>
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8E8E8E]" />
             <input
               type="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search dishes or restaurants..."
+              placeholder="Search restaurants..."
               className="h-11 w-full rounded-xl border border-[#ECECEC] bg-[#F8F8F8] pl-10 pr-4 text-sm text-[#1A1A1A] outline-none transition-colors placeholder:text-gray-500 focus:border-[#E23744]"
             />
           </label>
@@ -156,19 +157,19 @@ export default function CollectionDetailView({ slug }: Props) {
           </div>
         </div>
 
-        {filteredDishes.length === 0 ? (
+        {filteredItems.length === 0 ? (
           <div className="rounded-2xl border border-[#ECECEC] bg-[#FFF5F6] px-6 py-16 text-center">
-            <p className="text-lg font-black text-[#1A1A1A]">No dishes found</p>
+            <p className="text-lg font-black text-[#1A1A1A]">No restaurants found</p>
             <p className="mt-2 text-sm text-[#666666]">Try adjusting search or filters.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 md:gap-6">
-            {filteredDishes.map((dish) => (
-              <CollectionFoodCard
-                key={dish.id}
-                dish={dish}
-                quantity={quantities.get(dish.id) || 0}
-                isFavorite={itemIds.has(dish.id)}
+            {filteredItems.map((item) => (
+              <CollectionRestaurantCard
+                key={item.id}
+                item={item}
+                quantity={quantities.get(item.id) || 0}
+                isFavorite={itemIds.has(item.id)}
                 onAddToCart={handleAddToCart}
                 onUpdateQuantity={updateQuantity}
                 onToggleFavorite={toggleItem}
