@@ -230,7 +230,7 @@ const formatTime = (totalSeconds: number) => {
 };
 
 function mapApiDeal(apiDeal: any, index: number): Deal {
-  const fallback = ALL_FALLBACKS[index % ALL_FALLBACKS.length];
+  const fallback = fallbackDeals[index % fallbackDeals.length];
   const restaurant = apiDeal.restaurant_name || fallback.restaurant;
 
   return {
