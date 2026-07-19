@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Clock, Heart, MapPin, Sparkles, Star, Tag } from "lucide-react";
+import { ArrowRight, Heart, Sparkles, Star } from "lucide-react";
 import useSWR from "swr";
 import SafeImage from "@/components/ui/SafeImage";
 import { getRestaurantImage, RESTAURANT_FALLBACK } from "@/lib/images";
@@ -74,34 +74,31 @@ export default function PopularRestaurants() {
   };
 
   return (
-    <section className="py-10 bg-white border-y border-[#ECECEC]" id="popular-restaurants-section">
-      <div className="container mx-auto px-4 md:px-8 max-w-[1440px]">
+    <section className="py-8 bg-white border-y border-[#ECECEC]" id="popular-restaurants-section">
+      <div className="container mx-auto px-4 md:px-6 max-w-[1440px]">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 pb-3 border-b border-[#ECECEC] gap-4">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF5F6] text-[#E23744] text-xs font-black uppercase tracking-wider mb-2 border border-[#E23744]/20">
-              <Sparkles className="w-3.5 h-3.5 fill-[#E23744]" />
-              <span>Top Rated Spots</span>
+        <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#ECECEC]">
+          <div className="flex items-center gap-2.5">
+            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FFF5F6] text-[#E23744] text-[11px] font-black uppercase tracking-wider border border-[#E23744]/20">
+              <Sparkles className="w-3 h-3 fill-[#E23744]" />
+              <span>Top Spots</span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-black text-[#1A1A1A] tracking-tight">
+            <h2 className="text-xl md:text-2xl font-black text-[#1A1A1A] tracking-tight">
               Popular Restaurants Near You
             </h2>
-            <p className="text-[#666666] text-xs md:text-sm font-medium mt-1">
-              Explore top-rated spots categorized by your favorite cravings.
-            </p>
           </div>
 
           <Link
             href="/restaurants"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#ECECEC] bg-[#F8F8F8] hover:bg-[#ECECEC] text-[#1A1A1A] text-xs font-bold transition-all shadow-sm active:scale-95 shrink-0"
+            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg border border-[#ECECEC] bg-[#F8F8F8] hover:bg-[#ECECEC] text-[#1A1A1A] text-xs font-bold transition-all shadow-xs active:scale-95 shrink-0"
           >
-            <span>Explore All 30 Spots</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <span>Explore All 30</span>
+            <ArrowRight className="w-3 h-3" />
           </Link>
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-4 scrollbar-none">
           {categories.map((cat) => {
             const isActive = activeCategory === cat;
             return (
@@ -109,9 +106,9 @@ export default function PopularRestaurants() {
                 key={cat}
                 type="button"
                 onClick={() => setActiveCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-all duration-200 border ${
+                className={`px-3 py-1 rounded-full text-xs font-extrabold whitespace-nowrap transition-all duration-200 border ${
                   isActive
-                    ? "bg-[#E23744] text-white border-[#E23744] shadow-sm shadow-[#E23744]/20 scale-105"
+                    ? "bg-[#E23744] text-white border-[#E23744] shadow-xs scale-102"
                     : "bg-[#F8F8F8] text-[#1A1A1A] border-[#ECECEC] hover:bg-gray-100"
                 }`}
               >
@@ -121,51 +118,32 @@ export default function PopularRestaurants() {
           })}
         </div>
 
-        {/* Grid of Compact Restaurants: 2 col (mobile), 3 col (tablet), 5 col (desktop), 18px gap */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-[18px]">
+        {/* Ultra-compact Grid: Mobile: 2 cols, Tablet: 4 cols, Desktop: 7-8 cols, Gap: 10-12px */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 xl:grid-cols-8 gap-2.5 md:gap-3">
           {isLoading && filteredRestaurants.length === 0
-            ? Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="h-[315px] rounded-[18px] bg-[#F8F8F8] animate-pulse border border-[#ECECEC]" />
+            ? Array.from({ length: 14 }).map((_, i) => (
+                <div key={i} className="h-[195px] rounded-[12px] bg-[#F8F8F8] animate-pulse border border-[#ECECEC]" />
               ))
             : filteredRestaurants.map((restaurant) => {
                 const isFav = restaurantIds.has(restaurant.id) || localFavs.has(restaurant.id);
                 return (
                   <div
                     key={restaurant.id}
-                    className="group relative bg-white rounded-[18px] border border-[#ECECEC] overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_28px_rgba(226,55,68,0.14)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col h-[315px] cursor-pointer"
+                    className="group relative bg-white rounded-[12px] border border-[#ECECEC] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_20px_rgba(226,55,68,0.12)] hover:-translate-y-1 transition-all duration-300 flex flex-col h-[195px] cursor-pointer"
                   >
-                    {/* Top: Image (~145px height) */}
+                    {/* Top Image (85px height) */}
                     <Link
                       href={`/restaurant/${restaurant.id}`}
-                      className="relative block h-[145px] w-full overflow-hidden bg-[#F8F8F8] shrink-0"
+                      className="relative block h-[85px] w-full overflow-hidden bg-[#F8F8F8] shrink-0"
                     >
                       <SafeImage
                         src={restaurant.image}
                         fallback={RESTAURANT_FALLBACK}
                         alt={restaurant.name}
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 12vw"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-
-                      {/* Offer Badge */}
-                      {restaurant.offer && (
-                        <div className="absolute bottom-2 left-2 bg-[#E23744] text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-sm uppercase tracking-wide flex items-center gap-1 z-10">
-                          <Tag className="w-2.5 h-2.5" />
-                          <span className="truncate max-w-[120px]">{restaurant.offer}</span>
-                        </div>
-                      )}
-
-                      {/* Veg / Non-Veg Badge */}
-                      <div className="absolute top-2 left-2 bg-white/95 backdrop-blur-md p-1 rounded-md shadow-sm border border-gray-200 z-10">
-                        <div
-                          className={`w-3 h-3 border-2 flex items-center justify-center ${
-                            restaurant.isVeg ? "border-green-600" : "border-red-600"
-                          }`}
-                        >
-                          <div className={`w-1 h-1 rounded-full ${restaurant.isVeg ? "bg-green-600" : "bg-red-600"}`} />
-                        </div>
-                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
                       {/* Favorite Heart Icon */}
                       <button
@@ -175,78 +153,65 @@ export default function PopularRestaurants() {
                           e.stopPropagation();
                           handleToggleFav(restaurant.id);
                         }}
-                        className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 hover:bg-white text-gray-700 shadow-md transition-all z-20 backdrop-blur-sm active:scale-90"
+                        className="absolute top-1.5 right-1.5 p-1 rounded-full bg-white/80 hover:bg-white text-gray-700 shadow-xs transition-all z-20 backdrop-blur-xs active:scale-90"
                         aria-label="Save Favorite"
                       >
                         <Heart
-                          className={`w-3.5 h-3.5 transition-colors ${
+                          className={`w-3 h-3 transition-colors ${
                             isFav ? "fill-[#E23744] text-[#E23744]" : "text-gray-600 hover:text-[#E23744]"
                           }`}
                         />
                       </button>
 
-                      {/* Open Status */}
-                      {restaurant.isOpen ? (
-                        <div className="absolute top-2 right-10 bg-emerald-600/90 text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded shadow-sm z-10">
-                          OPEN
+                      {/* Veg / Non-Veg Indicator */}
+                      <div className="absolute top-1.5 left-1.5 bg-white/90 backdrop-blur-xs p-0.5 rounded border border-gray-200 z-10">
+                        <div
+                          className={`w-2.5 h-2.5 border flex items-center justify-center ${
+                            restaurant.isVeg ? "border-green-600" : "border-red-600"
+                          }`}
+                        >
+                          <div className={`w-0.5 h-0.5 rounded-full ${restaurant.isVeg ? "bg-green-600" : "bg-red-600"}`} />
                         </div>
-                      ) : (
-                        <div className="absolute top-2 right-10 bg-gray-800/90 text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded shadow-sm z-10">
-                          CLOSED
-                        </div>
-                      )}
+                      </div>
                     </Link>
 
-                    {/* Bottom: Card Content */}
-                    <div className="p-3 flex flex-col flex-1 justify-between bg-white min-w-0">
+                    {/* Bottom Ultra-compact Content (Padding 8px) */}
+                    <div className="p-2 flex flex-col flex-1 justify-between bg-white min-w-0">
                       <div>
-                        {/* Restaurant Name */}
+                        {/* Restaurant Name (1 line only) */}
                         <Link
                           href={`/restaurant/${restaurant.id}`}
-                          className="font-black text-[#1A1A1A] text-sm line-clamp-1 group-hover:text-[#E23744] transition-colors mb-0.5 block"
+                          className="font-black text-[#1A1A1A] text-xs line-clamp-1 group-hover:text-[#E23744] transition-colors block"
                         >
                           {restaurant.name}
                         </Link>
 
-                        {/* Cuisine */}
-                        <p className="text-[#666666] text-[11px] font-medium line-clamp-1 mb-2">
+                        {/* ⭐ Rating + Delivery Time (same line) */}
+                        <div className="flex items-center gap-1 text-[10px] font-extrabold text-[#1A1A1A] my-0.5">
+                          <span className="inline-flex items-center gap-0.5 bg-[#16A34A] text-white px-1 py-0.2 rounded text-[9px] font-black shrink-0">
+                            {restaurant.rating} <Star className="w-2 h-2 fill-white" />
+                          </span>
+                          <span className="text-gray-300">•</span>
+                          <span className="text-[#666666] truncate">{restaurant.time}</span>
+                        </div>
+
+                        {/* Cuisine (1 line only) */}
+                        <p className="text-[#666666] text-[10px] font-medium truncate">
                           {restaurant.cuisine}
                         </p>
 
-                        {/* Swiggy/Zomato Metrics Bar */}
-                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A1A1A] mb-1.5 flex-wrap">
-                          <div className="inline-flex items-center gap-0.5 bg-[#16A34A] text-white px-1.5 py-0.5 rounded text-[10px] font-black">
-                            <span>{restaurant.rating}</span>
-                            <Star className="w-2.5 h-2.5 fill-white" />
-                          </div>
-                          <span className="text-gray-300">•</span>
-                          <div className="flex items-center gap-1 text-[#666666]">
-                            <Clock className="w-3 h-3 text-[#E23744]" />
-                            <span>{restaurant.time}</span>
-                          </div>
-                          <span className="text-gray-300">•</span>
-                          <div className="flex items-center gap-0.5 text-[#666666]">
-                            <MapPin className="w-3 h-3 text-[#E23744]" />
-                            <span>{restaurant.location || "2.5 km"}</span>
-                          </div>
-                        </div>
-
-                        {/* Price & Free Delivery */}
-                        <div className="flex items-center justify-between text-[11px] text-[#666666] font-medium">
-                          <span className="truncate">{restaurant.priceForTwo}</span>
-                          <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                            Free Delivery
-                          </span>
-                        </div>
+                        {/* ₹ Price for Two */}
+                        <p className="text-[#888888] text-[9px] font-medium truncate">
+                          {restaurant.priceForTwo}
+                        </p>
                       </div>
 
-                      {/* View Menu Button */}
+                      {/* Small View Menu Button */}
                       <Link
                         href={`/restaurant/${restaurant.id}`}
-                        className="w-full mt-2 inline-flex items-center justify-center gap-1 py-1.5 rounded-xl bg-[#E23744] hover:bg-[#C81E34] text-white text-[11px] font-black transition-all shadow-sm active:scale-95"
+                        className="w-full mt-1 py-1 rounded-lg bg-[#E23744] hover:bg-[#C81E34] text-white text-[10px] font-bold transition-all text-center block shadow-xs active:scale-95 leading-tight"
                       >
-                        <span>View Menu</span>
-                        <ArrowRight className="w-3 h-3" />
+                        View Menu
                       </Link>
                     </div>
                   </div>
