@@ -11,17 +11,17 @@ export default function PopularRestaurants() {
     "/api/restaurants?sort=popular&limit=8"
   );
 
-  const rawArray = Array.isArray(rawRestaurants)
+  const rawArray: any[] = Array.isArray(rawRestaurants)
     ? rawRestaurants
-    : Array.isArray(rawRestaurants?.data)
-      ? rawRestaurants.data
-      : Array.isArray(rawRestaurants?.items)
-        ? rawRestaurants.items
-        : Array.isArray(rawRestaurants?.restaurants)
-          ? rawRestaurants.restaurants
+    : Array.isArray((rawRestaurants as any)?.data)
+      ? (rawRestaurants as any).data
+      : Array.isArray((rawRestaurants as any)?.items)
+        ? (rawRestaurants as any).items
+        : Array.isArray((rawRestaurants as any)?.restaurants)
+          ? (rawRestaurants as any).restaurants
           : [];
 
-  const restaurants = rawArray.map(mapRestaurantCard);
+  const restaurants = rawArray.map((r: any) => mapRestaurantCard(r));
   return (
     <section className="food-section" aria-labelledby="popular-restaurants-heading">
       <div className="mb-6 flex items-end justify-between gap-4 md:mb-7">
