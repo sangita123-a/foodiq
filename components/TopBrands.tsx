@@ -2,55 +2,55 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SafeImage from "@/components/ui/SafeImage";
-import { getBrandFoodImage, RESTAURANT_FALLBACK } from "@/lib/images";
+import { getBrandFoodImage, getBrandLogoImage, RESTAURANT_FALLBACK } from "@/lib/images";
 
 const brands = [
   { 
     name: "Subway", 
     foodImage: getBrandFoodImage("Subway"), 
-    logo: "https://logo.clearbit.com/subway.com",
+    logo: getBrandLogoImage("Subway"),
     bgColor: "#FFFFFF"
   },
   { 
     name: "Behrouz Biryani", 
     foodImage: getBrandFoodImage("Behrouz Biryani"), 
-    logo: "https://images.crunchbase.com/image/upload/c_pad,h_256,w_256,f_auto,q_auto:eco,dpr_1/g1uompslbfswsnhm8pys",
+    logo: getBrandLogoImage("Behrouz Biryani"),
     bgColor: "#FFFFFF"
   },
   { 
     name: "Biryani By Kilo", 
     foodImage: getBrandFoodImage("Biryani By Kilo"), 
-    logo: "https://logo.clearbit.com/biryanibykilo.com",
+    logo: getBrandLogoImage("Biryani By Kilo"),
     bgColor: "#FFFFFF"
   },
   { 
     name: "Wow! Momo", 
     foodImage: getBrandFoodImage("Wow! Momo"), 
-    logo: "https://logo.clearbit.com/wowmomo.com",
+    logo: getBrandLogoImage("Wow! Momo"),
     bgColor: "#FFFFFF"
   },
   { 
     name: "Haldiram's", 
     foodImage: getBrandFoodImage("Haldiram's"), 
-    logo: "https://logo.clearbit.com/haldirams.com",
+    logo: getBrandLogoImage("Haldiram's"),
     bgColor: "#FFFFFF"
   },
   { 
     name: "Barbeque Nation", 
     foodImage: getBrandFoodImage("Barbeque Nation"), 
-    logo: "https://logo.clearbit.com/barbequenation.com",
+    logo: getBrandLogoImage("Barbeque Nation"),
     bgColor: "#FFFFFF"
   },
   { 
     name: "Faasos", 
     foodImage: getBrandFoodImage("Faasos"), 
-    logo: "https://logo.clearbit.com/faasos.com",
+    logo: getBrandLogoImage("Faasos"),
     bgColor: "#FFFFFF"
   },
   { 
     name: "Domino's Pizza", 
     foodImage: getBrandFoodImage("Domino's Pizza"), 
-    logo: "https://logo.clearbit.com/dominos.co.in",
+    logo: getBrandLogoImage("Domino's Pizza"),
     bgColor: "#FFFFFF"
   },
 ];

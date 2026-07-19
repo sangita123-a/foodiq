@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import useSWR from "swr";
 import CuisineCard, { CuisineCardData } from "@/components/cuisines/CuisineCard";
+import { resolveBackendUrl } from "@/lib/images";
 
 const cuisineCategories = [
   {
@@ -128,7 +129,7 @@ export default function PopularCuisines() {
                   slug: category.slug,
                   description: cuisine?.description || category.description,
                 }}
-                fallbackImage={category.image}
+                fallbackImage={resolveBackendUrl(category.image) || category.image}
                 fallbackDescription={category.description}
                 index={index}
               />

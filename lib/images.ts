@@ -46,7 +46,7 @@ export const OFFER_IMAGES: Record<string, string> = {
 
 export function getOfferImage(code?: string | null, bannerUrl?: string | null): string {
   if (bannerUrl?.trim()) return resolveBackendUrl(bannerUrl) ?? OFFER_FALLBACK;
-  if (code && OFFER_IMAGES[code]) return OFFER_IMAGES[code];
+  if (code && OFFER_IMAGES[code]) return resolveBackendUrl(OFFER_IMAGES[code]) ?? OFFER_FALLBACK;
   return OFFER_FALLBACK;
 }
 
@@ -67,6 +67,19 @@ export const BRAND_FOOD_IMAGES: Record<string, string> = {
   "Burger King": "/images/catalog/food/burger.webp",
 };
 
+export const BRAND_LOGOS: Record<string, string> = {
+  Subway: "/images/catalog/logos/subway.webp",
+  "Behrouz Biryani": "/images/catalog/logos/biryani.webp",
+  "Biryani By Kilo": "/images/catalog/logos/biryani.webp",
+  "Wow! Momo": "/images/catalog/logos/chinese.webp",
+  "Haldiram's": "/images/catalog/logos/indian.webp",
+  "Barbeque Nation": "/images/catalog/logos/north-indian.webp",
+  Faasos: "/images/catalog/logos/street-food.webp",
+  "Domino's Pizza": "/images/catalog/logos/pizza.webp",
+  KFC: "/images/catalog/logos/fast-food.webp",
+  "Burger King": "/images/catalog/logos/burger.webp",
+};
+
 export function getRestaurantImage(url?: string | null): string {
   return resolveBackendUrl(url) ?? RESTAURANT_FALLBACK;
 }
@@ -76,8 +89,14 @@ export function getFoodImage(url?: string | null): string {
 }
 
 export function getBrandFoodImage(name: string, localPath?: string): string {
-  if (localPath?.trim()) return localPath;
-  return BRAND_FOOD_IMAGES[name] || RESTAURANT_FALLBACK;
+  if (localPath?.trim()) return resolveBackendUrl(localPath) ?? localPath;
+  const path = BRAND_FOOD_IMAGES[name] || RESTAURANT_FALLBACK;
+  return resolveBackendUrl(path) ?? RESTAURANT_FALLBACK;
+}
+
+export function getBrandLogoImage(name: string): string {
+  const path = BRAND_LOGOS[name] || RESTAURANT_FALLBACK;
+  return resolveBackendUrl(path) ?? RESTAURANT_FALLBACK;
 }
 
 export function getPriceForTwo(priceRange?: number | null): string {

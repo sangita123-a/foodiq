@@ -96,7 +96,7 @@ export default function CuisineFoodCard({
       </Link>
 
       <div className="food-card-body flex-1 flex flex-col">
-        <Link href={foodHref} className="food-card-title text-white mb-1 line-clamp-1 hover:text-[#FC8019] transition-colors">
+        <Link href={foodHref} className="food-card-title text-[#111827] mb-1 line-clamp-1 hover:text-[#FC8019] transition-colors">
           {item.name}
         </Link>
         <Link

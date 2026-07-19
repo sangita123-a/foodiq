@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import SafeImage from "@/components/ui/SafeImage";
+import { resolveBackendUrl } from "@/lib/images";
 
 export type CuisineCardData = {
   id?: number | string;
@@ -29,8 +30,9 @@ export default function CuisineCard({
   index = 0,
 }: Props) {
   const image =
-    cuisine.image_url ||
-    cuisine.preview_images?.find(Boolean) ||
+    resolveBackendUrl(cuisine.image_url) ||
+    resolveBackendUrl(cuisine.preview_images?.find(Boolean)) ||
+    resolveBackendUrl(fallbackImage) ||
     fallbackImage;
   const restaurantCount = cuisine.restaurant_count ?? 0;
 
