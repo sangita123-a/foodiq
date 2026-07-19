@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
@@ -13,6 +13,11 @@ import { useCartActions } from "@/hooks/useCartActions";
 import { useFavoriteActions } from "@/hooks/useFavoriteActions";
 import { useToast } from "@/contexts/ToastContext";
 import CatalogViewTracker from "@/components/analytics/CatalogViewTracker";
+import {
+  getCategoryDishById,
+  getCategoryDishes,
+  isCategoryDishId,
+} from "@/lib/data/categoryData";
 
 type FoodDetails = {
   id: string;
@@ -49,16 +54,57 @@ type FoodDetails = {
   }[];
 };
 
+function categoryDishToFoodDetails(id: string): FoodDetails | undefined {
+  const dish = getCategoryDishById(id);
+  if (!dish) return undefined;
+
+  const related = getCategoryDishes(dish.category)
+    .filter((item) => item.id !== dish.id)
+    .slice(0, 4)
+    .map((item) => ({
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      image_url: item.image,
+      price: item.originalPrice,
+      discount_price: item.price,
+      rating: item.rating,
+      restaurant_name: item.restaurantName,
+    }));
+
+  return {
+    id: dish.id,
+    name: dish.name,
+    description: dish.description,
+    image_url: dish.image,
+    price: dish.originalPrice,
+    discount_price: dish.price,
+    rating: dish.rating,
+    is_vegetarian: dish.isVeg,
+    preparation_time: Number.parseInt(dish.deliveryTime, 10) || 25,
+    restaurant_id: dish.restaurantId,
+    restaurant_name: dish.restaurantName,
+    cuisines: [{ name: dish.category, slug: dish.category }],
+    related_items: related,
+  };
+}
+
 export default function FoodDetailView({ id }: { id: string }) {
   const router = useRouter();
   const { showToast } = useToast();
-  const { data: rawFood, isLoading, error } = useSWR<any>(id ? `/api/menu-items/${id}` : null);
-  const food: FoodDetails | undefined = (rawFood as any)?.data || rawFood;
+  const isCategoryDish = isCategoryDishId(id);
+  const { data: rawFood, isLoading, error } = useSWR<any>(
+    id && !isCategoryDish ? `/api/menu-items/${id}` : null
+  );
+  const apiFood: FoodDetails | undefined = (rawFood as any)?.data || rawFood;
+  const food = useMemo(() => {
+    if (isCategoryDish) return categoryDishToFoodDetails(id);
+    return apiFood;
+  }, [apiFood, id, isCategoryDish]);
   const { quantities, updatingId, updateQuantity, addAndCheckout } = useCartActions();
   const { itemIds, toggleItem } = useFavoriteActions();
-  const [activeImage, setActiveImage] = useState(0);
 
-  if (isLoading) {
+  if (!isCategoryDish && isLoading) {
     return (
       <main className="min-h-screen bg-white pt-[90px]">
         <Navbar />
@@ -70,29 +116,49 @@ export default function FoodDetailView({ id }: { id: string }) {
     );
   }
 
-  if (error || !food) {
+  if ((!isCategoryDish && error) || !food) {
     return (
       <main className="min-h-screen bg-white pt-[90px]">
         <Navbar />
         <div className="mx-auto max-w-xl px-4 py-24 text-center">
           <h1 className="mb-3 text-3xl font-black text-[#111827]">Dish not found</h1>
           <p className="mb-8 text-[#6B7280]">This dish is unavailable or has been removed.</p>
-          <Link href="/trending-dishes" className="rounded-xl bg-primary px-6 py-3 font-bold text-white">
-            Browse dishes
+          <Link href="/" className="rounded-xl bg-primary px-6 py-3 font-bold text-white">
+            Browse categories
           </Link>
         </div>
       </main>
     );
   }
 
-  const gallery = (food.gallery_urls?.filter(Boolean).length
-    ? food.gallery_urls.filter(Boolean)
-    : [food.image_url || FOOD_FALLBACK]
-  ).map((url) => getFoodImage(url));
+  const categorySlug = isCategoryDish ? getCategoryDishById(id)?.category : undefined;
+  const heroImage = getFoodImage(food.image_url);
+  const gallery = isCategoryDish
+    ? [heroImage]
+    : (food.gallery_urls?.filter(Boolean).length
+        ? food.gallery_urls.filter(Boolean)
+        : [food.image_url || FOOD_FALLBACK]
+      ).map((url) => getFoodImage(url));
   const quantity = quantities.get(food.id) || 0;
   const price = Number(food.discount_price || food.price);
   const originalPrice = Number(food.price);
   const isFavorite = itemIds.has(food.id);
+
+  const handleAddToCart = () => {
+    const categoryDish = getCategoryDishById(food.id);
+    if (categoryDish) {
+      updateQuantity(food.id, 1, {
+        restaurant_id: categoryDish.restaurantId,
+        name: categoryDish.name,
+        price: categoryDish.price,
+        image: categoryDish.image,
+        isVeg: categoryDish.isVeg,
+      });
+      showToast(`🛒 ${categoryDish.name} added to cart!`, "success");
+      return;
+    }
+    updateQuantity(food.id, 1);
+  };
 
   const shareFood = async () => {
     const url = window.location.href;
@@ -120,15 +186,18 @@ export default function FoodDetailView({ id }: { id: string }) {
       />
       <Navbar />
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-8">
-        <Link href="/trending-dishes" className="mb-8 inline-flex items-center gap-2 text-[#6B7280] hover:text-[#111827]">
-          <ChevronLeft className="h-4 w-4" /> Back to dishes
+        <Link
+          href={categorySlug ? `/category/${categorySlug}` : "/trending-dishes"}
+          className="mb-8 inline-flex items-center gap-2 text-[#6B7280] hover:text-[#111827]"
+        >
+          <ChevronLeft className="h-4 w-4" /> {categorySlug ? "Back to collection" : "Back to dishes"}
         </Link>
 
         <section className="grid gap-10 lg:grid-cols-2">
           <div>
             <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-[#E5E7EB]">
               <SafeImage
-                src={gallery[activeImage] || FOOD_FALLBACK}
+                src={heroImage || FOOD_FALLBACK}
                 fallback={FOOD_FALLBACK}
                 alt={food.name}
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -136,25 +205,23 @@ export default function FoodDetailView({ id }: { id: string }) {
                 className="absolute inset-0 h-full w-full object-cover"
               />
             </div>
-            <div className="mt-4 grid grid-cols-3 gap-3">
-              {gallery.slice(0, 3).map((image, index) => (
-                <button
-                  key={`${image}-${index}`}
-                  onClick={() => setActiveImage(index)}
-                  className={`relative aspect-[4/3] overflow-hidden rounded-xl border ${
-                    activeImage === index ? "border-primary" : "border-[#E5E7EB]"
-                  }`}
-                  aria-label={`View ${food.name} image ${index + 1}`}
-                >
-                  <SafeImage
-                    src={image || FOOD_FALLBACK}
-                    fallback={FOOD_FALLBACK}
-                    alt={`${food.name} gallery image ${index + 1}`}
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
+            {!isCategoryDish && gallery.length > 1 ? (
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                {gallery.slice(0, 3).map((image, index) => (
+                  <div
+                    key={`${image}-${index}`}
+                    className="relative aspect-[4/3] overflow-hidden rounded-xl border border-[#E5E7EB]"
+                  >
+                    <SafeImage
+                      src={image || FOOD_FALLBACK}
+                      fallback={FOOD_FALLBACK}
+                      alt={`${food.name} gallery image ${index + 1}`}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
 
           <div className="rounded-3xl border border-[#E5E7EB] bg-white p-6 md:p-9">
@@ -193,7 +260,11 @@ export default function FoodDetailView({ id }: { id: string }) {
                 <Clock className="h-4 w-4 text-primary" /> {food.preparation_time || 20} min
               </span>
               {food.cuisines?.map((cuisine) => (
-                <Link key={cuisine.slug} href={`/cuisine/${cuisine.slug}`} className="rounded-lg bg-[#F8FAFC] px-3 py-2 text-[#6B7280] hover:text-[#111827]">
+                <Link
+                  key={cuisine.slug}
+                  href={isCategoryDish ? `/category/${cuisine.slug}` : `/cuisine/${cuisine.slug}`}
+                  className="rounded-lg bg-[#F8FAFC] px-3 py-2 text-[#6B7280] hover:text-[#111827]"
+                >
                   {cuisine.name}
                 </Link>
               ))}
@@ -230,7 +301,7 @@ export default function FoodDetailView({ id }: { id: string }) {
                 </div>
               ) : (
                 <button
-                  onClick={() => updateQuantity(food.id, 1)}
+                  onClick={handleAddToCart}
                   disabled={updatingId === food.id}
                   className="rounded-xl border border-primary bg-primary/10 px-6 py-3 font-bold text-primary hover:bg-primary hover:text-[#111827]"
                 >
@@ -238,7 +309,22 @@ export default function FoodDetailView({ id }: { id: string }) {
                 </button>
               )}
               <button
-                onClick={() => addAndCheckout(food.id, router)}
+                onClick={() => {
+                  const categoryDish = getCategoryDishById(food.id);
+                  addAndCheckout(
+                    food.id,
+                    router,
+                    categoryDish
+                      ? {
+                          restaurant_id: categoryDish.restaurantId,
+                          name: categoryDish.name,
+                          price: categoryDish.price,
+                          image: categoryDish.image,
+                          isVeg: categoryDish.isVeg,
+                        }
+                      : undefined
+                  );
+                }}
                 disabled={updatingId === food.id}
                 className="flex-1 rounded-xl bg-primary px-8 py-3 font-black hover:bg-primary/90"
               >

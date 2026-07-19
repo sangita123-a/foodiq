@@ -8,6 +8,7 @@ import {
   menuItemJsonLd,
 } from "@/lib/seo/jsonld";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { getCategoryDishById, isCategoryDishId } from "@/lib/data/categoryData";
 
 type MenuItem = {
   id: string;
@@ -27,6 +28,19 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { id } = await params;
+
+  if (isCategoryDishId(id)) {
+    const dish = getCategoryDishById(id);
+    if (dish) {
+      return buildPageMetadata({
+        title: dish.name,
+        description: dish.description.slice(0, 160),
+        path: `/food/${dish.id}`,
+        image: dish.image,
+      });
+    }
+  }
+
   const res = await fetchApiJson<ApiEnvelope<MenuItem>>(`/api/menu-items/${id}`);
   const item = res?.data;
 
@@ -52,6 +66,27 @@ export async function generateMetadata({
 
 export default async function FoodPage({ params }: PageProps) {
   const { id } = await params;
+
+  if (isCategoryDishId(id)) {
+    const dish = getCategoryDishById(id);
+    return (
+      <>
+        {dish ? (
+          <JsonLd
+            data={[
+              breadcrumbJsonLd([
+                { name: "Home", path: "/" },
+                { name: dish.category, path: `/category/${dish.category}` },
+                { name: dish.name, path: `/food/${dish.id}` },
+              ]),
+            ]}
+          />
+        ) : null}
+        <FoodDetailView id={id} />
+      </>
+    );
+  }
+
   const res = await fetchApiJson<ApiEnvelope<MenuItem>>(`/api/menu-items/${id}`);
   const item = res?.data;
 

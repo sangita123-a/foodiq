@@ -1,25 +1,45 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
 import { useAuthToken } from "@/hooks/useAuthToken";
+import { isCategoryDishId } from "@/lib/data/categoryData";
+import { getLocalFavoriteIds, toggleLocalFavorite } from "@/lib/favorites";
 
 export function useFavoriteActions() {
   const { showToast } = useToast();
   const authenticated = useAuthToken();
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [localFavoriteIds, setLocalFavoriteIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    setLocalFavoriteIds(getLocalFavoriteIds());
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<string[]>).detail;
+      setLocalFavoriteIds(Array.isArray(detail) ? detail : getLocalFavoriteIds());
+    };
+    window.addEventListener("foodiq:favorites-updated", handler);
+    return () => window.removeEventListener("foodiq:favorites-updated", handler);
+  }, []);
 
   const { data, mutate } = useSWR(authenticated ? "/api/favorites" : null);
   const dataObj = (data as any)?.data || data;
-  const itemIds = useMemo(
+  const apiItemIds = useMemo(
     () =>
       new Set<string>(
-        (dataObj?.items || (Array.isArray(dataObj) ? dataObj : [])).map((item: { menu_item_id?: string; id?: string }) => item.menu_item_id || item.id || "")
+        (dataObj?.items || (Array.isArray(dataObj) ? dataObj : [])).map(
+          (item: { menu_item_id?: string; id?: string }) => item.menu_item_id || item.id || ""
+        )
       ),
     [dataObj]
   );
+  const itemIds = useMemo(() => {
+    const merged = new Set(apiItemIds);
+    localFavoriteIds.forEach((id) => merged.add(id));
+    return merged;
+  }, [apiItemIds, localFavoriteIds]);
   const restaurantIds = useMemo(
     () =>
       new Set<string>(
@@ -31,6 +51,13 @@ export function useFavoriteActions() {
   );
 
   const toggleItem = async (id: string) => {
+    if (isCategoryDishId(id)) {
+      const added = toggleLocalFavorite(id);
+      setLocalFavoriteIds(getLocalFavoriteIds());
+      showToast(added ? "Added to favorites" : "Removed from favorites", "success");
+      return;
+    }
+
     if (!authenticated) {
       showToast("Please login to save favorites", "error");
       return;
