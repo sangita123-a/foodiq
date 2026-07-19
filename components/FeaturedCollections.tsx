@@ -1,172 +1,63 @@
 "use client";
 
-import { useRef } from "react";
-import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import useSWR from "swr";
+import { ArrowRight } from "lucide-react";
 import SafeImage from "@/components/ui/SafeImage";
-import { getRestaurantImage, RESTAURANT_FALLBACK } from "@/lib/images";
-import { fetchCollections } from "@/services/featuresApi";
+import { RESTAURANT_FALLBACK } from "@/lib/images";
+import { FEATURED_COLLECTIONS } from "@/lib/data/collectionsData";
 
-type CollectionData = {
-  id: string;
-  title: string;
-  description: string;
-  places: string;
-  image: string;
-  slug?: string;
-};
-
-const fallbackCollections: CollectionData[] = [
-  {
-    id: "c1",
-    title: "Best Biryani Near You",
-    description: "Authentic, rich, and aromatic biryanis.",
-    places: "24 Places",
-    image: "/images/catalog/restaurants/biryani.webp",
-    slug: "best-biryani",
-  },
-  {
-    id: "c2",
-    title: "Top Rated Restaurants",
-    description: "The absolute best rated spots in the city.",
-    places: "32 Places",
-    image: "/images/catalog/restaurants/north-indian.webp",
-    slug: "top-rated",
-  },
-  {
-    id: "c3",
-    title: "Newly Opened",
-    description: "Explore the newest flavors in your area.",
-    places: "15 Places",
-    image: "/images/catalog/restaurants/italian.webp",
-    slug: "newly-opened",
-  },
-  {
-    id: "c4",
-    title: "Pure Veg Delights",
-    description: "Wholesome vegetarian favourites.",
-    places: "28 Places",
-    image: "/images/catalog/restaurants/south-indian.webp",
-    slug: "pure-veg",
-  },
-];
+const CARD_WIDTH = 280;
+const CARD_HEIGHT = 200;
 
 export default function FeaturedCollections() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const { data } = useSWR("feature-collections", fetchCollections);
-
-  const collectionsData: CollectionData[] =
-    Array.isArray(data) && data.length
-      ? data.map((c) => ({
-          id: String(c.id),
-          title: String(c.title),
-          description: String(c.description || ""),
-          places: `${c.restaurant_count || 0} Places`,
-          image: getRestaurantImage(c.image_url as string),
-          slug: String(c.slug || ""),
-        }))
-      : fallbackCollections;
-
-  const scroll = (direction: "left" | "right") => {
-    if (scrollRef.current) {
-      const scrollAmount = direction === "left" ? -350 : 350;
-      scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    }
-  };
-
   return (
-    <section className="bg-white w-full overflow-hidden">
-      <div className="food-section">
-        <div className="food-section-heading flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-          >
-            <h2 className="text-2xl md:text-3xl font-bold text-[#111827] tracking-tight mb-2">
-              Featured Collections
-            </h2>
-            <p>Curated restaurant collections for every mood.</p>
-          </motion.div>
-
-          <div className="hidden sm:flex gap-3">
-            <button
-              onClick={() => scroll("left")}
-              className="food-button w-10 h-10 min-h-0 rounded-full border border-[#E5E7EB] bg-white flex items-center justify-center text-[#111827] hover:bg-[#E23744] hover:border-[#E23744] hover:text-[#111827]"
-              aria-label="Scroll left"
-              type="button"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-            <button
-              onClick={() => scroll("right")}
-              className="food-button w-10 h-10 min-h-0 rounded-full border border-[#E5E7EB] bg-white flex items-center justify-center text-[#111827] hover:bg-[#E23744] hover:border-[#E23744] hover:text-[#111827]"
-              aria-label="Scroll right"
-              type="button"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
-          </div>
+    <section className="w-full overflow-hidden bg-white py-10 md:py-12" id="featured-collections">
+      <div className="container mx-auto max-w-[1440px] px-4 md:px-8">
+        <div className="mb-8">
+          <h2 className="text-2xl font-black tracking-tight text-[#1A1A1A] md:text-3xl">
+            ✨ Featured Collections
+          </h2>
+          <p className="mt-1 text-sm font-medium text-[#666666] md:text-base">
+            Handpicked collections curated specially for you.
+          </p>
         </div>
 
-        <div className="relative group">
-          <div
-            ref={scrollRef}
-            className="flex overflow-x-auto gap-4 pb-6 snap-x snap-mandatory custom-scrollbar-hide"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            {collectionsData.map((collection, index) => (
-              <motion.div
-                key={collection.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{
-                  duration: 0.5,
-                  ease: "easeOut",
-                  delay: index * 0.1,
-                }}
-                className="food-card snap-start flex-shrink-0 w-[240px] md:w-[250px] h-[320px] relative group/card cursor-pointer"
-              >
-                <div className="absolute inset-0 w-full h-full">
-                  <SafeImage
-                    src={collection.image}
-                    fallback={RESTAURANT_FALLBACK}
-                    alt={collection.title}
-                    className="w-full h-full object-cover transform group-hover/card:scale-110 transition-transform duration-700 ease-in-out"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/75 via-[#111827]/30/50 to-transparent opacity-90 group-hover/card:opacity-100 transition-opacity duration-300" />
-                </div>
+        <div className="grid grid-cols-1 justify-items-center gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURED_COLLECTIONS.map((collection) => (
+            <Link
+              key={collection.slug}
+              href={`/collections/${collection.slug}`}
+              className="group/card relative block shrink-0 cursor-pointer overflow-hidden rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_32px_rgba(226,55,68,0.2)]"
+              style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
+            >
+              <SafeImage
+                src={collection.coverImage}
+                fallback={RESTAURANT_FALLBACK}
+                decorative
+                fill
+                sizes="280px"
+                className="block object-cover object-center transition-transform duration-500 ease-out group-hover/card:scale-110"
+              />
 
-                <div className="absolute inset-0 p-4 flex flex-col justify-end z-10">
-                  <span className="text-sm font-semibold text-[#6B7280] mb-2 bg-black/40 backdrop-blur-sm w-fit px-3 py-1 rounded-full border border-[#E5E7EB]">
-                    {collection.places}
-                  </span>
-                  <h3 className="text-lg font-semibold text-white mb-1 leading-tight">
-                    {collection.title}
-                  </h3>
-                  <p className="text-[#6B7280] text-sm mb-4 line-clamp-2">
-                    {collection.description}
-                  </p>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10 transition-all duration-300 group-hover/card:from-black/90 group-hover/card:via-black/55" />
 
-                  <Link
-                    href={
-                      collection.slug
-                        ? `/collections?slug=${collection.slug}`
-                        : "/collections"
-                    }
-                    className="flex items-center gap-2 text-white font-medium text-sm group-hover/card:text-[#E23744] transition-colors w-fit"
-                  >
-                    Explore Collection
-                    <ArrowRight className="w-4 h-4 transform group-hover/card:translate-x-1 transition-transform" />
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+              <div className="absolute inset-0 z-10 flex flex-col justify-end p-4">
+                <span className="mb-1.5 w-fit rounded-full border border-white/20 bg-black/30 px-2.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
+                  {collection.itemCount}
+                </span>
+                <h3 className="text-base font-black leading-tight text-white md:text-lg">
+                  {collection.title}
+                </h3>
+                <p className="mt-1 line-clamp-1 text-[11px] font-medium text-white/75 md:text-xs">
+                  {collection.description}
+                </p>
+                <span className="mt-2.5 inline-flex items-center gap-1 text-xs font-bold text-white transition-all duration-300 group-hover/card:gap-2 group-hover/card:text-[#FFB4BA]">
+                  Explore
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/card:translate-x-1" />
+                </span>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </section>

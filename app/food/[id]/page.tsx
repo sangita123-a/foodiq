@@ -9,6 +9,7 @@ import {
 } from "@/lib/seo/jsonld";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getCategoryDishById, isCategoryDishId } from "@/lib/data/categoryData";
+import { getCollectionDishById, isCollectionDishId } from "@/lib/data/collectionsData";
 
 type MenuItem = {
   id: string;
@@ -28,6 +29,18 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { id } = await params;
+
+  if (isCollectionDishId(id)) {
+    const dish = getCollectionDishById(id);
+    if (dish) {
+      return buildPageMetadata({
+        title: dish.name,
+        description: dish.description.slice(0, 160),
+        path: `/food/${dish.id}`,
+        image: dish.image,
+      });
+    }
+  }
 
   if (isCategoryDishId(id)) {
     const dish = getCategoryDishById(id);
@@ -66,6 +79,26 @@ export async function generateMetadata({
 
 export default async function FoodPage({ params }: PageProps) {
   const { id } = await params;
+
+  if (isCollectionDishId(id)) {
+    const dish = getCollectionDishById(id);
+    return (
+      <>
+        {dish ? (
+          <JsonLd
+            data={[
+              breadcrumbJsonLd([
+                { name: "Home", path: "/" },
+                { name: dish.collection, path: `/collections/${dish.collection}` },
+                { name: dish.name, path: `/food/${dish.id}` },
+              ]),
+            ]}
+          />
+        ) : null}
+        <FoodDetailView id={id} />
+      </>
+    );
+  }
 
   if (isCategoryDishId(id)) {
     const dish = getCategoryDishById(id);

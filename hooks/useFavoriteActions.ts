@@ -6,6 +6,7 @@ import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
 import { useAuthToken } from "@/hooks/useAuthToken";
 import { isCategoryDishId } from "@/lib/data/categoryData";
+import { isCollectionDishId } from "@/lib/data/collectionsData";
 import { getLocalFavoriteIds, toggleLocalFavorite } from "@/lib/favorites";
 
 export function useFavoriteActions() {
@@ -51,7 +52,7 @@ export function useFavoriteActions() {
   );
 
   const toggleItem = async (id: string) => {
-    if (isCategoryDishId(id)) {
+    if (isCategoryDishId(id) || isCollectionDishId(id)) {
       const added = toggleLocalFavorite(id);
       setLocalFavoriteIds(getLocalFavoriteIds());
       showToast(added ? "Added to favorites" : "Removed from favorites", "success");

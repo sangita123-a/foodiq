@@ -18,6 +18,11 @@ import {
   getCategoryDishes,
   isCategoryDishId,
 } from "@/lib/data/categoryData";
+import {
+  getCollectionDishById,
+  getCollectionDishes,
+  isCollectionDishId,
+} from "@/lib/data/collectionsData";
 
 type FoodDetails = {
   id: string;
@@ -89,22 +94,69 @@ function categoryDishToFoodDetails(id: string): FoodDetails | undefined {
   };
 }
 
+function collectionDishToFoodDetails(id: string): FoodDetails | undefined {
+  const dish = getCollectionDishById(id);
+  if (!dish) return undefined;
+
+  const related = getCollectionDishes(dish.collection)
+    .filter((item) => item.id !== dish.id)
+    .slice(0, 4)
+    .map((item) => ({
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      image_url: item.image,
+      price: item.originalPrice,
+      discount_price: item.price,
+      rating: item.rating,
+      restaurant_name: item.restaurantName,
+    }));
+
+  return {
+    id: dish.id,
+    name: dish.name,
+    description: dish.description,
+    image_url: dish.image,
+    price: dish.originalPrice,
+    discount_price: dish.price,
+    rating: dish.rating,
+    is_vegetarian: dish.isVeg,
+    preparation_time: Number.parseInt(dish.deliveryTime, 10) || 25,
+    restaurant_id: dish.restaurantId,
+    restaurant_name: dish.restaurantName,
+    cuisines: [{ name: dish.collection, slug: dish.collection }],
+    related_items: related,
+  };
+}
+
+function staticDishToFoodDetails(id: string): FoodDetails | undefined {
+  return categoryDishToFoodDetails(id) ?? collectionDishToFoodDetails(id);
+}
+
+function isStaticCatalogDishId(id: string): boolean {
+  return isCategoryDishId(id) || isCollectionDishId(id);
+}
+
+function getStaticCatalogDish(id: string) {
+  return getCategoryDishById(id) ?? getCollectionDishById(id);
+}
+
 export default function FoodDetailView({ id }: { id: string }) {
   const router = useRouter();
   const { showToast } = useToast();
-  const isCategoryDish = isCategoryDishId(id);
+  const isStaticDish = isStaticCatalogDishId(id);
   const { data: rawFood, isLoading, error } = useSWR<any>(
-    id && !isCategoryDish ? `/api/menu-items/${id}` : null
+    id && !isStaticDish ? `/api/menu-items/${id}` : null
   );
   const apiFood: FoodDetails | undefined = (rawFood as any)?.data || rawFood;
   const food = useMemo(() => {
-    if (isCategoryDish) return categoryDishToFoodDetails(id);
+    if (isStaticDish) return staticDishToFoodDetails(id);
     return apiFood;
-  }, [apiFood, id, isCategoryDish]);
+  }, [apiFood, id, isStaticDish]);
   const { quantities, updatingId, updateQuantity, addAndCheckout } = useCartActions();
   const { itemIds, toggleItem } = useFavoriteActions();
 
-  if (!isCategoryDish && isLoading) {
+  if (!isStaticDish && isLoading) {
     return (
       <main className="min-h-screen bg-white pt-[90px]">
         <Navbar />
@@ -116,7 +168,7 @@ export default function FoodDetailView({ id }: { id: string }) {
     );
   }
 
-  if ((!isCategoryDish && error) || !food) {
+  if ((!isStaticDish && error) || !food) {
     return (
       <main className="min-h-screen bg-white pt-[90px]">
         <Navbar />
@@ -131,9 +183,14 @@ export default function FoodDetailView({ id }: { id: string }) {
     );
   }
 
-  const categorySlug = isCategoryDish ? getCategoryDishById(id)?.category : undefined;
+  const staticDish = getStaticCatalogDish(id);
+  const backHref = staticDish
+    ? "collection" in staticDish
+      ? `/collections/${staticDish.collection}`
+      : `/category/${staticDish.category}`
+    : "/trending-dishes";
   const heroImage = getFoodImage(food.image_url);
-  const gallery = isCategoryDish
+  const gallery = isStaticDish
     ? [heroImage]
     : (food.gallery_urls?.filter(Boolean).length
         ? food.gallery_urls.filter(Boolean)
@@ -145,16 +202,16 @@ export default function FoodDetailView({ id }: { id: string }) {
   const isFavorite = itemIds.has(food.id);
 
   const handleAddToCart = () => {
-    const categoryDish = getCategoryDishById(food.id);
-    if (categoryDish) {
+    const catalogDish = getStaticCatalogDish(food.id);
+    if (catalogDish) {
       updateQuantity(food.id, 1, {
-        restaurant_id: categoryDish.restaurantId,
-        name: categoryDish.name,
-        price: categoryDish.price,
-        image: categoryDish.image,
-        isVeg: categoryDish.isVeg,
+        restaurant_id: catalogDish.restaurantId,
+        name: catalogDish.name,
+        price: catalogDish.price,
+        image: catalogDish.image,
+        isVeg: catalogDish.isVeg,
       });
-      showToast(`🛒 ${categoryDish.name} added to cart!`, "success");
+      showToast(`🛒 ${catalogDish.name} added to cart!`, "success");
       return;
     }
     updateQuantity(food.id, 1);
@@ -187,10 +244,10 @@ export default function FoodDetailView({ id }: { id: string }) {
       <Navbar />
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-8">
         <Link
-          href={categorySlug ? `/category/${categorySlug}` : "/trending-dishes"}
+          href={backHref}
           className="mb-8 inline-flex items-center gap-2 text-[#6B7280] hover:text-[#111827]"
         >
-          <ChevronLeft className="h-4 w-4" /> {categorySlug ? "Back to collection" : "Back to dishes"}
+          <ChevronLeft className="h-4 w-4" /> {isStaticDish ? "Back to collection" : "Back to dishes"}
         </Link>
 
         <section className="grid gap-10 lg:grid-cols-2">
@@ -205,7 +262,7 @@ export default function FoodDetailView({ id }: { id: string }) {
                 className="absolute inset-0 h-full w-full object-cover"
               />
             </div>
-            {!isCategoryDish && gallery.length > 1 ? (
+            {!isStaticDish && gallery.length > 1 ? (
               <div className="mt-4 grid grid-cols-3 gap-3">
                 {gallery.slice(0, 3).map((image, index) => (
                   <div
@@ -259,15 +316,23 @@ export default function FoodDetailView({ id }: { id: string }) {
               <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#F8FAFC] px-3 py-2 text-[#6B7280]">
                 <Clock className="h-4 w-4 text-primary" /> {food.preparation_time || 20} min
               </span>
-              {food.cuisines?.map((cuisine) => (
-                <Link
-                  key={cuisine.slug}
-                  href={isCategoryDish ? `/category/${cuisine.slug}` : `/cuisine/${cuisine.slug}`}
-                  className="rounded-lg bg-[#F8FAFC] px-3 py-2 text-[#6B7280] hover:text-[#111827]"
-                >
-                  {cuisine.name}
-                </Link>
-              ))}
+              {food.cuisines?.map((cuisine) => {
+                const collectionDish = getCollectionDishById(food.id);
+                const href = collectionDish
+                  ? `/collections/${cuisine.slug}`
+                  : isCategoryDishId(food.id)
+                    ? `/category/${cuisine.slug}`
+                    : `/cuisine/${cuisine.slug}`;
+                return (
+                  <Link
+                    key={cuisine.slug}
+                    href={href}
+                    className="rounded-lg bg-[#F8FAFC] px-3 py-2 text-[#6B7280] hover:text-[#111827]"
+                  >
+                    {cuisine.name}
+                  </Link>
+                );
+              })}
             </div>
 
             <p className="mb-7 leading-7 text-[#6B7280]">{food.description}</p>
@@ -310,17 +375,17 @@ export default function FoodDetailView({ id }: { id: string }) {
               )}
               <button
                 onClick={() => {
-                  const categoryDish = getCategoryDishById(food.id);
+                  const catalogDish = getStaticCatalogDish(food.id);
                   addAndCheckout(
                     food.id,
                     router,
-                    categoryDish
+                    catalogDish
                       ? {
-                          restaurant_id: categoryDish.restaurantId,
-                          name: categoryDish.name,
-                          price: categoryDish.price,
-                          image: categoryDish.image,
-                          isVeg: categoryDish.isVeg,
+                          restaurant_id: catalogDish.restaurantId,
+                          name: catalogDish.name,
+                          price: catalogDish.price,
+                          image: catalogDish.image,
+                          isVeg: catalogDish.isVeg,
                         }
                       : undefined
                   );
