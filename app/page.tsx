@@ -32,9 +32,6 @@ const TopBrands = dynamic(() => import("@/components/TopBrands"), {
 const FeaturedRestaurant = dynamic(() => import("@/components/FeaturedRestaurant"), {
   loading: () => <SectionSkeleton height="h-72" />,
 });
-const LiveDeals = dynamic(() => import("@/components/LiveDeals"), {
-  loading: () => <SectionSkeleton />,
-});
 const PopularCuisines = dynamic(() => import("@/components/PopularCuisines"), {
   loading: () => <SectionSkeleton height="h-48" />,
 });
@@ -60,6 +57,9 @@ const AppBanner = dynamic(() => import("@/components/AppBanner"), {
 const FAQ = dynamic(() => import("@/components/FAQ"), {
   loading: () => <SectionSkeleton height="h-72" />,
 });
+const FoodiqLiveHub = dynamic(() => import("@/components/FoodiqLiveHub"), {
+  loading: () => <SectionSkeleton height="h-56" />,
+});
 const Footer = dynamic(() => import("@/components/Footer"), {
   loading: () => <SectionSkeleton height="h-40" />,
 });
@@ -73,13 +73,12 @@ export default function Home() {
       <FloatingCart />
 
       <div className="relative z-10 bg-white pt-4 sm:pt-6">
-        <PersonalizedHomeRails />
+        <FoodiqLiveHub />
         <PopularRestaurants />
         <TrendingDishes />
         <BestOffers />
         <TopBrands />
         <FeaturedRestaurant />
-        <LiveDeals />
         <PopularCuisines />
         <FeaturedCollections />
         <LovedByFoodLovers />
