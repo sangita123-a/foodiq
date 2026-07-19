@@ -24,6 +24,7 @@ import { useFavoriteActions } from "@/hooks/useFavoriteActions";
 import { shareContent } from "@/lib/share";
 import CatalogViewTracker from "@/components/analytics/CatalogViewTracker";
 import { isClientAuthenticated } from "@/lib/authSession";
+import { useAuthToken } from "@/hooks/useAuthToken";
 import { POPULAR_RESTAURANTS_30, TRENDING_DISHES_60 } from "@/lib/data/30restaurantsData";
 
 function computeDealDisplayPrice(
