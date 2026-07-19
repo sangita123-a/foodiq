@@ -2,14 +2,17 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Clock, MapPin, Sparkles, Star, Tag, Utensils } from "lucide-react";
+import { ArrowRight, Clock, Heart, MapPin, Sparkles, Star, Tag } from "lucide-react";
 import useSWR from "swr";
 import SafeImage from "@/components/ui/SafeImage";
 import { getRestaurantImage, RESTAURANT_FALLBACK } from "@/lib/images";
 import { POPULAR_RESTAURANTS_30, Restaurant30 } from "@/lib/data/30restaurantsData";
+import { useFavoriteActions } from "@/hooks/useFavoriteActions";
 
 export default function PopularRestaurants() {
   const [activeCategory, setActiveCategory] = useState<string>("All");
+  const { restaurantIds, toggleRestaurant } = useFavoriteActions();
+  const [localFavs, setLocalFavs] = useState<Set<string>>(new Set());
 
   // Fetch API data if available, fallback to 30 category-themed restaurants
   const { data: apiData, isLoading } = useSWR("/api/restaurants?limit=30");
@@ -60,35 +63,45 @@ export default function PopularRestaurants() {
     return restaurants.filter((r) => r.category.toLowerCase() === activeCategory.toLowerCase());
   }, [restaurants, activeCategory]);
 
+  const handleToggleFav = async (id: string) => {
+    setLocalFavs((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+    await toggleRestaurant(id);
+  };
+
   return (
-    <section className="py-12 bg-[#F8FAFC] border-y border-[#E2E8F0]" id="popular-restaurants-section">
-      <div className="container mx-auto px-4 md:px-8 max-w-7xl">
+    <section className="py-10 bg-white border-y border-[#ECECEC]" id="popular-restaurants-section">
+      <div className="container mx-auto px-4 md:px-8 max-w-[1440px]">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 pb-3 border-b border-[#ECECEC] gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-3 uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>30 Handcrafted Categories</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF5F6] text-[#E23744] text-xs font-black uppercase tracking-wider mb-2 border border-[#E23744]/20">
+              <Sparkles className="w-3.5 h-3.5 fill-[#E23744]" />
+              <span>Top Rated Spots</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-[#0F172A] tracking-tight mb-2">
+            <h2 className="text-2xl md:text-3xl font-black text-[#1A1A1A] tracking-tight">
               Popular Restaurants Near You
             </h2>
-            <p className="text-[#64748B] text-base md:text-lg">
+            <p className="text-[#666666] text-xs md:text-sm font-medium mt-1">
               Explore top-rated spots categorized by your favorite cravings.
             </p>
           </div>
 
           <Link
             href="/restaurants"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#CBD5E1] bg-white text-[#0F172A] text-sm font-semibold hover:border-primary hover:text-primary transition-all shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#ECECEC] bg-[#F8F8F8] hover:bg-[#ECECEC] text-[#1A1A1A] text-xs font-bold transition-all shadow-sm active:scale-95 shrink-0"
           >
             <span>Explore All 30 Spots</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        {/* Category Pills Filter */}
-        <div className="flex items-center gap-2.5 overflow-x-auto pb-4 mb-8 hide-scrollbar scroll-smooth">
+        {/* Category Filter Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none">
           {categories.map((cat) => {
             const isActive = activeCategory === cat;
             return (
@@ -96,10 +109,10 @@ export default function PopularRestaurants() {
                 key={cat}
                 type="button"
                 onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-xl text-xs md:text-sm font-bold whitespace-nowrap transition-all duration-200 shadow-sm ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-all duration-200 border ${
                   isActive
-                    ? "bg-primary text-white shadow-md shadow-primary/20 scale-105"
-                    : "bg-white text-[#475569] hover:bg-[#F1F5F9] border border-[#E2E8F0]"
+                    ? "bg-[#E23744] text-white border-[#E23744] shadow-sm shadow-[#E23744]/20 scale-105"
+                    : "bg-[#F8F8F8] text-[#1A1A1A] border-[#ECECEC] hover:bg-gray-100"
                 }`}
               >
                 {cat}
@@ -108,91 +121,137 @@ export default function PopularRestaurants() {
           })}
         </div>
 
-        {/* Grid of 30 Restaurants: 2 col (mobile), 3 col (tablet), 4-5 col (desktop) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
+        {/* Grid of Compact Restaurants: 2 col (mobile), 3 col (tablet), 5 col (desktop), 18px gap */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-[18px]">
           {isLoading && filteredRestaurants.length === 0
             ? Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="h-[320px] rounded-[18px] bg-white animate-pulse border border-[#ECECEC]" />
+                <div key={i} className="h-[315px] rounded-[18px] bg-[#F8F8F8] animate-pulse border border-[#ECECEC]" />
               ))
-            : filteredRestaurants.map((restaurant) => (
-                <div
-                  key={restaurant.id}
-                  className="group relative bg-white rounded-[18px] border border-[#ECECEC] overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_32px_rgba(226,55,68,0.12)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300 flex flex-col h-[320px] sm:h-[340px]"
-                >
-                  {/* Cover Image (~60% height) */}
-                  <Link href={`/restaurant/${restaurant.id}`} className="relative block h-[175px] sm:h-[185px] w-full overflow-hidden bg-[#F8F8F8] shrink-0">
-                    <SafeImage
-                      src={restaurant.image}
-                      fallback={RESTAURANT_FALLBACK}
-                      alt={restaurant.name}
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+            : filteredRestaurants.map((restaurant) => {
+                const isFav = restaurantIds.has(restaurant.id) || localFavs.has(restaurant.id);
+                return (
+                  <div
+                    key={restaurant.id}
+                    className="group relative bg-white rounded-[18px] border border-[#ECECEC] overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_28px_rgba(226,55,68,0.14)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col h-[315px] cursor-pointer"
+                  >
+                    {/* Top: Image (~145px height) */}
+                    <Link
+                      href={`/restaurant/${restaurant.id}`}
+                      className="relative block h-[145px] w-full overflow-hidden bg-[#F8F8F8] shrink-0"
+                    >
+                      <SafeImage
+                        src={restaurant.image}
+                        fallback={RESTAURANT_FALLBACK}
+                        alt={restaurant.name}
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
-                    {/* Offer Tag */}
-                    {restaurant.offer && (
-                      <div className="absolute top-2.5 left-2.5 bg-[#E23744] text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-md uppercase tracking-wide flex items-center gap-1">
-                        <Tag className="w-3 h-3" />
-                        <span>{restaurant.offer}</span>
-                      </div>
-                    )}
-
-                    {/* Veg / Non-Veg Badge */}
-                    <div className="absolute top-2.5 right-2.5 bg-black/60 backdrop-blur-md p-1 rounded-md border border-white/20">
-                      <div
-                        className={`w-3 h-3 border-2 flex items-center justify-center ${
-                          restaurant.isVeg ? "border-green-500" : "border-red-500"
-                        }`}
-                      >
-                        <div className={`w-1 h-1 rounded-full ${restaurant.isVeg ? "bg-green-500" : "bg-red-500"}`} />
-                      </div>
-                    </div>
-
-                    {/* Rating Badge */}
-                    <div className="absolute bottom-2.5 left-2.5 bg-[#16A34A] text-white text-[11px] font-black px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
-                      <span>{restaurant.rating}</span>
-                      <Star className="w-3 h-3 fill-white" />
-                    </div>
-
-                    {/* Open Status */}
-                    <div className="absolute bottom-2.5 right-2.5 bg-emerald-600/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">
-                      OPEN
-                    </div>
-                  </Link>
-
-                  {/* Essential Card Content */}
-                  <div className="p-3.5 flex flex-col flex-1 min-w-0 justify-between">
-                    <div>
-                      <Link href={`/restaurant/${restaurant.id}`} className="font-extrabold text-[#1A1A1A] text-sm sm:text-base line-clamp-1 hover:text-[#E23744] transition-colors mb-0.5">
-                        {restaurant.name}
-                      </Link>
-
-                      <p className="text-[#666666] text-xs line-clamp-1 font-medium mb-2">{restaurant.cuisine}</p>
-                    </div>
-
-                    <div>
-                      <div className="flex items-center justify-between text-[#666666] text-xs font-semibold mb-3">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5 text-[#E23744]" />
-                          <span>{restaurant.time}</span>
+                      {/* Offer Badge */}
+                      {restaurant.offer && (
+                        <div className="absolute bottom-2 left-2 bg-[#E23744] text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-sm uppercase tracking-wide flex items-center gap-1 z-10">
+                          <Tag className="w-2.5 h-2.5" />
+                          <span className="truncate max-w-[120px]">{restaurant.offer}</span>
                         </div>
-                        <span>•</span>
-                        <span className="truncate">{restaurant.priceForTwo}</span>
+                      )}
+
+                      {/* Veg / Non-Veg Badge */}
+                      <div className="absolute top-2 left-2 bg-white/95 backdrop-blur-md p-1 rounded-md shadow-sm border border-gray-200 z-10">
+                        <div
+                          className={`w-3 h-3 border-2 flex items-center justify-center ${
+                            restaurant.isVeg ? "border-green-600" : "border-red-600"
+                          }`}
+                        >
+                          <div className={`w-1 h-1 rounded-full ${restaurant.isVeg ? "bg-green-600" : "bg-red-600"}`} />
+                        </div>
                       </div>
 
-                      {/* Action Button */}
+                      {/* Favorite Heart Icon */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleToggleFav(restaurant.id);
+                        }}
+                        className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 hover:bg-white text-gray-700 shadow-md transition-all z-20 backdrop-blur-sm active:scale-90"
+                        aria-label="Save Favorite"
+                      >
+                        <Heart
+                          className={`w-3.5 h-3.5 transition-colors ${
+                            isFav ? "fill-[#E23744] text-[#E23744]" : "text-gray-600 hover:text-[#E23744]"
+                          }`}
+                        />
+                      </button>
+
+                      {/* Open Status */}
+                      {restaurant.isOpen ? (
+                        <div className="absolute top-2 right-10 bg-emerald-600/90 text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded shadow-sm z-10">
+                          OPEN
+                        </div>
+                      ) : (
+                        <div className="absolute top-2 right-10 bg-gray-800/90 text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded shadow-sm z-10">
+                          CLOSED
+                        </div>
+                      )}
+                    </Link>
+
+                    {/* Bottom: Card Content */}
+                    <div className="p-3 flex flex-col flex-1 justify-between bg-white min-w-0">
+                      <div>
+                        {/* Restaurant Name */}
+                        <Link
+                          href={`/restaurant/${restaurant.id}`}
+                          className="font-black text-[#1A1A1A] text-sm line-clamp-1 group-hover:text-[#E23744] transition-colors mb-0.5 block"
+                        >
+                          {restaurant.name}
+                        </Link>
+
+                        {/* Cuisine */}
+                        <p className="text-[#666666] text-[11px] font-medium line-clamp-1 mb-2">
+                          {restaurant.cuisine}
+                        </p>
+
+                        {/* Swiggy/Zomato Metrics Bar */}
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A1A1A] mb-1.5 flex-wrap">
+                          <div className="inline-flex items-center gap-0.5 bg-[#16A34A] text-white px-1.5 py-0.5 rounded text-[10px] font-black">
+                            <span>{restaurant.rating}</span>
+                            <Star className="w-2.5 h-2.5 fill-white" />
+                          </div>
+                          <span className="text-gray-300">•</span>
+                          <div className="flex items-center gap-1 text-[#666666]">
+                            <Clock className="w-3 h-3 text-[#E23744]" />
+                            <span>{restaurant.time}</span>
+                          </div>
+                          <span className="text-gray-300">•</span>
+                          <div className="flex items-center gap-0.5 text-[#666666]">
+                            <MapPin className="w-3 h-3 text-[#E23744]" />
+                            <span>{restaurant.location || "2.5 km"}</span>
+                          </div>
+                        </div>
+
+                        {/* Price & Free Delivery */}
+                        <div className="flex items-center justify-between text-[11px] text-[#666666] font-medium">
+                          <span className="truncate">{restaurant.priceForTwo}</span>
+                          <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                            Free Delivery
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* View Menu Button */}
                       <Link
                         href={`/restaurant/${restaurant.id}`}
-                        className="w-full inline-flex items-center justify-center gap-1.5 py-1.5 rounded-xl bg-[#E23744] hover:bg-[#C81E34] text-white text-xs font-bold transition-all shadow-sm active:scale-98"
+                        className="w-full mt-2 inline-flex items-center justify-center gap-1 py-1.5 rounded-xl bg-[#E23744] hover:bg-[#C81E34] text-white text-[11px] font-black transition-all shadow-sm active:scale-95"
                       >
                         <span>View Menu</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <ArrowRight className="w-3 h-3" />
                       </Link>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
         </div>
       </div>
     </section>
