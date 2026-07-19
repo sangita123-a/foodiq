@@ -1,3 +1,24 @@
+/** Base URL for backend-served images. Relative paths from the API are prefixed with this. */
+const BACKEND_BASE =
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL) ||
+  "https://foodiq-2.onrender.com";
+
+/**
+ * Converts a possibly-relative backend image path to an absolute URL.
+ * e.g. "/images/catalog/restaurants/indian.webp"
+ *   → "https://foodiq-2.onrender.com/images/catalog/restaurants/indian.webp"
+ * Already-absolute URLs (https://...) are returned unchanged.
+ */
+export function resolveBackendUrl(path: string | null | undefined): string | null {
+  if (!path) return null;
+  const p = path.trim();
+  if (!p) return null;
+  // Already absolute
+  if (p.startsWith("http://") || p.startsWith("https://")) return p;
+  // Relative path from backend — prefix with backend origin
+  return `${BACKEND_BASE}${p.startsWith("/") ? "" : "/"}${p}`;
+}
+
 export const RESTAURANT_FALLBACK = "/images/catalog/restaurants/indian.webp";
 export const FOOD_FALLBACK = "/images/catalog/food/indian.webp";
 export const OFFER_FALLBACK = "/images/catalog/cuisines/pizza.webp";
@@ -15,13 +36,13 @@ export const OFFER_IMAGES: Record<string, string> = {
 };
 
 export function getOfferImage(code?: string | null, bannerUrl?: string | null): string {
-  if (bannerUrl?.trim()) return bannerUrl.trim();
+  if (bannerUrl?.trim()) return resolveBackendUrl(bannerUrl) ?? OFFER_FALLBACK;
   if (code && OFFER_IMAGES[code]) return OFFER_IMAGES[code];
   return OFFER_FALLBACK;
 }
 
 export function getAvatarImage(url?: string | null): string {
-  return url?.trim() || AVATAR_FALLBACK;
+  return resolveBackendUrl(url) ?? AVATAR_FALLBACK;
 }
 
 export const BRAND_FOOD_IMAGES: Record<string, string> = {
@@ -38,11 +59,11 @@ export const BRAND_FOOD_IMAGES: Record<string, string> = {
 };
 
 export function getRestaurantImage(url?: string | null): string {
-  return url?.trim() || RESTAURANT_FALLBACK;
+  return resolveBackendUrl(url) ?? RESTAURANT_FALLBACK;
 }
 
 export function getFoodImage(url?: string | null): string {
-  return url?.trim() || FOOD_FALLBACK;
+  return resolveBackendUrl(url) ?? FOOD_FALLBACK;
 }
 
 export function getBrandFoodImage(name: string, localPath?: string): string {

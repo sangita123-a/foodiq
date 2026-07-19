@@ -3,7 +3,7 @@ import { getAccessToken, setAccessToken } from '@/lib/accessToken';
 import { clearClientAuth, markAuthenticated } from '@/lib/authSession';
 
 /** Known production API — used when Vercel env is missing at build time. */
-const PRODUCTION_API_FALLBACK = 'https://foodiq-backend-api.onrender.com';
+const PRODUCTION_API_FALLBACK = 'https://foodiq-2.onrender.com';
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_URL ||

@@ -11,7 +11,7 @@ function apiBaseUrl() {
   return (
     process.env.NEXT_PUBLIC_API_URL ||
     (process.env.NODE_ENV === "production"
-      ? "https://foodiq-backend-api.onrender.com"
+      ? "https://foodiq-2.onrender.com"
       : "http://localhost:4000")
   );
 }

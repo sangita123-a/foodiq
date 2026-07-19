@@ -16,7 +16,7 @@ import useSWR, { mutate as globalMutate } from "swr";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/contexts/ToastContext";
 import api from "@/services/api";
-import { FOOD_FALLBACK, getFoodImage, getPriceForTwo, getRestaurantImage, getBrandFoodImage } from "@/lib/images";
+import { FOOD_FALLBACK, getFoodImage, getPriceForTwo, getRestaurantImage, getBrandFoodImage, resolveBackendUrl, RESTAURANT_FALLBACK } from "@/lib/images";
 import SafeImage from "@/components/ui/SafeImage";
 import LiveDealBanner from "@/components/restaurant/LiveDealBanner";
 import { setActiveOffer } from "@/lib/offers";
@@ -86,13 +86,17 @@ export default function RestaurantPage() {
   // Map backend restaurant to component props
   const mappedRestaurant = useMemo(() => {
     if (!restaurant) return null;
-    const brandLogo = liveDeal?.logo_url || restaurant.logo_url || getBrandFoodImage(restaurant.name, restaurant.logo_url);
+    const brandLogo =
+      resolveBackendUrl(liveDeal?.logo_url) ||
+      resolveBackendUrl(restaurant.logo_url) ||
+      getBrandFoodImage(restaurant.name, undefined) ||
+      RESTAURANT_FALLBACK;
     return {
       id: restaurant.id,
       name: restaurant.name,
       coverImage:
-        liveDeal?.banner_url ||
-        restaurant.banner_url ||
+        resolveBackendUrl(liveDeal?.banner_url) ||
+        resolveBackendUrl(restaurant.banner_url) ||
         getRestaurantImage(restaurant.image_url),
       logo: brandLogo,
       rating: String(restaurant.rating || "4.5"),
