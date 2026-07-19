@@ -23,6 +23,8 @@ export function resolveBackendUrl(path: string | null | undefined): string | nul
   if (!p) return null;
   // Already absolute
   if (p.startsWith("http://") || p.startsWith("https://")) return p;
+  // Local frontend assets starting with /images/
+  if (p.startsWith("/images/")) return p;
   // Relative path from backend — prefix with backend origin
   const base = getBackendBase();
   return `${base}${p.startsWith("/") ? "" : "/"}${p}`;
