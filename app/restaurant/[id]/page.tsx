@@ -74,7 +74,7 @@ export default function RestaurantPage() {
     id && dealCode ? `/api/live-deals/restaurant/${id}?coupon=${dealCode}` : null
   );
   const hasToken = useAuthToken();
-  const { data: cartResponse } = useSWR(hasToken ? "/api/cart" : null);
+  const { data: cartResponse, mutate: mutateCart } = useSWR(hasToken ? "/api/cart" : null);
   const { data: favResponse } = useSWR(hasToken ? "/api/favorites" : null);
 
   const fallbackRest = useMemo(
