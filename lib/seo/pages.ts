@@ -1,18 +1,21 @@
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { SITE_KEYWORDS } from "@/lib/seo/site";
 
 /** Static public route SEO copy (titles/descriptions). */
 export const PUBLIC_PAGE_SEO = {
   home: {
-    title: "Foodiq - Restaurant Ordering Platform",
+    title: "Foodiq | Online Food Delivery Platform",
     description:
-      "Discover amazing restaurants and delicious food delivered straight to your doorstep. Browse menus, trending dishes, and exclusive offers on Foodiq.",
+      "Order delicious food online from top restaurants with fast delivery only on Foodiq.",
     path: "/",
+    keywords: SITE_KEYWORDS,
   },
   restaurants: {
     title: "Restaurants Near You",
     description:
-      "Browse restaurants on Foodiq. Explore menus, ratings, delivery times, and order your favorites online.",
+      "Browse restaurants on Foodiq. Explore menus, ratings, delivery times, and order your favorites online in Hyderabad.",
     path: "/restaurants",
+    keywords: [...SITE_KEYWORDS, "Foodiq Restaurant", "restaurants Hyderabad"],
   },
   popularRestaurants: {
     title: "Popular Restaurants",
@@ -50,11 +53,26 @@ export const PUBLIC_PAGE_SEO = {
       "Search restaurants and dishes on Foodiq. Find meals, cuisines, and places to order from quickly.",
     path: "/search",
   },
+  orderOnline: {
+    title: "Order Food Online",
+    description:
+      "Order food online from top restaurants on Foodiq. Fast delivery, live tracking, and exclusive offers in Hyderabad.",
+    path: "/order-online",
+    keywords: [...SITE_KEYWORDS, "Foodiq Online Food Delivery", "order food online Hyderabad"],
+  },
+  liveCricket: {
+    title: "Live Cricket & Match Day Food",
+    description:
+      "Watch live cricket with real-time scores on Foodiq and order match day food combos delivered fast.",
+    path: "/live-cricket",
+    noIndex: false,
+  },
   about: {
     title: "About Foodiq",
     description:
-      "Learn about Foodiq — the restaurant ordering platform helping you discover and order delicious food.",
+      "Learn about Foodiq — the official online food delivery platform helping you discover and order delicious food in Hyderabad.",
     path: "/about",
+    keywords: [...SITE_KEYWORDS, "Foodiq Official Website"],
   },
   contact: {
     title: "Contact Us",
@@ -100,14 +118,13 @@ export const PUBLIC_PAGE_SEO = {
   },
 } as const;
 
-export function publicMetadata(
-  key: keyof typeof PUBLIC_PAGE_SEO
-) {
+export function publicMetadata(key: keyof typeof PUBLIC_PAGE_SEO) {
   const seo = PUBLIC_PAGE_SEO[key];
   return buildPageMetadata({
     title: seo.title,
     description: seo.description,
     path: seo.path,
+    keywords: "keywords" in seo ? [...seo.keywords] : undefined,
     noIndex: "noIndex" in seo ? Boolean(seo.noIndex) : false,
   });
 }

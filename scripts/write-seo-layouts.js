@@ -19,6 +19,8 @@ const publicLayouts = [
   ["terms-of-service", "terms"],
   ["login", "login"],
   ["register", "register"],
+  ["order-online", "orderOnline"],
+  ["live-cricket", "liveCricket"],
   ["forgot-password", "forgotPassword"],
 ];
 
@@ -33,6 +35,7 @@ const privateDirs = [
   "my-orders",
   "orders",
   "favorites",
+  "wishlist",
   "saved-addresses",
   "payment-methods",
   "notifications",

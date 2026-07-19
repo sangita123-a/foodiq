@@ -1,47 +1,69 @@
 import type { MetadataRoute } from "next";
+import { CATEGORY_DISHES, CATEGORY_SLUGS } from "@/lib/data/categoryData";
+import { COLLECTION_DISHES, COLLECTION_SLUGS } from "@/lib/data/collectionsData";
 import { CUISINE_SLUGS } from "@/lib/cuisines";
 import {
   ApiEnvelope,
   fetchApiJson,
 } from "@/lib/seo/jsonld";
+import {
+  getKnownDynamicRoutePatterns,
+  getStaticSitemapEntries,
+} from "@/lib/seo/public-routes";
 import { absoluteUrl } from "@/lib/seo/site";
 
 type RestaurantRow = { id: string; updated_at?: string };
 type MenuItemRow = { id: string; updated_at?: string };
 type OfferRow = { id: string; updated_at?: string };
 
-const STATIC_PATHS: Array<{ path: string; changeFrequency: MetadataRoute.Sitemap[0]["changeFrequency"]; priority: number }> = [
-  { path: "/", changeFrequency: "daily", priority: 1 },
-  { path: "/restaurants", changeFrequency: "daily", priority: 0.9 },
-  { path: "/popular-restaurants", changeFrequency: "daily", priority: 0.8 },
-  { path: "/popular-cuisines", changeFrequency: "weekly", priority: 0.8 },
-  { path: "/trending-dishes", changeFrequency: "daily", priority: 0.8 },
-  { path: "/offers", changeFrequency: "daily", priority: 0.8 },
-  { path: "/collections", changeFrequency: "weekly", priority: 0.7 },
-  { path: "/search", changeFrequency: "weekly", priority: 0.6 },
-  { path: "/about", changeFrequency: "monthly", priority: 0.5 },
-  { path: "/contact", changeFrequency: "monthly", priority: 0.5 },
-  { path: "/help-support", changeFrequency: "monthly", priority: 0.5 },
-  { path: "/privacy-policy", changeFrequency: "yearly", priority: 0.3 },
-  { path: "/terms-of-service", changeFrequency: "yearly", priority: 0.3 },
-];
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const entries: MetadataRoute.Sitemap = STATIC_PATHS.map((item) => ({
+  const entries: MetadataRoute.Sitemap = getStaticSitemapEntries().map((item) => ({
     url: absoluteUrl(item.path),
     lastModified: now,
     changeFrequency: item.changeFrequency,
     priority: item.priority,
   }));
 
+  for (const routePath of getKnownDynamicRoutePatterns()) {
+    entries.push({
+      url: absoluteUrl(routePath),
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: routePath.startsWith("/collections/") ? 0.7 : 0.75,
+    });
+  }
+
   for (const slug of CUISINE_SLUGS) {
+    if (entries.some((entry) => entry.url === absoluteUrl(`/cuisine/${slug}`))) continue;
     entries.push({
       url: absoluteUrl(`/cuisine/${slug}`),
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.7,
     });
+  }
+
+  for (const slug of CATEGORY_SLUGS) {
+    for (const dish of CATEGORY_DISHES[slug]) {
+      entries.push({
+        url: absoluteUrl(`/food/${dish.id}`),
+        lastModified: now,
+        changeFrequency: "weekly",
+        priority: 0.65,
+      });
+    }
+  }
+
+  for (const slug of COLLECTION_SLUGS) {
+    for (const dish of COLLECTION_DISHES[slug]) {
+      entries.push({
+        url: absoluteUrl(`/food/${dish.id}`),
+        lastModified: now,
+        changeFrequency: "weekly",
+        priority: 0.65,
+      });
+    }
   }
 
   const restaurants = await fetchApiJson<ApiEnvelope<RestaurantRow[]>>(
@@ -99,5 +121,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  return entries;
+  const seen = new Set<string>();
+  return entries.filter((entry) => {
+    if (seen.has(entry.url)) return false;
+    seen.add(entry.url);
+    return true;
+  });
 }

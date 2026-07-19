@@ -6,6 +6,7 @@ import {
   breadcrumbJsonLd,
   fetchApiJson,
   menuItemJsonLd,
+  productJsonLd,
 } from "@/lib/seo/jsonld";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getCategoryDishById, isCategoryDishId } from "@/lib/data/categoryData";
@@ -92,6 +93,14 @@ export default async function FoodPage({ params }: PageProps) {
                 { name: dish.collection, path: `/collections/${dish.collection}` },
                 { name: dish.name, path: `/food/${dish.id}` },
               ]),
+              productJsonLd({
+                id: dish.id,
+                name: dish.name,
+                description: dish.description,
+                price: dish.price,
+                image: dish.image,
+                restaurant_name: dish.restaurantName,
+              }),
             ]}
           />
         ) : null}
@@ -112,6 +121,14 @@ export default async function FoodPage({ params }: PageProps) {
                 { name: dish.category, path: `/category/${dish.category}` },
                 { name: dish.name, path: `/food/${dish.id}` },
               ]),
+              productJsonLd({
+                id: dish.id,
+                name: dish.name,
+                description: dish.description,
+                price: dish.price,
+                image: dish.image,
+                restaurant_name: dish.restaurantName,
+              }),
             ]}
           />
         ) : null}
@@ -134,6 +151,7 @@ export default async function FoodPage({ params }: PageProps) {
               { name: item.name, path: `/food/${item.id}` },
             ]),
             menuItemJsonLd(item),
+            productJsonLd(item),
           ]}
         />
       ) : null}

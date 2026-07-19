@@ -80,7 +80,7 @@ export default function Hero() {
           // eslint-disable-next-line @next/next/no-img-element -- static LCP poster before video hydrates
           <img
             src="/icons/og-default.png"
-            alt=""
+            alt="Foodiq online food delivery in Hyderabad"
             fetchPriority="high"
             decoding="async"
             className="w-full h-full object-cover object-center"

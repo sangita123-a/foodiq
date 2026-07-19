@@ -4,20 +4,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SupportHeader from "@/components/support/SupportHeader";
 import QuickHelpCards from "@/components/support/QuickHelpCards";
-import FaqAccordion, { FaqType } from "@/components/support/FaqAccordion";
+import FaqAccordion from "@/components/support/FaqAccordion";
+import { HELP_SUPPORT_FAQS } from "@/lib/seo/faq";
 import LiveChatCard from "@/components/support/LiveChatCard";
 import SupportTicketForm from "@/components/support/SupportTicketForm";
 import RecentTickets, { TicketType } from "@/components/support/RecentTickets";
 import ContactInfo from "@/components/support/ContactInfo";
 
-// Mock Data
-const faqs: FaqType[] = [
-  { id: "f1", question: "How do I track my order?", answer: "Once your order is confirmed, you can track it in real-time by going to the 'Live Order Tracking' page or clicking on the active order banner on your homepage. You will see the delivery partner's live location on the map." },
-  { id: "f2", question: "How can I cancel an order?", answer: "You can cancel an order within 60 seconds of placing it directly from the 'My Orders' page without any penalty. If the restaurant has already started preparing your food, cancellation may incur a small fee." },
-  { id: "f3", question: "How do refunds work?", answer: "If your order is cancelled, the refund is initiated immediately. For UPI and Wallets, it reflects within 2-4 hours. For Credit/Debit cards, it may take 5-7 business days depending on your bank." },
-  { id: "f4", question: "How do I apply coupons?", answer: "During checkout, you will see a 'Apply Coupon' section. You can either select an available coupon from the list or manually type in your promo code and click 'Apply'." },
-  { id: "f5", question: "How do I contact support?", answer: "You can reach us instantly via the 'Live Chat' option on this page, or you can call us at our toll-free number. For non-urgent issues, feel free to submit a support ticket below." }
-];
+const faqs = HELP_SUPPORT_FAQS;
 
 const recentTickets: TicketType[] = [
   { id: "TKT-8902", subject: "Food spilled during delivery", status: "Resolved", date: "Oct 12, 2026" },

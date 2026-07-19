@@ -2,17 +2,24 @@
  * Site-wide SEO configuration. Prefer NEXT_PUBLIC_SITE_URL in production.
  */
 export const SITE_NAME = "Foodiq";
-export const SITE_TAGLINE = "Restaurant Ordering Platform";
+export const SITE_TAGLINE = "Online Food Delivery Platform";
+export const SITE_CITY = "Hyderabad";
 export const SITE_DESCRIPTION =
-  "Discover amazing restaurants and delicious food delivered straight to your doorstep. Order from top local restaurants with Foodiq.";
+  "Order delicious food online from top restaurants with fast delivery only on Foodiq.";
 export const SITE_KEYWORDS = [
   "Foodiq",
+  "Foodiq Food Delivery",
+  "Foodiq Hyderabad",
+  "Foodiq Online Food Delivery",
+  "Foodiq Restaurant",
+  "Foodiq Official Website",
   "food delivery",
   "order food online",
   "restaurants near me",
   "online food ordering",
   "food delivery app",
   "restaurant menu",
+  "Hyderabad food delivery",
   "trending dishes",
 ];
 

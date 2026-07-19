@@ -1,9 +1,21 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import JsonLd from "@/components/seo/JsonLd";
+import { faqJsonLd } from "@/lib/seo/jsonld";
+import { HELP_SUPPORT_FAQS } from "@/lib/seo/faq";
 import { publicMetadata } from "@/lib/seo/pages";
 
 export const metadata: Metadata = publicMetadata("helpSupport");
 
-export default function SeoLayout({ children }: { children: ReactNode }) {
-  return children;
+export default function HelpSupportSeoLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <>
+      <JsonLd data={faqJsonLd(HELP_SUPPORT_FAQS)} />
+      {children}
+    </>
+  );
 }

@@ -41,11 +41,10 @@ export function buildPageMetadata({
   const ogImage = resolveImage(image);
 
   return {
-    // Let root `title.template` append " | Foodiq" unless title already includes brand
     title: title.includes(SITE_NAME) ? { absolute: title } : title,
     description,
     keywords,
-    authors: [{ name: SITE_NAME }],
+    authors: [{ name: SITE_NAME, url: absoluteUrl("/") }],
     creator: SITE_NAME,
     publisher: SITE_NAME,
     applicationName: SITE_NAME,
@@ -91,6 +90,8 @@ export function buildPageMetadata({
       title: ogTitle,
       description,
       images: [ogImage],
+      creator: "@foodiq",
+      site: "@foodiq",
     },
     metadataBase: new URL(getSiteUrl()),
   };
