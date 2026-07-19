@@ -6,52 +6,34 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import RestaurantHeader from "@/components/restaurant/RestaurantHeader";
 import RestaurantGallery from "@/components/restaurant/RestaurantGallery";
-import SimilarRestaurants from "@/components/restaurant/SimilarRestaurants";
 import RestaurantMenuNav from "@/components/restaurant/RestaurantMenuNav";
 import MenuItemCard, { MenuItem } from "@/components/restaurant/MenuItemCard";
-import RestaurantReviews from "@/components/restaurant/RestaurantReviews";
-import RestaurantCart from "@/components/restaurant/RestaurantCart";
-import { Star } from "lucide-react";
-import useSWR, { mutate as globalMutate } from "swr";
+import useSWR from "swr";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/contexts/ToastContext";
-import api from "@/services/api";
-import { FOOD_FALLBACK, getFoodImage, getPriceForTwo, getRestaurantImage, getBrandFoodImage, resolveBackendUrl, RESTAURANT_FALLBACK } from "@/lib/images";
-import SafeImage from "@/components/ui/SafeImage";
+import { getPriceForTwo, getRestaurantImage, resolveBackendUrl, RESTAURANT_FALLBACK } from "@/lib/images";
 import LiveDealBanner from "@/components/restaurant/LiveDealBanner";
 import { setActiveOffer } from "@/lib/offers";
 import { useFavoriteActions } from "@/hooks/useFavoriteActions";
 import { shareContent } from "@/lib/share";
 import CatalogViewTracker from "@/components/analytics/CatalogViewTracker";
 import { isClientAuthenticated } from "@/lib/authSession";
-import { useAuthToken } from "@/hooks/useAuthToken";
-import { POPULAR_RESTAURANTS_30, TRENDING_DISHES_60 } from "@/lib/data/30restaurantsData";
+import { POPULAR_RESTAURANTS_30 } from "@/lib/data/30restaurantsData";
 import { getMenuForRestaurant } from "@/lib/data/restaurantMenusData";
-
-function computeDealDisplayPrice(
-  basePrice: number,
-  discountType?: string,
-  discountAmount?: number
-) {
-  if (!discountType || discountAmount == null) {
-    return { displayPrice: basePrice, originalPrice: undefined as number | undefined };
-  }
-  if (discountType === "percentage") {
-    const displayPrice = Math.round(basePrice * (1 - Number(discountAmount) / 100));
-    return { displayPrice, originalPrice: basePrice };
-  }
-  return { displayPrice: basePrice, originalPrice: basePrice };
-}
+import { useCartActions } from "@/hooks/useCartActions";
+import { ShoppingBag, ArrowRight } from "lucide-react";
 
 export default function RestaurantPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const id = params?.id as string;
+  const rawId = (params?.id as string) || "";
+  const id = rawId.trim();
   const dealCode = searchParams.get("deal");
   const { showToast } = useToast();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { restaurantIds, toggleRestaurant } = useFavoriteActions();
+  const { quantities, updateQuantity, addAndCheckout } = useCartActions();
 
   useEffect(() => {
     setIsLoggedIn(isClientAuthenticated());
@@ -60,35 +42,51 @@ export default function RestaurantPage() {
     return () => window.removeEventListener("foodiq:auth", onAuth);
   }, []);
 
-  const isValidId = Boolean(id && id.length >= 8);
+  const isValidId = Boolean(id.length > 0);
 
-  const { data: restaurantResponse, isLoading: isLoadingRest, error: restaurantError } = useSWR(
-    id ? `/api/restaurants/${id}` : null
+  // Fetch API data with fallback
+  const { data: restaurantResponse, isLoading: isLoadingRest } = useSWR(
+    isValidId ? `/api/restaurants/${id}` : null
   );
   const { data: menuResponse, isLoading: isLoadingMenu } = useSWR(
-    id ? `/api/restaurants/${id}/menu` : null
-  );
-  const { data: queryMenuResponse } = useSWR(
-    id ? `/api/menu-items?restaurantId=${id}` : null
+    isValidId ? `/api/restaurants/${id}/menu` : null
   );
   const { data: liveDeal } = useSWR(
-    id && dealCode ? `/api/live-deals/restaurant/${id}?coupon=${dealCode}` : null
+    isValidId && dealCode ? `/api/live-deals/restaurant/${id}?coupon=${dealCode}` : null
   );
-  const hasToken = useAuthToken();
-  const { data: cartResponse, mutate: mutateCart } = useSWR(hasToken ? "/api/cart" : null);
-  const { data: favResponse, mutate: mutateFavs } = useSWR(hasToken ? "/api/favorites" : null);
 
-  const fallbackRest = useMemo(
-    () => POPULAR_RESTAURANTS_30.find((r) => r.id === id) || POPULAR_RESTAURANTS_30[0],
-    [id]
-  );
+  // Fallback restaurant object lookup
+  const fallbackRest = useMemo(() => {
+    if (!id) return POPULAR_RESTAURANTS_30[0];
+    const cleanId = id.toLowerCase();
+    
+    // Direct match by ID
+    let found = POPULAR_RESTAURANTS_30.find((r) => r.id.toLowerCase() === cleanId);
+    
+    // Keyword match
+    if (!found) {
+      if (cleanId.includes("pizza") || cleanId === "2") found = POPULAR_RESTAURANTS_30.find(r => r.category === "Pizza");
+      else if (cleanId.includes("cold-drinks") || cleanId === "1") found = POPULAR_RESTAURANTS_30.find(r => r.category === "Cold Drinks");
+      else if (cleanId.includes("burger") || cleanId === "3") found = POPULAR_RESTAURANTS_30.find(r => r.category === "Burger");
+      else if (cleanId.includes("biryani") || cleanId === "4") found = POPULAR_RESTAURANTS_30.find(r => r.category === "Biryani");
+      else if (cleanId.includes("south-indian") || cleanId === "5") found = POPULAR_RESTAURANTS_30.find(r => r.category === "South Indian");
+      else if (cleanId.includes("chinese") || cleanId === "6") found = POPULAR_RESTAURANTS_30.find(r => r.category === "Chinese");
+      else if (cleanId.includes("momos") || cleanId === "7") found = POPULAR_RESTAURANTS_30.find(r => r.category === "Momos");
+      else if (cleanId.includes("cakes") || cleanId === "11") found = POPULAR_RESTAURANTS_30.find(r => r.category === "Cakes");
+      else if (cleanId.includes("icecream") || cleanId === "10") found = POPULAR_RESTAURANTS_30.find(r => r.category === "Ice Cream");
+      else if (cleanId.includes("coffee") || cleanId === "12") found = POPULAR_RESTAURANTS_30.find(r => r.category === "Coffee");
+    }
+
+    return found || POPULAR_RESTAURANTS_30[0];
+  }, [id]);
 
   const restaurantData = restaurantResponse?.data || restaurantResponse;
   const restaurant = restaurantData?.name ? restaurantData : fallbackRest;
 
-  const rawMenu = menuResponse?.data || menuResponse || queryMenuResponse?.data || queryMenuResponse;
+  const rawMenu = menuResponse?.data || menuResponse;
   const apiMenuItems = Array.isArray(rawMenu) ? rawMenu : [];
 
+  // Guaranteed category-matched menu items
   const menuItems = useMemo(() => {
     if (apiMenuItems.length > 0) {
       const isValid = apiMenuItems.some((item: any) => {
@@ -100,43 +98,33 @@ export default function RestaurantPage() {
     }
     return getMenuForRestaurant(id, restaurant?.category, restaurant?.name);
   }, [apiMenuItems, id, restaurant]);
-  const cartItems = cartResponse?.items || [];
-  const cartTotals = cartResponse?.totals || { subtotal: 0, deliveryCharge: 0, tax: 0, discount: 0, grandTotal: 0 };
-  const favoriteItemIds = new Set(
-    (favResponse?.items || (Array.isArray(favResponse) ? favResponse : [])).map(
-      (f: any) => f.id || f.menu_item_id
-    )
-  );
 
-
-  // Map backend restaurant to component props
+  // Map restaurant to header props
   const mappedRestaurant = useMemo(() => {
     if (!restaurant) return null;
-    const brandLogo =
-      resolveBackendUrl(liveDeal?.logo_url) ||
-      resolveBackendUrl(restaurant.logo_url) ||
-      getBrandFoodImage(restaurant.name, undefined) ||
-      RESTAURANT_FALLBACK;
     return {
-      id: restaurant.id,
+      id: restaurant.id || id,
       name: restaurant.name,
       coverImage:
         resolveBackendUrl(liveDeal?.banner_url) ||
         resolveBackendUrl(restaurant.banner_url) ||
-        getRestaurantImage(restaurant.image_url),
-      logo: brandLogo,
-      rating: String(restaurant.rating || "4.5"),
-      reviewsCount: restaurant.review_count ? `${restaurant.review_count}+` : "100+",
-      deliveryTime: liveDeal?.delivery_time_label || `${restaurant.estimated_delivery_time || 30} min`,
-      priceForTwo: getPriceForTwo(restaurant.price_range),
-      location: restaurant.address,
-      tags: (restaurant.category_name || restaurant.description || "Various Cuisines")
+        getRestaurantImage(restaurant.image),
+      logo:
+        resolveBackendUrl(liveDeal?.logo_url) ||
+        resolveBackendUrl(restaurant.logo_url) ||
+        getRestaurantImage(restaurant.logo),
+      rating: String(restaurant.rating || "4.8"),
+      reviewsCount: restaurant.reviewsCount ? `${restaurant.reviewsCount}+` : "200+",
+      deliveryTime: liveDeal?.delivery_time_label || restaurant.time || "20-30 min",
+      priceForTwo: restaurant.priceForTwo || getPriceForTwo(restaurant.price_range),
+      location: restaurant.location || restaurant.address || "Hyderabad",
+      tags: (restaurant.cuisine || restaurant.category || "Delicious Food")
         .split(",")
         .map((tag: string) => tag.trim())
         .filter(Boolean),
-      isOpen: restaurant.is_active,
+      isOpen: restaurant.isOpen !== false,
     };
-  }, [restaurant, liveDeal]);
+  }, [restaurant, liveDeal, id]);
 
   useEffect(() => {
     if (liveDeal?.coupon_code && id) {
@@ -154,58 +142,48 @@ export default function RestaurantPage() {
     const categoriesSet = new Set<string>();
 
     menuItems.forEach((item: any) => {
-      const catName = item.category_name || "Others";
+      const catName = item.category || item.category_name || restaurant?.category || "Menu";
       categoriesSet.add(catName);
 
-      const basePrice = item.discount_price
-        ? parseFloat(item.discount_price)
-        : parseFloat(item.price);
-      const originalBase = parseFloat(item.price);
-      const dealPricing = liveDeal
-        ? computeDealDisplayPrice(
-            basePrice,
-            liveDeal.discount_type,
-            liveDeal.discount_amount
-          )
-        : { displayPrice: basePrice, originalPrice: item.discount_price ? originalBase : undefined };
+      const basePrice = item.price ? Number(item.price) : 199;
+      const originalBase = item.originalPrice ? Number(item.originalPrice) : undefined;
 
       if (!grouped[catName]) {
         grouped[catName] = [];
       }
 
       grouped[catName].push({
-        id: item.id,
+        id: String(item.id),
         name: item.name,
-        description: item.description,
-        image: getFoodImage(item.image_url),
-        price: dealPricing.displayPrice,
-        originalPrice: dealPricing.originalPrice,
-        rating: Number(item.rating || 4.5).toFixed(1),
-        isVeg: item.is_vegetarian,
-        prepTime: item.preparation_time ? `${item.preparation_time} min` : "15 min",
-        calories: item.calories ? `${item.calories} kcal` : undefined,
-        isFavorite: favoriteItemIds.has(item.id),
+        description: item.description || "Freshly prepared with authentic ingredients.",
+        image: item.image || item.image_url,
+        price: basePrice,
+        originalPrice: originalBase,
+        rating: String(item.rating || "4.8"),
+        isVeg: Boolean(item.isVeg ?? item.is_veg ?? true),
+        prepTime: item.prepTime || "15 min",
+        calories: item.calories || undefined,
+        tags: item.isBestseller ? ["Bestseller"] : [],
       });
     });
 
     return {
       groupedMenu: grouped,
-      menuCategories: Array.from(categoriesSet)
+      menuCategories: Array.from(categoriesSet),
     };
-  }, [menuItems, favoriteItemIds, liveDeal]);
+  }, [menuItems, restaurant]);
 
   const galleryImages = useMemo(() => {
     if (!mappedRestaurant) return [];
-    const menuImages = menuItems
-      .map((item: { image_url?: string }) => getFoodImage(item.image_url))
-      .filter((img: string, index: number, arr: string[]) => arr.indexOf(img) === index);
+    const menuImages = (menuItems || [])
+      .map((item: any) => (item.image || item.image_url) as string)
+      .filter((img): img is string => Boolean(img))
+      .filter((img, index, arr) => arr.indexOf(img) === index);
     return [mappedRestaurant.coverImage, ...menuImages].slice(0, 5);
   }, [mappedRestaurant, menuItems]);
 
   const [activeCategory, setActiveCategory] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [isUpdatingCart, setIsUpdatingCart] = useState(false);
-
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
   useEffect(() => {
@@ -214,126 +192,57 @@ export default function RestaurantPage() {
     }
   }, [menuCategories, activeCategory]);
 
-  // Scroll Spy Logic
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + 200; // Offset for sticky header
-
-      let currentActive = activeCategory;
-      
-      for (const category of menuCategories) {
-        const section = sectionRefs.current[category];
-        if (section) {
-          const sectionTop = section.offsetTop;
-          const sectionBottom = sectionTop + section.offsetHeight;
-
-          if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
-            currentActive = category;
-          }
-        }
-      }
-
-      if (currentActive !== activeCategory) {
-        setActiveCategory(currentActive);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [activeCategory]);
-
   const handleCategoryClick = (category: string) => {
     const section = sectionRefs.current[category];
     if (section) {
       window.scrollTo({
-        top: section.offsetTop - 140, // Offset for sticky nav
+        top: section.offsetTop - 140,
         behavior: "smooth",
       });
     }
   };
 
-  const handleUpdateQuantity = async (itemId: string, delta: number) => {
-    if (!isClientAuthenticated()) {
-      showToast("Please login to add items to cart", "error");
-      return false;
-    }
-    if (isUpdatingCart) return false;
-    
-    // Find if item is already in cart
-    const cartItem = cartItems.find((i: any) => i.menu_item_id === itemId);
-    const currentQty = cartItem ? cartItem.quantity : 0;
-    const newQty = currentQty + delta;
-    
-    try {
-      setIsUpdatingCart(true);
-      if (newQty <= 0) {
-        if (cartItem) {
-          await api.delete(`/api/cart/remove/${cartItem.cart_item_id}`);
-          void import("@/lib/analytics/events").then(({ AnalyticsEvents, trackEvent }) => {
-            trackEvent(AnalyticsEvents.removeFromCart, {
-              item_id: itemId,
-              quantity: currentQty,
-            });
-          });
-        }
-      } else if (!cartItem) {
-        await api.post(`/api/cart/add`, { menu_item_id: itemId, quantity: newQty });
-        showToast("Added to cart", "success");
-        void import("@/lib/analytics/events").then(({ AnalyticsEvents, trackEvent }) => {
-          trackEvent(AnalyticsEvents.addToCart, {
-            item_id: itemId,
-            quantity: newQty,
-          });
-        });
-      } else {
-        await api.put(`/api/cart/update/${cartItem.cart_item_id}`, { quantity: newQty });
-        if (delta > 0) {
-          showToast("Cart updated", "success");
-          void import("@/lib/analytics/events").then(({ AnalyticsEvents, trackEvent }) => {
-            trackEvent(AnalyticsEvents.addToCart, { item_id: itemId, quantity: delta });
-          });
-        } else if (delta < 0) {
-          void import("@/lib/analytics/events").then(({ AnalyticsEvents, trackEvent }) => {
-            trackEvent(AnalyticsEvents.removeFromCart, { item_id: itemId, quantity: 1 });
-          });
-        }
-      }
-      mutateCart();
-      globalMutate("/api/cart");
-      return true;
-    } catch (error: any) {
-      console.error("Failed to update cart", error);
-      showToast(error.response?.data?.message || "Failed to update cart", "error");
-      return false;
-    } finally {
-      setIsUpdatingCart(false);
+  const handleUpdateQuantity = (itemId: string, delta: number) => {
+    const targetItem = menuItems.find((i: any) => String(i.id) === String(itemId));
+    if (!targetItem) return;
+
+    updateQuantity(itemId, delta, {
+      restaurant_id: id,
+      name: targetItem.name,
+      price: Number(targetItem.price),
+      image: targetItem.image || targetItem.image_url,
+      isVeg: Boolean(targetItem.isVeg ?? targetItem.is_veg),
+    });
+
+    if (delta > 0) {
+      showToast("Added to cart", "success");
     }
   };
 
-  const handleOrderNow = async (itemId: string) => {
-    const cartItem = cartItems.find((item: any) => item.menu_item_id === itemId);
-    const canCheckout = cartItem ? true : await handleUpdateQuantity(itemId, 1);
+  const handleOrderNow = (itemId: string) => {
+    const targetItem = menuItems.find((i: any) => String(i.id) === String(itemId));
+    if (!targetItem) return;
 
-    if (canCheckout) {
-      router.push("/checkout");
-    }
+    addAndCheckout(itemId, router, {
+      restaurant_id: id,
+      name: targetItem.name,
+      price: Number(targetItem.price),
+      image: targetItem.image || targetItem.image_url,
+      isVeg: Boolean(targetItem.isVeg ?? targetItem.is_veg),
+    });
   };
 
-  // Cart Calculations
-  const totalItems = cartItems.reduce((sum: number, item: any) => sum + item.quantity, 0);
-  const totalPrice = cartTotals.subtotal;
-
-  // Filtered Menu
+  // Filtered Menu by Search Query
   const filteredMenu = useMemo(() => {
     if (!searchQuery) return groupedMenu;
-    
     const filtered: Record<string, MenuItem[]> = {};
     const query = searchQuery.toLowerCase();
 
     Object.entries(groupedMenu).forEach(([category, items]) => {
-      const matchingItems = items.filter(item => 
-        item.name.toLowerCase().includes(query) || 
-        (item.description && item.description.toLowerCase().includes(query))
+      const matchingItems = items.filter(
+        (item) =>
+          item.name.toLowerCase().includes(query) ||
+          (item.description && item.description.toLowerCase().includes(query))
       );
       if (matchingItems.length > 0) {
         filtered[category] = matchingItems;
@@ -343,56 +252,38 @@ export default function RestaurantPage() {
     return filtered;
   }, [searchQuery, groupedMenu]);
 
-  if (isLoadingRest || isLoadingMenu) {
+  if (isLoadingRest && !restaurant) {
     return (
       <main className="min-h-screen bg-white pt-[90px]">
         <Navbar />
-        {/* Header Skeleton */}
-        <div className="w-full h-[300px] md:h-[400px] bg-[#F8FAFC] animate-pulse relative"></div>
+        <div className="w-full h-[300px] md:h-[400px] bg-[#F8F8F8] animate-pulse relative"></div>
         <div className="container mx-auto px-4 md:px-8 mt-4">
-           <div className="w-1/2 h-10 bg-[#F8FAFC] animate-pulse rounded mb-2"></div>
-           <div className="w-1/3 h-6 bg-[#F8FAFC] animate-pulse rounded"></div>
+          <div className="w-1/2 h-10 bg-[#F8F8F8] animate-pulse rounded mb-2"></div>
+          <div className="w-1/3 h-6 bg-[#F8F8F8] animate-pulse rounded"></div>
         </div>
-
-        {/* Menu Skeleton */}
-        <div className="container mx-auto px-4 md:px-8 py-12">
-          <div className="restaurant-menu-grid">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <div key={i} className="h-[360px] w-full animate-pulse rounded-2xl border border-[#E5E7EB] bg-[#F8FAFC]"></div>
-              ))}
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  if (!isValidId || restaurantError) {
-    return (
-      <main className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 pt-[90px]">
-        <Navbar />
-        <div className="text-white text-xl">Restaurant not found.</div>
-        <Link href="/restaurants" className="text-primary font-bold hover:underline">
-          Browse restaurants
-        </Link>
       </main>
     );
   }
 
   if (!mappedRestaurant) {
     return (
-      <main className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-white text-xl">Restaurant not found.</div>
+      <main className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 pt-[90px]">
+        <Navbar />
+        <div className="text-[#1A1A1A] text-xl font-bold">Restaurant Details Unavailable</div>
+        <Link href="/popular-restaurants" className="text-[#E23744] font-bold hover:underline">
+          Explore Popular Restaurants
+        </Link>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-white relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-white relative selection:bg-[#E23744] selection:text-white pt-[90px]">
       <CatalogViewTracker
         type="restaurant"
-        ready={Boolean(restaurant?.id)}
-        id={restaurant?.id}
-        name={restaurant?.name}
+        ready={Boolean(mappedRestaurant.id)}
+        id={mappedRestaurant.id}
+        name={mappedRestaurant.name}
       />
       <Navbar />
 
@@ -419,100 +310,69 @@ export default function RestaurantPage() {
       )}
 
       <RestaurantGallery images={galleryImages} />
-      <RestaurantMenuNav 
-        categories={menuCategories.filter(cat => filteredMenu[cat])}
+
+      <RestaurantMenuNav
+        categories={menuCategories.filter((cat) => filteredMenu[cat])}
         activeCategory={activeCategory}
         onCategoryClick={handleCategoryClick}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
 
-      <div className="container mx-auto max-w-[1600px] px-4 py-10 md:px-8">
-        
-        {/* Main Menu Area */}
+      <div className="container mx-auto max-w-[1440px] px-4 py-10 md:px-8">
         <div className="flex-1 w-full">
-          {Object.entries(filteredMenu).map(([category, items]) => (
-            <div 
-              key={category} 
-              id={category} 
-              ref={(el) => { sectionRefs.current[category] = el; }}
-              className="mb-10 pt-6" // pt-6 gives breathing room for scroll-spy offset
-            >
-              <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold tracking-tight text-[#111827]">
-                {category}
-                <span className="bg-[#F8FAFC] text-[#6B7280] text-sm px-3 py-1 rounded-full font-medium">
-                  {items.length}
-                </span>
-              </h2>
-              
-              <div className="restaurant-menu-grid">
-                {items.map(item => {
-                  const cartItem = cartItems.find((ci: any) => ci.menu_item_id === item.id);
-                  const qty = cartItem ? cartItem.quantity : 0;
-                  return (
-                    <MenuItemCard 
-                      key={item.id} 
-                      item={item} 
-                      quantity={qty}
-                      isUpdating={isUpdatingCart}
-                      onUpdateQuantity={handleUpdateQuantity}
-                      onOrderNow={handleOrderNow}
-                      onFavoriteToggle={mutateFavs}
-                    />
-                  );
-                })}
-              </div>
+          {Object.keys(filteredMenu).length === 0 ? (
+            <div className="py-16 text-center bg-[#F8F8F8] rounded-2xl border border-[#ECECEC]">
+              <ShoppingBag className="w-12 h-12 text-[#E23744] mx-auto mb-3 opacity-60" />
+              <h3 className="text-xl font-bold text-[#1A1A1A] mb-1">No Menu Available</h3>
+              <p className="text-[#666666] text-sm mb-6">
+                This restaurant currently has no active menu items.
+              </p>
+              <Link
+                href="/popular-restaurants"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#E23744] text-white font-bold text-sm hover:bg-[#C81E34] transition-all"
+              >
+                <span>Browse Other Restaurants</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
-          ))}
+          ) : (
+            Object.entries(filteredMenu).map(([category, items]) => (
+              <div
+                key={category}
+                id={category}
+                ref={(el) => {
+                  sectionRefs.current[category] = el;
+                }}
+                className="mb-10 pt-6"
+              >
+                <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold tracking-tight text-[#1A1A1A]">
+                  {category}
+                  <span className="bg-[#FFF5F6] text-[#E23744] text-xs px-3 py-1 rounded-full font-bold border border-[#E23744]/20">
+                    {items.length} items
+                  </span>
+                </h2>
 
-          {Object.keys(filteredMenu).length === 0 && (
-            <div className="text-center py-20">
-              <h3 className="text-xl text-[#6B7280]">No dishes found for "{searchQuery}"</h3>
-            </div>
-          )}
-
-          {Object.values(groupedMenu).flat().length > 0 && (
-            <section className="mb-12 border-t border-white/[0.07] pt-10" aria-labelledby="recommended-menu-heading">
-              <h3 id="recommended-menu-heading" className="mb-5 text-xl font-bold text-[#111827]">
-                You May Also Like
-              </h3>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {Object.values(groupedMenu).flat().slice(0, 3).map(item => (
-                  <Link
-                    key={item.id}
-                    href={`/food/${item.id}`}
-                    className="group flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-[#FFFFFF] p-3 transition-all hover:-translate-y-0.5 hover:border-[#E5E7EB]"
-                  >
-                    <SafeImage
-                      src={item.image}
-                      fallback={FOOD_FALLBACK}
-                      alt={item.name}
-                      className="h-16 w-16 shrink-0 rounded-xl object-cover transition-transform group-hover:scale-105"
-                    />
-                    <div className="min-w-0">
-                      <h4 className="line-clamp-1 text-sm font-semibold text-white transition-colors group-hover:text-primary">
-                        {item.name}
-                      </h4>
-                      <div className="mb-1 text-xs text-[#9CA3AF]">₹{item.price}</div>
-                      <div className="flex items-center gap-1 text-xs font-semibold text-green-400">
-                        <Star className="h-3 w-3 fill-current" /> {item.rating}
-                      </div>
-                    </div>
-                  </Link>
-                ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {items.map((item) => {
+                    const qty = quantities.get(item.id) || 0;
+                    return (
+                      <MenuItemCard
+                        key={item.id}
+                        item={item}
+                        quantity={qty}
+                        onUpdateQuantity={(itemId, delta) => handleUpdateQuantity(itemId, delta)}
+                        onOrderNow={(itemId) => handleOrderNow(itemId)}
+                      />
+                    );
+                  })}
+                </div>
               </div>
-            </section>
+            ))
           )}
-
-          <RestaurantReviews restaurantId={id} />
         </div>
-
       </div>
 
-      <RestaurantCart totalItems={totalItems} totalPrice={totalPrice} />
-
-      <SimilarRestaurants currentRestaurantId={id} />
-      
       <Footer />
     </main>
   );
