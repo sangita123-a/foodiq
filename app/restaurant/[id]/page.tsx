@@ -72,6 +72,9 @@ export default function RestaurantPage() {
   const { data: liveDeal } = useSWR(
     id && dealCode ? `/api/live-deals/restaurant/${id}?coupon=${dealCode}` : null
   );
+  const hasToken = useAuthToken();
+  const { data: cartResponse } = useSWR(hasToken ? "/api/cart" : null);
+  const { data: favResponse } = useSWR(hasToken ? "/api/favorites" : null);
 
   const fallbackRest = useMemo(
     () => POPULAR_RESTAURANTS_30.find((r) => r.id === id) || POPULAR_RESTAURANTS_30[0],
