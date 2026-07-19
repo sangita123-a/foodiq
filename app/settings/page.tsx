@@ -62,7 +62,7 @@ export default function SettingsPage() {
           <div className="container mx-auto max-w-6xl px-4 md:px-8 flex items-center justify-between">
             <p className="text-[#6B7280] font-bold hidden md:block">You have unsaved changes.</p>
             <div className="flex gap-4 w-full md:w-auto">
-              <button className="flex-1 md:flex-none bg-[#F8FAFC] hover:bg-[#F8FAFC] text-white px-6 py-3 rounded-xl font-bold transition-colors">
+              <button className="flex-1 md:flex-none bg-[#F8FAFC] hover:bg-[#F1F5F9] text-[#111827] px-6 py-3 rounded-xl font-bold transition-colors border border-[#E5E7EB]">
                 Cancel
               </button>
               <button type="submit" form="settings-form" className="flex-1 md:flex-none bg-primary hover:bg-[#E76F0B] text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(252,128,25,0.3)]">

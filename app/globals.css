@@ -292,6 +292,17 @@ textarea:focus-visible {
   }
 }
 
+/* Hide scrollbar utility — used on horizontal scroll sections */
+.hide-scrollbar,
+.custom-scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.hide-scrollbar::-webkit-scrollbar,
+.custom-scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

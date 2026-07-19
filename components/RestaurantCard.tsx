@@ -66,7 +66,7 @@ export default function RestaurantCard({
             <div className="h-px w-full bg-[#E5E7EB] mb-4" />
             <div className="flex items-center justify-between">
               <span className="text-[var(--color-gray-text)] text-sm">{priceForTwo}</span>
-              <span className="food-button min-h-0 px-3 py-2 bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-semibold rounded-lg group-hover:bg-[var(--color-primary)] group-hover:text-[#111827] text-xs">
+              <span className="food-button min-h-0 px-3 py-2 bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-semibold rounded-lg group-hover:bg-[var(--color-primary)] group-hover:text-white text-xs">
                 View Menu
               </span>
             </div>

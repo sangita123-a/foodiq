@@ -4,7 +4,7 @@ import { Download, FileText, FileSpreadsheet } from "lucide-react";
 import { motion } from "framer-motion";
 import { getAccessToken } from "@/lib/accessToken";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://foodiq-2.onrender.com";
 
 export default function DownloadReports() {
   const download = async (format: "csv" | "pdf") => {

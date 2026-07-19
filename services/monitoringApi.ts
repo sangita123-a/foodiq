@@ -82,6 +82,6 @@ export async function reportClientError(payload: {
 }
 
 export function auditsExportUrl(q = "") {
-  const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+  const base = process.env.NEXT_PUBLIC_API_URL || "https://foodiq-2.onrender.com";
   return `${base}/api/monitoring/audits/export?q=${encodeURIComponent(q)}`;
 }

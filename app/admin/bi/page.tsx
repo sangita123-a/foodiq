@@ -97,7 +97,7 @@ type BiDash = {
   ai_insights?: { insights: Array<{ type: string; severity: string; message: string }> };
 };
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://foodiq-2.onrender.com";
 
 export default function AdminBiPage() {
   const [days, setDays] = useState(30);

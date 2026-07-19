@@ -74,7 +74,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
               />
             </div>
             <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-[#111827] mb-2">
                 {order.restaurant_name || "Order"}
               </h1>
               <p className="text-[#6B7280] text-sm mb-2">
@@ -107,7 +107,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
               {items.map((item: any, idx: number) => (
                 <div key={idx} className="flex justify-between text-sm">
                   <span className="text-[#6B7280]">
-                    <span className="text-white font-bold mr-2">{item.quantity}x</span>
+                    <span className="text-[#111827] font-bold mr-2">{item.quantity}x</span>
                     {item.name}
                   </span>
                   <span className="text-[#111827]">

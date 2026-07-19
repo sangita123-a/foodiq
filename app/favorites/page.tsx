@@ -138,7 +138,7 @@ export default function FavoritesPage() {
             
             {showRestaurants && filteredRestaurants.length > 0 && (
               <div>
-                {activeTab === "All Favorites" && <h3 className="text-2xl font-bold text-white mb-6">Restaurants</h3>}
+                {activeTab === "All Favorites" && <h3 className="text-2xl font-bold text-[#111827] mb-6">Restaurants</h3>}
                 <div className="food-grid">
                   <AnimatePresence>
                     {filteredRestaurants.map((r: any) => (
@@ -151,7 +151,7 @@ export default function FavoritesPage() {
 
             {showDishes && filteredDishes.length > 0 && (
               <div>
-                {activeTab === "All Favorites" && <h3 className="text-2xl font-bold text-white mb-6">Dishes</h3>}
+                {activeTab === "All Favorites" && <h3 className="text-2xl font-bold text-[#111827] mb-6">Dishes</h3>}
                 <div className="food-grid">
                   <AnimatePresence>
                     {filteredDishes.map((d: any) => (

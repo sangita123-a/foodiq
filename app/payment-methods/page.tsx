@@ -195,7 +195,7 @@ export default function PaymentMethodsPage() {
           <div className="flex flex-col gap-12">
             {cards.length > 0 && (
               <section>
-                <h3 className="text-2xl font-bold text-white mb-6">Credit & Debit Cards</h3>
+                <h3 className="text-2xl font-bold text-[#111827] mb-6">Credit & Debit Cards</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                   <AnimatePresence>
                     {cards.map((card) => (
@@ -214,7 +214,7 @@ export default function PaymentMethodsPage() {
 
             {upis.length > 0 && (
               <section>
-                <h3 className="text-2xl font-bold text-white mb-6">UPI Accounts</h3>
+                <h3 className="text-2xl font-bold text-[#111827] mb-6">UPI Accounts</h3>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <AnimatePresence>
                     {upis.map((upi) => (
@@ -226,7 +226,7 @@ export default function PaymentMethodsPage() {
             )}
 
             <section>
-              <h3 className="text-2xl font-bold text-white mb-6">Wallets</h3>
+              <h3 className="text-2xl font-bold text-[#111827] mb-6">Wallets</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {wallets.map((wallet) => (
                   <WalletItem key={wallet.id} wallet={wallet} onToggleConnect={handleToggleWallet} />
@@ -239,7 +239,7 @@ export default function PaymentMethodsPage() {
         )}
 
         <div className="mt-16 mb-12">
-          <h3 className="text-2xl font-bold text-white mb-6">Payment History</h3>
+          <h3 className="text-2xl font-bold text-[#111827] mb-6">Payment History</h3>
           {isLoadingHistory ? (
             <div className="h-64 bg-[#F8FAFC] animate-pulse rounded-2xl border border-[#E5E7EB]"></div>
           ) : historyError ? (

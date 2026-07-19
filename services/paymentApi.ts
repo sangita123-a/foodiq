@@ -87,7 +87,7 @@ export async function fetchPaymentHistory() {
 }
 
 export function invoiceUrl(paymentId: string) {
-  const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+  const base = process.env.NEXT_PUBLIC_API_URL || "https://foodiq-2.onrender.com";
   return `${base}/api/payments/${paymentId}/invoice`;
 }
 

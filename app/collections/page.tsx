@@ -59,7 +59,7 @@ function CollectionSection({
     <section className="mb-16">
       <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">{title}</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-[#111827] mb-2">{title}</h2>
           <p className="text-[var(--color-gray-text)]">{description}</p>
         </div>
         {fallback && (

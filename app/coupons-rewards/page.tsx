@@ -107,7 +107,7 @@ export default function CouponsRewardsPage() {
             
             {/* Active Coupons */}
             <section className="mb-12">
-              <h2 className="text-2xl font-bold text-white mb-6">Available Coupons</h2>
+              <h2 className="text-2xl font-bold text-[#111827] mb-6">Available Coupons</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {activeCoupons.map(coupon => (
                   <CouponCard key={coupon.id} coupon={coupon} />
