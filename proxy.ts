@@ -49,7 +49,7 @@ const protectedRoutes = [
 const authRoutes = ['/login', '/register', '/forgot-password', '/partner/login', '/admin/login', '/delivery/login', '/delivery/register'];
 
 export function proxy(request: NextRequest) {
-  const token = request.cookies.get('token')?.value;
+  const token = request.cookies.get('token')?.value || request.cookies.get('foodiq_session')?.value;
   const { pathname } = request.nextUrl;
 
   // Check if it's a protected route

@@ -6,25 +6,34 @@ import { Tag, ArrowRight } from "lucide-react";
 import api from "@/services/api";
 
 type OrderSummaryProps = {
-  subtotal: number;
+  subtotal?: number;
   taxes?: number;
   delivery?: number;
   discount?: number;
+  totals?: {
+    subtotal: number;
+    deliveryCharge?: number;
+    tax?: number;
+    discount?: number;
+    grandTotal?: number;
+  };
 };
 
 export default function OrderSummary({
-  subtotal,
+  subtotal: extSubtotal,
   taxes: extTaxes,
   delivery: extDelivery,
   discount: extDiscount,
+  totals,
 }: OrderSummaryProps) {
   const [couponCode, setCouponCode] = useState("");
   const [localDiscount, setLocalDiscount] = useState(0);
   const [couponError, setCouponError] = useState("");
 
-  const deliveryFee = extDelivery !== undefined ? extDelivery : 49;
-  const taxes = extTaxes !== undefined ? extTaxes : Math.round(subtotal * 0.05);
-  const discount = (extDiscount || 0) + localDiscount;
+  const subtotal = extSubtotal ?? totals?.subtotal ?? 0;
+  const deliveryFee = extDelivery !== undefined ? extDelivery : totals?.deliveryCharge !== undefined ? totals.deliveryCharge : 49;
+  const taxes = extTaxes !== undefined ? extTaxes : totals?.tax !== undefined ? totals.tax : Math.round(subtotal * 0.05);
+  const discount = (extDiscount || totals?.discount || 0) + localDiscount;
 
   const grandTotal = subtotal + deliveryFee + taxes - discount;
 

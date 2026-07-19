@@ -83,7 +83,9 @@ export default function CheckoutPage() {
   const { data: cartData, isLoading: isLoadingCart, mutate: mutateCart } = useSWR(
     hasToken ? "/api/cart" : null
   );
-  const { data: addressData } = useSWR(hasToken ? "/api/addresses" : null);
+  const { data: addressData, isLoading: isLoadingAddr, mutate: mutateAddresses } = useSWR(
+    hasToken ? "/api/addresses" : null
+  );
 
   const cartItems: CartItem[] = (cartData?.items?.length ? cartData.items : actionCartItems).map((i: any) => ({
     id: i.cart_item_id || i.id || i.menu_item_id,

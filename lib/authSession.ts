@@ -27,7 +27,7 @@ export function hasSessionMarker() {
 export function markAuthenticated(accessJwt?: string | null) {
   if (accessJwt) setAccessToken(accessJwt);
   Cookies.set(SESSION_COOKIE, "1", authCookieOptions());
-  Cookies.remove("token"); // legacy JS-readable JWT
+  Cookies.set("token", accessJwt || "1", authCookieOptions());
   notifyAuthChanged();
 }
 
