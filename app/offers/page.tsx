@@ -2,119 +2,111 @@
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import useSWR from "swr";
+import Image from "next/image";
 import Link from "next/link";
-import { Tag, Percent } from "lucide-react";
-import SafeImage from "@/components/ui/SafeImage";
-import { OFFER_FALLBACK, getOfferImage } from "@/lib/images";
-import { OFFER_SLUG_MAP } from "@/lib/offers";
-
-function getOfferHref(offer: { slug?: string; coupon_code?: string; code?: string }) {
-  if (offer.slug) return `/offers/${offer.slug}`;
-  const code = offer.coupon_code || offer.code;
-  if (code && OFFER_SLUG_MAP[code]) return `/offers/${OFFER_SLUG_MAP[code]}`;
-  return null;
-}
+import { Tag, Clock, ArrowRight, Sparkles } from "lucide-react";
+import { FIVE_BEST_OFFERS, PromotionalOffer } from "@/lib/data/20offersData";
+import { setActiveOffer } from "@/lib/offers";
+import { useToast } from "@/contexts/ToastContext";
+import { useRouter } from "next/navigation";
 
 export default function OffersPage() {
-  const { data, isLoading } = useSWR("/api/offers");
-  const rawOffers = (data as any)?.data || data;
-  const offers = Array.isArray(rawOffers) ? rawOffers : [];
+  const router = useRouter();
+  const { showToast } = useToast();
+
+  const handleOrderNow = (offer: PromotionalOffer) => {
+    setActiveOffer({
+      couponCode: offer.code,
+      title: offer.title,
+      restaurantId: offer.restaurantId,
+    });
+    showToast(`Coupon ${offer.code} applied! Opening ${offer.restaurantName}...`, "success");
+    router.push(`/restaurant/${offer.restaurantId}?deal=${offer.code}`);
+  };
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[#E23744] selection:text-white pt-[90px]">
       <Navbar />
 
-      <div className="container mx-auto px-4 md:px-8 py-12 max-w-5xl">
-        <div className="mb-10 text-center md:text-left border-b border-[#E5E7EB] pb-8">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-[#111827] mb-3">Offers & Deals</h1>
-          <p className="text-[var(--color-gray-text)] text-lg">
-            Save more on every order with active Foodiq coupons.
+      <div className="container mx-auto max-w-[1440px] px-4 md:px-8 py-10">
+        {/* Page Header */}
+        <div className="mb-10 text-center md:text-left border-b border-[#ECECEC] pb-8">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#FFF5F6] text-[#E23744] text-xs font-black uppercase tracking-wider mb-3 border border-[#E23744]/20">
+            <Sparkles className="w-4 h-4" />
+            <span>Today&apos;s Featured Deals</span>
+          </div>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-[#1A1A1A] tracking-tight mb-3">
+            Today&apos;s Best Offers
+          </h1>
+          <p className="text-[#666666] text-base md:text-lg max-w-2xl font-medium">
+            Save big on your favorite food with active coupons applied automatically at checkout.
           </p>
         </div>
 
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-56 bg-[#F8FAFC] animate-pulse rounded-2xl border border-[#E5E7EB]" />
-            ))}
-          </div>
-        ) : offers.length === 0 ? (
-          <div className="text-center py-20 bg-[#FFFFFF] rounded-2xl border border-[#E5E7EB]">
-            <Percent className="w-12 h-12 text-[#9CA3AF] mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-[#111827] mb-2">No offers available</h3>
-            <p className="text-[#6B7280] mb-6">Check back soon for new deals.</p>
-            <Link
-              href="/restaurants"
-              className="inline-flex px-6 py-3 rounded-xl bg-[var(--color-primary)] text-white font-medium"
+        {/* 5 Offers Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {FIVE_BEST_OFFERS.map((offer) => (
+            <div
+              key={offer.id}
+              className="food-card relative group cursor-pointer bg-gradient-to-br from-[#FFF5F6] via-white to-white p-6 flex flex-col justify-between border border-[#ECECEC] rounded-[18px] hover:shadow-[0_12px_32px_rgba(226,55,68,0.12)] hover:-translate-y-1 transition-all duration-300 min-h-[220px]"
             >
-              Explore Restaurants
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {offers.map((offer: any) => {
-              const href = getOfferHref(offer);
-              const code = offer.coupon_code || offer.code;
-              const card = (
-                <div className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-2xl overflow-hidden hover:border-[var(--color-primary)]/40 transition-colors">
-                  <div className="relative h-36 w-full overflow-hidden">
-                    <SafeImage
-                      src={getOfferImage(code, offer.banner_url)}
-                      fallback={OFFER_FALLBACK}
-                      alt={`${offer.title || code} offer`}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFC] via-[#111827]/30/30 to-transparent" />
+              {/* Image Banner Background */}
+              <div className="absolute top-0 right-0 w-40 sm:w-48 h-full opacity-40 group-hover:opacity-60 transition-opacity duration-300 group-hover:scale-105 transform origin-right overflow-hidden rounded-r-[18px]">
+                <Image
+                  src={offer.image}
+                  alt={offer.title}
+                  fill
+                  sizes="(max-width: 640px) 160px, 192px"
+                  className="object-cover object-left [mask-image:linear-gradient(to_right,transparent,black)]"
+                />
+              </div>
+
+              <div className="relative z-10 w-3/4 flex flex-col h-full justify-between">
+                <div>
+                  <div className="flex items-center gap-1 text-xs font-bold text-[#E23744] uppercase tracking-wider mb-1">
+                    <Tag className="w-3.5 h-3.5" />
+                    <span className="truncate">{offer.restaurantName}</span>
                   </div>
-                  <div className="p-6 flex gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-[var(--color-primary)]/15 flex items-center justify-center shrink-0">
-                      <Tag className="w-6 h-6 text-[var(--color-primary)]" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-[#111827]">{offer.title || code}</h3>
-                        <span className="text-[var(--color-primary)] font-bold text-sm shrink-0">
-                          {offer.discount_type === "percentage"
-                            ? `${offer.discount_amount}% OFF`
-                            : code === "FREEDEL"
-                              ? "Free Delivery"
-                              : `₹${offer.discount_amount} OFF`}
-                        </span>
-                      </div>
-                      <p className="text-[#6B7280] text-sm mb-1">Code: {code}</p>
-                      <p className="text-[#6B7280] text-sm mb-3">
-                        Min order ₹{offer.min_order_amount || offer.coupon_min_order || 0}
-                        {offer.valid_until
-                          ? ` · Valid till ${new Date(offer.valid_until).toLocaleDateString()}`
-                          : " · No expiry"}
-                      </p>
-                      {href ? (
-                        <span className="text-sm font-medium text-white hover:text-[var(--color-primary)] transition-colors">
-                          View offer →
-                        </span>
-                      ) : (
-                        <span className="text-sm text-[#9CA3AF]">Coupon only — apply at checkout</span>
-                      )}
-                    </div>
-                  </div>
+
+                  <h3 className="text-xl font-black text-[#1A1A1A] mb-1 leading-tight group-hover:text-[#E23744] transition-colors">
+                    {offer.title}
+                  </h3>
+
+                  <span className="inline-block bg-[#E23744] text-white text-xs font-black px-2.5 py-0.5 rounded-md mb-2 uppercase tracking-wide">
+                    {offer.discountBadge}
+                  </span>
+
+                  <p className="text-[#666666] text-xs font-medium line-clamp-2 mb-4">
+                    {offer.description}
+                  </p>
                 </div>
-              );
 
-              return href ? (
-                <Link key={offer.id} href={href}>
-                  {card}
-                </Link>
-              ) : (
-                <div key={offer.id}>{card}</div>
-              );
-            })}
-          </div>
-        )}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="inline-flex items-center bg-white border border-[#ECECEC] rounded-lg px-3 py-1 shadow-sm">
+                      <span className="text-xs text-[#666666] uppercase tracking-wider font-semibold mr-2">Code:</span>
+                      <span className="text-sm text-[#E23744] font-black tracking-wider">{offer.code}</span>
+                    </div>
 
-        <p className="text-[#9CA3AF] text-sm mt-8">
-          Note: Coupons require login. Offer coupons apply automatically when you checkout from an offer page.
-        </p>
+                    <div className="inline-flex items-center text-xs text-[#666666] font-bold gap-1 bg-[#F8F8F8] px-2.5 py-1 rounded-lg border border-[#ECECEC]">
+                      <Clock className="w-3.5 h-3.5 text-[#E23744]" />
+                      <span>{offer.expiryDate}</span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleOrderNow(offer)}
+                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#E23744] hover:bg-[#C81E34] text-white text-sm font-extrabold transition-all shadow-sm active:scale-98"
+                  >
+                    <span>Order Now</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <Footer />

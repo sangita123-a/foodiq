@@ -9,6 +9,7 @@ import { useToast } from "@/contexts/ToastContext";
 import SafeImage from "@/components/ui/SafeImage";
 import { FOOD_FALLBACK, getFoodImage } from "@/lib/images";
 import { useCartActions } from "@/hooks/useCartActions";
+import { getOfferByCode } from "@/lib/data/20offersData";
 
 type CartDrawerProps = {
   open: boolean;
@@ -36,6 +37,19 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
       setCouponDiscount(disc);
       showToast("Coupon applied successfully!", "success");
     } catch (err: any) {
+      const localOffer = getOfferByCode(couponCode.trim());
+      if (localOffer) {
+        let disc = localOffer.discountAmount;
+        if (localOffer.discountType === "percentage") {
+          disc = Math.round(subtotal * (localOffer.discountAmount / 100));
+          if (localOffer.maxDiscount && disc > localOffer.maxDiscount) {
+            disc = localOffer.maxDiscount;
+          }
+        }
+        setCouponDiscount(disc);
+        showToast(`Coupon ${localOffer.code} applied!`, "success");
+        return;
+      }
       setCouponDiscount(0);
       setCouponError(err.response?.data?.message || "Invalid or expired coupon code.");
     }

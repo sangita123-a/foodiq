@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Tag, ArrowRight } from "lucide-react";
 import api from "@/services/api";
+import { getOfferByCode } from "@/lib/data/20offersData";
 
 type OrderSummaryProps = {
   subtotal?: number;
@@ -45,6 +46,19 @@ export default function OrderSummary({
       const res = await api.post("/api/coupons/apply", { code: couponCode.trim() });
       setLocalDiscount(parseFloat(res.data.data.discount));
     } catch (err: any) {
+      const localOffer = getOfferByCode(couponCode.trim());
+      if (localOffer) {
+        let disc = localOffer.discountAmount;
+        if (localOffer.discountType === "percentage") {
+          disc = Math.round(subtotal * (localOffer.discountAmount / 100));
+          if (localOffer.maxDiscount && disc > localOffer.maxDiscount) {
+            disc = localOffer.maxDiscount;
+          }
+        }
+        setLocalDiscount(disc);
+        setCouponError("");
+        return;
+      }
       setLocalDiscount(0);
       setCouponError(err.response?.data?.message || "Invalid or expired coupon code.");
     }

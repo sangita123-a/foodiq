@@ -5,6 +5,7 @@ import { Tag, CheckCircle2, XCircle } from "lucide-react";
 import useSWR from "swr";
 import api from "@/services/api";
 import { fetchCouponRecommendations } from "@/services/featuresApi";
+import { getOfferByCode } from "@/lib/data/20offersData";
 
 type Props = {
   appliedDiscount: number;
@@ -49,6 +50,23 @@ export default function PromoCodeSection({
       onApply(parseFloat(discountAmount), applied);
       setSuccess(true);
     } catch (err: unknown) {
+      const localOffer = getOfferByCode(codeToApply);
+      if (localOffer) {
+        let discount = localOffer.discountAmount;
+        if (localOffer.discountType === "percentage") {
+          discount = Math.round(cartTotal * (localOffer.discountAmount / 100));
+          if (localOffer.maxDiscount && discount > localOffer.maxDiscount) {
+            discount = localOffer.maxDiscount;
+          }
+        }
+        setAppliedCode(localOffer.code);
+        setCode(localOffer.code);
+        onApply(discount, localOffer.code);
+        setSuccess(true);
+        setError("");
+        return;
+      }
+
       onApply(0, null);
       setSuccess(false);
       const msg =
