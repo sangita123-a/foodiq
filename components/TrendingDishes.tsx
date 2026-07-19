@@ -87,7 +87,7 @@ export default function TrendingDishes() {
                 >
                   <Link href={`/food/${dish.id}`} className="food-card-image block">
                     <SafeImage
-                      src={dish.image || FOOD_FALLBACK}
+                      src={getFoodImage(dish.image)}
                       fallback={FOOD_FALLBACK}
                       alt={dish.name}
                       sizes="250px"

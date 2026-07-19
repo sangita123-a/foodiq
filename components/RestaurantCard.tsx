@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Star, Clock } from "lucide-react";
 import Link from "next/link";
 import SafeImage from "@/components/ui/SafeImage";
-import { RESTAURANT_FALLBACK } from "@/lib/images";
+import { getRestaurantImage, RESTAURANT_FALLBACK } from "@/lib/images";
 
 interface RestaurantCardProps {
   id: string | number;
@@ -27,6 +27,8 @@ export default function RestaurantCard({
   priceForTwo,
   delay = 0,
 }: RestaurantCardProps) {
+  const imageUrl = getRestaurantImage(image);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -39,7 +41,7 @@ export default function RestaurantCard({
         <div className="food-card-image">
           <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/75/80 to-transparent z-10" />
           <SafeImage
-            src={image}
+            src={imageUrl}
             fallback={RESTAURANT_FALLBACK}
             alt={name}
             className="w-full h-full object-cover"

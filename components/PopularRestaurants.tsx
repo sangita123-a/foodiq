@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Clock, Star } from "lucide-react";
 import useSWR from "swr";
 import SafeImage from "@/components/ui/SafeImage";
-import { RESTAURANT_FALLBACK, mapRestaurantCard } from "@/lib/images";
+import { getRestaurantImage, RESTAURANT_FALLBACK, mapRestaurantCard } from "@/lib/images";
 
 export default function PopularRestaurants() {
   const { data: rawRestaurants, isLoading } = useSWR(
@@ -69,7 +69,7 @@ export default function PopularRestaurants() {
                   aria-label={`View ${restaurant.name} menu`}
                 >
                   <SafeImage
-                    src={restaurant.image}
+                    src={getRestaurantImage(restaurant.image)}
                     fallback={RESTAURANT_FALLBACK}
                     alt={restaurant.name}
                     sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 280px"
