@@ -2,22 +2,32 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Eye, Flame, Heart, Minus, Plus, ShoppingBag, Star } from "lucide-react";
+import { Clock, Eye, Flame, Heart, Minus, Plus, ShoppingBag, Star } from "lucide-react";
 import useSWR from "swr";
 import SafeImage from "@/components/ui/SafeImage";
 import { FOOD_FALLBACK, getFoodImage } from "@/lib/images";
-import { Dish60, TRENDING_DISHES_60 } from "@/lib/data/30restaurantsData";
+import {
+  Dish60,
+  POPULAR_RESTAURANTS_30,
+  TRENDING_DISHES_60,
+} from "@/lib/data/30restaurantsData";
 import { useCartActions } from "@/hooks/useCartActions";
 import { useFavoriteActions } from "@/hooks/useFavoriteActions";
 
+const CARD_WIDTH = 170;
+const CARD_HEIGHT = 240;
+const IMAGE_HEIGHT = 110;
+
+function getDeliveryTime(dish: Dish60): string {
+  const restaurant = POPULAR_RESTAURANTS_30.find((r) => r.id === dish.restaurantId);
+  return restaurant?.time || "25 min";
+}
+
 export default function TrendingDishes() {
-  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const { quantities, updatingId, updateQuantity, addAndCheckout } = useCartActions();
+  const { quantities, updatingId, updateQuantity } = useCartActions();
   const { itemIds, toggleItem } = useFavoriteActions();
 
-  // Live SWR fetch with fallback to 60 structured trending dishes
   const { data: apiData, isLoading } = useSWR("/api/menu-items?limit=60");
 
   const dishes: Dish60[] = useMemo(() => {
@@ -64,34 +74,32 @@ export default function TrendingDishes() {
   }, [dishes, selectedCategory]);
 
   return (
-    <section className="py-12 bg-white" id="trending-dishes-section">
-      <div className="container mx-auto px-4 md:px-8 max-w-7xl">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+    <section className="bg-white py-12" id="trending-dishes-section">
+      <div className="container mx-auto max-w-7xl px-4 md:px-8">
+        <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 text-red-600 text-xs font-bold mb-3 uppercase tracking-wider">
-              <Flame className="w-4 h-4 fill-red-500 text-red-500" />
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-red-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-red-600">
+              <Flame className="h-4 w-4 fill-red-500 text-red-500" />
               <span>60 Trending Delicacies</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-[#0F172A] tracking-tight mb-2">
+            <h2 className="mb-2 text-3xl font-extrabold tracking-tight text-[#0F172A] md:text-4xl">
               Trending Dishes Right Now
             </h2>
-            <p className="text-[#64748B] text-base md:text-lg">
+            <p className="text-base text-[#64748B] md:text-lg">
               Most ordered dishes across Foodiq with instant delivery.
             </p>
           </div>
 
           <Link
             href="/trending-dishes"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0F172A] text-white text-sm font-semibold hover:bg-primary transition-all shadow-md"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#0F172A] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#E23744]"
           >
-            <ShoppingBag className="w-4 h-4" />
+            <ShoppingBag className="h-4 w-4" />
             <span>View All 60 Dishes</span>
           </Link>
         </div>
 
-        {/* Category Pills Filter */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 hide-scrollbar scroll-smooth">
+        <div className="hide-scrollbar mb-8 flex items-center gap-2 overflow-x-auto pb-4 scroll-smooth">
           {categories.slice(0, 16).map((cat) => {
             const isActive = selectedCategory === cat;
             return (
@@ -99,10 +107,10 @@ export default function TrendingDishes() {
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-xl text-xs md:text-sm font-bold whitespace-nowrap transition-all duration-200 ${
+                className={`whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200 md:text-sm ${
                   isActive
-                    ? "bg-[#0F172A] text-white shadow-md scale-105"
-                    : "bg-[#F8FAFC] text-[#475569] hover:bg-[#F1F5F9] border border-[#E2E8F0]"
+                    ? "scale-105 bg-[#0F172A] text-white shadow-md"
+                    : "border border-[#E2E8F0] bg-[#F8FAFC] text-[#475569] hover:bg-[#F1F5F9]"
                 }`}
               >
                 {cat}
@@ -111,86 +119,81 @@ export default function TrendingDishes() {
           })}
         </div>
 
-        {/* Responsive Grid of 60 Dishes: 2 col (mobile), 3 col (tablet), 4-5 col (desktop) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
+        <div className="grid grid-cols-2 justify-items-center gap-[14px] md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7">
           {isLoading && filteredDishes.length === 0
-            ? Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="h-[320px] rounded-[18px] bg-[#F8F8F8] animate-pulse border border-[#ECECEC]" />
+            ? Array.from({ length: 14 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="animate-pulse rounded-2xl bg-[#F8F8F8]"
+                  style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
+                />
               ))
             : filteredDishes.map((dish) => {
                 const qty = quantities.get(dish.id) || 0;
                 const isUpdating = updatingId === dish.id;
                 const isFavorite = itemIds.has(dish.id);
+                const deliveryTime = getDeliveryTime(dish);
 
                 return (
-                  <div
+                  <article
                     key={dish.id}
-                    className="group relative bg-white rounded-[18px] border border-[#ECECEC] overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_32px_rgba(226,55,68,0.12)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300 flex flex-col h-[320px] sm:h-[340px]"
+                    className="group flex shrink-0 flex-col overflow-hidden rounded-2xl border border-[#ECECEC] bg-white shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(226,55,68,0.14)]"
+                    style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
                   >
-                    {/* Dish Image (160-175px high) */}
-                    <Link href={`/food/${dish.id}`} className="relative block h-[165px] sm:h-[175px] w-full overflow-hidden bg-[#F8F8F8] shrink-0">
-                      <SafeImage
-                        src={dish.image}
-                        fallback={FOOD_FALLBACK}
-                        alt={dish.name}
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-
-                      {/* Bestseller Badge */}
-                      {dish.isBestseller && (
-                        <div className="absolute top-2.5 left-2.5 bg-[#E23744] text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">
-                          BESTSELLER
-                        </div>
-                      )}
-
-                      {/* Veg / Non-Veg Badge */}
-                      <div className="absolute top-2.5 right-2.5 bg-black/60 backdrop-blur-md p-1 rounded-md border border-white/20">
-                        <div
-                          className={`w-3 h-3 border-2 flex items-center justify-center ${
-                            dish.isVeg ? "border-green-500" : "border-red-500"
-                          }`}
-                        >
-                          <div className={`w-1 h-1 rounded-full ${dish.isVeg ? "bg-green-500" : "bg-red-500"}`} />
-                        </div>
-                      </div>
-
-                      {/* Rating Overlay */}
-                      <div className="absolute bottom-2.5 left-2.5 bg-black/60 backdrop-blur-md text-white text-[11px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
-                        <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-                        <span>{dish.rating}</span>
-                      </div>
-                    </Link>
-
-                    {/* Favorite Button */}
-                    <button
-                      type="button"
-                      onClick={() => toggleItem(dish.id)}
-                      className="absolute top-10 right-2.5 z-10 w-7 h-7 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:text-[#E23744] transition-colors"
-                      aria-label={isFavorite ? "Remove favorite" : "Add favorite"}
+                    <div
+                      className="relative w-full shrink-0 overflow-hidden rounded-t-2xl bg-[#F8F8F8]"
+                      style={{ height: IMAGE_HEIGHT }}
                     >
-                      <Heart className={`w-3.5 h-3.5 ${isFavorite ? "fill-[#E23744] text-[#E23744]" : ""}`} />
-                    </button>
+                      <Link href={`/food/${dish.id}`} className="relative block h-full w-full">
+                        <SafeImage
+                          src={dish.image}
+                          fallback={FOOD_FALLBACK}
+                          alt={dish.name}
+                          fill
+                          sizes="170px"
+                          className="block object-cover object-center transition-transform duration-300 ease-out group-hover:scale-[1.05]"
+                        />
+                      </Link>
 
-                    {/* Content Body */}
-                    <div className="p-3.5 flex flex-col flex-1 min-w-0 justify-between">
-                      <div>
-                        <Link href={`/food/${dish.id}`} className="font-extrabold text-[#1A1A1A] text-sm sm:text-base line-clamp-1 hover:text-[#E23744] transition-colors mb-0.5">
-                          {dish.name}
-                        </Link>
+                      <button
+                        type="button"
+                        onClick={() => toggleItem(dish.id)}
+                        className="absolute right-1.5 top-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-[#666666] shadow-sm transition-colors hover:text-[#E23744]"
+                        aria-label={isFavorite ? "Remove favorite" : "Add favorite"}
+                      >
+                        <Heart
+                          className={`h-3 w-3 ${isFavorite ? "fill-[#E23744] text-[#E23744]" : ""}`}
+                        />
+                      </button>
+                    </div>
 
-                        <Link href={`/restaurant/${dish.restaurantId}`} className="text-[#666666] text-xs font-medium hover:text-[#E23744] transition-colors mb-2 block line-clamp-1">
-                          by {dish.restaurantName}
-                        </Link>
+                    <div className="flex min-h-0 flex-1 flex-col p-[10px]">
+                      <Link
+                        href={`/food/${dish.id}`}
+                        className="line-clamp-1 text-[13px] font-extrabold leading-tight text-[#1A1A1A] transition-colors hover:text-[#E23744]"
+                      >
+                        {dish.name}
+                      </Link>
+
+                      <div className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-[#666666]">
+                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                        <span className="text-[#1A1A1A]">{dish.rating}</span>
+                        <span className="text-[#CCCCCC]">·</span>
+                        <Clock className="h-2.5 w-2.5" />
+                        <span>{deliveryTime}</span>
                       </div>
 
-                      {/* Price & Add to Cart Controls */}
-                      <div className="pt-2 border-t border-[#F1F1F1] flex items-center justify-between gap-2">
-                        <div>
-                          <span className="text-base font-black text-[#E23744]">₹{dish.price}</span>
+                      <p className="mt-0.5 line-clamp-1 text-[10px] font-medium text-[#888888]">
+                        {dish.restaurantName}
+                      </p>
+
+                      <div className="mt-auto flex items-center justify-between gap-1 pt-1.5">
+                        <div className="min-w-0">
+                          <span className="text-sm font-black text-[#E23744]">₹{dish.price}</span>
                           {dish.originalPrice && dish.originalPrice > dish.price && (
-                            <span className="text-xs text-[#8E8E8E] line-through ml-1">₹{dish.originalPrice}</span>
+                            <span className="ml-0.5 text-[9px] text-[#AAAAAA] line-through">
+                              ₹{dish.originalPrice}
+                            </span>
                           )}
                         </div>
 
@@ -207,63 +210,45 @@ export default function TrendingDishes() {
                               })
                             }
                             disabled={isUpdating}
-                            className="inline-flex items-center gap-1 bg-[#E23744] text-white hover:bg-[#C81E34] px-3 py-1.5 rounded-xl text-xs font-extrabold shadow-sm hover:shadow transition-all disabled:opacity-50"
+                            className="inline-flex h-[34px] shrink-0 items-center justify-center gap-0.5 rounded-lg bg-[#E23744] px-2.5 text-[10px] font-extrabold text-white transition-all hover:bg-[#C81E34] disabled:opacity-50"
                           >
-                            <Plus className="w-3.5 h-3.5" />
-                            <span>ADD</span>
+                            <Plus className="h-3 w-3" />
+                            <span>Add</span>
                           </button>
                         ) : (
-                          <div className="flex items-center gap-1 bg-[#FFF5F6] border border-[#E23744] rounded-xl px-1.5 py-0.5">
+                          <div className="flex h-[34px] shrink-0 items-center gap-0.5 rounded-lg border border-[#E23744] bg-[#FFF5F6] px-1">
                             <button
                               type="button"
                               onClick={() => updateQuantity(dish.id, -1)}
                               disabled={isUpdating}
-                              className="w-5 h-5 rounded-md bg-white text-[#E23744] flex items-center justify-center font-bold shadow-sm hover:bg-[#E23744] hover:text-white transition-colors disabled:opacity-50"
+                              className="flex h-6 w-6 items-center justify-center rounded-md text-[#E23744] transition-colors hover:bg-[#E23744] hover:text-white disabled:opacity-50"
                             >
-                              <Minus className="w-3 h-3" />
+                              <Minus className="h-3 w-3" />
                             </button>
-                            <span className="text-xs font-black text-[#E23744] min-w-[14px] text-center">{qty}</span>
+                            <span className="min-w-[12px] text-center text-[10px] font-black text-[#E23744]">
+                              {qty}
+                            </span>
                             <button
                               type="button"
                               onClick={() => updateQuantity(dish.id, 1)}
                               disabled={isUpdating}
-                              className="w-5 h-5 rounded-md bg-white text-[#E23744] flex items-center justify-center font-bold shadow-sm hover:bg-[#E23744] hover:text-white transition-colors disabled:opacity-50"
+                              className="flex h-6 w-6 items-center justify-center rounded-md text-[#E23744] transition-colors hover:bg-[#E23744] hover:text-white disabled:opacity-50"
                             >
-                              <Plus className="w-3 h-3" />
+                              <Plus className="h-3 w-3" />
                             </button>
                           </div>
                         )}
                       </div>
 
-                      {/* Quick Details & Buy Now */}
-                      <div className="mt-2.5 grid grid-cols-2 gap-1.5">
-                        <Link
-                          href={`/food/${dish.id}`}
-                          className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-xl bg-[#F8F8F8] text-[#666666] hover:bg-[#ECECEC] text-[11px] font-bold border border-[#ECECEC] transition-colors"
-                        >
-                          <Eye className="w-3 h-3" />
-                          <span>Details</span>
-                        </Link>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            addAndCheckout(dish.id, router, {
-                              restaurant_id: dish.restaurantId,
-                              name: dish.name,
-                              price: dish.price,
-                              image: dish.image,
-                              isVeg: dish.isVeg,
-                            })
-                          }
-                          disabled={isUpdating}
-                          className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-xl bg-[#1A1A1A] text-white hover:bg-[#E23744] text-[11px] font-bold transition-colors disabled:opacity-50"
-                        >
-                          <span>Order</span>
-                        </button>
-                      </div>
+                      <Link
+                        href={`/food/${dish.id}`}
+                        className="mt-1 inline-flex items-center justify-center gap-0.5 text-[9px] font-bold text-[#888888] transition-colors hover:text-[#E23744]"
+                      >
+                        <Eye className="h-2.5 w-2.5" />
+                        <span>View Details</span>
+                      </Link>
                     </div>
-                  </div>
+                  </article>
                 );
               })}
         </div>
