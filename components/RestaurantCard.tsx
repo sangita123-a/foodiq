@@ -49,7 +49,7 @@ export default function RestaurantCard({
               <span>{rating}</span>
               <Star className="w-3 h-3 fill-white" />
             </div>
-            <div className="flex items-center gap-1 bg-[#F8FAFC] backdrop-blur-md px-2 py-1 rounded text-white text-xs font-medium">
+            <div className="flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-white text-xs font-medium">
               <Clock className="w-3 h-3" />
               <span>{time}</span>
             </div>

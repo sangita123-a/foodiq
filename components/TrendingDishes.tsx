@@ -18,6 +18,7 @@ type TrendingDish = {
   price: number;
   image: string;
   description?: string;
+  is_veg?: boolean;
 };
 
 export default function TrendingDishes() {
@@ -42,6 +43,7 @@ export default function TrendingDishes() {
       price: item.discount_price ? parseFloat(item.discount_price) : parseFloat(item.price),
       image: getFoodImage(item.image_url),
       description: item.description as string | undefined,
+      is_veg: Boolean(item.is_vegetarian ?? item.is_veg ?? true),
     }));
   }, [menuItems]);
 
@@ -93,6 +95,15 @@ export default function TrendingDishes() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/75/60 to-transparent" />
 
+                    <div className="absolute top-3 left-3 z-10 rounded-md border border-[#E5E7EB] bg-black/50 p-1.5 backdrop-blur-md">
+                      <div
+                        className={`w-3.5 h-3.5 border-2 flex items-center justify-center ${dish.is_veg ? "border-green-500" : "border-red-500"}`}
+                      >
+                        <div
+                          className={`w-1.5 h-1.5 rounded-full ${dish.is_veg ? "bg-green-500" : "bg-red-500"}`}
+                        />
+                      </div>
+                    </div>
                     <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg text-sm font-semibold text-white">
                       <Star className="w-3.5 h-3.5 text-yellow-400 fill-current" />
                       {dish.rating}

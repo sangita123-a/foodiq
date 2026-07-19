@@ -2,6 +2,7 @@
 
 import Image, { type ImageProps } from "next/image";
 import { useState } from "react";
+import { resolveBackendUrl } from "@/lib/images";
 
 type SafeImageProps = Omit<ImageProps, "src" | "alt" | "onError"> & {
   src?: string | null;
@@ -13,7 +14,11 @@ type SafeImageProps = Omit<ImageProps, "src" | "alt" | "onError"> & {
 
 function resolveSrc(src: string | null | undefined, fallback: string) {
   const value = typeof src === "string" ? src.trim() : "";
-  return value || fallback;
+  if (!value) return fallback;
+  if (value.startsWith("/") && !value.startsWith("//")) {
+    return resolveBackendUrl(value) || fallback;
+  }
+  return value;
 }
 
 export default function SafeImage({
