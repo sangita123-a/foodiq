@@ -18,9 +18,10 @@ type CartItemCardProps = {
   item: CartItemType;
   onUpdateQuantity: (id: string, delta: number) => void;
   onRemove: (id: string) => void;
+  isUpdating?: boolean;
 };
 
-export default function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
+export default function CartItemCard({ item, onUpdateQuantity, onRemove, isUpdating }: CartItemCardProps) {
   const itemTotal = item.price * item.quantity;
 
   return (
