@@ -165,8 +165,8 @@ export default function AdminBiPage() {
     <AdminShell title="Business Intelligence">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#FC8019]/10 flex items-center justify-center">
-            <LineChart className="w-5 h-5 text-[#FC8019]" />
+          <div className="w-10 h-10 rounded-xl bg-[#E23744]/10 flex items-center justify-center">
+            <LineChart className="w-5 h-5 text-[#E23744]" />
           </div>
           <div>
             <h1 className="text-3xl font-black text-[#111827]">
@@ -185,7 +185,7 @@ export default function AdminBiPage() {
               onClick={() => setDays(d)}
               className={`px-3 py-1.5 rounded-xl text-sm font-bold border ${
                 days === d
-                  ? "bg-[#FC8019] text-white border-[#FC8019]"
+                  ? "bg-[#E23744] text-white border-[#E23744]"
                   : "bg-white text-[#6B7280] border-[#E5E7EB]"
               }`}
             >
@@ -227,7 +227,7 @@ export default function AdminBiPage() {
             type="button"
             disabled={busy}
             onClick={() => void emailReport()}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#FC8019] text-white text-sm font-bold"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#E23744] text-white text-sm font-bold"
           >
             <Mail className="w-3.5 h-3.5" /> Email
           </button>
@@ -282,7 +282,7 @@ export default function AdminBiPage() {
                 </div>
                 <div className="h-2 bg-[#F8FAFC] rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#FC8019] rounded-full"
+                    className="h-full bg-[#E23744] rounded-full"
                     style={{
                       width: `${Math.min(100, s.conversion_from_prev || 0)}%`,
                     }}

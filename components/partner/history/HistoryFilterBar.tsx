@@ -38,14 +38,14 @@ export default function HistoryFilterBar({
             placeholder="Search Order ID or Customer..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
           />
         </div>
         
         <select 
           value={dateRange}
           onChange={(e) => setDateRange(e.target.value)}
-          className="w-full md:w-36 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors appearance-none cursor-pointer text-sm shrink-0"
+          className="w-full md:w-36 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors appearance-none cursor-pointer text-sm shrink-0"
         >
           <option value="Today">Today</option>
           <option value="Last 7 Days">Last 7 Days</option>
@@ -57,7 +57,7 @@ export default function HistoryFilterBar({
         <select 
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="w-full md:w-36 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors appearance-none cursor-pointer text-sm shrink-0"
+          className="w-full md:w-36 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors appearance-none cursor-pointer text-sm shrink-0"
         >
           <option value="All">All Statuses</option>
           <option value="Completed">Completed</option>
@@ -69,7 +69,7 @@ export default function HistoryFilterBar({
         <select 
           value={paymentFilter}
           onChange={(e) => setPaymentFilter(e.target.value)}
-          className="w-full md:w-36 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors appearance-none cursor-pointer text-sm shrink-0"
+          className="w-full md:w-36 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors appearance-none cursor-pointer text-sm shrink-0"
         >
           <option value="All">All Payments</option>
           <option value="Card">Card</option>
@@ -81,7 +81,7 @@ export default function HistoryFilterBar({
         <select 
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="w-full md:w-40 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors appearance-none cursor-pointer text-sm shrink-0"
+          className="w-full md:w-40 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors appearance-none cursor-pointer text-sm shrink-0"
         >
           <option value="Date (Newest)">Date (Newest)</option>
           <option value="Date (Oldest)">Date (Oldest)</option>
@@ -93,7 +93,7 @@ export default function HistoryFilterBar({
       <div className="relative self-end xl:self-auto shrink-0">
         <button 
           onClick={() => setShowExportMenu(!showExportMenu)}
-          className="flex items-center gap-2 bg-[#FC8019] hover:bg-[#E66F0D] text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-lg shadow-[#FC8019]/20"
+          className="flex items-center gap-2 bg-[#E23744] hover:bg-[#C81E34] text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-lg shadow-[#E23744]/20"
         >
           <Download className="w-4 h-4" />
           Export

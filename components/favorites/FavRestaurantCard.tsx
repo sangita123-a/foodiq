@@ -56,7 +56,7 @@ export default function FavRestaurantCard({ restaurant, onRemove }: Props) {
             onClick={() => onRemove(restaurant.id)}
             className="w-10 h-10 bg-[#F8FAFC] hover:bg-red-500/20 backdrop-blur-md rounded-full flex items-center justify-center transition-colors group/heart"
           >
-            <Heart className="w-5 h-5 text-[#FC8019] fill-[#FC8019] group-hover/heart:scale-110 transition-transform" />
+            <Heart className="w-5 h-5 text-[#E23744] fill-[#E23744] group-hover/heart:scale-110 transition-transform" />
           </button>
         </div>
       </div>

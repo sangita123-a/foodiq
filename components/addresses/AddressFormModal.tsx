@@ -50,7 +50,7 @@ export default function AddressFormModal({ isOpen, onClose, onSave, initialData 
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="bg-[#F8FAFC] rounded-3xl w-full max-w-2xl border border-[#E5E7EB] shadow-[0_20px_60px_rgba(252,128,25,0.15)] overflow-hidden max-h-[90vh] flex flex-col"
+        className="bg-[#F8FAFC] rounded-3xl w-full max-w-2xl border border-[#E5E7EB] shadow-[0_20px_60px_rgba(226, 55, 68,0.15)] overflow-hidden max-h-[90vh] flex flex-col"
       >
         {/* Modal Header */}
         <div className="p-6 md:p-8 border-b border-[#E5E7EB] flex justify-between items-center bg-[#F8FAFC]">
@@ -123,7 +123,7 @@ export default function AddressFormModal({ isOpen, onClose, onSave, initialData 
                     className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all border ${
                       isSelected 
                         ? 'bg-primary/10 border-primary text-primary' 
-                        : 'border-[#ECECEC] bg-white text-[#686B78] hover:border-[#FC8019]/40 hover:text-[#1C1C1C]'
+                        : 'border-[#ECECEC] bg-white text-[#686B78] hover:border-[#E23744]/40 hover:text-[#1C1C1C]'
                     }`}
                   >
                     {type === 'Home' && <Home className="w-4 h-4" />}
@@ -140,7 +140,7 @@ export default function AddressFormModal({ isOpen, onClose, onSave, initialData 
           <div className="mb-8">
             <label className="flex items-center gap-3 cursor-pointer group w-max">
               <div className={`w-6 h-6 rounded border flex items-center justify-center transition-colors ${
-                formData.isDefault ? 'bg-primary border-primary' : 'border-[#ECECEC] group-hover:border-[#FC8019]/40 bg-white'
+                formData.isDefault ? 'bg-primary border-primary' : 'border-[#ECECEC] group-hover:border-[#E23744]/40 bg-white'
               }`}>
                 {formData.isDefault && <Check className="h-4 w-4 text-white" />}
               </div>
@@ -159,13 +159,13 @@ export default function AddressFormModal({ isOpen, onClose, onSave, initialData 
             <button 
               type="button" 
               onClick={onClose}
-              className="flex-1 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] py-4 font-bold text-[#1C1C1C] transition-all hover:border-[#FC8019]/30 hover:bg-white"
+              className="flex-1 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] py-4 font-bold text-[#1C1C1C] transition-all hover:border-[#E23744]/30 hover:bg-white"
             >
               Cancel
             </button>
             <button 
               type="submit"
-              className="flex-1 rounded-xl bg-[#FC8019] py-4 font-bold text-white shadow-[0_10px_24px_rgba(252,128,25,0.20)] transition-all hover:bg-[#EF4F5F]"
+              className="flex-1 rounded-xl bg-[#E23744] py-4 font-bold text-white shadow-[0_10px_24px_rgba(226, 55, 68,0.20)] transition-all hover:bg-[#E23744]"
             >
               Save Address
             </button>

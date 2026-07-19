@@ -74,7 +74,7 @@ export default function FAQ() {
   }, [query]);
 
   return (
-    <section className="w-full border-t border-[#ECECEC] bg-[radial-gradient(circle_at_top,rgba(252,128,25,0.07),transparent_34%),#FFFFFF] py-16 md:py-24">
+    <section className="w-full border-t border-[#ECECEC] bg-[radial-gradient(circle_at_top,rgba(226, 55, 68,0.07),transparent_34%),#FFFFFF] py-16 md:py-24">
       <div className="mx-auto w-[calc(100%-32px)] max-w-5xl md:w-[calc(100%-64px)]">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -83,7 +83,7 @@ export default function FAQ() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-8 text-center"
         >
-          <span className="mb-3 inline-flex rounded-full border border-[#FC8019]/20 bg-[#FC8019]/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#FC8019]">
+          <span className="mb-3 inline-flex rounded-full border border-[#E23744]/20 bg-[#E23744]/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#E23744]">
             Help Center
           </span>
           <h2 className="mb-3 text-3xl font-bold tracking-[-0.045em] text-[#1C1C1C] md:text-5xl">
@@ -108,7 +108,7 @@ export default function FAQ() {
             }}
             placeholder="Search questions, payments, refunds..."
             aria-label="Search frequently asked questions"
-            className="h-13 w-full rounded-[14px] border border-[#ECECEC] bg-white py-3 pl-12 pr-4 text-sm text-[#1C1C1C] shadow-[0_10px_32px_rgba(28,28,28,0.07)] outline-none transition-all duration-300 placeholder:text-[#686B78] focus:border-[#FC8019]/60 focus:ring-4 focus:ring-[#FC8019]/10"
+            className="h-13 w-full rounded-[14px] border border-[#ECECEC] bg-white py-3 pl-12 pr-4 text-sm text-[#1C1C1C] shadow-[0_10px_32px_rgba(28,28,28,0.07)] outline-none transition-all duration-300 placeholder:text-[#686B78] focus:border-[#E23744]/60 focus:ring-4 focus:ring-[#E23744]/10"
           />
         </div>
 
@@ -126,8 +126,8 @@ export default function FAQ() {
                 transition={{ duration: 0.35, delay: Math.min(index * 0.025, 0.25) }}
                 className={`overflow-hidden rounded-2xl border bg-white transition-all duration-300 ${
                   isOpen
-                    ? "border-[#FC8019]/35 shadow-[0_14px_36px_rgba(252,128,25,0.1)]"
-                    : "border-[#E5E7EB] shadow-[0_8px_24px_rgba(15,23,42,0.06)] hover:-translate-y-0.5 hover:border-[#FC8019]/25 hover:shadow-[0_14px_32px_rgba(15,23,42,0.1)]"
+                    ? "border-[#E23744]/35 shadow-[0_14px_36px_rgba(226, 55, 68,0.1)]"
+                    : "border-[#E5E7EB] shadow-[0_8px_24px_rgba(15,23,42,0.06)] hover:-translate-y-0.5 hover:border-[#E23744]/25 hover:shadow-[0_14px_32px_rgba(15,23,42,0.1)]"
                 }`}
               >
                 <button
@@ -139,7 +139,7 @@ export default function FAQ() {
                 >
                   <span
                     className={`text-sm font-semibold leading-6 transition-colors duration-300 sm:text-base ${
-                      isOpen ? "text-[#FC8019]" : "text-[#111827]"
+                      isOpen ? "text-[#E23744]" : "text-[#111827]"
                     }`}
                   >
                     {faq.question}
@@ -149,7 +149,7 @@ export default function FAQ() {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors duration-300 ${
                       isOpen
-                        ? "border-[#FC8019] bg-[#FC8019] text-white"
+                        ? "border-[#E23744] bg-[#E23744] text-white"
                         : "border-[#E5E7EB] bg-[#F8FAFC] text-[#6B7280]"
                     }`}
                     aria-hidden="true"
@@ -212,14 +212,14 @@ export default function FAQ() {
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
             <a
               href="/help-support"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#FC8019] px-5 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#E76F0B] hover:shadow-[0_8px_24px_rgba(252,128,25,0.3)]"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#E23744] px-5 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#C81E34] hover:shadow-[0_8px_24px_rgba(226, 55, 68,0.3)]"
             >
               <MessageCircle className="h-4 w-4" />
               Contact Support
             </a>
             <a
               href="mailto:support@foodiq.com"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-5 text-sm font-bold text-[#111827] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#FC8019]/30 hover:bg-[#FFF7ED]"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-5 text-sm font-bold text-[#111827] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#E23744]/30 hover:bg-[#FFF7ED]"
             >
               <Mail className="h-4 w-4" />
               Email Us

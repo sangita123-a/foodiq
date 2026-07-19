@@ -20,7 +20,7 @@ export default function ReferBanner() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-[#FC8019] to-[#E76F0B] rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-[0_20px_50px_rgba(252,128,25,0.3)] mt-12">
+    <div className="bg-gradient-to-br from-[#E23744] to-[#C81E34] rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-[0_20px_50px_rgba(226, 55, 68,0.3)] mt-12">
       <div className="absolute top-0 right-0 w-64 h-64 bg-[#F8FAFC] rounded-full blur-[60px] pointer-events-none translate-x-1/2 -translate-y-1/2"></div>
 
       <div className="flex flex-col md:flex-row items-center justify-between gap-10 relative z-10">
@@ -48,7 +48,7 @@ export default function ReferBanner() {
             </span>
             <button
               onClick={handleCopy}
-              className="p-3 bg-[#FC8019] hover:bg-[#E76F0B] rounded-xl text-white transition-colors"
+              className="p-3 bg-[#E23744] hover:bg-[#C81E34] rounded-xl text-white transition-colors"
               type="button"
               aria-label="Copy referral code"
             >

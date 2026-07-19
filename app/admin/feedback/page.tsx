@@ -142,7 +142,7 @@ export default function AdminFeedbackPage() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-black text-[#111827] flex items-center gap-2">
-              <MessageSquare className="w-6 h-6 text-[#FC8019]" /> Feedback
+              <MessageSquare className="w-6 h-6 text-[#E23744]" /> Feedback
             </h1>
             <p className="text-sm text-[#6B7280] mt-1">
               Order ratings, analytics, product feedback, and review moderation.
@@ -165,7 +165,7 @@ export default function AdminFeedbackPage() {
               onClick={() => setTab(t.id)}
               className={`px-4 py-2 rounded-xl text-sm font-bold ${
                 tab === t.id
-                  ? "bg-[#FC8019] text-white"
+                  ? "bg-[#E23744] text-white"
                   : "bg-white border border-[#E5E7EB] text-[#6B7280]"
               }`}
             >
@@ -530,7 +530,7 @@ function FeedbackTable({
                 <button
                   type="button"
                   onClick={() => onStatus(String(row.id), "resolved")}
-                  className="text-xs font-bold text-[#FC8019] hover:underline"
+                  className="text-xs font-bold text-[#E23744] hover:underline"
                 >
                   Mark resolved
                 </button>

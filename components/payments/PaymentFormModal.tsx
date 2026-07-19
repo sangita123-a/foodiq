@@ -84,7 +84,7 @@ export default function PaymentFormModal({ isOpen, onClose, onSaveCard, onSaveUp
                 type="button"
                 onClick={() => setMethodType("Card")}
                 className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-bold text-sm transition-colors ${
-                  methodType === "Card" ? "bg-primary text-white shadow-[0_6px_16px_rgba(252,128,25,0.18)]" : "text-[#686B78] hover:text-[#1C1C1C]"
+                  methodType === "Card" ? "bg-primary text-white shadow-[0_6px_16px_rgba(226, 55, 68,0.18)]" : "text-[#686B78] hover:text-[#1C1C1C]"
                 }`}
               >
                 <CreditCard className="w-4 h-4" /> Card
@@ -93,7 +93,7 @@ export default function PaymentFormModal({ isOpen, onClose, onSaveCard, onSaveUp
                 type="button"
                 onClick={() => setMethodType("UPI")}
                 className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-bold text-sm transition-colors ${
-                  methodType === "UPI" ? "bg-primary text-white shadow-[0_6px_16px_rgba(252,128,25,0.18)]" : "text-[#686B78] hover:text-[#1C1C1C]"
+                  methodType === "UPI" ? "bg-primary text-white shadow-[0_6px_16px_rgba(226, 55, 68,0.18)]" : "text-[#686B78] hover:text-[#1C1C1C]"
                 }`}
               >
                 <Smartphone className="w-4 h-4" /> UPI ID
@@ -136,7 +136,7 @@ export default function PaymentFormModal({ isOpen, onClose, onSaveCard, onSaveUp
             <div className="mt-8 mb-4">
               <label className="flex items-center gap-3 cursor-pointer group w-max">
                 <div className={`w-6 h-6 rounded border flex items-center justify-center transition-colors ${
-                  formData.isDefault ? 'bg-primary border-primary' : 'border-[#E5E7EB] group-hover:border-[#FC8019]/40 bg-white'
+                  formData.isDefault ? 'bg-primary border-primary' : 'border-[#E5E7EB] group-hover:border-[#E23744]/40 bg-white'
                 }`}>
                   {formData.isDefault && <Check className="w-4 h-4 text-[#111827]" />}
                 </div>
@@ -155,13 +155,13 @@ export default function PaymentFormModal({ isOpen, onClose, onSaveCard, onSaveUp
             <button 
               type="button" 
               onClick={onClose}
-              className="flex-1 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] py-4 font-bold text-[#1C1C1C] transition-all hover:border-[#FC8019]/30 hover:bg-white"
+              className="flex-1 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] py-4 font-bold text-[#1C1C1C] transition-all hover:border-[#E23744]/30 hover:bg-white"
             >
               Cancel
             </button>
             <button 
               type="submit"
-              className="flex-1 rounded-xl bg-[#FC8019] py-4 font-bold text-white shadow-[0_10px_24px_rgba(252,128,25,0.20)] transition-all hover:bg-[#EF4F5F]"
+              className="flex-1 rounded-xl bg-[#E23744] py-4 font-bold text-white shadow-[0_10px_24px_rgba(226, 55, 68,0.20)] transition-all hover:bg-[#E23744]"
             >
               Save
             </button>

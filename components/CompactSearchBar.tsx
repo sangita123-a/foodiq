@@ -44,7 +44,7 @@ export default function CompactSearchBar() {
       {/* Right Section: Search Button */}
       <button 
         type="submit"
-        className="h-[52px] w-[140px] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-bold rounded-[14px] transition-all hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(252,128,25,0.3)] shrink-0 mr-1.5"
+        className="h-[52px] w-[140px] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-bold rounded-[14px] transition-all hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(226, 55, 68,0.3)] shrink-0 mr-1.5"
       >
         Search
       </button>

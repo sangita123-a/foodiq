@@ -170,7 +170,7 @@ function TrackOrderContent() {
           {location.eta_minutes != null && (
             <div className="rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF]">ETA</p>
-              <p className="text-lg font-black text-[#FC8019]">{location.eta_minutes} min</p>
+              <p className="text-lg font-black text-[#E23744]">{location.eta_minutes} min</p>
             </div>
           )}
         </div>

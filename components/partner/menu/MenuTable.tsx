@@ -123,14 +123,14 @@ export default function MenuTable({
               placeholder="Search dishes..." 
               value={search}
               onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-              className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors"
+              className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors"
             />
           </div>
           
           <select 
             value={categoryFilter}
             onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
-            className="w-full md:w-auto bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors appearance-none cursor-pointer"
+            className="w-full md:w-auto bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors appearance-none cursor-pointer"
           >
             <option value="All">All Categories</option>
             {categoryOptions.map((c) => (
@@ -141,7 +141,7 @@ export default function MenuTable({
           <select 
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            className="w-full md:w-auto bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors appearance-none cursor-pointer"
+            className="w-full md:w-auto bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors appearance-none cursor-pointer"
           >
             <option value="All">All Statuses</option>
             <option value="Available">Available</option>
@@ -152,7 +152,7 @@ export default function MenuTable({
 
         <Link
           href="/partner/menu/add-dish"
-          className="w-full xl:w-auto bg-[#FC8019] hover:bg-[#E66F0D] text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-lg flex items-center justify-center gap-2 flex-shrink-0"
+          className="w-full xl:w-auto bg-[#E23744] hover:bg-[#C81E34] text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-lg flex items-center justify-center gap-2 flex-shrink-0"
         >
           <PlusCircle className="w-5 h-5" /> Add New Dish
         </Link>
@@ -165,9 +165,9 @@ export default function MenuTable({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="bg-[#FC8019]/10 border-b border-[#FC8019]/20 px-6 py-3 flex items-center justify-between overflow-hidden"
+            className="bg-[#E23744]/10 border-b border-[#E23744]/20 px-6 py-3 flex items-center justify-between overflow-hidden"
           >
-            <span className="text-[#FC8019] font-bold text-sm">
+            <span className="text-[#E23744] font-bold text-sm">
               {selectedIds.size} {selectedIds.size === 1 ? 'dish' : 'dishes'} selected
             </span>
             <div className="flex items-center gap-2">
@@ -188,7 +188,7 @@ export default function MenuTable({
                   type="checkbox" 
                   checked={paginatedDishes.length > 0 && selectedIds.size === paginatedDishes.length}
                   onChange={handleSelectAll}
-                  className="w-4 h-4 rounded border-[#E5E7EB] bg-transparent text-[#FC8019] focus:ring-[#FC8019] focus:ring-offset-[#FFFFFF]"
+                  className="w-4 h-4 rounded border-[#E5E7EB] bg-transparent text-[#E23744] focus:ring-[#E23744] focus:ring-offset-[#FFFFFF]"
                 />
               </th>
               <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">Dish</th>
@@ -209,14 +209,14 @@ export default function MenuTable({
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                   key={dish.id} 
-                  className={`border-b border-[#E5E7EB] group transition-colors ${selectedIds.has(dish.id) ? 'bg-[#FC8019]/5' : 'hover:bg-[#F8FAFC]'}`}
+                  className={`border-b border-[#E5E7EB] group transition-colors ${selectedIds.has(dish.id) ? 'bg-[#E23744]/5' : 'hover:bg-[#F8FAFC]'}`}
                 >
                   <td className="p-4 pl-6">
                     <input 
                       type="checkbox" 
                       checked={selectedIds.has(dish.id)}
                       onChange={() => handleSelectRow(dish.id)}
-                      className="w-4 h-4 rounded border-[#E5E7EB] bg-transparent text-[#FC8019] focus:ring-[#FC8019] focus:ring-offset-[#FFFFFF]"
+                      className="w-4 h-4 rounded border-[#E5E7EB] bg-transparent text-[#E23744] focus:ring-[#E23744] focus:ring-offset-[#FFFFFF]"
                     />
                   </td>
                   <td className="p-4">
@@ -265,7 +265,7 @@ export default function MenuTable({
                       <Link href={`/partner/menu/add-dish?edit=${dish.id}`} className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:text-[#111827] transition-colors" title="View">
                         <Eye className="w-4 h-4" />
                       </Link>
-                      <Link href={`/partner/menu/add-dish?edit=${dish.id}`} className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-[#FC8019]/20 border border-[#E5E7EB] hover:border-[#FC8019]/30 flex items-center justify-center text-[#6B7280] hover:text-[#FC8019] transition-colors" title="Edit">
+                      <Link href={`/partner/menu/add-dish?edit=${dish.id}`} className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-[#E23744]/20 border border-[#E5E7EB] hover:border-[#E23744]/30 flex items-center justify-center text-[#6B7280] hover:text-[#E23744] transition-colors" title="Edit">
                         <Edit2 className="w-4 h-4" />
                       </Link>
                       <button type="button" className="w-8 h-8 rounded-lg bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:text-[#111827] transition-colors" title="Duplicate">

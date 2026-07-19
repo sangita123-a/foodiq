@@ -97,7 +97,7 @@ export default function AdminMonitoringPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-black text-[#111827] flex items-center gap-2">
-              <Activity className="w-6 h-6 text-[#FC8019]" /> Monitoring & Security
+              <Activity className="w-6 h-6 text-[#E23744]" /> Monitoring & Security
             </h1>
             <p className="text-sm text-[#6B7280] mt-1">
               Server health, audits, errors, logs, and backups
@@ -127,7 +127,7 @@ export default function AdminMonitoringPage() {
               type="button"
               onClick={() => setTab(id)}
               className={`px-4 py-2 rounded-xl text-sm font-bold ${
-                tab === id ? "bg-[#FC8019] text-white" : "bg-white border border-[#E5E7EB] text-[#111827]"
+                tab === id ? "bg-[#E23744] text-white" : "bg-white border border-[#E5E7EB] text-[#111827]"
               }`}
             >
               {label}
@@ -156,7 +156,7 @@ export default function AdminMonitoringPage() {
                   ].map((c) => (
                     <div key={c.label} className="bg-white border border-[#E5E7EB] rounded-2xl p-4">
                       <div className="flex items-center gap-2 text-[#6B7280] text-xs font-bold uppercase mb-2">
-                        <c.icon className="w-4 h-4 text-[#FC8019]" /> {c.label}
+                        <c.icon className="w-4 h-4 text-[#E23744]" /> {c.label}
                       </div>
                       <div className="text-2xl font-black text-[#111827]">{c.value}</div>
                     </div>
@@ -166,7 +166,7 @@ export default function AdminMonitoringPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 space-y-3">
                     <h3 className="font-bold text-[#111827] flex items-center gap-2">
-                      <Server className="w-4 h-4 text-[#FC8019]" /> Server Health
+                      <Server className="w-4 h-4 text-[#E23744]" /> Server Health
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       <StatusPill ok={data.status === "healthy"} label={data.status} />
@@ -197,7 +197,7 @@ export default function AdminMonitoringPage() {
 
                   <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
                     <h3 className="font-bold text-[#111827] mb-3 flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-[#FC8019]" /> Alerts
+                      <AlertTriangle className="w-4 h-4 text-[#E23744]" /> Alerts
                     </h3>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                       {(data.alerts || []).length === 0 && (
@@ -218,7 +218,7 @@ export default function AdminMonitoringPage() {
                           {a.status === "open" && (
                             <button
                               type="button"
-                              className="text-xs font-bold text-[#FC8019]"
+                              className="text-xs font-bold text-[#E23744]"
                               onClick={async () => {
                                 await ackAlert(a.id);
                                 loadOverview();
@@ -371,7 +371,7 @@ export default function AdminMonitoringPage() {
                   type="button"
                   onClick={() => setSelectedLog(f.name)}
                   className={`w-full text-left text-xs px-3 py-2 rounded-lg ${
-                    selectedLog === f.name ? "bg-[#FC8019]/10 font-bold" : "hover:bg-[#F8FAFC]"
+                    selectedLog === f.name ? "bg-[#E23744]/10 font-bold" : "hover:bg-[#F8FAFC]"
                   }`}
                 >
                   {f.name}
@@ -397,7 +397,7 @@ export default function AdminMonitoringPage() {
               {(backups?.health || []).map((h: any) => (
                 <div key={h.type} className="bg-white border border-[#E5E7EB] rounded-2xl p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Database className="w-4 h-4 text-[#FC8019]" />
+                    <Database className="w-4 h-4 text-[#E23744]" />
                     <span className="font-bold capitalize">{h.type}</span>
                   </div>
                   <StatusPill ok={!h.stale} label={h.stale ? "Stale / failed" : "Healthy"} />

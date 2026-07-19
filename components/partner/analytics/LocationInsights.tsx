@@ -13,7 +13,7 @@ export default function LocationInsights({ data }: LocationInsightsProps) {
     <div className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-xl flex flex-col h-full">
       <div className="flex items-center justify-between mb-8">
         <h3 className="text-xl font-black text-[#111827] flex items-center gap-2">
-          <MapPin className="w-6 h-6 text-orange-500" /> Location Insights
+          <MapPin className="w-6 h-6 text-[#E23744]" /> Location Insights
         </h3>
       </div>
 
@@ -33,7 +33,7 @@ export default function LocationInsights({ data }: LocationInsightsProps) {
           <motion.div 
             animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0.7, 0.4] }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute bottom-1/4 right-1/3 w-32 h-32 bg-orange-500/40 blur-xl rounded-full"
+            className="absolute bottom-1/4 right-1/3 w-32 h-32 bg-[#E23744]/40 blur-xl rounded-full"
           />
           <motion.div 
             animate={{ scale: [1, 1.1, 1], opacity: [0.6, 0.9, 0.6] }}
@@ -42,7 +42,7 @@ export default function LocationInsights({ data }: LocationInsightsProps) {
           />
 
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity">
-            <span className="bg-[#FC8019] px-4 py-2 rounded-xl text-white font-bold text-sm">Interactive Map Coming Soon</span>
+            <span className="bg-[#E23744] px-4 py-2 rounded-xl text-white font-bold text-sm">Interactive Map Coming Soon</span>
           </div>
         </div>
 
@@ -65,7 +65,7 @@ export default function LocationInsights({ data }: LocationInsightsProps) {
                   initial={{ width: 0 }}
                   animate={{ width: `${loc.percentage}%` }}
                   transition={{ duration: 1, delay: 0.5 + (idx * 0.1) }}
-                  className="h-full bg-orange-500 rounded-full"
+                  className="h-full bg-[#E23744] rounded-full"
                 />
               </div>
             </motion.div>

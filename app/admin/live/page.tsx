@@ -78,7 +78,7 @@ export default function AdminLivePage() {
           <div key={c.label} className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF]">{c.label}</p>
-              <c.icon className="w-4 h-4 text-[#FC8019]" />
+              <c.icon className="w-4 h-4 text-[#E23744]" />
             </div>
             <p className="text-2xl font-black text-[#111827]">{c.value}</p>
             <p className="text-xs text-[#6B7280] mt-1">{c.hint}</p>
@@ -89,7 +89,7 @@ export default function AdminLivePage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <section className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
           <h2 className="text-lg font-black text-[#111827] mb-4 flex items-center gap-2">
-            <Radio className="w-4 h-4 text-[#FC8019]" />
+            <Radio className="w-4 h-4 text-[#E23744]" />
             Live Event Feed
           </h2>
           <div className="space-y-2 max-h-[420px] overflow-y-auto">

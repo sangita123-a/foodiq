@@ -42,7 +42,7 @@ export default function DeliveryOrdersPage() {
                       #{order.id.slice(0, 8)} · {formatCurrency(order.delivery_fee)} fee
                     </p>
                   </div>
-                  <span className="text-xs font-bold h-fit px-2 py-1 rounded-lg bg-[#FC8019]/10 text-[#FC8019]">
+                  <span className="text-xs font-bold h-fit px-2 py-1 rounded-lg bg-[#E23744]/10 text-[#E23744]">
                     {STATUS_LABELS[order.assignment_status || ""] || order.assignment_status}
                   </span>
                 </div>
@@ -71,7 +71,7 @@ export default function DeliveryOrdersPage() {
                       await acceptDeliveryOrder(order.id);
                       refresh();
                     }}
-                    className="flex-1 bg-[#FC8019] text-white text-sm font-bold py-2 rounded-lg"
+                    className="flex-1 bg-[#E23744] text-white text-sm font-bold py-2 rounded-lg"
                   >
                     Accept
                   </button>
@@ -87,7 +87,7 @@ export default function DeliveryOrdersPage() {
                   </button>
                   <Link
                     href={`/delivery/orders/${order.id}`}
-                    className="px-3 py-2 text-sm font-bold text-[#FC8019] border border-[#FC8019]/30 rounded-lg"
+                    className="px-3 py-2 text-sm font-bold text-[#E23744] border border-[#E23744]/30 rounded-lg"
                   >
                     View
                   </Link>

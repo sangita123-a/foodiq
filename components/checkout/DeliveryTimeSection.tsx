@@ -34,7 +34,7 @@ export default function DeliveryTimeSection({
           onClick={() => onModeChange("Now")}
           className={`flex-1 py-3 rounded-xl font-bold transition-colors ${
             mode === "Now" 
-            ? 'bg-primary text-white shadow-[0_8px_18px_rgba(252,128,25,0.18)]' 
+            ? 'bg-primary text-white shadow-[0_8px_18px_rgba(226, 55, 68,0.18)]' 
             : 'border border-[#ECECEC] bg-[#F8F9FA] text-[#686B78] hover:bg-white'
           }`}
         >
@@ -44,7 +44,7 @@ export default function DeliveryTimeSection({
           onClick={() => onModeChange("Schedule")}
           className={`flex-1 py-3 rounded-xl font-bold transition-colors ${
             mode === "Schedule" 
-            ? 'bg-primary text-white shadow-[0_8px_18px_rgba(252,128,25,0.18)]' 
+            ? 'bg-primary text-white shadow-[0_8px_18px_rgba(226, 55, 68,0.18)]' 
             : 'border border-[#ECECEC] bg-[#F8F9FA] text-[#686B78] hover:bg-white'
           }`}
         >

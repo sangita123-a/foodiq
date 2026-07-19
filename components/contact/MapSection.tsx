@@ -19,7 +19,7 @@ export default function MapSection() {
         {/* Map Marker Pin */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
           <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center animate-pulse">
-            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(252,128,25,0.8)]">
+            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(226, 55, 68,0.8)]">
               <MapPin className="w-6 h-6 text-[#111827]" />
             </div>
           </div>

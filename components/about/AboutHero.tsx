@@ -42,7 +42,7 @@ export default function AboutHero() {
         >
           <Link 
             href="/"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#FC8019] px-8 py-4 font-bold text-white shadow-[0_12px_30px_rgba(252,128,25,0.22)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#EF4F5F] hover:shadow-[0_16px_34px_rgba(239,79,95,0.22)]"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#E23744] px-8 py-4 font-bold text-white shadow-[0_12px_30px_rgba(226, 55, 68,0.22)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#E23744] hover:shadow-[0_16px_34px_rgba(239,79,95,0.22)]"
           >
             Explore Restaurants <ArrowRight className="w-5 h-5" />
           </Link>

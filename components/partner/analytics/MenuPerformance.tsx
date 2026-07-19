@@ -46,7 +46,7 @@ export default function MenuPerformance({ data }: MenuPerformanceProps) {
     <div className="mb-8">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-black text-[#111827] flex items-center gap-2">
-          <Utensils className="w-6 h-6 text-orange-500" /> Menu Performance
+          <Utensils className="w-6 h-6 text-[#E23744]" /> Menu Performance
         </h3>
       </div>
 

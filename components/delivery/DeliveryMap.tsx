@@ -36,7 +36,7 @@ export default function DeliveryMap({
             </span>
           )}
           {durationMin != null && (
-            <span className="px-3 py-1 rounded-lg bg-[#FC8019]/10 text-[#FC8019] border border-[#FC8019]/20">
+            <span className="px-3 py-1 rounded-lg bg-[#E23744]/10 text-[#E23744] border border-[#E23744]/20">
               ~{durationMin} min
             </span>
           )}
@@ -45,7 +45,7 @@ export default function DeliveryMap({
               href={directionsUrl}
               target="_blank"
               rel="noreferrer"
-              className="px-3 py-1 rounded-lg bg-[#FC8019] text-white hover:bg-[#E66F0D]"
+              className="px-3 py-1 rounded-lg bg-[#E23744] text-white hover:bg-[#C81E34]"
             >
               Navigate
             </a>

@@ -190,7 +190,7 @@ export default function NotificationsPage() {
               r.ok ? "success" : "error"
             );
           }}
-          className="mb-8 text-sm font-bold text-[#FC8019] hover:underline"
+          className="mb-8 text-sm font-bold text-[#E23744] hover:underline"
         >
           Enable browser push notifications
         </button>

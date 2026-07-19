@@ -10,7 +10,7 @@ export default function AppBanner() {
         {/* Abstract Background Shapes */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/20 rounded-full blur-3xl opacity-50"></div>
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-orange-200/30 rounded-full blur-3xl opacity-50"></div>
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#E23744]/10/30 rounded-full blur-3xl opacity-50"></div>
         </div>
 
         <div className="flex flex-col md:flex-row items-center relative z-10">
@@ -24,7 +24,7 @@ export default function AppBanner() {
             
             <div className="flex flex-wrap justify-center md:justify-start gap-4">
               {/* App Store Button */}
-              <button className="flex items-center gap-3 bg-white text-[#1C1C1C] border border-[#ECECEC] px-6 py-3.5 rounded-xl shadow-sm hover:border-[#FC8019]/30 hover:-translate-y-0.5 transition-all duration-300">
+              <button className="flex items-center gap-3 bg-white text-[#1C1C1C] border border-[#ECECEC] px-6 py-3.5 rounded-xl shadow-sm hover:border-[#E23744]/30 hover:-translate-y-0.5 transition-all duration-300">
                 <Apple className="w-8 h-8" />
                 <div className="text-left flex flex-col justify-center">
                   <span className="text-[10px] leading-none mb-1 font-medium">Download on the</span>
@@ -33,7 +33,7 @@ export default function AppBanner() {
               </button>
               
               {/* Google Play Button */}
-              <button className="flex items-center gap-3 bg-white text-[#1C1C1C] border border-[#ECECEC] px-6 py-3.5 rounded-xl shadow-sm hover:border-[#FC8019]/30 hover:-translate-y-0.5 transition-all duration-300">
+              <button className="flex items-center gap-3 bg-white text-[#1C1C1C] border border-[#ECECEC] px-6 py-3.5 rounded-xl shadow-sm hover:border-[#E23744]/30 hover:-translate-y-0.5 transition-all duration-300">
                 <Play className="w-7 h-7 fill-[#111827]" />
                 <div className="text-left flex flex-col justify-center">
                   <span className="text-[10px] leading-none mb-1 text-[#6B7280]">GET IT ON</span>

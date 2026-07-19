@@ -66,7 +66,7 @@ export default function SearchBar() {
     <div ref={wrapRef} className="relative w-full max-w-[900px]">
       <form
         onSubmit={handleSearch}
-        className="w-full h-[60px] sm:h-[66px] bg-white/95 backdrop-blur-md border border-[#ECECEC] rounded-[18px] flex items-center shadow-[0_18px_50px_rgba(28,28,28,0.14)] overflow-hidden relative transition-shadow focus-within:border-[#FC8019]/40 focus-within:shadow-[0_20px_55px_rgba(252,128,25,0.16)]"
+        className="w-full h-[60px] sm:h-[66px] bg-white/95 backdrop-blur-md border border-[#ECECEC] rounded-[18px] flex items-center shadow-[0_18px_50px_rgba(28,28,28,0.14)] overflow-hidden relative transition-shadow focus-within:border-[#E23744]/40 focus-within:shadow-[0_20px_55px_rgba(226, 55, 68,0.16)]"
       >
         <div className="hidden sm:flex items-center h-full px-4 border-r border-[#ECECEC] w-[210px] shrink-0 text-[#1C1C1C] cursor-pointer hover:bg-[#F8F9FA] rounded-l-[18px] transition-colors">
           <MapPin className="text-[var(--color-primary)] w-4 h-4 mr-2.5 shrink-0" />
@@ -109,7 +109,7 @@ export default function SearchBar() {
 
         <button
           type="submit"
-          className="h-[50px] sm:h-[56px] w-[92px] sm:w-[170px] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold rounded-xl transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-[0_7px_18px_rgba(252,128,25,0.28)] shrink-0 mr-1"
+          className="h-[50px] sm:h-[56px] w-[92px] sm:w-[170px] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold rounded-xl transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-[0_7px_18px_rgba(226, 55, 68,0.28)] shrink-0 mr-1"
         >
           Search
         </button>

@@ -101,7 +101,7 @@ export default function AdminPaymentsPage() {
             type="button"
             disabled={busy || !refundOrderId}
             onClick={handleRefund}
-            className="bg-[#FC8019] text-white font-bold rounded-xl px-4 py-3 disabled:opacity-60"
+            className="bg-[#E23744] text-white font-bold rounded-xl px-4 py-3 disabled:opacity-60"
           >
             {busy ? "Processing..." : "Refund"}
           </button>

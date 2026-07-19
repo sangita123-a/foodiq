@@ -73,7 +73,7 @@ export default function AdminMediaPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-black text-[#111827] flex items-center gap-2">
-              <Images className="w-6 h-6 text-[#FC8019]" /> Media Library
+              <Images className="w-6 h-6 text-[#E23744]" /> Media Library
             </h1>
             <p className="text-sm text-[#6B7280] mt-1">
               Provider: <span className="font-bold text-[#111827]">{info?.provider || "…"}</span>
@@ -146,7 +146,7 @@ export default function AdminMediaPage() {
           <button
             type="button"
             onClick={load}
-            className="px-5 py-2.5 rounded-xl bg-[#FC8019] text-white font-bold text-sm"
+            className="px-5 py-2.5 rounded-xl bg-[#E23744] text-white font-bold text-sm"
           >
             Filter
           </button>
@@ -174,7 +174,7 @@ export default function AdminMediaPage() {
                 <div
                   key={item.id}
                   className={`rounded-2xl border overflow-hidden bg-white ${
-                    selected.has(item.id) ? "border-[#FC8019] ring-2 ring-[#FC8019]/30" : "border-[#E5E7EB]"
+                    selected.has(item.id) ? "border-[#E23744] ring-2 ring-[#E23744]/30" : "border-[#E5E7EB]"
                   }`}
                 >
                   <button

@@ -24,7 +24,7 @@ export default function NotificationPreferencesPage() {
           <button
             type="submit"
             form="settings-form"
-            className="bg-primary hover:bg-[#E76F0B] text-white px-8 py-3 rounded-xl font-bold transition-colors"
+            className="bg-primary hover:bg-[#C81E34] text-white px-8 py-3 rounded-xl font-bold transition-colors"
           >
             Save Changes
           </button>

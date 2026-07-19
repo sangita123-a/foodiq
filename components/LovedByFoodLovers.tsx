@@ -148,9 +148,9 @@ export default function LovedByFoodLovers() {
                 className="flex-shrink-0"
                 style={{ width: `calc(${100 / cardsToShow}% - ${(6 * (cardsToShow - 1)) / cardsToShow}rem)` }}
               >
-                <div className="bg-white rounded-[20px] p-8 h-full border border-[#ECECEC] shadow-[0_8px_28px_rgba(28,28,28,0.06)] relative group hover:-translate-y-1 hover:border-[#FC8019]/25 hover:shadow-[0_18px_42px_rgba(28,28,28,0.1)] transition-all duration-300">
+                <div className="bg-white rounded-[20px] p-8 h-full border border-[#ECECEC] shadow-[0_8px_28px_rgba(28,28,28,0.06)] relative group hover:-translate-y-1 hover:border-[#E23744]/25 hover:shadow-[0_18px_42px_rgba(28,28,28,0.1)] transition-all duration-300">
                   {/* Background Quote Icon */}
-                  <Quote className="absolute top-6 right-6 w-16 h-16 text-[#FC8019]/10 group-hover:text-[#FC8019]/20 transition-colors duration-300 pointer-events-none" />
+                  <Quote className="absolute top-6 right-6 w-16 h-16 text-[#E23744]/10 group-hover:text-[#E23744]/20 transition-colors duration-300 pointer-events-none" />
 
                   {/* Header: Rating & Profile */}
                   <div className="flex justify-between items-start mb-6 relative z-10">
@@ -216,7 +216,7 @@ export default function LovedByFoodLovers() {
               onClick={() => setCurrentIndex(idx)}
               className={`h-2 rounded-full transition-all duration-300 ${
                 currentIndex === idx 
-                ? 'w-8 bg-[#FC8019]' 
+                ? 'w-8 bg-[#E23744]' 
                 : 'w-2 bg-[#D1D5DB] hover:bg-[#9CA3AF]'
               }`}
               aria-label={`Go to slide ${idx + 1}`}

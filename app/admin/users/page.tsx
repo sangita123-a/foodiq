@@ -73,7 +73,7 @@ export default function AdminUsersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name, email, phone…"
-            className="bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FC8019]"
+            className="bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#E23744]"
           />
           <select
             value={suspended}
@@ -119,7 +119,7 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="p-4 text-right space-x-2">
                     <button type="button" onClick={() => viewOrders(u)} className="text-xs font-bold text-[#111827]">Orders</button>
-                    <button type="button" onClick={() => toggleSuspend(u)} className="text-xs font-bold text-[#FC8019]">
+                    <button type="button" onClick={() => toggleSuspend(u)} className="text-xs font-bold text-[#E23744]">
                       {u.is_suspended ? "Activate" : "Suspend"}
                     </button>
                     <button type="button" onClick={() => remove(u.id)} className="text-xs font-bold text-red-500">Delete</button>
@@ -141,7 +141,7 @@ export default function AdminUsersPage() {
               {orders.map((o) => (
                 <div key={o.id} className="border border-[#E5E7EB] rounded-xl p-3 flex justify-between">
                   <div>
-                    <p className="font-mono text-xs text-[#FC8019]">#{String(o.id).slice(0, 8)}</p>
+                    <p className="font-mono text-xs text-[#E23744]">#{String(o.id).slice(0, 8)}</p>
                     <p className="text-sm font-bold">{o.restaurant_name}</p>
                     <p className="text-xs text-[#6B7280]">{formatDate(o.created_at)}</p>
                   </div>

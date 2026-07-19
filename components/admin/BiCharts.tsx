@@ -8,7 +8,7 @@ type Point = { label: string; value: number };
 export function BiBarChart({
   data,
   height = 160,
-  color = "#FC8019",
+  color = "#E23744",
 }: {
   data: Point[];
   height?: number;
@@ -57,7 +57,7 @@ export function BiBarChart({
 export function BiLineChart({
   data,
   height = 160,
-  color = "#FC8019",
+  color = "#E23744",
 }: {
   data: Point[];
   height?: number;

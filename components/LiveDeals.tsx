@@ -324,7 +324,7 @@ export default function LiveDeals() {
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, ease: "easeOut", delay: index * 0.1 }}
                 whileHover={{ y: -5, scale: 1.025 }}
-                className="group flex h-full w-full min-w-0 flex-col overflow-hidden rounded-[16px] border border-[#E5E7EB] bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow] duration-300 hover:border-[#FC8019]/40 hover:shadow-[0_18px_40px_rgba(15,23,42,0.1),0_8px_24px_rgba(252,128,25,0.1)]"
+                className="group flex h-full w-full min-w-0 flex-col overflow-hidden rounded-[16px] border border-[#E5E7EB] bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow] duration-300 hover:border-[#E23744]/40 hover:shadow-[0_18px_40px_rgba(15,23,42,0.1),0_8px_24px_rgba(226, 55, 68,0.1)]"
               >
                 <div className="relative h-[120px] w-full shrink-0 overflow-hidden rounded-t-[16px] bg-[#F8FAFC]">
                   <SafeImage
@@ -351,7 +351,7 @@ export default function LiveDeals() {
                     </h3>
                   </div>
 
-                  <div className="mb-2 inline-flex w-fit max-w-full items-center rounded-md bg-[#FC8019]/10 px-2 py-1 text-[10px] font-bold leading-4 text-[#FC8019] ring-1 ring-inset ring-[#FC8019]/25">
+                  <div className="mb-2 inline-flex w-fit max-w-full items-center rounded-md bg-[#E23744]/10 px-2 py-1 text-[10px] font-bold leading-4 text-[#E23744] ring-1 ring-inset ring-[#E23744]/25">
                     <span className="truncate">{deal.offer}</span>
                   </div>
 
@@ -392,7 +392,7 @@ export default function LiveDeals() {
                     ) : orderHref ? (
                       <Link
                         href={orderHref}
-                        className="flex h-8 w-full items-center justify-center rounded-lg bg-[#FC8019] px-3 text-[11px] font-bold text-white shadow-[0_5px_14px_rgba(252,128,25,0.2)] transition-all duration-200 hover:bg-[#E76F0B] hover:shadow-[0_7px_18px_rgba(252,128,25,0.3)]"
+                        className="flex h-8 w-full items-center justify-center rounded-lg bg-[#E23744] px-3 text-[11px] font-bold text-white shadow-[0_5px_14px_rgba(226, 55, 68,0.2)] transition-all duration-200 hover:bg-[#C81E34] hover:shadow-[0_7px_18px_rgba(226, 55, 68,0.3)]"
                       >
                         Order Now
                       </Link>

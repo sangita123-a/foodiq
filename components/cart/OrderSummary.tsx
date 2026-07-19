@@ -90,7 +90,7 @@ export default function OrderSummary({
                 setCouponCode(e.target.value);
                 setCouponError("");
               }}
-              className="w-full bg-[#FFFFFF] text-[#111827] border border-[#E5E7EB] rounded-xl py-2.5 pl-9 pr-3 text-sm focus:outline-none focus:border-[#FC8019]/50 transition-colors uppercase"
+              className="w-full bg-[#FFFFFF] text-[#111827] border border-[#E5E7EB] rounded-xl py-2.5 pl-9 pr-3 text-sm focus:outline-none focus:border-[#E23744]/50 transition-colors uppercase"
             />
           </div>
           <button
@@ -105,12 +105,12 @@ export default function OrderSummary({
 
       <div className="flex justify-between items-center mb-8">
         <span className="text-lg text-white font-bold">Grand Total</span>
-        <span className="text-2xl font-black text-[#FC8019]">₹{grandTotal}</span>
+        <span className="text-2xl font-black text-[#E23744]">₹{grandTotal}</span>
       </div>
 
       <Link
         href="/checkout"
-        className="w-full bg-[#FC8019] hover:bg-[#E76F0B] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(252,128,25,0.4)] hover:-translate-y-1 transition-all duration-300"
+        className="w-full bg-[#E23744] hover:bg-[#C81E34] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(226, 55, 68,0.4)] hover:-translate-y-1 transition-all duration-300"
       >
         Proceed to Checkout
         <ArrowRight className="w-5 h-5" />

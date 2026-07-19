@@ -82,8 +82,8 @@ export default function CreateOfferModal({ isOpen, onClose, onSave }: CreateOffe
             {/* Header */}
             <div className="p-6 border-b border-[#E5E7EB] flex items-center justify-between bg-[#F8FAFC]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FC8019]/20 flex items-center justify-center border border-[#FC8019]/30">
-                  <Tag className="w-5 h-5 text-[#FC8019]" />
+                <div className="w-10 h-10 rounded-xl bg-[#E23744]/20 flex items-center justify-center border border-[#E23744]/30">
+                  <Tag className="w-5 h-5 text-[#E23744]" />
                 </div>
                 <div>
                   <h2 className="text-xl font-black text-[#111827]">Create New Offer</h2>
@@ -112,7 +112,7 @@ export default function CreateOfferModal({ isOpen, onClose, onSave }: CreateOffe
                       value={formData.name}
                       onChange={e => setFormData({...formData, name: e.target.value})}
                       placeholder="e.g. Summer Special 20%"
-                      className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+                      className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
                     />
                   </div>
                   <div>
@@ -123,7 +123,7 @@ export default function CreateOfferModal({ isOpen, onClose, onSave }: CreateOffe
                       value={formData.code}
                       onChange={e => setFormData({...formData, code: e.target.value})}
                       placeholder="e.g. SUMMER20"
-                      className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm uppercase placeholder:normal-case font-bold tracking-widest"
+                      className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm uppercase placeholder:normal-case font-bold tracking-widest"
                     />
                   </div>
                 </div>
@@ -135,7 +135,7 @@ export default function CreateOfferModal({ isOpen, onClose, onSave }: CreateOffe
                     <select 
                       value={formData.type}
                       onChange={e => setFormData({...formData, type: e.target.value as DiscountType})}
-                      className="w-full bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors appearance-none text-sm cursor-pointer"
+                      className="w-full bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors appearance-none text-sm cursor-pointer"
                     >
                       <option value="Percentage Discount">Percentage (%)</option>
                       <option value="Flat Discount">Flat Amount (₹)</option>
@@ -149,7 +149,7 @@ export default function CreateOfferModal({ isOpen, onClose, onSave }: CreateOffe
                       type="number" 
                       value={formData.value}
                       onChange={e => setFormData({...formData, value: Number(e.target.value)})}
-                      className="w-full bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+                      className="w-full bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
                       disabled={formData.type === 'Free Delivery' || formData.type === 'Buy One Get One (BOGO)'}
                     />
                   </div>
@@ -159,7 +159,7 @@ export default function CreateOfferModal({ isOpen, onClose, onSave }: CreateOffe
                       type="number" 
                       value={formData.minOrderValue}
                       onChange={e => setFormData({...formData, minOrderValue: Number(e.target.value)})}
-                      className="w-full bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+                      className="w-full bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
                     />
                   </div>
                 </div>
@@ -172,7 +172,7 @@ export default function CreateOfferModal({ isOpen, onClose, onSave }: CreateOffe
                       type="number" 
                       value={formData.usageLimit}
                       onChange={e => setFormData({...formData, usageLimit: Number(e.target.value)})}
-                      className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+                      className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
                     />
                   </div>
                   <div>
@@ -181,7 +181,7 @@ export default function CreateOfferModal({ isOpen, onClose, onSave }: CreateOffe
                       type="date" 
                       value={formData.startDate}
                       onChange={e => setFormData({...formData, startDate: e.target.value})}
-                      className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm cursor-pointer"
+                      className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm cursor-pointer"
                     />
                   </div>
                   <div>
@@ -190,7 +190,7 @@ export default function CreateOfferModal({ isOpen, onClose, onSave }: CreateOffe
                       type="date" 
                       value={formData.endDate}
                       onChange={e => setFormData({...formData, endDate: e.target.value})}
-                      className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm cursor-pointer"
+                      className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm cursor-pointer"
                     />
                   </div>
                 </div>
@@ -203,7 +203,7 @@ export default function CreateOfferModal({ isOpen, onClose, onSave }: CreateOffe
                     onChange={e => setFormData({...formData, description: e.target.value})}
                     placeholder="Enter offer terms and conditions..."
                     rows={3}
-                    className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm resize-none"
+                    className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm resize-none"
                   />
                 </div>
 
@@ -221,7 +221,7 @@ export default function CreateOfferModal({ isOpen, onClose, onSave }: CreateOffe
               <button 
                 type="submit"
                 form="offerForm"
-                className="px-8 py-3 bg-[#FC8019] hover:bg-[#E66F0D] text-white rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg shadow-[#FC8019]/20"
+                className="px-8 py-3 bg-[#E23744] hover:bg-[#C81E34] text-white rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg shadow-[#E23744]/20"
               >
                 <Save className="w-4 h-4" /> Save Offer
               </button>

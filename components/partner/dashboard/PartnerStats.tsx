@@ -58,7 +58,7 @@ export default function PartnerStats({
     { title: "Today's Revenue", value: todaysRevenue, prefix: "₹", icon: DollarSign, color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20" },
     { title: "Pending Orders", value: pendingOrders, icon: Clock, color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20" },
     { title: "Completed Orders", value: completedOrders, icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20" },
-    { title: "Active Menu Items", value: activeMenuItems, icon: UtensilsCrossed, color: "text-[#FC8019]", bg: "bg-[#FC8019]/10", border: "border-[#FC8019]/20" },
+    { title: "Active Menu Items", value: activeMenuItems, icon: UtensilsCrossed, color: "text-[#E23744]", bg: "bg-[#E23744]/10", border: "border-[#E23744]/20" },
   ];
 
   return (

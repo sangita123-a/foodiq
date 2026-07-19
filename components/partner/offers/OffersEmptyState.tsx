@@ -17,7 +17,7 @@ export default function OffersEmptyState({ onCreateNew }: OffersEmptyStateProps)
       <div className="w-24 h-24 bg-[#F8FAFC] rounded-full flex items-center justify-center mb-6 border border-[#E5E7EB] relative">
         <Tag className="w-10 h-10 text-[#9CA3AF]" />
         {/* Decorative elements */}
-        <div className="absolute top-0 -right-2 w-4 h-4 bg-[#FC8019]/20 rounded-full animate-ping"></div>
+        <div className="absolute top-0 -right-2 w-4 h-4 bg-[#E23744]/20 rounded-full animate-ping"></div>
         <div className="absolute bottom-4 -left-4 w-6 h-6 bg-blue-500/20 rounded-full animate-pulse"></div>
       </div>
       
@@ -28,7 +28,7 @@ export default function OffersEmptyState({ onCreateNew }: OffersEmptyStateProps)
 
       <button 
         onClick={onCreateNew}
-        className="px-6 py-3 bg-[#FC8019] hover:bg-[#E66F0D] text-white rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg shadow-[#FC8019]/20"
+        className="px-6 py-3 bg-[#E23744] hover:bg-[#C81E34] text-white rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg shadow-[#E23744]/20"
       >
         <Plus className="w-4 h-4" />
         Create Your First Offer

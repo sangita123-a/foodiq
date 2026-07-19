@@ -95,7 +95,7 @@ export default function FeaturedCollections() {
           <div className="hidden sm:flex gap-3">
             <button
               onClick={() => scroll("left")}
-              className="food-button w-10 h-10 min-h-0 rounded-full border border-[#E5E7EB] bg-white flex items-center justify-center text-[#111827] hover:bg-[#FC8019] hover:border-[#FC8019] hover:text-[#111827]"
+              className="food-button w-10 h-10 min-h-0 rounded-full border border-[#E5E7EB] bg-white flex items-center justify-center text-[#111827] hover:bg-[#E23744] hover:border-[#E23744] hover:text-[#111827]"
               aria-label="Scroll left"
               type="button"
             >
@@ -103,7 +103,7 @@ export default function FeaturedCollections() {
             </button>
             <button
               onClick={() => scroll("right")}
-              className="food-button w-10 h-10 min-h-0 rounded-full border border-[#E5E7EB] bg-white flex items-center justify-center text-[#111827] hover:bg-[#FC8019] hover:border-[#FC8019] hover:text-[#111827]"
+              className="food-button w-10 h-10 min-h-0 rounded-full border border-[#E5E7EB] bg-white flex items-center justify-center text-[#111827] hover:bg-[#E23744] hover:border-[#E23744] hover:text-[#111827]"
               aria-label="Scroll right"
               type="button"
             >
@@ -158,7 +158,7 @@ export default function FeaturedCollections() {
                         ? `/collections?slug=${collection.slug}`
                         : "/collections"
                     }
-                    className="flex items-center gap-2 text-white font-medium text-sm group-hover/card:text-[#FC8019] transition-colors w-fit"
+                    className="flex items-center gap-2 text-white font-medium text-sm group-hover/card:text-[#E23744] transition-colors w-fit"
                   >
                     Explore Collection
                     <ArrowRight className="w-4 h-4 transform group-hover/card:translate-x-1 transition-transform" />

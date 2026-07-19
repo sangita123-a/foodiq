@@ -96,12 +96,12 @@ export default function CuisineFoodCard({
       </Link>
 
       <div className="food-card-body flex-1 flex flex-col">
-        <Link href={foodHref} className="food-card-title text-[#111827] mb-1 line-clamp-1 hover:text-[#FC8019] transition-colors">
+        <Link href={foodHref} className="food-card-title text-[#111827] mb-1 line-clamp-1 hover:text-[#E23744] transition-colors">
           {item.name}
         </Link>
         <Link
           href={`/restaurant/${item.restaurant_id}`}
-          className="text-[#6B7280] text-sm mb-2 line-clamp-1 hover:text-[#FC8019] transition-colors"
+          className="text-[#6B7280] text-sm mb-2 line-clamp-1 hover:text-[#E23744] transition-colors"
         >
           {item.restaurant_name}
         </Link>
@@ -122,7 +122,7 @@ export default function CuisineFoodCard({
 
         <div className="flex items-center justify-between gap-3 mt-auto mb-4">
           <div className="flex items-baseline gap-2">
-            <span className="food-price text-[#FC8019]">₹{item.discounted_price}</span>
+            <span className="food-price text-[#E23744]">₹{item.discounted_price}</span>
             {hasDiscount && (
               <span className="text-sm text-[#9CA3AF] line-through">₹{item.original_price}</span>
             )}
@@ -132,7 +132,7 @@ export default function CuisineFoodCard({
             <button
               onClick={() => onUpdateQuantity(item.menu_item_id, 1)}
               disabled={isUpdating}
-              className="food-button min-h-0 flex items-center gap-1.5 bg-[#FC8019] hover:bg-[#E76F0B] disabled:opacity-50 text-white px-3 py-2 rounded-xl text-sm font-bold"
+              className="food-button min-h-0 flex items-center gap-1.5 bg-[#E23744] hover:bg-[#C81E34] disabled:opacity-50 text-white px-3 py-2 rounded-xl text-sm font-bold"
             >
               <Plus className="w-4 h-4" />
               Add

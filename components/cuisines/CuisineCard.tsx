@@ -51,7 +51,7 @@ export default function CuisineCard({
           opacity: { duration: 0.4, delay: (index % 6) * 0.04 },
           y: { duration: 0.3, ease: "easeOut" },
         }}
-        className="group flex h-[232px] flex-col items-center overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white px-3.5 py-4 text-center shadow-[0_10px_28px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow,background-color] duration-300 hover:border-[#FC8019]/60 hover:shadow-[0_16px_34px_rgba(15,23,42,0.12),0_8px_24px_rgba(252,128,25,0.12)]"
+        className="group flex h-[232px] flex-col items-center overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white px-3.5 py-4 text-center shadow-[0_10px_28px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow,background-color] duration-300 hover:border-[#E23744]/60 hover:shadow-[0_16px_34px_rgba(15,23,42,0.12),0_8px_24px_rgba(226, 55, 68,0.12)]"
       >
         <div className="relative mb-3 h-[76px] w-[76px] shrink-0 overflow-hidden rounded-full bg-[#F8FAFC] shadow-[0_6px_18px_rgba(0,0,0,0.35)] ring-2 ring-[#E5E7EB]">
           <SafeImage
@@ -62,7 +62,7 @@ export default function CuisineCard({
           />
         </div>
 
-        <h3 className="line-clamp-1 text-base font-bold leading-5 tracking-[-0.02em] text-[#111827] transition-colors duration-300 group-hover:text-[#FC8019]">
+        <h3 className="line-clamp-1 text-base font-bold leading-5 tracking-[-0.02em] text-[#111827] transition-colors duration-300 group-hover:text-[#E23744]">
           {cuisine.name}
         </h3>
         <p className="mt-1 text-xs font-medium text-[#9CA3AF]">
@@ -72,7 +72,7 @@ export default function CuisineCard({
           {cuisine.description || fallbackDescription}
         </p>
 
-        <span className="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-[#6B7280] transition-colors duration-300 group-hover:text-[#FC8019]">
+        <span className="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-[#6B7280] transition-colors duration-300 group-hover:text-[#E23744]">
           Explore
           <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
         </span>

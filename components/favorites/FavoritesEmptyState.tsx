@@ -22,7 +22,7 @@ export default function FavoritesEmptyState() {
 
       <Link 
         href="/"
-        className="bg-primary hover:bg-[#E76F0B] text-white px-8 py-4 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(252,128,25,0.3)] hover:-translate-y-1 block"
+        className="bg-primary hover:bg-[#C81E34] text-white px-8 py-4 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(226, 55, 68,0.3)] hover:-translate-y-1 block"
       >
         Explore Restaurants
       </Link>

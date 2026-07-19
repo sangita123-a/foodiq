@@ -105,7 +105,7 @@ export default function AdminCouponsPage() {
         <label className="flex items-center gap-2 text-sm font-bold text-[#6B7280]">
           <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} /> Active
         </label>
-        <button type="submit" disabled={saving} className="bg-[#FC8019] text-white font-black rounded-xl py-3 disabled:opacity-60">
+        <button type="submit" disabled={saving} className="bg-[#E23744] text-white font-black rounded-xl py-3 disabled:opacity-60">
           {saving ? "Saving…" : editingId ? "Update Coupon" : "Create Coupon"}
         </button>
       </form>
@@ -123,7 +123,7 @@ export default function AdminCouponsPage() {
               </p>
             </div>
             <div className="flex gap-3">
-              <button type="button" onClick={() => edit(c)} className="text-xs font-bold text-[#FC8019]">Edit</button>
+              <button type="button" onClick={() => edit(c)} className="text-xs font-bold text-[#E23744]">Edit</button>
               <button type="button" onClick={() => remove(c.id)} className="text-xs font-bold text-red-500">Delete</button>
             </div>
           </div>

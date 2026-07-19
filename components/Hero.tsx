@@ -129,13 +129,13 @@ export default function Hero() {
           animate={{ 
             y: [0, -10, 0],
             boxShadow: [
-              "0 0 15px rgba(252, 128, 25, 0.35)", 
-              "0 0 25px rgba(252, 128, 25, 0.6)", 
-              "0 0 15px rgba(252, 128, 25, 0.35)"
+              "0 0 15px rgba(226, 55, 68, 0.35)", 
+              "0 0 25px rgba(226, 55, 68, 0.6)", 
+              "0 0 15px rgba(226, 55, 68, 0.35)"
             ]
           }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          whileHover={{ scale: 1.1, boxShadow: "0 0 40px rgba(252, 128, 25, 0.65)" }}
+          whileHover={{ scale: 1.1, boxShadow: "0 0 40px rgba(226, 55, 68, 0.65)" }}
           className="mt-12 sm:mt-16 flex items-center justify-center w-10 h-10 rounded-full bg-white/95 backdrop-blur-md border border-[var(--color-primary)] cursor-pointer z-20 shrink-0"
         >
           <ArrowDown className="text-[var(--color-primary)] w-4 h-4" />

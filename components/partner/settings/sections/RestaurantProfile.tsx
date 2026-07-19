@@ -15,7 +15,7 @@ export default function RestaurantProfile({ data, onChange }: RestaurantProfileP
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-black text-[#111827] flex items-center gap-2 mb-2">
-          <Store className="w-6 h-6 text-[#FC8019]" /> Restaurant Profile
+          <Store className="w-6 h-6 text-[#E23744]" /> Restaurant Profile
         </h2>
         <p className="text-[#6B7280] text-sm mb-6">Manage your public restaurant identity.</p>
       </div>
@@ -64,7 +64,7 @@ export default function RestaurantProfile({ data, onChange }: RestaurantProfileP
             type="text"
             value={data.restaurantName}
             onChange={(e) => onChange({ restaurantName: e.target.value })}
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
           />
         </div>
         <div>
@@ -75,7 +75,7 @@ export default function RestaurantProfile({ data, onChange }: RestaurantProfileP
             type="text"
             value={data.ownerName}
             onChange={(e) => onChange({ ownerName: e.target.value })}
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
           />
         </div>
         <div>
@@ -86,7 +86,7 @@ export default function RestaurantProfile({ data, onChange }: RestaurantProfileP
             type="email"
             value={data.email}
             onChange={(e) => onChange({ email: e.target.value })}
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
           />
         </div>
         <div>
@@ -97,7 +97,7 @@ export default function RestaurantProfile({ data, onChange }: RestaurantProfileP
             type="tel"
             value={data.phone}
             onChange={(e) => onChange({ phone: e.target.value })}
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
           />
         </div>
         <div className="md:col-span-2">
@@ -108,7 +108,7 @@ export default function RestaurantProfile({ data, onChange }: RestaurantProfileP
             value={data.description}
             onChange={(e) => onChange({ description: e.target.value })}
             rows={3}
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm resize-none"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm resize-none"
           />
         </div>
         <div className="md:col-span-2">
@@ -120,7 +120,7 @@ export default function RestaurantProfile({ data, onChange }: RestaurantProfileP
             value={data.cuisineType}
             onChange={(e) => onChange({ cuisineType: e.target.value })}
             placeholder="Indian, Chinese, Fast Food"
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
           />
         </div>
       </div>

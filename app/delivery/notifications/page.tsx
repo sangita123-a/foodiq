@@ -50,7 +50,7 @@ export default function DeliveryNotificationsPage() {
         )}
         <div className="divide-y divide-[#F3F4F6]">
           {(data || []).map((n) => (
-            <div key={n.id} className={`px-5 py-4 flex gap-3 ${!n.is_read ? "bg-[#FC8019]/5" : ""}`}>
+            <div key={n.id} className={`px-5 py-4 flex gap-3 ${!n.is_read ? "bg-[#E23744]/5" : ""}`}>
               <div className="flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div>

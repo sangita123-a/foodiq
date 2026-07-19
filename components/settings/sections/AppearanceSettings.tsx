@@ -11,13 +11,13 @@ export default function AppearanceSettings() {
   const { data, mutate } = useSWR("/api/settings");
   const { showToast } = useToast();
   const [theme, setTheme] = useState<"dark" | "light" | "system">("dark");
-  const [accent, setAccent] = useState("#FC8019");
-  const accents = ["#FC8019", "#3B82F6", "#10B981", "#F59E0B", "#8B5CF6"];
+  const [accent, setAccent] = useState("#E23744");
+  const accents = ["#E23744", "#3B82F6", "#10B981", "#F59E0B", "#8B5CF6"];
 
   useEffect(() => {
     if (data) {
       setTheme((data.theme as any) || "dark");
-      setAccent(data.accent_color || "#FC8019");
+      setAccent(data.accent_color || "#E23744");
     }
   }, [data]);
 
@@ -73,7 +73,7 @@ export default function AppearanceSettings() {
                 className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-3 transition-colors ${
                   theme === opt.id
                     ? "border-primary bg-primary/5"
-                    : "border-[#E5E7EB] hover:border-[#FC8019]/40 bg-white"
+                    : "border-[#E5E7EB] hover:border-[#E23744]/40 bg-white"
                 }`}
               >
                 <div

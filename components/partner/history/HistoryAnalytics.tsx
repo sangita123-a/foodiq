@@ -22,7 +22,7 @@ export default function HistoryAnalytics() {
       {/* Daily Order Trend Chart */}
       <div className="xl:col-span-2 bg-[#FFFFFF] rounded-3xl p-6 border border-[#E5E7EB] shadow-xl">
         <h3 className="text-xl font-black text-[#111827] flex items-center gap-2 mb-6">
-          <TrendingUp className="w-5 h-5 text-[#FC8019]" /> Daily Order Trend
+          <TrendingUp className="w-5 h-5 text-[#E23744]" /> Daily Order Trend
         </h3>
         
         <div className="h-64 flex items-end justify-between gap-2 md:gap-6 pt-4 border-b border-[#E5E7EB] pb-4">
@@ -35,7 +35,7 @@ export default function HistoryAnalytics() {
                 initial={{ height: 0 }}
                 animate={{ height: data.height }}
                 transition={{ duration: 1, delay: idx * 0.1, type: "spring" }}
-                className={`w-full max-w-[40px] rounded-t-lg transition-colors ${data.height === '100%' ? 'bg-[#FC8019]' : 'bg-[#F8FAFC] border-x border-t border-[#E5E7EB] group-hover:bg-[#F8FAFC]'}`}
+                className={`w-full max-w-[40px] rounded-t-lg transition-colors ${data.height === '100%' ? 'bg-[#E23744]' : 'bg-[#F8FAFC] border-x border-t border-[#E5E7EB] group-hover:bg-[#F8FAFC]'}`}
               />
             </div>
           ))}
@@ -55,8 +55,8 @@ export default function HistoryAnalytics() {
         <h3 className="text-xl font-black text-[#111827] mb-2">Key Insights</h3>
         
         <div className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-2xl p-4 flex items-center gap-4 group hover:border-[#E5E7EB] transition-colors">
-          <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 group-hover:bg-orange-500 group-hover:text-[#111827] transition-colors">
-            <Flame className="w-6 h-6 text-orange-500 group-hover:text-[#111827]" />
+          <div className="w-12 h-12 rounded-xl bg-[#E23744]/10 flex items-center justify-center border border-[#E23744]/20 group-hover:bg-[#E23744] group-hover:text-[#111827] transition-colors">
+            <Flame className="w-6 h-6 text-[#E23744] group-hover:text-[#111827]" />
           </div>
           <div>
             <p className="text-[#6B7280] text-xs font-bold uppercase tracking-wider">Top Selling Dish</p>

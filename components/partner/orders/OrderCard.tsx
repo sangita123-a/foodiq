@@ -16,7 +16,7 @@ export default function OrderCard({ order, onUpdateStatus, onViewDetails, isComp
   const statusColors = {
     "New": "bg-yellow-500/20 text-yellow-500 border-yellow-500/30",
     "Accepted": "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    "Preparing": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    "Preparing": "bg-[#E23744]/20 text-[#E23744] border-[#E23744]/30",
     "Ready for Pickup": "bg-purple-500/20 text-purple-400 border-purple-500/30",
     "Picked Up": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
     "Delivered": "bg-green-500/20 text-green-400 border-green-500/30",
@@ -41,7 +41,7 @@ export default function OrderCard({ order, onUpdateStatus, onViewDetails, isComp
         );
       case "Accepted":
         return (
-          <button onClick={() => onUpdateStatus(order.id, "Preparing")} className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-1 shadow-lg shadow-orange-500/20">
+          <button onClick={() => onUpdateStatus(order.id, "Preparing")} className="w-full mt-4 bg-[#E23744] hover:bg-[#C81E34] text-white py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-1 shadow-lg shadow-[#E23744]/20">
             <ChefHat className="w-4 h-4" /> Start Preparing
           </button>
         );
@@ -96,7 +96,7 @@ export default function OrderCard({ order, onUpdateStatus, onViewDetails, isComp
         </div>
         <div className="text-right">
           <p className="text-xl font-black text-[#111827]">₹{order.grandTotal}</p>
-          <p className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${order.paymentStatus === 'Paid' ? 'text-green-400' : 'text-orange-400'}`}>
+          <p className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${order.paymentStatus === 'Paid' ? 'text-green-400' : 'text-[#E23744]'}`}>
             {order.paymentStatus} ({order.paymentMethod})
           </p>
         </div>
@@ -130,7 +130,7 @@ export default function OrderCard({ order, onUpdateStatus, onViewDetails, isComp
         {order.items.slice(0, 2).map(item => (
           <div key={item.id} className="flex items-start justify-between text-sm">
             <div className="flex gap-2">
-              <span className="text-[#FC8019] font-black">{item.quantity}x</span>
+              <span className="text-[#E23744] font-black">{item.quantity}x</span>
               <span className="text-[#6B7280] font-medium truncate max-w-[180px]">{item.name}</span>
             </div>
           </div>

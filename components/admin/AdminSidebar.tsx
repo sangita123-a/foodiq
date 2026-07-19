@@ -63,12 +63,12 @@ export default function AdminSidebar() {
     <div className="w-64 bg-[#FFFFFF] h-screen border-r border-[#E5E7EB] flex flex-col fixed left-0 top-0 z-40">
       <div className="h-20 flex items-center px-6 border-b border-[#E5E7EB]">
         <Link href="/admin/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#FC8019] rounded-lg flex items-center justify-center font-black text-white text-xl">
+          <div className="w-8 h-8 bg-[#E23744] rounded-lg flex items-center justify-center font-black text-white text-xl">
             F
           </div>
           <span className="text-xl font-black text-[#111827] tracking-tight">
             Foodiq{" "}
-            <span className="text-[#FC8019] text-sm uppercase tracking-widest font-bold ml-1 border border-[#FC8019]/30 px-1.5 py-0.5 rounded">
+            <span className="text-[#E23744] text-sm uppercase tracking-widest font-bold ml-1 border border-[#E23744]/30 px-1.5 py-0.5 rounded">
               Admin
             </span>
           </span>
@@ -84,7 +84,7 @@ export default function AdminSidebar() {
               href={item.href}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                 isActive
-                  ? "bg-[#FC8019] text-white shadow-[0_0_15px_rgba(252,128,25,0.3)]"
+                  ? "bg-[#E23744] text-white shadow-[0_0_15px_rgba(226, 55, 68,0.3)]"
                   : "text-[#6B7280] hover:text-[#111827] hover:bg-[#F8FAFC]"
               }`}
             >

@@ -99,9 +99,9 @@ function AddDishContent() {
     <div className="max-w-7xl mx-auto">
       <div className="mb-8">
         <div className="flex items-center gap-2 text-sm text-[#9CA3AF] font-bold uppercase tracking-wider mb-4">
-          <Link href="/partner/dashboard" className="hover:text-[#FC8019] transition-colors">Dashboard</Link>
+          <Link href="/partner/dashboard" className="hover:text-[#E23744] transition-colors">Dashboard</Link>
           <ChevronRight className="w-4 h-4" />
-          <Link href="/partner/menu" className="hover:text-[#FC8019] transition-colors">Menu Management</Link>
+          <Link href="/partner/menu" className="hover:text-[#E23744] transition-colors">Menu Management</Link>
           <ChevronRight className="w-4 h-4" />
           <span className="text-[#111827]">{editId ? "Edit Dish" : "Add New Dish"}</span>
         </div>
@@ -136,7 +136,7 @@ function AddDishContent() {
 
 export default function AddDishPage() {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#FC8019] selection:text-white">
+    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#E23744] selection:text-white">
       <div className="hidden lg:block w-64 flex-shrink-0">
         <PartnerSidebar />
       </div>

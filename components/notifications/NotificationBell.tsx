@@ -99,7 +99,7 @@ export default function NotificationBell({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="relative h-10 w-10 rounded-xl border border-[#ECECEC] bg-white hover:border-[#FC8019]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] flex items-center justify-center transition-all"
+        className="relative h-10 w-10 rounded-xl border border-[#ECECEC] bg-white hover:border-[#E23744]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] flex items-center justify-center transition-all"
         aria-label="Notifications"
         aria-expanded={open}
       >
@@ -162,7 +162,7 @@ export default function NotificationBell({
                     <div
                       key={n.id}
                       className={`px-4 py-3 border-b border-[#F3F4F6] hover:bg-[#F8FAFC] ${
-                        !n.is_read ? "bg-[#FC8019]/5" : ""
+                        !n.is_read ? "bg-[#E23744]/5" : ""
                       }`}
                     >
                       <div className="flex gap-2">
@@ -200,14 +200,14 @@ export default function NotificationBell({
                 <button
                   type="button"
                   onClick={enablePush}
-                  className="text-xs font-bold text-[#FC8019] text-left hover:underline"
+                  className="text-xs font-bold text-[#E23744] text-left hover:underline"
                 >
                   Enable push notifications
                 </button>
                 <Link
                   href={inboxHref}
                   onClick={() => setOpen(false)}
-                  className="text-sm font-bold text-[#111827] text-center py-2 rounded-xl bg-[#F8FAFC] hover:bg-[#FC8019]/10"
+                  className="text-sm font-bold text-[#111827] text-center py-2 rounded-xl bg-[#F8FAFC] hover:bg-[#E23744]/10"
                 >
                   View all
                 </Link>

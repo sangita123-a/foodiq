@@ -29,7 +29,7 @@ export default function FavoritesFilterTabs({ activeTab, setActiveTab }: Props) 
               {isActive && (
                 <motion.div
                   layoutId="favActiveTabUnderline"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FC8019] shadow-[0_0_10px_rgba(252,128,25,0.8)]"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#E23744] shadow-[0_0_10px_rgba(226, 55, 68,0.8)]"
                   initial={false}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />

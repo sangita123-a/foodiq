@@ -89,7 +89,7 @@ export default function PopularCuisines() {
   );
 
   return (
-    <section className="relative w-full overflow-hidden border-y border-[#E5E7EB] bg-[radial-gradient(circle_at_50%_0%,rgba(252,128,25,0.08),transparent_34%),linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_50%,#FFFFFF_100%)]">
+    <section className="relative w-full overflow-hidden border-y border-[#E5E7EB] bg-[radial-gradient(circle_at_50%_0%,rgba(226, 55, 68,0.08),transparent_34%),linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_50%,#FFFFFF_100%)]">
       <div className="food-section">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -109,7 +109,7 @@ export default function PopularCuisines() {
           </div>
           <Link
             href="/popular-cuisines"
-            className="group/view-all inline-flex shrink-0 items-center gap-1 rounded-full border border-[#E5E7EB] bg-white px-3.5 py-2 text-xs font-semibold text-[#111827] shadow-sm transition-[color,border-color,background-color] duration-300 hover:border-[#FC8019]/50 hover:bg-[#FFF7ED] hover:text-[#FC8019] sm:px-4 sm:text-sm"
+            className="group/view-all inline-flex shrink-0 items-center gap-1 rounded-full border border-[#E5E7EB] bg-white px-3.5 py-2 text-xs font-semibold text-[#111827] shadow-sm transition-[color,border-color,background-color] duration-300 hover:border-[#E23744]/50 hover:bg-[#FFF7ED] hover:text-[#E23744] sm:px-4 sm:text-sm"
           >
             View All
             <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/view-all:translate-x-0.5" />

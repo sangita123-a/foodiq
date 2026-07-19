@@ -83,7 +83,7 @@ export default function PromoCodeSection({
   return (
     <div className="bg-[#F8FAFC] rounded-2xl p-6 border border-[#E5E7EB] mb-6">
       <h3 className="text-xl font-bold text-[#111827] mb-4 flex items-center gap-2">
-        <Tag className="w-5 h-5 text-[#FC8019]" />
+        <Tag className="w-5 h-5 text-[#E23744]" />
         Promo Code
       </h3>
 
@@ -99,14 +99,14 @@ export default function PromoCodeSection({
                   setCode(e.target.value);
                   setError("");
                 }}
-                className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-[#FC8019] transition-colors uppercase"
+                className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-[#E23744] transition-colors uppercase"
               />
             </div>
             <button
               onClick={handleApply}
               disabled={!code || isApplying}
               type="button"
-              className="bg-[#FC8019] hover:bg-[#E76F0B] disabled:opacity-50 text-white px-6 rounded-xl text-sm font-bold transition-colors"
+              className="bg-[#E23744] hover:bg-[#C81E34] disabled:opacity-50 text-white px-6 rounded-xl text-sm font-bold transition-colors"
             >
               {isApplying ? "..." : "Apply"}
             </button>
@@ -126,7 +126,7 @@ export default function PromoCodeSection({
                   key={String(s.code)}
                   type="button"
                   onClick={() => void applyCode(String(s.code))}
-                  className="text-xs font-bold px-3 py-1.5 rounded-xl border border-[#E5E7EB] bg-white text-[#111827] hover:border-[#FC8019]"
+                  className="text-xs font-bold px-3 py-1.5 rounded-xl border border-[#E5E7EB] bg-white text-[#111827] hover:border-[#E23744]"
                 >
                   {String(s.code)}
                   {s.eligible === false ? " (add more)" : ""}

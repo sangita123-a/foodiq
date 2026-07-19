@@ -50,8 +50,8 @@ export default function DeliveryLoginForm() {
 
   return (
     <div className="w-full h-full min-h-[50vh] lg:min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6 lg:p-16 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-[#FC8019]/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#FC8019]/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-64 h-64 bg-[#E23744]/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#E23744]/5 rounded-full blur-[100px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -83,7 +83,7 @@ export default function DeliveryLoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="rider@foodiq.com"
                 required
-                className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-[#FC8019] focus:ring-1 focus:ring-[#FC8019] transition-colors"
+                className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-[#E23744] focus:ring-1 focus:ring-[#E23744] transition-colors"
               />
             </div>
           </div>
@@ -100,7 +100,7 @@ export default function DeliveryLoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-[#FC8019] focus:ring-1 focus:ring-[#FC8019] transition-colors"
+                className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-[#E23744] focus:ring-1 focus:ring-[#E23744] transition-colors"
               />
             </div>
           </div>
@@ -108,7 +108,7 @@ export default function DeliveryLoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#FC8019] hover:bg-[#E66F0D] text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-60"
+            className="w-full bg-[#E23744] hover:bg-[#C81E34] text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-60"
           >
             {loading ? "Signing in..." : "Sign In"}
             <ArrowRight className="w-5 h-5" />
@@ -117,7 +117,7 @@ export default function DeliveryLoginForm() {
 
         <p className="text-center text-sm text-[#6B7280] mt-8">
           New rider?{" "}
-          <Link href="/delivery/register" className="text-[#FC8019] font-bold hover:underline">
+          <Link href="/delivery/register" className="text-[#E23744] font-bold hover:underline">
             Register here
           </Link>
         </p>

@@ -91,7 +91,7 @@ export default function PartnerNotificationsPage() {
                 <div
                   key={n.id}
                   className={`bg-white border border-[#E5E7EB] rounded-2xl p-4 flex gap-3 ${
-                    !n.is_read ? "border-l-4 border-l-[#FC8019]" : ""
+                    !n.is_read ? "border-l-4 border-l-[#E23744]" : ""
                   }`}
                 >
                   <div className="flex-1 min-w-0">

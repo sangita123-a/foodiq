@@ -116,7 +116,7 @@ export default function ReviewCard({ review, onUpdateReply, onUpdateStatus }: Re
 
       {/* Content */}
       <div className="mb-4">
-        <p className="text-xs text-[#FC8019] font-bold uppercase tracking-wider mb-2">Ordered: {review.orderedDish}</p>
+        <p className="text-xs text-[#E23744] font-bold uppercase tracking-wider mb-2">Ordered: {review.orderedDish}</p>
         {review.title && <h4 className="text-[#111827] font-bold mb-1">{review.title}</h4>}
         <p className="text-[#6B7280] text-sm leading-relaxed">{review.description}</p>
       </div>
@@ -135,11 +135,11 @@ export default function ReviewCard({ review, onUpdateReply, onUpdateStatus }: Re
       {/* Restaurant Response Area */}
       <div className="mt-4 pt-4 border-t border-[#E5E7EB]">
         {review.reply ? (
-          <div className="bg-[#FC8019]/5 border border-[#FC8019]/20 rounded-2xl p-4">
+          <div className="bg-[#E23744]/5 border border-[#E23744]/20 rounded-2xl p-4">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-[#FC8019]/20 flex items-center justify-center">
-                  <span className="text-[10px] font-black text-[#FC8019]">FQ</span>
+                <div className="w-6 h-6 rounded-full bg-[#E23744]/20 flex items-center justify-center">
+                  <span className="text-[10px] font-black text-[#E23744]">FQ</span>
                 </div>
                 <span className="text-[#111827] font-bold text-sm">Restaurant Reply</span>
                 <span className="text-[#9CA3AF] text-xs">• {review.reply.date}</span>
@@ -155,12 +155,12 @@ export default function ReviewCard({ review, onUpdateReply, onUpdateStatus }: Re
                 <textarea
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  className="w-full bg-[#F8FAFC] text-[#111827] text-sm border border-[#E5E7EB] rounded-xl p-3 focus:outline-none focus:border-[#FC8019] resize-none"
+                  className="w-full bg-[#F8FAFC] text-[#111827] text-sm border border-[#E5E7EB] rounded-xl p-3 focus:outline-none focus:border-[#E23744] resize-none"
                   rows={3}
                 />
                 <div className="flex justify-end gap-2 mt-2">
                   <button onClick={() => setIsReplying(false)} className="px-4 py-2 text-xs font-bold text-[#6B7280] hover:text-[#111827] transition-colors">Cancel</button>
-                  <button onClick={handleReplySubmit} className="px-4 py-2 text-xs font-bold bg-[#FC8019] text-white rounded-lg hover:bg-[#E66F0D] transition-colors flex items-center gap-1">Update <Send className="w-3 h-3"/></button>
+                  <button onClick={handleReplySubmit} className="px-4 py-2 text-xs font-bold bg-[#E23744] text-white rounded-lg hover:bg-[#C81E34] transition-colors flex items-center gap-1">Update <Send className="w-3 h-3"/></button>
                 </div>
               </div>
             ) : (
@@ -175,18 +175,18 @@ export default function ReviewCard({ review, onUpdateReply, onUpdateStatus }: Re
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   placeholder="Type your response to the customer..."
-                  className="w-full bg-[#F8FAFC] text-[#111827] text-sm border border-[#E5E7EB] rounded-xl p-3 focus:outline-none focus:border-[#FC8019] resize-none"
+                  className="w-full bg-[#F8FAFC] text-[#111827] text-sm border border-[#E5E7EB] rounded-xl p-3 focus:outline-none focus:border-[#E23744] resize-none"
                   rows={3}
                 />
                 <div className="flex justify-end gap-2 mt-2">
                   <button onClick={() => {setIsReplying(false); setReplyText("");}} className="px-4 py-2 text-xs font-bold text-[#6B7280] hover:text-[#111827] transition-colors">Cancel</button>
-                  <button onClick={handleReplySubmit} disabled={!replyText.trim()} className="px-4 py-2 text-xs font-bold bg-[#FC8019] text-white rounded-lg hover:bg-[#E66F0D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1">Send Reply <Send className="w-3 h-3"/></button>
+                  <button onClick={handleReplySubmit} disabled={!replyText.trim()} className="px-4 py-2 text-xs font-bold bg-[#E23744] text-white rounded-lg hover:bg-[#C81E34] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1">Send Reply <Send className="w-3 h-3"/></button>
                 </div>
               </motion.div>
             ) : (
               <button
                 onClick={() => setIsReplying(true)}
-                className="text-[#FC8019] hover:text-[#111827] text-sm font-bold flex items-center gap-2 transition-colors group"
+                className="text-[#E23744] hover:text-[#111827] text-sm font-bold flex items-center gap-2 transition-colors group"
               >
                 <MessageCircle className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" /> Reply to Review
               </button>

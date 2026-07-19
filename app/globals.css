@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #FC8019;
-  --color-primary-hover: #E9700A;
-  --color-accent: #EF4F5F;
+  --color-primary: #E23744;
+  --color-primary-hover: #C81E34;
+  --color-accent: #E23744;
   --color-background: #FFFFFF;
-  --color-foreground: #1C1C1C;
-  --color-gray-text: #686B78;
+  --color-foreground: #1A1A1A;
+  --color-gray-text: #666666;
   --color-border: #ECECEC;
   
   --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
@@ -14,17 +14,17 @@
 
 :root {
   --background: #FFFFFF;
-  --foreground: #1C1C1C;
+  --foreground: #1A1A1A;
   --surface: #FFFFFF;
-  --surface-elevated: #F8F9FA;
-  --surface-hover: #F8F9FA;
-  --muted: #686B78;
+  --surface-elevated: #F8F8F8;
+  --surface-hover: #F8F8F8;
+  --muted: #666666;
   --border: #ECECEC;
   --card-radius: 18px;
-  --button-radius: 12px;
-  --input-radius: 14px;
-  --card-shadow: 0 6px 24px rgba(28, 28, 28, 0.06);
-  --card-shadow-hover: 0 18px 44px rgba(28, 28, 28, 0.1), 0 8px 24px rgba(252, 128, 25, 0.08);
+  --button-radius: 14px;
+  --input-radius: 12px;
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  --card-shadow-hover: 0 12px 32px rgba(226, 55, 68, 0.12), 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 html {
@@ -61,8 +61,8 @@ button:not(:disabled),
 }
 
 ::selection {
-  background: rgba(252, 128, 25, 0.2);
-  color: #1C1C1C;
+  background: rgba(226, 55, 68, 0.15);
+  color: #1A1A1A;
 }
 
 button:focus-visible,
@@ -70,38 +70,38 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #FC8019;
+  outline: 2px solid #E23744;
   outline-offset: 3px;
 }
 
 /* Shared premium food marketplace primitives */
 .food-section {
-  width: min(100% - 32px, 1600px);
+  width: min(100% - 32px, 1280px);
   margin-inline: auto;
-  padding-block: clamp(52px, 6vw, 88px);
+  padding-block: clamp(40px, 5vw, 80px);
 }
 
 .food-section-heading {
-  margin-bottom: clamp(26px, 3vw, 40px);
+  margin-bottom: clamp(24px, 3vw, 36px);
 }
 
 .food-section-heading h1,
 .food-section-heading h2 {
   letter-spacing: -0.035em;
   line-height: 1.15;
-  color: #1C1C1C;
+  color: #1A1A1A;
 }
 
 .food-section-heading p {
-  color: var(--muted);
-  font-size: 0.9375rem;
-  line-height: 1.7;
+  color: #666666;
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 .food-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px;
   align-items: stretch;
 }
 
@@ -109,42 +109,42 @@ textarea:focus-visible {
 .restaurant-menu-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 16px;
   align-items: stretch;
 }
 
 .food-card {
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: var(--card-radius);
-  background: var(--surface);
-  box-shadow: var(--card-shadow);
-  transition: transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 280ms ease, border-color 280ms ease, background-color 280ms ease;
+  border: 1px solid #ECECEC;
+  border-radius: 18px;
+  background: #FFFFFF;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: transform 250ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 250ms ease, border-color 250ms ease, background-color 250ms ease;
 }
 
 .food-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(252, 128, 25, 0.32);
-  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(226, 55, 68, 0.25);
+  box-shadow: 0 12px 32px rgba(226, 55, 68, 0.12), 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .food-card-image {
   position: relative;
   width: 100%;
-  height: clamp(150px, 15vw, 168px);
+  height: clamp(150px, 15vw, 175px);
   overflow: hidden;
-  background: #F8F9FA;
+  background: #F8F8F8;
 }
 
 .food-card-image img {
   object-fit: cover;
-  transition: transform 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .food-card:hover .food-card-image img {
-  transform: scale(1.055);
+  transform: scale(1.05);
 }
 
 .food-card-body {
@@ -153,154 +153,130 @@ textarea:focus-visible {
 
 .food-card-title {
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.35;
-  letter-spacing: -0.025em;
+  color: #1A1A1A;
+  letter-spacing: -0.02em;
 }
 
 .food-card-description {
-  color: var(--muted);
+  color: #666666;
   font-size: 0.875rem;
-  line-height: 1.55;
+  line-height: 1.5;
 }
 
 .food-price {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
+  color: #E23744;
 }
 
 .food-rating {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  border: 1px solid rgba(34, 197, 94, 0.25);
-  border-radius: 7px;
-  background: rgba(34, 197, 94, 0.12);
-  color: #15803d;
-  padding: 4px 7px;
+  border: 1px solid rgba(22, 163, 74, 0.2);
+  border-radius: 8px;
+  background: #F0FDF4;
+  color: #16A34A;
+  padding: 3px 8px;
   font-size: 0.75rem;
   font-weight: 700;
 }
 
 .food-button {
-  min-height: 42px;
-  border-radius: var(--button-radius);
-  transition: transform 220ms ease, background-color 220ms ease,
-    border-color 220ms ease, box-shadow 220ms ease, color 220ms ease;
+  min-height: 44px;
+  border-radius: 14px;
+  transition: transform 200ms ease, background-color 200ms ease,
+    border-color 200ms ease, box-shadow 200ms ease, color 200ms ease;
 }
 
-.food-button:hover {
+.food-button-primary {
+  background: #E23744;
+  color: #FFFFFF;
+  font-weight: 600;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(226, 55, 68, 0.25);
+}
+
+.food-button-primary:hover {
+  background: #C81E34;
   transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(200, 30, 52, 0.32);
 }
 
-.food-button:active {
-  transform: translateY(0);
+.food-button-secondary {
+  background: #FFFFFF;
+  border: 1px solid #E23744;
+  color: #E23744;
+  font-weight: 600;
+  border-radius: 14px;
+}
+
+.food-button-secondary:hover {
+  background: #FFF5F6;
+  transform: translateY(-1px);
 }
 
 @media (min-width: 768px) {
   .food-section {
-    width: min(100% - 48px, 1600px);
+    width: min(100% - 48px, 1280px);
   }
 
   .food-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
+    gap: 20px;
   }
 
   .popular-restaurants-grid,
   .restaurant-menu-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
+    gap: 18px;
   }
 }
 
 @media (min-width: 1024px) {
   .food-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .food-grid-contained {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .popular-restaurants-grid {
+    grid-template-columns: repeat(4, minmax(220px, 1fr));
+    gap: 24px;
+  }
+
+  .restaurant-menu-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 20px;
   }
-
-  .food-grid-contained {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .popular-restaurants-grid {
-    grid-template-columns: repeat(4, minmax(220px, 235px));
-    justify-content: space-between;
-  }
-
-  .restaurant-menu-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 215px));
-    gap: 16px;
-  }
 }
 
-@media (min-width: 1210px) {
+@media (min-width: 1280px) {
   .food-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-
-  .food-grid-contained {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
   }
 
   .popular-restaurants-grid {
-    grid-template-columns: repeat(5, minmax(220px, 235px));
+    grid-template-columns: repeat(5, minmax(220px, 1fr));
+    gap: 24px;
   }
 }
 
-@media (min-width: 1480px) {
-  .popular-restaurants-grid {
-    grid-template-columns: repeat(6, minmax(220px, 235px));
-  }
-}
-
-@media (min-width: 1740px) {
-  .food-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-
-  .food-grid-contained {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 420px) {
-  .food-section {
-    width: min(100% - 20px, 1600px);
-  }
-
-  .food-grid {
-    gap: 10px;
-  }
-
-  .popular-restaurants-grid,
-  .restaurant-menu-grid {
-    gap: 10px;
-  }
-
-  .food-card-body {
-    padding: 11px;
-  }
-
-  .food-card-title {
-    font-size: 0.95rem;
-  }
-
-  .food-card-description {
-    font-size: 0.78rem;
-  }
-}
-
-/* Hide scrollbar utility — used on horizontal scroll sections */
+/* Hide scrollbar utility */
 .hide-scrollbar,
 .custom-scrollbar-hide {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .hide-scrollbar::-webkit-scrollbar,
 .custom-scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Chrome/Safari/Opera */
+  display: none;
 }
 
 /* Custom scrollbar */
@@ -308,7 +284,7 @@ textarea:focus-visible {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #F8F9FA;
+  background: #F8F8F8;
 }
 ::-webkit-scrollbar-thumb {
   background: #D8D8D8;

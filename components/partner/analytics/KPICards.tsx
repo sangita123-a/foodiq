@@ -65,7 +65,7 @@ export default function KPICards({ data }: KPICardsProps) {
     { title: "New Customers", value: data.newCustomers, icon: Users, color: "text-pink-400", bg: "bg-pink-400/10", border: "border-pink-400/20", trend: data.newCustomersGrowth, prefix: "" },
     
     { title: "Average Rating", value: data.averageRating, icon: Star, color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20", trend: data.averageRatingGrowth, prefix: "", isDecimal: true },
-    { title: "Best Selling Dish", value: 0, icon: Flame, color: "text-orange-400", bg: "bg-orange-400/10", border: "border-orange-400/20", trend: 12, prefix: "", isString: true, stringVal: data.bestSellingDish },
+    { title: "Best Selling Dish", value: 0, icon: Flame, color: "text-[#E23744]", bg: "bg-[#E23744]/10", border: "border-[#E23744]/20", trend: 12, prefix: "", isString: true, stringVal: data.bestSellingDish },
     { title: "Avg Delivery Time", value: data.avgDeliveryTime, icon: Clock, color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20", trend: data.avgDeliveryTimeGrowth, prefix: "", suffix: "m", inverseGood: true },
     { title: "Avg Order Value", value: data.averageOrderValue, icon: Tag, color: "text-indigo-400", bg: "bg-indigo-400/10", border: "border-indigo-400/20", trend: data.aovGrowth, prefix: "₹" }
   ];

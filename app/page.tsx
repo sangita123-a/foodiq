@@ -66,7 +66,7 @@ const Footer = dynamic(() => import("@/components/Footer"), {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white text-[#1C1C1C] relative selection:bg-[#FC8019]/20 selection:text-[#1C1C1C]">
+    <main className="min-h-screen bg-white text-[#1C1C1C] relative selection:bg-[#E23744]/20 selection:text-[#1C1C1C]">
       <Navbar />
       <Hero />
       <ScrollButton />

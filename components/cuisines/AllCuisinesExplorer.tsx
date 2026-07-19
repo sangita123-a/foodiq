@@ -69,7 +69,7 @@ export default function AllCuisinesExplorer() {
                   setPage(1);
                 }}
                 placeholder="Search cuisines..."
-                className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-black/30 pl-10 pr-4 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-[#FC8019]/70"
+                className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-black/30 pl-10 pr-4 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-[#E23744]/70"
               />
             </label>
 
@@ -84,7 +84,7 @@ export default function AllCuisinesExplorer() {
                   }}
                   className={`h-10 shrink-0 rounded-xl border px-3.5 text-xs font-semibold transition-colors duration-300 ${
                     group === item.label
-                      ? "border-[#FC8019] bg-[#FC8019] text-white"
+                      ? "border-[#E23744] bg-[#E23744] text-white"
                       : "border-[#E5E7EB] bg-white/[0.04] text-[#6B7280] hover:border-[#E5E7EB] hover:bg-white/[0.08]"
                   }`}
                 >
@@ -102,7 +102,7 @@ export default function AllCuisinesExplorer() {
                   setSort(event.target.value);
                   setPage(1);
                 }}
-                className="h-11 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-black/30 pl-10 pr-8 text-sm text-gray-200 outline-none transition-colors focus:border-[#FC8019]/70 lg:w-48"
+                className="h-11 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-black/30 pl-10 pr-8 text-sm text-gray-200 outline-none transition-colors focus:border-[#E23744]/70 lg:w-48"
               >
                 <option value="recommended">Recommended</option>
                 <option value="restaurants">Most restaurants</option>

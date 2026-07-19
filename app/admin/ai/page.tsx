@@ -17,8 +17,8 @@ export default function AdminAiPage() {
   return (
     <AdminShell title="AI Assistants">
       <div className="mb-6 flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-[#FC8019]/10 flex items-center justify-center">
-          <Bot className="w-5 h-5 text-[#FC8019]" />
+        <div className="w-10 h-10 rounded-xl bg-[#E23744]/10 flex items-center justify-center">
+          <Bot className="w-5 h-5 text-[#E23744]" />
         </div>
         <div>
           <h1 className="text-3xl font-black text-[#111827]">AI Assistants</h1>

@@ -151,7 +151,7 @@ export default function OfferDetailView({ offerId }: Props) {
             {cartItems.length > 0 && (
               <Link
                 href="/checkout"
-                className="mt-6 w-full flex items-center justify-center gap-2 bg-[#FC8019] hover:bg-[#E76F0B] text-white py-3 rounded-xl font-bold transition-colors"
+                className="mt-6 w-full flex items-center justify-center gap-2 bg-[#E23744] hover:bg-[#C81E34] text-white py-3 rounded-xl font-bold transition-colors"
               >
                 <ShoppingCart className="w-5 h-5" />
                 Proceed to Checkout

@@ -43,7 +43,7 @@ export default function SettingsActionBar({ isVisible, onSave, onReset, onCancel
 
             <button 
               onClick={onSave}
-              className="flex items-center gap-2 bg-[#FC8019] hover:bg-[#E66F0D] text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-lg shadow-[#FC8019]/20"
+              className="flex items-center gap-2 bg-[#E23744] hover:bg-[#C81E34] text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-lg shadow-[#E23744]/20"
             >
               <Save className="w-4 h-4" /> Save Changes
             </button>

@@ -11,9 +11,9 @@ type Props = {
 export default function LiveDealBanner({ title, description, couponCode, deliveryTime }: Props) {
   return (
     <div className="container mx-auto px-4 md:px-8 -mt-4 mb-6 relative z-20">
-      <div className="bg-gradient-to-r from-[#FC8019]/20 to-[#FC8019]/5 border border-[#FC8019]/30 rounded-2xl p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-[#E23744]/20 to-[#E23744]/5 border border-[#E23744]/30 rounded-2xl p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <p className="text-[#FC8019] text-sm font-bold uppercase tracking-wider mb-1">Live Deal Active</p>
+          <p className="text-[#E23744] text-sm font-bold uppercase tracking-wider mb-1">Live Deal Active</p>
           <h2 className="text-xl md:text-2xl font-bold text-white mb-1">{title}</h2>
           <p className="text-[#6B7280] text-sm">{description}</p>
         </div>
@@ -30,7 +30,7 @@ export default function LiveDealBanner({ title, description, couponCode, deliver
           </div>
           <Link
             href="/checkout"
-            className="px-4 py-2 bg-[#FC8019] hover:bg-[#E76F0B] text-white text-sm font-bold rounded-xl transition-colors"
+            className="px-4 py-2 bg-[#E23744] hover:bg-[#C81E34] text-white text-sm font-bold rounded-xl transition-colors"
           >
             Checkout with Offer
           </Link>

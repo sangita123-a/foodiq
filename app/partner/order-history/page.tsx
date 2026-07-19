@@ -148,7 +148,7 @@ export default function OrderHistoryPage() {
   }, [orders, search, statusFilter, paymentFilter, sortBy]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#FC8019] selection:text-white">
+    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#E23744] selection:text-white">
       
       {/* Sidebar - Fixed on left for desktop */}
       <div className="hidden lg:block w-64 flex-shrink-0">

@@ -7,13 +7,13 @@
   --partner-surface: #ffffff;
   --partner-surface-subtle: #f8f9fa;
   --partner-surface-warm: #fffaf6;
-  --partner-primary: #fc8019;
+  --partner-primary: #E23744;
   --partner-primary-hover: #e96f0b;
-  --partner-secondary: #ef4f5f;
+  --partner-secondary: #E23744;
   --partner-ink: #1c1c1c;
   --partner-muted: #686b78;
   --partner-line: #ececec;
-  --partner-focus: rgba(252, 128, 25, 0.24);
+  --partner-focus: rgba(226, 55, 68, 0.24);
   --partner-shadow-sm: 0 1px 2px rgba(28, 28, 28, 0.04),
     0 4px 14px rgba(28, 28, 28, 0.035);
   --partner-shadow-md: 0 2px 5px rgba(28, 28, 28, 0.045),
@@ -83,7 +83,7 @@
 }
 
 [data-partner-surface] .shadow-\[0_0_15px_rgba\(252\,128\,25\,0\.3\)\] {
-  box-shadow: 0 6px 18px rgba(252, 128, 25, 0.18);
+  box-shadow: 0 6px 18px rgba(226, 55, 68, 0.18);
 }
 
 /* Consistent control feedback across every partner workflow. */
@@ -119,19 +119,19 @@
 }
 
 /* Keep branded actions crisp and consistent. */
-[data-partner-surface] .bg-\[\#FC8019\] {
+[data-partner-surface] .bg-\[\#E23744\] {
   background-color: var(--partner-primary);
 }
 
-[data-partner-surface] .text-\[\#FC8019\] {
+[data-partner-surface] .text-\[\#E23744\] {
   color: var(--partner-primary);
 }
 
-[data-partner-surface] .border-\[\#FC8019\] {
+[data-partner-surface] .border-\[\#E23744\] {
   border-color: var(--partner-primary);
 }
 
-[data-partner-surface] .hover\:bg-\[\#E66F0D\]:hover {
+[data-partner-surface] .hover\:bg-\[\#C81E34\]:hover {
   background-color: var(--partner-primary-hover);
 }
 
@@ -162,7 +162,7 @@
     .border,
     [class*="border-[#E5E7EB]"]
   ):hover {
-  border-color: rgba(252, 128, 25, 0.2);
+  border-color: rgba(226, 55, 68, 0.2);
   box-shadow: var(--partner-shadow-md);
 }
 

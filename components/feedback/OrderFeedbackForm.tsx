@@ -196,7 +196,7 @@ export default function OrderFeedbackForm({
             <button
               type="button"
               onClick={() => setEditing(true)}
-              className="bg-[#FC8019] hover:bg-[#E76F0B] text-white px-5 py-2.5 rounded-xl text-sm font-bold"
+              className="bg-[#E23744] hover:bg-[#C81E34] text-white px-5 py-2.5 rounded-xl text-sm font-bold"
             >
               Edit feedback
             </button>
@@ -225,7 +225,7 @@ export default function OrderFeedbackForm({
             rows={2}
             maxLength={2000}
             placeholder="How was the food and restaurant?"
-            className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#FC8019] resize-none"
+            className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E23744] resize-none"
           />
 
           {hasDeliveryPartner && (
@@ -241,7 +241,7 @@ export default function OrderFeedbackForm({
                 rows={2}
                 maxLength={2000}
                 placeholder="How was the delivery experience?"
-                className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#FC8019] resize-none"
+                className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E23744] resize-none"
               />
             </>
           )}
@@ -257,14 +257,14 @@ export default function OrderFeedbackForm({
             rows={3}
             maxLength={2000}
             placeholder="Any other feedback about this order?"
-            className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#FC8019] resize-none"
+            className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E23744] resize-none"
           />
 
           <div className="flex flex-wrap gap-2">
             <button
               type="submit"
               disabled={submitting}
-              className="bg-[#FC8019] hover:bg-[#E76F0B] disabled:opacity-60 text-white px-6 py-3 rounded-xl text-sm font-bold transition-colors"
+              className="bg-[#E23744] hover:bg-[#C81E34] disabled:opacity-60 text-white px-6 py-3 rounded-xl text-sm font-bold transition-colors"
             >
               {submitting
                 ? "Saving…"

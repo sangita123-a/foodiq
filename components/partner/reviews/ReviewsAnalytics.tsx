@@ -58,7 +58,7 @@ export default function ReviewsAnalytics({ data }: ReviewsAnalyticsProps) {
       {/* 2. Satisfaction Metrics */}
       <div className="bg-[#FFFFFF] rounded-3xl p-6 border border-[#E5E7EB] shadow-xl flex flex-col">
         <h3 className="text-xl font-black text-[#111827] flex items-center gap-2 mb-6">
-          <Heart className="w-5 h-5 text-[#FC8019]" /> Customer Satisfaction
+          <Heart className="w-5 h-5 text-[#E23744]" /> Customer Satisfaction
         </h3>
         
         <div className="space-y-5 flex-1 flex flex-col justify-center">
@@ -66,7 +66,7 @@ export default function ReviewsAnalytics({ data }: ReviewsAnalyticsProps) {
             { label: "Food Quality", value: data.satisfaction.foodQuality, color: "bg-green-500" },
             { label: "Delivery Experience", value: data.satisfaction.deliveryExperience, color: "bg-blue-500" },
             { label: "Packaging", value: data.satisfaction.packaging, color: "bg-purple-500" },
-            { label: "Restaurant Service", value: data.satisfaction.restaurantService, color: "bg-orange-500" }
+            { label: "Restaurant Service", value: data.satisfaction.restaurantService, color: "bg-[#E23744]" }
           ].map((metric, idx) => (
             <div key={metric.label}>
               <div className="flex justify-between text-sm mb-1.5">

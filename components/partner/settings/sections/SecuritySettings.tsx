@@ -15,7 +15,7 @@ export default function SecuritySettings({ data, onChange }: SecuritySettingsPro
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-black text-[#111827] flex items-center gap-2 mb-2">
-          <Shield className="w-6 h-6 text-[#FC8019]" /> Security Settings
+          <Shield className="w-6 h-6 text-[#E23744]" /> Security Settings
         </h2>
         <p className="text-[#6B7280] text-sm mb-6">Protect your account and manage active sessions.</p>
       </div>
@@ -31,21 +31,21 @@ export default function SecuritySettings({ data, onChange }: SecuritySettingsPro
             <input 
               type="password" 
               placeholder="Current Password"
-              className="w-full bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+              className="w-full bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
             />
           </div>
           <div>
             <input 
               type="password" 
               placeholder="New Password"
-              className="w-full bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+              className="w-full bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
             />
           </div>
           <div>
             <input 
               type="password" 
               placeholder="Confirm New Password"
-              className="w-full bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+              className="w-full bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
             />
           </div>
           <button className="px-6 py-2.5 bg-[#FFFFFF] hover:bg-[#F8FAFC] border border-[#E5E7EB] text-[#111827] rounded-xl text-sm font-bold transition-colors">
@@ -85,12 +85,12 @@ export default function SecuritySettings({ data, onChange }: SecuritySettingsPro
         </h3>
         
         <div className="space-y-3 mb-6">
-          <div className="flex items-center justify-between p-4 bg-[#FFFFFF] rounded-xl border border-[#FC8019]/20">
+          <div className="flex items-center justify-between p-4 bg-[#FFFFFF] rounded-xl border border-[#E23744]/20">
             <div className="flex items-center gap-4">
               <Laptop className="w-5 h-5 text-[#6B7280]" />
               <div>
                 <p className="text-sm font-bold text-[#111827]">Windows PC • Chrome</p>
-                <p className="text-xs text-[#FC8019] font-bold">Active Now</p>
+                <p className="text-xs text-[#E23744] font-bold">Active Now</p>
               </div>
             </div>
           </div>

@@ -49,8 +49,8 @@ export default function PartnerLoginForm() {
 
   return (
     <div className="w-full h-full min-h-[50vh] lg:min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6 lg:p-16 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-[#FC8019]/10 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#FC8019]/5 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-64 h-64 bg-[#E23744]/10 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#E23744]/5 rounded-full blur-[100px] pointer-events-none"></div>
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -82,7 +82,7 @@ export default function PartnerLoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="partner@restaurant.com"
                 required
-                className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-[#FC8019] focus:ring-1 focus:ring-[#FC8019] transition-colors"
+                className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-[#E23744] focus:ring-1 focus:ring-[#E23744] transition-colors"
               />
             </div>
           </div>
@@ -90,7 +90,7 @@ export default function PartnerLoginForm() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-bold text-[#6B7280]">Password</label>
-              <Link href="/forgot-password" className="text-xs text-[#FC8019] hover:text-[#E66F0D] font-bold transition-colors">
+              <Link href="/forgot-password" className="text-xs text-[#E23744] hover:text-[#C81E34] font-bold transition-colors">
                 Forgot Password?
               </Link>
             </div>
@@ -104,7 +104,7 @@ export default function PartnerLoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-[#FC8019] focus:ring-1 focus:ring-[#FC8019] transition-colors"
+                className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-[#E23744] focus:ring-1 focus:ring-[#E23744] transition-colors"
               />
             </div>
           </div>
@@ -113,7 +113,7 @@ export default function PartnerLoginForm() {
             <input
               type="checkbox"
               id="remember"
-              className="w-4 h-4 rounded border-[#E5E7EB] text-[#FC8019] focus:ring-[#FC8019] focus:ring-offset-[#FFFFFF] bg-[#F8FAFC]"
+              className="w-4 h-4 rounded border-[#E5E7EB] text-[#E23744] focus:ring-[#E23744] focus:ring-offset-[#FFFFFF] bg-[#F8FAFC]"
             />
             <label htmlFor="remember" className="ml-2 block text-sm text-[#6B7280] cursor-pointer">
               Remember me on this device
@@ -123,7 +123,7 @@ export default function PartnerLoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#FC8019] hover:bg-[#E66F0D] text-white py-4 rounded-xl font-black transition-all shadow-[0_0_20px_rgba(252,128,25,0.2)] hover:shadow-[0_0_30px_rgba(252,128,25,0.4)] flex items-center justify-center gap-2 group disabled:opacity-70"
+            className="w-full bg-[#E23744] hover:bg-[#C81E34] text-white py-4 rounded-xl font-black transition-all shadow-[0_0_20px_rgba(226, 55, 68,0.2)] hover:shadow-[0_0_30px_rgba(226, 55, 68,0.4)] flex items-center justify-center gap-2 group disabled:opacity-70"
           >
             {loading ? "Signing in..." : "Sign In"}
             {!loading && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
@@ -147,7 +147,7 @@ export default function PartnerLoginForm() {
 
         <p className="text-center text-[#6B7280] mt-8 text-sm">
           Customer account?{" "}
-          <Link href="/login" className="text-[#111827] font-bold hover:text-[#FC8019] transition-colors">
+          <Link href="/login" className="text-[#111827] font-bold hover:text-[#E23744] transition-colors">
             Customer Login
           </Link>
         </p>

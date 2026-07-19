@@ -42,7 +42,7 @@ export default function OrderTimeline({ currentStageId, cancelled = false }: Pro
           initial={{ height: 0 }}
           animate={{ height: `${progress}%` }}
           transition={{ duration: 0.6, ease: "easeInOut" }}
-          className="absolute top-2 left-[23px] w-0.5 bg-[#FC8019] rounded-full z-0"
+          className="absolute top-2 left-[23px] w-0.5 bg-[#E23744] rounded-full z-0"
           style={{ maxHeight: "calc(100% - 1rem)" }}
         />
 
@@ -64,7 +64,7 @@ export default function OrderTimeline({ currentStageId, cancelled = false }: Pro
                       <CheckCircle2
                         className={`w-6 h-6 ${
                           isCurrent
-                            ? "text-[#FC8019] drop-shadow-[0_0_10px_rgba(252,128,25,0.8)]"
+                            ? "text-[#E23744] drop-shadow-[0_0_10px_rgba(226, 55, 68,0.8)]"
                             : "text-green-500"
                         }`}
                       />

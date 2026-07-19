@@ -53,8 +53,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               aria-live="polite"
               className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white/95 backdrop-blur-xl shadow-[0_18px_50px_rgba(28,28,28,0.16)] border pointer-events-auto ${
                 toast.type === "success" 
-                  ? "border-[#FC8019]/30 text-[#FC8019]" 
-                  : "border-[#EF4F5F]/30 text-[#EF4F5F]"
+                  ? "border-[#E23744]/30 text-[#E23744]" 
+                  : "border-[#E23744]/30 text-[#E23744]"
               }`}
             >
               {toast.type === "success" ? (

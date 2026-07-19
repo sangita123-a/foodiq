@@ -30,7 +30,7 @@ export default function PaymentRetryClient() {
         <button
           type="button"
           onClick={() => router.push("/checkout")}
-          className="bg-[#FC8019] text-white font-bold px-5 py-2 rounded-xl"
+          className="bg-[#E23744] text-white font-bold px-5 py-2 rounded-xl"
         >
           Go to Checkout
         </button>
@@ -92,14 +92,14 @@ export default function PaymentRetryClient() {
           <p className="text-[#6B7280] mb-2">
             Complete payment for order #{orderId.slice(0, 8)}
           </p>
-          <p className="text-2xl font-black text-[#FC8019] mb-8">
+          <p className="text-2xl font-black text-[#E23744] mb-8">
             ₹{amount.toLocaleString("en-IN")}
           </p>
           <button
             type="button"
             disabled={loading}
             onClick={handleRetry}
-            className="inline-flex items-center gap-2 bg-[#FC8019] hover:bg-[#E66F0D] text-white font-bold px-6 py-3 rounded-xl disabled:opacity-60"
+            className="inline-flex items-center gap-2 bg-[#E23744] hover:bg-[#C81E34] text-white font-bold px-6 py-3 rounded-xl disabled:opacity-60"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
             {loading ? "Processing..." : "Pay with Razorpay"}

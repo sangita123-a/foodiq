@@ -132,7 +132,7 @@ export default function PopularRestaurants() {
 
                     {/* Offer Tag */}
                     {restaurant.offer && (
-                      <div className="absolute top-3 left-3 bg-gradient-to-r from-[#FC8019] to-[#E26700] text-white text-[11px] font-black px-2.5 py-1 rounded-lg shadow-md uppercase tracking-wide flex items-center gap-1">
+                      <div className="absolute top-3 left-3 bg-gradient-to-r from-[#E23744] to-[#E26700] text-white text-[11px] font-black px-2.5 py-1 rounded-lg shadow-md uppercase tracking-wide flex items-center gap-1">
                         <Tag className="w-3 h-3" />
                         <span>{restaurant.offer}</span>
                       </div>

@@ -23,14 +23,14 @@ export default function OrdersFilterBar({ viewMode, setViewMode, search, setSear
             placeholder="Search Order ID or Customer..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
           />
         </div>
         
         <select 
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="w-full md:w-auto bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors appearance-none cursor-pointer text-sm"
+          className="w-full md:w-auto bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors appearance-none cursor-pointer text-sm"
         >
           <option value="All">All Statuses</option>
           <option value="New">New Orders</option>
@@ -40,7 +40,7 @@ export default function OrdersFilterBar({ viewMode, setViewMode, search, setSear
         </select>
 
         <select 
-          className="w-full md:w-auto bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors appearance-none cursor-pointer text-sm"
+          className="w-full md:w-auto bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors appearance-none cursor-pointer text-sm"
         >
           <option value="All">All Payments</option>
           <option value="Paid">Paid Online</option>
@@ -48,7 +48,7 @@ export default function OrdersFilterBar({ viewMode, setViewMode, search, setSear
         </select>
         
         <select 
-          className="w-full md:w-auto bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors appearance-none cursor-pointer text-sm"
+          className="w-full md:w-auto bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors appearance-none cursor-pointer text-sm"
         >
           <option value="Today">Today</option>
           <option value="Yesterday">Yesterday</option>
@@ -58,7 +58,7 @@ export default function OrdersFilterBar({ viewMode, setViewMode, search, setSear
       <div className="flex items-center gap-4 self-end xl:self-auto flex-shrink-0">
         
         <button className="flex items-center gap-2 bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] text-[#111827] px-4 py-2.5 rounded-xl text-sm font-bold transition-colors group">
-          <RefreshCw className="w-4 h-4 text-[#6B7280] group-hover:text-[#FC8019] transition-colors group-hover:animate-spin" />
+          <RefreshCw className="w-4 h-4 text-[#6B7280] group-hover:text-[#E23744] transition-colors group-hover:animate-spin" />
           Refresh
         </button>
 

@@ -59,7 +59,7 @@ export default function OfferFoodCard({ item, quantity, isUpdating, onUpdateQuan
 
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-baseline gap-2">
-            <span className="food-price text-[#FC8019]">₹{item.discounted_price}</span>
+            <span className="food-price text-[#E23744]">₹{item.discounted_price}</span>
             {hasDiscount && (
               <span className="text-sm text-[#9CA3AF] line-through">₹{item.original_price}</span>
             )}
@@ -69,7 +69,7 @@ export default function OfferFoodCard({ item, quantity, isUpdating, onUpdateQuan
             <button
               onClick={() => onUpdateQuantity(item.menu_item_id, 1)}
               disabled={isUpdating}
-              className="food-button min-h-0 flex items-center gap-1.5 bg-[#FC8019] hover:bg-[#E76F0B] disabled:opacity-50 text-white px-3 py-2 rounded-xl text-sm font-bold"
+              className="food-button min-h-0 flex items-center gap-1.5 bg-[#E23744] hover:bg-[#C81E34] disabled:opacity-50 text-white px-3 py-2 rounded-xl text-sm font-bold"
             >
               <Plus className="w-4 h-4" />
               Add

@@ -57,8 +57,8 @@ export default function DeliveryAddressSection({
                 onClick={() => onSelect(addr.id)}
                 className={`p-4 rounded-xl border cursor-pointer transition-all duration-300 relative ${
                   isSelected
-                    ? "border-primary bg-primary/5 shadow-[0_0_15px_rgba(252,128,25,0.15)]"
-                    : "border-[#E5E7EB] bg-white hover:border-[#FC8019]/40"
+                    ? "border-primary bg-primary/5 shadow-[0_0_15px_rgba(226, 55, 68,0.15)]"
+                    : "border-[#E5E7EB] bg-white hover:border-[#E23744]/40"
                 }`}
               >
                 {isSelected && (

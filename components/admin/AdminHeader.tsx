@@ -37,7 +37,7 @@ export default function AdminHeader({ title = "Admin Console" }: AdminHeaderProp
       <div className="flex items-center gap-4">
         <NotificationBell endpoint="/api/notifications" inboxHref="/admin/notifications" />
         <div className="flex items-center gap-2 bg-[#F8FAFC] border border-[#E5E7EB] rounded-full pl-2 pr-4 py-1.5">
-          <div className="w-8 h-8 rounded-full bg-[#FC8019]/15 flex items-center justify-center text-[#FC8019] font-black text-sm">
+          <div className="w-8 h-8 rounded-full bg-[#E23744]/15 flex items-center justify-center text-[#E23744] font-black text-sm">
             {adminName.charAt(0).toUpperCase()}
           </div>
           <span className="text-sm font-bold text-[#111827] hidden sm:block">{adminName}</span>

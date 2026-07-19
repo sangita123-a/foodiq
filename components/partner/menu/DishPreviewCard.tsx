@@ -51,7 +51,7 @@ export default function DishPreviewCard({ dish }: DishPreviewCardProps) {
               </span>
             )}
             {dish.badges.trending && (
-              <span className="bg-[#FC8019] text-white text-xs font-black px-3 py-1 rounded-full shadow-lg">
+              <span className="bg-[#E23744] text-white text-xs font-black px-3 py-1 rounded-full shadow-lg">
                 Trending
               </span>
             )}
@@ -128,7 +128,7 @@ export default function DishPreviewCard({ dish }: DishPreviewCardProps) {
             )}
             {dish.calories && (
               <div className="flex items-center gap-1.5 bg-[#F8FAFC] border border-[#E5E7EB] px-2.5 py-1 rounded-md">
-                <Flame className="w-3 h-3 text-orange-400" />
+                <Flame className="w-3 h-3 text-[#E23744]" />
                 <span className="text-xs font-bold text-[#6B7280]">{dish.calories} kcal</span>
               </div>
             )}
@@ -142,7 +142,7 @@ export default function DishPreviewCard({ dish }: DishPreviewCardProps) {
             )}
           </div>
 
-          <button className="w-full bg-[#F8FAFC] hover:bg-[#FC8019]/20 hover:text-[#FC8019] border border-[#E5E7EB] hover:border-[#FC8019]/50 text-[#111827] py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 group">
+          <button className="w-full bg-[#F8FAFC] hover:bg-[#E23744]/20 hover:text-[#E23744] border border-[#E5E7EB] hover:border-[#E23744]/50 text-[#111827] py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 group">
             <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" /> Add to Cart
           </button>
 

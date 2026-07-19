@@ -69,7 +69,7 @@ export default function HistoryTable({ orders, onViewDetails }: HistoryTableProp
                   <td className="px-6 py-4">
                     <p className="text-[#111827] font-black">₹{order.grandTotal}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className={`text-[10px] uppercase font-bold tracking-wider ${order.paymentStatus === 'Paid' ? 'text-green-400' : 'text-orange-400'}`}>
+                      <span className={`text-[10px] uppercase font-bold tracking-wider ${order.paymentStatus === 'Paid' ? 'text-green-400' : 'text-[#E23744]'}`}>
                         {order.paymentStatus}
                       </span>
                       <span className="text-[#9CA3AF] text-xs">• {order.paymentMethod}</span>
@@ -88,7 +88,7 @@ export default function HistoryTable({ orders, onViewDetails }: HistoryTableProp
                     <div className="flex items-center justify-end gap-2 relative">
                       <button 
                         onClick={() => onViewDetails(order)}
-                        className="p-2 rounded-lg bg-[#F8FAFC] border border-[#E5E7EB] text-[#6B7280] hover:text-[#FC8019] hover:bg-[#FC8019]/20 hover:border-[#FC8019]/50 transition-colors tooltip-trigger relative"
+                        className="p-2 rounded-lg bg-[#F8FAFC] border border-[#E5E7EB] text-[#6B7280] hover:text-[#E23744] hover:bg-[#E23744]/20 hover:border-[#E23744]/50 transition-colors tooltip-trigger relative"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
@@ -116,7 +116,7 @@ export default function HistoryTable({ orders, onViewDetails }: HistoryTableProp
                               <Printer className="w-4 h-4 text-[#6B7280]" /> Print Receipt
                             </button>
                             <button className="w-full px-4 py-3 text-sm text-[#6B7280] hover:text-[#111827] hover:bg-[#F8FAFC] transition-colors flex items-center gap-2">
-                              <RotateCw className="w-4 h-4 text-[#FC8019]" /> Reorder Summary
+                              <RotateCw className="w-4 h-4 text-[#E23744]" /> Reorder Summary
                             </button>
                           </motion.div>
                         )}

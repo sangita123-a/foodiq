@@ -23,7 +23,7 @@ export default function LiveOrders({ orders = [], onAccept, onReject }: LiveOrde
         <div className="flex items-center gap-3">
           <h2 className="text-xl font-bold text-[#111827]">Live Orders</h2>
           {newCount > 0 && (
-            <span className="bg-red-500/20 text-[#FC8019] text-xs font-bold px-2 py-1 rounded-md animate-pulse">
+            <span className="bg-red-500/20 text-[#E23744] text-xs font-bold px-2 py-1 rounded-md animate-pulse">
               {newCount} New
             </span>
           )}
@@ -49,7 +49,7 @@ export default function LiveOrders({ orders = [], onAccept, onReject }: LiveOrde
               
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="font-mono text-sm text-[#FC8019] font-bold">
+                  <span className="font-mono text-sm text-[#E23744] font-bold">
                     #{String(order.id).slice(0, 8)}
                   </span>
                   <span className="text-xs text-[#9CA3AF] flex items-center gap-1">

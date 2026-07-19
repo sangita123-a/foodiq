@@ -78,7 +78,7 @@ export default function DeliveryDashboardPage() {
               <p className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF]">
                 {stat.label}
               </p>
-              <stat.icon className="w-4 h-4 text-[#FC8019]" />
+              <stat.icon className="w-4 h-4 text-[#E23744]" />
             </div>
             <p className="text-2xl font-black text-[#111827]">{stat.value}</p>
           </div>
@@ -89,7 +89,7 @@ export default function DeliveryDashboardPage() {
         <section className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-black text-[#111827]">Assigned Orders</h2>
-            <Link href="/delivery/orders" className="text-sm font-bold text-[#FC8019]">
+            <Link href="/delivery/orders" className="text-sm font-bold text-[#E23744]">
               View all
             </Link>
           </div>
@@ -108,7 +108,7 @@ export default function DeliveryDashboardPage() {
                       {order.customer.address || "Customer address"}
                     </p>
                   </div>
-                  <span className="text-xs font-bold px-2 py-1 rounded-lg bg-[#FC8019]/10 text-[#FC8019]">
+                  <span className="text-xs font-bold px-2 py-1 rounded-lg bg-[#E23744]/10 text-[#E23744]">
                     {STATUS_LABELS[order.assignment_status || ""] ||
                       order.assignment_status}
                   </span>
@@ -146,7 +146,7 @@ export default function DeliveryDashboardPage() {
                   </div>
                   <Link
                     href={`/delivery/orders/${order.id}`}
-                    className="text-xs font-bold text-[#FC8019]"
+                    className="text-xs font-bold text-[#E23744]"
                   >
                     Details
                   </Link>
@@ -155,7 +155,7 @@ export default function DeliveryDashboardPage() {
                   <button
                     type="button"
                     onClick={() => handleAccept(order.id)}
-                    className="flex-1 bg-[#FC8019] hover:bg-[#E66F0D] text-white text-sm font-bold py-2 rounded-lg"
+                    className="flex-1 bg-[#E23744] hover:bg-[#C81E34] text-white text-sm font-bold py-2 rounded-lg"
                   >
                     Accept
                   </button>

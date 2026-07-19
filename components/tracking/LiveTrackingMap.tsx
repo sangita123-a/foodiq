@@ -112,7 +112,7 @@ export default function LiveTrackingMap({
     };
 
     upsert("restaurant", restaurant, "#6B7280", "R");
-    upsert("customer", customer, "#FC8019", "H");
+    upsert("customer", customer, "#E23744", "H");
     upsert("rider", rider, "#111827", "🛵");
 
     // Route line restaurant → rider → customer (when available)
@@ -127,7 +127,7 @@ export default function LiveTrackingMap({
     }
     if (linePts.length >= 2) {
       markersRef.current.route = L.polyline(linePts, {
-        color: "#FC8019",
+        color: "#E23744",
         weight: 4,
         opacity: 0.75,
         dashArray: "8 10",

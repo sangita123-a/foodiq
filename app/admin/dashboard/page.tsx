@@ -21,7 +21,7 @@ export default function AdminDashboardPage() {
   const cards = useMemo(
     () => [
       { title: "Total Users", value: data?.totalUsers ?? 0, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
-      { title: "Total Restaurants", value: data?.totalRestaurants ?? 0, icon: Store, color: "text-[#FC8019]", bg: "bg-[#FC8019]/10" },
+      { title: "Total Restaurants", value: data?.totalRestaurants ?? 0, icon: Store, color: "text-[#E23744]", bg: "bg-[#E23744]/10" },
       { title: "Total Orders", value: data?.totalOrders ?? 0, icon: ShoppingBag, color: "text-purple-500", bg: "bg-purple-500/10" },
       { title: "Total Revenue", value: data?.totalRevenue ?? 0, icon: DollarSign, color: "text-green-500", bg: "bg-green-500/10", money: true },
       { title: "Today's Orders", value: data?.todaysOrders ?? 0, icon: Clock, color: "text-sky-500", bg: "bg-sky-500/10" },
@@ -77,7 +77,7 @@ export default function AdminDashboardPage() {
             {(data?.weekly || []).map((d) => (
               <div key={d.day} className="flex-1 flex flex-col items-center gap-2">
                 <div
-                  className="w-full max-w-[36px] bg-[#FC8019]/25 border border-[#FC8019]/40 rounded-t-lg"
+                  className="w-full max-w-[36px] bg-[#E23744]/25 border border-[#E23744]/40 rounded-t-lg"
                   style={{ height: `${Math.max(8, Math.round((d.revenue / weeklyMax) * 100))}%` }}
                   title={formatCurrency(d.revenue)}
                 />

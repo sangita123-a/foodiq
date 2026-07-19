@@ -20,7 +20,7 @@ export default function RestaurantCart({ totalItems, totalPrice }: RestaurantCar
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
           className="fixed bottom-6 right-4 md:right-8 z-50 w-[calc(100%-2rem)] md:w-auto"
         >
-          <Link href="/checkout" className="bg-[#FC8019] text-white rounded-2xl shadow-[0_10px_40px_rgba(252,128,25,0.4)] flex items-center justify-between px-6 py-4 border border-[#E5E7EB] md:min-w-[320px] overflow-hidden group cursor-pointer hover:bg-[#E76F0B] transition-colors block">
+          <Link href="/checkout" className="bg-[#E23744] text-white rounded-2xl shadow-[0_10px_40px_rgba(226, 55, 68,0.4)] flex items-center justify-between px-6 py-4 border border-[#E5E7EB] md:min-w-[320px] overflow-hidden group cursor-pointer hover:bg-[#C81E34] transition-colors block">
             
             {/* Ambient background glow */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>

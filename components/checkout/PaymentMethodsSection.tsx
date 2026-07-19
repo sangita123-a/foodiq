@@ -89,8 +89,8 @@ export default function PaymentMethodsSection({ selectedMethod, onSelect }: Prop
               onClick={() => onSelect(option.id)}
               className={`p-4 rounded-xl border flex items-start gap-3 text-left transition-all duration-300 ${
                 isSelected
-                  ? "border-primary bg-primary/5 text-primary shadow-[0_0_15px_rgba(252,128,25,0.15)]"
-                  : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#FC8019]/40 hover:text-[#111827]"
+                  ? "border-primary bg-primary/5 text-primary shadow-[0_0_15px_rgba(226, 55, 68,0.15)]"
+                  : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#E23744]/40 hover:text-[#111827]"
               }`}
             >
               <span className="mt-0.5">{option.icon}</span>

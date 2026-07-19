@@ -51,7 +51,7 @@ export default function NotificationCard({ notification, onMarkAsRead, onDelete 
       exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
       className={`relative bg-[#F8FAFC] rounded-2xl p-5 md:p-6 border flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all duration-300 hover:bg-[#F8FAFC] group ${
         !notification.isRead 
-          ? "border-l-4 border-l-[#FC8019] border-y-white/5 border-r-white/5 shadow-lg" 
+          ? "border-l-4 border-l-[#E23744] border-y-white/5 border-r-white/5 shadow-lg" 
           : "border-l-4 border-l-transparent border-y-white/5 border-r-white/5 opacity-80"
       }`}
     >
@@ -68,7 +68,7 @@ export default function NotificationCard({ notification, onMarkAsRead, onDelete 
               {notification.title}
             </h3>
             {!notification.isRead && (
-              <span className="w-2 h-2 bg-primary rounded-full shadow-[0_0_8px_rgba(252,128,25,0.8)]"></span>
+              <span className="w-2 h-2 bg-primary rounded-full shadow-[0_0_8px_rgba(226, 55, 68,0.8)]"></span>
             )}
           </div>
           <p className="text-[#6B7280] text-sm leading-relaxed mb-2 max-w-2xl">

@@ -109,7 +109,7 @@ export default function ContactForm() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 pt-4">
-          <button type="submit" disabled={isSubmitting} className="flex-1 bg-primary hover:bg-[#E76F0B] text-white px-6 py-4 rounded-xl font-black transition-colors shadow-xl flex items-center justify-center gap-2 disabled:opacity-50">
+          <button type="submit" disabled={isSubmitting} className="flex-1 bg-primary hover:bg-[#C81E34] text-white px-6 py-4 rounded-xl font-black transition-colors shadow-xl flex items-center justify-center gap-2 disabled:opacity-50">
             {isSubmitting ? "Sending..." : "Send Message"} <Send className="w-4 h-4" />
           </button>
           <button type="reset" className="w-full sm:w-auto bg-white hover:bg-[#F8FAFC] border border-[#E5E7EB] text-white px-6 py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2">

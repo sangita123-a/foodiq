@@ -27,7 +27,7 @@ export default function OffersAnalytics({ data }: OffersAnalyticsProps) {
       {/* Daily Usage Chart */}
       <div className="xl:col-span-2 bg-[#FFFFFF] rounded-3xl p-6 border border-[#E5E7EB] shadow-xl">
         <h3 className="text-xl font-black text-[#111827] flex items-center gap-2 mb-6">
-          <BarChart2 className="w-5 h-5 text-[#FC8019]" /> Daily Coupon Usage
+          <BarChart2 className="w-5 h-5 text-[#E23744]" /> Daily Coupon Usage
         </h3>
         
         <div className="h-64 flex items-end justify-between gap-2 md:gap-6 pt-4 border-b border-[#E5E7EB] pb-4">
@@ -40,7 +40,7 @@ export default function OffersAnalytics({ data }: OffersAnalyticsProps) {
                 initial={{ height: 0 }}
                 animate={{ height: d.height }}
                 transition={{ duration: 1, delay: idx * 0.1, type: "spring" }}
-                className={`w-full max-w-[40px] rounded-t-lg transition-colors ${d.height === '100%' ? 'bg-[#FC8019]' : 'bg-[#F8FAFC] border-x border-t border-[#E5E7EB] group-hover:bg-[#F8FAFC]'}`}
+                className={`w-full max-w-[40px] rounded-t-lg transition-colors ${d.height === '100%' ? 'bg-[#E23744]' : 'bg-[#F8FAFC] border-x border-t border-[#E5E7EB] group-hover:bg-[#F8FAFC]'}`}
               />
             </div>
           ))}

@@ -51,9 +51,9 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
   return (
     <div className="bg-[#F8FAFC] rounded-[24px] border border-[#E5E7EB] overflow-hidden sticky top-[100px]">
       <div className="p-6 md:p-8 flex flex-col items-center border-b border-[#E5E7EB] relative overflow-hidden">
-        <div className="absolute inset-0 bg-[#FC8019]/5 blur-3xl pointer-events-none"></div>
+        <div className="absolute inset-0 bg-[#E23744]/5 blur-3xl pointer-events-none"></div>
 
-        <div className="w-24 h-24 rounded-full border-2 border-primary overflow-hidden relative z-10 mb-4 shadow-[0_0_20px_rgba(252,128,25,0.2)]">
+        <div className="w-24 h-24 rounded-full border-2 border-primary overflow-hidden relative z-10 mb-4 shadow-[0_0_20px_rgba(226, 55, 68,0.2)]">
           <SafeImage
             src={user?.profile_image_url}
             fallback={DEFAULT_AVATAR}

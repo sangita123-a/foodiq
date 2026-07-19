@@ -15,7 +15,7 @@ export default function BusinessAddress({ data, onChange }: BusinessAddressProps
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-black text-[#111827] flex items-center gap-2 mb-2">
-          <MapPin className="w-6 h-6 text-[#FC8019]" /> Business Address
+          <MapPin className="w-6 h-6 text-[#E23744]" /> Business Address
         </h2>
         <p className="text-[#6B7280] text-sm mb-6">Set your restaurant's physical location for delivery and pickup.</p>
       </div>
@@ -27,7 +27,7 @@ export default function BusinessAddress({ data, onChange }: BusinessAddressProps
             type="text" 
             value={data.street}
             onChange={(e) => onChange({ street: e.target.value })}
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
           />
         </div>
         <div>
@@ -36,7 +36,7 @@ export default function BusinessAddress({ data, onChange }: BusinessAddressProps
             type="text" 
             value={data.city}
             onChange={(e) => onChange({ city: e.target.value })}
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
           />
         </div>
         <div>
@@ -45,7 +45,7 @@ export default function BusinessAddress({ data, onChange }: BusinessAddressProps
             type="text" 
             value={data.state}
             onChange={(e) => onChange({ state: e.target.value })}
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
           />
         </div>
         <div className="md:col-span-2">
@@ -54,7 +54,7 @@ export default function BusinessAddress({ data, onChange }: BusinessAddressProps
             type="text" 
             value={data.pincode}
             onChange={(e) => onChange({ pincode: e.target.value })}
-            className="w-full md:w-1/2 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+            className="w-full md:w-1/2 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
           />
         </div>
       </div>
@@ -71,7 +71,7 @@ export default function BusinessAddress({ data, onChange }: BusinessAddressProps
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             >
-              <MapPin className="w-10 h-10 text-[#FC8019] drop-shadow-[0_10px_10px_rgba(252,128,25,0.5)]" />
+              <MapPin className="w-10 h-10 text-[#E23744] drop-shadow-[0_10px_10px_rgba(226, 55, 68,0.5)]" />
             </motion.div>
           </div>
 

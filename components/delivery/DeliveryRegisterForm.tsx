@@ -56,7 +56,7 @@ export default function DeliveryRegisterForm() {
 
   return (
     <div className="w-full h-full min-h-[50vh] lg:min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6 lg:p-16 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-[#FC8019]/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-64 h-64 bg-[#E23744]/10 rounded-full blur-[100px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -95,7 +95,7 @@ export default function DeliveryRegisterForm() {
                   onChange={(e) => update(field.key, e.target.value)}
                   placeholder={field.placeholder}
                   required={!["vehicle_details", "license_number"].includes(field.key)}
-                  className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-[#FC8019] focus:ring-1 focus:ring-[#FC8019]"
+                  className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-[#E23744] focus:ring-1 focus:ring-[#E23744]"
                 />
               </div>
             </div>
@@ -106,7 +106,7 @@ export default function DeliveryRegisterForm() {
             <select
               value={form.vehicle_type}
               onChange={(e) => update("vehicle_type", e.target.value)}
-              className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 focus:outline-none focus:border-[#FC8019]"
+              className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 focus:outline-none focus:border-[#E23744]"
             >
               <option value="Bike">Bike</option>
               <option value="Scooter">Scooter</option>
@@ -118,7 +118,7 @@ export default function DeliveryRegisterForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#FC8019] hover:bg-[#E66F0D] text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-60 mt-2"
+            className="w-full bg-[#E23744] hover:bg-[#C81E34] text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-60 mt-2"
           >
             {loading ? "Creating account..." : "Register"}
             <ArrowRight className="w-5 h-5" />
@@ -127,7 +127,7 @@ export default function DeliveryRegisterForm() {
 
         <p className="text-center text-sm text-[#6B7280] mt-6">
           Already a rider?{" "}
-          <Link href="/delivery/login" className="text-[#FC8019] font-bold hover:underline">
+          <Link href="/delivery/login" className="text-[#E23744] font-bold hover:underline">
             Sign in
           </Link>
         </p>

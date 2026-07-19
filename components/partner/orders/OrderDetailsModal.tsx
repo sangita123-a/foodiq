@@ -40,7 +40,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
             <div className="p-6 border-b border-[#E5E7EB] flex items-center justify-between bg-[#FFFFFF]">
               <div>
                 <h2 className="text-2xl font-black text-[#111827] flex items-center gap-2">
-                  <Receipt className="w-6 h-6 text-[#FC8019]" /> Order {order.id}
+                  <Receipt className="w-6 h-6 text-[#E23744]" /> Order {order.id}
                 </h2>
                 <p className="text-[#6B7280] text-sm mt-1">{order.orderTime}</p>
               </div>
@@ -83,7 +83,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
                   {order.items.map((item, idx) => (
                     <div key={item.id} className={`p-3 flex justify-between gap-4 ${idx !== order.items.length - 1 ? 'border-b border-[#E5E7EB]' : ''}`}>
                       <div className="flex gap-3">
-                        <span className="text-[#FC8019] font-black bg-[#FC8019]/10 px-2 py-0.5 rounded text-sm h-fit">{item.quantity}x</span>
+                        <span className="text-[#E23744] font-black bg-[#E23744]/10 px-2 py-0.5 rounded text-sm h-fit">{item.quantity}x</span>
                         <div>
                           <p className="text-[#111827] font-bold text-sm">{item.name}</p>
                           {item.customizations && item.customizations.length > 0 && (
@@ -125,11 +125,11 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
                   </div>
                   <div className="pt-3 border-t border-[#E5E7EB] flex justify-between items-center mt-2">
                     <span className="text-[#111827] font-bold">Grand Total</span>
-                    <span className="text-2xl font-black text-[#FC8019]">₹{order.grandTotal}</span>
+                    <span className="text-2xl font-black text-[#E23744]">₹{order.grandTotal}</span>
                   </div>
                   
                   <div className="pt-4 mt-2">
-                    <div className={`px-4 py-3 rounded-xl border flex items-center justify-between font-bold text-sm ${order.paymentStatus === 'Paid' ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-orange-500/10 border-orange-500/20 text-orange-400'}`}>
+                    <div className={`px-4 py-3 rounded-xl border flex items-center justify-between font-bold text-sm ${order.paymentStatus === 'Paid' ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-[#E23744]/10 border-[#E23744]/20 text-[#E23744]'}`}>
                       <span>Payment Status</span>
                       <span className="uppercase tracking-wider">{order.paymentStatus} ({order.paymentMethod})</span>
                     </div>

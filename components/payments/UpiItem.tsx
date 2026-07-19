@@ -21,7 +21,7 @@ export default function UpiItem({ upi, onEdit, onRemove }: Props) {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="group flex flex-col items-center justify-between gap-4 rounded-2xl border border-[#ECECEC] bg-white p-4 shadow-[0_6px_18px_rgba(28,28,28,0.05)] transition-all duration-300 hover:border-[#FC8019]/30 hover:shadow-[0_10px_26px_rgba(28,28,28,0.08)] sm:flex-row md:p-6"
+      className="group flex flex-col items-center justify-between gap-4 rounded-2xl border border-[#ECECEC] bg-white p-4 shadow-[0_6px_18px_rgba(28,28,28,0.05)] transition-all duration-300 hover:border-[#E23744]/30 hover:shadow-[0_10px_26px_rgba(28,28,28,0.08)] sm:flex-row md:p-6"
     >
       <div className="flex items-center gap-4 w-full sm:w-auto">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#ECECEC] bg-[#F8F9FA] transition-colors group-hover:border-primary/50">
@@ -36,7 +36,7 @@ export default function UpiItem({ upi, onEdit, onRemove }: Props) {
       <div className="flex items-center gap-3 w-full sm:w-auto">
         <button 
           onClick={() => onEdit(upi)}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-4 py-2.5 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#FC8019]/30 hover:bg-white sm:flex-none"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-4 py-2.5 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#E23744]/30 hover:bg-white sm:flex-none"
         >
           <Edit2 className="w-4 h-4" /> Edit
         </button>

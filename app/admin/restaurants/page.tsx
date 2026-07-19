@@ -65,7 +65,7 @@ export default function AdminRestaurantsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search restaurants…"
-            className="bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#FC8019]"
+            className="bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#E23744]"
           />
           <select
             value={status}
@@ -131,7 +131,7 @@ export default function AdminRestaurantsPage() {
                         <button type="button" onClick={() => setApproval(r.id, "rejected")} className="text-xs font-bold text-red-500">Reject</button>
                       </>
                     )}
-                    <button type="button" onClick={() => toggleActive(r)} className="text-xs font-bold text-[#FC8019]">
+                    <button type="button" onClick={() => toggleActive(r)} className="text-xs font-bold text-[#E23744]">
                       {r.is_active ? "Suspend" : "Activate"}
                     </button>
                     <button type="button" onClick={() => remove(r.id)} className="text-xs font-bold text-red-500">Delete</button>

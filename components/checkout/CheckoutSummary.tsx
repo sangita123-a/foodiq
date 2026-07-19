@@ -36,7 +36,7 @@ export default function CheckoutSummary({
     <div className="sticky top-[100px] rounded-2xl border border-[#ECECEC] bg-white p-6 shadow-[0_12px_32px_rgba(28,28,28,0.08)] md:p-8">
       <div className="mb-6 flex items-start gap-4 border-b border-[#ECECEC] pb-6">
         <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-[#F8F9FA]">
-          <Utensils className="h-6 w-6 text-[#FC8019]" />
+          <Utensils className="h-6 w-6 text-[#E23744]" />
         </div>
         <div>
           <h3 className="mb-1 text-xl font-bold tracking-[-0.025em] text-[#1C1C1C]">{restaurantName}</h3>
@@ -87,14 +87,14 @@ export default function CheckoutSummary({
 
       <div className="flex justify-between items-center mb-8">
         <span className="text-lg font-bold text-[#1C1C1C]">Grand Total</span>
-        <span className="text-2xl font-black text-[#FC8019]">₹{grandTotal}</span>
+        <span className="text-2xl font-black text-[#E23744]">₹{grandTotal}</span>
       </div>
 
       <button
         type="button"
         onClick={onPlaceOrder}
         disabled={isSubmitting || items.length === 0}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FC8019] py-4 font-bold text-white shadow-[0_8px_20px_rgba(252,128,25,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#EF4F5F] hover:shadow-[0_12px_26px_rgba(239,79,95,0.22)] disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#E23744] py-4 font-bold text-white shadow-[0_8px_20px_rgba(226, 55, 68,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#E23744] hover:shadow-[0_12px_26px_rgba(239,79,95,0.22)] disabled:opacity-50"
       >
         {buttonLabel}
         {!isSubmitting && <ArrowRight className="w-5 h-5" />}

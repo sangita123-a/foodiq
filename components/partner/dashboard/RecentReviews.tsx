@@ -43,7 +43,7 @@ export default function RecentReviews() {
               "{review.text}"
             </p>
 
-            <button className="flex items-center gap-2 text-sm text-[#FC8019] font-bold hover:text-[#E66F0D] transition-colors">
+            <button className="flex items-center gap-2 text-sm text-[#E23744] font-bold hover:text-[#C81E34] transition-colors">
               <MessageSquareReply className="w-4 h-4" /> Reply to {review.name.split(' ')[0]}
             </button>
           </div>

@@ -30,7 +30,7 @@ export default function DeliveryMapPage() {
               onClick={() => setSelectedId(order.id)}
               className={`w-full text-left border rounded-xl p-4 transition-colors ${
                 activeId === order.id
-                  ? "border-[#FC8019] bg-[#FC8019]/5"
+                  ? "border-[#E23744] bg-[#E23744]/5"
                   : "border-[#E5E7EB] bg-white hover:bg-[#F8FAFC]"
               }`}
             >
@@ -40,7 +40,7 @@ export default function DeliveryMapPage() {
               </p>
               <Link
                 href={`/delivery/orders/${order.id}`}
-                className="inline-block mt-2 text-xs font-bold text-[#FC8019]"
+                className="inline-block mt-2 text-xs font-bold text-[#E23744]"
                 onClick={(e) => e.stopPropagation()}
               >
                 Order details

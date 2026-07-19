@@ -30,7 +30,7 @@ export default function FeaturedOfferBanner({ offer }: FeaturedOfferBannerProps)
             className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-r from-[#FFFFFF] to-[#FC8019]/20"></div>
+          <div className="w-full h-full bg-gradient-to-r from-[#FFFFFF] to-[#E23744]/20"></div>
         )}
       </div>
 
@@ -41,7 +41,7 @@ export default function FeaturedOfferBanner({ offer }: FeaturedOfferBannerProps)
       {/* Content */}
       <div className="absolute inset-0 p-8 md:p-12 flex flex-col justify-end">
         <div className="flex items-center gap-2 mb-4">
-          <span className="bg-[#FC8019] text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex items-center gap-1">
+          <span className="bg-[#E23744] text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex items-center gap-1">
             <Sparkles className="w-3 h-3" /> Featured Campaign
           </span>
           <span className="bg-[#F8FAFC] backdrop-blur-md text-[#111827] text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full border border-[#E5E7EB]">
@@ -62,7 +62,7 @@ export default function FeaturedOfferBanner({ offer }: FeaturedOfferBannerProps)
             <span className="text-xl font-black text-[#111827] uppercase tracking-widest">{offer.code}</span>
           </div>
 
-          <button className="bg-[#FC8019] hover:bg-[#E66F0D] text-white px-6 py-4 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg shadow-[#FC8019]/20 h-full">
+          <button className="bg-[#E23744] hover:bg-[#C81E34] text-white px-6 py-4 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg shadow-[#E23744]/20 h-full">
             View Analytics <ArrowRight className="w-4 h-4" />
           </button>
         </div>

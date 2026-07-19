@@ -20,7 +20,7 @@ export default function WorkingHours({ data, onChange }: WorkingHoursProps) {
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-black text-[#111827] flex items-center gap-2 mb-2">
-          <Clock className="w-6 h-6 text-[#FC8019]" /> Working Hours
+          <Clock className="w-6 h-6 text-[#E23744]" /> Working Hours
         </h2>
         <p className="text-[#6B7280] text-sm mb-6">Define your restaurant's operating schedule.</p>
       </div>
@@ -57,7 +57,7 @@ export default function WorkingHours({ data, onChange }: WorkingHoursProps) {
                   type="time" 
                   value={day.openTime}
                   onChange={(e) => handleUpdateDay(idx, { openTime: e.target.value })}
-                  className="bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm flex-1 sm:w-36"
+                  className="bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm flex-1 sm:w-36"
                 />
               </div>
               
@@ -69,7 +69,7 @@ export default function WorkingHours({ data, onChange }: WorkingHoursProps) {
                   type="time" 
                   value={day.closeTime}
                   onChange={(e) => handleUpdateDay(idx, { closeTime: e.target.value })}
-                  className="bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm flex-1 sm:w-36"
+                  className="bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm flex-1 sm:w-36"
                 />
               </div>
             </div>

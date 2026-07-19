@@ -64,7 +64,7 @@ export default function AdminMenuPage() {
         <div className="flex flex-wrap gap-2">
           {(categories || []).map((c) => (
             <span key={c.id} className="bg-white border border-[#E5E7EB] rounded-full px-4 py-2 text-sm font-bold text-[#6B7280]">
-              {c.name} <span className="text-[#FC8019]">({c.restaurant_count || 0})</span>
+              {c.name} <span className="text-[#E23744]">({c.restaurant_count || 0})</span>
             </span>
           ))}
         </div>

@@ -217,7 +217,7 @@ export default function CuisineDetailView({ slug }: Props) {
                 {restaurants.map((restaurant) => (
                 <article
                   key={restaurant.id}
-                  className="group relative flex min-w-0 gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-3 transition-[transform,border-color,background-color] duration-300 hover:-translate-y-1 hover:border-[#FC8019]/50 hover:bg-white/[0.06]"
+                  className="group relative flex min-w-0 gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-3 transition-[transform,border-color,background-color] duration-300 hover:-translate-y-1 hover:border-[#E23744]/50 hover:bg-white/[0.06]"
                 >
                   <Link
                     href={`/restaurant/${restaurant.id}`}
@@ -253,7 +253,7 @@ export default function CuisineDetailView({ slug }: Props) {
                   <button
                     type="button"
                     onClick={() => toggleRestaurant(restaurant.id)}
-                    className="absolute right-3 top-3 rounded-full p-1.5 text-[#6B7280] transition-colors hover:bg-[#F8FAFC] hover:text-[#FC8019]"
+                    className="absolute right-3 top-3 rounded-full p-1.5 text-[#6B7280] transition-colors hover:bg-[#F8FAFC] hover:text-[#E23744]"
                     aria-label={
                       restaurantIds.has(restaurant.id)
                         ? "Remove restaurant from favorites"
@@ -263,7 +263,7 @@ export default function CuisineDetailView({ slug }: Props) {
                     <Heart
                       className={`h-4 w-4 ${
                         restaurantIds.has(restaurant.id)
-                          ? "fill-[#FC8019] text-[#FC8019]"
+                          ? "fill-[#E23744] text-[#E23744]"
                           : ""
                       }`}
                     />
@@ -399,7 +399,7 @@ export default function CuisineDetailView({ slug }: Props) {
           <div className="mb-8 flex justify-end">
             <Link
               href="/checkout"
-              className="inline-flex items-center gap-2 bg-[#FC8019] hover:bg-[#E76F0B] text-white px-6 py-3 rounded-xl font-bold transition-colors"
+              className="inline-flex items-center gap-2 bg-[#E23744] hover:bg-[#C81E34] text-white px-6 py-3 rounded-xl font-bold transition-colors"
             >
               <ShoppingCart className="w-5 h-5" />
               Proceed to Checkout

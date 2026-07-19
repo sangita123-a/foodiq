@@ -126,7 +126,7 @@ export default function MediaUploader({
 
       <div
         className={`${sizeClass} relative bg-[#F8FAFC] border border-dashed ${
-          dragging ? "border-[#FC8019] bg-[#FC8019]/5" : "border-[#E5E7EB]"
+          dragging ? "border-[#E23744] bg-[#E23744]/5" : "border-[#E5E7EB]"
         } overflow-hidden flex flex-col items-center justify-center cursor-pointer group transition-all`}
         onClick={() => !uploading && inputRef.current?.click()}
         onDragEnter={(e) => {
@@ -147,13 +147,13 @@ export default function MediaUploader({
           />
         ) : preview && isPdf ? (
           <div className="flex flex-col items-center gap-2 text-[#6B7280] z-10">
-            <FileText className="w-8 h-8 text-[#FC8019]" />
+            <FileText className="w-8 h-8 text-[#E23744]" />
             <span className="text-xs font-bold">PDF uploaded</span>
             <a
               href={preview}
               target="_blank"
               rel="noreferrer"
-              className="text-xs text-[#FC8019] underline"
+              className="text-xs text-[#E23744] underline"
               onClick={(e) => e.stopPropagation()}
             >
               Open
@@ -162,7 +162,7 @@ export default function MediaUploader({
         ) : (
           <div className="flex flex-col items-center text-[#9CA3AF] z-10 px-4 text-center">
             {isDoc ? <FileText className="w-7 h-7 mb-2" /> : <ImageIcon className="w-7 h-7 mb-2" />}
-            <span className="text-sm font-bold text-[#111827] group-hover:text-[#FC8019]">
+            <span className="text-sm font-bold text-[#111827] group-hover:text-[#E23744]">
               {label}
             </span>
             {hint && <span className="text-xs mt-1">{hint}</span>}
@@ -178,7 +178,7 @@ export default function MediaUploader({
             <span className="text-xs font-bold">{progress}%</span>
             <div className="w-2/3 h-1.5 bg-white/30 rounded-full mt-2 overflow-hidden">
               <div
-                className="h-full bg-[#FC8019] transition-all"
+                className="h-full bg-[#E23744] transition-all"
                 style={{ width: `${progress}%` }}
               />
             </div>

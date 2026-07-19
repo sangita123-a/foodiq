@@ -13,7 +13,7 @@ export default function OffersHeader() {
       className="mb-8"
     >
       <div className="flex items-center gap-2 text-sm text-[#9CA3AF] font-bold uppercase tracking-wider mb-4">
-        <Link href="/partner/dashboard" className="hover:text-[#FC8019] transition-colors">Dashboard</Link>
+        <Link href="/partner/dashboard" className="hover:text-[#E23744] transition-colors">Dashboard</Link>
         <ChevronRight className="w-4 h-4" />
         <span className="hover:text-[#111827] transition-colors cursor-default">Marketing</span>
         <ChevronRight className="w-4 h-4" />

@@ -97,16 +97,16 @@ export default function MenuItemCard({
           </div>
 
           <div className="flex justify-between items-start gap-2">
-            <Link href={`/food/${item.id}`} className="mb-1 line-clamp-1 text-[15px] font-semibold leading-5 text-[#1C1C1C] transition-colors group-hover:text-[#FC8019]">
+            <Link href={`/food/${item.id}`} className="mb-1 line-clamp-1 text-[15px] font-semibold leading-5 text-[#1C1C1C] transition-colors group-hover:text-[#E23744]">
               {item.name}
             </Link>
             <button 
               onClick={toggleFavorite}
               disabled={isTogglingFav}
-              className="rounded-full border border-transparent bg-[#F8F9FA] p-1.5 transition-all hover:border-[#FC8019]/25 hover:bg-white"
+              className="rounded-full border border-transparent bg-[#F8F9FA] p-1.5 transition-all hover:border-[#E23744]/25 hover:bg-white"
               aria-label={isFav ? `Remove ${item.name} from favorites` : `Add ${item.name} to favorites`}
             >
-              <Heart className={`w-5 h-5 ${isFav ? 'fill-[#EF4F5F] text-[#EF4F5F]' : 'text-[#686B78] hover:text-[#1C1C1C]'}`} />
+              <Heart className={`w-5 h-5 ${isFav ? 'fill-[#E23744] text-[#E23744]' : 'text-[#686B78] hover:text-[#1C1C1C]'}`} />
             </button>
           </div>
 
@@ -161,7 +161,7 @@ export default function MenuItemCard({
               <button 
                 onClick={() => onUpdateQuantity(item.id, -1)}
                 disabled={isUpdating}
-                className="flex h-full w-1/3 items-center justify-center text-[#FC8019] transition-colors hover:bg-[#F8F9FA] disabled:opacity-50"
+                className="flex h-full w-1/3 items-center justify-center text-[#E23744] transition-colors hover:bg-[#F8F9FA] disabled:opacity-50"
               >
                 <Minus className="w-4 h-4" />
               </button>
@@ -169,7 +169,7 @@ export default function MenuItemCard({
               <button 
                 onClick={() => onUpdateQuantity(item.id, 1)}
                 disabled={isUpdating}
-                className="flex h-full w-1/3 items-center justify-center text-[#FC8019] transition-colors hover:bg-[#F8F9FA] disabled:opacity-50"
+                className="flex h-full w-1/3 items-center justify-center text-[#E23744] transition-colors hover:bg-[#F8F9FA] disabled:opacity-50"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -178,7 +178,7 @@ export default function MenuItemCard({
             <button 
               onClick={() => onUpdateQuantity(item.id, 1)}
               disabled={isUpdating}
-              className="h-full w-full text-center text-sm font-bold tracking-wider text-[#FC8019] transition-colors hover:bg-[#F8F9FA] disabled:opacity-50"
+              className="h-full w-full text-center text-sm font-bold tracking-wider text-[#E23744] transition-colors hover:bg-[#F8F9FA] disabled:opacity-50"
             >
               ADD
             </button>

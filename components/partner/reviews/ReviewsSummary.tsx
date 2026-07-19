@@ -34,7 +34,7 @@ export default function ReviewsSummary({ data }: ReviewsSummaryProps) {
     { title: "Average Rating", value: data.averageRating, icon: Star, color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20", trend: "+0.2", isUp: true, isDecimal: true },
     { title: "Total Reviews", value: data.totalReviews, icon: MessageSquare, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20", trend: "+15%", isUp: true },
     { title: "Positive Reviews", value: data.positiveReviews, icon: Smile, color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20", trend: "+5%", isUp: true },
-    { title: "Neutral Reviews", value: data.neutralReviews, icon: Meh, color: "text-orange-400", bg: "bg-orange-400/10", border: "border-orange-400/20", trend: "-2%", isUp: false },
+    { title: "Neutral Reviews", value: data.neutralReviews, icon: Meh, color: "text-[#E23744]", bg: "bg-[#E23744]/10", border: "border-[#E23744]/20", trend: "-2%", isUp: false },
     { title: "Negative Reviews", value: data.negativeReviews, icon: Frown, color: "text-red-400", bg: "bg-red-400/10", border: "border-red-400/20", trend: "-8%", isUp: true } // Down is good here, so isUp=true for green color
   ];
 

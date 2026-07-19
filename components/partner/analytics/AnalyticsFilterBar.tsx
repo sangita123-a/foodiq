@@ -25,11 +25,11 @@ export default function AnalyticsFilterBar({
         
         {/* Date Range Picker (Simulated via Select for layout purposes) */}
         <div className="relative shrink-0">
-          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FC8019]" />
+          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#E23744]" />
           <select 
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value)}
-            className="w-48 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl pl-10 pr-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors appearance-none cursor-pointer text-sm font-bold"
+            className="w-48 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl pl-10 pr-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors appearance-none cursor-pointer text-sm font-bold"
           >
             <option value="Today">Today</option>
             <option value="Last 7 Days">Last 7 Days</option>
@@ -42,7 +42,7 @@ export default function AnalyticsFilterBar({
         {/* Compare Period Toggle */}
         <button 
           onClick={() => setComparePeriod(!comparePeriod)}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-colors border ${comparePeriod ? 'bg-[#FC8019]/10 border-[#FC8019]/30 text-[#FC8019]' : 'bg-[#F8FAFC] border-[#E5E7EB] text-[#6B7280] hover:text-[#111827] hover:border-[#E5E7EB]'}`}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-colors border ${comparePeriod ? 'bg-[#E23744]/10 border-[#E23744]/30 text-[#E23744]' : 'bg-[#F8FAFC] border-[#E5E7EB] text-[#6B7280] hover:text-[#111827] hover:border-[#E5E7EB]'}`}
         >
           <ArrowRightLeft className="w-4 h-4" />
           Compare Period
@@ -55,7 +55,7 @@ export default function AnalyticsFilterBar({
           onClick={() => setShowExportMenu(!showExportMenu)}
           className="flex items-center gap-2 bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] text-[#111827] px-5 py-2.5 rounded-xl text-sm font-bold transition-colors group shadow-lg"
         >
-          <Download className="w-4 h-4 text-[#6B7280] group-hover:text-[#FC8019] transition-colors" />
+          <Download className="w-4 h-4 text-[#6B7280] group-hover:text-[#E23744] transition-colors" />
           Export Report
         </button>
 

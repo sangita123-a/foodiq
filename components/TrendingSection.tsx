@@ -9,24 +9,24 @@ const trendingItems = [
     title: "Most Ordered",
     subtitle: "Local favorites",
     icon: Flame,
-    color: "from-orange-100 to-orange-50",
-    iconColor: "text-orange-500",
+    color: "from-[#FFF5F6] to-white",
+    iconColor: "text-[#E23744]",
   },
   {
     id: 2,
     title: "Fast Delivery",
     subtitle: "Under 30 mins",
     icon: Zap,
-    color: "from-orange-50 to-white",
-    iconColor: "text-[#FC8019]",
+    color: "from-[#FFF5F6] to-white",
+    iconColor: "text-[#E23744]",
   },
   {
     id: 3,
     title: "Best Offers",
     subtitle: "Up to 50% off",
     icon: Gift,
-    color: "from-orange-100 to-white",
-    iconColor: "text-[#FC8019]",
+    color: "from-[#FFF5F6] to-white",
+    iconColor: "text-[#E23744]",
   }
 ];
 

@@ -14,7 +14,7 @@ interface BrandingSettingsProps {
 export default function BrandingSettings({ data, onChange }: BrandingSettingsProps) {
   
   const presetColors = [
-    "#E66F0D", // Foodiq Red
+    "#C81E34", // Foodiq Red
     "#3b82f6", // Blue
     "#10b981", // Emerald
     "#f59e0b", // Amber
@@ -27,7 +27,7 @@ export default function BrandingSettings({ data, onChange }: BrandingSettingsPro
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-black text-[#111827] flex items-center gap-2 mb-2">
-          <Palette className="w-6 h-6 text-[#FC8019]" /> Branding
+          <Palette className="w-6 h-6 text-[#E23744]" /> Branding
         </h2>
         <p className="text-[#6B7280] text-sm mb-6">Customize how your restaurant appears to customers on Foodiq.</p>
       </div>
@@ -57,7 +57,7 @@ export default function BrandingSettings({ data, onChange }: BrandingSettingsPro
               type="text" 
               value={data.themeColor}
               onChange={(e) => onChange({ themeColor: e.target.value })}
-              className="w-24 bg-[#FFFFFF] border border-[#E5E7EB] rounded-lg px-3 py-2 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm font-mono"
+              className="w-24 bg-[#FFFFFF] border border-[#E5E7EB] rounded-lg px-3 py-2 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm font-mono"
             />
           </div>
         </div>

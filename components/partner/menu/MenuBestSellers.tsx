@@ -21,7 +21,7 @@ export default function MenuBestSellers({ bestSellers = [] }: MenuBestSellersPro
   return (
     <div className="mb-10">
       <h2 className="text-xl font-bold text-[#111827] flex items-center gap-2 mb-6">
-        All-Time Best Sellers <TrendingUp className="w-5 h-5 text-[#FC8019]" />
+        All-Time Best Sellers <TrendingUp className="w-5 h-5 text-[#E23744]" />
       </h2>
 
       <div className="flex gap-6 overflow-x-auto custom-scrollbar pb-4 -mx-4 px-4 md:mx-0 md:px-0">

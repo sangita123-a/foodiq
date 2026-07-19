@@ -14,7 +14,7 @@ export default function ReviewsEmptyState() {
       <div className="w-24 h-24 bg-[#F8FAFC] rounded-full flex items-center justify-center mb-6 border border-[#E5E7EB] relative">
         <MessageSquareOff className="w-10 h-10 text-[#9CA3AF]" />
         {/* Decorative elements */}
-        <div className="absolute top-0 -right-2 w-4 h-4 bg-[#FC8019]/20 rounded-full animate-ping"></div>
+        <div className="absolute top-0 -right-2 w-4 h-4 bg-[#E23744]/20 rounded-full animate-ping"></div>
         <div className="absolute bottom-4 -left-4 w-6 h-6 bg-yellow-500/20 rounded-full animate-pulse"></div>
       </div>
       

@@ -83,7 +83,7 @@ export default function Navbar() {
       <div className="hidden md:flex items-center space-x-3">
         <Link
           href="/search"
-          className="h-10 w-10 rounded-xl border border-[#ECECEC] bg-white hover:border-[#FC8019]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] flex items-center justify-center transition-all hover:-translate-y-0.5"
+          className="h-10 w-10 rounded-xl border border-[#ECECEC] bg-white hover:border-[#E23744]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] flex items-center justify-center transition-all hover:-translate-y-0.5"
           aria-label="Search"
         >
           <Search className="w-4 h-4" />
@@ -93,7 +93,7 @@ export default function Navbar() {
           <>
             <Link
               href="/cart"
-              className="relative h-10 w-10 rounded-xl border border-[#ECECEC] bg-white hover:border-[#FC8019]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] flex items-center justify-center transition-all hover:-translate-y-0.5"
+              className="relative h-10 w-10 rounded-xl border border-[#ECECEC] bg-white hover:border-[#E23744]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] flex items-center justify-center transition-all hover:-translate-y-0.5"
               aria-label={`Cart with ${cartCount} items`}
             >
               <ShoppingCart className="w-4 h-4" />
@@ -109,7 +109,7 @@ export default function Navbar() {
 
         <Link
           href="/restaurants"
-          className="h-10 px-5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm shadow-[0_6px_16px_rgba(252,128,25,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_9px_22px_rgba(252,128,25,0.28)] active:translate-y-0 inline-flex items-center"
+          className="h-10 px-5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm shadow-[0_6px_16px_rgba(226, 55, 68,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_9px_22px_rgba(226, 55, 68,0.28)] active:translate-y-0 inline-flex items-center"
         >
           Order Online
         </Link>
@@ -126,7 +126,7 @@ export default function Navbar() {
             </Link>
             <button
               onClick={handleLogout}
-              className="h-10 px-5 rounded-xl border border-[#ECECEC] hover:border-[#FC8019]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] font-medium text-sm transition-all hover:-translate-y-0.5 active:translate-y-0"
+              className="h-10 px-5 rounded-xl border border-[#ECECEC] hover:border-[#E23744]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] font-medium text-sm transition-all hover:-translate-y-0.5 active:translate-y-0"
             >
               Logout
             </button>
@@ -134,7 +134,7 @@ export default function Navbar() {
         ) : (
           <Link
             href="/login"
-            className="h-10 px-6 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm shadow-[0_6px_16px_rgba(252,128,25,0.2)] transition-all hover:-translate-y-0.5 active:translate-y-0 inline-flex items-center"
+            className="h-10 px-6 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm shadow-[0_6px_16px_rgba(226, 55, 68,0.2)] transition-all hover:-translate-y-0.5 active:translate-y-0 inline-flex items-center"
           >
             Login
           </Link>
@@ -163,7 +163,7 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   className={`px-4 py-3 rounded-xl font-medium ${
-                    link.isActive(pathname) ? "bg-[#FC8019]/10 text-[var(--color-primary)]" : "text-[#686B78] hover:bg-[#F8F9FA] hover:text-[#1C1C1C]"
+                    link.isActive(pathname) ? "bg-[#E23744]/10 text-[var(--color-primary)]" : "text-[#686B78] hover:bg-[#F8F9FA] hover:text-[#1C1C1C]"
                   }`}
                 >
                   {link.label}

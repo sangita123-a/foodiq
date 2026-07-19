@@ -27,7 +27,7 @@ export default function CreditCardItem({ card, onEdit, onRemove, onSetDefault }:
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
       className={`bg-[#F8FAFC] rounded-[24px] p-6 md:p-8 border hover:border-[#E5E7EB] transition-all duration-300 relative flex flex-col h-full group shadow-lg ${
-        card.isDefault ? "border-primary/50 shadow-[0_0_15px_rgba(252,128,25,0.1)]" : "border-[#E5E7EB]"
+        card.isDefault ? "border-primary/50 shadow-[0_0_15px_rgba(226, 55, 68,0.1)]" : "border-[#E5E7EB]"
       }`}
     >
       
@@ -70,7 +70,7 @@ export default function CreditCardItem({ card, onEdit, onRemove, onSetDefault }:
       <div className="flex flex-wrap items-center gap-3 mt-auto">
         <button 
           onClick={() => onEdit(card)}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-4 py-3 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#FC8019]/30 hover:bg-white"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-4 py-3 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#E23744]/30 hover:bg-white"
         >
           <Edit2 className="w-4 h-4" /> Edit
         </button>

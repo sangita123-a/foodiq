@@ -13,7 +13,7 @@ export default function AboutCTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="bg-gradient-to-br from-[#FC8019] to-[#E76F0B] rounded-[40px] p-12 md:p-20 text-center relative overflow-hidden shadow-[0_20px_60px_rgba(252,128,25,0.25)]"
+          className="bg-gradient-to-br from-[#E23744] to-[#C81E34] rounded-[40px] p-12 md:p-20 text-center relative overflow-hidden shadow-[0_20px_60px_rgba(226, 55, 68,0.25)]"
         >
           {/* Background Decor */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#F8FAFC] rounded-full blur-[80px] pointer-events-none translate-x-1/2 -translate-y-1/2"></div>

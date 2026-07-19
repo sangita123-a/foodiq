@@ -98,7 +98,7 @@ export default function AdminNotificationsPage() {
               <div
                 key={n.id}
                 className={`bg-white border border-[#E5E7EB] rounded-2xl p-4 flex gap-3 ${
-                  !n.is_read ? "border-l-4 border-l-[#FC8019]" : ""
+                  !n.is_read ? "border-l-4 border-l-[#E23744]" : ""
                 }`}
               >
                 <div className="flex-1">
@@ -169,7 +169,7 @@ export default function AdminNotificationsPage() {
             <button
               type="submit"
               disabled={sending}
-              className="bg-[#FC8019] text-white font-black px-6 py-3 rounded-xl disabled:opacity-60"
+              className="bg-[#E23744] text-white font-black px-6 py-3 rounded-xl disabled:opacity-60"
             >
               {sending ? "Sending…" : "Send Notification"}
             </button>

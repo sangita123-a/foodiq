@@ -308,7 +308,7 @@ export default function PaymentMethodsPage() {
                             payment.status === "partially_refunded") && (
                             <button
                               type="button"
-                              className="text-xs font-bold text-[#FC8019] hover:underline"
+                              className="text-xs font-bold text-[#E23744] hover:underline"
                               onClick={async () => {
                                 try {
                                   const { downloadInvoice } = await import("@/services/paymentApi");

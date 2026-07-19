@@ -78,7 +78,7 @@ export default function AdminMaintenancePage() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-black text-[#111827] flex items-center gap-2">
-              <Activity className="w-6 h-6 text-[#FC8019]" /> Maintenance
+              <Activity className="w-6 h-6 text-[#E23744]" /> Maintenance
             </h1>
             <p className="text-sm text-[#6B7280] mt-1">
               Health snapshot, review analytics, and weekly/monthly maintenance reports.
@@ -149,7 +149,7 @@ export default function AdminMaintenancePage() {
                 type="button"
                 disabled={busy}
                 onClick={() => void generate("weekly")}
-                className="inline-flex items-center gap-2 bg-[#FC8019] text-white font-bold px-4 py-2.5 rounded-xl disabled:opacity-60"
+                className="inline-flex items-center gap-2 bg-[#E23744] text-white font-bold px-4 py-2.5 rounded-xl disabled:opacity-60"
               >
                 <FileText className="w-4 h-4" /> Generate weekly
               </button>

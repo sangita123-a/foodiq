@@ -24,7 +24,7 @@ export default function AdminAnalyticsPage() {
           <h1 className="text-3xl font-black text-[#111827]">Analytics</h1>
           <p className="text-[#6B7280]">
             Sales, restaurant performance, growth, and peak hours.{" "}
-            <a href="/admin/bi" className="text-[#FC8019] font-bold">
+            <a href="/admin/bi" className="text-[#E23744] font-bold">
               Open full BI dashboard →
             </a>
           </p>
@@ -38,7 +38,7 @@ export default function AdminAnalyticsPage() {
           <h2 className="font-bold text-lg mb-4">Daily Sales (14 days)</h2>
           <div className="h-40 flex items-end gap-1">
             {(data?.sales_daily || []).map((d) => (
-              <div key={d.day} className="flex-1 bg-[#FC8019]/25 border border-[#FC8019]/40 rounded-t" style={{ height: `${Math.max(6, Math.round((d.revenue / salesMax) * 100))}%` }} title={formatCurrency(d.revenue)} />
+              <div key={d.day} className="flex-1 bg-[#E23744]/25 border border-[#E23744]/40 rounded-t" style={{ height: `${Math.max(6, Math.round((d.revenue / salesMax) * 100))}%` }} title={formatCurrency(d.revenue)} />
             ))}
           </div>
         </div>

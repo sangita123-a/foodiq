@@ -55,7 +55,7 @@ export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false 
       initial={{ scale: 0.9, y: 50 }}
       animate={{ scale: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
-      className="bg-[#F8FAFC] rounded-3xl p-8 md:p-12 max-w-lg w-full border border-[#E5E7EB] shadow-[0_20px_60px_rgba(252,128,25,0.2)] text-center relative overflow-hidden"
+      className="bg-[#F8FAFC] rounded-3xl p-8 md:p-12 max-w-lg w-full border border-[#E5E7EB] shadow-[0_20px_60px_rgba(226, 55, 68,0.2)] text-center relative overflow-hidden"
     >
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-green-500/20 rounded-full blur-[80px] pointer-events-none" />
 
@@ -138,7 +138,7 @@ export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false 
 
       <Link
         href={`/track-order?id=${orderId}`}
-        className="w-full bg-[#FC8019] hover:bg-[#E76F0B] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:-translate-y-1 relative z-10"
+        className="w-full bg-[#E23744] hover:bg-[#C81E34] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:-translate-y-1 relative z-10"
       >
         <Navigation className="w-5 h-5" />
         Track Your Order

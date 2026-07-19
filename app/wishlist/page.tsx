@@ -35,7 +35,7 @@ export default function WishlistPage() {
       <Navbar />
       <div className="max-w-5xl mx-auto px-4 py-10">
         <h1 className="text-2xl sm:text-3xl font-black text-[#111827] flex items-center gap-2">
-          <Heart className="w-7 h-7 text-[#FC8019]" /> Wishlist
+          <Heart className="w-7 h-7 text-[#E23744]" /> Wishlist
         </h1>
         <p className="text-sm text-[#6B7280] mt-1 mb-8">
           Dishes you saved for later. Separate from favorites restaurants.
@@ -43,7 +43,7 @@ export default function WishlistPage() {
 
         {!authenticated ? (
           <p className="text-[#6B7280]">
-            <Link href="/login" className="text-[#FC8019] font-bold">
+            <Link href="/login" className="text-[#E23744] font-bold">
               Sign in
             </Link>{" "}
             to view your wishlist.
@@ -53,7 +53,7 @@ export default function WishlistPage() {
         ) : items.length === 0 ? (
           <p className="text-[#6B7280]">
             Your wishlist is empty.{" "}
-            <Link href="/restaurants" className="text-[#FC8019] font-bold">
+            <Link href="/restaurants" className="text-[#E23744] font-bold">
               Browse restaurants
             </Link>
           </p>
@@ -84,7 +84,7 @@ export default function WishlistPage() {
                     <button
                       type="button"
                       onClick={() => void remove(String(item.id))}
-                      className="text-xs font-bold text-[#FC8019]"
+                      className="text-xs font-bold text-[#E23744]"
                     >
                       Remove
                     </button>

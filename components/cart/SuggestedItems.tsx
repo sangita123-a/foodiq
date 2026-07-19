@@ -61,7 +61,7 @@ export default function SuggestedItems() {
               <div className="text-[#A1A1A1] font-bold text-sm">₹{item.price}</div>
             </div>
             
-            <button className="w-8 h-8 rounded-full bg-[#F8FAFC] flex items-center justify-center text-white hover:bg-[#FC8019] transition-colors">
+            <button className="w-8 h-8 rounded-full bg-[#F8FAFC] flex items-center justify-center text-white hover:bg-[#E23744] transition-colors">
               <Plus className="w-4 h-4" />
             </button>
           </motion.div>

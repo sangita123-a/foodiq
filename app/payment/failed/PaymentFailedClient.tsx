@@ -50,7 +50,7 @@ export default function PaymentFailedPage() {
             <button
               type="button"
               onClick={() => router.push("/checkout")}
-              className="inline-flex items-center justify-center gap-2 bg-[#FC8019] hover:bg-[#E66F0D] text-white font-bold px-6 py-3 rounded-xl"
+              className="inline-flex items-center justify-center gap-2 bg-[#E23744] hover:bg-[#C81E34] text-white font-bold px-6 py-3 rounded-xl"
             >
               <RefreshCw className="w-4 h-4" />
               Retry Payment

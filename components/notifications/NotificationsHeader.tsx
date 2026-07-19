@@ -26,9 +26,9 @@ export default function NotificationsHeader({ activeFilter, setActiveFilter, onM
       <div>
         <h1 className="relative mb-3 flex items-center gap-4 text-3xl font-black tracking-[-0.04em] text-[#1C1C1C] md:text-4xl lg:text-5xl">
           <div className="relative">
-            <Bell className="w-10 h-10 md:w-12 md:h-12 text-[#FC8019] fill-[#FC8019]/20" />
+            <Bell className="w-10 h-10 md:w-12 md:h-12 text-[#E23744] fill-[#E23744]/20" />
             {hasUnread && (
-              <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-[#FC8019] border-2 border-[#FFFFFF] rounded-full"></span>
+              <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-[#E23744] border-2 border-[#FFFFFF] rounded-full"></span>
             )}
           </div>
           Notifications
@@ -43,7 +43,7 @@ export default function NotificationsHeader({ activeFilter, setActiveFilter, onM
         
         <button 
           onClick={onMarkAllAsRead}
-          className="flex items-center gap-2 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-4 py-2.5 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#FC8019]/30 hover:bg-white"
+          className="flex items-center gap-2 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-4 py-2.5 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#E23744]/30 hover:bg-white"
         >
           <CheckCircle2 className="w-4 h-4 text-green-400" />
           Mark all as read

@@ -23,7 +23,7 @@ export default function NotificationPreferences({ data, onChange }: Notification
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-black text-[#111827] flex items-center gap-2 mb-2">
-          <Bell className="w-6 h-6 text-[#FC8019]" /> Notification Preferences
+          <Bell className="w-6 h-6 text-[#E23744]" /> Notification Preferences
         </h2>
         <p className="text-[#6B7280] text-sm mb-6">Control what alerts you receive across your devices.</p>
       </div>
@@ -45,7 +45,7 @@ export default function NotificationPreferences({ data, onChange }: Notification
               </div>
             </div>
             
-            <div className={`w-12 h-6 rounded-full p-1 transition-colors ${opt.value ? 'bg-[#FC8019]' : 'bg-[#FFFFFF] border border-[#E5E7EB]'}`}>
+            <div className={`w-12 h-6 rounded-full p-1 transition-colors ${opt.value ? 'bg-[#E23744]' : 'bg-[#FFFFFF] border border-[#E5E7EB]'}`}>
               <motion.div 
                 layout
                 className="w-4 h-4 rounded-full bg-white shadow-md"

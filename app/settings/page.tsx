@@ -65,7 +65,7 @@ export default function SettingsPage() {
               <button className="flex-1 md:flex-none bg-[#F8FAFC] hover:bg-[#F1F5F9] text-[#111827] px-6 py-3 rounded-xl font-bold transition-colors border border-[#E5E7EB]">
                 Cancel
               </button>
-              <button type="submit" form="settings-form" className="flex-1 md:flex-none bg-primary hover:bg-[#E76F0B] text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(252,128,25,0.3)]">
+              <button type="submit" form="settings-form" className="flex-1 md:flex-none bg-primary hover:bg-[#C81E34] text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(226, 55, 68,0.3)]">
                 Save Changes
               </button>
             </div>

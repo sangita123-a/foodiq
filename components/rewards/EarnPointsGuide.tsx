@@ -9,8 +9,8 @@ export default function EarnPointsGuide() {
       icon: Utensils,
       title: "Place Orders",
       desc: "Earn 10 points for every ₹100 spent on any food order.",
-      color: "text-orange-500",
-      bg: "bg-orange-500/10"
+      color: "text-[#E23744]",
+      bg: "bg-[#E23744]/10"
     },
     {
       icon: Star,

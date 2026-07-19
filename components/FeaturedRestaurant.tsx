@@ -107,10 +107,10 @@ export default function FeaturedRestaurant() {
 
             {/* Buttons */}
             <div className="flex flex-wrap gap-4 mb-10">
-              <Link href={`/restaurant/${restaurant.id}`} className="bg-[#FC8019] hover:bg-[var(--color-primary-hover)] text-white px-8 py-3.5 rounded-xl font-semibold shadow-[0_8px_20px_rgba(252,128,25,0.22)] transition-all duration-300 hover:shadow-[0_12px_26px_rgba(252,128,25,0.3)] hover:-translate-y-1">
+              <Link href={`/restaurant/${restaurant.id}`} className="bg-[#E23744] hover:bg-[var(--color-primary-hover)] text-white px-8 py-3.5 rounded-xl font-semibold shadow-[0_8px_20px_rgba(226, 55, 68,0.22)] transition-all duration-300 hover:shadow-[0_12px_26px_rgba(226, 55, 68,0.3)] hover:-translate-y-1">
                 Explore Menu
               </Link>
-              <Link href={`/restaurant/${restaurant.id}`} className="bg-white border border-[#FC8019] text-[#FC8019] hover:bg-[#FC8019] hover:text-white px-8 py-3.5 rounded-xl font-semibold transition-all duration-300 hover:-translate-y-1">
+              <Link href={`/restaurant/${restaurant.id}`} className="bg-white border border-[#E23744] text-[#E23744] hover:bg-[#E23744] hover:text-white px-8 py-3.5 rounded-xl font-semibold transition-all duration-300 hover:-translate-y-1">
                 View Restaurant
               </Link>
             </div>

@@ -28,7 +28,7 @@ export default function OfferNotFound({ offerId }: Props) {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/offers"
-              className="inline-flex items-center justify-center gap-2 bg-[#FC8019] hover:bg-[#E76F0B] text-white px-6 py-3 rounded-xl font-bold transition-colors"
+              className="inline-flex items-center justify-center gap-2 bg-[#E23744] hover:bg-[#C81E34] text-white px-6 py-3 rounded-xl font-bold transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Browse Offers

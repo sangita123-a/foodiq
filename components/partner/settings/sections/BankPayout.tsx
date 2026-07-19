@@ -27,7 +27,7 @@ export default function BankPayout({ data, onChange }: BankPayoutProps) {
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-black text-[#111827] flex items-center gap-2 mb-2">
-          <CreditCard className="w-6 h-6 text-[#FC8019]" /> Bank & Payout Details
+          <CreditCard className="w-6 h-6 text-[#E23744]" /> Bank & Payout Details
         </h2>
         <p className="text-[#6B7280] text-sm mb-6">Manage the bank account where your weekly payouts will be deposited.</p>
       </div>
@@ -61,7 +61,7 @@ export default function BankPayout({ data, onChange }: BankPayoutProps) {
             type="text" 
             value={data.accountName}
             onChange={(e) => onChange({ accountName: e.target.value })}
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
           />
         </div>
         <div>
@@ -70,7 +70,7 @@ export default function BankPayout({ data, onChange }: BankPayoutProps) {
             type="text" 
             value={data.bankName}
             onChange={(e) => onChange({ bankName: e.target.value })}
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
           />
         </div>
         <div>
@@ -79,7 +79,7 @@ export default function BankPayout({ data, onChange }: BankPayoutProps) {
             type="password" 
             value={data.accountNumber}
             onChange={(e) => onChange({ accountNumber: e.target.value })}
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm font-mono tracking-widest placeholder:tracking-normal placeholder:font-sans"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm font-mono tracking-widest placeholder:tracking-normal placeholder:font-sans"
             placeholder="Enter Account Number"
           />
         </div>
@@ -89,7 +89,7 @@ export default function BankPayout({ data, onChange }: BankPayoutProps) {
             type="text" 
             value={data.ifsc}
             onChange={(e) => onChange({ ifsc: e.target.value.toUpperCase() })}
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm uppercase"
+            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm uppercase"
           />
         </div>
         <div className="md:col-span-2">
@@ -99,7 +99,7 @@ export default function BankPayout({ data, onChange }: BankPayoutProps) {
             value={data.upi}
             onChange={(e) => onChange({ upi: e.target.value })}
             placeholder="e.g. foodiq.restaurant@okhdfc"
-            className="w-full md:w-1/2 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#FC8019] transition-colors text-sm"
+            className="w-full md:w-1/2 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
           />
         </div>
       </div>

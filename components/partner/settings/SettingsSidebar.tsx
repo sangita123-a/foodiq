@@ -52,12 +52,12 @@ export default function SettingsSidebar({ activeTab, setActiveTab }: SettingsSid
               {isActive && (
                 <motion.div 
                   layoutId="settings-sidebar-active"
-                  className="absolute inset-0 bg-[#FC8019]/10 border border-[#FC8019]/20 rounded-xl"
+                  className="absolute inset-0 bg-[#E23744]/10 border border-[#E23744]/20 rounded-xl"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
               
-              <tab.icon className={`w-5 h-5 shrink-0 z-10 ${isActive ? 'text-[#FC8019]' : ''}`} />
+              <tab.icon className={`w-5 h-5 shrink-0 z-10 ${isActive ? 'text-[#E23744]' : ''}`} />
               <span className={`text-sm font-bold z-10 ${isActive ? '' : 'font-medium'}`}>{tab.label}</span>
             </button>
           );

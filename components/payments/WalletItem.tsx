@@ -15,7 +15,7 @@ type Props = {
 
 export default function WalletItem({ wallet, onToggleConnect }: Props) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-[#ECECEC] bg-white p-4 shadow-[0_6px_18px_rgba(28,28,28,0.05)] transition-all duration-300 hover:border-[#FC8019]/30 hover:shadow-[0_10px_26px_rgba(28,28,28,0.08)] md:p-6">
+    <div className="flex items-center justify-between gap-4 rounded-2xl border border-[#ECECEC] bg-white p-4 shadow-[0_6px_18px_rgba(28,28,28,0.05)] transition-all duration-300 hover:border-[#E23744]/30 hover:shadow-[0_10px_26px_rgba(28,28,28,0.08)] md:p-6">
       
       <div className="flex items-center gap-4">
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center border transition-colors ${
@@ -38,7 +38,7 @@ export default function WalletItem({ wallet, onToggleConnect }: Props) {
         className={`px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors ${
           wallet.isConnected 
             ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/10' 
-            : 'border border-[#ECECEC] bg-[#F8F9FA] text-[#1C1C1C] hover:border-[#FC8019]/30 hover:bg-white'
+            : 'border border-[#ECECEC] bg-[#F8F9FA] text-[#1C1C1C] hover:border-[#E23744]/30 hover:bg-white'
         }`}
       >
         {wallet.isConnected ? (

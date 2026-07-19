@@ -96,7 +96,7 @@ export default function SupportTicketForm() {
             onClick={() => setMode(key)}
             className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
               mode === key
-                ? "bg-[#FC8019] text-white"
+                ? "bg-[#E23744] text-white"
                 : "bg-white border border-[#E5E7EB] text-[#6B7280] hover:text-[#111827]"
             }`}
           >
@@ -194,7 +194,7 @@ export default function SupportTicketForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-[#FC8019] hover:bg-[#E76F0B] disabled:opacity-60 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors"
+          className="w-full bg-[#E23744] hover:bg-[#C81E34] disabled:opacity-60 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors"
         >
           <Send className="w-4 h-4" />
           {isSubmitting ? "Submitting…" : "Submit"}

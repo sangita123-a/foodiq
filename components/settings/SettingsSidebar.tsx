@@ -45,7 +45,7 @@ export default function SettingsSidebar({ activeSection, setActiveSection }: Pro
                 isActive 
                   ? isDanger 
                     ? "bg-red-500/10 text-red-500 border border-red-500/20"
-                    : "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(252,128,25,0.1)]"
+                    : "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(226, 55, 68,0.1)]"
                   : isDanger 
                     ? "text-red-400 hover:bg-red-500/5 hover:text-red-300 border border-transparent"
                     : "text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827] border border-transparent"

@@ -60,7 +60,7 @@ export default function RewardPointsCard({ totalPoints, level, pointsToNextLevel
               initial={{ width: 0 }}
               animate={{ width: `${progressPercent}%` }}
               transition={{ duration: 1.5, ease: "easeOut" }}
-              className="h-full bg-gradient-to-r from-primary to-orange-500 rounded-full"
+              className="h-full bg-gradient-to-r from-primary to-[#E23744] rounded-full"
             />
           </div>
         </div>

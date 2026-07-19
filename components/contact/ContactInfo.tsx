@@ -35,7 +35,7 @@ export default function ContactInfo() {
       <div className="mt-12 pt-8 border-t border-[#E5E7EB]">
         <h3 className="text-white font-bold mb-6">Connect with us</h3>
         <div className="flex flex-wrap items-center gap-4">
-          <a href="https://instagram.com/foodiq" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-white border border-[#E5E7EB] hover:border-primary hover:shadow-[0_0_15px_rgba(252,128,25,0.5)] flex items-center justify-center transition-all hover:scale-110">
+          <a href="https://instagram.com/foodiq" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-white border border-[#E5E7EB] hover:border-primary hover:shadow-[0_0_15px_rgba(226, 55, 68,0.5)] flex items-center justify-center transition-all hover:scale-110">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#6B7280] hover:text-[#111827] transition-colors"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
           </a>
           <a href="https://facebook.com/foodiq" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-white border border-[#E5E7EB] hover:border-blue-500 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] flex items-center justify-center transition-all hover:scale-110">

@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function QuickActions() {
   const actions = [
-    { name: "Add New Dish", icon: PlusCircle, href: "/partner/menu/add", color: "bg-[#FC8019]" },
+    { name: "Add New Dish", icon: PlusCircle, href: "/partner/menu/add", color: "bg-[#E23744]" },
     { name: "Manage Menu", icon: UtensilsCrossed, href: "/partner/menu", color: "bg-[#FFFFFF]" },
     { name: "View Orders", icon: ShoppingBag, href: "/partner/orders", color: "bg-[#FFFFFF]" },
     { name: "Create Offer", icon: Tag, href: "/partner/offers/create", color: "bg-[#FFFFFF]" }
@@ -21,7 +21,7 @@ export default function QuickActions() {
             <motion.div
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`${action.color} ${action.color === 'bg-[#FC8019]' ? 'text-white hover:bg-[#E66F0D]' : 'text-[#6B7280] hover:text-[#111827] hover:bg-[#F8FAFC]'} rounded-2xl p-4 flex flex-col items-center justify-center text-center transition-colors border border-[#E5E7EB] h-32 cursor-pointer shadow-lg`}
+              className={`${action.color} ${action.color === 'bg-[#E23744]' ? 'text-white hover:bg-[#C81E34]' : 'text-[#6B7280] hover:text-[#111827] hover:bg-[#F8FAFC]'} rounded-2xl p-4 flex flex-col items-center justify-center text-center transition-colors border border-[#E5E7EB] h-32 cursor-pointer shadow-lg`}
             >
               <action.icon className="w-8 h-8 mb-3" />
               <span className="font-bold text-sm">{action.name}</span>

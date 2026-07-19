@@ -76,12 +76,12 @@ export default function RestaurantHeader({
                   <button
                     type="button"
                     onClick={onToggleFavorite}
-                    className="w-12 h-12 rounded-full bg-[#F8FAFC] border border-[#E5E7EB] flex items-center justify-center text-white hover:bg-[#F8FAFC] hover:text-[#FC8019] transition-all group"
+                    className="w-12 h-12 rounded-full bg-[#F8FAFC] border border-[#E5E7EB] flex items-center justify-center text-white hover:bg-[#F8FAFC] hover:text-[#E23744] transition-all group"
                     aria-label={isFavorite ? "Remove from favorites" : "Save restaurant"}
                   >
                     <Heart
                       className={`w-5 h-5 transition-all ${
-                        isFavorite ? "fill-[#FC8019] text-[#FC8019]" : "group-hover:fill-[#FC8019]"
+                        isFavorite ? "fill-[#E23744] text-[#E23744]" : "group-hover:fill-[#E23744]"
                       }`}
                     />
                   </button>

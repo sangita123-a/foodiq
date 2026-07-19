@@ -29,7 +29,7 @@ export default function PartnerHero() {
           transition={{ duration: 0.8 }}
           className="text-4xl md:text-5xl lg:text-6xl font-black text-[#111827] mb-6 leading-tight"
         >
-          Grow Your Restaurant with <span className="text-[#FC8019]">Foodiq</span>
+          Grow Your Restaurant with <span className="text-[#E23744]">Foodiq</span>
         </motion.h1>
         
         <motion.p 

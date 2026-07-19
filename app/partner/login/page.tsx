@@ -3,7 +3,7 @@ import PartnerLoginForm from "@/components/partner/PartnerLoginForm";
 
 export default function PartnerLoginPage() {
   return (
-    <main className="min-h-screen bg-[#F8FAFC] selection:bg-[#FC8019] selection:text-white flex flex-col lg:flex-row">
+    <main className="min-h-screen bg-[#F8FAFC] selection:bg-[#E23744] selection:text-white flex flex-col lg:flex-row">
       
       {/* Left Side: Hero & Features (50%) */}
       <div className="w-full lg:w-1/2">

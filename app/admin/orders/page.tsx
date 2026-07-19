@@ -105,7 +105,7 @@ export default function AdminOrdersPage() {
               {orders.map((o) => (
                 <tr key={o.id} className="border-b border-[#E5E7EB]">
                   <td className="p-4">
-                    <p className="font-mono text-sm font-bold text-[#FC8019]">#{String(o.id).slice(0, 8)}</p>
+                    <p className="font-mono text-sm font-bold text-[#E23744]">#{String(o.id).slice(0, 8)}</p>
                     <p className="text-[10px] text-[#9CA3AF]">{formatDate(o.created_at)}</p>
                   </td>
                   <td className="p-4 text-sm font-bold">{o.customer_name}</td>
@@ -147,7 +147,7 @@ export default function AdminOrdersPage() {
                   <option key={p.id} value={p.id}>{p.full_name || p.id}</option>
                 ))}
               </select>
-              <button type="button" onClick={() => assignPartner(String(selected.id))} className="bg-[#FC8019] text-white font-bold px-4 rounded-xl text-sm">
+              <button type="button" onClick={() => assignPartner(String(selected.id))} className="bg-[#E23744] text-white font-bold px-4 rounded-xl text-sm">
                 Assign
               </button>
             </div>

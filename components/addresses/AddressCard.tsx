@@ -33,8 +33,8 @@ export default function AddressCard({ address, onEdit, onDelete, onSetDefault }:
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className={`group relative flex h-full flex-col rounded-2xl border bg-white p-6 shadow-[0_8px_24px_rgba(28,28,28,0.07)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#FC8019]/35 hover:shadow-[0_14px_32px_rgba(28,28,28,0.10)] md:p-8 ${
-        address.isDefault ? "border-primary/50 shadow-[0_10px_26px_rgba(252,128,25,0.10)]" : "border-[#ECECEC]"
+      className={`group relative flex h-full flex-col rounded-2xl border bg-white p-6 shadow-[0_8px_24px_rgba(28,28,28,0.07)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#E23744]/35 hover:shadow-[0_14px_32px_rgba(28,28,28,0.10)] md:p-8 ${
+        address.isDefault ? "border-primary/50 shadow-[0_10px_26px_rgba(226, 55, 68,0.10)]" : "border-[#ECECEC]"
       }`}
     >
       {/* Top Badges */}
@@ -69,7 +69,7 @@ export default function AddressCard({ address, onEdit, onDelete, onSetDefault }:
       <div className="flex flex-wrap items-center gap-3 border-t border-[#ECECEC] pt-6">
         <button 
           onClick={() => onEdit(address)}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-4 py-2.5 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#FC8019]/30 hover:bg-white"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-4 py-2.5 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#E23744]/30 hover:bg-white"
         >
           <Edit2 className="w-4 h-4" /> Edit
         </button>

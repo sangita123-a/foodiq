@@ -18,7 +18,7 @@ export default function OrdersKanban({ orders, onUpdateStatus, onViewDetails }: 
 
   const columns: { id: OrderStatus; title: string; icon: any; color: string }[] = [
     { id: "New", title: "New Orders", icon: Bell, color: "text-yellow-400 border-yellow-400/20 bg-yellow-400/5" },
-    { id: "Preparing", title: "Preparing", icon: ChefHat, color: "text-orange-400 border-orange-400/20 bg-orange-400/5" },
+    { id: "Preparing", title: "Preparing", icon: ChefHat, color: "text-[#E23744] border-[#E23744]/20 bg-[#E23744]/5" },
     { id: "Ready for Pickup", title: "Ready", icon: PackageCheck, color: "text-purple-400 border-purple-400/20 bg-purple-400/5" },
     { id: "Picked Up", title: "Picked Up", icon: Bike, color: "text-indigo-400 border-indigo-400/20 bg-indigo-400/5" }
   ];

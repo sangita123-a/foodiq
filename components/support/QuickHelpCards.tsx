@@ -10,7 +10,7 @@ export default function QuickHelpCards() {
     { icon: AlertTriangle, title: "Order Problems", desc: "Missing items, wrong orders, or poor quality.", color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/20" },
     { icon: MessageSquare, title: "Live Chat", desc: "Chat instantly with our support team.", color: "text-primary", bg: "bg-primary/10 border-primary/20" },
     { icon: PhoneCall, title: "Call Support", desc: "Speak directly to a customer care executive.", color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20" },
-    { icon: Mail, title: "Email Support", desc: "Write to us for detailed queries or feedback.", color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/20" },
+    { icon: Mail, title: "Email Support", desc: "Write to us for detailed queries or feedback.", color: "text-[#E23744]", bg: "bg-[#E23744]/10 border-[#E23744]/20" },
   ];
 
   return (

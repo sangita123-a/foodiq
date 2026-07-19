@@ -37,7 +37,7 @@ function DecimalCounter({ from, to }: { from: number, to: number }) {
 
 export default function Achievements() {
   return (
-    <div className="py-24 bg-gradient-to-br from-primary to-[#E76F0B] text-white">
+    <div className="py-24 bg-gradient-to-br from-primary to-[#C81E34] text-white">
       <div className="container mx-auto px-4 md:px-8">
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 text-center">

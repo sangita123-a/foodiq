@@ -391,7 +391,7 @@ export default function CheckoutPage() {
         </div>
 
         {(paymentStep === "verifying" || paymentStep === "creating") && (
-          <div className="mb-6 rounded-xl border border-[#FC8019]/30 bg-[#FC8019]/5 px-4 py-3 text-sm font-bold text-[#FC8019]">
+          <div className="mb-6 rounded-xl border border-[#E23744]/30 bg-[#E23744]/5 px-4 py-3 text-sm font-bold text-[#E23744]">
             {paymentStep === "creating"
               ? "Creating secure payment session..."
               : "Verifying payment signature on server..."}

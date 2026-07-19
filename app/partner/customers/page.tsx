@@ -13,7 +13,7 @@ const MOCK_CUSTOMERS = [
 
 export default function PartnerCustomersPage() {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#FC8019] selection:text-white">
+    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#E23744] selection:text-white">
       <div className="hidden lg:block w-64 flex-shrink-0">
         <PartnerSidebar />
       </div>
@@ -22,8 +22,8 @@ export default function PartnerCustomersPage() {
         <main className="flex-1 overflow-y-auto p-4 md:p-8">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 rounded-xl bg-[#FC8019]/15 flex items-center justify-center">
-                <Users className="w-6 h-6 text-[#FC8019]" />
+              <div className="w-12 h-12 rounded-xl bg-[#E23744]/15 flex items-center justify-center">
+                <Users className="w-6 h-6 text-[#E23744]" />
               </div>
               <div>
                 <h1 className="text-3xl font-black text-[#111827]">Customers</h1>

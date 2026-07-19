@@ -35,7 +35,7 @@ export default function BestOffers() {
 
               <div className="inline-flex items-center bg-white border border-[#E5E7EB] rounded-lg px-3 py-1.5 sm:px-4 sm:py-2">
                 <span className="text-xs sm:text-sm text-[#6B7280] uppercase tracking-wider font-semibold mr-2">Code:</span>
-                <span className="text-sm sm:text-base text-[#FC8019] font-bold">{offer.code}</span>
+                <span className="text-sm sm:text-base text-[#E23744] font-bold">{offer.code}</span>
               </div>
             </div>
           </Link>

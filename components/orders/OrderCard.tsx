@@ -48,7 +48,7 @@ export default function OrderCard({ order }: Props) {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group mb-6 rounded-2xl border border-[#ECECEC] bg-white p-6 shadow-[0_8px_24px_rgba(28,28,28,0.07)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#FC8019]/35 hover:shadow-[0_14px_34px_rgba(28,28,28,0.10)] md:p-8"
+      className="group mb-6 rounded-2xl border border-[#ECECEC] bg-white p-6 shadow-[0_8px_24px_rgba(28,28,28,0.07)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#E23744]/35 hover:shadow-[0_14px_34px_rgba(28,28,28,0.10)] md:p-8"
     >
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-6">
@@ -125,7 +125,7 @@ export default function OrderCard({ order }: Props) {
 
           <Link
             href={`/my-orders/${order.id}`}
-              className="flex items-center gap-2 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-5 py-2.5 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#FC8019]/30 hover:bg-white"
+              className="flex items-center gap-2 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-5 py-2.5 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#E23744]/30 hover:bg-white"
           >
             <Download className="w-4 h-4" /> Invoice
           </Link>
@@ -133,7 +133,7 @@ export default function OrderCard({ order }: Props) {
           {order.status === "Pending" && order.onCancel && (
             <button 
               onClick={() => order.onCancel!(order.id)}
-              className="bg-[#FC8019]/10 hover:bg-[#FC8019]/20 text-[#FC8019] border border-[#FC8019]/20 px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors"
+              className="bg-[#E23744]/10 hover:bg-[#E23744]/20 text-[#E23744] border border-[#E23744]/20 px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors"
             >
               Cancel Order
             </button>
@@ -142,7 +142,7 @@ export default function OrderCard({ order }: Props) {
           {(order.status === "Delivered" || order.status === "Cancelled") && (
             <Link
               href="/restaurants"
-              className="bg-[#FC8019] hover:bg-[#E76F0B] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors shadow-[0_0_15px_rgba(252,128,25,0.3)]"
+              className="bg-[#E23744] hover:bg-[#C81E34] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors shadow-[0_0_15px_rgba(226, 55, 68,0.3)]"
             >
               <RefreshCw className="w-4 h-4" /> Reorder
             </Link>

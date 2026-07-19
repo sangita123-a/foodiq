@@ -65,7 +65,7 @@ export default function DeliveryOrderDetailPage({
                 </h2>
                 <p className="text-sm text-[#6B7280] mt-1">{order.restaurant.address}</p>
               </div>
-              <span className="text-sm font-bold px-3 py-1.5 rounded-xl bg-[#FC8019]/10 text-[#FC8019]">
+              <span className="text-sm font-bold px-3 py-1.5 rounded-xl bg-[#E23744]/10 text-[#E23744]">
                 {STATUS_LABELS[status] || status || "Unassigned"}
               </span>
             </div>
@@ -97,7 +97,7 @@ export default function DeliveryOrderDetailPage({
               <span className="font-bold text-[#111827]">
                 Order {formatCurrency(order.total_amount)}
               </span>
-              <span className="font-bold text-[#FC8019]">
+              <span className="font-bold text-[#E23744]">
                 Fee {formatCurrency(order.delivery_fee)}
               </span>
               {order.delivery_instructions && (
@@ -129,7 +129,7 @@ export default function DeliveryOrderDetailPage({
                       await acceptDeliveryOrder(order.id);
                       refresh();
                     }}
-                    className="bg-[#FC8019] hover:bg-[#E66F0D] text-white font-bold px-4 py-2.5 rounded-xl"
+                    className="bg-[#E23744] hover:bg-[#C81E34] text-white font-bold px-4 py-2.5 rounded-xl"
                   >
                     Accept Order
                   </button>
@@ -154,14 +154,14 @@ export default function DeliveryOrderDetailPage({
                     await updateDeliveryStatus(order.id, next);
                     refresh();
                   }}
-                  className="bg-[#FC8019] hover:bg-[#E66F0D] text-white font-bold px-4 py-2.5 rounded-xl"
+                  className="bg-[#E23744] hover:bg-[#C81E34] text-white font-bold px-4 py-2.5 rounded-xl"
                 >
                   Mark: {STATUS_LABELS[next]}
                 </button>
               )}
               <Link
                 href="/delivery/map"
-                className="border border-[#FC8019]/30 text-[#FC8019] font-bold px-4 py-2.5 rounded-xl"
+                className="border border-[#E23744]/30 text-[#E23744] font-bold px-4 py-2.5 rounded-xl"
               >
                 Open Map
               </Link>

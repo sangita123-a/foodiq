@@ -34,7 +34,7 @@ export default function OrdersSummary({ orders }: OrdersSummaryProps) {
 
   const stats = [
     { title: "New Orders", value: newOrders, icon: Bell, color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20", trend: "+2", isUp: true },
-    { title: "Preparing", value: preparing, icon: ChefHat, color: "text-orange-400", bg: "bg-orange-400/10", border: "border-orange-400/20", trend: "-1", isUp: false },
+    { title: "Preparing", value: preparing, icon: ChefHat, color: "text-[#E23744]", bg: "bg-[#E23744]/10", border: "border-[#E23744]/20", trend: "-1", isUp: false },
     { title: "Ready for Pickup", value: ready, icon: PackageCheck, color: "text-purple-400", bg: "bg-purple-400/10", border: "border-purple-400/20", trend: "+5", isUp: true },
     { title: "Picked Up", value: pickedUp, icon: Bike, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20", trend: "+12", isUp: true },
     { title: "Completed Today", value: completed, icon: CheckCircle2, color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20", trend: "+24%", isUp: true }

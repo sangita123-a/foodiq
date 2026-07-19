@@ -30,7 +30,7 @@ export default function LiveChatCard() {
         </div>
       </div>
 
-      <button className="w-full bg-primary hover:bg-[#E76F0B] text-white px-6 py-4 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(252,128,25,0.3)] hover:-translate-y-1 relative z-10 flex items-center justify-center gap-2">
+      <button className="w-full bg-primary hover:bg-[#C81E34] text-white px-6 py-4 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(226, 55, 68,0.3)] hover:-translate-y-1 relative z-10 flex items-center justify-center gap-2">
         <MessageSquareText className="w-5 h-5" />
         Start Live Chat
       </button>

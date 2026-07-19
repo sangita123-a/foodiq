@@ -43,9 +43,9 @@ export default function Reviews() {
         {reviews.map((review) => (
           <div 
             key={review.id}
-            className="bg-white border border-[#ECECEC] rounded-[18px] p-7 relative shadow-[0_6px_22px_rgba(28,28,28,0.05)] hover:-translate-y-1 hover:border-[#FC8019]/30 hover:shadow-[0_18px_42px_rgba(28,28,28,0.09)] transition-all duration-300 group"
+            className="bg-white border border-[#ECECEC] rounded-[18px] p-7 relative shadow-[0_6px_22px_rgba(28,28,28,0.05)] hover:-translate-y-1 hover:border-[#E23744]/30 hover:shadow-[0_18px_42px_rgba(28,28,28,0.09)] transition-all duration-300 group"
           >
-            <Quote className="absolute top-6 right-8 w-12 h-12 text-[#FC8019]/5 group-hover:text-primary/10 transition-colors duration-300" />
+            <Quote className="absolute top-6 right-8 w-12 h-12 text-[#E23744]/5 group-hover:text-primary/10 transition-colors duration-300" />
             
             <div className="flex gap-1 mb-6">
               {[...Array(5)].map((_, i) => (

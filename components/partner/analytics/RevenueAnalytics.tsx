@@ -23,7 +23,7 @@ export default function RevenueAnalytics({ data }: RevenueAnalyticsProps) {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h3 className="text-xl font-black text-[#111827] flex items-center gap-2 mb-1">
-            <BarChart3 className="w-6 h-6 text-[#FC8019]" /> Revenue Analytics
+            <BarChart3 className="w-6 h-6 text-[#E23744]" /> Revenue Analytics
           </h3>
           <p className="text-[#6B7280] text-sm">Visualize your income streams over time.</p>
         </div>
@@ -79,7 +79,7 @@ export default function RevenueAnalytics({ data }: RevenueAnalyticsProps) {
                   initial={{ height: 0 }}
                   animate={{ height: d.height }}
                   transition={{ duration: 0.8, delay: idx * 0.05, type: "spring", bounce: 0.2 }}
-                  className="w-full max-w-[48px] rounded-t-lg bg-gradient-to-t from-[#FC8019]/40 to-[#FC8019] border-x border-t border-[#FC8019]/50 group-hover:from-[#FC8019]/60 group-hover:to-red-400 transition-colors relative overflow-hidden"
+                  className="w-full max-w-[48px] rounded-t-lg bg-gradient-to-t from-[#E23744]/40 to-[#E23744] border-x border-t border-[#E23744]/50 group-hover:from-[#E23744]/60 group-hover:to-red-400 transition-colors relative overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </motion.div>

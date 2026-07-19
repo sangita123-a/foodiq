@@ -116,7 +116,7 @@ export default function AdminBugsPage() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-black text-[#111827] flex items-center gap-2">
-              <Bug className="w-6 h-6 text-[#FC8019]" /> Bug management
+              <Bug className="w-6 h-6 text-[#E23744]" /> Bug management
             </h1>
             <p className="text-sm text-[#6B7280] mt-1">
               Track production crashes and user-reported bugs. Update status as
@@ -157,8 +157,8 @@ export default function AdminBugsPage() {
                 className={[
                   "px-3 py-1.5 rounded-xl text-sm font-bold border transition-colors",
                   active
-                    ? "bg-[#FC8019] text-white border-[#FC8019]"
-                    : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#FC8019]",
+                    ? "bg-[#E23744] text-white border-[#E23744]"
+                    : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#E23744]",
                 ].join(" ")}
               >
                 {chip.label}
@@ -217,7 +217,7 @@ export default function AdminBugsPage() {
             <button
               type="button"
               onClick={() => void createFromError()}
-              className="bg-[#FC8019] text-white text-sm font-bold px-4 py-2 rounded-xl"
+              className="bg-[#E23744] text-white text-sm font-bold px-4 py-2 rounded-xl"
             >
               Create from error
             </button>
@@ -235,7 +235,7 @@ export default function AdminBugsPage() {
                 type="button"
                 disabled={weeklyLoading}
                 onClick={() => void loadWeekly(true)}
-                className="text-xs font-bold text-[#FC8019]"
+                className="text-xs font-bold text-[#E23744]"
               >
                 {weeklyLoading ? "Saving…" : "Persist report"}
               </button>
@@ -276,7 +276,7 @@ export default function AdminBugsPage() {
                   >
                     <div className="flex items-center justify-between gap-3">
                       <p className="font-bold text-[#111827]">{String(b.title)}</p>
-                      <span className="text-xs font-bold uppercase text-[#FC8019]">
+                      <span className="text-xs font-bold uppercase text-[#E23744]">
                         {String(b.severity)}
                       </span>
                     </div>
@@ -385,7 +385,7 @@ export default function AdminBugsPage() {
                 <button
                   type="button"
                   onClick={() => void saveBug()}
-                  className="w-full bg-[#FC8019] text-white font-bold py-3 rounded-xl"
+                  className="w-full bg-[#E23744] text-white font-bold py-3 rounded-xl"
                 >
                   Save changes
                 </button>

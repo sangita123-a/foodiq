@@ -35,7 +35,7 @@ export default function RevenueChart({
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
         <h2 className="text-xl font-bold text-[#111827] flex items-center gap-2">
-          Revenue Overview <BarChart3 className="w-5 h-5 text-[#FC8019]" />
+          Revenue Overview <BarChart3 className="w-5 h-5 text-[#E23744]" />
         </h2>
         
         <div className="flex gap-4">
@@ -53,7 +53,7 @@ export default function RevenueChart({
       <div className="h-64 mt-4 flex items-end justify-between gap-2 pb-6 border-b border-[#E5E7EB] relative">
         {data.map((point, idx) => (
           <div key={idx} className="flex flex-col items-center flex-1 group">
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold text-[#FC8019] mb-2">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold text-[#E23744] mb-2">
               {point.amount}
             </div>
             <motion.div 
@@ -61,7 +61,7 @@ export default function RevenueChart({
               whileInView={{ height: point.height }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: idx * 0.1, type: "spring", bounce: 0.2 }}
-              className="w-full max-w-[40px] bg-[#FC8019]/20 border border-[#FC8019]/50 rounded-t-lg group-hover:bg-[#FC8019] transition-colors cursor-pointer relative overflow-hidden"
+              className="w-full max-w-[40px] bg-[#E23744]/20 border border-[#E23744]/50 rounded-t-lg group-hover:bg-[#E23744] transition-colors cursor-pointer relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/20"></div>
             </motion.div>

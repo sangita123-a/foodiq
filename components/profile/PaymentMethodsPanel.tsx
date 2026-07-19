@@ -102,7 +102,7 @@ export default function PaymentMethodsPanel() {
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="bg-primary hover:bg-[#E76F0B] text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5"
+          className="bg-primary hover:bg-[#C81E34] text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5"
         >
           <Plus className="w-4 h-4" /> Add Method
         </button>
