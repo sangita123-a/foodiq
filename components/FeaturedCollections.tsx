@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import useSWR from "swr";
 import SafeImage from "@/components/ui/SafeImage";
-import { RESTAURANT_FALLBACK } from "@/lib/images";
+import { getRestaurantImage, RESTAURANT_FALLBACK } from "@/lib/images";
 import { fetchCollections } from "@/services/featuresApi";
 
 type CollectionData = {
@@ -64,7 +64,7 @@ export default function FeaturedCollections() {
           title: String(c.title),
           description: String(c.description || ""),
           places: `${c.restaurant_count || 0} Places`,
-          image: String(c.image_url || RESTAURANT_FALLBACK),
+          image: getRestaurantImage(c.image_url as string),
           slug: String(c.slug || ""),
         }))
       : fallbackCollections;

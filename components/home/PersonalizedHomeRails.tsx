@@ -89,7 +89,7 @@ export default function PersonalizedHomeRails() {
             {restaurants.slice(0, 8).map((r) => (
               <Link
                 key={String(r.id)}
-                href={`/restaurants/${r.slug || r.id}`}
+                href={`/restaurant/${r.id}`}
                 className="min-w-[160px] max-w-[180px] shrink-0"
               >
                 <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[#F8F9FA]">
@@ -153,8 +153,8 @@ export default function PersonalizedHomeRails() {
                 key={`${item.item_id}-${idx}`}
                 href={
                   item.item_type === "restaurant"
-                    ? `/restaurants/${item.slug || item.item_id}`
-                    : `/restaurants`
+                    ? `/restaurant/${item.item_id}`
+                    : `/food/${item.item_id}`
                 }
                 className="min-w-[140px] shrink-0"
               >

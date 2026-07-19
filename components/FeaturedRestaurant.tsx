@@ -8,7 +8,7 @@ import SafeImage from "@/components/ui/SafeImage";
 import { getPriceForTwo, getRestaurantImage, RESTAURANT_FALLBACK } from "@/lib/images";
 
 export default function FeaturedRestaurant() {
-  const { data, isLoading } = useSWR('/api/restaurants?rating=4.5&limit=1');
+  const { data, isLoading } = useSWR('/api/restaurants?sort=popular&limit=1');
   const restaurant = data?.[0];
 
   if (isLoading) {

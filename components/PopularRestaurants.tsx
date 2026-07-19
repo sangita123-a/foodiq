@@ -1,65 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Clock, Star } from "lucide-react";
+import useSWR from "swr";
 import SafeImage from "@/components/ui/SafeImage";
-import { fetchRestaurantsPage } from "@/lib/restaurants";
-import { RESTAURANT_FALLBACK } from "@/lib/images";
-const PAGE_LIMIT = 8;
-
-type PopularRestaurant = {
-  id: string | number;
-  name: string;
-  image: string;
-  rating: string;
-  time: string;
-  cuisine: string;
-  priceForTwo: string;
-  is_veg?: boolean;
-  distance?: string;
-  offer?: string | null;
-};
+import { RESTAURANT_FALLBACK, mapRestaurantCard } from "@/lib/images";
 
 export default function PopularRestaurants() {
-  const [restaurants, setRestaurants] = useState<PopularRestaurant[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const { data: rawRestaurants, isLoading } = useSWR(
+    "/api/restaurants?sort=popular&limit=8"
+  );
 
-  const loadPage = useCallback(async (pageNum: number, append: boolean) => {
-    if (append) setIsLoadingMore(true);
-    else setIsLoading(true);
-
-    try {
-      const { restaurants: items, pagination } = await fetchRestaurantsPage(
-        pageNum,
-        PAGE_LIMIT,
-        "sort=popular"
-      );
-      setRestaurants((prev) => (append ? [...prev, ...items] : items));
-      setPage(pagination.page);
-      setTotalPages(pagination.totalPages);
-    } catch {
-      if (!append) setRestaurants([]);
-    } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadPage(1, false);
-  }, [loadPage]);
-
-  const handleViewMore = () => {
-    if (page < totalPages && !isLoadingMore) {
-      loadPage(page + 1, true);
-    }
-  };
-
-  const hasMore = page < totalPages;
+  const restaurants = Array.isArray(rawRestaurants)
+    ? rawRestaurants.map(mapRestaurantCard)
+    : [];
   return (
     <section className="food-section" aria-labelledby="popular-restaurants-heading">
       <div className="mb-6 flex items-end justify-between gap-4 md:mb-7">
@@ -169,18 +123,6 @@ export default function PopularRestaurants() {
               </div>
             ))}
       </div>
-
-      {!isLoading && hasMore && (
-        <div className="flex justify-center mt-8">
-          <button
-            onClick={handleViewMore}
-            disabled={isLoadingMore}
-            className="food-button px-7 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-semibold disabled:opacity-60"
-          >
-            {isLoadingMore ? "Loading..." : "View More"}
-          </button>
-        </div>
-      )}
     </section>
   );
 }

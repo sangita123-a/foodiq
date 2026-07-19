@@ -15,52 +15,15 @@ type RecommendationItem = {
 };
 
 export default function FoodRecommendation() {
-  const { data: restaurants } = useSWR("/api/restaurants?limit=4");
-  const firstRestaurantId = restaurants?.[0]?.id;
-  const { data: menuItems } = useSWR(
-    firstRestaurantId ? `/api/restaurants/${firstRestaurantId}/menu` : null
-  );
+  const { data: menuItems, isLoading } = useSWR("/api/menu-items?limit=4");
 
-  const recommendations: RecommendationItem[] = (menuItems || []).slice(0, 4).map((item: any, index: number) => ({
+  const items: RecommendationItem[] = (menuItems || []).slice(0, 4).map((item: any, index: number) => ({
     id: item.id || index,
     name: item.name,
-    restaurant: restaurants?.[0]?.name || "Foodiq Partner",
+    restaurant: item.restaurant_name || "Foodiq Kitchen",
     price: `₹${item.discount_price || item.price}`,
     image: getFoodImage(item.image_url),
   }));
-
-  const fallbackRecommendations: RecommendationItem[] = [
-    {
-      id: 1,
-      name: "Truffle Mushroom Burger",
-      restaurant: "Burger House",
-      price: "₹249",
-      image: "/images/catalog/food/burger.webp",
-    },
-    {
-      id: 2,
-      name: "Margherita Pizza",
-      restaurant: "Luigi's Italian",
-      price: "₹399",
-      image: "/images/catalog/food/pizza.webp",
-    },
-    {
-      id: 3,
-      name: "Hyderabadi Chicken Dum Biryani",
-      restaurant: "Paradise",
-      price: "₹349",
-      image: "/images/catalog/food/biryani.webp",
-    },
-    {
-      id: 4,
-      name: "Hakka Noodles",
-      restaurant: "Wok This Way",
-      price: "₹199",
-      image: "/images/catalog/food/chinese.webp",
-    },
-  ];
-
-  const items: RecommendationItem[] = recommendations.length > 0 ? recommendations : fallbackRecommendations;
 
   return (
     <div className="mb-20">
@@ -69,7 +32,14 @@ export default function FoodRecommendation() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {items.map((food, idx) => (
+        {isLoading
+          ? [1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-56 bg-[#F8FAFC] rounded-2xl animate-pulse border border-[#E5E7EB]"
+              />
+            ))
+          : items.map((food, idx) => (
           <motion.div
             key={food.id}
             initial={{ opacity: 0, y: 20 }}
