@@ -33,6 +33,8 @@ import {
   placeCodOrder,
 } from "@/services/paymentApi";
 import { openRazorpayCheckout } from "@/lib/razorpay";
+import { useCartActions } from "@/hooks/useCartActions";
+import { clearLocalCart } from "@/lib/cart";
 
 type CartItem = {
   id?: string;
@@ -76,21 +78,35 @@ export default function CheckoutPage() {
   );
   const { showToast } = useToast();
   const hasToken = useAuthToken();
+  const { items: actionCartItems, subtotal: actionSubtotal } = useCartActions();
 
-  const { data: cartData, isLoading: isLoadingCart, error: cartError, mutate: mutateCart } = useSWR(
+  const { data: cartData, isLoading: isLoadingCart, mutate: mutateCart } = useSWR(
     hasToken ? "/api/cart" : null
   );
-  const { data: addressData, isLoading: isLoadingAddr, error: addrError, mutate: mutateAddresses } =
-    useSWR(hasToken ? "/api/addresses" : null);
+  const { data: addressData } = useSWR(hasToken ? "/api/addresses" : null);
 
-  const cartItems: CartItem[] = cartData?.items || [];
-  const totals = cartData?.totals || {
-    subtotal: 0,
-    deliveryCharge: 0,
-    tax: 0,
-    discount: 0,
-    grandTotal: 0,
+  const cartItems: CartItem[] = (cartData?.items?.length ? cartData.items : actionCartItems).map((i: any) => ({
+    id: i.cart_item_id || i.id || i.menu_item_id,
+    cart_item_id: i.cart_item_id || i.id || i.menu_item_id,
+    name: i.name,
+    quantity: i.quantity,
+    price: i.price,
+    restaurant_name: i.restaurant_name || "Foodiq Partner",
+  }));
+
+  const subtotal = cartData?.totals?.subtotal ? Number(cartData.totals.subtotal) : actionSubtotal;
+  const deliveryCharge = cartItems.length > 0 ? 35 : 0;
+  const tax = Math.round(subtotal * 0.05);
+  const grandTotal = Math.max(0, subtotal + deliveryCharge + tax - discount);
+
+  const totals = {
+    subtotal,
+    deliveryCharge,
+    tax,
+    discount,
+    grandTotal,
   };
+
   const addresses: AddressRow[] = addressData || [];
   const selectedAddressId =
     activeAddress ||
@@ -114,6 +130,7 @@ export default function CheckoutPage() {
     });
     clearCheckoutDraft();
     clearActiveOffer();
+    clearLocalCart();
     await Promise.all([mutateCart(), globalMutate("/api/cart"), globalMutate("/api/orders")]);
     showToast("Order confirmed!", "success");
     router.push(`/order-success?orderId=${orderId}&eta=${etaMinutes}`);

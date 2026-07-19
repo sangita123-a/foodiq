@@ -1,57 +1,60 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { ShoppingCart } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, ShoppingCart } from "lucide-react";
 import dynamic from "next/dynamic";
-import useSWR from "swr";
-import { isClientAuthenticated } from "@/lib/authSession";
+import { useCartActions } from "@/hooks/useCartActions";
 
 const CartDrawer = dynamic(() => import("@/components/cart/CartDrawer"), {
   ssr: false,
 });
 
 export default function FloatingCart() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { totalQuantity, subtotal } = useCartActions();
 
-  useEffect(() => {
-    setIsLoggedIn(isClientAuthenticated());
-    const onAuth = () => setIsLoggedIn(isClientAuthenticated());
-    window.addEventListener("foodiq:auth", onAuth);
-    return () => window.removeEventListener("foodiq:auth", onAuth);
-  }, []);
-
-  const { data } = useSWR(isLoggedIn ? "/api/cart" : null);
-  const items = data?.items || [];
-  const count = items.reduce((sum: number, item: { quantity: number }) => sum + item.quantity, 0);
-
-  if (!isLoggedIn) return null;
+  if (totalQuantity <= 0) return null;
 
   return (
     <>
-      <motion.button
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 1.2, type: "spring", stiffness: 200, damping: 15 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setDrawerOpen(true)}
-        className="fixed bottom-5 right-5 sm:bottom-8 sm:right-8 z-50 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-white bg-[var(--color-primary)] text-white shadow-[0_12px_30px_rgba(252,128,25,0.36)] hover:bg-[var(--color-primary-hover)] transition-colors"
-        aria-label={`Open cart with ${count} items`}
-      >
-        <ShoppingCart className="w-7 h-7" />
+      <AnimatePresence>
+        <motion.div
+          initial={{ y: 80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 80, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md"
+        >
+          <button
+            type="button"
+            onClick={() => setDrawerOpen(true)}
+            className="w-full bg-[#0F172A] hover:bg-primary text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between transition-all duration-300 group border border-white/10 backdrop-blur-xl"
+          >
+            <div className="flex items-center gap-3">
+              <div className="relative w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary group-hover:bg-white group-hover:text-primary transition-colors">
+                <ShoppingCart className="w-5 h-5 text-white group-hover:text-primary" />
+                <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#0F172A]">
+                  {totalQuantity}
+                </span>
+              </div>
+              <div className="text-left">
+                <p className="text-xs text-[#94A3B8] font-bold uppercase tracking-wider">
+                  {totalQuantity} {totalQuantity === 1 ? "Item" : "Items"} in Cart
+                </p>
+                <p className="text-base font-black text-white">₹{subtotal}</p>
+              </div>
+            </div>
 
-        {count > 0 && (
-          <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[24px] h-6 px-1 text-xs font-bold text-[var(--color-primary)] bg-white rounded-full border-2 border-[#E5E7EB]">
-            {count > 99 ? "99+" : count}
-          </span>
-        )}
-      </motion.button>
+            <div className="flex items-center gap-1.5 bg-primary px-4 py-2 rounded-xl text-xs font-black text-white group-hover:bg-white group-hover:text-primary transition-colors shadow-md">
+              <span>View Cart</span>
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </button>
+        </motion.div>
+      </AnimatePresence>
 
-      {drawerOpen ? (
-        <CartDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
-      ) : null}
+      {drawerOpen && <CartDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />}
     </>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CompactSearchBar from "@/components/CompactSearchBar";
@@ -8,9 +9,9 @@ import MenuItemCard from "@/components/restaurant/MenuItemCard";
 import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import Link from "next/link";
-import { Suspense } from "react";
 import { getFoodImage, mapRestaurantCard } from "@/lib/images";
 import { useCartActions } from "@/hooks/useCartActions";
+import { POPULAR_RESTAURANTS_30, TRENDING_DISHES_60 } from "@/lib/data/30restaurantsData";
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -26,9 +27,61 @@ function SearchContent() {
       : Array.isArray(data?.results)
         ? data.results
         : [];
-  const restaurants = results.filter((r: any) => r.type === "restaurant");
-  const menuItems = results.filter((r: any) => r.type === "menu_item");
+
+  const fallbackRestaurants = useMemo(() => {
+    if (!query) return [];
+    const q = query.toLowerCase();
+    return POPULAR_RESTAURANTS_30.filter(
+      (r) =>
+        r.name.toLowerCase().includes(q) ||
+        r.category.toLowerCase().includes(q) ||
+        r.cuisine.toLowerCase().includes(q)
+    );
+  }, [query]);
+
+  const fallbackDishes = useMemo(() => {
+    if (!query) return [];
+    const q = query.toLowerCase();
+    return TRENDING_DISHES_60.filter(
+      (d) =>
+        d.name.toLowerCase().includes(q) ||
+        d.category.toLowerCase().includes(q) ||
+        d.restaurantName.toLowerCase().includes(q)
+    );
+  }, [query]);
+
+  const apiRestaurants = results.filter((r: any) => r.type === "restaurant");
+  const apiMenuItems = results.filter((r: any) => r.type === "menu_item");
   const cuisines = results.filter((r: any) => r.type === "cuisine");
+
+  const restaurants =
+    apiRestaurants.length > 0
+      ? apiRestaurants
+      : fallbackRestaurants.map((r) => ({
+          id: r.id,
+          name: r.name,
+          image_url: r.image,
+          rating: r.rating,
+          estimated_delivery_time: r.time,
+          description: r.cuisine,
+          category_name: r.category,
+          price_range: 2,
+          is_veg: r.isVeg,
+        }));
+
+  const menuItems =
+    apiMenuItems.length > 0
+      ? apiMenuItems
+      : fallbackDishes.map((d) => ({
+          id: d.id,
+          name: d.name,
+          description: d.description,
+          image_url: d.image,
+          price: d.price,
+          rating: d.rating,
+          is_vegetarian: d.isVeg,
+          restaurant_name: d.restaurantName,
+        }));
 
   return (
     <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
@@ -45,34 +98,34 @@ function SearchContent() {
           <h1 className="text-3xl md:text-4xl font-black text-[#111827] mb-2">
             Search Results for &quot;{query}&quot;
           </h1>
-          <p>
+          <p className="text-[#6B7280]">
             {!query
               ? "Enter a search term above."
-              : isLoading
+              : isLoading && restaurants.length === 0
                 ? "Searching..."
                 : `Found ${restaurants.length} restaurants, ${menuItems.length} dishes, and ${cuisines.length} cuisines.`}
           </p>
         </div>
 
-        {isLoading && query && (
-          <div className="food-grid">
+        {isLoading && restaurants.length === 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-64 bg-[#F8FAFC] rounded-2xl animate-pulse border border-[#E5E7EB]" />
             ))}
           </div>
         )}
 
-        {!isLoading && query && (
+        {query && (
           <>
             {cuisines.length > 0 && (
               <div className="mb-16">
                 <h2 className="text-2xl md:text-3xl font-bold text-[#111827] mb-8">Cuisines</h2>
-                <div className="food-grid">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                   {cuisines.map((cuisine: any) => (
                     <Link
                       key={cuisine.id || cuisine.slug}
                       href={`/cuisine/${cuisine.slug}`}
-                      className="food-card p-4 hover:border-primary/40"
+                      className="p-4 rounded-2xl border border-[#E5E7EB] bg-white hover:border-primary transition-all shadow-sm"
                     >
                       <h3 className="text-lg font-bold text-[#111827]">{cuisine.name}</h3>
                       <p className="mt-2 text-sm text-[#6B7280] line-clamp-2">{cuisine.description}</p>
@@ -85,7 +138,7 @@ function SearchContent() {
             {restaurants.length > 0 && (
               <div className="mb-16">
                 <h2 className="text-2xl md:text-3xl font-bold text-[#111827] mb-8">Restaurants</h2>
-                <div className="food-grid">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {restaurants.map((restaurant: any, idx: number) => (
                     <RestaurantCard
                       key={restaurant.id}
@@ -112,16 +165,16 @@ function SearchContent() {
             {menuItems.length > 0 && (
               <div className="mb-16">
                 <h2 className="text-2xl md:text-3xl font-bold text-[#111827] mb-8">Dishes</h2>
-                <div className="food-grid">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {menuItems.map((item: any) => {
                     const mappedItem = {
-                      id: item.id,
+                      id: String(item.id),
                       name: item.name,
-                      description: item.description,
+                      description: item.description || "",
                       image: getFoodImage(item.image_url),
                       price: item.discount_price ? parseFloat(item.discount_price) : parseFloat(item.price),
                       rating: String(item.rating || "4.5"),
-                      isVeg: item.is_vegetarian,
+                      isVeg: Boolean(item.is_vegetarian ?? item.is_veg ?? true),
                       prepTime: item.preparation_time ? `${item.preparation_time} min` : "15 min",
                     };
                     return (
@@ -132,7 +185,7 @@ function SearchContent() {
                           isUpdating={updatingId === item.id}
                           onUpdateQuantity={updateQuantity}
                         />
-                        <div className="px-4 pb-3 flex items-center justify-between text-xs">
+                        <div className="px-4 pb-3 flex items-center justify-between text-xs mt-2">
                           <span className="text-primary font-bold">From: {item.restaurant_name}</span>
                           <Link href={`/food/${item.id}`} className="font-bold text-[#6B7280] hover:text-[#111827]">
                             View Details

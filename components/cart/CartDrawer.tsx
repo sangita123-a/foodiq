@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import useSWR, { mutate as globalMutate } from "swr";
 import { Minus, Plus, ShoppingBag, Tag, Trash2, X } from "lucide-react";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
 import SafeImage from "@/components/ui/SafeImage";
 import { FOOD_FALLBACK, getFoodImage } from "@/lib/images";
+import { useCartActions } from "@/hooks/useCartActions";
 
 type CartDrawerProps = {
   open: boolean;
@@ -16,68 +16,25 @@ type CartDrawerProps = {
 };
 
 export default function CartDrawer({ open, onClose }: CartDrawerProps) {
-  const { data, mutate } = useSWR(open ? "/api/cart" : null);
   const { showToast } = useToast();
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const { items, subtotal, updatingId, updateQuantity } = useCartActions();
   const [couponCode, setCouponCode] = useState("");
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponError, setCouponError] = useState("");
 
-  const items = data?.items || [];
-  const totals = data?.totals || {
-    subtotal: 0,
-    deliveryCharge: 0,
-    tax: 0,
-    discount: 0,
-    grandTotal: 0,
-  };
-  const discount = (Number(totals.discount) || 0) + couponDiscount;
-  const grandTotal =
-    Number(totals.subtotal) + Number(totals.deliveryCharge) + Number(totals.tax) - discount;
-
-  const refresh = async () => {
-    await Promise.all([mutate(), globalMutate("/api/cart")]);
-  };
-
-  const updateQuantity = async (cartItemId: string, quantity: number) => {
-    if (updatingId) return;
-    try {
-      setUpdatingId(cartItemId);
-      if (quantity < 1) {
-        await api.delete(`/api/cart/remove/${cartItemId}`);
-        showToast("Item removed from cart", "success");
-      } else {
-        await api.put(`/api/cart/update/${cartItemId}`, { quantity });
-      }
-      await refresh();
-    } catch {
-      showToast("Could not update your cart", "error");
-    } finally {
-      setUpdatingId(null);
-    }
-  };
-
-  const removeItem = async (cartItemId: string) => {
-    if (updatingId) return;
-    try {
-      setUpdatingId(cartItemId);
-      await api.delete(`/api/cart/remove/${cartItemId}`);
-      showToast("Item removed from cart", "success");
-      await refresh();
-    } catch {
-      showToast("Could not remove item", "error");
-    } finally {
-      setUpdatingId(null);
-    }
-  };
+  const deliveryFee = items.length > 0 ? 35 : 0;
+  const tax = Math.round(subtotal * 0.05);
+  const discount = couponDiscount;
+  const grandTotal = Math.max(0, subtotal + deliveryFee + tax - discount);
 
   const applyCoupon = async () => {
     if (!couponCode.trim()) return;
     setCouponError("");
     try {
       const res = await api.post("/api/coupons/apply", { code: couponCode.trim() });
-      setCouponDiscount(parseFloat(res.data.data.discount));
-      showToast("Coupon applied", "success");
+      const disc = Number(res.data?.data?.discount || res.data?.discount || 50);
+      setCouponDiscount(disc);
+      showToast("Coupon applied successfully!", "success");
     } catch (err: any) {
       setCouponDiscount(0);
       setCouponError(err.response?.data?.message || "Invalid or expired coupon code.");
@@ -101,180 +58,174 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", stiffness: 320, damping: 34 }}
-            className="fixed right-0 top-0 z-[70] flex h-full w-full max-w-[420px] flex-col border-l border-[#ECECEC] bg-white shadow-[-24px_0_70px_rgba(28,28,28,0.14)]"
-            role="dialog"
-            aria-label="Cart drawer"
+            transition={{ type: "spring", stiffness: 350, damping: 32 }}
+            className="fixed top-0 right-0 z-[70] h-full w-full max-w-[460px] bg-white shadow-2xl flex flex-col"
           >
-            <div className="flex items-center justify-between border-b border-[#ECECEC] px-5 py-4">
-              <h2 className="flex items-center gap-2 text-lg font-bold tracking-[-0.02em] text-[#1C1C1C]">
-                <ShoppingBag className="h-5 w-5 text-[#FC8019]" />
-                Your Cart
-                {items.length > 0 && (
-                  <span className="rounded-full bg-[#FC8019]/10 px-2 py-0.5 text-xs font-bold text-[#FC8019]">
-                    {items.length} {items.length === 1 ? "item" : "items"}
-                  </span>
-                )}
-              </h2>
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-[#ECECEC]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">
+                  <ShoppingBag className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-[#0F172A]">Your Order</h2>
+                  <p className="text-xs text-[#64748B] font-medium">
+                    {items.length} {items.length === 1 ? "item" : "items"} selected
+                  </p>
+                </div>
+              </div>
               <button
+                type="button"
                 onClick={onClose}
-                aria-label="Close cart"
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#ECECEC] text-[#686B78] transition-all hover:border-[#FC8019]/30 hover:bg-[#F8F9FA] hover:text-[#1C1C1C]"
+                className="w-9 h-9 rounded-full bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0] hover:text-[#0F172A] flex items-center justify-center transition-colors"
+                aria-label="Close cart drawer"
               >
-                <X className="h-5 w-5" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            {items.length === 0 ? (
-              <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
-                <div className="text-5xl">🛒</div>
-                <p className="text-base font-bold text-[#1C1C1C]">Your cart is empty</p>
-                <p className="text-sm text-[#686B78]">
-                  Add something delicious from the live deals!
-                </p>
-                <button
-                  onClick={onClose}
-                  className="mt-2 rounded-xl bg-[#FC8019] px-6 py-2.5 text-sm font-bold text-white shadow-[0_7px_18px_rgba(252,128,25,0.24)] transition-all hover:-translate-y-0.5 hover:bg-[var(--color-primary-hover)]"
-                >
-                  Browse Food
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="flex-1 overflow-y-auto p-4">
-                  <div className="flex flex-col gap-3">
-                    {items.map((item: any) => {
-                      const price = item.discount_price
-                        ? parseFloat(item.discount_price)
-                        : parseFloat(item.price);
-                      const busy = updatingId === item.cart_item_id;
-                      return (
-                        <div
-                          key={item.cart_item_id}
-                          className="flex gap-3 rounded-2xl border border-[#ECECEC] bg-[#F8F9FA] p-3.5 transition-colors hover:border-[#FC8019]/20"
-                        >
-                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[#ECECEC] shadow-sm">
-                            <SafeImage
-                              src={getFoodImage(item.image_url)}
-                              fallback={FOOD_FALLBACK}
-                              alt={item.name}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                          <div className="flex min-w-0 flex-1 flex-col">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0">
-                                <p className="line-clamp-1 text-sm font-semibold text-[#1C1C1C]">
-                                  {item.name}
-                                </p>
-                                <p className="line-clamp-1 text-xs text-[#686B78]">
-                                  {item.restaurant_name || "Foodiq Kitchen"}
-                                </p>
-                              </div>
-                              <button
-                                onClick={() => removeItem(item.cart_item_id)}
-                                disabled={busy}
-                                aria-label={`Remove ${item.name}`}
-                                className="shrink-0 rounded-md p-1 text-[#9CA3AF] transition-colors hover:bg-white hover:text-red-500 disabled:opacity-50"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </div>
-                            <div className="mt-auto flex items-center justify-between pt-1.5">
-                              <span className="text-sm font-bold text-[#1C1C1C]">
-                                ₹{(price * item.quantity).toFixed(0)}
-                              </span>
-                              <div className="flex items-center gap-2 rounded-xl border border-[#ECECEC] bg-white px-1.5 py-1 shadow-sm">
-                                <button
-                                  onClick={() =>
-                                    updateQuantity(item.cart_item_id, item.quantity - 1)
-                                  }
-                                  disabled={busy}
-                                  aria-label="Decrease quantity"
-                                  className="text-[#6B7280] transition-colors hover:text-[#111827] disabled:opacity-50"
-                                >
-                                  <Minus className="h-3.5 w-3.5" />
-                                </button>
-                                <span className="min-w-4 text-center text-xs font-bold text-[#111827]">
-                                  {item.quantity}
-                                </span>
-                                <button
-                                  onClick={() =>
-                                    updateQuantity(item.cart_item_id, item.quantity + 1)
-                                  }
-                                  disabled={busy}
-                                  aria-label="Increase quantity"
-                                  className="text-[#6B7280] transition-colors hover:text-[#111827] disabled:opacity-50"
-                                >
-                                  <Plus className="h-3.5 w-3.5" />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+            {/* Items List */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {items.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center py-12">
+                  <div className="w-20 h-20 rounded-full bg-[#F8FAFC] flex items-center justify-center text-[#94A3B8] mb-4">
+                    <ShoppingBag className="w-10 h-10" />
                   </div>
-                </div>
-
-                <div className="border-t border-[#ECECEC] bg-white p-4 shadow-[0_-10px_30px_rgba(28,28,28,0.04)]">
-                  <div className="mb-3 flex gap-2">
-                    <div className="relative flex-1">
-                      <Tag className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />
-                      <input
-                        type="text"
-                        placeholder="Coupon code"
-                        value={couponCode}
-                        onChange={(e) => {
-                          setCouponCode(e.target.value);
-                          setCouponError("");
-                        }}
-                        className="w-full rounded-[14px] border border-[#ECECEC] bg-white py-2.5 pl-9 pr-3 text-sm uppercase text-[#1C1C1C] placeholder:normal-case placeholder:text-[#686B78] focus:border-[#FC8019]/60 focus:outline-none focus:ring-4 focus:ring-[#FC8019]/10"
-                      />
-                    </div>
-                    <button
-                      onClick={applyCoupon}
-                      className="rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-4 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#FC8019]/30 hover:bg-white"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                  {couponError && <p className="mb-2 text-xs text-red-500">{couponError}</p>}
-
-                  <div className="mb-3 flex flex-col gap-1.5 text-sm text-[#686B78]">
-                    <div className="flex justify-between">
-                      <span>Subtotal</span>
-                      <span className="font-medium text-[#111827]">₹{totals.subtotal}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>GST (5%)</span>
-                      <span className="font-medium text-[#111827]">₹{totals.tax}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Delivery Charge</span>
-                      <span className="font-medium text-[#111827]">₹{totals.deliveryCharge}</span>
-                    </div>
-                    {discount > 0 && (
-                      <div className="flex justify-between font-medium text-green-400">
-                        <span>Coupon Discount</span>
-                        <span>-₹{discount}</span>
-                      </div>
-                    )}
-                    <div className="mt-1 flex justify-between border-t border-[#ECECEC] pt-2 text-base font-bold text-[#1C1C1C]">
-                      <span>Grand Total</span>
-                      <span className="text-[#FC8019]">₹{grandTotal.toFixed(0)}</span>
-                    </div>
-                  </div>
-
-                  <Link
-                    href="/checkout"
+                  <h3 className="text-lg font-bold text-[#0F172A] mb-1">Your cart is empty</h3>
+                  <p className="text-sm text-[#64748B] max-w-[240px] mb-6">
+                    Explore our top restaurants and add delicious meals to your cart.
+                  </p>
+                  <button
+                    type="button"
                     onClick={onClose}
-                    className="flex w-full items-center justify-center rounded-xl bg-[#FC8019] py-3 text-sm font-bold text-white shadow-[0_8px_20px_rgba(252,128,25,0.24)] transition-all hover:-translate-y-0.5 hover:bg-[var(--color-primary-hover)] hover:shadow-[0_12px_26px_rgba(252,128,25,0.3)]"
+                    className="px-6 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-hover transition-colors"
                   >
-                    Proceed to Checkout
-                  </Link>
+                    Start Ordering
+                  </button>
                 </div>
-              </>
+              ) : (
+                items.map((item) => {
+                  const isUpdating = updatingId === item.menu_item_id;
+                  return (
+                    <div
+                      key={item.cart_item_id}
+                      className="flex items-center justify-between p-3.5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] gap-3"
+                    >
+                      <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white shrink-0">
+                        <SafeImage
+                          src={getFoodImage(item.image)}
+                          fallback={FOOD_FALLBACK}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-extrabold text-[#0F172A] truncate mb-0.5">
+                          {item.name}
+                        </h4>
+                        <p className="text-xs font-black text-primary">₹{item.price}</p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 bg-white border border-[#CBD5E1] rounded-xl px-2 py-1">
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(item.menu_item_id, -1)}
+                            disabled={isUpdating}
+                            className="w-6 h-6 rounded-lg bg-[#F1F5F9] text-primary flex items-center justify-center font-bold hover:bg-primary hover:text-white transition-colors disabled:opacity-50"
+                          >
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
+                          <span className="text-xs font-black text-[#0F172A] min-w-[16px] text-center">
+                            {item.quantity}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(item.menu_item_id, 1)}
+                            disabled={isUpdating}
+                            className="w-6 h-6 rounded-lg bg-[#F1F5F9] text-primary flex items-center justify-center font-bold hover:bg-primary hover:text-white transition-colors disabled:opacity-50"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(item.menu_item_id, -item.quantity)}
+                          disabled={isUpdating}
+                          className="w-8 h-8 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors disabled:opacity-50"
+                          aria-label="Remove item"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Coupon Code & Totals Footer */}
+            {items.length > 0 && (
+              <div className="p-6 border-t border-[#ECECEC] bg-white space-y-4">
+                {/* Coupon input */}
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Tag className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Coupon Code"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] uppercase font-bold focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={applyCoupon}
+                    className="px-4 py-2 bg-[#0F172A] text-white text-xs font-extrabold rounded-xl hover:bg-primary transition-colors"
+                  >
+                    Apply
+                  </button>
+                </div>
+                {couponError && <p className="text-[11px] text-red-500 font-medium">{couponError}</p>}
+
+                {/* Summary Rows */}
+                <div className="space-y-1.5 text-xs text-[#64748B] pt-2 border-t border-[#F1F5F9]">
+                  <div className="flex justify-between">
+                    <span>Subtotal</span>
+                    <span className="font-bold text-[#0F172A]">₹{subtotal}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Delivery Fee</span>
+                    <span className="font-bold text-[#0F172A]">₹{deliveryFee}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Taxes & Charges (5% GST)</span>
+                    <span className="font-bold text-[#0F172A]">₹{tax}</span>
+                  </div>
+                  {discount > 0 && (
+                    <div className="flex justify-between text-emerald-600 font-bold">
+                      <span>Discount</span>
+                      <span>-₹{discount}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-base font-black text-[#0F172A] pt-2 border-t border-[#ECECEC]">
+                    <span>Total Amount</span>
+                    <span className="text-primary">₹{grandTotal}</span>
+                  </div>
+                </div>
+
+                {/* Checkout Link */}
+                <Link
+                  href="/checkout"
+                  onClick={onClose}
+                  className="block w-full py-3.5 bg-primary text-white text-center font-extrabold rounded-xl text-sm shadow-md hover:bg-primary-hover transition-colors"
+                >
+                  Proceed to Checkout
+                </Link>
+              </div>
             )}
           </motion.aside>
         </>

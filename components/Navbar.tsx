@@ -9,6 +9,7 @@ import { ShoppingCart, Search, Menu, X } from "lucide-react";
 import api from "@/services/api";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import { clearClientAuth } from "@/lib/authSession";
+import { useCartActions } from "@/hooks/useCartActions";
 
 const NAV_LINKS = [
   { href: "/", label: "Home", isActive: (path: string) => path === "/" },
@@ -45,12 +46,7 @@ export default function Navbar() {
     router.push("/login");
   };
 
-  const { data: cartData } = useSWR(isLoggedIn ? "/api/cart" : null);
-  const cartObj = (cartData as any)?.data || cartData;
-  const cartCount = (cartObj?.items || []).reduce(
-    (sum: number, item: { quantity: number }) => sum + item.quantity,
-    0
-  );
+  const { totalQuantity: cartCount } = useCartActions();
 
   return (
     <motion.nav
