@@ -75,7 +75,7 @@ export default function RestaurantPage() {
   );
   const hasToken = useAuthToken();
   const { data: cartResponse, mutate: mutateCart } = useSWR(hasToken ? "/api/cart" : null);
-  const { data: favResponse } = useSWR(hasToken ? "/api/favorites" : null);
+  const { data: favResponse, mutate: mutateFavs } = useSWR(hasToken ? "/api/favorites" : null);
 
   const fallbackRest = useMemo(
     () => POPULAR_RESTAURANTS_30.find((r) => r.id === id) || POPULAR_RESTAURANTS_30[0],
