@@ -59,13 +59,13 @@ export default function TrendingDishesPage() {
       </div>
 
       {isLoading && dishes.length === 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="h-[340px] bg-[#F8FAFC] rounded-2xl animate-pulse border border-[#E5E7EB]" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="h-[320px] bg-[#F8F8F8] rounded-[18px] animate-pulse border border-[#ECECEC]" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
           {dishes.map((dish, index) => {
             const qty = quantities.get(dish.id) || 0;
             const isUpdating = updatingId === dish.id;
@@ -74,32 +74,33 @@ export default function TrendingDishesPage() {
             return (
               <div
                 key={dish.id}
-                className="group relative bg-white rounded-[20px] border border-[#E2E8F0] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col h-full"
+                className="group relative bg-white rounded-[18px] border border-[#ECECEC] overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_32px_rgba(226,55,68,0.12)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300 flex flex-col h-[320px] sm:h-[340px]"
               >
-                <Link href={`/food/${dish.id}`} className="relative block h-48 w-full overflow-hidden bg-[#F1F5F9]">
+                <Link href={`/food/${dish.id}`} className="relative block h-[165px] sm:h-[175px] w-full overflow-hidden bg-[#F8F8F8] shrink-0">
                   <SafeImage
                     src={dish.image}
                     fallback={FOOD_FALLBACK}
                     alt={dish.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                  <div className="absolute top-3 left-3 bg-[#0F172A] text-white text-xs font-black px-2.5 py-1 rounded-lg shadow-sm">
+                  <div className="absolute top-2.5 left-2.5 bg-[#1A1A1A] text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-sm">
                     #{index + 1}
                   </div>
 
-                  <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md p-1.5 rounded-lg border border-white/20">
+                  <div className="absolute top-2.5 right-2.5 bg-black/60 backdrop-blur-md p-1 rounded-md border border-white/20">
                     <div
-                      className={`w-3.5 h-3.5 border-2 flex items-center justify-center ${
+                      className={`w-3 h-3 border-2 flex items-center justify-center ${
                         dish.isVeg ? "border-green-500" : "border-red-500"
                       }`}
                     >
-                      <div className={`w-1.5 h-1.5 rounded-full ${dish.isVeg ? "bg-green-500" : "bg-red-500"}`} />
+                      <div className={`w-1 h-1 rounded-full ${dish.isVeg ? "bg-green-500" : "bg-red-500"}`} />
                     </div>
                   </div>
 
-                  <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
-                    <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+                  <div className="absolute bottom-2.5 left-2.5 bg-black/60 backdrop-blur-md text-white text-[11px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
+                    <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
                     <span>{dish.rating}</span>
                   </div>
                 </Link>
@@ -107,23 +108,25 @@ export default function TrendingDishesPage() {
                 <button
                   type="button"
                   onClick={() => toggleItem(dish.id)}
-                  className="absolute top-12 right-3 z-10 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white hover:text-primary transition-colors"
+                  className="absolute top-10 right-2.5 z-10 w-7 h-7 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:text-[#E23744] transition-colors"
                   aria-label={isFavorite ? "Remove favorite" : "Add favorite"}
                 >
-                  <Heart className={`w-4 h-4 ${isFavorite ? "fill-primary text-primary" : ""}`} />
+                  <Heart className={`w-3.5 h-3.5 ${isFavorite ? "fill-[#E23744] text-[#E23744]" : ""}`} />
                 </button>
 
-                <div className="p-4 flex flex-col flex-1">
-                  <Link href={`/food/${dish.id}`} className="font-extrabold text-[#0F172A] text-base line-clamp-1 hover:text-primary transition-colors mb-0.5">
-                    {dish.name}
-                  </Link>
-                  <p className="text-[#64748B] text-xs font-semibold mb-2 line-clamp-1">by {dish.restaurantName}</p>
+                <div className="p-3.5 flex flex-col flex-1 min-w-0 justify-between">
+                  <div>
+                    <Link href={`/food/${dish.id}`} className="font-extrabold text-[#1A1A1A] text-sm sm:text-base line-clamp-1 hover:text-[#E23744] transition-colors mb-0.5">
+                      {dish.name}
+                    </Link>
+                    <p className="text-[#666666] text-xs font-medium line-clamp-1 mb-2">by {dish.restaurantName}</p>
+                  </div>
 
-                  <div className="mt-auto pt-3 border-t border-[#F1F5F9] flex items-center justify-between gap-2">
+                  <div className="pt-2 border-t border-[#F1F1F1] flex items-center justify-between gap-2">
                     <div>
-                      <span className="text-lg font-black text-[#0F172A]">₹{dish.price}</span>
+                      <span className="text-base font-black text-[#E23744]">₹{dish.price}</span>
                       {dish.originalPrice && dish.originalPrice > dish.price && (
-                        <span className="text-xs text-[#94A3B8] line-through ml-1.5">₹{dish.originalPrice}</span>
+                        <span className="text-xs text-[#8E8E8E] line-through ml-1">₹{dish.originalPrice}</span>
                       )}
                     </div>
 
@@ -140,40 +143,40 @@ export default function TrendingDishesPage() {
                           })
                         }
                         disabled={isUpdating}
-                        className="inline-flex items-center gap-1 bg-primary text-white hover:bg-primary-hover px-3.5 py-1.5 rounded-xl text-xs font-extrabold shadow-sm transition-all disabled:opacity-50"
+                        className="inline-flex items-center gap-1 bg-[#E23744] text-white hover:bg-[#C81E34] px-3 py-1.5 rounded-xl text-xs font-extrabold shadow-sm transition-all disabled:opacity-50"
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-3.5 h-3.5" />
                         <span>ADD</span>
                       </button>
                     ) : (
-                      <div className="flex items-center gap-1.5 bg-[#F1F5F9] border border-[#CBD5E1] rounded-xl px-2 py-1">
+                      <div className="flex items-center gap-1 bg-[#FFF5F6] border border-[#E23744] rounded-xl px-1.5 py-0.5">
                         <button
                           type="button"
                           onClick={() => updateQuantity(dish.id, -1)}
                           disabled={isUpdating}
-                          className="w-6 h-6 rounded-lg bg-white text-primary flex items-center justify-center font-bold shadow-sm hover:bg-primary hover:text-white transition-colors disabled:opacity-50"
+                          className="w-5 h-5 rounded-md bg-white text-[#E23744] flex items-center justify-center font-bold shadow-sm hover:bg-[#E23744] hover:text-white transition-colors disabled:opacity-50"
                         >
-                          <Minus className="w-3.5 h-3.5" />
+                          <Minus className="w-3 h-3" />
                         </button>
-                        <span className="text-xs font-black text-[#0F172A] min-w-[16px] text-center">{qty}</span>
+                        <span className="text-xs font-black text-[#E23744] min-w-[14px] text-center">{qty}</span>
                         <button
                           type="button"
                           onClick={() => updateQuantity(dish.id, 1)}
                           disabled={isUpdating}
-                          className="w-6 h-6 rounded-lg bg-white text-primary flex items-center justify-center font-bold shadow-sm hover:bg-primary hover:text-white transition-colors disabled:opacity-50"
+                          className="w-5 h-5 rounded-md bg-white text-[#E23744] flex items-center justify-center font-bold shadow-sm hover:bg-[#E23744] hover:text-white transition-colors disabled:opacity-50"
                         >
-                          <Plus className="w-3.5 h-3.5" />
+                          <Plus className="w-3 h-3" />
                         </button>
                       </div>
                     )}
                   </div>
 
-                  <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="mt-2.5 grid grid-cols-2 gap-1.5">
                     <Link
                       href={`/food/${dish.id}`}
-                      className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#F8FAFC] text-[#475569] hover:bg-[#F1F5F9] text-xs font-bold border border-[#E2E8F0] transition-colors"
+                      className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-xl bg-[#F8F8F8] text-[#666666] hover:bg-[#ECECEC] text-[11px] font-bold border border-[#ECECEC] transition-colors"
                     >
-                      <Eye className="w-3.5 h-3.5" />
+                      <Eye className="w-3 h-3" />
                       <span>Details</span>
                     </Link>
                     <button
@@ -188,9 +191,9 @@ export default function TrendingDishesPage() {
                         })
                       }
                       disabled={isUpdating}
-                      className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#0F172A] text-white hover:bg-primary text-xs font-bold transition-colors disabled:opacity-50"
+                      className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-xl bg-[#1A1A1A] text-white hover:bg-[#E23744] text-[11px] font-bold transition-colors disabled:opacity-50"
                     >
-                      <span>Order Now</span>
+                      <span>Order</span>
                     </button>
                   </div>
                 </div>

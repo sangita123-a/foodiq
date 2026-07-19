@@ -108,94 +108,83 @@ export default function PopularRestaurants() {
           })}
         </div>
 
-        {/* Grid of Exactly 30 Restaurants */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {/* Grid of 30 Restaurants: 2 col (mobile), 3 col (tablet), 4-5 col (desktop) */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
           {isLoading && filteredRestaurants.length === 0
-            ? Array.from({ length: 12 }).map((_, i) => (
-                <div key={i} className="h-[340px] rounded-[20px] bg-white animate-pulse border border-[#E2E8F0]" />
+            ? Array.from({ length: 10 }).map((_, i) => (
+                <div key={i} className="h-[320px] rounded-[18px] bg-white animate-pulse border border-[#ECECEC]" />
               ))
             : filteredRestaurants.map((restaurant) => (
                 <div
                   key={restaurant.id}
-                  className="group relative bg-white rounded-[20px] border border-[#E2E8F0] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col h-full"
+                  className="group relative bg-white rounded-[18px] border border-[#ECECEC] overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_32px_rgba(226,55,68,0.12)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300 flex flex-col h-[320px] sm:h-[340px]"
                 >
-                  {/* Cover Image */}
-                  <Link href={`/restaurant/${restaurant.id}`} className="relative block h-48 w-full overflow-hidden bg-[#F1F5F9]">
+                  {/* Cover Image (~60% height) */}
+                  <Link href={`/restaurant/${restaurant.id}`} className="relative block h-[175px] sm:h-[185px] w-full overflow-hidden bg-[#F8F8F8] shrink-0">
                     <SafeImage
                       src={restaurant.image}
                       fallback={RESTAURANT_FALLBACK}
                       alt={restaurant.name}
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
 
                     {/* Offer Tag */}
                     {restaurant.offer && (
-                      <div className="absolute top-3 left-3 bg-gradient-to-r from-[#E23744] to-[#E26700] text-white text-[11px] font-black px-2.5 py-1 rounded-lg shadow-md uppercase tracking-wide flex items-center gap-1">
+                      <div className="absolute top-2.5 left-2.5 bg-[#E23744] text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-md uppercase tracking-wide flex items-center gap-1">
                         <Tag className="w-3 h-3" />
                         <span>{restaurant.offer}</span>
                       </div>
                     )}
 
                     {/* Veg / Non-Veg Badge */}
-                    <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md p-1.5 rounded-lg border border-white/20">
+                    <div className="absolute top-2.5 right-2.5 bg-black/60 backdrop-blur-md p-1 rounded-md border border-white/20">
                       <div
-                        className={`w-3.5 h-3.5 border-2 flex items-center justify-center ${
+                        className={`w-3 h-3 border-2 flex items-center justify-center ${
                           restaurant.isVeg ? "border-green-500" : "border-red-500"
                         }`}
                       >
-                        <div className={`w-1.5 h-1.5 rounded-full ${restaurant.isVeg ? "bg-green-500" : "bg-red-500"}`} />
+                        <div className={`w-1 h-1 rounded-full ${restaurant.isVeg ? "bg-green-500" : "bg-red-500"}`} />
                       </div>
                     </div>
 
-                    {/* Category Pill Overlay */}
-                    <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md text-[#0F172A] text-[11px] font-bold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
-                      <Utensils className="w-3 h-3 text-primary" />
-                      <span>{restaurant.category}</span>
+                    {/* Rating Badge */}
+                    <div className="absolute bottom-2.5 left-2.5 bg-[#16A34A] text-white text-[11px] font-black px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
+                      <span>{restaurant.rating}</span>
+                      <Star className="w-3 h-3 fill-white" />
                     </div>
 
                     {/* Open Status */}
-                    <div className="absolute bottom-3 right-3 bg-emerald-600/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm">
-                      OPEN NOW
+                    <div className="absolute bottom-2.5 right-2.5 bg-emerald-600/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">
+                      OPEN
                     </div>
                   </Link>
 
-                  {/* Card Content */}
-                  <div className="p-4 flex flex-col flex-1">
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <Link href={`/restaurant/${restaurant.id}`} className="font-extrabold text-[#0F172A] text-base line-clamp-1 hover:text-primary transition-colors">
+                  {/* Essential Card Content */}
+                  <div className="p-3.5 flex flex-col flex-1 min-w-0 justify-between">
+                    <div>
+                      <Link href={`/restaurant/${restaurant.id}`} className="font-extrabold text-[#1A1A1A] text-sm sm:text-base line-clamp-1 hover:text-[#E23744] transition-colors mb-0.5">
                         {restaurant.name}
                       </Link>
-                      <div className="inline-flex items-center gap-1 bg-emerald-600 text-white px-2 py-0.5 rounded-md text-xs font-bold shrink-0">
-                        <span>{restaurant.rating}</span>
-                        <Star className="w-3 h-3 fill-white" />
-                      </div>
+
+                      <p className="text-[#666666] text-xs line-clamp-1 font-medium mb-2">{restaurant.cuisine}</p>
                     </div>
 
-                    <p className="text-[#64748B] text-xs mb-3 line-clamp-1 font-medium">{restaurant.cuisine}</p>
-
-                    <div className="flex items-center gap-3 text-[#475569] text-xs font-semibold mb-4">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-primary" />
-                        <span>{restaurant.time}</span>
-                      </div>
-                      <span>•</span>
-                      <span>{restaurant.deliveryFee}</span>
-                      <span>•</span>
-                      <span className="text-[#64748B]">{restaurant.priceForTwo}</span>
-                    </div>
-
-                    {/* Action Button */}
-                    <div className="mt-auto pt-3 border-t border-[#F1F5F9] flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1 text-[11px] text-[#64748B] line-clamp-1">
-                        <MapPin className="w-3 h-3 text-primary shrink-0" />
-                        <span>{restaurant.location}</span>
+                    <div>
+                      <div className="flex items-center justify-between text-[#666666] text-xs font-semibold mb-3">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5 text-[#E23744]" />
+                          <span>{restaurant.time}</span>
+                        </div>
+                        <span>•</span>
+                        <span className="truncate">{restaurant.priceForTwo}</span>
                       </div>
 
+                      {/* Action Button */}
                       <Link
                         href={`/restaurant/${restaurant.id}`}
-                        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 text-primary hover:bg-primary hover:text-white text-xs font-bold transition-all shrink-0"
+                        className="w-full inline-flex items-center justify-center gap-1.5 py-1.5 rounded-xl bg-[#E23744] hover:bg-[#C81E34] text-white text-xs font-bold transition-all shadow-sm active:scale-98"
                       >
                         <span>View Menu</span>
                         <ArrowRight className="w-3.5 h-3.5" />
