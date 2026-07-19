@@ -80,10 +80,10 @@ export default function CheckoutPage() {
   const hasToken = useAuthToken();
   const { items: actionCartItems, subtotal: actionSubtotal } = useCartActions();
 
-  const { data: cartData, isLoading: isLoadingCart, mutate: mutateCart } = useSWR(
+  const { data: cartData, isLoading: isLoadingCart, error: cartError, mutate: mutateCart } = useSWR(
     hasToken ? "/api/cart" : null
   );
-  const { data: addressData, isLoading: isLoadingAddr, mutate: mutateAddresses } = useSWR(
+  const { data: addressData, isLoading: isLoadingAddr, error: addrError, mutate: mutateAddresses } = useSWR(
     hasToken ? "/api/addresses" : null
   );
 
