@@ -1,165 +1,180 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, Heart, Minus, Plus, Star } from "lucide-react";
 import useSWR from "swr";
-import { useMemo } from "react";
 import SafeImage from "@/components/ui/SafeImage";
 import { FOOD_FALLBACK, getFoodImage } from "@/lib/images";
+import { TRENDING_DISHES_60, Dish60 } from "@/lib/data/30restaurantsData";
 import { useCartActions } from "@/hooks/useCartActions";
 import { useFavoriteActions } from "@/hooks/useFavoriteActions";
-
-type TrendingDish = {
-  id: string;
-  name: string;
-  restaurant: string;
-  rating: string;
-  price: number;
-  image: string;
-  description?: string;
-  trendingScore?: number;
-};
 
 export default function TrendingDishesPage() {
   const router = useRouter();
   const { data: menuItems, isLoading } = useSWR("/api/menu-items?trending=true&limit=80");
   const { quantities, updatingId, updateQuantity, addAndCheckout } = useCartActions();
-  const { itemIds, updatingId: favoriteUpdatingId, toggleItem } = useFavoriteActions();
+  const { itemIds, toggleItem } = useFavoriteActions();
 
-  const dishes: TrendingDish[] = useMemo(() => {
+  const dishes: Dish60[] = useMemo(() => {
     const rawArray = Array.isArray(menuItems)
       ? menuItems
-      : Array.isArray(menuItems?.data)
-        ? menuItems.data
-        : Array.isArray(menuItems?.items)
-          ? menuItems.items
+      : Array.isArray((menuItems as any)?.data)
+        ? (menuItems as any).data
+        : Array.isArray((menuItems as any)?.items)
+          ? (menuItems as any).items
           : [];
-    return rawArray.map((item: any) => ({
-      id: item.id,
-      name: item.name,
-      restaurant: item.restaurant_name || "Foodiq Partner",
-      rating: Number(item.rating || item.restaurant_rating || 4.5).toFixed(1),
-      price: item.discount_price ? parseFloat(item.discount_price) : parseFloat(item.price),
-      image: getFoodImage(item.image_url),
-      description: item.description,
-      trendingScore: item.trending_score || 0,
-    }));
+
+    if (rawArray.length >= 60) {
+      return rawArray.slice(0, 60).map((item: any, idx: number) => {
+        const fallbackObj = TRENDING_DISHES_60[idx % TRENDING_DISHES_60.length];
+        return {
+          id: String(item.id || fallbackObj.id),
+          name: item.name || fallbackObj.name,
+          restaurantId: String(item.restaurant_id || fallbackObj.restaurantId),
+          restaurantName: item.restaurant_name || fallbackObj.restaurantName,
+          rating: String(item.rating || item.restaurant_rating || fallbackObj.rating),
+          price: item.discount_price ? Number(item.discount_price) : Number(item.price || fallbackObj.price),
+          originalPrice: item.price ? Number(item.price) : fallbackObj.originalPrice,
+          image: getFoodImage(item.image_url || item.image) || fallbackObj.image,
+          description: item.description || fallbackObj.description,
+          isVeg: Boolean(item.is_vegetarian ?? item.is_veg ?? fallbackObj.isVeg),
+          isBestseller: Boolean(item.is_bestseller ?? fallbackObj.isBestseller),
+          category: item.category_name || fallbackObj.category,
+        };
+      });
+    }
+
+    return TRENDING_DISHES_60;
   }, [menuItems]);
 
   return (
-    <div className="food-section">
-      <div className="food-section-heading border-b border-[#E5E7EB] pb-6">
-        <h1 className="text-3xl md:text-4xl font-black text-[#111827] mb-2">Trending Dishes</h1>
-        <p>
-          Top ordered dishes right now across Foodiq · {dishes.length} dishes
+    <div className="container mx-auto px-4 md:px-8 py-12 max-w-7xl">
+      <div className="border-b border-[#E5E7EB] pb-6 mb-8">
+        <h1 className="text-3xl md:text-5xl font-black text-[#111827] mb-2">Trending Dishes</h1>
+        <p className="text-[#6B7280] text-base md:text-lg">
+          Top ordered dishes right now across Foodiq · {dishes.length} items available
         </p>
       </div>
 
-      {isLoading ? (
-        <div className="food-grid">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="h-[318px] bg-[#F8FAFC] rounded-2xl animate-pulse border border-[#E5E7EB]" />
+      {isLoading && dishes.length === 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="h-[340px] bg-[#F8FAFC] rounded-2xl animate-pulse border border-[#E5E7EB]" />
           ))}
         </div>
-      ) : dishes.length === 0 ? (
-        <div className="text-center py-20 text-[#6B7280]">No trending dishes available yet.</div>
       ) : (
-        <div className="food-grid">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {dishes.map((dish, index) => {
             const qty = quantities.get(dish.id) || 0;
             const isUpdating = updatingId === dish.id;
+            const isFavorite = itemIds.has(dish.id);
 
             return (
               <div
                 key={dish.id}
-                className="food-card relative group"
+                className="group relative bg-white rounded-[20px] border border-[#E2E8F0] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col h-full"
               >
-                <Link href={`/food/${dish.id}`} className="food-card-image block">
+                <Link href={`/food/${dish.id}`} className="relative block h-48 w-full overflow-hidden bg-[#F1F5F9]">
                   <SafeImage
-                    src={dish.image || FOOD_FALLBACK}
+                    src={dish.image}
                     fallback={FOOD_FALLBACK}
                     alt={dish.name}
-                    className="h-full w-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/75/60 to-transparent" />
-                  <div className="absolute top-3 left-3 bg-primary/90 text-white text-xs font-black px-2.5 py-1 rounded-lg">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                  <div className="absolute top-3 left-3 bg-[#0F172A] text-white text-xs font-black px-2.5 py-1 rounded-lg shadow-sm">
                     #{index + 1}
                   </div>
-                  <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg text-sm font-semibold text-white">
-                    <Star className="w-3.5 h-3.5 text-yellow-400 fill-current" />
-                    {dish.rating}
+
+                  <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md p-1.5 rounded-lg border border-white/20">
+                    <div
+                      className={`w-3.5 h-3.5 border-2 flex items-center justify-center ${
+                        dish.isVeg ? "border-green-500" : "border-red-500"
+                      }`}
+                    >
+                      <div className={`w-1.5 h-1.5 rounded-full ${dish.isVeg ? "bg-green-500" : "bg-red-500"}`} />
+                    </div>
+                  </div>
+
+                  <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
+                    <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+                    <span>{dish.rating}</span>
                   </div>
                 </Link>
+
                 <button
                   type="button"
                   onClick={() => toggleItem(dish.id)}
-                  disabled={favoriteUpdatingId === dish.id}
-                  className="absolute right-3 top-3 z-10 rounded-full bg-black/70 p-2.5 text-white backdrop-blur-md transition-colors hover:text-primary disabled:opacity-50"
-                  aria-label={itemIds.has(dish.id) ? `Remove ${dish.name} from favorites` : `Favorite ${dish.name}`}
+                  className="absolute top-12 right-3 z-10 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white hover:text-primary transition-colors"
+                  aria-label={isFavorite ? "Remove favorite" : "Add favorite"}
                 >
-                  <Heart className={`h-4 w-4 ${itemIds.has(dish.id) ? "fill-primary text-primary" : ""}`} />
+                  <Heart className={`w-4 h-4 ${isFavorite ? "fill-primary text-primary" : ""}`} />
                 </button>
 
-                <div className="food-card-body">
-                  <Link href={`/food/${dish.id}`} className="food-card-title text-[#111827] mb-1 line-clamp-1 hover:text-primary transition-colors block">
+                <div className="p-4 flex flex-col flex-1">
+                  <Link href={`/food/${dish.id}`} className="font-extrabold text-[#0F172A] text-base line-clamp-1 hover:text-primary transition-colors mb-0.5">
                     {dish.name}
                   </Link>
-                  <p className="text-[#6B7280] text-sm mb-2 line-clamp-1">by {dish.restaurant}</p>
-                  {dish.description && (
-                    <p className="food-card-description text-xs mb-3 line-clamp-2">{dish.description}</p>
-                  )}
+                  <p className="text-[#64748B] text-xs font-semibold mb-2 line-clamp-1">by {dish.restaurantName}</p>
 
-                  <div className="flex items-center justify-between mt-auto">
-                    <span className="food-price text-[#111827]">₹{dish.price}</span>
+                  <div className="mt-auto pt-3 border-t border-[#F1F5F9] flex items-center justify-between gap-2">
+                    <div>
+                      <span className="text-lg font-black text-[#0F172A]">₹{dish.price}</span>
+                      {dish.originalPrice && dish.originalPrice > dish.price && (
+                        <span className="text-xs text-[#94A3B8] line-through ml-1.5">₹{dish.originalPrice}</span>
+                      )}
+                    </div>
 
                     {qty === 0 ? (
                       <button
                         type="button"
                         onClick={() => updateQuantity(dish.id, 1)}
                         disabled={isUpdating}
-                        className="bg-primary/10 hover:bg-primary text-primary hover:text-white p-2.5 rounded-full transition-colors disabled:opacity-50"
-                        aria-label={`Add ${dish.name} to cart`}
+                        className="inline-flex items-center gap-1 bg-primary text-white hover:bg-primary-hover px-3.5 py-1.5 rounded-xl text-xs font-extrabold shadow-sm transition-all disabled:opacity-50"
                       >
-                        <Plus className="w-5 h-5" />
+                        <Plus className="w-4 h-4" />
+                        <span>ADD</span>
                       </button>
                     ) : (
-                      <div className="flex items-center gap-1 bg-primary/10 rounded-full px-1 py-1">
+                      <div className="flex items-center gap-1.5 bg-[#F1F5F9] border border-[#CBD5E1] rounded-xl px-2 py-1">
                         <button
                           type="button"
                           onClick={() => updateQuantity(dish.id, -1)}
                           disabled={isUpdating}
-                          className="p-1.5 text-primary hover:text-[#111827] hover:bg-primary rounded-full transition-colors disabled:opacity-50"
+                          className="w-6 h-6 rounded-lg bg-white text-primary flex items-center justify-center font-bold shadow-sm hover:bg-primary hover:text-white transition-colors disabled:opacity-50"
                         >
-                          <Minus className="w-4 h-4" />
+                          <Minus className="w-3.5 h-3.5" />
                         </button>
-                        <span className="text-[#111827] font-bold text-sm min-w-[20px] text-center">{qty}</span>
+                        <span className="text-xs font-black text-[#0F172A] min-w-[16px] text-center">{qty}</span>
                         <button
                           type="button"
                           onClick={() => updateQuantity(dish.id, 1)}
                           disabled={isUpdating}
-                          className="p-1.5 text-primary hover:text-[#111827] hover:bg-primary rounded-full transition-colors disabled:opacity-50"
+                          className="w-6 h-6 rounded-lg bg-white text-primary flex items-center justify-center font-bold shadow-sm hover:bg-primary hover:text-white transition-colors disabled:opacity-50"
                         >
-                          <Plus className="w-4 h-4" />
+                          <Plus className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     )}
                   </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[#E5E7EB] pt-3">
+
+                  <div className="mt-3 grid grid-cols-2 gap-2">
                     <Link
                       href={`/food/${dish.id}`}
-                      className="inline-flex items-center justify-center gap-1 rounded-lg bg-[#F8FAFC] px-2 py-2 text-[11px] font-bold text-[#111827] transition-colors hover:bg-[#F1F5F9]"
+                      className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#F8FAFC] text-[#475569] hover:bg-[#F1F5F9] text-xs font-bold border border-[#E2E8F0] transition-colors"
                     >
-                      <Eye className="h-4 w-4" />
-                      View Details
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Details</span>
                     </Link>
                     <button
                       type="button"
                       onClick={() => addAndCheckout(dish.id, router)}
                       disabled={isUpdating}
-                      className="rounded-lg bg-primary px-2 py-2 text-[11px] font-bold text-white transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+                      className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#0F172A] text-white hover:bg-primary text-xs font-bold transition-colors disabled:opacity-50"
                     >
-                      Order Now
+                      <span>Order Now</span>
                     </button>
                   </div>
                 </div>
