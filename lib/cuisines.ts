@@ -15,6 +15,9 @@ export const CUISINE_SLUGS = [
   "seafood",
   "bakery",
   "beverages",
+  "chicken",
+  "momos",
+  "coffee",
 ] as const;
 
 export type CuisineSlug = (typeof CUISINE_SLUGS)[number];

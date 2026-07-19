@@ -17,8 +17,8 @@ function SectionSkeleton({ height = "h-64" }: { height?: string }) {
 
 const ScrollButton = dynamic(() => import("@/components/ScrollButton"));
 const FloatingCart = dynamic(() => import("@/components/FloatingCart"));
-const PopularRestaurants = dynamic(() => import("@/components/PopularRestaurants"), {
-  loading: () => <SectionSkeleton height="h-80" />,
+const BestFoodOptions = dynamic(() => import("@/components/BestFoodOptions"), {
+  loading: () => <SectionSkeleton height="h-60" />,
 });
 const TrendingDishes = dynamic(() => import("@/components/TrendingDishes"), {
   loading: () => <SectionSkeleton />,
@@ -74,7 +74,7 @@ export default function Home() {
 
       <div className="relative z-10 bg-white pt-4 sm:pt-6">
         <FoodiqLiveHub />
-        <PopularRestaurants />
+        <BestFoodOptions />
         <TrendingDishes />
         <BestOffers />
         <TopBrands />

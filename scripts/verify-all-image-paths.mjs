@@ -15,7 +15,7 @@ const filesToAudit = [
   path.join(process.cwd(), 'lib', 'images.ts'),
   path.join(process.cwd(), 'lib', 'cuisines.ts'),
   path.join(process.cwd(), 'lib', 'offers.ts'),
-  path.join(process.cwd(), 'components', 'PopularRestaurants.tsx'),
+  path.join(process.cwd(), 'components', 'BestFoodOptions.tsx'),
   path.join(process.cwd(), 'components', 'TrendingDishes.tsx'),
   path.join(process.cwd(), 'components', 'TrendingDishesPage.tsx'),
   path.join(process.cwd(), 'app', 'restaurant', '[id]', 'page.tsx'),
