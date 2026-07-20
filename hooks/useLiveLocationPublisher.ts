@@ -18,7 +18,7 @@ type Options = {
  */
 export function useLiveLocationPublisher({
   orderId = null,
-  intervalMs = 4000,
+  intervalMs = 5000,
   enabled = true,
 }: Options = {}) {
   const { socket, connected, offline } = useSocket();

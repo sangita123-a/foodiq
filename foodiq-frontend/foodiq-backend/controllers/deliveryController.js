@@ -28,6 +28,10 @@ const requirePartner = async (req, res) => {
     fail(res, 403, 'Your delivery partner account was rejected.');
     return null;
   }
+  if (partner.approval_status === 'suspended') {
+    fail(res, 403, 'Your delivery partner account has been suspended.');
+    return null;
+  }
   if (partner.approval_status === 'pending') {
     fail(res, 403, 'Your account is pending approval.');
     return null;
@@ -90,6 +94,7 @@ const register = async (req, res) => {
       role: 'delivery_partner',
       token,
       partner,
+      verification_status: partner.approval_status || 'pending',
     });
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
@@ -98,8 +103,10 @@ const register = async (req, res) => {
 
 const getMe = async (req, res) => {
   try {
-    const partner = await requirePartner(req, res);
-    if (!partner) return;
+    const partner = await delivery.getPartnerByUserId(req.user.id);
+    if (!partner) {
+      return fail(res, 404, 'Delivery partner profile not found. Please register first.');
+    }
     ok(res, 'Delivery partner profile', {
       user: {
         id: req.user.id,
@@ -108,6 +115,7 @@ const getMe = async (req, res) => {
         role: req.user.role,
       },
       partner,
+      verification_status: partner.approval_status || 'approved',
     });
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
@@ -162,7 +170,7 @@ const setLocation = async (req, res) => {
          JOIN orders o ON o.id = da.order_id
          LEFT JOIN addresses a ON a.id = o.delivery_address_id
          WHERE da.delivery_partner_id = $1
-           AND da.status IN ('accepted', 'assigned', 'reached_restaurant', 'picked_up', 'on_the_way')
+           AND da.status IN ('accepted', 'assigned', 'reached_restaurant', 'picked_up', 'on_the_way', 'near_customer')
          ORDER BY da.updated_at DESC
          LIMIT 1`,
         [partner.id]
@@ -406,6 +414,9 @@ const getRoute = async (req, res) => {
       duration_min,
       osm_embed_url: `https://www.openstreetmap.org/export/embed.html?bbox=${Math.min(fromLng, toLng) - 0.02}%2C${Math.min(fromLat, toLat) - 0.02}%2C${Math.max(fromLng, toLng) + 0.02}%2C${Math.max(fromLat, toLat) + 0.02}&layer=mapnik&marker=${fromLat}%2C${fromLng}`,
       osm_directions_url: `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${fromLat}%2C${fromLng}%3B${toLat}%2C${toLng}`,
+      google_maps_url: `https://www.google.com/maps/dir/?api=1&origin=${fromLat},${fromLng}&destination=${toLat},${toLng}&travelmode=driving`,
+      google_maps_pickup_url: `https://www.google.com/maps/dir/?api=1&destination=${fromLat},${fromLng}&travelmode=driving`,
+      google_maps_dropoff_url: `https://www.google.com/maps/dir/?api=1&destination=${toLat},${toLng}&travelmode=driving`,
     });
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
@@ -461,6 +472,46 @@ const getMyReviews = async (req, res) => {
   }
 };
 
+const getWallet = async (req, res) => {
+  try {
+    const partner = await requirePartner(req, res);
+    if (!partner) return;
+    const wallet = require('../models/deliveryWalletModel');
+    ok(res, 'Wallet retrieved', await wallet.getWalletSummary(partner.id));
+  } catch (error) {
+    fail(res, error.status || 500, error.message, error.message);
+  }
+};
+
+const requestWithdrawal = async (req, res) => {
+  try {
+    const partner = await requirePartner(req, res);
+    if (!partner) return;
+    const wallet = require('../models/deliveryWalletModel');
+    const amount = Number(req.body.amount);
+    const note = String(req.body.note || '').trim();
+    const data = await wallet.requestWithdrawal(partner.id, amount, note);
+    ok(res, 'Withdrawal request submitted', data);
+  } catch (error) {
+    fail(res, error.status || 500, error.message, error.message);
+  }
+};
+
+const getHistory = async (req, res) => {
+  try {
+    const partner = await requirePartner(req, res);
+    if (!partner) return;
+    const status = String(req.query.status || 'all').toLowerCase();
+    const data = await delivery.getDeliveryHistory(partner.id, {
+      status,
+      limit: req.query.limit,
+    });
+    ok(res, 'Delivery history retrieved', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
 module.exports = {
   register,
   getMe,
@@ -475,6 +526,13 @@ module.exports = {
   updateStatus,
   getEarnings,
   getNotifications,
+  getRoute,
+  updateProfile,
+  getMyReviews,
+  getWallet,
+  requestWithdrawal,
+  getHistory,
+};
   updateProfile,
   getRoute,
   getMyReviews,

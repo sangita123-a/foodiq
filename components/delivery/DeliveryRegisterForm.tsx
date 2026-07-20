@@ -39,7 +39,7 @@ export default function DeliveryRegisterForm() {
         const user = res.data.data;
         markAuthenticated(user.token);
         persistAuthUser(user);
-        router.push("/delivery/dashboard");
+        router.push("/delivery/profile");
       }
     } catch (err: unknown) {
       const ax = err as { response?: { data?: { message?: string } }; message?: string };

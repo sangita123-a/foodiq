@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { mutate } from "swr";
 import AdminShell from "@/components/admin/AdminShell";
@@ -17,7 +18,15 @@ type Partner = {
   approval_status?: string;
   rating?: number;
   delivery_count?: number;
+  total_earnings?: number;
+  wallet_balance?: number;
+  profile_photo_url?: string;
+  license_photo_url?: string;
 };
+
+function formatCurrency(amount: number) {
+  return `₹${Number(amount || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+}
 
 export default function AdminDeliveryPartnersPage() {
   const [search, setSearch] = useState("");
@@ -42,6 +51,15 @@ export default function AdminDeliveryPartnersPage() {
     refresh();
   };
 
+  const suspendPartner = async (id: string) => {
+    await adminPut(`/api/admin/delivery-partners/${id}`, {
+      approval_status: "suspended",
+      suspended: true,
+      is_available: false,
+    });
+    refresh();
+  };
+
   const toggleAvailable = async (p: Partner) => {
     await adminPut(`/api/admin/delivery-partners/${p.id}`, { is_available: !p.is_available });
     refresh();
@@ -52,9 +70,15 @@ export default function AdminDeliveryPartnersPage() {
       <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-[#111827]">Delivery Partners</h1>
-          <p className="text-[#6B7280]">Approve registrations and track availability.</p>
+          <p className="text-[#6B7280]">Approve, suspend, track live, and view earnings.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
+          <Link
+            href="/admin/live"
+            className="text-sm font-bold bg-[#E23744] text-white px-4 py-2.5 rounded-xl"
+          >
+            Live Deliveries
+          </Link>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -65,6 +89,7 @@ export default function AdminDeliveryPartnersPage() {
             <option value="">All</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
+            <option value="suspended">Suspended</option>
             <option value="rejected">Rejected</option>
           </select>
         </div>
@@ -84,21 +109,48 @@ export default function AdminDeliveryPartnersPage() {
               <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full ${
                 p.is_available ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-500"
               }`}>
-                {p.is_available ? "Available" : "Offline"}
+                {p.is_available ? "Online" : "Offline"}
               </span>
             </div>
             <p className="text-sm text-[#6B7280] mb-1">
               {p.vehicle_type || "Vehicle"} — {p.vehicle_details || "—"}
             </p>
-            <p className="text-xs text-[#9CA3AF] mb-4">
+            <p className="text-xs text-[#9CA3AF] mb-2">
               Status: {p.approval_status || "approved"} · Deliveries: {p.delivery_count || 0} · Rating: {p.rating || 0}
             </p>
+            <p className="text-xs font-bold text-[#111827] mb-4">
+              Earnings: {formatCurrency(Number(p.total_earnings || 0))} · Wallet: {formatCurrency(Number(p.wallet_balance || 0))}
+            </p>
+            {(p.profile_photo_url || p.license_photo_url) && (
+              <div className="flex gap-2 mb-4">
+                {p.profile_photo_url && (
+                  <a href={p.profile_photo_url} target="_blank" rel="noreferrer" className="text-xs font-bold text-[#E23744]">
+                    Photo
+                  </a>
+                )}
+                {p.license_photo_url && (
+                  <a href={p.license_photo_url} target="_blank" rel="noreferrer" className="text-xs font-bold text-[#E23744]">
+                    License
+                  </a>
+                )}
+              </div>
+            )}
             <div className="flex flex-wrap gap-2">
               {(p.approval_status || "approved") === "pending" && (
                 <>
                   <button type="button" onClick={() => setApproval(p.id, "approved")} className="text-xs font-bold bg-green-500 text-white px-3 py-1.5 rounded-lg">Approve</button>
                   <button type="button" onClick={() => setApproval(p.id, "rejected")} className="text-xs font-bold bg-red-500 text-white px-3 py-1.5 rounded-lg">Reject</button>
                 </>
+              )}
+              {(p.approval_status || "approved") === "approved" && (
+                <button type="button" onClick={() => suspendPartner(p.id)} className="text-xs font-bold bg-amber-500 text-white px-3 py-1.5 rounded-lg">
+                  Suspend
+                </button>
+              )}
+              {p.approval_status === "suspended" && (
+                <button type="button" onClick={() => setApproval(p.id, "approved")} className="text-xs font-bold bg-green-500 text-white px-3 py-1.5 rounded-lg">
+                  Reactivate
+                </button>
               )}
               <button type="button" onClick={() => toggleAvailable(p)} className="text-xs font-bold border border-[#E5E7EB] px-3 py-1.5 rounded-lg">
                 {p.is_available ? "Set Offline" : "Set Available"}

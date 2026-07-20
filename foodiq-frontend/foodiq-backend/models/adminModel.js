@@ -180,7 +180,9 @@ const getUserOrders = async (userId) => {
 const listDeliveryPartners = async ({ search = '', status = '' } = {}) => {
   const { rows } = await pool.query(
     `SELECT dp.*, u.full_name, u.email, u.phone_number, u.is_suspended,
-       (SELECT COUNT(*)::int FROM order_tracking ot WHERE ot.delivery_partner_id = dp.id) AS delivery_count
+       (SELECT COUNT(*)::int FROM delivery_assignments da WHERE da.delivery_partner_id = dp.id AND da.status = 'delivered') AS delivery_count,
+       (SELECT COALESCE(SUM(amount), 0)::float FROM delivery_earnings e WHERE e.delivery_partner_id = dp.id) AS total_earnings,
+       (SELECT COALESCE(balance, 0)::float FROM driver_wallets w WHERE w.delivery_partner_id = dp.id) AS wallet_balance
      FROM delivery_partners dp
      JOIN users u ON u.id = dp.user_id
      WHERE ($1 = '' OR u.full_name ILIKE '%' || $1 || '%' OR u.email ILIKE '%' || $1 || '%')
@@ -193,6 +195,10 @@ const listDeliveryPartners = async ({ search = '', status = '' } = {}) => {
 
 const updateDeliveryPartner = async (id, data) => {
   const { is_available, approval_status, vehicle_details, vehicle_type, license_number } = data;
+  let nextStatus = approval_status;
+  if (data.suspended === true || data.is_suspended === true) {
+    nextStatus = 'suspended';
+  }
   const { rows } = await pool.query(
     `UPDATE delivery_partners SET
        is_available = COALESCE($1, is_available),
@@ -202,8 +208,28 @@ const updateDeliveryPartner = async (id, data) => {
        license_number = COALESCE($5, license_number),
        updated_at = CURRENT_TIMESTAMP
      WHERE id = $6 RETURNING *`,
-    [is_available, approval_status, vehicle_details, vehicle_type, license_number, id]
+    [
+      nextStatus === 'suspended' ? false : is_available,
+      nextStatus,
+      vehicle_details,
+      vehicle_type,
+      license_number,
+      id,
+    ]
   );
+  if (rows[0] && nextStatus === 'suspended') {
+    await pool.query(
+      `UPDATE users SET is_suspended = TRUE, updated_at = CURRENT_TIMESTAMP
+       WHERE id = (SELECT user_id FROM delivery_partners WHERE id = $1)`,
+      [id]
+    );
+  } else if (rows[0] && nextStatus === 'approved') {
+    await pool.query(
+      `UPDATE users SET is_suspended = FALSE, updated_at = CURRENT_TIMESTAMP
+       WHERE id = (SELECT user_id FROM delivery_partners WHERE id = $1)`,
+      [id]
+    );
+  }
   return rows[0] || null;
 };
 

@@ -103,6 +103,11 @@ export default function DeliveryLoginForm() {
                 className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-[#E23744] focus:ring-1 focus:ring-[#E23744] transition-colors"
               />
             </div>
+            <div className="text-right mt-2">
+              <Link href="/delivery/forgot-password" className="text-xs font-bold text-[#E23744] hover:underline">
+                Forgot password?
+              </Link>
+            </div>
           </div>
 
           <button

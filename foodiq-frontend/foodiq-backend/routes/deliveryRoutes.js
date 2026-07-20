@@ -22,6 +22,9 @@ router.post('/orders/:id/reject', c.reject);
 router.put('/orders/:id/status', c.updateStatus);
 router.get('/orders/:id/route', c.getRoute);
 router.get('/earnings', c.getEarnings);
+router.get('/wallet', c.getWallet);
+router.post('/wallet/withdraw', c.requestWithdrawal);
+router.get('/history', c.getHistory);
 router.get('/notifications', c.getNotifications);
 
 module.exports = router;

@@ -12,6 +12,9 @@ import {
   FileBadge,
   Star,
   BarChart3,
+  Wallet,
+  User,
+  History,
 } from "lucide-react";
 import { clearClientAuth } from "@/lib/authSession";
 
@@ -25,6 +28,9 @@ export default function DeliverySidebar() {
     { name: "Analytics", icon: BarChart3, href: "/delivery/analytics" },
     { name: "Map", icon: Map, href: "/delivery/map" },
     { name: "Earnings", icon: DollarSign, href: "/delivery/earnings" },
+    { name: "Wallet", icon: Wallet, href: "/delivery/wallet" },
+    { name: "History", icon: History, href: "/delivery/history" },
+    { name: "Profile", icon: User, href: "/delivery/profile" },
     { name: "Ratings", icon: Star, href: "/delivery/reviews" },
     { name: "Documents", icon: FileBadge, href: "/delivery/documents" },
     { name: "Notifications", icon: Bell, href: "/delivery/notifications" },

@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { mutate } from "swr";
-import { MapPin, Package, Star, Wallet } from "lucide-react";
+import { MapPin, Package, Star, Wallet, Clock, XCircle, TrendingUp } from "lucide-react";
 import DeliveryShell from "@/components/delivery/DeliveryShell";
-import {
-  useDeliveryDashboard,
-} from "@/hooks/useDeliveryData";
+import OrderExpiryCountdown from "@/components/delivery/OrderExpiryCountdown";
+import { useDeliveryDashboard, useDeliveryMe } from "@/hooks/useDeliveryData";
 import {
   acceptDeliveryOrder,
   rejectDeliveryOrder,
@@ -15,7 +14,9 @@ import {
 } from "@/services/deliveryApi";
 
 export default function DeliveryDashboardPage() {
+  const { data: me } = useDeliveryMe();
   const { data, error, isLoading } = useDeliveryDashboard();
+  const pendingVerification = me?.partner?.approval_status === "pending";
 
   const refresh = () => {
     mutate("/api/delivery/dashboard");
@@ -35,8 +36,38 @@ export default function DeliveryDashboardPage() {
 
   const stats = [
     {
-      label: "Earnings Today",
+      label: "Today's Earnings",
       value: formatCurrency(data?.earnings_today || 0),
+      icon: Wallet,
+    },
+    {
+      label: "Today's Deliveries",
+      value: String(data?.completed_today || 0),
+      icon: Package,
+    },
+    {
+      label: "Pending Deliveries",
+      value: String(data?.pending_deliveries || 0),
+      icon: Clock,
+    },
+    {
+      label: "Completed",
+      value: String(data?.completed_total || 0),
+      icon: TrendingUp,
+    },
+    {
+      label: "Cancelled",
+      value: String(data?.cancelled_total || 0),
+      icon: XCircle,
+    },
+    {
+      label: "Average Rating",
+      value: (data?.rating || 0).toFixed(1),
+      icon: Star,
+    },
+    {
+      label: "Wallet Balance",
+      value: formatCurrency(data?.wallet_balance || 0),
       icon: Wallet,
     },
     {
@@ -44,23 +75,25 @@ export default function DeliveryDashboardPage() {
       value: formatCurrency(data?.earnings_weekly || 0),
       icon: Wallet,
     },
-    {
-      label: "Completed",
-      value: String(data?.completed_total || 0),
-      icon: Package,
-    },
-    {
-      label: "Rating",
-      value: (data?.rating || 0).toFixed(1),
-      icon: Star,
-    },
   ];
 
   return (
     <DeliveryShell online={data?.is_online}>
+      {pendingVerification && (
+        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Your account is pending admin verification. Complete your{" "}
+          <Link href="/delivery/profile" className="font-bold underline">
+            profile & documents
+          </Link>{" "}
+          while you wait.
+        </div>
+      )}
+
       {error && (
         <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Unable to load delivery dashboard. Sign in as a delivery partner.
+          {pendingVerification
+            ? "Dashboard stats will appear after admin approval."
+            : "Unable to load delivery dashboard. Sign in as a delivery partner."}
         </div>
       )}
 
@@ -88,7 +121,7 @@ export default function DeliveryDashboardPage() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <section className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-black text-[#111827]">Assigned Orders</h2>
+            <h2 className="text-lg font-black text-[#111827]">Active Deliveries</h2>
             <Link href="/delivery/orders" className="text-sm font-bold text-[#E23744]">
               View all
             </Link>
@@ -117,7 +150,7 @@ export default function DeliveryDashboardPage() {
             ))}
             {!data?.assigned_orders?.length && (
               <p className="text-sm text-[#6B7280] py-6 text-center">
-                No assigned orders right now
+                No active deliveries right now
               </p>
             )}
           </div>
@@ -125,7 +158,7 @@ export default function DeliveryDashboardPage() {
 
         <section className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-black text-[#111827]">Available Nearby</h2>
+            <h2 className="text-lg font-black text-[#111827]">New Orders Nearby</h2>
             <span className="text-xs font-bold text-[#9CA3AF]">
               {data?.available_orders?.length || 0} orders
             </span>
@@ -144,12 +177,15 @@ export default function DeliveryDashboardPage() {
                       {formatCurrency(order.total_amount)}
                     </p>
                   </div>
-                  <Link
-                    href={`/delivery/orders/${order.id}`}
-                    className="text-xs font-bold text-[#E23744]"
-                  >
-                    Details
-                  </Link>
+                  <div className="flex flex-col items-end gap-1">
+                    <OrderExpiryCountdown expiresAt={order.expires_at} onExpired={refresh} />
+                    <Link
+                      href={`/delivery/orders/${order.id}`}
+                      className="text-xs font-bold text-[#E23744]"
+                    >
+                      Details
+                    </Link>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button

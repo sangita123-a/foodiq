@@ -339,6 +339,51 @@ async function ensureSchema() {
     `);
 
     await q(`
+      ALTER TABLE delivery_partners
+        ADD COLUMN IF NOT EXISTS bank_account_name TEXT,
+        ADD COLUMN IF NOT EXISTS bank_account_number TEXT,
+        ADD COLUMN IF NOT EXISTS bank_ifsc TEXT,
+        ADD COLUMN IF NOT EXISTS upi_id TEXT,
+        ADD COLUMN IF NOT EXISTS aadhaar_last4 VARCHAR(4)
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS driver_wallets (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        delivery_partner_id UUID NOT NULL UNIQUE REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        balance NUMERIC(12,2) NOT NULL DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS driver_wallet_transactions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        delivery_partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        type VARCHAR(20) NOT NULL CHECK (type IN ('credit', 'debit', 'withdrawal')),
+        amount NUMERIC(12,2) NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'completed',
+        reference_type VARCHAR(40),
+        reference_id UUID,
+        note TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS driver_withdrawal_requests (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        delivery_partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        amount NUMERIC(12,2) NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'pending',
+        note TEXT,
+        processed_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
       CREATE TABLE IF NOT EXISTS admin_settings (
         id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
         delivery_charge NUMERIC(10,2) DEFAULT 50,

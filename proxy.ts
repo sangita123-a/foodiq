@@ -37,16 +37,23 @@ const protectedRoutes = [
   '/admin/analytics',
   '/admin/notifications',
   '/admin/settings',
+  '/admin/live',
   '/payment/failed',
   '/delivery/dashboard',
   '/delivery/orders',
   '/delivery/map',
   '/delivery/earnings',
+  '/delivery/wallet',
+  '/delivery/profile',
+  '/delivery/history',
+  '/delivery/documents',
+  '/delivery/reviews',
+  '/delivery/analytics',
   '/delivery/notifications',
 ];
 
 // Define which routes should redirect away if already authenticated
-const authRoutes = ['/login', '/register', '/forgot-password', '/partner/login', '/admin/login', '/delivery/login', '/delivery/register'];
+const authRoutes = ['/login', '/register', '/forgot-password', '/partner/login', '/admin/login', '/delivery/login', '/delivery/register', '/delivery/forgot-password'];
 
 export function proxy(request: NextRequest) {
   const token = request.cookies.get('token')?.value || request.cookies.get('foodiq_session')?.value;

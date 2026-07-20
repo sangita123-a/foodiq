@@ -3,8 +3,10 @@
 import { use } from "react";
 import Link from "next/link";
 import { mutate } from "swr";
+import { Phone, Navigation } from "lucide-react";
 import DeliveryShell from "@/components/delivery/DeliveryShell";
 import DeliveryMap from "@/components/delivery/DeliveryMap";
+import OrderExpiryCountdown from "@/components/delivery/OrderExpiryCountdown";
 import {
   useDeliveryDashboard,
   useDeliveryOrder,
@@ -36,13 +38,19 @@ export default function DeliveryOrderDetailPage({
     mutate("/api/delivery/orders/assigned");
     mutate("/api/delivery/orders/available");
     mutate("/api/delivery/earnings");
+    mutate("/api/delivery/wallet");
+    mutate("/api/delivery/history");
   };
 
   const status = order?.assignment_status || "";
   const next = NEXT_STATUS[status];
+  const navUrl =
+    status === "accepted" || status === "reached_restaurant" || status === "assigned"
+      ? route?.google_maps_pickup_url || route?.google_maps_url
+      : route?.google_maps_dropoff_url || route?.google_maps_url;
 
   return (
-    <DeliveryShell title="Order Details" online={dashboard?.is_online}>
+    <DeliveryShell title="Active Delivery" online={dashboard?.is_online}>
       {error && (
         <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           Unable to load this order.
@@ -65,30 +73,47 @@ export default function DeliveryOrderDetailPage({
                 </h2>
                 <p className="text-sm text-[#6B7280] mt-1">{order.restaurant.address}</p>
               </div>
-              <span className="text-sm font-bold px-3 py-1.5 rounded-xl bg-[#E23744]/10 text-[#E23744]">
-                {STATUS_LABELS[status] || status || "Unassigned"}
-              </span>
+              <div className="flex flex-col items-end gap-2">
+                <span className="text-sm font-bold px-3 py-1.5 rounded-xl bg-[#E23744]/10 text-[#E23744]">
+                  {STATUS_LABELS[status] || status || "Unassigned"}
+                </span>
+                {status === "offered" && (
+                  <OrderExpiryCountdown expiresAt={order.expires_at} onExpired={refresh} />
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div className="rounded-xl bg-[#F8FAFC] border border-[#E5E7EB] p-4">
                 <p className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF] mb-2">
-                  Pickup
+                  Restaurant
                 </p>
                 <p className="font-bold text-[#111827]">{order.restaurant.name}</p>
                 <p className="text-sm text-[#6B7280] mt-1">{order.restaurant.address}</p>
                 {order.restaurant.phone && (
-                  <p className="text-sm text-[#6B7280] mt-1">{order.restaurant.phone}</p>
+                  <a
+                    href={`tel:${order.restaurant.phone}`}
+                    className="inline-flex items-center gap-1 text-sm font-bold text-[#E23744] mt-2"
+                  >
+                    <Phone className="w-4 h-4" />
+                    Call Restaurant
+                  </a>
                 )}
               </div>
               <div className="rounded-xl bg-[#F8FAFC] border border-[#E5E7EB] p-4">
                 <p className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF] mb-2">
-                  Drop-off
+                  Customer
                 </p>
                 <p className="font-bold text-[#111827]">{order.customer.name}</p>
                 <p className="text-sm text-[#6B7280] mt-1">{order.customer.address}</p>
                 {order.customer.phone && (
-                  <p className="text-sm text-[#6B7280] mt-1">{order.customer.phone}</p>
+                  <a
+                    href={`tel:${order.customer.phone}`}
+                    className="inline-flex items-center gap-1 text-sm font-bold text-[#E23744] mt-2"
+                  >
+                    <Phone className="w-4 h-4" />
+                    Call Customer
+                  </a>
                 )}
               </div>
             </div>
@@ -159,9 +184,20 @@ export default function DeliveryOrderDetailPage({
                   Mark: {STATUS_LABELS[next]}
                 </button>
               )}
+              {navUrl && (
+                <a
+                  href={navUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 border border-[#E23744]/30 text-[#E23744] font-bold px-4 py-2.5 rounded-xl"
+                >
+                  <Navigation className="w-4 h-4" />
+                  Google Maps
+                </a>
+              )}
               <Link
                 href="/delivery/map"
-                className="border border-[#E23744]/30 text-[#E23744] font-bold px-4 py-2.5 rounded-xl"
+                className="border border-[#E5E7EB] text-[#6B7280] font-bold px-4 py-2.5 rounded-xl"
               >
                 Open Map
               </Link>
@@ -170,7 +206,7 @@ export default function DeliveryOrderDetailPage({
 
           <DeliveryMap
             embedUrl={route?.osm_embed_url}
-            directionsUrl={route?.osm_directions_url}
+            directionsUrl={route?.google_maps_url || route?.osm_directions_url}
             distanceKm={route?.distance_km}
             durationMin={route?.duration_min}
             restaurantName={order.restaurant.name}

@@ -39,6 +39,10 @@ export type DeliveryDashboard = {
   earnings_monthly: number;
   completed_today: number;
   completed_total: number;
+  pending_deliveries?: number;
+  cancelled_total?: number;
+  total_earnings?: number;
+  wallet_balance?: number;
   assigned_orders: DeliveryOrder[];
   available_orders: DeliveryOrder[];
 };
@@ -49,6 +53,7 @@ export type DeliveryEarnings = {
     weekly: number;
     monthly: number;
     incentives_month: number;
+    total?: number;
   };
   history: Array<{
     id: string;
@@ -71,6 +76,44 @@ export type DeliveryRoute = {
   duration_min: number | null;
   osm_embed_url: string;
   osm_directions_url: string;
+  google_maps_url?: string;
+  google_maps_pickup_url?: string;
+  google_maps_dropoff_url?: string;
+};
+
+export type DeliveryWallet = {
+  balance: number;
+  total_earned: number;
+  transactions: Array<{
+    id: string;
+    type: string;
+    amount: number;
+    status: string;
+    note?: string;
+    created_at: string;
+  }>;
+  withdrawals: Array<{
+    id: string;
+    amount: number;
+    status: string;
+    note?: string;
+    created_at: string;
+    processed_at?: string;
+  }>;
+};
+
+export type DeliveryHistoryItem = {
+  id: string;
+  order_id: string;
+  status: string;
+  total_amount: number;
+  delivery_fee: number;
+  restaurant_name: string;
+  customer_name: string;
+  customer_address?: string;
+  customer_rating?: number;
+  customer_comment?: string;
+  updated_at: string;
 };
 
 export type DeliveryNotification = {
@@ -108,6 +151,26 @@ export async function updateDeliveryStatus(orderId: string, status: string) {
   return res.data.data as DeliveryOrder;
 }
 
+export async function fetchDeliveryWallet() {
+  const res = await api.get("/api/delivery/wallet");
+  return res.data.data as DeliveryWallet;
+}
+
+export async function requestWalletWithdrawal(amount: number, note?: string) {
+  const res = await api.post("/api/delivery/wallet/withdraw", { amount, note });
+  return res.data.data;
+}
+
+export async function fetchDeliveryHistory(status: "all" | "completed" | "cancelled" = "all") {
+  const res = await api.get(`/api/delivery/history?status=${status}`);
+  return res.data.data as DeliveryHistoryItem[];
+}
+
+export async function updateDeliveryProfile(body: Record<string, unknown>) {
+  const res = await api.put("/api/delivery/profile", body);
+  return res.data.data;
+}
+
 export function formatCurrency(amount: number) {
   return `₹${Number(amount || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 }
@@ -130,11 +193,13 @@ export const STATUS_LABELS: Record<string, string> = {
   assigned: "Assigned",
   accepted: "Accepted",
   reached_restaurant: "Reached Restaurant",
-  picked_up: "Picked Up",
+  picked_up: "Food Picked Up",
   on_the_way: "On The Way",
+  near_customer: "Near Customer",
   delivered: "Delivered",
   rejected: "Rejected",
   expired: "Expired",
+  cancelled: "Cancelled",
 };
 
 export const NEXT_STATUS: Record<string, string | null> = {
@@ -143,6 +208,7 @@ export const NEXT_STATUS: Record<string, string | null> = {
   accepted: "reached_restaurant",
   reached_restaurant: "picked_up",
   picked_up: "on_the_way",
-  on_the_way: "delivered",
+  on_the_way: "near_customer",
+  near_customer: "delivered",
   delivered: null,
 };

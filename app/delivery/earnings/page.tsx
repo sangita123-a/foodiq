@@ -13,10 +13,7 @@ export default function DeliveryEarningsPage() {
     { label: "Today", value: formatCurrency(summary?.daily || 0) },
     { label: "This Week", value: formatCurrency(summary?.weekly || 0) },
     { label: "This Month", value: formatCurrency(summary?.monthly || 0) },
-    {
-      label: "Incentives (Month)",
-      value: formatCurrency(summary?.incentives_month || 0),
-    },
+    { label: "Total Earnings", value: formatCurrency(summary?.total || 0) },
   ];
 
   return (

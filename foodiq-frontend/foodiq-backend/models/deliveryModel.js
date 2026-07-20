@@ -55,6 +55,35 @@ const getDashboard = async (partnerId) => {
     [partnerId]
   );
 
+  const pending = await pool.query(
+    `SELECT COUNT(*)::int AS total
+     FROM delivery_assignments
+     WHERE delivery_partner_id = $1
+       AND status IN ('offered', 'accepted', 'assigned', 'reached_restaurant', 'picked_up', 'on_the_way', 'near_customer')`,
+    [partnerId]
+  );
+
+  const cancelled = await pool.query(
+    `SELECT COUNT(*)::int AS total
+     FROM delivery_assignments
+     WHERE delivery_partner_id = $1 AND status IN ('rejected', 'expired', 'cancelled')`,
+    [partnerId]
+  );
+
+  const totalEarnings = await pool.query(
+    `SELECT COALESCE(SUM(amount), 0)::float AS total FROM delivery_earnings WHERE delivery_partner_id = $1`,
+    [partnerId]
+  );
+
+  let walletBalance = 0;
+  try {
+    const { getOrCreateWallet } = require('./deliveryWalletModel');
+    const wallet = await getOrCreateWallet(partnerId);
+    walletBalance = Number(wallet.balance || 0);
+  } catch {
+    walletBalance = 0;
+  }
+
   const assigned = await listAssignedOrders(partnerId);
   const available = await listAvailableOrders(partnerId);
 
@@ -67,6 +96,10 @@ const getDashboard = async (partnerId) => {
     earnings_monthly: earnings.rows[0].monthly,
     completed_today: earnings.rows[0].completed_today,
     completed_total: completed.rows[0].total,
+    pending_deliveries: pending.rows[0].total,
+    cancelled_total: cancelled.rows[0].total,
+    total_earnings: totalEarnings.rows[0].total,
+    wallet_balance: walletBalance,
     assigned_orders: assigned,
     available_orders: available,
   };
@@ -290,12 +323,14 @@ const STATUS_FLOW = [
   'reached_restaurant',
   'picked_up',
   'on_the_way',
+  'near_customer',
   'delivered',
 ];
 
 const mapToOrderStatus = (status) => {
   if (status === 'picked_up') return 'Picked Up';
   if (status === 'on_the_way') return 'On The Way';
+  if (status === 'near_customer') return 'On The Way';
   if (status === 'delivered') return 'Delivered';
   if (status === 'reached_restaurant') return 'Ready for Pickup';
   return null;
@@ -308,6 +343,7 @@ const mapToTrackingStatus = (status) => {
     reached_restaurant: 'Reached Restaurant',
     picked_up: 'Picked Up',
     on_the_way: 'On The Way',
+    near_customer: 'Near Customer',
     delivered: 'Delivered',
   };
   return map[status] || status;
@@ -321,7 +357,7 @@ const updateDeliveryStatus = async (orderId, partnerId, status) => {
   const { rows: assignments } = await pool.query(
     `SELECT * FROM delivery_assignments
      WHERE order_id = $1 AND delivery_partner_id = $2
-       AND status IN ('accepted', 'assigned', 'reached_restaurant', 'picked_up', 'on_the_way')`,
+       AND status IN ('accepted', 'assigned', 'reached_restaurant', 'picked_up', 'on_the_way', 'near_customer')`,
     [orderId, partnerId]
   );
   if (!assignments[0] && status === 'accepted') {
@@ -489,6 +525,13 @@ const settleEarnings = async (orderId, partnerId, assignmentId) => {
       { order_id: orderId, amount }
     );
   }
+
+  try {
+    const { creditWallet } = require('./deliveryWalletModel');
+    await creditWallet(partnerId, amount, orderId, incentive ? 'Delivery fee + incentive' : 'Delivery fee');
+  } catch (walletErr) {
+    console.warn('[delivery] wallet credit skipped:', walletErr.message);
+  }
 };
 
 const recordHistory = async (assignmentId, orderId, partnerId, status, note) => {
@@ -506,13 +549,42 @@ const notifyStakeholders = async (orderId, title, message) => {
   }
 };
 
+const getDeliveryHistory = async (partnerId, { status = 'all', limit = 50 } = {}) => {
+  const statusFilter =
+    status === 'completed'
+      ? `da.status = 'delivered'`
+      : status === 'cancelled'
+        ? `da.status IN ('rejected', 'expired', 'cancelled')`
+        : `da.status IN ('delivered', 'rejected', 'expired', 'cancelled')`;
+
+  const { rows } = await pool.query(
+    `SELECT da.*, o.total_amount, o.delivery_fee, o.status AS order_status, o.created_at AS order_created_at,
+            r.name AS restaurant_name, r.address AS restaurant_address,
+            u.full_name AS customer_name, u.phone_number AS customer_phone,
+            TRIM(CONCAT_WS(', ', a.house_no, a.street, a.landmark, a.city, a.state, a.zip_code)) AS customer_address,
+            dr.rating AS customer_rating, dr.comment AS customer_comment
+     FROM delivery_assignments da
+     JOIN orders o ON o.id = da.order_id
+     JOIN restaurants r ON r.id = o.restaurant_id
+     JOIN users u ON u.id = o.user_id
+     LEFT JOIN addresses a ON a.id = o.delivery_address_id
+     LEFT JOIN delivery_reviews dr ON dr.order_id = da.order_id AND dr.delivery_partner_id = da.delivery_partner_id
+     WHERE da.delivery_partner_id = $1 AND ${statusFilter}
+     ORDER BY da.updated_at DESC
+     LIMIT $2`,
+    [partnerId, Math.min(Number(limit) || 50, 100)]
+  );
+  return rows;
+};
+
 const getEarnings = async (partnerId) => {
   const summary = await pool.query(
     `SELECT
        COALESCE(SUM(amount) FILTER (WHERE earned_at::date = CURRENT_DATE), 0)::float AS daily,
        COALESCE(SUM(amount) FILTER (WHERE earned_at >= date_trunc('week', CURRENT_DATE)), 0)::float AS weekly,
        COALESCE(SUM(amount) FILTER (WHERE earned_at >= date_trunc('month', CURRENT_DATE)), 0)::float AS monthly,
-       COALESCE(SUM(incentive) FILTER (WHERE earned_at >= date_trunc('month', CURRENT_DATE)), 0)::float AS incentives_month
+       COALESCE(SUM(incentive) FILTER (WHERE earned_at >= date_trunc('month', CURRENT_DATE)), 0)::float AS incentives_month,
+       COALESCE(SUM(amount), 0)::float AS total
      FROM delivery_earnings WHERE delivery_partner_id = $1`,
     [partnerId]
   );
@@ -562,7 +634,7 @@ const registerPartner = async ({ userId, vehicle_details, vehicle_type, license_
   const { rows } = await pool.query(
     `INSERT INTO delivery_partners (
        user_id, vehicle_details, vehicle_type, license_number, is_available, approval_status
-     ) VALUES ($1, $2, $3, $4, FALSE, 'approved')
+     ) VALUES ($1, $2, $3, $4, FALSE, 'pending')
      ON CONFLICT (user_id) DO UPDATE SET
        vehicle_details = EXCLUDED.vehicle_details,
        vehicle_type = EXCLUDED.vehicle_type,
@@ -583,6 +655,11 @@ const updatePartnerDocuments = async (userId, data = {}) => {
     vehicle_details,
     vehicle_type,
     license_number,
+    bank_account_name,
+    bank_account_number,
+    bank_ifsc,
+    upi_id,
+    aadhaar_last4,
   } = data;
   const { rows } = await pool.query(
     `UPDATE delivery_partners SET
@@ -594,8 +671,13 @@ const updatePartnerDocuments = async (userId, data = {}) => {
        vehicle_details = COALESCE($6, vehicle_details),
        vehicle_type = COALESCE($7, vehicle_type),
        license_number = COALESCE($8, license_number),
+       bank_account_name = COALESCE($9, bank_account_name),
+       bank_account_number = COALESCE($10, bank_account_number),
+       bank_ifsc = COALESCE($11, bank_ifsc),
+       upi_id = COALESCE($12, upi_id),
+       aadhaar_last4 = COALESCE($13, aadhaar_last4),
        updated_at = CURRENT_TIMESTAMP
-     WHERE user_id = $9
+     WHERE user_id = $14
      RETURNING *`,
     [
       profile_photo_url || null,
@@ -606,6 +688,11 @@ const updatePartnerDocuments = async (userId, data = {}) => {
       vehicle_details || null,
       vehicle_type || null,
       license_number || null,
+      bank_account_name || null,
+      bank_account_number || null,
+      bank_ifsc || null,
+      upi_id || null,
+      aadhaar_last4 || null,
       userId,
     ]
   );
@@ -623,6 +710,7 @@ module.exports = {
   rejectOrder,
   updateDeliveryStatus,
   getEarnings,
+  getDeliveryHistory,
   updateAvailability,
   updateLocation,
   registerPartner,
