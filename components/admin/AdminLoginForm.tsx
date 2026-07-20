@@ -63,8 +63,8 @@ export default function AdminLoginForm() {
           <div className="w-14 h-14 bg-[#E23744] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Shield className="w-7 h-7 text-white" />
           </div>
-          <h2 className="text-3xl font-black text-[#111827] mb-2">Admin Portal</h2>
-          <p className="text-[#6B7280]">Sign in to manage the Foodiq platform.</p>
+          <h2 className="text-3xl font-black text-[#111827] mb-2">Enterprise Admin Portal</h2>
+          <p className="text-[#6B7280]">Secure sign-in for Super Admin, Admin, Support, Finance & Marketing roles.</p>
         </div>
 
         {error && (

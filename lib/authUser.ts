@@ -8,6 +8,7 @@ export type PublicUser = {
   email?: string;
   phone_number?: string;
   role?: string;
+  admin_role?: string;
   profile_image_url?: string | null;
 };
 
@@ -20,6 +21,7 @@ export function toPublicUser(payload: Record<string, unknown> | null | undefined
     phone_number:
       payload.phone_number != null ? String(payload.phone_number) : undefined,
     role: payload.role != null ? String(payload.role) : undefined,
+    admin_role: payload.admin_role != null ? String(payload.admin_role) : undefined,
     profile_image_url:
       payload.profile_image_url != null
         ? String(payload.profile_image_url)

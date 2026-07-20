@@ -26,11 +26,32 @@ type UserOrder = {
   restaurant_name: string;
 };
 
+type UserWallet = {
+  reward_points: number;
+  referral_count: number;
+  total_spent: number;
+  order_count: number;
+};
+
+type ReferralRow = {
+  id: string;
+  code?: string;
+  referee_name?: string;
+  referee_email?: string;
+  points_awarded?: number;
+  status?: string;
+  created_at?: string;
+};
+
 export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
   const [suspended, setSuspended] = useState("");
   const [ordersUser, setOrdersUser] = useState<UserRow | null>(null);
   const [orders, setOrders] = useState<UserOrder[]>([]);
+  const [walletUser, setWalletUser] = useState<UserRow | null>(null);
+  const [wallet, setWallet] = useState<UserWallet | null>(null);
+  const [referralUser, setReferralUser] = useState<UserRow | null>(null);
+  const [referrals, setReferrals] = useState<ReferralRow[]>([]);
 
   const path = useMemo(() => {
     const q = new URLSearchParams({ role: "customer" });
@@ -59,6 +80,18 @@ export default function AdminUsersPage() {
     setOrdersUser(u);
     const list = await adminGet<UserOrder[]>(`/api/admin/users/${u.id}/orders`);
     setOrders(list);
+  };
+
+  const viewWallet = async (u: UserRow) => {
+    setWalletUser(u);
+    const data = await adminGet<UserWallet>(`/api/admin/users/${u.id}/wallet`);
+    setWallet(data);
+  };
+
+  const viewReferrals = async (u: UserRow) => {
+    setReferralUser(u);
+    const list = await adminGet<ReferralRow[]>(`/api/admin/users/${u.id}/referrals`);
+    setReferrals(list);
   };
 
   return (
@@ -119,6 +152,8 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="p-4 text-right space-x-2">
                     <button type="button" onClick={() => viewOrders(u)} className="text-xs font-bold text-[#111827]">Orders</button>
+                    <button type="button" onClick={() => viewWallet(u)} className="text-xs font-bold text-[#111827]">Wallet</button>
+                    <button type="button" onClick={() => viewReferrals(u)} className="text-xs font-bold text-[#111827]">Referrals</button>
                     <button type="button" onClick={() => toggleSuspend(u)} className="text-xs font-bold text-[#E23744]">
                       {u.is_suspended ? "Activate" : "Suspend"}
                     </button>
@@ -154,6 +189,62 @@ export default function AdminUsersPage() {
               {!orders.length && <p className="text-sm text-[#6B7280]">No orders.</p>}
             </div>
             <button type="button" onClick={() => setOrdersUser(null)} className="mt-4 w-full py-3 rounded-xl bg-[#F8FAFC] border border-[#E5E7EB] font-bold">
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {walletUser && wallet && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setWalletUser(null)}>
+          <div className="bg-white rounded-3xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-black text-[#111827] mb-1">Wallet — {walletUser.full_name}</h3>
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              <div className="bg-[#F8FAFC] rounded-xl p-4 border border-[#E5E7EB]">
+                <p className="text-xs text-[#9CA3AF] font-bold uppercase">Reward Points</p>
+                <p className="text-2xl font-black">{wallet.reward_points}</p>
+              </div>
+              <div className="bg-[#F8FAFC] rounded-xl p-4 border border-[#E5E7EB]">
+                <p className="text-xs text-[#9CA3AF] font-bold uppercase">Referrals</p>
+                <p className="text-2xl font-black">{wallet.referral_count}</p>
+              </div>
+              <div className="bg-[#F8FAFC] rounded-xl p-4 border border-[#E5E7EB]">
+                <p className="text-xs text-[#9CA3AF] font-bold uppercase">Total Spent</p>
+                <p className="text-xl font-black">{formatCurrency(wallet.total_spent)}</p>
+              </div>
+              <div className="bg-[#F8FAFC] rounded-xl p-4 border border-[#E5E7EB]">
+                <p className="text-xs text-[#9CA3AF] font-bold uppercase">Orders</p>
+                <p className="text-2xl font-black">{wallet.order_count}</p>
+              </div>
+            </div>
+            <button type="button" onClick={() => setWalletUser(null)} className="mt-4 w-full py-3 rounded-xl bg-[#F8FAFC] border border-[#E5E7EB] font-bold">
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {referralUser && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setReferralUser(null)}>
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-black text-[#111827] mb-1">Referral History — {referralUser.full_name}</h3>
+            <div className="space-y-2 mt-4">
+              {referrals.map((r) => (
+                <div key={r.id} className="border border-[#E5E7EB] rounded-xl p-3 flex justify-between">
+                  <div>
+                    <p className="text-sm font-bold">{r.referee_name || r.referee_email || "User"}</p>
+                    <p className="text-xs text-[#6B7280]">Code: {r.code}</p>
+                    <p className="text-xs text-[#9CA3AF]">{formatDate(r.created_at)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-black text-[#E23744]">+{r.points_awarded || 0} pts</p>
+                    <p className="text-xs text-[#6B7280]">{r.status}</p>
+                  </div>
+                </div>
+              ))}
+              {!referrals.length && <p className="text-sm text-[#6B7280]">No referrals yet.</p>}
+            </div>
+            <button type="button" onClick={() => setReferralUser(null)} className="mt-4 w-full py-3 rounded-xl bg-[#F8FAFC] border border-[#E5E7EB] font-bold">
               Close
             </button>
           </div>

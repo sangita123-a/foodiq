@@ -14,12 +14,19 @@ const getDashboard = async (req, res) => {
       totalRevenue: data.total_revenue,
       todaysOrders: data.todays_orders,
       todaysRevenue: data.todays_revenue,
+      weeklyRevenue: data.weekly_revenue,
+      monthlyRevenue: data.monthly_revenue,
+      yearlyRevenue: data.yearly_revenue,
       activeDeliveryPartners: data.active_delivery_partners,
+      totalDeliveryPartners: data.total_delivery_partners,
       pendingRestaurantApprovals: data.pending_restaurant_approvals,
       pendingPartnerApprovals: data.pending_partner_approvals,
       activeOrders: data.active_orders,
       deliveredOrders: data.delivered_orders,
       cancelledOrders: data.cancelled_orders,
+      totalMenuItems: data.total_menu_items,
+      avgDeliveryTimeMinutes: data.avg_delivery_time_minutes,
+      customerSatisfaction: data.customer_satisfaction,
       weekly: data.weekly,
       monthly: data.monthly,
     });
@@ -429,6 +436,275 @@ const getLiveDeliveries = async (req, res) => {
   }
 };
 
+const getStaff = async (req, res) => {
+  try {
+    ok(res, 'Admin staff retrieved', await admin.listAdminStaff());
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const postStaff = async (req, res) => {
+  try {
+    const bcrypt = require('bcrypt');
+    const { email, password, full_name, phone_number, admin_role } = req.body;
+    if (!email || !password || !full_name) {
+      return fail(res, 400, 'Email, password, and name are required');
+    }
+    const password_hash = await bcrypt.hash(password, 12);
+    const data = await admin.createAdminStaff({
+      email: String(email).trim().toLowerCase(),
+      password_hash,
+      full_name,
+      phone_number,
+      admin_role: admin_role || 'admin',
+    });
+    ok(res, 'Admin staff created', data);
+  } catch (error) {
+    if (error.code === '23505') return fail(res, 409, 'Email already exists');
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const patchStaff = async (req, res) => {
+  try {
+    let password_hash;
+    if (req.body.password) {
+      const bcrypt = require('bcrypt');
+      password_hash = await bcrypt.hash(req.body.password, 12);
+    }
+    const data = await admin.updateAdminStaff(req.params.id, {
+      ...req.body,
+      password_hash,
+    });
+    if (!data) return fail(res, 404, 'Staff member not found');
+    ok(res, 'Staff updated', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const removeStaff = async (req, res) => {
+  try {
+    if (req.params.id === req.user.id) {
+      return fail(res, 400, 'Cannot delete your own account');
+    }
+    const data = await admin.deleteAdminStaff(req.params.id);
+    if (!data) return fail(res, 404, 'Staff member not found');
+    ok(res, 'Staff deleted', {});
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const userWallet = async (req, res) => {
+  try {
+    ok(res, 'User wallet retrieved', await admin.getUserWallet(req.params.id));
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const userReferrals = async (req, res) => {
+  try {
+    ok(res, 'User referrals retrieved', await admin.getUserReferrals(req.params.id));
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getCms = async (req, res) => {
+  try {
+    ok(res, 'CMS content retrieved', await admin.listCmsContent());
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const putCms = async (req, res) => {
+  try {
+    const data = await admin.upsertCmsContent(req.body);
+    ok(res, 'CMS content saved', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const removeCms = async (req, res) => {
+  try {
+    const data = await admin.deleteCmsContent(req.params.key);
+    if (!data) return fail(res, 404, 'Content not found');
+    ok(res, 'CMS content deleted', {});
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getMarketing = async (req, res) => {
+  try {
+    const campaigns = await admin.listMarketingCampaigns({
+      channel: req.query.channel || '',
+      status: req.query.status || '',
+    });
+    const seasonal = await admin.listSeasonalCampaigns();
+    ok(res, 'Marketing data retrieved', { campaigns, seasonal });
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const postMarketing = async (req, res) => {
+  try {
+    const data = await admin.createMarketingCampaign({
+      ...req.body,
+      created_by: req.user.id,
+    });
+    ok(res, 'Campaign created', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const patchMarketing = async (req, res) => {
+  try {
+    const data = await admin.updateMarketingCampaign(req.params.id, req.body);
+    if (!data) return fail(res, 404, 'Campaign not found');
+    ok(res, 'Campaign updated', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const postSeasonal = async (req, res) => {
+  try {
+    ok(res, 'Seasonal campaign saved', await admin.upsertSeasonalCampaign(req.body));
+  } catch (error) {
+    if (error.code === '23505') return fail(res, 409, 'Slug already exists');
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const sendMarketingCampaign = async (req, res) => {
+  try {
+    const campaign = await admin.updateMarketingCampaign(req.params.id, { status: 'sending' });
+    if (!campaign) return fail(res, 404, 'Campaign not found');
+
+    let sent = 0;
+    if (campaign.channel === 'push') {
+      const result = await admin.broadcastNotification({
+        audience: campaign.audience || 'all',
+        title: campaign.subject || campaign.name,
+        message: campaign.message,
+      });
+      sent = result.sent;
+    } else if (campaign.channel === 'email' || campaign.channel === 'sms') {
+      const messaging = require('../controllers/messagingController');
+      const fakeReq = {
+        body: {
+          audience: campaign.audience || 'all',
+          subject: campaign.subject || campaign.name,
+          message: campaign.message,
+          template: 'promo',
+        },
+        user: req.user,
+      };
+      const fakeRes = {
+        json: (payload) => payload,
+        status: () => ({ json: () => ({}) }),
+      };
+      if (campaign.channel === 'email') {
+        await messaging.postPromo(fakeReq, fakeRes);
+      } else {
+        await messaging.postPromo(fakeReq, fakeRes);
+      }
+      sent = 1;
+    }
+
+    const updated = await admin.updateMarketingCampaign(req.params.id, {
+      status: 'sent',
+      sent_count: sent,
+    });
+    ok(res, 'Campaign sent', updated);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getSecurity = async (req, res) => {
+  try {
+    const { ADMIN_ROLES, ROLE_LABELS, ROLE_PERMISSIONS } = require('../utils/adminPermissions');
+    const loginLogs = await admin.getAdminLoginLogs({ limit: 100 });
+    const auditLogs = await admin.getAuditLogs({ limit: 100, category: req.query.category || '' });
+    ok(res, 'Security data retrieved', {
+      roles: ADMIN_ROLES.map((r) => ({ id: r, label: ROLE_LABELS[r], permissions: ROLE_PERMISSIONS[r] })),
+      login_logs: loginLogs,
+      audit_logs: auditLogs,
+    });
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getPaymentReportHandler = async (req, res) => {
+  try {
+    ok(res, 'Payment report retrieved', await admin.getPaymentReport(req.query));
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getDeliveryReportHandler = async (req, res) => {
+  try {
+    ok(res, 'Delivery report retrieved', await admin.getDeliveryReport());
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getSettlements = async (req, res) => {
+  try {
+    ok(res, 'Settlements retrieved', await admin.getRestaurantSettlements());
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const exportReport = async (req, res) => {
+  try {
+    const { type = 'sales', format = 'json', start_date, end_date } = req.query;
+    let rows = [];
+    if (type === 'sales' || type === 'payment') {
+      rows = await admin.getPaymentReport({ start_date, end_date, group_by: 'day' });
+    } else if (type === 'delivery') {
+      rows = await admin.getDeliveryReport();
+    } else if (type === 'restaurants') {
+      rows = await admin.listRestaurants({});
+    } else if (type === 'customers') {
+      rows = await admin.listUsers({ role: 'customer' });
+    } else if (type === 'orders') {
+      rows = await admin.listOrders({});
+    }
+
+    if (format === 'csv') {
+      if (!rows.length) {
+        res.setHeader('Content-Type', 'text/csv');
+        return res.send('No data');
+      }
+      const keys = Object.keys(rows[0]);
+      const csv = [keys.join(',')].concat(
+        rows.map((r) => keys.map((k) => JSON.stringify(r[k] ?? '')).join(','))
+      ).join('\n');
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${type}-report.csv"`);
+      return res.send(csv);
+    }
+
+    ok(res, 'Report exported', { type, rows, count: rows.length });
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
 module.exports = {
   getDashboard,
   getLiveDeliveries,
@@ -465,4 +741,23 @@ module.exports = {
   getOrderReports,
   getUserReports,
   getRestaurantReports,
+  getStaff,
+  postStaff,
+  patchStaff,
+  removeStaff,
+  userWallet,
+  userReferrals,
+  getCms,
+  putCms,
+  removeCms,
+  getMarketing,
+  postMarketing,
+  patchMarketing,
+  postSeasonal,
+  sendMarketingCampaign,
+  getSecurity,
+  getPaymentReportHandler,
+  getDeliveryReportHandler,
+  getSettlements,
+  exportReport,
 };

@@ -21,7 +21,23 @@ const getDashboardStats = async () => {
       (SELECT COUNT(*)::int FROM orders
         WHERE LOWER(status) NOT IN ('delivered', 'cancelled')) AS active_orders,
       (SELECT COUNT(*)::int FROM orders WHERE LOWER(status) = 'delivered') AS delivered_orders,
-      (SELECT COUNT(*)::int FROM orders WHERE LOWER(status) = 'cancelled') AS cancelled_orders
+      (SELECT COUNT(*)::int FROM orders WHERE LOWER(status) = 'cancelled') AS cancelled_orders,
+      (SELECT COUNT(*)::int FROM menu_items) AS total_menu_items,
+      (SELECT COUNT(*)::int FROM delivery_partners) AS total_delivery_partners,
+      (SELECT COALESCE(SUM(total_amount), 0)::float FROM orders
+        WHERE created_at >= date_trunc('week', CURRENT_DATE)
+          AND LOWER(status) NOT IN ('cancelled', 'pending', 'rejected')) AS weekly_revenue,
+      (SELECT COALESCE(SUM(total_amount), 0)::float FROM orders
+        WHERE created_at >= date_trunc('month', CURRENT_DATE)
+          AND LOWER(status) NOT IN ('cancelled', 'pending', 'rejected')) AS monthly_revenue,
+      (SELECT COALESCE(SUM(total_amount), 0)::float FROM orders
+        WHERE created_at >= date_trunc('year', CURRENT_DATE)
+          AND LOWER(status) NOT IN ('cancelled', 'pending', 'rejected')) AS yearly_revenue,
+      (SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (o.updated_at - o.created_at)) / 60), 0)::float
+        FROM orders o
+        WHERE LOWER(o.status) = 'delivered'
+          AND o.created_at >= CURRENT_DATE - INTERVAL '30 days') AS avg_delivery_time_minutes,
+      (SELECT COALESCE(AVG(r.rating), 0)::float FROM reviews r) AS customer_satisfaction
   `);
 
   const weekly = await pool.query(`
@@ -591,6 +607,279 @@ const updateSettings = async (data) => {
   return rows[0];
 };
 
+const listAdminStaff = async () => {
+  const { rows } = await pool.query(
+    `SELECT id, email, full_name, phone_number, admin_role, created_at, updated_at
+     FROM users WHERE role = 'admin' ORDER BY created_at ASC`
+  );
+  return rows;
+};
+
+const createAdminStaff = async ({ email, password_hash, full_name, phone_number, admin_role }) => {
+  const { rows } = await pool.query(
+    `INSERT INTO users (email, password_hash, full_name, phone_number, role, admin_role)
+     VALUES ($1, $2, $3, $4, 'admin', $5)
+     RETURNING id, email, full_name, phone_number, admin_role, created_at`,
+    [email, password_hash, full_name, phone_number || null, admin_role || 'admin']
+  );
+  return rows[0];
+};
+
+const updateAdminStaff = async (id, data) => {
+  const { full_name, phone_number, admin_role, password_hash } = data;
+  const { rows } = await pool.query(
+    `UPDATE users SET
+       full_name = COALESCE($1, full_name),
+       phone_number = COALESCE($2, phone_number),
+       admin_role = COALESCE($3, admin_role),
+       password_hash = COALESCE($4, password_hash),
+       updated_at = CURRENT_TIMESTAMP
+     WHERE id = $5 AND role = 'admin'
+     RETURNING id, email, full_name, phone_number, admin_role, created_at, updated_at`,
+    [full_name, phone_number, admin_role, password_hash, id]
+  );
+  return rows[0] || null;
+};
+
+const deleteAdminStaff = async (id) => {
+  const { rows } = await pool.query(
+    `DELETE FROM users WHERE id = $1 AND role = 'admin' RETURNING id`,
+    [id]
+  );
+  return rows[0];
+};
+
+const getUserWallet = async (userId) => {
+  const { rows } = await pool.query(
+    `SELECT COALESCE(SUM(points_awarded), 0)::int AS reward_points,
+            COUNT(*)::int AS referral_count
+     FROM referral_redemptions WHERE referrer_id = $1`,
+    [userId]
+  );
+  const payments = await pool.query(
+    `SELECT COALESCE(SUM(total_amount), 0)::float AS total_spent,
+            COUNT(*)::int AS order_count
+     FROM orders WHERE user_id = $1 AND LOWER(status) = 'delivered'`,
+    [userId]
+  );
+  return {
+    reward_points: rows[0]?.reward_points || 0,
+    referral_count: rows[0]?.referral_count || 0,
+    total_spent: payments.rows[0]?.total_spent || 0,
+    order_count: payments.rows[0]?.order_count || 0,
+  };
+};
+
+const getUserReferrals = async (userId) => {
+  const { rows } = await pool.query(
+    `SELECT rr.*, u.full_name AS referee_name, u.email AS referee_email, rc.code
+     FROM referral_redemptions rr
+     JOIN referral_codes rc ON rc.id = rr.referral_code_id
+     LEFT JOIN users u ON u.id = rr.referee_id
+     WHERE rr.referrer_id = $1
+     ORDER BY rr.created_at DESC
+     LIMIT 100`,
+    [userId]
+  );
+  return rows;
+};
+
+const listCmsContent = async () => {
+  const { rows } = await pool.query(
+    `SELECT * FROM cms_content ORDER BY sort_order ASC, content_key ASC`
+  );
+  return rows;
+};
+
+const upsertCmsContent = async (data) => {
+  const { content_key, content_type, title, body, is_active, sort_order } = data;
+  const { rows } = await pool.query(
+    `INSERT INTO cms_content (content_key, content_type, title, body, is_active, sort_order)
+     VALUES ($1, $2, $3, $4, COALESCE($5, TRUE), COALESCE($6, 0))
+     ON CONFLICT (content_key) DO UPDATE SET
+       content_type = COALESCE(EXCLUDED.content_type, cms_content.content_type),
+       title = COALESCE(EXCLUDED.title, cms_content.title),
+       body = COALESCE(EXCLUDED.body, cms_content.body),
+       is_active = COALESCE(EXCLUDED.is_active, cms_content.is_active),
+       sort_order = COALESCE(EXCLUDED.sort_order, cms_content.sort_order),
+       updated_at = CURRENT_TIMESTAMP
+     RETURNING *`,
+    [content_key, content_type || 'block', title, JSON.stringify(body || {}), is_active, sort_order]
+  );
+  return rows[0];
+};
+
+const deleteCmsContent = async (key) => {
+  const { rows } = await pool.query(
+    `DELETE FROM cms_content WHERE content_key = $1 RETURNING content_key`,
+    [key]
+  );
+  return rows[0];
+};
+
+const listMarketingCampaigns = async ({ channel = '', status = '' } = {}) => {
+  const { rows } = await pool.query(
+    `SELECT mc.*, u.full_name AS created_by_name
+     FROM marketing_campaigns mc
+     LEFT JOIN users u ON u.id = mc.created_by
+     WHERE ($1 = '' OR mc.channel = $1)
+       AND ($2 = '' OR mc.status = $2)
+     ORDER BY mc.created_at DESC
+     LIMIT 200`,
+    [channel, status]
+  );
+  return rows;
+};
+
+const createMarketingCampaign = async (data) => {
+  const { name, channel, audience, subject, message, status, scheduled_at, meta, created_by } = data;
+  const { rows } = await pool.query(
+    `INSERT INTO marketing_campaigns
+       (name, channel, audience, subject, message, status, scheduled_at, meta, created_by)
+     VALUES ($1, $2, $3, $4, $5, COALESCE($6, 'draft'), $7, $8, $9)
+     RETURNING *`,
+    [name, channel, audience || 'all', subject, message, status, scheduled_at, JSON.stringify(meta || {}), created_by]
+  );
+  return rows[0];
+};
+
+const updateMarketingCampaign = async (id, data) => {
+  const { name, channel, audience, subject, message, status, scheduled_at, sent_count, meta } = data;
+  const { rows } = await pool.query(
+    `UPDATE marketing_campaigns SET
+       name = COALESCE($1, name),
+       channel = COALESCE($2, channel),
+       audience = COALESCE($3, audience),
+       subject = COALESCE($4, subject),
+       message = COALESCE($5, message),
+       status = COALESCE($6, status),
+       scheduled_at = COALESCE($7, scheduled_at),
+       sent_count = COALESCE($8, sent_count),
+       meta = COALESCE($9, meta),
+       updated_at = CURRENT_TIMESTAMP
+     WHERE id = $10 RETURNING *`,
+    [name, channel, audience, subject, message, status, scheduled_at, sent_count,
+     meta ? JSON.stringify(meta) : null, id]
+  );
+  return rows[0] || null;
+};
+
+const listSeasonalCampaigns = async () => {
+  const { rows } = await pool.query(
+    `SELECT * FROM seasonal_campaigns ORDER BY starts_at DESC LIMIT 100`
+  );
+  return rows;
+};
+
+const upsertSeasonalCampaign = async (data) => {
+  const { id, slug, title, subtitle, banner_url, offer_code, starts_at, ends_at, is_active, meta } = data;
+  if (id) {
+    const { rows } = await pool.query(
+      `UPDATE seasonal_campaigns SET
+         slug = COALESCE($1, slug), title = COALESCE($2, title),
+         subtitle = COALESCE($3, subtitle), banner_url = COALESCE($4, banner_url),
+         offer_code = COALESCE($5, offer_code), starts_at = COALESCE($6, starts_at),
+         ends_at = COALESCE($7, ends_at), is_active = COALESCE($8, is_active),
+         meta = COALESCE($9, meta)
+       WHERE id = $10 RETURNING *`,
+      [slug, title, subtitle, banner_url, offer_code, starts_at, ends_at, is_active,
+       meta ? JSON.stringify(meta) : null, id]
+    );
+    return rows[0] || null;
+  }
+  const { rows } = await pool.query(
+    `INSERT INTO seasonal_campaigns (slug, title, subtitle, banner_url, offer_code, starts_at, ends_at, is_active, meta)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, COALESCE($8, TRUE), $9) RETURNING *`,
+    [slug, title, subtitle, banner_url, offer_code, starts_at, ends_at, is_active, JSON.stringify(meta || {})]
+  );
+  return rows[0];
+};
+
+const getAdminLoginLogs = async ({ limit = 100 } = {}) => {
+  const { rows } = await pool.query(
+    `SELECT lh.*, u.email, u.full_name, u.admin_role
+     FROM login_history lh
+     JOIN users u ON u.id = lh.user_id
+     WHERE u.role = 'admin'
+     ORDER BY lh.created_at DESC
+     LIMIT $1`,
+    [limit]
+  );
+  return rows;
+};
+
+const getAuditLogs = async ({ limit = 100, category = '' } = {}) => {
+  const { rows } = await pool.query(
+    `SELECT al.*, u.email, u.full_name
+     FROM audit_logs al
+     LEFT JOIN users u ON u.id = al.user_id
+     WHERE ($1 = '' OR al.category = $1)
+     ORDER BY al.created_at DESC
+     LIMIT $2`,
+    [category, limit]
+  );
+  return rows;
+};
+
+const getPaymentReport = async ({ start_date, end_date, group_by = 'day' } = {}) => {
+  const trunc = group_by === 'month' ? 'month' : group_by === 'week' ? 'week' : 'day';
+  const conditions = ["LOWER(o.status) NOT IN ('cancelled', 'pending', 'rejected')"];
+  const values = [trunc];
+  if (start_date && end_date) {
+    conditions.push('CAST(o.created_at AS DATE) >= $2');
+    conditions.push('CAST(o.created_at AS DATE) <= $3');
+    values.push(start_date, end_date);
+  }
+  const { rows } = await pool.query(
+    `SELECT date_trunc($1, o.created_at)::date AS period,
+            COUNT(*)::int AS orders,
+            COALESCE(SUM(o.total_amount), 0)::float AS revenue,
+            COALESCE(SUM(o.delivery_fee), 0)::float AS delivery_fees,
+            COALESCE(SUM(o.discount_amount), 0)::float AS discounts
+     FROM orders o
+     WHERE ${conditions.join(' AND ')}
+     GROUP BY 1 ORDER BY 1 DESC LIMIT 90`,
+    values
+  );
+  return rows;
+};
+
+const getDeliveryReport = async () => {
+  const { rows } = await pool.query(
+    `SELECT dp.id, u.full_name, dp.rating,
+            COUNT(da.id)::int AS total_deliveries,
+            COUNT(da.id) FILTER (WHERE da.status = 'delivered')::int AS completed,
+            COALESCE(SUM(e.amount), 0)::float AS earnings
+     FROM delivery_partners dp
+     JOIN users u ON u.id = dp.user_id
+     LEFT JOIN delivery_assignments da ON da.delivery_partner_id = dp.id
+     LEFT JOIN delivery_earnings e ON e.delivery_partner_id = dp.id
+     GROUP BY dp.id, u.full_name, dp.rating
+     ORDER BY completed DESC
+     LIMIT 100`
+  );
+  return rows;
+};
+
+const getRestaurantSettlements = async () => {
+  const commission = await pool.query(`SELECT commission_percent FROM admin_settings WHERE id = 1`);
+  const rate = Number(commission.rows[0]?.commission_percent || 15) / 100;
+  const { rows } = await pool.query(
+    `SELECT r.id, r.name,
+            COALESCE(SUM(o.total_amount) FILTER (WHERE LOWER(o.status) = 'delivered'), 0)::float AS gross_revenue,
+            COALESCE(SUM(o.total_amount) FILTER (WHERE LOWER(o.status) = 'delivered'), 0)::float * $1 AS commission,
+            COALESCE(SUM(o.total_amount) FILTER (WHERE LOWER(o.status) = 'delivered'), 0)::float * (1 - $1) AS settlement
+     FROM restaurants r
+     LEFT JOIN orders o ON o.restaurant_id = r.id
+     GROUP BY r.id, r.name
+     HAVING COALESCE(SUM(o.total_amount) FILTER (WHERE LOWER(o.status) = 'delivered'), 0) > 0
+     ORDER BY gross_revenue DESC
+     LIMIT 100`,
+    [rate]
+  );
+  return { commission_rate: rate * 100, settlements: rows };
+};
+
 module.exports = {
   getDashboardStats,
   listRestaurants,
@@ -618,4 +907,23 @@ module.exports = {
   broadcastNotification,
   getSettings,
   updateSettings,
+  listAdminStaff,
+  createAdminStaff,
+  updateAdminStaff,
+  deleteAdminStaff,
+  getUserWallet,
+  getUserReferrals,
+  listCmsContent,
+  upsertCmsContent,
+  deleteCmsContent,
+  listMarketingCampaigns,
+  createMarketingCampaign,
+  updateMarketingCampaign,
+  listSeasonalCampaigns,
+  upsertSeasonalCampaign,
+  getAdminLoginLogs,
+  getAuditLogs,
+  getPaymentReport,
+  getDeliveryReport,
+  getRestaurantSettlements,
 };

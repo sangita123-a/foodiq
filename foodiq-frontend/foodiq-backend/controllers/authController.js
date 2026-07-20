@@ -279,6 +279,7 @@ const loginUser = async (req, res) => {
         email: user.email,
         phone_number: user.phone_number,
         role: user.role,
+        admin_role: user.admin_role || (user.role === 'admin' ? 'admin' : null),
         token,
         refresh_token,
       },

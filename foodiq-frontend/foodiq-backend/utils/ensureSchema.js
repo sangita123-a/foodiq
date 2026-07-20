@@ -435,6 +435,44 @@ async function ensureSchema() {
     await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_banner_url TEXT`);
     await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth DATE`);
     await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS gender VARCHAR(30)`);
+    await q(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS admin_role VARCHAR(40)
+        CHECK (admin_role IS NULL OR admin_role IN (
+          'super_admin', 'admin', 'support_executive', 'finance_manager', 'marketing_manager'
+        ))
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS cms_content (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        content_key VARCHAR(80) NOT NULL UNIQUE,
+        content_type VARCHAR(40) NOT NULL DEFAULT 'block',
+        title VARCHAR(200),
+        body JSONB DEFAULT '{}'::jsonb,
+        is_active BOOLEAN DEFAULT TRUE,
+        sort_order INTEGER DEFAULT 0,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS marketing_campaigns (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(160) NOT NULL,
+        channel VARCHAR(40) NOT NULL CHECK (channel IN ('push', 'email', 'sms', 'banner')),
+        audience VARCHAR(40) DEFAULT 'all',
+        subject VARCHAR(200),
+        message TEXT NOT NULL,
+        status VARCHAR(30) DEFAULT 'draft',
+        scheduled_at TIMESTAMP WITH TIME ZONE,
+        sent_count INTEGER DEFAULT 0,
+        meta JSONB DEFAULT '{}'::jsonb,
+        created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
 
     await q(`ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS admin_reply TEXT`);
     await q(`ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT FALSE`);
@@ -1768,8 +1806,8 @@ async function ensureSchema() {
     if (!existing?.rows?.[0]) {
       const hash = await bcrypt.hash('Password123', 12);
       const inserted = await q(
-        `INSERT INTO users (email, password_hash, full_name, phone_number, role)
-         VALUES ($1, $2, $3, $4, 'admin') RETURNING id`,
+        `INSERT INTO users (email, password_hash, full_name, phone_number, role, admin_role)
+         VALUES ($1, $2, $3, $4, 'admin', 'super_admin') RETURNING id`,
         [adminEmail, hash, 'Foodiq Admin', '9999999999']
       );
       if (inserted?.rows?.[0]) {
@@ -1779,6 +1817,12 @@ async function ensureSchema() {
         );
         console.log('[SCHEMA] Seeded admin@foodiq.com (dev bootstrap)');
       }
+    } else {
+      await q(
+        `UPDATE users SET admin_role = COALESCE(admin_role, 'super_admin')
+         WHERE email = $1 AND role = 'admin'`,
+        [adminEmail]
+      );
     }
 
     const riderEmail = 'rider@foodiq.com';
