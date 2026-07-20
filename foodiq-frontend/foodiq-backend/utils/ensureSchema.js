@@ -677,7 +677,35 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS assigned_agent_id UUID REFERENCES users(id) ON DELETE SET NULL,
         ADD COLUMN IF NOT EXISTS satisfaction_score INTEGER,
         ADD COLUMN IF NOT EXISTS ai_session_id UUID,
-        ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMP WITH TIME ZONE
+        ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMP WITH TIME ZONE,
+        ADD COLUMN IF NOT EXISTS ticket_number VARCHAR(20),
+        ADD COLUMN IF NOT EXISTS order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+        ADD COLUMN IF NOT EXISTS restaurant_id UUID REFERENCES restaurants(id) ON DELETE SET NULL,
+        ADD COLUMN IF NOT EXISTS closed_at TIMESTAMP WITH TIME ZONE
+    `);
+
+    await q(`CREATE SEQUENCE IF NOT EXISTS support_ticket_number_seq START 1000`);
+
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_support_tickets_number
+        ON support_tickets(ticket_number) WHERE ticket_number IS NOT NULL
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS support_ticket_messages (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        ticket_id UUID NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+        sender_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        sender_role VARCHAR(30) NOT NULL,
+        message TEXT NOT NULL,
+        attachment_urls JSONB DEFAULT '[]'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_support_ticket_messages_ticket
+        ON support_ticket_messages(ticket_id, created_at ASC)
     `);
 
     await q(`

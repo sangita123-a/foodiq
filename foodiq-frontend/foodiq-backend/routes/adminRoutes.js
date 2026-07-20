@@ -95,6 +95,14 @@ router.get('/support/live-chats/:id', requirePermission('feedback'), c.getSuppor
 router.post('/support/live-chats/:id/messages', requirePermission('feedback'), c.postSupportAgentMessage);
 router.get('/support/ai-sessions', requirePermission('feedback'), c.getSupportAiSessions);
 
+const ticketAdmin = require('../controllers/ticketController');
+router.get('/tickets', requirePermission('feedback'), ticketAdmin.adminListTickets);
+router.get('/tickets/:id', requirePermission('feedback'), ticketAdmin.adminGetTicket);
+router.put('/tickets/:id/assign', requirePermission('feedback'), ticketAdmin.adminAssignTicket);
+router.put('/tickets/:id/status', requirePermission('feedback'), ticketAdmin.adminUpdateStatus);
+router.post('/tickets/:id/messages', requirePermission('feedback'), ticketAdmin.adminReplyTicket);
+router.put('/tickets/:id/close', requirePermission('feedback'), ticketAdmin.adminCloseTicket);
+
 router.get('/inventory', requirePermission('restaurants'), c.getAdminInventory);
 
 const feedbackAdmin = require('../controllers/feedbackController');

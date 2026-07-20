@@ -37,6 +37,9 @@ router.get('/notifications', getNotifications);
 router.get('/settlements', getSettlements);
 router.get('/reviews', getPartnerReviews);
 router.put('/reviews/:id', replyPartnerReview);
+router.get('/tickets', require('../controllers/ticketController').partnerListTickets);
+router.get('/tickets/:id', require('../controllers/ticketController').partnerGetTicket);
+router.post('/tickets/:id/messages', require('../controllers/ticketController').partnerReplyTicket);
 
 router.use('/inventory', require('./inventoryRoutes'));
 

@@ -73,6 +73,7 @@ const menuItems: MenuItem[] = [
   { name: "Notifications", icon: Bell, href: "/admin/notifications", permission: "notifications" },
   { name: "Push Notifications", icon: Bell, href: "/admin/push-notifications", permission: "notifications" },
   { name: "Support Center", icon: Headphones, href: "/admin/support", permission: "feedback" },
+  { name: "Support Tickets", icon: MessageSquare, href: "/admin/tickets", permission: "feedback" },
   { name: "Feedback", icon: MessageSquare, href: "/admin/feedback", permission: "feedback" },
   { name: "Bugs", icon: Bug, href: "/admin/bugs", permission: "bugs" },
   { name: "Maintenance", icon: Wrench, href: "/admin/maintenance", permission: "maintenance" },

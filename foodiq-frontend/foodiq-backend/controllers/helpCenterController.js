@@ -57,7 +57,8 @@ const getChatSession = async (req, res) => {
 const listTickets = async (req, res) => {
   try {
     if (!req.user) return fail(res, 401, 'Sign in required');
-    ok(res, 'Tickets retrieved', await helpCenter.listUserTickets(req.user.id));
+    const ticketModel = require('../models/ticketModel');
+    ok(res, 'Tickets retrieved', await ticketModel.listUserTickets(req.user.id));
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
   }
@@ -66,21 +67,29 @@ const listTickets = async (req, res) => {
 const createTicket = async (req, res) => {
   try {
     if (!req.user) return fail(res, 401, 'Sign in required');
+    const ticketModel = require('../models/ticketModel');
+    const { notifyTicketCreated } = require('../services/ticketNotificationService');
     const { category, subject, description, priority } = req.body;
     if (!category || !subject || !description) {
       return fail(res, 400, 'Category, subject, and description are required');
     }
-    const ticket = await helpCenter.createTicket({
+    const ticket = await ticketModel.createTicket({
       userId: req.user.id,
       category,
       subject,
       description,
       priority,
       aiSessionId: req.body.session_id,
+      attachmentUrls: req.body.attachment_urls || [],
     });
+    try {
+      await notifyTicketCreated(ticket, req.user);
+    } catch (emailErr) {
+      console.warn('[help-center] ticket email skipped:', emailErr.message);
+    }
     ok(res, 'Ticket created', ticket, 201);
   } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
+    fail(res, error.status || 500, error.message);
   }
 };
 
