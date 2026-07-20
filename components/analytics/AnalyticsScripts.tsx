@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Script from "next/script";
-import { getClarityId, getGaId, getGtmId, isAnalyticsEnabled } from "@/lib/analytics/config";
+import { getClarityId, getGtmId, isAnalyticsEnabled } from "@/lib/analytics/config";
 
 /**
- * Loads GTM, GA4, and Microsoft Clarity only in production when IDs are set.
- * Client-gated so localhost never loads third-party tags.
+ * Loads GTM and Microsoft Clarity only in production when IDs are set.
+ * GA4 is loaded separately via GoogleAnalytics in app/layout.tsx.
  */
 export default function AnalyticsScripts() {
   const [ready, setReady] = useState(false);
@@ -18,10 +18,9 @@ export default function AnalyticsScripts() {
   if (!ready) return null;
 
   const gtmId = getGtmId();
-  const gaId = getGaId();
   const clarityId = getClarityId();
 
-  if (!gtmId && !gaId && !clarityId) return null;
+  if (!gtmId && !clarityId) return null;
 
   return (
     <>
@@ -43,27 +42,6 @@ export default function AnalyticsScripts() {
               title="Google Tag Manager"
             />
           </noscript>
-        </>
-      ) : null}
-
-      {gaId ? (
-        <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-            strategy="lazyOnload"
-          />
-          <Script id="ga4-init" strategy="lazyOnload">{`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            window.gtag = gtag;
-            gtag('js', new Date());
-            gtag('config', '${gaId}', {
-              anonymize_ip: true,
-              allow_google_signals: false,
-              allow_ad_personalization_signals: false,
-              send_page_view: false
-            });
-          `}</Script>
         </>
       ) : null}
 

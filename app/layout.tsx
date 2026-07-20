@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import JsonLd from "@/components/seo/JsonLd";
 import {
   faqJsonLd,
@@ -114,6 +115,7 @@ export default function RootLayout({
         <link rel="preload" as="image" href="/default-food.webp" type="image/webp" />
       </head>
       <body className="min-h-full flex flex-col bg-white text-[#1C1C1C]">
+        <GoogleAnalytics />
         <JsonLd
           data={[
             organizationJsonLd(),
