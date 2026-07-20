@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { buildPageMetadata } from "@/lib/seo/metadata";
+import { buildPrivatePageMetadata } from "@/lib/seo/entity-metadata";
 
-export const metadata: Metadata = buildPageMetadata({
+export const metadata: Metadata = buildPrivatePageMetadata({
   title: "Delivery Partner",
-  description: "Foodiq delivery partner portal. Not indexed by search engines.",
   path: "/delivery",
-  noIndex: true,
+  description: "Foodiq delivery partner portal. Not indexed by search engines.",
 });
 
 export default function DeliveryLayout({ children }: { children: ReactNode }) {

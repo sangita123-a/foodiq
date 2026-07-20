@@ -8,6 +8,8 @@ import {
   foodItemJsonLd,
   productJsonLd,
 } from "@/lib/seo/jsonld";
+import { buildEntityMetadata } from "@/lib/seo/entity-metadata";
+import { foodItemKeywords } from "@/lib/seo/keywords";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getCategoryDishById, isCategoryDishId } from "@/lib/data/categoryData";
 import { getCollectionDishById, isCollectionDishId } from "@/lib/data/collectionsData";
@@ -42,11 +44,13 @@ export async function generateMetadata({
   if (isCollectionDishId(id)) {
     const dish = getCollectionDishById(id);
     if (dish) {
-      return buildPageMetadata({
+      return buildEntityMetadata({
+        entityName: dish.name,
         title: dish.name,
         description: dish.description.slice(0, 160),
         path: `/food/${dish.id}`,
         image: dish.image,
+        keywords: foodItemKeywords(dish.name, dish.restaurantName, dish.collection),
       });
     }
   }
@@ -54,11 +58,13 @@ export async function generateMetadata({
   if (isCategoryDishId(id)) {
     const dish = getCategoryDishById(id);
     if (dish) {
-      return buildPageMetadata({
+      return buildEntityMetadata({
+        entityName: dish.name,
         title: dish.name,
         description: dish.description.slice(0, 160),
         path: `/food/${dish.id}`,
         image: dish.image,
+        keywords: foodItemKeywords(dish.name, dish.restaurantName, dish.category),
       });
     }
   }
@@ -78,11 +84,13 @@ export async function generateMetadata({
     item.description?.trim() ||
     `Order ${item.name}${item.restaurant_name ? ` from ${item.restaurant_name}` : ""} on Foodiq.`;
 
-  return buildPageMetadata({
+  return buildEntityMetadata({
+    entityName: item.name,
     title: item.name,
     description: description.slice(0, 160),
     path: `/food/${item.id}`,
     image: item.image_url,
+    keywords: foodItemKeywords(item.name, item.restaurant_name),
   });
 }
 

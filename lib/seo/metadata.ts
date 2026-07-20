@@ -4,6 +4,7 @@ import {
   DEFAULT_TWITTER_IMAGE,
   SITE_DESCRIPTION,
   SITE_KEYWORDS,
+  SITE_LOCALE,
   SITE_NAME,
   SITE_OG_DESCRIPTION,
   SITE_OG_IMAGE_ALT,
@@ -52,8 +53,16 @@ function buildOpenGraphImages(ogImage: string, alt: string) {
   ];
 }
 
+function buildLanguageAlternates(path: string) {
+  const pageUrl = absoluteUrl(path);
+  return {
+    [SITE_LOCALE]: pageUrl,
+    en: pageUrl,
+    "x-default": pageUrl,
+  };
+}
+
 /**
- * Build consistent Metadata for App Router pages/layouts.
  * Open Graph tags power WhatsApp, LinkedIn, Telegram, and Facebook previews.
  */
 export function buildPageMetadata({
@@ -86,6 +95,7 @@ export function buildPageMetadata({
     category: "food",
     alternates: {
       canonical: url,
+      languages: buildLanguageAlternates(path),
     },
     robots: noIndex
       ? {
@@ -107,6 +117,7 @@ export function buildPageMetadata({
     openGraph: {
       type,
       locale: "en_IN",
+      alternateLocale: ["en"],
       url,
       title: ogTitle,
       description: ogDescription,
@@ -131,6 +142,7 @@ export function buildPageMetadata({
     other: {
       "og:image:alt": imageAlt,
       "twitter:image:alt": imageAlt,
+      "content-language": SITE_LOCALE,
     },
     metadataBase: new URL(getSiteUrl()),
   };
@@ -152,6 +164,6 @@ export function buildDefaultSocialMetadata(): Metadata {
 export const noIndexMetadata = buildPageMetadata({
   title: "Private",
   description: "This page is not indexed.",
-  path: "/",
+  path: "/private",
   noIndex: true,
 });

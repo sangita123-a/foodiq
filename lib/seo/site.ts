@@ -70,3 +70,13 @@ export const ORGANIZATION_SAME_AS = [
 
 export const SITE_SUPPORT_EMAIL = "support@foodiq.com";
 export const SITE_SUPPORT_PHONE = "+91-40-4010-0100";
+export const SITE_LOCALE = "en-IN";
+
+/** Primary routes prefetched for faster navigation (no UI change). */
+export const PREFETCH_ROUTES = [
+  "/order-online",
+  "/restaurants",
+  "/offers",
+  "/collections",
+  "/search",
+] as const;

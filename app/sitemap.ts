@@ -7,6 +7,7 @@ import {
   fetchApiJsonWithTimeout,
 } from "@/lib/seo/jsonld";
 import { absoluteUrl } from "@/lib/seo/site";
+import { OFFER_IDS } from "@/lib/offers";
 
 export const revalidate = 3600;
 
@@ -22,15 +23,17 @@ const STATIC_PAGES: StaticPage[] = [
   { path: "/", changeFrequency: "daily", priority: 1 },
   { path: "/order-online", changeFrequency: "daily", priority: 0.85 },
   { path: "/restaurants", changeFrequency: "daily", priority: 0.9 },
+  { path: "/popular-restaurants", changeFrequency: "daily", priority: 0.85 },
+  { path: "/popular-cuisines", changeFrequency: "weekly", priority: 0.8 },
+  { path: "/trending-dishes", changeFrequency: "daily", priority: 0.8 },
   { path: "/offers", changeFrequency: "daily", priority: 0.8 },
   { path: "/collections", changeFrequency: "weekly", priority: 0.75 },
+  { path: "/search", changeFrequency: "weekly", priority: 0.6 },
+  { path: "/help-support", changeFrequency: "monthly", priority: 0.5 },
   { path: "/about", changeFrequency: "monthly", priority: 0.5 },
   { path: "/contact", changeFrequency: "monthly", priority: 0.5 },
   { path: "/privacy-policy", changeFrequency: "yearly", priority: 0.3 },
   { path: "/terms-of-service", changeFrequency: "yearly", priority: 0.3 },
-  { path: "/favorites", changeFrequency: "weekly", priority: 0.5 },
-  { path: "/payment-methods", changeFrequency: "monthly", priority: 0.4 },
-  { path: "/coupons-rewards", changeFrequency: "weekly", priority: 0.5 },
 ];
 
 type RestaurantRow = { id: string; updated_at?: string };
@@ -130,6 +133,10 @@ async function buildDynamicEntries(now: Date): Promise<SitemapEntry[]> {
     entries.push(
       toEntry(`/food/${item.id}`, now, "weekly", 0.7, item.updated_at)
     );
+  }
+
+  for (const offerId of OFFER_IDS) {
+    entries.push(toEntry(`/offers/${offerId}`, now, "daily", 0.6));
   }
 
   return entries;

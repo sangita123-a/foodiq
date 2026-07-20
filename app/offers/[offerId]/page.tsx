@@ -7,7 +7,8 @@ import {
   breadcrumbJsonLd,
   fetchApiJson,
 } from "@/lib/seo/jsonld";
-import { buildPageMetadata } from "@/lib/seo/metadata";
+import { buildEntityMetadata } from "@/lib/seo/entity-metadata";
+import { offerKeywords } from "@/lib/seo/keywords";
 import { absoluteUrl, SITE_NAME } from "@/lib/seo/site";
 
 export function generateStaticParams() {
@@ -39,11 +40,14 @@ export async function generateMetadata({
     offer?.description?.trim() ||
     `Claim the ${title} deal on ${SITE_NAME} and save on your next food order.`;
 
-  return buildPageMetadata({
+  return buildEntityMetadata({
+    entityName: title,
     title,
     description: description.slice(0, 160),
     path: `/offers/${offerId}`,
     image: offer?.image_url,
+    keywords: offerKeywords(title, offerId),
+    type: "article",
   });
 }
 

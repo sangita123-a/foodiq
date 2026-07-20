@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { buildPageMetadata } from "@/lib/seo/metadata";
+import { buildPrivatePageMetadata } from "@/lib/seo/entity-metadata";
 
-export const metadata: Metadata = buildPageMetadata({
+export const metadata: Metadata = buildPrivatePageMetadata({
   title: "Wishlist",
-  description: "Private Foodiq wishlist. Not indexed by search engines.",
   path: "/wishlist",
-  noIndex: true,
 });
 
 export default function WishlistSeoLayout({

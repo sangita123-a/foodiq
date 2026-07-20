@@ -16,6 +16,7 @@ import { buildPageMetadata } from "@/lib/seo/metadata";
 import { PUBLIC_PAGE_SEO } from "@/lib/seo/pages";
 import {
   DEFAULT_OG_IMAGE,
+  PREFETCH_ROUTES,
   SITE_NAME,
   getApiBaseUrl,
   getSiteUrl,
@@ -153,6 +154,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         <link rel="preload" as="image" href={DEFAULT_OG_IMAGE} type="image/png" />
+        {PREFETCH_ROUTES.map((route) => (
+          <link key={route} rel="prefetch" href={route} />
+        ))}
         <link rel="preload" as="image" href="/default-restaurant.webp" type="image/webp" />
         <link rel="preload" as="image" href="/default-food.webp" type="image/webp" />
       </head>

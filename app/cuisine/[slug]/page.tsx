@@ -7,7 +7,8 @@ import {
   breadcrumbJsonLd,
   fetchApiJson,
 } from "@/lib/seo/jsonld";
-import { buildPageMetadata } from "@/lib/seo/metadata";
+import { buildEntityMetadata } from "@/lib/seo/entity-metadata";
+import { cuisineKeywords } from "@/lib/seo/keywords";
 import { absoluteUrl, SITE_NAME } from "@/lib/seo/site";
 
 export function generateStaticParams() {
@@ -45,11 +46,13 @@ export async function generateMetadata({
     cuisine?.description?.trim() ||
     `Explore ${name} restaurants and dishes on ${SITE_NAME}. Order authentic ${name} food online.`;
 
-  return buildPageMetadata({
+  return buildEntityMetadata({
+    entityName: name,
     title: `${name} Cuisine`,
     description: description.slice(0, 160),
     path: `/cuisine/${slug}`,
     image: cuisine?.image_url,
+    keywords: cuisineKeywords(name, slug),
   });
 }
 

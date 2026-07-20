@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import CategoryDetailView from "@/components/categories/CategoryDetailView";
 import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbJsonLd } from "@/lib/seo/jsonld";
-import { buildPageMetadata } from "@/lib/seo/metadata";
+import { buildEntityMetadata } from "@/lib/seo/entity-metadata";
+import { categoryKeywords } from "@/lib/seo/keywords";
 import { absoluteUrl, SITE_NAME } from "@/lib/seo/site";
 import {
   CATEGORY_SLUGS,
@@ -28,11 +29,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     category?.description ??
     `Explore ${name} dishes and order online on ${SITE_NAME}.`;
 
-  return buildPageMetadata({
+  return buildEntityMetadata({
+    entityName: name,
     title: `${name} Collection`,
     description: description.slice(0, 160),
     path: `/category/${slug}`,
     image: category?.image,
+    keywords: categoryKeywords(name, slug),
   });
 }
 

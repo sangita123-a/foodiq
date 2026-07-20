@@ -1,15 +1,15 @@
 # Foodiq SEO Report
 
-Generated: 2026-07-19T18:49:27.633Z
+Generated: 2026-07-20T07:56:25.842Z
 
 ## Summary
 
-- Total routes: **87**
-- Public routes: **16**
+- Total routes: **88**
+- Public routes: **17**
 - Private routes: **71**
-- Public routes with metadata: **16/16**
+- Public routes with metadata: **17/17**
 - SEO layout files: **41**
-- Icon assets: **8**
+- Icon assets: **16**
 
 ## Production SEO Checklist
 
@@ -51,6 +51,7 @@ Homepage title: **Foodiq | Online Food Delivery Platform**
 | `/help-support` | ✅ | layout |
 | `/live-cricket` | ✅ | layout |
 | `/offers` | ✅ | layout |
+| `/offline` | ✅ | page |
 | `/order-online` | ✅ | layout |
 | `/popular-cuisines` | ✅ | layout |
 | `/popular-restaurants` | ✅ | layout |
@@ -67,20 +68,3 @@ Homepage title: **Foodiq | Online Food Delivery Platform**
 2. Submit sitemap: `https://YOUR_DOMAIN/sitemap.xml`
 3. Request indexing for homepage and key landing pages.
 4. Optional: set `NEXT_PUBLIC_BING_SITE_VERIFICATION` and `NEXT_PUBLIC_YANDEX_SITE_VERIFICATION`.
-
-## Lighthouse (local production build)
-
-Audited at `http://localhost:3001` after `npm run build && npm run start`.
-
-| Audit | Result |
-|-------|--------|
-| SEO — document title | ✅ Pass |
-| SEO — meta description | ✅ Pass |
-| SEO — canonical | ✅ Pass |
-| SEO — crawlable | ✅ Pass |
-| Performance — FCP | 1.2s (score 99) |
-| Performance — LCP | 5.1s (local; Vercel CDN typically improves) |
-| Performance — CLS | 0 (score 100) |
-| Accessibility — image alt | ✅ Pass |
-
-> Re-run on deployed Vercel URL for production Lighthouse scores. Set `NEXT_PUBLIC_SITE_URL` to your custom domain before deploy.

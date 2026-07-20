@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import CollectionDetailView from "@/components/collections/CollectionDetailView";
 import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbJsonLd } from "@/lib/seo/jsonld";
-import { buildPageMetadata } from "@/lib/seo/metadata";
+import { buildEntityMetadata } from "@/lib/seo/entity-metadata";
+import { collectionKeywords } from "@/lib/seo/keywords";
 import { absoluteUrl, SITE_NAME } from "@/lib/seo/site";
 import {
   COLLECTION_SLUGS,
@@ -28,11 +29,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     collection?.description ??
     `Explore curated ${title} on ${SITE_NAME}.`;
 
-  return buildPageMetadata({
+  return buildEntityMetadata({
+    entityName: title,
     title: `${title} Collection`,
     description: description.slice(0, 160),
     path: `/collections/${slug}`,
     image: collection?.bannerImage,
+    keywords: collectionKeywords(title, slug),
   });
 }
 

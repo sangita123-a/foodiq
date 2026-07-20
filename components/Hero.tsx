@@ -125,7 +125,9 @@ export default function Hero() {
         </motion.div>
 
         <motion.button
+          type="button"
           onClick={scrollToContent}
+          aria-label="Scroll to explore restaurants and food"
           animate={{ 
             y: [0, -10, 0],
             boxShadow: [

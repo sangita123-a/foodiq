@@ -1,14 +1,13 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { buildPageMetadata } from "@/lib/seo/metadata";
+import { buildPrivatePageMetadata } from "@/lib/seo/entity-metadata";
 
-export const metadata: Metadata = buildPageMetadata({
+export const metadata: Metadata = buildPrivatePageMetadata({
   title: "Profile",
-  description: "Private Foodiq page. Not indexed by search engines.",
-  path: "/",
-  noIndex: true,
+  path: "/profile",
 });
 
 export default function PrivateSeoLayout({ children }: { children: ReactNode }) {
   return children;
 }
+

@@ -8,6 +8,8 @@ import {
   foodMenuJsonLd,
   restaurantJsonLd,
 } from "@/lib/seo/jsonld";
+import { buildEntityMetadata } from "@/lib/seo/entity-metadata";
+import { restaurantKeywords } from "@/lib/seo/keywords";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
 type Restaurant = {
@@ -58,11 +60,13 @@ export async function generateMetadata({
     restaurant.description?.trim() ||
     `Order from ${restaurant.name} on Foodiq. Browse the full menu, ratings, and delivery options.`;
 
-  return buildPageMetadata({
+  return buildEntityMetadata({
+    entityName: restaurant.name,
     title: restaurant.name,
     description: description.slice(0, 160),
     path: `/restaurant/${restaurant.id}`,
     image: restaurant.image_url,
+    keywords: restaurantKeywords(restaurant.name),
   });
 }
 
