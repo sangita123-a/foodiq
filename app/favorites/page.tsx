@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -15,27 +15,58 @@ import { getFoodImage, getRestaurantImage } from "@/lib/images";
 import { useToast } from "@/contexts/ToastContext";
 import { useCartActions } from "@/hooks/useCartActions";
 import { useAuthToken } from "@/hooks/useAuthToken";
+import {
+  resolveLocalFavoriteDishes,
+  toggleLocalFavorite,
+  type LocalFavoriteDishMeta,
+} from "@/lib/favorites";
 
 export default function FavoritesPage() {
   const [activeTab, setActiveTab] = useState<FavoriteTab>("All Favorites");
   const [searchQuery, setSearchQuery] = useState("");
+  const [localDishes, setLocalDishes] = useState<LocalFavoriteDishMeta[]>([]);
   const authenticated = useAuthToken();
   const { showToast } = useToast();
   const { updateQuantity, updatingId } = useCartActions();
+
+  const refreshLocalDishes = useCallback(() => {
+    setLocalDishes(resolveLocalFavoriteDishes());
+  }, []);
+
+  useEffect(() => {
+    refreshLocalDishes();
+    const handler = () => refreshLocalDishes();
+    window.addEventListener("foodiq:favorites-updated", handler);
+    return () => window.removeEventListener("foodiq:favorites-updated", handler);
+  }, [refreshLocalDishes]);
   
   const { data: favsData, mutate, isLoading, error } = useSWR(authenticated ? '/api/favorites' : null);
   const favItems = favsData?.items || (Array.isArray(favsData) ? favsData : []);
   const favRestaurantsRaw = favsData?.restaurants || [];
   
-  const favDishes = favItems.map((item: any) => ({
-    id: item.id, // menuItemId
-    name: item.name,
-    restaurant: item.restaurant_name,
-    image: getFoodImage(item.image_url),
-    price: item.discount_price ? parseFloat(item.discount_price) : parseFloat(item.price),
-    rating: Number(item.rating || item.restaurant_rating || 4.5).toFixed(1),
-    isVeg: item.is_vegetarian
-  }));
+  const favDishes = useMemo(() => {
+    const apiDishes = favItems.map((item: Record<string, unknown>) => ({
+      id: item.id as string,
+      name: item.name as string,
+      restaurant: item.restaurant_name as string,
+      image: getFoodImage(item.image_url as string),
+      price: item.discount_price ? parseFloat(String(item.discount_price)) : parseFloat(String(item.price)),
+      rating: Number(item.rating || item.restaurant_rating || 4.5).toFixed(1),
+      isVeg: Boolean(item.is_vegetarian),
+    }));
+
+    if (authenticated) return apiDishes;
+
+    return localDishes.map((d) => ({
+      id: d.id,
+      name: d.name,
+      restaurant: d.restaurant,
+      image: getFoodImage(d.image),
+      price: d.price,
+      rating: d.rating,
+      isVeg: d.isVeg,
+    }));
+  }, [authenticated, favItems, localDishes]);
   
   const favRestaurants = favRestaurantsRaw.map((r: any) => ({
     id: r.id,
@@ -59,12 +90,17 @@ export default function FavoritesPage() {
   };
 
   const handleRemoveDish = async (id: string) => {
+    if (!authenticated) {
+      toggleLocalFavorite(id);
+      refreshLocalDishes();
+      showToast("Removed from favorites", "success");
+      return;
+    }
     try {
       await api.delete(`/api/favorites/${id}`);
       mutate();
       showToast("Removed from favorites", "success");
-    } catch (error) {
-      console.error("Failed to remove favorite", error);
+    } catch {
       showToast("Failed to remove favorite", "error");
     }
   };
@@ -82,7 +118,12 @@ export default function FavoritesPage() {
   const showRestaurants = activeTab === "All Favorites" || activeTab === "Restaurants";
   const showDishes = activeTab === "All Favorites" || activeTab === "Dishes";
 
-  const isEmpty = !authenticated || (showRestaurants ? filteredRestaurants.length : 0) + (showDishes ? filteredDishes.length : 0) === 0;
+  const isEmpty =
+    (authenticated
+      ? (showRestaurants ? filteredRestaurants.length : 0) + (showDishes ? filteredDishes.length : 0)
+      : showDishes
+        ? filteredDishes.length
+        : 0) === 0;
 
   if (authenticated && isLoading) {
     return (

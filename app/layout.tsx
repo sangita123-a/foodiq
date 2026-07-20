@@ -12,14 +12,12 @@ import {
   websiteJsonLd,
 } from "@/lib/seo/jsonld";
 import { HOME_FAQS } from "@/lib/seo/faq";
-import { buildPageMetadata } from "@/lib/seo/metadata";
-import { PUBLIC_PAGE_SEO } from "@/lib/seo/pages";
+import { buildRootLayoutMetadata } from "@/lib/seo/metadata";
 import {
   DEFAULT_OG_IMAGE,
   PREFETCH_ROUTES,
   SITE_NAME,
   getApiBaseUrl,
-  getSiteUrl,
 } from "@/lib/seo/site";
 
 const poppins = Poppins({
@@ -32,7 +30,6 @@ const poppins = Poppins({
 });
 
 const apiBase = getApiBaseUrl();
-const homeSeo = PUBLIC_PAGE_SEO.home;
 
 function buildSiteVerification(): Metadata["verification"] | undefined {
   const google = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
@@ -47,39 +44,7 @@ function buildSiteVerification(): Metadata["verification"] | undefined {
 }
 
 export const metadata: Metadata = {
-  ...buildPageMetadata({
-    title: homeSeo.title,
-    description: homeSeo.description,
-    path: homeSeo.path,
-    keywords: homeSeo.keywords,
-    socialTitle: homeSeo.title,
-    socialDescription: homeSeo.description,
-  }),
-  metadataBase: new URL(getSiteUrl()),
-  title: {
-    default: homeSeo.title,
-    template: `%s | ${SITE_NAME}`,
-  },
-  description: homeSeo.description,
-  icons: {
-    icon: [
-      { url: "/icons/favicon-16.png", sizes: "16x16", type: "image/png" },
-      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icons/icon-72.png", sizes: "72x72", type: "image/png" },
-      { url: "/icons/icon-96.png", sizes: "96x96", type: "image/png" },
-      { url: "/icons/icon-128.png", sizes: "128x128", type: "image/png" },
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [
-      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-    ],
-    shortcut: ["/icons/favicon-32.png"],
-    other: [
-      { rel: "mask-icon", url: "/icons/icon-maskable-512.png", color: "#E23744" },
-    ],
-  },
-  manifest: "/manifest.webmanifest",
+  ...buildRootLayoutMetadata(),
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -106,14 +71,6 @@ export const metadata: Metadata = {
           "(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)",
       },
     ],
-  },
-  other: {
-    "mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-status-bar-style": "default",
-    "apple-mobile-web-app-title": SITE_NAME,
-    "msapplication-TileColor": "#E23744",
-    "msapplication-config": "/browserconfig.xml",
   },
   formatDetection: {
     telephone: false,

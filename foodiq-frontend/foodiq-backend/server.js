@@ -216,6 +216,7 @@ app.use('/api/admin/v4', require('./routes/v4AdminRoutes'));
 app.use('/api/v1', require('./routes/v1Routes'));
 app.use('/api/v4', require('./routes/v4Routes'));
 app.use('/api/contact', contactRoutes);
+app.use('/api/newsletter', require('./routes/newsletterRoutes'));
 app.use('/api/site-settings', siteSettingsRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/help-center', require('./routes/helpCenterRoutes'));
@@ -258,8 +259,8 @@ app.use(
   })
 );
 
-app.get('/images/*', (req, res, next) => {
-  if (req.method !== 'GET') return next();
+app.use('/images', (req, res, next) => {
+  if (req.method !== 'GET' || res.headersSent) return next();
   const p = req.path.toLowerCase();
   const defName = /restaurant|logo/.test(p) ? 'default-restaurant.webp' : 'default-food.webp';
   const defPath = path.join(__dirname, 'public', defName);

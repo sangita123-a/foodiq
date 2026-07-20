@@ -14,6 +14,8 @@ export type SiteSettings = {
   twitter_url?: string;
   linkedin_url?: string;
   youtube_url?: string;
+  google_play_url?: string;
+  app_store_url?: string;
   theme_color: string;
   footer_content?: string;
   privacy_policy_text?: string;
@@ -32,6 +34,14 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   office_address: "123 Culinary Avenue, Tech Park, Hyderabad, India 500081",
   business_hours: "Mon - Sun: 24/7 Support",
   website_url: "https://foodiq.com",
+  facebook_url: "https://facebook.com/foodiq",
+  instagram_url: "https://instagram.com/foodiq",
+  twitter_url: "https://twitter.com/foodiq",
+  linkedin_url: "https://linkedin.com/company/foodiq",
+  youtube_url: "https://youtube.com/@foodiq",
+  google_play_url:
+    "https://play.google.com/store/apps/details?id=com.foodiq.app",
+  app_store_url: "https://apps.apple.com/app/foodiq/id6470000000",
   theme_color: "#E23744",
   footer_content:
     "Discover amazing restaurants and delicious food delivered straight to your doorstep.",

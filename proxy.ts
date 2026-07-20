@@ -13,7 +13,6 @@ const protectedRoutes = [
   '/notifications',
   '/saved-addresses',
   '/payment-methods',
-  '/favorites',
   '/coupons-rewards',
   '/coupons',
   '/my-rewards',

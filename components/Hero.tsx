@@ -1,21 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import SearchBar from "./SearchBar";
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
+import { useEffect, useState } from "react";
+import SearchBar from "@/components/SearchBar";
 import { usePrefersReducedMotion } from "@/hooks/useMediaQuery";
 
 const words = [
   "Restaurants",
-  "Biryani",
   "Pizza",
-  "Burger",
-  "Chinese",
+  "Burgers",
+  "Biryani",
+  "Momos",
+  "Cafes",
   "Desserts",
-  "Cafe",
-  "Rolls",
-  "Shawarma"
 ];
 
 export default function Hero() {
@@ -26,15 +24,16 @@ export default function Hero() {
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % words.length);
-    }, 2500); // 2 seconds pause + 500ms transition
+    }, 2500);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const prefersReduced =
-      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    if (prefersReduced) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) {
+      setVideoReady(true);
+      return;
+    }
 
     const enable = () => setVideoReady(true);
     let idleId: number | undefined;
@@ -55,16 +54,21 @@ export default function Hero() {
   }, []);
 
   const scrollToContent = () => {
-    window.scrollTo({
-      top: window.innerHeight,
-      behavior: "smooth"
-    });
+    const nextSection = document.getElementById("food-category-nav") || document.querySelector("main > div");
+    if (nextSection) {
+      nextSection.scrollIntoView({ behavior: "smooth" });
+    } else {
+      window.scrollTo({
+        top: 600,
+        behavior: "smooth",
+      });
+    }
   };
 
   return (
-    <div className="relative w-full h-[calc(100dvh-64px)] md:h-[calc(100dvh-72px)] lg:h-[calc(100dvh-80px)] min-h-[480px] sm:min-h-[560px] lg:min-h-[640px] flex flex-col items-center justify-center overflow-hidden bg-[#F8F9FA]">
-      {/* Background Video — deferred until idle to improve LCP */}
-      <div className="absolute top-0 left-0 w-full h-full z-0">
+    <section className="relative flex min-h-[540px] sm:min-h-[600px] md:min-h-[660px] lg:min-h-[700px] w-full flex-col items-center justify-center overflow-hidden bg-[#0F172A] px-4 py-12 sm:px-6 sm:py-16 md:px-8 md:py-20">
+      {/* Background Video / Image — Crystal clear & sharp with clean contrast overlay */}
+      <div className="absolute inset-0 z-0 h-full w-full overflow-hidden">
         {videoReady ? (
           <video
             autoPlay
@@ -74,77 +78,78 @@ export default function Hero() {
             preload="none"
             poster="/icons/og-default.png"
             aria-label="Foodiq hero background showing food delivery atmosphere"
-            className="w-full h-full object-cover object-center contrast-[1.02] saturate-[1.04] transform-gpu"
+            className="h-full w-full object-cover object-center transform-gpu scale-[1.01]"
           >
             <source src="/hero-video.mp4" type="video/mp4" />
           </video>
         ) : (
-          // eslint-disable-next-line @next/next/no-img-element -- static LCP poster before video hydrates
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src="/icons/og-default.png"
-            alt="Foodiq online food delivery in Hyderabad"
+            alt="Foodiq online food delivery"
             fetchPriority="high"
             decoding="async"
-            className="w-full h-full object-cover object-center"
+            className="h-full w-full object-cover object-center"
           />
         )}
-        {/* Light readability overlay without softening the video */}
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.52)_0%,rgba(255,255,255,0.34)_48%,rgba(255,255,255,0.7)_100%)]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),rgba(255,255,255,0.3))]"></div>
+        {/* Subtle dark gradient overlay for text clarity — NO heavy white or grey blurry wash */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 pointer-events-none" />
       </div>
 
-      {/* Hero Content */}
-      <div className="relative z-10 flex flex-col items-center w-full px-4 sm:px-6">
-        <motion.h1 
-          className="text-[#1C1C1C] font-extrabold text-center flex flex-col items-center justify-center m-0 p-0 tracking-[-0.055em] leading-none drop-shadow-[0_2px_18px_rgba(255,255,255,0.5)]"
-        >
-          <span className="block text-[clamp(28px,8vw,72px)]">Find the Best</span>
-          <span className="block text-[var(--color-primary)] text-[clamp(32px,9vw,78px)] relative overflow-hidden w-full h-[1.1em]">
+      {/* Hero Central Content */}
+      <div className="relative z-10 flex w-full max-w-5xl flex-col items-center justify-center text-center">
+        {/* Main Heading */}
+        <motion.h1 className="m-0 flex flex-col items-center justify-center p-0 text-center font-extrabold leading-tight tracking-tight text-white drop-shadow-md">
+          <span className="block text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold">
+            Find the Best
+          </span>
+          <span className="relative my-1 block h-[1.25em] w-full max-w-[500px] overflow-hidden text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-[#E23744]">
             <AnimatePresence mode="wait">
               <motion.span
                 key={index}
-                initial={prefersReduced ? false : { y: 30, opacity: 0 }}
+                initial={prefersReduced ? false : { y: 28, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                exit={prefersReduced ? undefined : { y: -30, opacity: 0 }}
-                transition={{ duration: prefersReduced ? 0 : 0.4, ease: "easeInOut" }}
-                className="absolute left-0 right-0 text-center"
+                exit={prefersReduced ? undefined : { y: -28, opacity: 0 }}
+                transition={{ duration: prefersReduced ? 0 : 0.35, ease: "easeInOut" }}
+                className="absolute inset-0 flex items-center justify-center text-center"
               >
                 {words[index]}
               </motion.span>
             </AnimatePresence>
           </span>
-          <span className="block text-[clamp(28px,8vw,72px)]">Near You</span>
+          <span className="block text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold">
+            Near You
+          </span>
         </motion.h1>
 
-        <motion.p 
-          className="text-[#424242] text-sm sm:text-base md:text-lg lg:text-xl text-center max-w-[700px] mt-4 sm:mt-6 mb-6 sm:mb-9 md:mb-12 font-medium leading-relaxed px-2"
-        >
+        {/* Subtext */}
+        <motion.p className="mt-4 sm:mt-6 max-w-2xl text-center text-sm sm:text-base md:text-lg lg:text-xl font-medium text-white/95 leading-relaxed drop-shadow">
           Discover amazing restaurants and delicious food delivered straight to your doorstep.
         </motion.p>
 
-        <motion.div className="w-full max-w-[1100px] flex justify-center">
+        {/* Unified Search Bar */}
+        <motion.div className="mt-8 sm:mt-10 md:mt-12 w-full max-w-4xl flex justify-center px-2">
           <SearchBar />
         </motion.div>
 
+        {/* Scroll Indicator Button */}
         <motion.button
           type="button"
           onClick={scrollToContent}
-          aria-label="Scroll to explore restaurants and food"
-          animate={prefersReduced ? undefined : { 
-            y: [0, -10, 0],
-            boxShadow: [
-              "0 0 15px rgba(226, 55, 68, 0.35)", 
-              "0 0 25px rgba(226, 55, 68, 0.6)", 
-              "0 0 15px rgba(226, 55, 68, 0.35)"
-            ]
-          }}
-          transition={prefersReduced ? undefined : { duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          whileHover={prefersReduced ? undefined : { scale: 1.1, boxShadow: "0 0 40px rgba(226, 55, 68, 0.65)" }}
-          className="mt-8 sm:mt-12 md:mt-16 flex items-center justify-center w-11 h-11 sm:w-10 sm:h-10 rounded-full bg-white/95 backdrop-blur-md border border-[var(--color-primary)] cursor-pointer z-20 shrink-0 touch-target"
+          aria-label="Scroll down to explore categories and dishes"
+          animate={
+            prefersReduced
+              ? undefined
+              : {
+                  y: [0, 8, 0],
+                }
+          }
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+          className="mt-8 sm:mt-12 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/30 bg-white/20 text-white backdrop-blur-sm transition-all hover:bg-white hover:text-[#E23744] hover:shadow-lg"
         >
-          <ArrowDown className="text-[var(--color-primary)] w-4 h-4" />
+          <ArrowDown className="h-5 w-5" />
         </motion.button>
       </div>
-    </div>
+    </section>
   );
 }

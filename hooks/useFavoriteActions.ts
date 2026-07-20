@@ -7,7 +7,11 @@ import { useToast } from "@/contexts/ToastContext";
 import { useAuthToken } from "@/hooks/useAuthToken";
 import { isCategoryDishId } from "@/lib/data/categoryData";
 import { isCollectionDishId } from "@/lib/data/collectionsData";
-import { getLocalFavoriteIds, toggleLocalFavorite } from "@/lib/favorites";
+import {
+  getLocalFavoriteIds,
+  toggleLocalFavorite,
+  type LocalFavoriteDishMeta,
+} from "@/lib/favorites";
 
 export function useFavoriteActions() {
   const { showToast } = useToast();
@@ -51,7 +55,10 @@ export function useFavoriteActions() {
     [dataObj]
   );
 
-  const toggleItem = async (id: string) => {
+  const toggleItem = async (
+    id: string,
+    localMeta?: Omit<LocalFavoriteDishMeta, "id">
+  ) => {
     if (isCategoryDishId(id) || isCollectionDishId(id)) {
       const added = toggleLocalFavorite(id);
       setLocalFavoriteIds(getLocalFavoriteIds());
@@ -60,7 +67,9 @@ export function useFavoriteActions() {
     }
 
     if (!authenticated) {
-      showToast("Please login to save favorites", "error");
+      const added = toggleLocalFavorite(id, localMeta);
+      setLocalFavoriteIds(getLocalFavoriteIds());
+      showToast(added ? "Added to favorites" : "Removed from favorites", "success");
       return;
     }
     try {

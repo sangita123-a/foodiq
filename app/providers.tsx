@@ -34,7 +34,7 @@ function SWRGlobalConfig({ children }: { children: ReactNode }) {
           }
           if (status >= 500) {
             showToast("Server error. Please try again later.", "error");
-          } else if (error.message === "Network Error" || error.code === "ECONNABORTED") {
+          } else if (error.message === "Network Error" || error.message?.includes("Cannot reach the server") || error.code === "ECONNABORTED") {
             showToast(error.message || "Network error. Please check your connection.", "error");
           }
         },

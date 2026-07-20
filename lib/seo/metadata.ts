@@ -167,3 +167,110 @@ export const noIndexMetadata = buildPageMetadata({
   path: "/private",
   noIndex: true,
 });
+
+const ROOT_ICON_SIZES = [16, 32, 72, 96, 128, 192, 512] as const;
+
+function buildRootIcons(): NonNullable<Metadata["icons"]> {
+  const pngIcons = ROOT_ICON_SIZES.map((size) => ({
+    url: `/icons/${size <= 32 ? `favicon-${size}` : `icon-${size}`}.png`,
+    sizes: `${size}x${size}`,
+    type: "image/png" as const,
+  }));
+
+  return {
+    icon: pngIcons,
+    apple: [
+      {
+        url: "/icons/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
+    shortcut: ["/icons/favicon-32.png"],
+    other: [
+      {
+        rel: "mask-icon",
+        url: "/icons/icon-maskable-512.png",
+        color: "#E23744",
+      },
+    ],
+  };
+}
+
+/**
+ * Site-wide root layout metadata: defaults, social previews, icons, and manifest.
+ * Child routes override title, description, canonical, and social tags as needed.
+ */
+export function buildRootLayoutMetadata(): Metadata {
+  const siteUrl = getSiteUrl();
+  const canonicalUrl = absoluteUrl("/");
+  const ogImage = absoluteUrl(DEFAULT_OG_IMAGE);
+  const twitterImage = absoluteUrl(DEFAULT_TWITTER_IMAGE);
+  const imageAlt = `${SITE_OG_TITLE} — ${SITE_OG_IMAGE_ALT}`;
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: SITE_OG_TITLE,
+      template: `%s | ${SITE_NAME}`,
+    },
+    description: SITE_OG_DESCRIPTION,
+    keywords: [...SITE_KEYWORDS],
+    authors: [{ name: SITE_NAME, url: canonicalUrl }],
+    creator: SITE_NAME,
+    publisher: SITE_NAME,
+    applicationName: SITE_NAME,
+    category: "food",
+    alternates: {
+      canonical: canonicalUrl,
+      languages: {
+        [SITE_LOCALE]: canonicalUrl,
+        en: canonicalUrl,
+        "x-default": canonicalUrl,
+      },
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_IN",
+      alternateLocale: ["en"],
+      url: canonicalUrl,
+      title: SITE_OG_TITLE,
+      description: SITE_OG_DESCRIPTION,
+      siteName: SITE_NAME,
+      images: buildOpenGraphImages(ogImage, imageAlt),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: SITE_OG_TITLE,
+      description: SITE_OG_DESCRIPTION,
+      site: "@foodiq",
+      creator: "@foodiq",
+      images: [
+        {
+          url: twitterImage,
+          width: 1200,
+          height: 630,
+          alt: imageAlt,
+        },
+      ],
+    },
+    other: {
+      "og:image:alt": imageAlt,
+      "twitter:image:alt": imageAlt,
+      "content-language": SITE_LOCALE,
+    },
+    icons: buildRootIcons(),
+    manifest: "/manifest.webmanifest",
+  };
+}

@@ -248,11 +248,46 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      { source: "/terms", destination: "/terms-of-service", permanent: true },
+      { source: "/privacy", destination: "/privacy-policy", permanent: true },
+      { source: "/help", destination: "/help-center", permanent: true },
+      { source: "/faq", destination: "/help-center", permanent: true },
+      { source: "/partner", destination: "/partner/login", permanent: false },
+      {
+        source: "/restaurant/login",
+        destination: "/partner/login",
+        permanent: true,
+      },
+      {
+        source: "/restaurant/register",
+        destination: "/partner/login",
+        permanent: false,
+      },
+      {
+        source: "/categories",
+        destination: "/popular-cuisines",
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
+    const backend = (
+      process.env.NEXT_PUBLIC_API_URL ||
+      process.env.API_PROXY_TARGET ||
+      "http://localhost:4000"
+    ).replace(/\/$/, "");
+
     return [
       {
         source: "/firebase-messaging-sw.js",
         destination: "/api/firebase-messaging-sw",
+      },
+      // Dev/local: proxy API through Next.js to avoid browser CORS errors
+      {
+        source: "/backend-api/:path*",
+        destination: `${backend}/:path*`,
       },
     ];
   },

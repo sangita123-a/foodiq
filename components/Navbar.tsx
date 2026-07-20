@@ -149,7 +149,7 @@ export default function Navbar() {
 
           <Link
             href="/order-online"
-            className="hidden lg:inline-flex h-10 px-5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm shadow-[0_6px_16px_rgba(226,55,68,0.2)] transition-all items-center"
+            className="hidden lg:inline-flex h-9 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm shadow-[0_6px_16px_rgba(226,55,68,0.2)] transition-all items-center"
           >
             Order Online
           </Link>
@@ -174,7 +174,7 @@ export default function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="h-10 px-4 lg:px-6 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm transition-all inline-flex items-center"
+              className="h-9 px-3.5 lg:px-5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm transition-all inline-flex items-center"
             >
               Login
             </Link>

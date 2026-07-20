@@ -13,7 +13,24 @@ const getApiBaseUrl = () => {
   return envUrl;
 };
 
-const apiBaseUrl = getApiBaseUrl();
+/** Resolved backend origin for rewrites / SSR (never empty). */
+export function getResolvedApiBaseUrl(): string {
+  return getApiBaseUrl();
+}
+
+/**
+ * Browser dev uses same-origin `/api/*` (Next rewrite → backend) to avoid CORS.
+ * SSR and production keep the full backend URL.
+ */
+function getClientApiBaseUrl(): string | undefined {
+  const resolved = getApiBaseUrl();
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    return '/backend-api';
+  }
+  return resolved || undefined;
+}
+
+const apiBaseUrl = getClientApiBaseUrl();
 
 const api = axios.create({
   baseURL: apiBaseUrl || undefined,
@@ -153,13 +170,21 @@ api.interceptors.response.use(
   }
 );
 
-export const fetcher = (url: string) =>
-  api.get(url).then((res) => {
+export const fetcher = async (url: string) => {
+  try {
+    const res = await api.get(url);
     const body = res.data;
     if (body && typeof body === "object" && "data" in body && body.data !== undefined) {
       return body.data;
     }
     return body;
-  });
+  } catch (error) {
+    // Graceful fallback — prevents dev overlay crashes when API is offline/CORS-blocked
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[foodiq] API fetch failed:", url, error);
+    }
+    return undefined;
+  }
+};
 
 export default api;

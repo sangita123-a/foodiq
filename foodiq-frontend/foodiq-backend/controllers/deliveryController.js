@@ -566,7 +566,3 @@ module.exports = {
   getHistory,
   notifyCustomerCalling,
 };
-  updateProfile,
-  getRoute,
-  getMyReviews,
-};

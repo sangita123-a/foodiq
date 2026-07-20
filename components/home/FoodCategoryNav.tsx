@@ -32,8 +32,7 @@ export default function FoodCategoryNav() {
           Choose your favourite food category
         </p>
 
-        {/* Mobile & tablet: horizontal scroll */}
-        <div className="scroll-row mt-5 sm:mt-6 lg:hidden">
+        <div className="scroll-row mt-5 sm:mt-6 flex flex-nowrap overflow-x-auto">
           {FOOD_CATEGORIES.map((item) => (
             <Link
               key={item.slug}
@@ -51,31 +50,6 @@ export default function FoodCategoryNav() {
                 />
               </div>
               <span className="w-full text-center text-[10px] sm:text-xs font-black text-[#1A1A1A] line-clamp-2 leading-tight">
-                {item.label}
-              </span>
-            </Link>
-          ))}
-        </div>
-
-        {/* Desktop: grid */}
-        <div className="mt-6 hidden lg:grid grid-cols-7 xl:grid-cols-7 gap-6">
-          {FOOD_CATEGORIES.map((item) => (
-            <Link
-              key={item.slug}
-              href={`/category/${item.slug}`}
-              className="flex flex-col items-center gap-2.5 group"
-            >
-              <div className="h-[110px] w-[110px] overflow-hidden rounded-full ring-2 ring-[#ECECEC] ring-offset-2 transition-transform group-hover:scale-105">
-                <SafeImage
-                  src={item.image}
-                  fallback={FOOD_FALLBACK}
-                  decorative
-                  width={110}
-                  height={110}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <span className="w-full text-center text-sm font-black text-[#1A1A1A]">
                 {item.label}
               </span>
             </Link>
