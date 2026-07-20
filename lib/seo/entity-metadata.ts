@@ -9,7 +9,7 @@ type EntityMetadataInput = PageSeoInput & {
 
 /** Build indexable metadata for catalog entities with unique keywords and social copy. */
 export function buildEntityMetadata({
-  entityName,
+  entityName: _entityName,
   keywords,
   title,
   description,

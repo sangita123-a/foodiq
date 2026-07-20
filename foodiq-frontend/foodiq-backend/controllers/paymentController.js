@@ -57,6 +57,12 @@ const createPayment = async (req, res) => {
     if (String(order.rows[0].status).toLowerCase() === 'cancelled') {
       return fail(res, 409, 'Cancelled orders cannot be paid');
     }
+
+    const existingPayment = await getPaymentByOrderId(order_id);
+    if (existingPayment && String(existingPayment.status).toLowerCase() === 'completed') {
+      return fail(res, 409, 'Order is already paid');
+    }
+
     if (Math.abs(Number(order.rows[0].total_amount) - Number(amount)) > 0.01) {
       return fail(res, 400, 'Payment amount does not match the order total');
     }
@@ -235,19 +241,32 @@ const finalizeVerifiedPayment = async ({
 }) => {
   const client = await pool.connect();
   try {
-    if (txn.status === 'paid' && txn.order_id) {
+    await client.query('BEGIN');
+
+    const locked = await client.query(
+      `SELECT * FROM payment_transactions WHERE id = $1 FOR UPDATE`,
+      [txn.id]
+    );
+    const lockedTxn = locked.rows[0];
+    if (!lockedTxn) {
+      await client.query('ROLLBACK');
+      const err = new Error('Payment transaction not found');
+      err.status = 404;
+      throw err;
+    }
+
+    if (lockedTxn.status === 'paid' && lockedTxn.order_id) {
+      await client.query('COMMIT');
       return {
         already_processed: true,
-        order_id: txn.order_id,
-        payment_id: txn.payment_id,
-        razorpay_payment_id: txn.razorpay_payment_id || razorpay_payment_id,
+        order_id: lockedTxn.order_id,
+        payment_id: lockedTxn.payment_id,
+        razorpay_payment_id: lockedTxn.razorpay_payment_id || razorpay_payment_id,
       };
     }
 
-    await client.query('BEGIN');
-
-    const payload = txn.checkout_payload || {};
-    let orderId = payload.order_id || txn.order_id;
+    const payload = lockedTxn.checkout_payload || {};
+    let orderId = payload.order_id || lockedTxn.order_id;
     let payment;
     let checkoutPrepared = null;
     let checkoutResult = null;
@@ -257,8 +276,8 @@ const finalizeVerifiedPayment = async ({
         {
           orderId,
           userId,
-          amount: Number(txn.amount),
-          method: txn.payment_method || 'razorpay',
+          amount: Number(lockedTxn.amount),
+          method: lockedTxn.payment_method || 'razorpay',
           status: 'completed',
           provider_transaction_id: razorpay_payment_id,
           razorpay_order_id,
@@ -272,12 +291,12 @@ const finalizeVerifiedPayment = async ({
     } else {
       checkoutPrepared = await prepareCheckout(userId, {
         ...payload,
-        payment_method: txn.payment_method || payload.payment_method,
+        payment_method: lockedTxn.payment_method || payload.payment_method,
       });
 
-      if (Math.abs(checkoutPrepared.totalAmount - Number(txn.amount)) > 0.5) {
+      if (Math.abs(checkoutPrepared.totalAmount - Number(lockedTxn.amount)) > 0.5) {
         await client.query('ROLLBACK');
-        await updateTransaction(txn.id, {
+        await updateTransaction(lockedTxn.id, {
           status: 'failed',
           failure_reason: 'Amount mismatch on verify',
         });
@@ -305,7 +324,7 @@ const finalizeVerifiedPayment = async ({
     }
 
     await updateTransaction(
-      txn.id,
+      lockedTxn.id,
       {
         status: 'paid',
         razorpay_payment_id,

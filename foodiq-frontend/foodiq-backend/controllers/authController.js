@@ -187,6 +187,13 @@ const registerUser = async (req, res) => {
       });
     }
   } catch (error) {
+    if (error?.code === '23505') {
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists with this email',
+        error: {},
+      });
+    }
     return fail(res, 500, 'Server Error during registration', error);
   }
 };
@@ -490,6 +497,7 @@ const resetPassword = async (req, res) => {
     const password_hash = await bcrypt.hash(newPassword, salt);
     await updateUserPassword(user.id, password_hash);
     await revokeAllForUser(user.id).catch(() => {});
+    await require('../middleware/authMiddleware').invalidateUserSession(user.id).catch(() => {});
 
     writeAudit({
       userId: user.id,
@@ -550,6 +558,7 @@ const logoutAllDevices = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Not authorized', error: {} });
     }
     await revokeAllForUser(req.user.id);
+    await require('../middleware/authMiddleware').invalidateUserSession(req.user.id).catch(() => {});
     clearAuthCookies(res);
     writeAudit({
       userId: req.user.id,

@@ -57,10 +57,9 @@ const protect = async (req, res, next) => {
       });
     }
 
-    if (
-      decoded.tv != null &&
-      Number(decoded.tv) !== Number(req.user.token_version ?? 1)
-    ) {
+    const tokenVersion = Number(decoded.tv ?? 1);
+    const userVersion = Number(req.user.token_version ?? 1);
+    if (tokenVersion !== userVersion) {
       return res.status(401).json({
         success: false,
         message: 'Session expired. Please sign in again.',
@@ -100,7 +99,15 @@ const optionalProtect = async (req, res, next) => {
   try {
     const decoded = verifyAccessToken(token);
     req.user = await resolveUser(decoded.id);
-    if (req.user?.is_deleted) req.user = null;
+    if (req.user?.is_deleted) {
+      req.user = null;
+    } else if (req.user) {
+      const tokenVersion = Number(decoded.tv ?? 1);
+      const userVersion = Number(req.user.token_version ?? 1);
+      if (tokenVersion !== userVersion) {
+        req.user = null;
+      }
+    }
   } catch {
     /* ignore */
   }

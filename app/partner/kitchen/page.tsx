@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
 import PartnerSidebar from "@/components/partner/PartnerSidebar";
 import PartnerHeader from "@/components/partner/PartnerHeader";
@@ -30,6 +31,12 @@ export default function PartnerKitchenPage() {
   const { data, isLoading } = useSWR<KitchenData>("/api/partner/inventory/kitchen", inventoryFetcher, {
     refreshInterval: 15000,
   });
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
 
   const advance = async (order: KitchenOrder) => {
     const next: Record<string, OrderStatus> = {
@@ -47,7 +54,7 @@ export default function PartnerKitchenPage() {
 
   const elapsed = (started?: string) => {
     if (!started) return null;
-    const mins = Math.floor((Date.now() - new Date(started).getTime()) / 60000);
+    const mins = Math.floor((now - new Date(started).getTime()) / 60000);
     return `${mins}m`;
   };
 

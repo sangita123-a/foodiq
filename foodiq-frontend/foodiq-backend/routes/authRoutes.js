@@ -6,16 +6,17 @@ const {
   getUserProfile,
   updateUserProfile,
   logoutUser,
+  logoutAllDevices,
   forgotPassword,
   resetPassword,
   refreshAccessToken,
 } = require('../controllers/authController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, optionalProtect } = require('../middleware/authMiddleware');
 const { authLimiter } = require('../middleware/rateLimiters');
 
 router.post('/register', authLimiter, registerUser);
 router.post('/login', authLimiter, loginUser);
-router.post('/logout', logoutUser);
+router.post('/logout', optionalProtect, logoutUser);
 router.post('/logout-all', protect, logoutAllDevices);
 router.post('/refresh', authLimiter, refreshAccessToken);
 router.post('/forgot-password', authLimiter, forgotPassword);

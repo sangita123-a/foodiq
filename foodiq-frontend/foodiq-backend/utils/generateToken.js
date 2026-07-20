@@ -164,6 +164,12 @@ const revokeAllForUser = async (userId) => {
   } catch (err) {
     console.warn('[AUTH] token version bump skipped', err.message);
   }
+  try {
+    const { invalidateUserSession } = require('../middleware/authMiddleware');
+    await invalidateUserSession(userId);
+  } catch (err) {
+    console.warn('[AUTH] session cache invalidate skipped', err.message);
+  }
 };
 
 const verifyAccessToken = (token) =>

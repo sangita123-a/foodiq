@@ -32,11 +32,11 @@ const rateLimitHandler = (label) => (req, res, _next, options) => {
   });
 };
 
-const makeLimiter = (opts) =>
+const makeLimiter = ({ label, ...opts }) =>
   rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
-    handler: rateLimitHandler(opts.label || 'api'),
+    handler: rateLimitHandler(label || 'api'),
     ...opts,
   });
 
