@@ -49,7 +49,7 @@ const getMenuItemDetailsById = async (id) => {
   const item = await getMenuItemById(id);
   if (!item) return null;
 
-  const [related, reviews, cuisines] = await Promise.all([
+  const [related, reviews, cuisines, itemStats] = await Promise.all([
     pool.query(
       `SELECT DISTINCT
          other.id, other.name, other.description, other.price, other.discount_price,
@@ -66,13 +66,17 @@ const getMenuItemDetailsById = async (id) => {
       [id]
     ),
     pool.query(
-      `SELECT rv.id, rv.rating, rv.comment, rv.created_at, u.full_name, u.profile_image_url
+      `SELECT rv.id, rv.rating, rv.comment, rv.created_at, rv.image_urls, rv.admin_reply,
+              u.full_name, u.profile_image_url
        FROM reviews rv
+       JOIN order_items oi ON oi.order_id = rv.order_id
        JOIN users u ON u.id = rv.user_id
-       WHERE rv.restaurant_id = $1
+       WHERE oi.menu_item_id = $1
+         AND COALESCE(rv.status, 'visible') = 'visible'
+       GROUP BY rv.id, u.full_name, u.profile_image_url
        ORDER BY rv.created_at DESC
        LIMIT 6`,
-      [item.restaurant_id]
+      [id]
     ),
     pool.query(
       `SELECT rc.name, rc.slug
@@ -82,10 +86,24 @@ const getMenuItemDetailsById = async (id) => {
        ORDER BY rc.sort_order`,
       [id]
     ),
+    pool.query(
+      `SELECT
+         ROUND(AVG(rv.rating)::numeric, 1)::float AS avg_rating,
+         COUNT(DISTINCT rv.id)::int AS review_count
+       FROM reviews rv
+       JOIN order_items oi ON oi.order_id = rv.order_id
+       WHERE oi.menu_item_id = $1
+         AND COALESCE(rv.status, 'visible') = 'visible'`,
+      [id]
+    ),
   ]);
+
+  const stats = itemStats.rows[0] || { avg_rating: 0, review_count: 0 };
 
   return {
     ...item,
+    rating: stats.avg_rating > 0 ? stats.avg_rating : item.rating,
+    review_count: stats.review_count,
     gallery_urls: Array.isArray(item.gallery_urls) && item.gallery_urls.length
       ? item.gallery_urls
       : [item.image_url],

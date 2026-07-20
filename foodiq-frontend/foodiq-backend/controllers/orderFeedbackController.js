@@ -113,6 +113,7 @@ const submitFeedback = async (req, res) => {
         rating: rr.value,
         comment: sanitizeComment(req.body.restaurant_comment),
         order_id: orderId,
+        image_urls: require('../models/reviewModel').normalizeImageUrls(req.body.image_urls),
       },
       client
     );
@@ -146,6 +147,13 @@ const submitFeedback = async (req, res) => {
 
     await client.query('COMMIT');
     await updateRestaurantRating(order.restaurant_id);
+
+    try {
+      const loyaltyEngine = require('../services/loyaltyEngine');
+      await loyaltyEngine.creditReview(req.user.id, restaurantReview.id);
+    } catch {
+      /* optional */
+    }
 
     return ok(
       res,
@@ -208,6 +216,10 @@ const updateFeedback = async (req, res) => {
             req.body.restaurant_comment !== undefined
               ? sanitizeComment(req.body.restaurant_comment)
               : existingReview.comment,
+          image_urls:
+            req.body.image_urls !== undefined
+              ? require('../models/reviewModel').normalizeImageUrls(req.body.image_urls)
+              : undefined,
         },
         client
       );

@@ -1,5 +1,14 @@
 const { pool } = require('../config/db');
 
+const normalizeImageUrls = (raw) => {
+  if (!raw) return [];
+  const arr = Array.isArray(raw) ? raw : [];
+  return arr
+    .map((u) => (typeof u === 'string' ? u.trim() : ''))
+    .filter(Boolean)
+    .slice(0, 3);
+};
+
 const getReviewsByRestaurant = async (restaurantId, { includeHidden = false } = {}) => {
   const { rows } = await pool.query(
     `SELECT r.*, u.full_name, u.profile_image_url
@@ -10,7 +19,71 @@ const getReviewsByRestaurant = async (restaurantId, { includeHidden = false } = 
      ORDER BY r.created_at DESC`,
     [restaurantId, includeHidden]
   );
-  return rows;
+  return rows.map((row) => ({
+    ...row,
+    image_urls: Array.isArray(row.image_urls) ? row.image_urls : [],
+  }));
+};
+
+const getRatingDistribution = async (restaurantId) => {
+  const { rows } = await pool.query(
+    `SELECT rating, COUNT(*)::int AS count
+     FROM reviews
+     WHERE restaurant_id = $1 AND COALESCE(status, 'visible') = 'visible'
+     GROUP BY rating
+     ORDER BY rating DESC`,
+    [restaurantId]
+  );
+  const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  let total = 0;
+  let sum = 0;
+  for (const row of rows) {
+    const star = Number(row.rating);
+    if (star >= 1 && star <= 5) {
+      distribution[star] = row.count;
+      total += row.count;
+      sum += star * row.count;
+    }
+  }
+  return {
+    average_rating: total > 0 ? Math.round((sum / total) * 10) / 10 : 0,
+    total_reviews: total,
+    distribution,
+  };
+};
+
+const getMenuItemReviewStats = async (menuItemId) => {
+  const { rows } = await pool.query(
+    `SELECT
+       ROUND(AVG(rv.rating)::numeric, 1)::float AS avg_rating,
+       COUNT(*)::int AS review_count
+     FROM reviews rv
+     JOIN order_items oi ON oi.order_id = rv.order_id
+     WHERE oi.menu_item_id = $1
+       AND COALESCE(rv.status, 'visible') = 'visible'`,
+    [menuItemId]
+  );
+  return rows[0] || { avg_rating: 0, review_count: 0 };
+};
+
+const getReviewsForMenuItem = async (menuItemId, limit = 6) => {
+  const { rows } = await pool.query(
+    `SELECT DISTINCT ON (rv.id)
+       rv.id, rv.rating, rv.comment, rv.created_at, rv.image_urls, rv.admin_reply, rv.replied_at,
+       u.full_name, u.profile_image_url
+     FROM reviews rv
+     JOIN order_items oi ON oi.order_id = rv.order_id
+     JOIN users u ON u.id = rv.user_id
+     WHERE oi.menu_item_id = $1
+       AND COALESCE(rv.status, 'visible') = 'visible'
+     ORDER BY rv.id, rv.created_at DESC
+     LIMIT $2`,
+    [menuItemId, limit]
+  );
+  return rows.map((row) => ({
+    ...row,
+    image_urls: Array.isArray(row.image_urls) ? row.image_urls : [],
+  }));
 };
 
 const getReviewById = async (id) => {
@@ -27,10 +100,11 @@ const getReviewByOrder = async (orderId, userId) => {
 };
 
 const createReview = async (reviewData, client = pool) => {
-  const { user_id, restaurant_id, rating, comment, order_id = null } = reviewData;
+  const { user_id, restaurant_id, rating, comment, order_id = null, image_urls = [] } =
+    reviewData;
   const query = `
-    INSERT INTO reviews (user_id, restaurant_id, rating, comment, order_id, status)
-    VALUES ($1, $2, $3, $4, $5, 'visible')
+    INSERT INTO reviews (user_id, restaurant_id, rating, comment, order_id, status, image_urls)
+    VALUES ($1, $2, $3, $4, $5, 'visible', $6::jsonb)
     RETURNING *
   `;
   const { rows } = await client.query(query, [
@@ -39,12 +113,13 @@ const createReview = async (reviewData, client = pool) => {
     rating,
     comment || null,
     order_id,
+    JSON.stringify(normalizeImageUrls(image_urls)),
   ]);
   return rows[0];
 };
 
 const updateReview = async (id, reviewData, client = pool) => {
-  const { rating, comment, status, admin_reply } = reviewData;
+  const { rating, comment, status, admin_reply, image_urls } = reviewData;
   if (rating != null) {
     const n = Number(rating);
     if (!Number.isFinite(n) || n < 1 || n > 5) {
@@ -61,6 +136,8 @@ const updateReview = async (id, reviewData, client = pool) => {
         ? null
         : undefined;
 
+  const setImages = Object.prototype.hasOwnProperty.call(reviewData, 'image_urls');
+
   const query = `
     UPDATE reviews
     SET rating = COALESCE($1, rating),
@@ -70,8 +147,10 @@ const updateReview = async (id, reviewData, client = pool) => {
         replied_at = CASE
           WHEN $6::boolean THEN $5
           ELSE replied_at
-        END
-    WHERE id = $7
+        END,
+        image_urls = CASE WHEN $8::boolean THEN $7::jsonb ELSE image_urls END,
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = $9
     RETURNING *
   `;
   const { rows } = await client.query(query, [
@@ -81,6 +160,8 @@ const updateReview = async (id, reviewData, client = pool) => {
     setReply ? admin_reply : null,
     repliedAt === undefined ? null : repliedAt,
     setReply,
+    setImages ? JSON.stringify(normalizeImageUrls(image_urls)) : '[]',
+    setImages,
     id,
   ]);
   return rows[0];
@@ -183,4 +264,8 @@ module.exports = {
   deleteReview,
   listAdminReviews,
   listPartnerReviews,
+  getRatingDistribution,
+  getMenuItemReviewStats,
+  getReviewsForMenuItem,
+  normalizeImageUrls,
 };

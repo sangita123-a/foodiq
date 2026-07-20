@@ -4,6 +4,8 @@ const {
   createReview,
   updateReview,
   deleteReview,
+  getRatingDistribution,
+  normalizeImageUrls,
 } = require('../models/reviewModel');
 const { updateRestaurantRating } = require('../models/restaurantModel');
 const { getOrderById } = require('../models/orderModel');
@@ -12,8 +14,11 @@ const { ok, fail } = require('../utils/respond');
 const getForRestaurant = async (req, res) => {
   try {
     const restaurantId = req.params.restaurantId;
-    const reviews = await getReviewsByRestaurant(restaurantId);
-    return ok(res, 'Reviews retrieved', reviews);
+    const [reviews, summary] = await Promise.all([
+      getReviewsByRestaurant(restaurantId),
+      getRatingDistribution(restaurantId),
+    ]);
+    return ok(res, 'Reviews retrieved', { reviews, summary });
   } catch (error) {
     return fail(res, 500, 'Server Error', error);
   }
@@ -31,18 +36,19 @@ const create = async (req, res) => {
       return fail(res, 400, 'A rating between 1 and 5 is required');
     }
 
-    if (order_id) {
-      const order = await getOrderById(order_id);
-      if (!order) return fail(res, 404, 'Order not found');
-      if (order.user_id !== user_id) return fail(res, 403, 'Not authorized for this order');
-      if (String(order.restaurant_id) !== String(restaurantId)) {
-        return fail(res, 400, 'Order does not belong to this restaurant');
-      }
-      const delivered =
-        String(order.status || '').toLowerCase() === 'delivered';
-      if (!delivered) {
-        return fail(res, 400, 'Order must be delivered before reviewing');
-      }
+    if (!order_id) {
+      return fail(res, 400, 'order_id is required — only customers who completed an order can review');
+    }
+
+    const order = await getOrderById(order_id);
+    if (!order) return fail(res, 404, 'Order not found');
+    if (order.user_id !== user_id) return fail(res, 403, 'Not authorized for this order');
+    if (String(order.restaurant_id) !== String(restaurantId)) {
+      return fail(res, 400, 'Order does not belong to this restaurant');
+    }
+    const delivered = String(order.status || '').toLowerCase() === 'delivered';
+    if (!delivered) {
+      return fail(res, 400, 'Order must be delivered before reviewing');
     }
 
     const newReview = await createReview({
@@ -51,6 +57,7 @@ const create = async (req, res) => {
       rating,
       comment,
       order_id,
+      image_urls: normalizeImageUrls(req.body.image_urls),
     });
 
     await updateRestaurantRating(restaurantId);
@@ -86,7 +93,10 @@ const update = async (req, res) => {
       }
     }
 
-    const updatedReview = await updateReview(id, req.body);
+    const updatedReview = await updateReview(id, {
+      ...req.body,
+      image_urls: req.body.image_urls !== undefined ? normalizeImageUrls(req.body.image_urls) : undefined,
+    });
     await updateRestaurantRating(updatedReview.restaurant_id);
     return ok(res, 'Review updated', updatedReview);
   } catch (error) {

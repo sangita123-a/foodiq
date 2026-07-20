@@ -5,6 +5,7 @@ import AdminShell from "@/components/admin/AdminShell";
 import { getAccessToken } from "@/lib/accessToken";
 import {
   adminPut,
+  adminDelete,
   fetchAdminOrderFeedback,
   fetchAdminReviews,
   fetchFeedbackAnalytics,
@@ -100,6 +101,11 @@ export default function AdminFeedbackPage() {
   };
   const patchReview = async (id: string, status: string) => {
     await adminPut(`/api/admin/reviews/${id}`, { status });
+    await load();
+  };
+  const deleteReview = async (id: string) => {
+    if (!confirm("Delete this review permanently?")) return;
+    await adminDelete(`/api/admin/reviews/${id}`);
     await load();
   };
 
@@ -423,6 +429,13 @@ export default function AdminFeedbackPage() {
                         className="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-50 text-red-600"
                       >
                         Hide
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void deleteReview(String(r.id))}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#111827] text-white"
+                      >
+                        Delete
                       </button>
                     </div>
                   </div>

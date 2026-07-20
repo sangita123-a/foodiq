@@ -1017,7 +1017,8 @@ async function ensureSchema() {
       ALTER TABLE reviews
         ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'visible',
         ADD COLUMN IF NOT EXISTS admin_reply TEXT,
-        ADD COLUMN IF NOT EXISTS replied_at TIMESTAMP WITH TIME ZONE
+        ADD COLUMN IF NOT EXISTS replied_at TIMESTAMP WITH TIME ZONE,
+        ADD COLUMN IF NOT EXISTS image_urls JSONB DEFAULT '[]'::jsonb
     `);
 
     await q(`

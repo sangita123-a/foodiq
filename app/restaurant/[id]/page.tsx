@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import RestaurantReviews from "@/components/restaurant/RestaurantReviews";
 import RestaurantHeader from "@/components/restaurant/RestaurantHeader";
 import RestaurantGallery from "@/components/restaurant/RestaurantGallery";
 import RestaurantMenuNav from "@/components/restaurant/RestaurantMenuNav";
@@ -372,6 +373,8 @@ export default function RestaurantPage() {
           )}
         </div>
       </div>
+
+      {isValidId && <RestaurantReviews restaurantId={id} />}
 
       <Footer />
     </main>

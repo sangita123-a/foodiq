@@ -726,17 +726,13 @@ const getPartnerReviews = async (req, res) => {
     if (!restaurantId) {
       return res.status(400).json({ success: false, message: 'restaurant_id required', error: {} });
     }
-    const { listPartnerReviews } = require('../models/reviewModel');
+    const { listPartnerReviews, getRatingDistribution } = require('../models/reviewModel');
     const rows = await listPartnerReviews(restaurantId, {
       limit: req.query.limit,
       offset: req.query.offset,
     });
-    const avg =
-      rows.length > 0
-        ? Math.round(
-            (rows.reduce((s, r) => s + Number(r.rating || 0), 0) / rows.length) * 10
-          ) / 10
-        : Number(restaurant?.rating || 0);
+    const summary = await getRatingDistribution(restaurantId);
+    const avg = summary.average_rating || Number(restaurant?.rating || 0);
     const positive = rows.filter((r) => r.rating >= 4).length;
     const neutral = rows.filter((r) => r.rating === 3).length;
     const negative = rows.filter((r) => r.rating <= 2).length;
@@ -747,10 +743,11 @@ const getPartnerReviews = async (req, res) => {
         reviews: rows,
         analytics: {
           averageRating: avg,
-          totalReviews: rows.length,
+          totalReviews: summary.total_reviews || rows.length,
           positiveReviews: positive,
           neutralReviews: neutral,
           negativeReviews: negative,
+          distribution: summary.distribution,
         },
       },
     });

@@ -63,6 +63,7 @@ export default function OrderFeedbackForm({
   const [restaurantComment, setRestaurantComment] = useState("");
   const [deliveryComment, setDeliveryComment] = useState("");
   const [comment, setComment] = useState("");
+  const [images, setImages] = useState<string[]>([]);
 
   const load = async () => {
     const res = await api.get(`/api/orders/${orderId}/feedback`);
@@ -72,6 +73,7 @@ export default function OrderFeedbackForm({
       if (d.restaurant_review) {
         setRestaurantRating(Number(d.restaurant_review.rating) || 5);
         setRestaurantComment(d.restaurant_review.comment || "");
+        setImages(Array.isArray(d.restaurant_review.image_urls) ? d.restaurant_review.image_urls : []);
       }
       if (d.delivery_review) {
         setDeliveryRating(Number(d.delivery_review.rating) || 5);
@@ -106,6 +108,7 @@ export default function OrderFeedbackForm({
   const payload = () => ({
     restaurant_rating: restaurantRating,
     restaurant_comment: restaurantComment || undefined,
+    image_urls: images.slice(0, 3),
     delivery_rating: hasDeliveryPartner ? deliveryRating : undefined,
     delivery_comment: hasDeliveryPartner
       ? deliveryComment || undefined
@@ -151,6 +154,7 @@ export default function OrderFeedbackForm({
       setRestaurantComment("");
       setDeliveryComment("");
       setComment("");
+      setImages([]);
       showToast("Feedback deleted", "success");
     } catch (err: unknown) {
       const msg =
@@ -227,6 +231,47 @@ export default function OrderFeedbackForm({
             placeholder="How was the food and restaurant?"
             className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E23744] resize-none"
           />
+
+          <div>
+            <p className="text-sm font-bold text-[#6B7280] mb-2">Photos (up to 3)</p>
+            <div className="flex flex-wrap gap-2 items-center">
+              {images.map((img, i) => (
+                <div key={i} className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img} alt="" className="w-20 h-20 rounded-xl object-cover border border-[#E5E7EB]" />
+                  <button
+                    type="button"
+                    onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              {images.length < 3 && (
+                <label className="w-20 h-20 rounded-xl border-2 border-dashed border-[#E5E7EB] flex items-center justify-center text-xs text-[#9CA3AF] cursor-pointer hover:border-[#E23744]">
+                  + Photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file || images.length >= 3) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        if (typeof reader.result === "string") {
+                          setImages((prev) => [...prev, reader.result as string].slice(0, 3));
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+          </div>
 
           {hasDeliveryPartner && (
             <>

@@ -225,7 +225,11 @@ const deleteRestaurant = async (id) => {
 const updateRestaurantRating = async (id) => {
   const query = `
     UPDATE restaurants r
-    SET rating = COALESCE((SELECT ROUND(AVG(rating), 1) FROM reviews WHERE restaurant_id = r.id), 0.0)
+    SET rating = COALESCE((
+      SELECT ROUND(AVG(rating), 1)
+      FROM reviews
+      WHERE restaurant_id = r.id AND COALESCE(status, 'visible') = 'visible'
+    ), 0.0)
     WHERE id = $1
     RETURNING rating
   `;

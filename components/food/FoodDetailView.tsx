@@ -34,6 +34,7 @@ type FoodDetails = {
   price: string | number;
   discount_price?: string | number | null;
   rating?: string | number;
+  review_count?: number;
   is_vegetarian?: boolean;
   preparation_time?: number;
   ingredients?: string[];
@@ -47,6 +48,8 @@ type FoodDetails = {
     full_name: string;
     profile_image_url?: string;
     created_at: string;
+    image_urls?: string[];
+    admin_reply?: string;
   }[];
   related_items?: {
     id: string;
@@ -318,6 +321,9 @@ export default function FoodDetailView({ id }: { id: string }) {
             <div className="mb-6 flex flex-wrap gap-4 text-sm">
               <span className="inline-flex items-center gap-1.5 rounded-lg bg-yellow-500/10 px-3 py-2">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" /> {Number(food.rating || 4.5).toFixed(1)}
+                {food.review_count != null && Number(food.review_count) > 0 && (
+                  <span className="text-[#9CA3AF]">({food.review_count} reviews)</span>
+                )}
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#F8FAFC] px-3 py-2 text-[#6B7280]">
                 <Clock className="h-4 w-4 text-primary" /> {food.preparation_time || 20} min
@@ -416,6 +422,20 @@ export default function FoodDetailView({ id }: { id: string }) {
                     <span className="flex items-center gap-1 text-yellow-400"><Star className="h-4 w-4 fill-current" />{review.rating}</span>
                   </div>
                   <p className="text-sm leading-6 text-[#6B7280]">{review.comment || "Enjoyed this order."}</p>
+                  {review.image_urls && review.image_urls.length > 0 && (
+                    <div className="mt-3 flex gap-2 flex-wrap">
+                      {review.image_urls.slice(0, 3).map((img, i) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img key={i} src={img} alt="" className="w-14 h-14 rounded-lg object-cover border border-[#E5E7EB]" />
+                      ))}
+                    </div>
+                  )}
+                  {review.admin_reply && (
+                    <p className="mt-2 text-xs text-[#9CA3AF]">
+                      <span className="font-bold text-[#111827]">Restaurant: </span>
+                      {review.admin_reply}
+                    </p>
+                  )}
                 </article>
               ))}
             </div>

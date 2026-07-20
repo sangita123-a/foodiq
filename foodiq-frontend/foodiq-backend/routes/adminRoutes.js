@@ -107,6 +107,7 @@ router.get('/feedback/contact/export', feedbackAdmin.adminExportContactCsv);
 
 router.get('/reviews', feedbackAdmin.adminListReviews);
 router.put('/reviews/:id', feedbackAdmin.adminPatchReview);
+router.delete('/reviews/:id', feedbackAdmin.adminDeleteReview);
 
 router.get('/order-feedback', feedbackAdmin.adminListOrderFeedback);
 router.get('/analytics/feedback', feedbackAdmin.adminFeedbackAnalytics);

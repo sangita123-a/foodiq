@@ -5,7 +5,7 @@ const {
   updateUserFeedback,
 } = require('../models/userFeedbackModel');
 const { pool } = require('../config/db');
-const { listAdminReviews, updateReview, getReviewById } = require('../models/reviewModel');
+const { listAdminReviews, updateReview, getReviewById, deleteReview } = require('../models/reviewModel');
 const { updateRestaurantRating } = require('../models/restaurantModel');
 
 const sanitizeText = (s, max = 4000) =>
@@ -230,6 +230,20 @@ const adminPatchReview = async (req, res) => {
   }
 };
 
+const adminDeleteReview = async (req, res) => {
+  try {
+    const existing = await getReviewById(req.params.id);
+    if (!existing) return fail(res, 404, 'Review not found');
+    const deleted = await deleteReview(req.params.id);
+    if (deleted?.restaurant_id) {
+      await updateRestaurantRating(deleted.restaurant_id);
+    }
+    return ok(res, 'Review deleted', { id: deleted?.id });
+  } catch (err) {
+    return fail(res, 500, 'Server Error', err);
+  }
+};
+
 const adminListOrderFeedback = async (req, res) => {
   try {
     const { listAdminOrderFeedback } = require('../models/orderFeedbackModel');
@@ -269,6 +283,7 @@ module.exports = {
   adminExportContactCsv,
   adminListReviews,
   adminPatchReview,
+  adminDeleteReview,
   adminListOrderFeedback,
   adminFeedbackAnalytics,
 };
