@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import JsonLd from "@/components/seo/JsonLd";
 import {
   ApiEnvelope,
+  breadcrumbJsonLd,
   fetchApiJson,
   restaurantListJsonLd,
 } from "@/lib/seo/jsonld";
@@ -24,9 +25,15 @@ export default async function RestaurantsSeoLayout({
 
   return (
     <>
-      {restaurants.length > 0 ? (
-        <JsonLd data={restaurantListJsonLd(restaurants)} />
-      ) : null}
+      <JsonLd
+        data={[
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Restaurants", path: "/restaurants" },
+          ]),
+          ...(restaurants.length > 0 ? [restaurantListJsonLd(restaurants)] : []),
+        ]}
+      />
       {children}
     </>
   );

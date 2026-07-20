@@ -5,7 +5,7 @@ import {
   ApiEnvelope,
   breadcrumbJsonLd,
   fetchApiJson,
-  menuItemJsonLd,
+  foodItemJsonLd,
   productJsonLd,
 } from "@/lib/seo/jsonld";
 import { buildPageMetadata } from "@/lib/seo/metadata";
@@ -20,7 +20,15 @@ type MenuItem = {
   image_url?: string | null;
   restaurant_id?: string | null;
   restaurant_name?: string | null;
+  rating?: number | string | null;
+  review_count?: number | string | null;
 };
+
+function parseRating(value?: string | number | null): number | undefined {
+  if (value == null) return undefined;
+  const parsed = Number(String(value).replace(/[^\d.]/g, ""));
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -100,6 +108,17 @@ export default async function FoodPage({ params }: PageProps) {
                 price: dish.price,
                 image: dish.image,
                 restaurant_name: dish.restaurantName,
+                rating: parseRating(dish.rating),
+              }),
+              foodItemJsonLd({
+                id: dish.id,
+                name: dish.name,
+                description: dish.description,
+                price: dish.price,
+                image: dish.image,
+                restaurant_id: dish.restaurantId,
+                restaurant_name: dish.restaurantName,
+                rating: parseRating(dish.rating),
               }),
             ]}
           />
@@ -128,6 +147,17 @@ export default async function FoodPage({ params }: PageProps) {
                 price: dish.price,
                 image: dish.image,
                 restaurant_name: dish.restaurantName,
+                rating: parseRating(dish.rating),
+              }),
+              foodItemJsonLd({
+                id: dish.id,
+                name: dish.name,
+                description: dish.description,
+                price: dish.price,
+                image: dish.image,
+                restaurant_id: dish.restaurantId,
+                restaurant_name: dish.restaurantName,
+                rating: parseRating(dish.rating),
               }),
             ]}
           />
@@ -150,7 +180,7 @@ export default async function FoodPage({ params }: PageProps) {
               { name: "Trending Dishes", path: "/trending-dishes" },
               { name: item.name, path: `/food/${item.id}` },
             ]),
-            menuItemJsonLd(item),
+            foodItemJsonLd(item),
             productJsonLd(item),
           ]}
         />

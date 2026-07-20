@@ -19,6 +19,7 @@ type Restaurant = {
   phone?: string | null;
   rating?: number | string | null;
   review_count?: number | string | null;
+  price_range?: number | string | null;
 };
 
 type MenuItem = {

@@ -56,3 +56,12 @@ export function absoluteUrl(path = "/"): string {
 }
 
 export const DEFAULT_OG_IMAGE = "/icons/og-default.png";
+
+/** Public social profiles for Organization sameAs (omit when empty). */
+export const ORGANIZATION_SAME_AS = [
+  "https://github.com/sangita123-a/foodiq",
+  "https://www.linkedin.com/company/foodiq",
+] as const;
+
+export const SITE_SUPPORT_EMAIL = "support@foodiq.com";
+export const SITE_SUPPORT_PHONE = "+91-40-4010-0100";

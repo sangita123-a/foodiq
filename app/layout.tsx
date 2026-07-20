@@ -7,6 +7,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import {
   faqJsonLd,
   foodDeliveryServiceJsonLd,
+  localBusinessJsonLd,
   organizationJsonLd,
   websiteJsonLd,
 } from "@/lib/seo/jsonld";
@@ -120,6 +121,7 @@ export default function RootLayout({
           data={[
             organizationJsonLd(),
             websiteJsonLd(),
+            localBusinessJsonLd(),
             foodDeliveryServiceJsonLd(),
             faqJsonLd(HOME_FAQS),
           ]}

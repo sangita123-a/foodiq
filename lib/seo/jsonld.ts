@@ -1,23 +1,77 @@
 import {
   absoluteUrl,
   getApiBaseUrl,
+  ORGANIZATION_SAME_AS,
   SITE_CITY,
   SITE_DESCRIPTION,
   SITE_NAME,
+  SITE_SUPPORT_EMAIL,
+  SITE_SUPPORT_PHONE,
 } from "./site";
 import type { FaqEntry } from "./faq";
 
 type JsonLd = Record<string, unknown>;
 
-export function organizationJsonLd(): JsonLd {
+function compact<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
+function logoImageObject() {
   return {
+    "@type": "ImageObject",
+    url: absoluteUrl("/icons/icon-512.png"),
+    width: 512,
+    height: 512,
+  };
+}
+
+function buildAggregateRating(
+  rating?: number | string | null,
+  reviewCount?: number | string | null
+): JsonLd | undefined {
+  const ratingValue = rating != null ? Number(rating) : null;
+  const count =
+    reviewCount != null
+      ? Number(reviewCount)
+      : ratingValue != null
+        ? 1
+        : null;
+
+  if (ratingValue == null || count == null || count <= 0 || Number.isNaN(ratingValue)) {
+    return undefined;
+  }
+
+  return {
+    "@type": "AggregateRating",
+    ratingValue,
+    reviewCount: count,
+    bestRating: 5,
+    worstRating: 1,
+  };
+}
+
+function foodOffer(path: string, price?: number | string | null): JsonLd {
+  return compact({
+    "@type": "Offer",
+    price: price != null ? Number(price) : undefined,
+    priceCurrency: "INR",
+    availability: "https://schema.org/InStock",
+    url: absoluteUrl(path),
+  });
+}
+
+export function organizationJsonLd(): JsonLd {
+  return compact({
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": `${absoluteUrl("/")}#organization`,
     name: SITE_NAME,
     url: absoluteUrl("/"),
-    logo: absoluteUrl("/icons/icon-512.png"),
+    logo: logoImageObject(),
+    image: absoluteUrl("/icons/og-default.png"),
     description: SITE_DESCRIPTION,
+    email: SITE_SUPPORT_EMAIL,
+    sameAs: [...ORGANIZATION_SAME_AS],
     areaServed: {
       "@type": "City",
       name: SITE_CITY,
@@ -29,20 +83,23 @@ export function organizationJsonLd(): JsonLd {
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer support",
+      telephone: SITE_SUPPORT_PHONE,
+      email: SITE_SUPPORT_EMAIL,
       url: absoluteUrl("/contact"),
       availableLanguage: ["English", "Hindi"],
     },
-  };
+  });
 }
 
 export function websiteJsonLd(): JsonLd {
-  return {
+  return compact({
     "@context": "https://schema.org",
     "@type": "WebSite",
     "@id": `${absoluteUrl("/")}#website`,
     name: SITE_NAME,
     url: absoluteUrl("/"),
     description: SITE_DESCRIPTION,
+    inLanguage: "en-IN",
     publisher: {
       "@id": `${absoluteUrl("/")}#organization`,
     },
@@ -54,11 +111,60 @@ export function websiteJsonLd(): JsonLd {
       },
       "query-input": "required name=search_term_string",
     },
-  };
+  });
+}
+
+export function localBusinessJsonLd(): JsonLd {
+  return compact({
+    "@context": "https://schema.org",
+    "@type": ["LocalBusiness", "FoodEstablishment"],
+    "@id": `${absoluteUrl("/")}#local-business`,
+    name: SITE_NAME,
+    url: absoluteUrl("/"),
+    image: absoluteUrl("/icons/og-default.png"),
+    logo: logoImageObject(),
+    description: SITE_DESCRIPTION,
+    telephone: SITE_SUPPORT_PHONE,
+    email: SITE_SUPPORT_EMAIL,
+    priceRange: "₹₹",
+    servesCuisine: "Indian",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: SITE_CITY,
+      addressRegion: "Telangana",
+      addressCountry: "IN",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: 17.385,
+      longitude: 78.4867,
+    },
+    areaServed: {
+      "@type": "City",
+      name: SITE_CITY,
+    },
+    openingHoursSpecification: {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+      ],
+      opens: "00:00",
+      closes: "23:59",
+    },
+    parentOrganization: {
+      "@id": `${absoluteUrl("/")}#organization`,
+    },
+  });
 }
 
 export function foodDeliveryServiceJsonLd(): JsonLd {
-  return {
+  return compact({
     "@context": "https://schema.org",
     "@type": "FoodDeliveryService",
     "@id": `${absoluteUrl("/")}#food-delivery`,
@@ -78,11 +184,11 @@ export function foodDeliveryServiceJsonLd(): JsonLd {
       serviceUrl: absoluteUrl("/order-online"),
       serviceType: "Online ordering",
     },
-  };
+  });
 }
 
 export function faqJsonLd(faqs: FaqEntry[]): JsonLd {
-  return {
+  return compact({
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: faqs.map((faq) => ({
@@ -93,13 +199,13 @@ export function faqJsonLd(faqs: FaqEntry[]): JsonLd {
         text: faq.answer,
       },
     })),
-  };
+  });
 }
 
 export function breadcrumbJsonLd(
   items: Array<{ name: string; path: string }>
 ): JsonLd {
-  return {
+  return compact({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: items.map((item, index) => ({
@@ -108,13 +214,13 @@ export function breadcrumbJsonLd(
       name: item.name,
       item: absoluteUrl(item.path),
     })),
-  };
+  });
 }
 
 export function restaurantListJsonLd(
   restaurants: Array<{ id: string; name: string; image_url?: string | null }>
 ): JsonLd {
-  return {
+  return compact({
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: `Restaurants on ${SITE_NAME}`,
@@ -127,7 +233,7 @@ export function restaurantListJsonLd(
       url: absoluteUrl(`/restaurant/${restaurant.id}`),
       image: restaurant.image_url || absoluteUrl("/icons/og-default.png"),
     })),
-  };
+  });
 }
 
 export function restaurantJsonLd(restaurant: {
@@ -140,20 +246,17 @@ export function restaurantJsonLd(restaurant: {
   rating?: number | string | null;
   review_count?: number | string | null;
   estimated_delivery_time?: number | string | null;
+  price_range?: number | string | null;
 }): JsonLd {
   const path = `/restaurant/${restaurant.id}`;
-  const ratingValue =
-    restaurant.rating != null ? Number(restaurant.rating) : null;
-  const reviewCount =
-    restaurant.review_count != null
-      ? Number(restaurant.review_count)
-      : ratingValue != null
-        ? 1
-        : null;
+  const aggregateRating = buildAggregateRating(
+    restaurant.rating,
+    restaurant.review_count
+  );
 
-  return {
+  return compact({
     "@context": "https://schema.org",
-    "@type": "Restaurant",
+    "@type": ["Restaurant", "LocalBusiness", "FoodEstablishment"],
     "@id": absoluteUrl(path),
     name: restaurant.name,
     description:
@@ -162,30 +265,28 @@ export function restaurantJsonLd(restaurant: {
     image: restaurant.image_url || absoluteUrl("/icons/og-default.png"),
     url: absoluteUrl(path),
     telephone: restaurant.phone || undefined,
+    priceRange:
+      restaurant.price_range != null
+        ? "₹".repeat(Math.min(Math.max(Number(restaurant.price_range), 1), 4))
+        : "₹₹",
     address: restaurant.address
       ? {
           "@type": "PostalAddress",
           streetAddress: restaurant.address,
           addressLocality: SITE_CITY,
+          addressRegion: "Telangana",
           addressCountry: "IN",
         }
       : {
           "@type": "PostalAddress",
           addressLocality: SITE_CITY,
+          addressRegion: "Telangana",
           addressCountry: "IN",
         },
-    aggregateRating:
-      ratingValue != null && reviewCount != null && reviewCount > 0
-        ? {
-            "@type": "AggregateRating",
-            ratingValue,
-            reviewCount,
-            bestRating: 5,
-            worstRating: 1,
-          }
-        : undefined,
+    aggregateRating,
     servesCuisine: "Multi-cuisine",
-  };
+    hasMenu: absoluteUrl(path),
+  });
 }
 
 export function foodMenuJsonLd(
@@ -198,29 +299,68 @@ export function foodMenuJsonLd(
     image_url?: string | null;
   }>
 ): JsonLd {
-  return {
+  return compact({
     "@context": "https://schema.org",
     "@type": "Menu",
     name: `${restaurant.name} Menu`,
     url: absoluteUrl(`/restaurant/${restaurant.id}`),
-    hasMenuSection: {
-      "@type": "MenuSection",
-      name: "Full Menu",
-      hasMenuItem: items.slice(0, 50).map((item) => ({
-        "@type": "MenuItem",
-        name: item.name,
-        description: item.description || undefined,
-        image: item.image_url || undefined,
-        offers: {
-          "@type": "Offer",
-          price: item.price != null ? Number(item.price) : undefined,
-          priceCurrency: "INR",
+    inLanguage: "en-IN",
+    hasMenuSection: [
+      {
+        "@type": "MenuSection",
+        name: "Full Menu",
+        hasMenuItem: items.slice(0, 50).map((item) => ({
+          "@type": "MenuItem",
+          name: item.name,
+          description: item.description || undefined,
+          image: item.image_url || undefined,
           url: item.id ? absoluteUrl(`/food/${item.id}`) : undefined,
-          availability: "https://schema.org/InStock",
-        },
-      })),
-    },
-  };
+          offers: item.id
+            ? foodOffer(`/food/${item.id}`, item.price)
+            : foodOffer(`/restaurant/${restaurant.id}`, item.price),
+        })),
+      },
+    ],
+  });
+}
+
+/** Schema.org MenuItem structured data for individual food/dish pages. */
+export function foodItemJsonLd(item: {
+  id: string;
+  name: string;
+  description?: string | null;
+  price?: number | string | null;
+  image?: string | null;
+  image_url?: string | null;
+  restaurant_id?: string | null;
+  restaurant_name?: string | null;
+  rating?: number | string | null;
+  review_count?: number | string | null;
+}): JsonLd {
+  const path = `/food/${item.id}`;
+  const image = item.image || item.image_url || absoluteUrl("/icons/og-default.png");
+  const aggregateRating = buildAggregateRating(item.rating, item.review_count);
+
+  return compact({
+    "@context": "https://schema.org",
+    "@type": "MenuItem",
+    "@id": absoluteUrl(path),
+    name: item.name,
+    description: item.description || `Order ${item.name} on ${SITE_NAME}.`,
+    image,
+    url: absoluteUrl(path),
+    offers: foodOffer(path, item.price),
+    aggregateRating,
+    provider: item.restaurant_name
+      ? {
+          "@type": "Restaurant",
+          name: item.restaurant_name,
+          url: item.restaurant_id
+            ? absoluteUrl(`/restaurant/${item.restaurant_id}`)
+            : undefined,
+        }
+      : undefined,
+  });
 }
 
 export function menuItemJsonLd(item: {
@@ -231,32 +371,10 @@ export function menuItemJsonLd(item: {
   image_url?: string | null;
   restaurant_id?: string | null;
   restaurant_name?: string | null;
+  rating?: number | string | null;
+  review_count?: number | string | null;
 }): JsonLd {
-  return {
-    "@context": "https://schema.org",
-    "@type": "MenuItem",
-    "@id": absoluteUrl(`/food/${item.id}`),
-    name: item.name,
-    description: item.description || `Order ${item.name} on ${SITE_NAME}.`,
-    image: item.image_url || absoluteUrl("/icons/og-default.png"),
-    url: absoluteUrl(`/food/${item.id}`),
-    offers: {
-      "@type": "Offer",
-      price: item.price != null ? Number(item.price) : undefined,
-      priceCurrency: "INR",
-      availability: "https://schema.org/InStock",
-      url: absoluteUrl(`/food/${item.id}`),
-    },
-    menuAddOn: item.restaurant_name
-      ? {
-          "@type": "Restaurant",
-          name: item.restaurant_name,
-          url: item.restaurant_id
-            ? absoluteUrl(`/restaurant/${item.restaurant_id}`)
-            : undefined,
-        }
-      : undefined,
-  };
+  return foodItemJsonLd(item);
 }
 
 export function productJsonLd(item: {
@@ -267,28 +385,28 @@ export function productJsonLd(item: {
   image?: string | null;
   image_url?: string | null;
   restaurant_name?: string | null;
+  rating?: number | string | null;
+  review_count?: number | string | null;
 }): JsonLd {
+  const path = `/food/${item.id}`;
   const image = item.image || item.image_url || absoluteUrl("/icons/og-default.png");
-  return {
+  const aggregateRating = buildAggregateRating(item.rating, item.review_count);
+
+  return compact({
     "@context": "https://schema.org",
     "@type": "Product",
-    "@id": `${absoluteUrl(`/food/${item.id}`)}#product`,
+    "@id": `${absoluteUrl(path)}#product`,
     name: item.name,
     description:
       item.description || `Order ${item.name} online on ${SITE_NAME}.`,
     image,
-    url: absoluteUrl(`/food/${item.id}`),
+    url: absoluteUrl(path),
     brand: item.restaurant_name
       ? { "@type": "Brand", name: item.restaurant_name }
       : { "@type": "Brand", name: SITE_NAME },
-    offers: {
-      "@type": "Offer",
-      price: item.price != null ? Number(item.price) : undefined,
-      priceCurrency: "INR",
-      availability: "https://schema.org/InStock",
-      url: absoluteUrl(`/food/${item.id}`),
-    },
-  };
+    offers: foodOffer(path, item.price),
+    aggregateRating,
+  });
 }
 
 /** Lightweight server fetch for SEO metadata (never throws). */

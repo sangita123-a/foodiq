@@ -57,4 +57,49 @@ export const HOME_FAQS: FaqEntry[] = [
     answer:
       "Yes. Foodiq delivers across Hyderabad from popular local restaurants with fast online food delivery.",
   },
+  {
+    id: "h4",
+    question: "How do I place an order?",
+    answer:
+      "Browse restaurants, add your preferred dishes to the cart, enter your delivery details, and complete payment at checkout.",
+  },
+  {
+    id: "h5",
+    question: "Which payment methods are supported?",
+    answer:
+      "We support UPI, credit and debit cards, net banking, wallets, and Cash on Delivery where available.",
+  },
+  {
+    id: "h6",
+    question: "How do I contact customer support?",
+    answer:
+      "Visit Help & Support or email support@foodiq.com for assistance with your order or account.",
+  },
+];
+
+export const CONTACT_FAQS: FaqEntry[] = [
+  {
+    id: "c1",
+    question: "How long does delivery usually take?",
+    answer:
+      "Our average delivery time is 30-45 minutes depending on the restaurant's preparation time and your distance.",
+  },
+  {
+    id: "c2",
+    question: "What payment methods do you accept?",
+    answer:
+      "We accept all major Credit/Debit cards, UPI, popular digital wallets, and Cash on Delivery for select orders.",
+  },
+  {
+    id: "c3",
+    question: "How can I become a restaurant partner?",
+    answer:
+      "Please use the contact form and select Business as the reason. Our partnership team will contact you within 24 hours.",
+  },
+  {
+    id: "c4",
+    question: "Do you offer refunds for poor quality food?",
+    answer:
+      "If your order arrives in poor condition, please take a photo and submit a support ticket immediately. We will initiate a full refund.",
+  },
 ];
