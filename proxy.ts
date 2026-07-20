@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+export const runtime = 'edge';
+
 // Define which routes require authentication
 const protectedRoutes = [
   '/profile',
