@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { mutate as globalMutate } from "swr";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -60,6 +60,8 @@ type AddressRow = {
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlCoupon = searchParams.get("coupon");
   const [activeAddress, setActiveAddress] = useState("");
   const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("Now");
   const [selectedDate, setSelectedDate] = useState("Today");
@@ -70,6 +72,7 @@ export default function CheckoutPage() {
   const [activeOfferCoupon] = useState<string | null>(
     () => getActiveOffer()?.couponCode || null
   );
+  const autoApplyCoupon = activeOfferCoupon || urlCoupon;
   const [instructions, setInstructions] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("Cash on Delivery");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -419,12 +422,12 @@ export default function CheckoutPage() {
 
             <PromoCodeSection
               appliedDiscount={discount}
-              autoApplyCode={activeOfferCoupon}
+              autoApplyCode={autoApplyCoupon}
               cartTotal={totals.subtotal}
-              onApply={(amount, code) => {
+              onApply={(amount, code, freeDel) => {
                 setDiscount(amount);
                 setCouponCode(code);
-                setFreeDelivery(code === "FREEDEL");
+                setFreeDelivery(Boolean(freeDel) || code === "FREEDEL");
               }}
             />
 

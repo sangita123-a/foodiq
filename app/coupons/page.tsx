@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import CouponsPageView from "@/components/coupons/CouponsPageView";
 
-export default function CouponsRedirect() {
-  redirect("/coupons-rewards");
+export default function CouponsPage() {
+  return <CouponsPageView />;
 }

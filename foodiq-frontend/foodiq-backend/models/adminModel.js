@@ -413,12 +413,14 @@ const createCoupon = async (data) => {
   const {
     code, discount_amount, discount_type, min_order_amount, max_discount_amount,
     usage_limit, valid_from, valid_until, is_active,
+    coupon_type, one_time_per_user, title, description,
   } = data;
   const { rows } = await pool.query(
     `INSERT INTO coupons (
        code, discount_amount, discount_type, min_order_amount, max_discount_amount,
-       usage_limit, valid_from, valid_until, is_active
-     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,COALESCE($9, TRUE)) RETURNING *`,
+       usage_limit, valid_from, valid_until, is_active,
+       coupon_type, one_time_per_user, title, description
+     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,COALESCE($9, TRUE),$10,COALESCE($11, FALSE),$12,$13) RETURNING *`,
     [
       String(code).toUpperCase().trim(),
       discount_amount,
@@ -429,6 +431,10 @@ const createCoupon = async (data) => {
       valid_from || null,
       valid_until || null,
       is_active,
+      coupon_type || (discount_type === 'fixed' ? 'flat' : 'percentage'),
+      one_time_per_user,
+      title || null,
+      description || null,
     ]
   );
   return rows[0];
@@ -438,6 +444,7 @@ const updateCoupon = async (id, data) => {
   const {
     code, discount_amount, discount_type, min_order_amount, max_discount_amount,
     usage_limit, valid_from, valid_until, is_active,
+    coupon_type, one_time_per_user, title, description,
   } = data;
   const { rows } = await pool.query(
     `UPDATE coupons SET
@@ -450,12 +457,17 @@ const updateCoupon = async (id, data) => {
        valid_from = COALESCE($7, valid_from),
        valid_until = COALESCE($8, valid_until),
        is_active = COALESCE($9, is_active),
+       coupon_type = COALESCE($10, coupon_type),
+       one_time_per_user = COALESCE($11, one_time_per_user),
+       title = COALESCE($12, title),
+       description = COALESCE($13, description),
        updated_at = CURRENT_TIMESTAMP
-     WHERE id = $10 RETURNING *`,
+     WHERE id = $14 RETURNING *`,
     [
       code ? String(code).toUpperCase().trim() : null,
       discount_amount, discount_type, min_order_amount, max_discount_amount,
-      usage_limit, valid_from, valid_until, is_active, id,
+      usage_limit, valid_from, valid_until, is_active,
+      coupon_type, one_time_per_user, title, description, id,
     ]
   );
   return rows[0] || null;
@@ -464,6 +476,11 @@ const updateCoupon = async (id, data) => {
 const deleteCoupon = async (id) => {
   const { rows } = await pool.query('DELETE FROM coupons WHERE id = $1 RETURNING id', [id]);
   return rows[0];
+};
+
+const getCouponAnalytics = async () => {
+  const { getCouponAnalytics } = require('./couponModel');
+  return getCouponAnalytics();
 };
 
 const getAnalytics = async () => {
@@ -911,6 +928,7 @@ module.exports = {
   createCoupon,
   updateCoupon,
   deleteCoupon,
+  getCouponAnalytics,
   getAnalytics,
   broadcastNotification,
   getSettings,

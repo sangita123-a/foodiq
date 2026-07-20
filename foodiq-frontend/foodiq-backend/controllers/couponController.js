@@ -1,7 +1,14 @@
-const { getActiveCoupons, getCouponByCode, getCouponUsageCount } = require('../models/couponModel');
+const {
+  getActiveCoupons,
+  getCouponByCode,
+  validateCoupon,
+  getMyRewardsSummary,
+  resolveCouponType,
+} = require('../models/couponModel');
 const { getCartByUserId, getCartItems } = require('../models/cartModel');
 const { getOfferByCouponCode, validateOfferEligibility } = require('../models/offerModel');
 const { validateRestaurantCoupon } = require('../models/liveDealModel');
+const { listReferralStats } = require('../models/referralModel');
 const { pool } = require('../config/db');
 
 const getCoupons = async (req, res) => {
@@ -15,26 +22,41 @@ const getCoupons = async (req, res) => {
 
 const getMyCoupons = async (req, res) => {
   try {
-    const available = await getActiveCoupons();
-    const { rows: saved } = await pool.query(
-      `SELECT uc.*, c.code, c.discount_amount, c.discount_type, c.min_order_amount, c.valid_until, c.is_active
-       FROM user_coupons uc
-       JOIN coupons c ON uc.coupon_id = c.id
-       WHERE uc.user_id = $1
-       ORDER BY uc.created_at DESC`,
-      [req.user.id]
-    );
-    const expired = available.filter(
-      (c) => c.valid_until && new Date(c.valid_until) < new Date()
-    );
+    const summary = await getMyRewardsSummary(req.user.id);
     res.json({
       success: true,
       message: 'User coupons retrieved',
       data: {
-        available: available.filter((c) => !c.valid_until || new Date(c.valid_until) >= new Date()),
-        saved,
-        applied: saved.filter((s) => s.status === 'applied'),
-        expired: [...expired, ...saved.filter((s) => s.status === 'expired')],
+        available: summary.available,
+        saved: summary.saved,
+        applied: summary.saved.filter((s) => s.status === 'applied'),
+        expired: summary.expired,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+  }
+};
+
+const getMyRewards = async (req, res) => {
+  try {
+    const [summary, referral] = await Promise.all([
+      getMyRewardsSummary(req.user.id),
+      listReferralStats(req.user.id),
+    ]);
+    res.json({
+      success: true,
+      message: 'My rewards retrieved',
+      data: {
+        available_coupons: summary.available,
+        saved_coupons: summary.saved,
+        coupon_history: summary.coupon_history,
+        referral: {
+          code: referral.code,
+          reward_points: referral.reward_points,
+          earnings: referral.earnings,
+          history: referral.history,
+        },
       },
     });
   } catch (error) {
@@ -74,27 +96,8 @@ const applyCoupon = async (req, res) => {
     if (!code) return res.status(400).json({ success: false, message: 'Coupon code required', error: {} });
 
     const coupon = await getCouponByCode(code.toUpperCase());
-    if (!coupon || !coupon.is_active) {
-      return res.status(400).json({ success: false, message: 'Invalid or inactive coupon', error: {} });
-    }
-
-    const now = new Date();
-    if (coupon.valid_from && new Date(coupon.valid_from) > now) {
-      return res.status(400).json({ success: false, message: 'Coupon is not yet valid', error: {} });
-    }
-    if (coupon.valid_until && new Date(coupon.valid_until) < now) {
-      return res.status(400).json({ success: false, message: 'Coupon has expired', error: {} });
-    }
-
-    if (coupon.usage_limit) {
-      const usageCount = await getCouponUsageCount(coupon.id, req.user.id);
-      if (usageCount >= coupon.usage_limit) {
-        return res.status(400).json({ success: false, message: 'Coupon usage limit reached', error: {} });
-      }
-    }
-
     const cart = await getCartByUserId(req.user.id);
-    const items = await getCartItems(cart.id);
+    const items = cart ? await getCartItems(cart.id) : [];
 
     let subtotal = 0;
     items.forEach((item) => {
@@ -102,12 +105,11 @@ const applyCoupon = async (req, res) => {
       subtotal += price * item.quantity;
     });
 
-    if (items.length > 0 && subtotal < parseFloat(coupon.min_order_amount)) {
-      return res.status(400).json({
-        success: false,
-        message: `Minimum order amount of ₹${coupon.min_order_amount} required`,
-        error: {},
-      });
+    const validation = await validateCoupon(coupon, req.user.id, subtotal, {
+      skipCartCheck: items.length === 0,
+    });
+    if (!validation.valid) {
+      return res.status(400).json({ success: false, message: validation.message, error: {} });
     }
 
     const normalizedCode = code.toUpperCase();
@@ -127,19 +129,6 @@ const applyCoupon = async (req, res) => {
       }
     }
 
-    let discount = 0;
-    const isFreeDelivery = normalizedCode === 'FREEDEL';
-    if (!isFreeDelivery) {
-      if (coupon.discount_type === 'percentage') {
-        discount = subtotal * (parseFloat(coupon.discount_amount) / 100);
-        if (coupon.max_discount_amount && discount > parseFloat(coupon.max_discount_amount)) {
-          discount = parseFloat(coupon.max_discount_amount);
-        }
-      } else {
-        discount = parseFloat(coupon.discount_amount);
-      }
-    }
-
     await pool.query(
       `INSERT INTO user_coupons (user_id, coupon_id, status, applied_at)
        VALUES ($1, $2, 'applied', CURRENT_TIMESTAMP)
@@ -153,8 +142,9 @@ const applyCoupon = async (req, res) => {
       data: {
         coupon_id: coupon.id,
         code: coupon.code,
-        discount: parseFloat(discount.toFixed(2)),
-        free_delivery: isFreeDelivery,
+        coupon_type: resolveCouponType(coupon),
+        discount: validation.discount,
+        free_delivery: validation.freeDelivery,
       },
     });
   } catch (error) {
@@ -176,4 +166,11 @@ const removeCoupon = async (req, res) => {
   }
 };
 
-module.exports = { getCoupons, getMyCoupons, saveCoupon, applyCoupon, removeCoupon };
+module.exports = {
+  getCoupons,
+  getMyCoupons,
+  getMyRewards,
+  saveCoupon,
+  applyCoupon,
+  removeCoupon,
+};

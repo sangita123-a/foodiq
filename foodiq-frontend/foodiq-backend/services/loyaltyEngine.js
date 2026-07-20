@@ -194,6 +194,13 @@ const creditForOrderDelivered = async (order) => {
       orderId: order.id,
       description: 'First order bonus',
     });
+
+    try {
+      const { creditReferralOnFirstOrder } = require('../models/referralModel');
+      await creditReferralOnFirstOrder(order.user_id, order.id);
+    } catch (refErr) {
+      console.warn('[loyalty] referral credit skipped:', refErr.message);
+    }
   }
 
   return result;

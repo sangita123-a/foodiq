@@ -46,7 +46,7 @@ const applyReferralOnSignup = async ({ refereeId, code }) => {
     await pool.query(
       `INSERT INTO referral_redemptions
          (referral_code_id, referrer_id, referee_id, status, points_awarded)
-       VALUES ($1, $2, $3, 'credited', $4)`,
+       VALUES ($1, $2, $3, 'pending', $4)`,
       [ref.id, ref.user_id, refereeId, points]
     );
   } catch (err) {
@@ -54,20 +54,10 @@ const applyReferralOnSignup = async ({ refereeId, code }) => {
     throw err;
   }
 
-  // Credit referrer + referee welcome bonus via loyalty engine
   const loyaltyEngine = require('../services/loyaltyEngine');
-  const referralRule = await require('../models/loyaltyModel').getRule('referral');
   const welcomeRule = await require('../models/loyaltyModel').getRule('referral_welcome');
-
-  await loyaltyEngine.credit({
-    userId: ref.user_id,
-    points: Number(referralRule?.points || points),
-    source: 'referral',
-    referenceId: refereeId,
-    description: `Referral bonus for new customer`,
-  });
-
   const refereeBonus = Number(welcomeRule?.points || Math.round(points / 2));
+
   await loyaltyEngine.credit({
     userId: refereeId,
     points: refereeBonus,
@@ -76,7 +66,61 @@ const applyReferralOnSignup = async ({ refereeId, code }) => {
     description: 'Welcome referral bonus',
   });
 
-  return { referrer_id: ref.user_id, points, referee_bonus: refereeBonus, code: ref.code };
+  return {
+    referrer_id: ref.user_id,
+    points,
+    referee_bonus: refereeBonus,
+    code: ref.code,
+    status: 'pending',
+  };
+};
+
+const creditReferralOnFirstOrder = async (refereeId, orderId) => {
+  const { rows } = await pool.query(
+    `SELECT rr.*, rc.reward_points
+     FROM referral_redemptions rr
+     JOIN referral_codes rc ON rc.id = rr.referral_code_id
+     WHERE rr.referee_id = $1 AND rr.status = 'pending'
+     LIMIT 1`,
+    [refereeId]
+  );
+  const redemption = rows[0];
+  if (!redemption) return null;
+
+  const { rows: orderCount } = await pool.query(
+    `SELECT COUNT(*)::int AS cnt FROM orders
+     WHERE user_id = $1 AND LOWER(status) = 'delivered'`,
+    [refereeId]
+  );
+  if (orderCount[0]?.cnt !== 1) return null;
+
+  const points = Number(redemption.reward_points || redemption.points_awarded) || 100;
+  const loyaltyEngine = require('../services/loyaltyEngine');
+  const referralRule = await require('../models/loyaltyModel').getRule('referral');
+
+  const result = await loyaltyEngine.credit({
+    userId: redemption.referrer_id,
+    points: Number(referralRule?.points || points),
+    source: 'referral',
+    referenceId: refereeId,
+    orderId,
+    description: 'Referral bonus — friend completed first order',
+  });
+
+  if (result?.duplicate) return result;
+
+  await pool.query(
+    `UPDATE referral_redemptions
+     SET status = 'credited', points_awarded = $1
+     WHERE id = $2`,
+    [Number(referralRule?.points || points), redemption.id]
+  );
+
+  return {
+    referrer_id: redemption.referrer_id,
+    points: Number(referralRule?.points || points),
+    order_id: orderId,
+  };
 };
 
 const listReferralStats = async (userId) => {
@@ -90,11 +134,27 @@ const listReferralStats = async (userId) => {
      LIMIT 50`,
     [userId]
   );
-  return { code: code.code, reward_points: code.reward_points, history: rows };
+
+  const { rows: earnings } = await pool.query(
+    `SELECT COALESCE(SUM(points_awarded), 0)::int AS total_points,
+            COUNT(*) FILTER (WHERE status = 'credited')::int AS credited_count,
+            COUNT(*) FILTER (WHERE status = 'pending')::int AS pending_count
+     FROM referral_redemptions
+     WHERE referrer_id = $1`,
+    [userId]
+  );
+
+  return {
+    code: code.code,
+    reward_points: code.reward_points,
+    history: rows,
+    earnings: earnings[0] || { total_points: 0, credited_count: 0, pending_count: 0 },
+  };
 };
 
 module.exports = {
   getOrCreateReferralCode,
   applyReferralOnSignup,
+  creditReferralOnFirstOrder,
   listReferralStats,
 };

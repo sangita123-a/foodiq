@@ -41,6 +41,7 @@ router.delete('/menu/:id', requirePermission('menu'), c.removeMenuItem);
 router.get('/categories', requirePermission('menu'), c.getCategories);
 
 router.get('/coupons', requirePermission('coupons'), c.getCoupons);
+router.get('/coupons/analytics', requirePermission('coupons'), c.getCouponAnalytics);
 router.post('/coupons', requirePermission('coupons'), c.postCoupon);
 router.put('/coupons/:id', requirePermission('coupons'), c.patchCoupon);
 router.delete('/coupons/:id', requirePermission('coupons'), c.removeCoupon);

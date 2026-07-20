@@ -339,6 +339,14 @@ const removeCoupon = async (req, res) => {
   }
 };
 
+const getCouponAnalytics = async (req, res) => {
+  try {
+    ok(res, 'Coupon analytics retrieved', await admin.getCouponAnalytics());
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
 const getAnalytics = async (req, res) => {
   try {
     ok(res, 'Analytics retrieved', await admin.getAnalytics());
@@ -916,6 +924,7 @@ module.exports = {
   postCoupon,
   patchCoupon,
   removeCoupon,
+  getCouponAnalytics,
   getAnalytics,
   postBroadcast,
   getSettings,

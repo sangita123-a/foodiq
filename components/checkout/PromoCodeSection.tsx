@@ -9,7 +9,7 @@ import { getOfferByCode } from "@/lib/data/20offersData";
 
 type Props = {
   appliedDiscount: number;
-  onApply: (discount: number, code: string | null) => void;
+  onApply: (discount: number, code: string | null, freeDelivery?: boolean) => void;
   autoApplyCode?: string | null;
   cartTotal?: number;
 };
@@ -43,11 +43,11 @@ export default function PromoCodeSection({
       const res = await api.post("/api/coupons/apply", {
         code: codeToApply.trim(),
       });
-      const { discount: discountAmount, code: applied } = res.data.data;
+      const { discount: discountAmount, code: applied, free_delivery: freeDelivery } = res.data.data;
 
       setAppliedCode(applied);
       setCode(applied);
-      onApply(parseFloat(discountAmount), applied);
+      onApply(parseFloat(discountAmount), applied, Boolean(freeDelivery));
       setSuccess(true);
     } catch (err: unknown) {
       const localOffer = getOfferByCode(codeToApply);

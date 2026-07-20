@@ -27,6 +27,7 @@ export const PRIVATE_ROUTE_PREFIXES = [
   "/settings",
   "/coupons-rewards",
   "/coupons",
+  "/my-rewards",
   "/rewards",
   "/login",
   "/register",

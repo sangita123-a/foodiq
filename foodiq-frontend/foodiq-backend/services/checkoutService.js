@@ -1,6 +1,6 @@
 const { getCartByUserId, getCartItems } = require('../models/cartModel');
 const { getAddressById } = require('../models/addressModel');
-const { getCouponByCode, getCouponUsageCount, recordCouponUsage } = require('../models/couponModel');
+const { getCouponByCode, validateCoupon, recordCouponUsage, resolveCouponType } = require('../models/couponModel');
 const {
   getOfferByCouponCode,
   validateOfferEligibility,
@@ -158,53 +158,21 @@ const prepareCheckout = async (userId, body) => {
   const usePoints = redemption_type === 'points' && Number(points_to_redeem) > 0;
   const useCoupon = !usePoints && coupon_code;
 
+  let freeDeliveryCoupon = false;
+
   if (useCoupon) {
     normalizedCode = String(coupon_code).trim().toUpperCase();
     const coupon = await getCouponByCode(normalizedCode);
 
-    if (!coupon || !coupon.is_active) {
-      const err = new Error('Invalid or inactive coupon');
+    const validation = await validateCoupon(coupon, userId, subtotal);
+    if (!validation.valid) {
+      const err = new Error(validation.message);
       err.status = 400;
       throw err;
     }
 
-    const now = new Date();
-    if (coupon.valid_from && new Date(coupon.valid_from) > now) {
-      const err = new Error('Coupon is not yet valid');
-      err.status = 400;
-      throw err;
-    }
-    if (coupon.valid_until && new Date(coupon.valid_until) < now) {
-      const err = new Error('Coupon has expired');
-      err.status = 400;
-      throw err;
-    }
-
-    if (coupon.usage_limit) {
-      const usageCount = await getCouponUsageCount(coupon.id, userId);
-      if (usageCount >= coupon.usage_limit) {
-        const err = new Error('Coupon usage limit reached');
-        err.status = 400;
-        throw err;
-      }
-    }
-
-    if (subtotal < parseFloat(coupon.min_order_amount)) {
-      const err = new Error(`Minimum order amount of ₹${coupon.min_order_amount} required`);
-      err.status = 400;
-      throw err;
-    }
-
-    if (normalizedCode !== 'FREEDEL') {
-      if (coupon.discount_type === 'percentage') {
-        discount = subtotal * (parseFloat(coupon.discount_amount) / 100);
-        if (coupon.max_discount_amount && discount > parseFloat(coupon.max_discount_amount)) {
-          discount = parseFloat(coupon.max_discount_amount);
-        }
-      } else {
-        discount = parseFloat(coupon.discount_amount);
-      }
-    }
+    discount = validation.discount;
+    freeDeliveryCoupon = validation.freeDelivery;
     couponId = coupon.id;
 
     const linkedOffer = await getOfferByCouponCode(normalizedCode);
@@ -249,7 +217,7 @@ const prepareCheckout = async (userId, body) => {
   }
 
   let deliveryCharge = subtotal > 0 ? (subtotal > 500 ? 0 : 50) : 0;
-  if (normalizedCode === 'FREEDEL' && couponId) {
+  if (freeDeliveryCoupon && couponId) {
     deliveryCharge = 0;
   }
   if (usePoints) {

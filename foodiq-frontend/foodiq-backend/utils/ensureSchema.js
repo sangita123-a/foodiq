@@ -1229,6 +1229,56 @@ async function ensureSchema() {
         ON coupons(code)
     `);
     await q(`
+      ALTER TABLE coupons
+        ADD COLUMN IF NOT EXISTS coupon_type VARCHAR(30) DEFAULT 'percentage',
+        ADD COLUMN IF NOT EXISTS one_time_per_user BOOLEAN DEFAULT FALSE,
+        ADD COLUMN IF NOT EXISTS title VARCHAR(120),
+        ADD COLUMN IF NOT EXISTS description TEXT
+    `);
+    await q(`
+      CREATE TABLE IF NOT EXISTS user_coupons (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        coupon_id UUID NOT NULL REFERENCES coupons(id) ON DELETE CASCADE,
+        status VARCHAR(30) DEFAULT 'saved' CHECK (status IN ('saved', 'applied', 'used', 'expired')),
+        applied_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, coupon_id)
+      )
+    `);
+    await q(`
+      CREATE TABLE IF NOT EXISTS coupon_history (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        coupon_id UUID REFERENCES coupons(id) ON DELETE SET NULL,
+        offer_id UUID,
+        order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        coupon_code VARCHAR(50),
+        discount_amount DECIMAL(10,2) DEFAULT 0,
+        final_price DECIMAL(10,2) NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_coupon_history_user
+        ON coupon_history(user_id, created_at DESC)
+    `);
+    await q(`
+      INSERT INTO coupons (code, discount_amount, discount_type, coupon_type, min_order_amount, title, description, one_time_per_user, valid_until, is_active)
+      SELECT 'WELCOME50', 50, 'fixed', 'first_order', 199, 'First Order Offer', 'Flat ₹50 off on your first order', TRUE, CURRENT_TIMESTAMP + INTERVAL '1 year', TRUE
+      WHERE NOT EXISTS (SELECT 1 FROM coupons WHERE code = 'WELCOME50')
+    `);
+    await q(`
+      INSERT INTO coupons (code, discount_amount, discount_type, coupon_type, min_order_amount, title, description, valid_until, is_active)
+      SELECT 'FREEDEL', 0, 'fixed', 'free_delivery', 299, 'Free Delivery', 'Zero delivery fee on orders above ₹299', CURRENT_TIMESTAMP + INTERVAL '6 months', TRUE
+      WHERE NOT EXISTS (SELECT 1 FROM coupons WHERE code = 'FREEDEL')
+    `);
+    await q(`
+      INSERT INTO coupons (code, discount_amount, discount_type, coupon_type, min_order_amount, max_discount_amount, title, description, valid_until, is_active)
+      SELECT 'DIWALI25', 25, 'percentage', 'festival', 499, 150, 'Diwali Festival Offer', '25% off during festival — max ₹150', CURRENT_TIMESTAMP + INTERVAL '3 months', TRUE
+      WHERE NOT EXISTS (SELECT 1 FROM coupons WHERE code = 'DIWALI25')
+    `);
+    await q(`
       CREATE INDEX IF NOT EXISTS idx_delivery_partners_user
         ON delivery_partners(user_id)
     `);

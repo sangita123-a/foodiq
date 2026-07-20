@@ -15,6 +15,8 @@ const protectedRoutes = [
   '/payment-methods',
   '/favorites',
   '/coupons-rewards',
+  '/coupons',
+  '/my-rewards',
   '/track-order',
   '/partner/dashboard',
   '/partner/menu',
