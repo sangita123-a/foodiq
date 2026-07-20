@@ -61,7 +61,9 @@ const SIGN_OPTS = { algorithm: 'HS256' };
 const VERIFY_OPTS = { algorithms: ['HS256'] };
 
 const generateToken = (id, extras = {}) => {
-  return jwt.sign({ id, ...extras }, getJwtSecret(), {
+  const { tv, token_version, ...rest } = extras;
+  const tokenVersion = tv ?? token_version ?? 1;
+  return jwt.sign({ id, tv: tokenVersion, ...rest }, getJwtSecret(), {
     expiresIn: accessTtl(),
     ...SIGN_OPTS,
   });
@@ -112,6 +114,18 @@ const rotateRefreshToken = async (oldToken, meta = {}) => {
     [oldHash]
   );
   if (!existing.rows[0]) {
+    const reused = await pool.query(
+      `SELECT user_id FROM refresh_tokens WHERE token_hash = $1 AND revoked_at IS NOT NULL LIMIT 1`,
+      [oldHash]
+    );
+    if (reused.rows[0]?.user_id) {
+      const { bumpTokenVersion } = require('./tokenVersion');
+      await revokeAllForUser(reused.rows[0].user_id);
+      await bumpTokenVersion(reused.rows[0].user_id);
+      const err = new Error('Refresh token reuse detected. All sessions revoked.');
+      err.status = 401;
+      throw err;
+    }
     const err = new Error('Refresh token revoked or unknown');
     err.status = 401;
     throw err;
@@ -122,7 +136,9 @@ const rotateRefreshToken = async (oldToken, meta = {}) => {
     [oldHash]
   );
 
-  const access = generateToken(payload.id);
+  const { getTokenVersion } = require('./tokenVersion');
+  const tv = await getTokenVersion(payload.id);
+  const access = generateToken(payload.id, { tv });
   const refresh = await generateRefreshToken(payload.id, meta);
   return { access, refresh, userId: payload.id };
 };
@@ -142,6 +158,12 @@ const revokeAllForUser = async (userId) => {
      WHERE user_id = $1 AND revoked_at IS NULL`,
     [userId]
   );
+  try {
+    const { bumpTokenVersion } = require('./tokenVersion');
+    await bumpTokenVersion(userId);
+  } catch (err) {
+    console.warn('[AUTH] token version bump skipped', err.message);
+  }
 };
 
 const verifyAccessToken = (token) =>

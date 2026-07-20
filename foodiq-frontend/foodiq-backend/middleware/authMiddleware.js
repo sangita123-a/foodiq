@@ -57,6 +57,17 @@ const protect = async (req, res, next) => {
       });
     }
 
+    if (
+      decoded.tv != null &&
+      Number(decoded.tv) !== Number(req.user.token_version ?? 1)
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: 'Session expired. Please sign in again.',
+        error: { code: 'TOKEN_REVOKED' },
+      });
+    }
+
     next();
   } catch (error) {
     return res.status(401).json({

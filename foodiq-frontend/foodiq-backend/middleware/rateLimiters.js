@@ -2,50 +2,69 @@
  * Route-scoped rate limiters. Never applied to Razorpay webhook.
  */
 const rateLimit = require('express-rate-limit');
+const { log } = require('../utils/logger');
+const { writeAudit } = require('../services/auditService');
 
 const windowMs = Number(process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000);
 
-const authLimiter = rateLimit({
+const rateLimitHandler = (label) => (req, res, _next, options) => {
+  const ip = req.headers['x-forwarded-for'] || req.ip;
+  log.warn('rate_limit_blocked', {
+    label,
+    ip,
+    path: req.originalUrl,
+    method: req.method,
+    user_id: req.user?.id || null,
+  });
+  writeAudit({
+    userId: req.user?.id || null,
+    action: 'rate_limit_blocked',
+    category: 'security',
+    status: 'blocked',
+    message: `${label} rate limit exceeded`,
+    req,
+  }).catch(() => {});
+
+  res.status(options.statusCode).json({
+    success: false,
+    message: options.message?.message || options.message || 'Too many requests',
+    error: { code: 'RATE_LIMIT' },
+  });
+};
+
+const makeLimiter = (opts) =>
+  rateLimit({
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: rateLimitHandler(opts.label || 'api'),
+    ...opts,
+  });
+
+const authLimiter = makeLimiter({
+  label: 'auth',
   windowMs,
   max: Number(process.env.RATE_LIMIT_AUTH_MAX || 30),
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    success: false,
-    message: 'Too many auth attempts. Please try again later.',
-    error: { code: 'RATE_LIMIT' },
-  },
+  message: 'Too many auth attempts. Please try again later.',
 });
 
-const otpLimiter = rateLimit({
+const otpLimiter = makeLimiter({
+  label: 'otp',
   windowMs: Number(process.env.RATE_LIMIT_OTP_WINDOW_MS || 15 * 60 * 1000),
   max: Number(process.env.RATE_LIMIT_OTP_MAX || 10),
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    success: false,
-    message: 'Too many OTP requests. Please try again later.',
-    error: { code: 'RATE_LIMIT' },
-  },
+  message: 'Too many OTP requests. Please try again later.',
 });
 
-const uploadLimiter = rateLimit({
+const uploadLimiter = makeLimiter({
+  label: 'upload',
   windowMs: 60 * 1000,
   max: Number(process.env.RATE_LIMIT_UPLOAD_MAX || 40),
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    success: false,
-    message: 'Upload rate limit exceeded.',
-    error: { code: 'RATE_LIMIT' },
-  },
+  message: 'Upload rate limit exceeded.',
 });
 
-const apiLimiter = rateLimit({
+const apiLimiter = makeLimiter({
+  label: 'api',
   windowMs: 60 * 1000,
   max: Number(process.env.RATE_LIMIT_API_MAX || 300),
-  standardHeaders: true,
-  legacyHeaders: false,
   skip: (req) => {
     const p = req.originalUrl || '';
     if (
@@ -55,7 +74,6 @@ const apiLimiter = rateLimit({
     ) {
       return true;
     }
-    // Opt-in only: allow local/staging load tests (never enable in public prod without LB limits)
     if (
       String(process.env.PERF_LOADTEST_BYPASS || '').toLowerCase() === 'true' &&
       String(req.headers['user-agent'] || '').includes('foodiq-load-test')
@@ -64,35 +82,35 @@ const apiLimiter = rateLimit({
     }
     return false;
   },
-  message: {
-    success: false,
-    message: 'Too many requests. Please slow down.',
-    error: { code: 'RATE_LIMIT' },
-  },
+  message: 'Too many requests. Please slow down.',
 });
 
-const contactLimiter = rateLimit({
+const contactLimiter = makeLimiter({
+  label: 'contact',
   windowMs: Number(process.env.RATE_LIMIT_CONTACT_WINDOW_MS || 15 * 60 * 1000),
   max: Number(process.env.RATE_LIMIT_CONTACT_MAX || 8),
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    success: false,
-    message: 'Too many contact submissions. Please try again later.',
-    error: { code: 'RATE_LIMIT' },
-  },
+  message: 'Too many contact submissions. Please try again later.',
 });
 
-const feedbackLimiter = rateLimit({
+const feedbackLimiter = makeLimiter({
+  label: 'feedback',
   windowMs: Number(process.env.RATE_LIMIT_FEEDBACK_WINDOW_MS || 15 * 60 * 1000),
   max: Number(process.env.RATE_LIMIT_FEEDBACK_MAX || 20),
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    success: false,
-    message: 'Too many feedback submissions. Please try again later.',
-    error: { code: 'RATE_LIMIT' },
-  },
+  message: 'Too many feedback submissions. Please try again later.',
+});
+
+const paymentLimiter = makeLimiter({
+  label: 'payment',
+  windowMs: Number(process.env.RATE_LIMIT_PAYMENT_WINDOW_MS || 15 * 60 * 1000),
+  max: Number(process.env.RATE_LIMIT_PAYMENT_MAX || 25),
+  message: 'Too many payment attempts. Please try again later.',
+});
+
+const reviewLimiter = makeLimiter({
+  label: 'review',
+  windowMs: Number(process.env.RATE_LIMIT_REVIEW_WINDOW_MS || 15 * 60 * 1000),
+  max: Number(process.env.RATE_LIMIT_REVIEW_MAX || 15),
+  message: 'Too many review submissions. Please try again later.',
 });
 
 module.exports = {
@@ -102,4 +120,6 @@ module.exports = {
   apiLimiter,
   contactLimiter,
   feedbackLimiter,
+  paymentLimiter,
+  reviewLimiter,
 };

@@ -229,7 +229,8 @@ async function ensureSchema() {
 
     await q(`
       ALTER TABLE users
-        ADD COLUMN IF NOT EXISTS is_suspended BOOLEAN DEFAULT FALSE
+        ADD COLUMN IF NOT EXISTS is_suspended BOOLEAN DEFAULT FALSE,
+        ADD COLUMN IF NOT EXISTS token_version INTEGER DEFAULT 1
     `);
     await q(`
       ALTER TABLE restaurants

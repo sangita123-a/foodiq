@@ -4,6 +4,8 @@ const {
   findUserByEmail,
 } = require('../models/userModel');
 const generateToken = require('../utils/generateToken');
+const { generateRefreshToken } = require('../utils/generateToken');
+const { clientMeta } = require('../services/auditService');
 const { normalizeEmail } = require('../utils/normalizeEmail');
 const {
   isValidEmail,
@@ -85,7 +87,13 @@ const register = async (req, res) => {
       license_number,
     });
 
-    const token = generateToken(user.id);
+    const token = generateToken(user.id, { tv: 1 });
+    let refresh_token = null;
+    try {
+      refresh_token = await generateRefreshToken(user.id, clientMeta(req));
+    } catch {
+      /* optional */
+    }
     ok(res, 'Delivery partner registered', {
       id: user.id,
       full_name: user.full_name,
@@ -93,6 +101,7 @@ const register = async (req, res) => {
       phone_number: phone,
       role: 'delivery_partner',
       token,
+      refresh_token,
       partner,
       verification_status: partner.approval_status || 'pending',
     });

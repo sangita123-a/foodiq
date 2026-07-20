@@ -13,11 +13,13 @@ const {
   getPaymentForOrder,
 } = require('../controllers/paymentController');
 const { protect } = require('../middleware/authMiddleware');
+const { paymentLimiter } = require('../middleware/rateLimiters');
 
 // Webhook must be public (Razorpay signs with webhook secret — no JWT).
 router.post('/webhook', handleRazorpayWebhook);
 
 router.use(protect);
+router.use(paymentLimiter);
 
 router.post('/create', createPayment);
 router.post('/verify', verifyPayment);

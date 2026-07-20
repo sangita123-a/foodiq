@@ -22,7 +22,7 @@ const findUserByEmail = async (email) => {
 };
 
 const findUserById = async (id) => {
-  const query = `SELECT id, full_name, email, phone_number, role, admin_role, created_at, updated_at FROM users WHERE id = $1 AND COALESCE(is_deleted, false) = false`;
+  const query = `SELECT id, full_name, email, phone_number, role, admin_role, COALESCE(token_version, 1)::int AS token_version, created_at, updated_at FROM users WHERE id = $1 AND COALESCE(is_deleted, false) = false`;
   const { rows } = await pool.query(query, [id]);
   return rows[0];
 };

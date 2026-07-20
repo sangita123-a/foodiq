@@ -21,6 +21,7 @@ const {
   isValidEmail,
   isValidPassword,
   isValidPhone,
+  getPasswordPolicyMessage,
 } = require('../utils/validation');
 const { setAuthCookies, clearAuthCookies } = require('../utils/authCookies');
 const { fail } = require('../utils/respond');
@@ -57,8 +58,7 @@ const registerUser = async (req, res) => {
     if (!isValidPassword(password)) {
       return res.status(400).json({
         success: false,
-        message:
-          'Password must be at least 8 characters and include a letter and a number',
+        message: getPasswordPolicyMessage(),
         error: {},
       });
     }
@@ -145,7 +145,7 @@ const registerUser = async (req, res) => {
         log.warn('welcome email skipped', { error: err.message });
       }
 
-      const token = generateToken(user.id);
+      const token = generateToken(user.id, { tv: user.token_version ?? 1 });
 
       let refresh_token = null;
       try {
@@ -262,7 +262,7 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const token = generateToken(user.id);
+    const token = generateToken(user.id, { tv: user.token_version ?? 1 });
     let refresh_token = null;
     try {
       refresh_token = await generateRefreshToken(user.id, clientMeta(req));
@@ -273,9 +273,9 @@ const loginUser = async (req, res) => {
     writeAudit({
       userId: user.id,
       role: user.role,
-      action: 'login',
+      action: user.role === 'admin' ? 'admin_login' : 'login',
       category: 'auth',
-      message: 'User logged in',
+      message: user.role === 'admin' ? 'Admin logged in' : 'User logged in',
       req,
     }).catch(() => {});
 
@@ -457,8 +457,7 @@ const resetPassword = async (req, res) => {
     if (!isValidPassword(newPassword)) {
       return res.status(400).json({
         success: false,
-        message:
-          'Password must be at least 8 characters and include a letter and a number',
+        message: getPasswordPolicyMessage(),
         error: {},
       });
     }
@@ -545,6 +544,31 @@ const logoutUser = async (req, res) => {
   }
 };
 
+const logoutAllDevices = async (req, res) => {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).json({ success: false, message: 'Not authorized', error: {} });
+    }
+    await revokeAllForUser(req.user.id);
+    clearAuthCookies(res);
+    writeAudit({
+      userId: req.user.id,
+      role: req.user.role,
+      action: 'logout_all_devices',
+      category: 'auth',
+      message: 'Logged out from all devices',
+      req,
+    }).catch(() => {});
+    res.json({
+      success: true,
+      message: 'Logged out from all devices. Please sign in again.',
+      data: {},
+    });
+  } catch (error) {
+    return fail(res, 500, 'Logout failed', error);
+  }
+};
+
 const refreshAccessToken = async (req, res) => {
   try {
     const refresh_token = req.body.refresh_token || req.cookies?.refresh_token;
@@ -585,6 +609,7 @@ module.exports = {
   getUserProfile,
   updateUserProfile,
   logoutUser,
+  logoutAllDevices,
   forgotPassword,
   resetPassword,
   refreshAccessToken,

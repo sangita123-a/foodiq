@@ -33,10 +33,7 @@ const {
   toRazorpayPrefillMethod,
 } = require('../utils/razorpayClient');
 
-const fail = (res, status, message, error = {}) =>
-  res.status(status).json({ success: false, message, error });
-const ok = (res, message, data, status = 200) =>
-  res.status(status).json({ success: true, message, data });
+const { fail, ok } = require('../utils/respond');
 
 /** Legacy: initialize payment against an existing order (retry). */
 const createPayment = async (req, res) => {
@@ -541,6 +538,20 @@ const markPaymentFailed = async (req, res) => {
 
     try {
       require('../services/metricsService').bump('payments_failed');
+    } catch {
+      /* ignore */
+    }
+
+    try {
+      const { writeAudit } = require('../services/auditService');
+      await writeAudit({
+        userId: req.user.id,
+        action: 'payment_failed',
+        category: 'payment',
+        status: 'failure',
+        message: reason || 'Payment failed',
+        req,
+      });
     } catch {
       /* ignore */
     }

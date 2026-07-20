@@ -45,9 +45,20 @@ const sanitizeBody = (req, _res, next) => {
   next();
 };
 
+const sanitizeQuery = (req, _res, next) => {
+  if (req.query && typeof req.query === 'object') {
+    req.query = sanitizeObject(req.query);
+  }
+  if (req.params && typeof req.params === 'object') {
+    req.params = sanitizeObject(req.params);
+  }
+  next();
+};
+
 module.exports = {
   stripTags,
   stripDangerousHtml,
   sanitizeObject,
   sanitizeBody,
+  sanitizeQuery,
 };

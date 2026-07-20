@@ -20,7 +20,7 @@ const requestContext = require('./middleware/requestContext');
 const securityHeaders = require('./middleware/securityHeaders');
 const { apiLimiter } = require('./middleware/rateLimiters');
 const { csrfProtection } = require('./middleware/csrf');
-const { sanitizeBody } = require('./middleware/sanitize');
+const { sanitizeBody, sanitizeQuery } = require('./middleware/sanitize');
 const { log } = require('./utils/logger');
 
 const app = express();
@@ -112,6 +112,7 @@ app.use(
 );
 
 app.use(sanitizeBody);
+app.use(sanitizeQuery);
 app.use(csrfProtection);
 app.use('/api', apiLimiter);
 

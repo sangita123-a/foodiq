@@ -542,7 +542,10 @@ const postStaff = async (req, res) => {
     if (!email || !password || !full_name) {
       return fail(res, 400, 'Email, password, and name are required');
     }
-    const password_hash = await bcrypt.hash(password, 12);
+    const password_hash = await bcrypt.hash(
+      password,
+      Number(process.env.BCRYPT_ROUNDS || 12)
+    );
     const data = await admin.createAdminStaff({
       email: String(email).trim().toLowerCase(),
       password_hash,
@@ -562,7 +565,7 @@ const patchStaff = async (req, res) => {
     let password_hash;
     if (req.body.password) {
       const bcrypt = require('bcrypt');
-      password_hash = await bcrypt.hash(req.body.password, 12);
+      password_hash = await bcrypt.hash(req.body.password, Number(process.env.BCRYPT_ROUNDS || 12));
     }
     const data = await admin.updateAdminStaff(req.params.id, {
       ...req.body,

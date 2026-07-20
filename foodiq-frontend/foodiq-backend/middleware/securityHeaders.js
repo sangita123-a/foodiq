@@ -9,7 +9,7 @@ const securityHeaders = helmet({
   contentSecurityPolicy: false, // SPA + Socket.IO; frontend owns CSP
   crossOriginEmbedderPolicy: false,
   crossOriginResourcePolicy: { policy: 'cross-origin' },
-  referrerPolicy: { policy: 'no-referrer' },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   hsts: isProd
     ? {
         maxAge: 31536000,
@@ -20,6 +20,14 @@ const securityHeaders = helmet({
   frameguard: { action: 'deny' },
   noSniff: true,
   xssFilter: true,
+  permissionsPolicy: {
+    features: {
+      camera: ["'none'"],
+      microphone: ["'none'"],
+      geolocation: ["'self'"],
+      payment: ["'self'", 'https://checkout.razorpay.com'],
+    },
+  },
 });
 
 module.exports = securityHeaders;

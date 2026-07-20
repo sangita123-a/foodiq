@@ -1,6 +1,10 @@
 const { pool } = require('../config/db');
 const bcrypt = require('bcrypt');
 const { revokeAllForUser } = require('../utils/generateToken');
+const {
+  isValidPassword,
+  getPasswordPolicyMessage,
+} = require('../utils/validation');
 const { writeAudit } = require('../services/auditService');
 
 const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS || 12);
@@ -78,10 +82,10 @@ const updateProfile = async (req, res) => {
     let valueIndex = 13;
 
     if (old_password && new_password) {
-      if (String(new_password).length < 8) {
+      if (!isValidPassword(String(new_password))) {
         return res.status(400).json({
           success: false,
-          message: 'New password must be at least 8 characters',
+          message: getPasswordPolicyMessage(),
           error: {},
         });
       }

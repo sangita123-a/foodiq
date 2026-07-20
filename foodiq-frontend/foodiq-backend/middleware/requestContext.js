@@ -26,8 +26,8 @@ const requestContext = (req, res, next) => {
       ip: req.headers['x-forwarded-for'] || req.ip,
     });
 
-    // Suspicious activity: auth failures, forbidden, CSRF
-    if (res.statusCode === 401 || res.statusCode === 403) {
+    // Suspicious activity: auth failures, forbidden, CSRF, rate limits
+    if (res.statusCode === 401 || res.statusCode === 403 || res.statusCode === 429) {
       log.warn('suspicious_activity', {
         request_id: req.requestId,
         method: req.method,
