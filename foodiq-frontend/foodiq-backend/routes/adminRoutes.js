@@ -91,6 +91,8 @@ router.get('/support/live-chats/:id', requirePermission('feedback'), c.getSuppor
 router.post('/support/live-chats/:id/messages', requirePermission('feedback'), c.postSupportAgentMessage);
 router.get('/support/ai-sessions', requirePermission('feedback'), c.getSupportAiSessions);
 
+router.get('/inventory', requirePermission('restaurants'), c.getAdminInventory);
+
 const feedbackAdmin = require('../controllers/feedbackController');
 const bugAdmin = require('../controllers/bugController');
 const maintenance = require('../controllers/maintenanceController');

@@ -38,4 +38,6 @@ router.get('/settlements', getSettlements);
 router.get('/reviews', getPartnerReviews);
 router.put('/reviews/:id', replyPartnerReview);
 
+router.use('/inventory', require('./inventoryRoutes'));
+
 module.exports = router;

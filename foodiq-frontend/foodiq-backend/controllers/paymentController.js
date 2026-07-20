@@ -305,6 +305,12 @@ const finalizeVerifiedPayment = async ({
         orderId,
         checkoutPrepared.totalAmount
       );
+      try {
+        const { deductInventoryForOrder } = require('../services/inventoryService');
+        await deductInventoryForOrder(orderId, checkoutPrepared.restaurantId);
+      } catch {
+        /* non-blocking */
+      }
       return {
         already_processed: false,
         order_id: orderId,

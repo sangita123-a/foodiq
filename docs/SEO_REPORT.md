@@ -1,12 +1,12 @@
 # Foodiq SEO Report
 
-Generated: 2026-07-20T08:54:46.624Z
+Generated: 2026-07-20T09:13:22.333Z
 
 ## Summary
 
-- Total routes: **100**
+- Total routes: **106**
 - Public routes: **18**
-- Private routes: **82**
+- Private routes: **88**
 - Public routes with metadata: **18/18**
 - SEO layout files: **42**
 - Icon assets: **16**

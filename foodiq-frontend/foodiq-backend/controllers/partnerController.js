@@ -244,6 +244,13 @@ const updatePartnerOrderStatus = async (req, res) => {
 
     const updated = await updateOrderStatus(req.params.id, dbStatus);
 
+    try {
+      const { trackKitchenStatus } = require('../services/inventoryService');
+      await trackKitchenStatus(req.params.id, restaurant.id, dbStatus);
+    } catch {
+      /* non-blocking */
+    }
+
     await pool.query(
       `INSERT INTO order_tracking (order_id, current_status, estimated_delivery_time)
        VALUES ($1, $2, CURRENT_TIMESTAMP + INTERVAL '30 minutes')

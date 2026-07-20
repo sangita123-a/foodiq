@@ -33,6 +33,13 @@ const checkout = async (req, res) => {
 
     await notifyRestaurantOwner(prepared.restaurantId, order.id, prepared.totalAmount);
 
+    try {
+      const { deductInventoryForOrder } = require('../services/inventoryService');
+      await deductInventoryForOrder(order.id, prepared.restaurantId);
+    } catch {
+      /* non-blocking */
+    }
+
     res.status(201).json({
       success: true,
       message: 'Order placed successfully (Cash on Delivery)',

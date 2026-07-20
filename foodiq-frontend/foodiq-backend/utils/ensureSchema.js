@@ -655,6 +655,124 @@ async function ensureSchema() {
       ON CONFLICT (rule_key) DO NOTHING
     `);
 
+    await q(`
+      CREATE TABLE IF NOT EXISTS inventory_categories (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        name VARCHAR(100) NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(restaurant_id, name)
+      )
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS inventory_suppliers (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        name VARCHAR(160) NOT NULL,
+        contact_person VARCHAR(120),
+        phone VARCHAR(30),
+        email VARCHAR(255),
+        address TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS restaurant_inventory_items (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        category_id UUID REFERENCES inventory_categories(id) ON DELETE SET NULL,
+        name VARCHAR(160) NOT NULL,
+        quantity NUMERIC(12,3) NOT NULL DEFAULT 0,
+        unit VARCHAR(40) NOT NULL DEFAULT 'pieces',
+        purchase_price NUMERIC(12,2) DEFAULT 0,
+        supplier_id UUID REFERENCES inventory_suppliers(id) ON DELETE SET NULL,
+        expiry_date DATE,
+        reorder_level NUMERIC(12,3) DEFAULT 5,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS recipe_ingredients (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        menu_item_id UUID NOT NULL REFERENCES menu_items(id) ON DELETE CASCADE,
+        inventory_item_id UUID NOT NULL REFERENCES restaurant_inventory_items(id) ON DELETE CASCADE,
+        quantity_required NUMERIC(12,3) NOT NULL DEFAULT 1,
+        unit VARCHAR(40),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(menu_item_id, inventory_item_id)
+      )
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS inventory_purchase_orders (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        supplier_id UUID REFERENCES inventory_suppliers(id) ON DELETE SET NULL,
+        status VARCHAR(40) DEFAULT 'draft',
+        total_amount NUMERIC(12,2) DEFAULT 0,
+        notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        received_at TIMESTAMP WITH TIME ZONE
+      )
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS inventory_purchase_items (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        purchase_order_id UUID NOT NULL REFERENCES inventory_purchase_orders(id) ON DELETE CASCADE,
+        inventory_item_id UUID REFERENCES restaurant_inventory_items(id) ON DELETE SET NULL,
+        item_name VARCHAR(160),
+        quantity NUMERIC(12,3) NOT NULL,
+        unit VARCHAR(40) DEFAULT 'pieces',
+        unit_price NUMERIC(12,2) DEFAULT 0
+      )
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS inventory_transactions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        inventory_item_id UUID NOT NULL REFERENCES restaurant_inventory_items(id) ON DELETE CASCADE,
+        transaction_type VARCHAR(40) NOT NULL,
+        quantity NUMERIC(12,3) NOT NULL,
+        reference_id UUID,
+        notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS kitchen_order_timers (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        started_at TIMESTAMP WITH TIME ZONE,
+        ready_at TIMESTAMP WITH TIME ZONE,
+        completed_at TIMESTAMP WITH TIME ZONE,
+        prep_minutes INTEGER,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(order_id)
+      )
+    `);
+
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_restaurant_inventory_restaurant
+        ON restaurant_inventory_items(restaurant_id, name)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_inventory_transactions_item
+        ON inventory_transactions(inventory_item_id, created_at DESC)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_recipe_ingredients_menu
+        ON recipe_ingredients(menu_item_id)
+    `);
+
     await q(`ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS admin_reply TEXT`);
     await q(`ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT FALSE`);
 

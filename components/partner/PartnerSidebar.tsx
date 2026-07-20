@@ -15,6 +15,11 @@ import {
   Settings,
   LogOut,
   Bell,
+  Package,
+  ChefHat,
+  BookOpen,
+  Truck,
+  ClipboardList,
 } from "lucide-react";
 import { clearClientAuth } from "@/lib/authSession";
 
@@ -25,7 +30,12 @@ export default function PartnerSidebar() {
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard, href: "/partner/dashboard" },
     { name: "Orders", icon: ShoppingBag, href: "/partner/orders" },
+    { name: "Kitchen", icon: ChefHat, href: "/partner/kitchen" },
     { name: "Menu Management", icon: UtensilsCrossed, href: "/partner/menu" },
+    { name: "Inventory", icon: Package, href: "/partner/inventory" },
+    { name: "Recipes", icon: BookOpen, href: "/partner/recipes" },
+    { name: "Suppliers", icon: Truck, href: "/partner/suppliers" },
+    { name: "Inv. Reports", icon: ClipboardList, href: "/partner/inventory-reports" },
     { name: "Add New Dish", icon: PlusCircle, href: "/partner/menu/add-dish" },
     { name: "Customers", icon: Users, href: "/partner/customers" },
     { name: "Reviews", icon: Star, href: "/partner/reviews" },

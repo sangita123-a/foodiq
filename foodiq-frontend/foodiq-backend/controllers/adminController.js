@@ -879,6 +879,15 @@ const getSupportAiSessions = async (req, res) => {
   }
 };
 
+const getAdminInventory = async (req, res) => {
+  try {
+    const inventory = require('../models/inventoryModel');
+    ok(res, 'Inventory health overview', await inventory.adminInventoryOverview());
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
 module.exports = {
   getDashboard,
   getLiveDeliveries,
@@ -948,4 +957,5 @@ module.exports = {
   getSupportLiveChatDetail,
   postSupportAgentMessage,
   getSupportAiSessions,
+  getAdminInventory,
 };
