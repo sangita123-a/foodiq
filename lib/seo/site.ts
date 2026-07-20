@@ -39,7 +39,7 @@ export function getSiteUrl(): string {
     return "http://localhost:3000";
   }
 
-  return "https://foodiq-sangita123-as-projects.vercel.app";
+  return "https://foodiq-ecru.vercel.app";
 }
 
 export function getApiBaseUrl(): string {

@@ -296,17 +296,33 @@ export async function fetchApiJson<T = unknown>(
   path: string,
   revalidateSeconds = 300
 ): Promise<T | null> {
+  return fetchApiJsonWithTimeout<T>(path, 15000, revalidateSeconds);
+}
+
+/** Same as fetchApiJson but with an explicit timeout (for sitemap generation). */
+export async function fetchApiJsonWithTimeout<T = unknown>(
+  path: string,
+  timeoutMs = 8000,
+  revalidateSeconds = 300
+): Promise<T | null> {
   const base = getApiBaseUrl();
   if (!base) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
   try {
     const res = await fetch(`${base}${path.startsWith("/") ? path : `/${path}`}`, {
       next: { revalidate: revalidateSeconds },
       headers: { Accept: "application/json" },
+      signal: controller.signal,
     });
     if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
