@@ -8,6 +8,7 @@ import useSWR from "swr";
 import { ShoppingCart, Search, Menu, X } from "lucide-react";
 import api from "@/services/api";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import InstallAppButton from "@/components/pwa/InstallAppButton";
 import { clearClientAuth } from "@/lib/authSession";
 import { useCartActions } from "@/hooks/useCartActions";
 
@@ -106,6 +107,8 @@ export default function Navbar() {
             <NotificationBell endpoint="/api/notifications" inboxHref="/notifications" />
           </>
         )}
+
+        <InstallAppButton />
 
         <Link
           href="/order-online"

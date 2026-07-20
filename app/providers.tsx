@@ -7,6 +7,7 @@ import { fetcher } from "@/services/api";
 import { ToastProvider, useToast } from "@/contexts/ToastContext";
 import ErrorBoundary from "@/components/monitoring/ErrorBoundary";
 import AnalyticsProvider from "@/components/analytics/AnalyticsProvider";
+import PwaProvider from "@/components/pwa/PwaProvider";
 import AuthBootstrap from "@/components/AuthBootstrap";
 import { FeatureFlagProvider } from "@/lib/featureFlags";
 import { SiteSettingsProvider } from "@/contexts/SiteSettingsContext";
@@ -49,14 +50,16 @@ export function Providers({ children }: { children: ReactNode }) {
     <ToastProvider>
       <ErrorBoundary>
         <AnalyticsProvider>
-          <AuthBootstrap />
-          <SWRGlobalConfig>
-            <FeatureFlagProvider>
-              <SiteSettingsProvider>
-                <PushNotificationProvider>{children}</PushNotificationProvider>
-              </SiteSettingsProvider>
-            </FeatureFlagProvider>
-          </SWRGlobalConfig>
+          <PwaProvider>
+            <AuthBootstrap />
+            <SWRGlobalConfig>
+              <FeatureFlagProvider>
+                <SiteSettingsProvider>
+                  <PushNotificationProvider>{children}</PushNotificationProvider>
+                </SiteSettingsProvider>
+              </FeatureFlagProvider>
+            </SWRGlobalConfig>
+          </PwaProvider>
         </AnalyticsProvider>
       </ErrorBoundary>
     </ToastProvider>

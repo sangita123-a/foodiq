@@ -15,6 +15,7 @@
     "seo:report": "node scripts/generate-seo-report.mjs",
     "seo:icons": "node scripts/generate-seo-icons.js",
     "seo:social-images": "node scripts/generate-social-images.js",
+    "pwa:icons": "node scripts/generate-pwa-icons.js",
     "postbuild": "node scripts/generate-seo-report.mjs",
     "images:build": "node scripts/buildDishImages.js",
     "analyze": "next build"

@@ -120,9 +120,12 @@ export async function registerPushDevice(): Promise<{
   }
 
   try {
-    const registration = await navigator.serviceWorker.register(
-      "/firebase-messaging-sw.js"
-    );
+    let registration = await navigator.serviceWorker.getRegistration("/");
+    if (!registration) {
+      registration = await navigator.serviceWorker.register("/sw.js", {
+        scope: "/",
+      });
+    }
     await navigator.serviceWorker.ready;
 
     const vapidKey =

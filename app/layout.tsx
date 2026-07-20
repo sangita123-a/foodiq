@@ -64,16 +64,55 @@ export const metadata: Metadata = {
     icon: [
       { url: "/icons/favicon-16.png", sizes: "16x16", type: "image/png" },
       { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-72.png", sizes: "72x72", type: "image/png" },
+      { url: "/icons/icon-96.png", sizes: "96x96", type: "image/png" },
+      { url: "/icons/icon-128.png", sizes: "128x128", type: "image/png" },
       { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
-    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
     shortcut: ["/icons/favicon-32.png"],
+    other: [
+      { rel: "mask-icon", url: "/icons/icon-maskable-512.png", color: "#E23744" },
+    ],
   },
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: SITE_NAME,
+    startupImage: [
+      {
+        url: "/splash/iphone-se.png",
+        media:
+          "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)",
+      },
+      {
+        url: "/splash/iphone-14.png",
+        media:
+          "(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)",
+      },
+      {
+        url: "/splash/iphone-14-pro-max.png",
+        media:
+          "(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)",
+      },
+      {
+        url: "/splash/ipad.png",
+        media:
+          "(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)",
+      },
+    ],
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "default",
+    "apple-mobile-web-app-title": SITE_NAME,
+    "msapplication-TileColor": "#E23744",
+    "msapplication-config": "/browserconfig.xml",
   },
   formatDetection: {
     telephone: false,
