@@ -122,13 +122,11 @@ const registerUser = async (req, res) => {
       // Referral invite code (optional)
       try {
         const referralCode = req.body.referral_code || req.body.invite_code;
+        const { applyReferralOnSignup, getOrCreateReferralCode } = require('../models/referralModel');
         if (referralCode) {
-          const { applyReferralOnSignup, getOrCreateReferralCode } = require('../models/referralModel');
           await applyReferralOnSignup({ refereeId: user.id, code: referralCode });
-        } else {
-          const { getOrCreateReferralCode } = require('../models/referralModel');
-          await getOrCreateReferralCode(user.id, full_name);
         }
+        await getOrCreateReferralCode(user.id, full_name);
       } catch (refErr) {
         log.warn('referral on signup skipped', { error: refErr.message });
       }
