@@ -14,6 +14,7 @@
     "ci": "npm run lint && npm run typecheck && npm run test:unit && npm run build",
     "seo:report": "node scripts/generate-seo-report.mjs",
     "seo:icons": "node scripts/generate-seo-icons.js",
+    "seo:social-images": "node scripts/generate-social-images.js",
     "postbuild": "node scripts/generate-seo-report.mjs",
     "images:build": "node scripts/buildDishImages.js",
     "analyze": "next build"

@@ -15,7 +15,7 @@ import { HOME_FAQS } from "@/lib/seo/faq";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { PUBLIC_PAGE_SEO } from "@/lib/seo/pages";
 import {
-  SITE_DESCRIPTION,
+  DEFAULT_OG_IMAGE,
   SITE_NAME,
   getApiBaseUrl,
   getSiteUrl,
@@ -51,13 +51,15 @@ export const metadata: Metadata = {
     description: homeSeo.description,
     path: homeSeo.path,
     keywords: homeSeo.keywords,
+    socialTitle: homeSeo.title,
+    socialDescription: homeSeo.description,
   }),
   metadataBase: new URL(getSiteUrl()),
   title: {
     default: homeSeo.title,
     template: `%s | ${SITE_NAME}`,
   },
-  description: SITE_DESCRIPTION,
+  description: homeSeo.description,
   icons: {
     icon: [
       { url: "/icons/favicon-16.png", sizes: "16x16", type: "image/png" },
@@ -111,7 +113,7 @@ export default function RootLayout({
         ) : null}
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-        <link rel="preload" as="image" href="/icons/og-default.png" type="image/png" />
+        <link rel="preload" as="image" href={DEFAULT_OG_IMAGE} type="image/png" />
         <link rel="preload" as="image" href="/default-restaurant.webp" type="image/webp" />
         <link rel="preload" as="image" href="/default-food.webp" type="image/webp" />
       </head>

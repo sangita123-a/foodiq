@@ -4,9 +4,9 @@ import { SITE_KEYWORDS } from "@/lib/seo/site";
 /** Static public route SEO copy (titles/descriptions). */
 export const PUBLIC_PAGE_SEO = {
   home: {
-    title: "Foodiq | Online Food Delivery Platform",
+    title: "Foodiq | Online Food Delivery",
     description:
-      "Order delicious food online from top restaurants with fast delivery only on Foodiq.",
+      "Order delicious food from top restaurants with fast delivery, exciting offers, and premium dining experience.",
     path: "/",
     keywords: SITE_KEYWORDS,
   },
@@ -126,5 +126,7 @@ export function publicMetadata(key: keyof typeof PUBLIC_PAGE_SEO) {
     path: seo.path,
     keywords: "keywords" in seo ? [...seo.keywords] : undefined,
     noIndex: "noIndex" in seo ? Boolean(seo.noIndex) : false,
+    socialTitle: seo.path === "/" ? seo.title : undefined,
+    socialDescription: seo.path === "/" ? seo.description : undefined,
   });
 }

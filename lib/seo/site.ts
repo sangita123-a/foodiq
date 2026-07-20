@@ -6,6 +6,10 @@ export const SITE_TAGLINE = "Online Food Delivery Platform";
 export const SITE_CITY = "Hyderabad";
 export const SITE_DESCRIPTION =
   "Order delicious food online from top restaurants with fast delivery only on Foodiq.";
+export const SITE_OG_TITLE = "Foodiq | Online Food Delivery";
+export const SITE_OG_DESCRIPTION =
+  "Order delicious food from top restaurants with fast delivery, exciting offers, and premium dining experience.";
+export const SITE_OG_IMAGE_ALT = "Foodiq — Order Delicious Food Anytime";
 export const SITE_KEYWORDS = [
   "Foodiq",
   "Foodiq Food Delivery",
@@ -55,7 +59,8 @@ export function absoluteUrl(path = "/"): string {
   return `${base}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-export const DEFAULT_OG_IMAGE = "/icons/og-default.png";
+export const DEFAULT_OG_IMAGE = "/opengraph-image.png";
+export const DEFAULT_TWITTER_IMAGE = "/twitter-image.png";
 
 /** Public social profiles for Organization sameAs (omit when empty). */
 export const ORGANIZATION_SAME_AS = [
