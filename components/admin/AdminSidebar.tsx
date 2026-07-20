@@ -63,6 +63,7 @@ const menuItems: MenuItem[] = [
   { name: "Delivery Partners", icon: Bike, href: "/admin/delivery-partners", permission: "delivery" },
   { name: "Menu", icon: UtensilsCrossed, href: "/admin/menu", permission: "menu" },
   { name: "Payments", icon: Wallet, href: "/admin/payments", permission: "payments" },
+  { name: "Customer Wallet", icon: Wallet, href: "/admin/wallet", permission: "payments" },
   { name: "Coupons", icon: Ticket, href: "/admin/coupons", permission: "coupons" },
   { name: "Loyalty", icon: Gift, href: "/admin/loyalty", permission: "loyalty" },
   { name: "Marketing", icon: Megaphone, href: "/admin/marketing", permission: "marketing" },

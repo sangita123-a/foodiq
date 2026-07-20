@@ -54,6 +54,7 @@ export function buildPlaceOrderPayload(draft: {
   deliveryMode?: string;
   scheduledFor?: string | null;
   paymentMethod?: string | null;
+  walletAmount?: number;
 }) {
   const payload: {
     address_id: string;
@@ -62,6 +63,7 @@ export function buildPlaceOrderPayload(draft: {
     delivery_mode?: string;
     scheduled_for?: string;
     payment_method?: string;
+    wallet_amount?: number;
   } = {
     address_id: draft.addressId,
     delivery_instructions: draft.instructions || null,
@@ -74,6 +76,9 @@ export function buildPlaceOrderPayload(draft: {
   }
   if (draft.deliveryMode === "Schedule" && draft.scheduledFor) {
     payload.scheduled_for = draft.scheduledFor;
+  }
+  if (draft.walletAmount != null && draft.walletAmount > 0) {
+    payload.wallet_amount = draft.walletAmount;
   }
 
   return payload;

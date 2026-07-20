@@ -199,8 +199,8 @@ const createRefundRecord = async (data, client = pool) => {
   const { rows } = await client.query(
     `INSERT INTO refunds (
        payment_id, order_id, user_id, amount, type, reason, status,
-       razorpay_refund_id, initiated_by, notes
-     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       razorpay_refund_id, initiated_by, notes, refund_method, refund_request_id
+     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
      RETURNING *`,
     [
       data.payment_id,
@@ -213,6 +213,8 @@ const createRefundRecord = async (data, client = pool) => {
       data.razorpay_refund_id || null,
       data.initiated_by || null,
       data.notes || null,
+      data.refund_method || 'original',
+      data.refund_request_id || null,
     ]
   );
   return rows[0];

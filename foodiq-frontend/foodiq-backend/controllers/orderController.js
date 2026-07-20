@@ -49,6 +49,25 @@ const cancelOrder = async (req, res) => {
     }
 
     const updated = await updateOrderStatus(req.params.id, 'Cancelled');
+
+    try {
+      const payment = await require('../models/paymentModel').getPaymentByOrderId(req.params.id);
+      if (payment && ['completed', 'partially_refunded'].includes(payment.status)) {
+        const { createRefundRequest } = require('../services/refundService');
+        await createRefundRequest({
+          orderId: req.params.id,
+          userId: order.user_id,
+          refundType: 'cancelled_order',
+          refundMethod: req.body.refund_method || 'wallet',
+          reason: 'Order cancelled by customer',
+          initiatedBy: req.user.id,
+          autoApprove: true,
+        });
+      }
+    } catch (refErr) {
+      console.warn('[order] cancel refund skipped:', refErr.message);
+    }
+
     return ok(res, 'Order cancelled', updated);
   } catch (error) {
     return fail(res, 500, 'Server Error', error);

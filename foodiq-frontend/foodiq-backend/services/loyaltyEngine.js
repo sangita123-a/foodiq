@@ -203,6 +203,31 @@ const creditForOrderDelivered = async (order) => {
     }
   }
 
+  try {
+    if (order.coupon_id) {
+      const { rows: couponRows } = await pool.query(
+        `SELECT coupon_type FROM coupons WHERE id = $1`,
+        [order.coupon_id]
+      );
+      if (couponRows[0]?.coupon_type === 'festival') {
+        const { creditWallet } = require('../models/customerWalletModel');
+        const cashback = Math.max(1, Math.round(Number(order.total_amount || 0) * 0.05));
+        await creditWallet(order.user_id, cashback, {
+          type: 'cashback',
+          category: 'cashback',
+          cashbackPortion: cashback,
+          referenceType: 'order',
+          referenceId: order.id,
+          orderId: order.id,
+          dedupeKey: `festival_cashback:${order.id}`,
+          note: 'Festival offer cashback',
+        });
+      }
+    }
+  } catch (cbErr) {
+    console.warn('[loyalty] festival cashback skipped:', cbErr.message);
+  }
+
   return result;
 };
 

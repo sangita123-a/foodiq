@@ -61,6 +61,7 @@ const prepareCheckout = async (userId, body) => {
     payment_method,
     points_to_redeem,
     redemption_type,
+    wallet_amount,
   } = body;
 
   if (!address_id) {
@@ -257,6 +258,17 @@ const prepareCheckout = async (userId, body) => {
     /* keep V2 totals */
   }
 
+  const originalTotalAmount = totalAmount;
+  let walletAmountUsed = 0;
+  const requestedWallet = Number(wallet_amount) || 0;
+  if (requestedWallet > 0) {
+    const { getWalletByUserId } = require('../models/customerWalletModel');
+    const wallet = await getWalletByUserId(userId);
+    walletAmountUsed = Math.min(requestedWallet, Number(wallet.balance || 0), totalAmount);
+    walletAmountUsed = Math.round(walletAmountUsed * 100) / 100;
+    totalAmount = Math.max(0, totalAmount - walletAmountUsed);
+  }
+
   return {
     cart,
     items,
@@ -270,6 +282,8 @@ const prepareCheckout = async (userId, body) => {
     deliveryCharge,
     tax,
     totalAmount,
+    originalTotalAmount,
+    wallet_amount_used: walletAmountUsed,
     market_id: marketId,
     currency,
     pricing_multiplier: pricingMultiplier,
@@ -291,6 +305,7 @@ const prepareCheckout = async (userId, body) => {
       scheduled_for:
         delivery_mode === 'Schedule' && scheduled_for ? scheduled_for : null,
       payment_method: normalizedPaymentMethod,
+      wallet_amount: walletAmountUsed || undefined,
     },
   };
 };
@@ -308,9 +323,9 @@ const commitCheckoutOrder = async (userId, prepared, paymentMeta = {}, client = 
     INSERT INTO orders (
       user_id, restaurant_id, delivery_address_id, coupon_id, offer_id, status,
       subtotal, discount_amount, delivery_fee, total_amount, delivery_instructions,
-      delivery_mode, scheduled_for, market_id, currency
+      delivery_mode, scheduled_for, market_id, currency, wallet_amount_used
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
     RETURNING *
   `;
   const orderValues = [
@@ -323,12 +338,13 @@ const commitCheckoutOrder = async (userId, prepared, paymentMeta = {}, client = 
     prepared.subtotal,
     prepared.discount,
     prepared.deliveryCharge,
-    prepared.totalAmount,
+    prepared.originalTotalAmount ?? prepared.totalAmount,
     prepared.delivery_instructions,
     prepared.delivery_mode,
     prepared.scheduled_for,
     prepared.market_id || null,
     prepared.currency || 'INR',
+    prepared.wallet_amount_used || 0,
   ];
 
   const { rows: orderRows } = await client.query(orderQuery, orderValues);
@@ -379,12 +395,34 @@ const commitCheckoutOrder = async (userId, prepared, paymentMeta = {}, client = 
     );
   }
 
+  if (prepared.wallet_amount_used > 0) {
+    const { debitWallet } = require('../models/customerWalletModel');
+    await debitWallet(
+      userId,
+      prepared.wallet_amount_used,
+      {
+        type: 'wallet_payment',
+        category: 'payment',
+        referenceType: 'order',
+        referenceId: newOrder.id,
+        orderId: newOrder.id,
+        dedupeKey: `wallet_pay:${newOrder.id}`,
+        note: `Wallet payment for order #${String(newOrder.id).slice(0, 8)}`,
+      },
+      client
+    );
+  }
+
+  const payableAmount = prepared.totalAmount;
+  const effectiveMethod =
+    payableAmount <= 0 && prepared.wallet_amount_used > 0 ? 'wallet' : prepared.payment_method;
+
   const payment = await createPaymentRecord(
     {
       orderId: newOrder.id,
       userId,
-      amount: prepared.totalAmount,
-      method: prepared.payment_method,
+      amount: payableAmount > 0 ? payableAmount : prepared.originalTotalAmount ?? payableAmount,
+      method: effectiveMethod,
       status: paymentStatus,
       provider_transaction_id: paymentMeta.provider_transaction_id || null,
       razorpay_order_id: paymentMeta.razorpay_order_id || null,

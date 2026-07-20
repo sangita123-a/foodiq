@@ -10,9 +10,11 @@ export type PaymentMethodApi =
   | "net_banking";
 
 export type RazorpayOrderResponse = {
-  transaction_id: string;
-  razorpay_order_id: string;
-  amount: number;
+  transaction_id?: string;
+  razorpay_order_id?: string;
+  order_id?: string;
+  wallet_only?: boolean;
+  amount?: number;
   amount_paise: number;
   currency: string;
   key_id: string;

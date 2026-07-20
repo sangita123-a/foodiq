@@ -205,6 +205,7 @@ app.use('/api/delivery-partners', deliveryPartnerRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/rewards', rewardRoutes);
 app.use('/api/loyalty', require('./routes/loyaltyRoutes'));
+app.use('/api/wallet', require('./routes/walletRoutes'));
 app.use('/api/profile', profileRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/sessions', sessionRoutes);

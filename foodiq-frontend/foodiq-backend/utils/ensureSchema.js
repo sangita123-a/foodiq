@@ -384,6 +384,77 @@ async function ensureSchema() {
     `);
 
     await q(`
+      CREATE TABLE IF NOT EXISTS customer_wallets (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        balance NUMERIC(12,2) NOT NULL DEFAULT 0,
+        cashback_balance NUMERIC(12,2) NOT NULL DEFAULT 0,
+        refund_balance NUMERIC(12,2) NOT NULL DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      CREATE TABLE IF NOT EXISTS wallet_transactions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        type VARCHAR(40) NOT NULL,
+        category VARCHAR(40) DEFAULT 'general',
+        amount NUMERIC(12,2) NOT NULL,
+        balance_after NUMERIC(12,2) NOT NULL DEFAULT 0,
+        status VARCHAR(30) NOT NULL DEFAULT 'completed',
+        reference_type VARCHAR(40),
+        reference_id VARCHAR(120),
+        order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+        dedupe_key VARCHAR(200),
+        note TEXT,
+        meta JSONB DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_wallet_transactions_dedupe
+        ON wallet_transactions(dedupe_key) WHERE dedupe_key IS NOT NULL
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_wallet_transactions_user
+        ON wallet_transactions(user_id, created_at DESC)
+    `);
+    await q(`
+      CREATE TABLE IF NOT EXISTS refund_requests (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        payment_id UUID REFERENCES payments(id) ON DELETE SET NULL,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        amount NUMERIC(12,2) NOT NULL,
+        refund_type VARCHAR(30) NOT NULL DEFAULT 'full',
+        refund_method VARCHAR(30) NOT NULL DEFAULT 'wallet',
+        status VARCHAR(30) NOT NULL DEFAULT 'pending',
+        reason TEXT,
+        initiated_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        processed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        dedupe_key VARCHAR(200),
+        notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        processed_at TIMESTAMP WITH TIME ZONE
+      )
+    `);
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_refund_requests_dedupe
+        ON refund_requests(dedupe_key) WHERE dedupe_key IS NOT NULL
+    `);
+    await q(`
+      ALTER TABLE refunds
+        ADD COLUMN IF NOT EXISTS refund_method VARCHAR(30) DEFAULT 'original',
+        ADD COLUMN IF NOT EXISTS refund_request_id UUID
+    `);
+    await q(`
+      ALTER TABLE orders
+        ADD COLUMN IF NOT EXISTS wallet_amount_used NUMERIC(12,2) DEFAULT 0
+    `);
+
+    await q(`
       CREATE TABLE IF NOT EXISTS admin_settings (
         id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
         delivery_charge NUMERIC(10,2) DEFAULT 50,

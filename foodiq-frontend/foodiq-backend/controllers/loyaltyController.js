@@ -119,14 +119,27 @@ const previewCheckout = async (req, res) => {
       pointsPreview = loyaltyEngine.previewRedemption(Number(points_to_redeem), Number(subtotal));
     }
 
+    let customerWallet = { balance: 0 };
+    try {
+      customerWallet = await require('../models/customerWalletModel').getWalletByUserId(req.user.id);
+    } catch {
+      /* ignore */
+    }
+
     ok(res, 'Checkout preview retrieved', {
       wallet: {
         points_balance: wallet.points_balance,
         tier: wallet.tier.current,
+        foodiq_balance: Number(customerWallet.balance || 0),
       },
       redemption_options: {
         coupon: { available: true, label: 'Use Coupon Code' },
-        wallet: { available: false, label: 'Foodiq Wallet (coming soon)' },
+        wallet: {
+          available: Number(customerWallet.balance || 0) > 0,
+          label: 'Foodiq Wallet',
+          balance: Number(customerWallet.balance || 0),
+          max_usable: Math.min(Number(customerWallet.balance || 0), Number(subtotal)),
+        },
         points: {
           available: wallet.points_balance >= 100,
           label: 'Use Loyalty Points',

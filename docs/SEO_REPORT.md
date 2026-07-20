@@ -1,14 +1,14 @@
 # Foodiq SEO Report
 
-Generated: 2026-07-20T09:58:48.723Z
+Generated: 2026-07-20T10:09:55.681Z
 
 ## Summary
 
-- Total routes: **108**
-- Public routes: **19**
-- Private routes: **89**
-- Public routes with metadata: **19/19**
-- SEO layout files: **43**
+- Total routes: **110**
+- Public routes: **20**
+- Private routes: **90**
+- Public routes with metadata: **20/20**
+- SEO layout files: **44**
 - Icon assets: **16**
 
 ## Production SEO Checklist
@@ -52,6 +52,7 @@ Homepage title: **Foodiq | Online Food Delivery Platform**
 | `/help-support` | ✅ | layout |
 | `/live-cricket` | ✅ | layout |
 | `/my-rewards` | ✅ | layout |
+| `/my-wallet` | ✅ | layout |
 | `/offers` | ✅ | layout |
 | `/offline` | ✅ | page |
 | `/order-online` | ✅ | layout |

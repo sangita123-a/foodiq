@@ -116,6 +116,24 @@ const creditReferralOnFirstOrder = async (refereeId, orderId) => {
     [Number(referralRule?.points || points), redemption.id]
   );
 
+  try {
+    const cashbackAmount = Math.round(Number(referralRule?.points || points) / 10);
+    if (cashbackAmount > 0) {
+      const { creditWallet } = require('../models/customerWalletModel');
+      await creditWallet(redemption.referrer_id, cashbackAmount, {
+        type: 'cashback',
+        category: 'cashback',
+        cashbackPortion: cashbackAmount,
+        referenceType: 'referral',
+        referenceId: refereeId,
+        dedupeKey: `referral_cashback:${refereeId}`,
+        note: 'Referral cashback — friend completed first order',
+      });
+    }
+  } catch (cbErr) {
+    console.warn('[referral] cashback credit skipped:', cbErr.message);
+  }
+
   return {
     referrer_id: redemption.referrer_id,
     points: Number(referralRule?.points || points),

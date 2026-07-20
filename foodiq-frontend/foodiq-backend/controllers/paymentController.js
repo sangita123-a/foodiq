@@ -139,6 +139,27 @@ const createRazorpayCheckoutOrder = async (req, res) => {
 
     const amountInPaise = Math.round(prepared.totalAmount * 100);
     if (amountInPaise < 100) {
+      if (prepared.wallet_amount_used > 0) {
+        const { commitCheckoutOrder } = require('../services/checkoutService');
+        const dbClient = await pool.connect();
+        try {
+          await dbClient.query('BEGIN');
+          const { order, payment } = await commitCheckoutOrder(req.user.id, prepared, {
+            status: 'completed',
+          }, dbClient);
+          await dbClient.query('COMMIT');
+          return ok(res, 'Order placed with wallet', {
+            order_id: order.id,
+            payment_id: payment.id,
+            wallet_only: true,
+          });
+        } catch (err) {
+          await dbClient.query('ROLLBACK');
+          throw err;
+        } finally {
+          dbClient.release();
+        }
+      }
       return fail(res, 400, 'Minimum payable amount is ₹1');
     }
 
@@ -1047,8 +1068,26 @@ const adminListRefunds = async (req, res) => {
 
 const adminCreateRefund = async (req, res) => {
   try {
-    const { order_id, amount, reason, type } = req.body;
+    const { order_id, amount, reason, type, refund_method, auto_approve } = req.body;
     if (!order_id) return fail(res, 400, 'order_id is required');
+
+    if (refund_method === 'wallet' || auto_approve !== false) {
+      const { createRefundRequest } = require('../services/refundService');
+      const payment = await getPaymentByOrderId(order_id);
+      const result = await createRefundRequest({
+        orderId: order_id,
+        userId: payment?.user_id,
+        amount,
+        refundType: type || (amount ? 'partial' : 'full'),
+        refundMethod: refund_method || 'wallet',
+        reason: reason || 'Admin refund',
+        initiatedBy: req.user.id,
+        autoApprove: auto_approve !== false,
+      });
+      const msg = result.duplicate ? 'Duplicate refund request' : 'Refund processed';
+      return ok(res, msg, result, result.duplicate ? 200 : 201);
+    }
+
     const refund = await processRefund({
       orderId: order_id,
       amount,

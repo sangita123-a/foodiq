@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import DeliveryAddressSection from "@/components/checkout/DeliveryAddressSection";
 import DeliveryTimeSection, { DeliveryMode } from "@/components/checkout/DeliveryTimeSection";
 import PromoCodeSection from "@/components/checkout/PromoCodeSection";
+import WalletCheckoutSection from "@/components/checkout/WalletCheckoutSection";
 import DeliveryInstructionsSection from "@/components/checkout/DeliveryInstructionsSection";
 import PaymentMethodsSection, {
   PaymentMethod,
@@ -69,6 +70,7 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState<string | null>(null);
   const [discount, setDiscount] = useState(0);
   const [freeDelivery, setFreeDelivery] = useState(false);
+  const [walletAmount, setWalletAmount] = useState(0);
   const [activeOfferCoupon] = useState<string | null>(
     () => getActiveOffer()?.couponCode || null
   );
@@ -102,14 +104,18 @@ export default function CheckoutPage() {
   const subtotal = cartData?.totals?.subtotal ? Number(cartData.totals.subtotal) : actionSubtotal;
   const deliveryCharge = cartItems.length > 0 ? 35 : 0;
   const tax = Math.round(subtotal * 0.05);
-  const grandTotal = Math.max(0, subtotal + deliveryCharge + tax - discount);
+  const effectiveDelivery = freeDelivery ? 0 : deliveryCharge;
+  const preWalletTotal = Math.max(0, subtotal + effectiveDelivery + tax - discount);
+  const grandTotal = Math.max(0, preWalletTotal - walletAmount);
 
   const totals = {
     subtotal,
-    deliveryCharge,
+    deliveryCharge: effectiveDelivery,
     tax,
     discount,
     grandTotal,
+    preWalletTotal,
+    walletAmount,
   };
 
   const addresses: AddressRow[] = addressData || [];
@@ -175,6 +181,7 @@ export default function CheckoutPage() {
       deliveryMode,
       scheduledFor: buildScheduledFor(deliveryMode, selectedDate, selectedTime),
       paymentMethod: mapPaymentMethodToApi(paymentMethod),
+      walletAmount: walletAmount > 0 ? walletAmount : undefined,
     });
 
     setIsSubmitting(true);
@@ -189,12 +196,22 @@ export default function CheckoutPage() {
       setPaymentStep("creating");
       const rz = await createRazorpayOrder(payload);
 
+      if (rz.wallet_only && rz.order_id) {
+        await finishSuccess(rz.order_id, 30);
+        return;
+      }
+
+      const razorpayOrderId = rz.razorpay_order_id;
+      if (!razorpayOrderId) {
+        throw new Error("Payment session could not be created");
+      }
+
       if (rz.mock) {
         if (process.env.NODE_ENV === "production") {
           throw new Error("Online payments are temporarily unavailable. Please try again later.");
         }
         setPaymentStep("verifying");
-        const verified = await mockCompleteRazorpay(rz.razorpay_order_id);
+        const verified = await mockCompleteRazorpay(razorpayOrderId);
         await finishSuccess(
           verified.order_id,
           verified.summary?.estimated_delivery_minutes || 30
@@ -204,10 +221,10 @@ export default function CheckoutPage() {
 
       setPaymentStep("checkout");
       await openRazorpayCheckout({
-        key: rz.key_id,
-        amountPaise: rz.amount_paise,
-        currency: rz.currency,
-        orderId: rz.razorpay_order_id,
+        key: rz.key_id!,
+        amountPaise: rz.amount_paise!,
+        currency: rz.currency!,
+        orderId: razorpayOrderId,
         description: `Foodiq order · ${mapPaymentMethodToApi(paymentMethod)}`,
         prefill: rz.prefill,
         preferredMethod: rz.prefill_method,
@@ -228,12 +245,12 @@ export default function CheckoutPage() {
             void import("@/lib/analytics/events").then(({ AnalyticsEvents, trackEvent }) => {
               trackEvent(AnalyticsEvents.paymentFailed, {
                 reason: "verification_failed",
-                razorpay_order_id: rz.razorpay_order_id,
+                razorpay_order_id: razorpayOrderId,
               });
             });
             showToast(message || "Payment verification failed", "error");
             router.push(
-              `/payment/failed?order=${encodeURIComponent(rz.razorpay_order_id)}&reason=${encodeURIComponent(message || "verification_failed")}`
+              `/payment/failed?order=${encodeURIComponent(razorpayOrderId)}&reason=${encodeURIComponent(message || "verification_failed")}`
             );
           } finally {
             setIsSubmitting(false);
@@ -244,30 +261,30 @@ export default function CheckoutPage() {
           void import("@/lib/analytics/events").then(({ AnalyticsEvents, trackEvent }) => {
             trackEvent(AnalyticsEvents.paymentFailed, {
               reason: "cancelled",
-              razorpay_order_id: rz.razorpay_order_id,
+              razorpay_order_id: razorpayOrderId,
             });
           });
-          await markRazorpayFailed(rz.razorpay_order_id, "Checkout dismissed");
+          await markRazorpayFailed(razorpayOrderId, "Checkout dismissed");
           setIsSubmitting(false);
           setPaymentStep("idle");
           showToast("Payment cancelled. You can try again.", "error");
           router.push(
-            `/payment/failed?order=${encodeURIComponent(rz.razorpay_order_id)}&reason=cancelled`
+            `/payment/failed?order=${encodeURIComponent(razorpayOrderId)}&reason=cancelled`
           );
         },
         onError: async (message) => {
           void import("@/lib/analytics/events").then(({ AnalyticsEvents, trackEvent }) => {
             trackEvent(AnalyticsEvents.paymentFailed, {
               reason: message.slice(0, 100),
-              razorpay_order_id: rz.razorpay_order_id,
+              razorpay_order_id: razorpayOrderId,
             });
           });
-          await markRazorpayFailed(rz.razorpay_order_id, message);
+          await markRazorpayFailed(razorpayOrderId, message);
           setIsSubmitting(false);
           setPaymentStep("idle");
           showToast(message, "error");
           router.push(
-            `/payment/failed?order=${encodeURIComponent(rz.razorpay_order_id)}&reason=${encodeURIComponent(message)}`
+            `/payment/failed?order=${encodeURIComponent(razorpayOrderId)}&reason=${encodeURIComponent(message)}`
           );
         },
       });
@@ -428,7 +445,14 @@ export default function CheckoutPage() {
                 setDiscount(amount);
                 setCouponCode(code);
                 setFreeDelivery(Boolean(freeDel) || code === "FREEDEL");
+                setWalletAmount(0);
               }}
+            />
+
+            <WalletCheckoutSection
+              grandTotal={totals.preWalletTotal}
+              walletAmount={walletAmount}
+              onWalletChange={setWalletAmount}
             />
 
             <PaymentMethodsSection selectedMethod={paymentMethod} onSelect={setPaymentMethod} />
