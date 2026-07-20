@@ -404,8 +404,34 @@ const getOrderReports = (req, res) => getReportTemplate(req, res, 'COUNT(*)', 'o
 const getUserReports = (req, res) => getReportTemplate(req, res, 'COUNT(*)', 'users', 'created_at');
 const getRestaurantReports = (req, res) => getReportTemplate(req, res, 'COUNT(*)', 'restaurants', 'created_at');
 
+const getLiveDeliveries = async (req, res) => {
+  try {
+    const { pool } = require('../config/db');
+    const { getLiveDeliveries: fetchLive, getDelayedOrders } = require('../services/trackingService');
+    const live = await fetchLive();
+    const delayed = await getDelayedOrders();
+    const cancelled = await pool.query(
+      `SELECT o.id, o.status, o.created_at, r.name AS restaurant_name
+       FROM orders o
+       JOIN restaurants r ON r.id = o.restaurant_id
+       WHERE LOWER(o.status) IN ('cancelled', 'rejected')
+         AND o.created_at >= CURRENT_TIMESTAMP - INTERVAL '24 hours'
+       ORDER BY o.created_at DESC
+       LIMIT 30`
+    );
+    ok(res, 'Live deliveries retrieved', {
+      live_deliveries: live,
+      delayed_orders: delayed,
+      cancelled_orders: cancelled.rows,
+    });
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
 module.exports = {
   getDashboard,
+  getLiveDeliveries,
   getRestaurants,
   patchRestaurant,
   removeRestaurant,

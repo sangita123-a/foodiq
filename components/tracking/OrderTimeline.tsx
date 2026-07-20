@@ -6,15 +6,17 @@ import { motion } from "framer-motion";
 const stages = [
   { id: 1, title: "Order Placed", description: "We received your order" },
   { id: 2, title: "Restaurant Accepted", description: "Restaurant confirmed your order" },
-  { id: 3, title: "Preparing", description: "Your food is being prepared" },
-  { id: 4, title: "Ready For Pickup", description: "Waiting for delivery partner" },
-  { id: 5, title: "Picked Up", description: "Rider collected your order" },
-  { id: 6, title: "Out For Delivery", description: "Heading to your address" },
-  { id: 7, title: "Delivered", description: "Enjoy your meal" },
+  { id: 3, title: "Preparing Food", description: "Your food is being prepared" },
+  { id: 4, title: "Ready for Pickup", description: "Waiting for delivery partner" },
+  { id: 5, title: "Delivery Partner Assigned", description: "A rider is on the way to the restaurant" },
+  { id: 6, title: "Picked Up", description: "Rider collected your order" },
+  { id: 7, title: "On the Way", description: "Heading to your address" },
+  { id: 8, title: "Arriving Soon", description: "Your order is almost at your doorstep" },
+  { id: 9, title: "Delivered", description: "Enjoy your meal" },
 ];
 
 type Props = {
-  currentStageId: number; // 1–7, 0 = cancelled
+  currentStageId: number; // 1–9, 0 = cancelled
   cancelled?: boolean;
 };
 

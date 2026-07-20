@@ -285,6 +285,41 @@ async function ensureSchema() {
     `);
 
     await q(`
+      CREATE TABLE IF NOT EXISTS driver_locations (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        driver_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+        latitude NUMERIC(10,7) NOT NULL,
+        longitude NUMERIC(10,7) NOT NULL,
+        last_updated TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_driver_locations_driver_time
+        ON driver_locations(driver_id, last_updated DESC)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_driver_locations_order
+        ON driver_locations(order_id, last_updated DESC)
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS order_tracking_history (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        status VARCHAR(80) NOT NULL,
+        note TEXT,
+        actor_type VARCHAR(40),
+        actor_id UUID,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_order_tracking_history_order
+        ON order_tracking_history(order_id, created_at ASC)
+    `);
+
+    await q(`
       CREATE TABLE IF NOT EXISTS delivery_earnings (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         delivery_partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,

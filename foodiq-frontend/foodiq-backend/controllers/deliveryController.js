@@ -146,9 +146,11 @@ const setLocation = async (req, res) => {
     if (Number.isNaN(lat) || Number.isNaN(lng)) {
       return fail(res, 400, 'lat and lng are required');
     }
-    const data = await delivery.updateLocation(partner.id, lat, lng);
 
     // Sync active delivery order_tracking + broadcast live location
+    let distance_km = null;
+    let eta_minutes = null;
+    let activeOrderId = null;
     try {
       const { pool } = require('../config/db');
       const { emitLocationUpdated } = require('../socket/emitters');
@@ -167,9 +169,8 @@ const setLocation = async (req, res) => {
       );
 
       const job = active.rows[0];
-      let distance_km = null;
-      let eta_minutes = null;
       if (job) {
+        activeOrderId = job.order_id;
         await pool.query(
           `UPDATE order_tracking
            SET location_lat = $1, location_lng = $2,
@@ -192,6 +193,40 @@ const setLocation = async (req, res) => {
           eta_minutes,
           distance_km,
         });
+
+        if (job.user_id && distance_km != null) {
+          try {
+            const { createNotification } = require('../models/notificationModel');
+            const types = require('../services/notificationTypes');
+            if (distance_km <= 0.5) {
+              await createNotification(
+                job.user_id,
+                types.ARRIVING_SOON,
+                'Arriving Soon',
+                'Your delivery partner is almost at your doorstep.',
+                {
+                  order_id: job.order_id,
+                  link: `/track-order/${job.order_id}`,
+                  dedupe_key: `arriving:${job.order_id}`,
+                }
+              );
+            } else if (distance_km <= 2) {
+              await createNotification(
+                job.user_id,
+                types.NEAR_YOU,
+                'Driver Near You',
+                'Your order is nearby and will arrive shortly.',
+                {
+                  order_id: job.order_id,
+                  link: `/track-order/${job.order_id}`,
+                  dedupe_key: `near:${job.order_id}`,
+                }
+              );
+            }
+          } catch {
+            /* non-blocking */
+          }
+        }
       } else {
         emitLocationUpdated({
           delivery_partner_id: partner.id,
@@ -203,7 +238,8 @@ const setLocation = async (req, res) => {
       console.warn('[delivery] location emit skipped:', socketErr.message);
     }
 
-    ok(res, 'Location updated', data);
+    const data = await delivery.updateLocation(partner.id, lat, lng, activeOrderId);
+    ok(res, 'Location updated', { ...data, distance_km, eta_minutes });
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
   }

@@ -219,6 +219,7 @@ app.use('/api/feedback', require('./routes/feedbackRoutes'));
 app.use('/api/bugs', require('./routes/bugRoutes'));
 app.use('/api/partner', partnerRoutes);
 app.use('/api/delivery', deliveryRoutes);
+app.use('/api/driver', require('./routes/driverRoutes'));
 app.use('/api/messaging', require('./routes/messagingRoutes'));
 app.use('/api/media', require('./routes/mediaRoutes'));
 app.use('/api/monitoring', require('./routes/monitoringRoutes'));

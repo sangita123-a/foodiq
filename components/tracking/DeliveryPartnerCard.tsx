@@ -50,14 +50,31 @@ export default function DeliveryPartnerCard({ partner }: Props) {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-4 w-full sm:w-auto mt-2 sm:mt-0">
-          <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#F8FAFC] hover:bg-[#F8FAFC] text-white px-6 py-3.5 rounded-xl font-bold transition-colors">
+          <button
+            type="button"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#F8FAFC] hover:bg-[#F8FAFC] text-white px-6 py-3.5 rounded-xl font-bold transition-colors"
+          >
             <MessageSquare className="w-4 h-4" />
             Chat
           </button>
-          <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3.5 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(34,197,94,0.3)]">
-            <Phone className="w-4 h-4" />
-            Call
-          </button>
+          {partner.phone ? (
+            <a
+              href={`tel:${partner.phone.replace(/\s/g, "")}`}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3.5 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(34,197,94,0.3)]"
+            >
+              <Phone className="w-4 h-4" />
+              Call
+            </a>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3.5 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(34,197,94,0.3)] opacity-50"
+            >
+              <Phone className="w-4 h-4" />
+              Call
+            </button>
+          )}
         </div>
 
       </div>

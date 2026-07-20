@@ -253,6 +253,18 @@ const acceptOrder = async (orderId, partnerId) => {
   );
 
   await recordHistory(rows[0].id, orderId, partnerId, 'accepted', 'Partner accepted delivery');
+  try {
+    const { recordOrderTrackingHistory } = require('../services/trackingService');
+    await recordOrderTrackingHistory({
+      orderId,
+      status: 'Delivery Partner Assigned',
+      note: 'Delivery partner accepted the order',
+      actorType: 'driver',
+      actorId: partnerId,
+    });
+  } catch {
+    /* non-blocking */
+  }
   await notifyStakeholders(orderId, 'Delivery partner assigned', 'A delivery partner has accepted your order.');
 
   return getOrderForPartner(orderId, partnerId);
@@ -529,13 +541,19 @@ const updateAvailability = async (partnerId, isAvailable) => {
   return rows[0];
 };
 
-const updateLocation = async (partnerId, lat, lng) => {
+const updateLocation = async (partnerId, lat, lng, orderId = null) => {
   const { rows } = await pool.query(
     `UPDATE delivery_partners
      SET current_lat = $1, current_lng = $2, updated_at = CURRENT_TIMESTAMP
      WHERE id = $3 RETURNING *`,
     [lat, lng, partnerId]
   );
+  try {
+    const { recordDriverLocation } = require('../services/trackingService');
+    await recordDriverLocation({ driverId: partnerId, lat, lng, orderId });
+  } catch {
+    /* non-blocking */
+  }
   return rows[0];
 };
 

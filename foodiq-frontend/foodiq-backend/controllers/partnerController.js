@@ -253,6 +253,19 @@ const updatePartnerOrderStatus = async (req, res) => {
       [req.params.id, dbStatus]
     ).catch(() => {});
 
+    try {
+      const { recordOrderTrackingHistory } = require('../services/trackingService');
+      await recordOrderTrackingHistory({
+        orderId: req.params.id,
+        status: dbStatus,
+        note: `Restaurant updated status to ${dbStatus}`,
+        actorType: 'restaurant',
+        actorId: restaurant.id,
+      });
+    } catch {
+      /* non-blocking */
+    }
+
     await createNotification(
       order.user_id,
       require('../services/notificationTypes').statusToCustomerType(dbStatus),

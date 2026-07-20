@@ -9,6 +9,9 @@ module.exports = {
   ORDER_PREPARING: 'order_preparing',
   ORDER_READY: 'order_ready',
   ORDER_PICKED_UP: 'order_picked_up',
+  DRIVER_ASSIGNED: 'driver_assigned',
+  NEAR_YOU: 'near_you',
+  ARRIVING_SOON: 'arriving_soon',
   OUT_FOR_DELIVERY: 'out_for_delivery',
   ORDER_DELIVERED: 'order_delivered',
   ORDER_CANCELLED: 'order_cancelled',
@@ -61,7 +64,10 @@ const statusToCustomerType = (status) => {
   if (s === 'accepted') return module.exports.ORDER_ACCEPTED;
   if (s === 'preparing') return module.exports.ORDER_PREPARING;
   if (s === 'ready for pickup' || s === 'reached restaurant') return module.exports.ORDER_READY;
+  if (s === 'assigned' || s === 'delivery partner assigned') return module.exports.DRIVER_ASSIGNED;
   if (s === 'picked up') return module.exports.ORDER_PICKED_UP;
+  if (s === 'arriving soon') return module.exports.ARRIVING_SOON;
+  if (s === 'near you') return module.exports.NEAR_YOU;
   if (s === 'on the way' || s === 'out for delivery') return module.exports.OUT_FOR_DELIVERY;
   if (s === 'delivered') return module.exports.ORDER_DELIVERED;
   if (s === 'cancelled' || s === 'rejected') return module.exports.ORDER_CANCELLED;

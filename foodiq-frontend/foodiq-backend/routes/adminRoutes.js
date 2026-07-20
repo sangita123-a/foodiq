@@ -7,6 +7,7 @@ router.use(protect);
 router.use(authorize('admin'));
 
 router.get('/dashboard', c.getDashboard);
+router.get('/live-deliveries', c.getLiveDeliveries);
 router.get('/analytics', c.getAnalytics);
 
 router.get('/restaurants', c.getRestaurants);
