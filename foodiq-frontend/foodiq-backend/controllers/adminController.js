@@ -781,6 +781,104 @@ const postLoyaltyCampaign = async (req, res) => {
   }
 };
 
+const getSupportCenter = async (req, res) => {
+  try {
+    const helpCenter = require('../models/helpCenterModel');
+    const analytics = await helpCenter.getAnalytics();
+    ok(res, 'Support analytics retrieved', analytics);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getSupportTickets = async (req, res) => {
+  try {
+    const helpCenter = require('../models/helpCenterModel');
+    ok(res, 'Tickets retrieved', await helpCenter.listAllTickets({
+      status: req.query.status || '',
+      category: req.query.category || '',
+    }));
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const assignSupportTicket = async (req, res) => {
+  try {
+    const helpCenter = require('../models/helpCenterModel');
+    const ticket = await helpCenter.assignTicket(req.params.id, req.body.agent_id || req.user.id);
+    if (!ticket) return fail(res, 404, 'Ticket not found');
+    ok(res, 'Ticket assigned', ticket);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const resolveSupportTicket = async (req, res) => {
+  try {
+    const helpCenter = require('../models/helpCenterModel');
+    const ticket = await helpCenter.resolveTicket(req.params.id, req.body.admin_notes);
+    if (!ticket) return fail(res, 404, 'Ticket not found');
+    ok(res, 'Ticket resolved', ticket);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getSupportLiveChats = async (req, res) => {
+  try {
+    const helpCenter = require('../models/helpCenterModel');
+    ok(res, 'Live chats retrieved', await helpCenter.listActiveChats());
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getSupportLiveChatDetail = async (req, res) => {
+  try {
+    const helpCenter = require('../models/helpCenterModel');
+    const chat = await helpCenter.getLiveChat(req.params.id);
+    if (!chat) return fail(res, 404, 'Chat not found');
+    const messages = await helpCenter.getLiveMessages(req.params.id);
+    ok(res, 'Live chat detail', { chat, messages });
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const postSupportAgentMessage = async (req, res) => {
+  try {
+    const helpCenter = require('../models/helpCenterModel');
+    await helpCenter.assignLiveChat(req.params.id, req.user.id);
+    const msg = await helpCenter.addLiveMessage({
+      chatId: req.params.id,
+      senderId: req.user.id,
+      senderRole: 'agent',
+      message: req.body.message,
+      attachmentUrl: req.body.attachment_url,
+      attachmentType: req.body.attachment_type,
+    });
+    try {
+      const { getIO } = require('../socket/emitters');
+      getIO()?.to(`support:${req.params.id}`).emit('supportMessage', msg);
+    } catch {
+      /* optional */
+    }
+    ok(res, 'Message sent', msg, 201);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getSupportAiSessions = async (req, res) => {
+  try {
+    const helpCenter = require('../models/helpCenterModel');
+    ok(res, 'AI sessions retrieved', await helpCenter.listAiSessions({ limit: 50 }));
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
 module.exports = {
   getDashboard,
   getLiveDeliveries,
@@ -842,4 +940,12 @@ module.exports = {
   postLoyaltyAdjust,
   postLoyaltyExpire,
   postLoyaltyCampaign,
+  getSupportCenter,
+  getSupportTickets,
+  assignSupportTicket,
+  resolveSupportTicket,
+  getSupportLiveChats,
+  getSupportLiveChatDetail,
+  postSupportAgentMessage,
+  getSupportAiSessions,
 };

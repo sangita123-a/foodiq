@@ -19,6 +19,11 @@ export const SOCKET_EVENTS = {
   UPDATE_LOCATION: "updateLocation",
   PING: "ping",
   CONNECTED: "connected",
+  JOIN_SUPPORT: "joinSupport",
+  LEAVE_SUPPORT: "leaveSupport",
+  SUPPORT_MESSAGE: "supportMessage",
+  SUPPORT_TYPING: "supportTyping",
+  SUPPORT_AGENT_STATUS: "supportAgentStatus",
 } as const;
 
 export type SocketEventName = (typeof SOCKET_EVENTS)[keyof typeof SOCKET_EVENTS];

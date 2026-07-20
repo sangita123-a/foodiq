@@ -31,6 +31,7 @@ import {
   UserCog,
   Gift,
   ClipboardList,
+  Headphones,
 } from "lucide-react";
 import { clearClientAuth } from "@/lib/authSession";
 import {
@@ -67,6 +68,7 @@ const menuItems: MenuItem[] = [
   { name: "Reports", icon: ClipboardList, href: "/admin/reports", permission: "reports" },
   { name: "Analytics", icon: BarChart3, href: "/admin/analytics", permission: "analytics" },
   { name: "Notifications", icon: Bell, href: "/admin/notifications", permission: "notifications" },
+  { name: "Support Center", icon: Headphones, href: "/admin/support", permission: "feedback" },
   { name: "Feedback", icon: MessageSquare, href: "/admin/feedback", permission: "feedback" },
   { name: "Bugs", icon: Bug, href: "/admin/bugs", permission: "bugs" },
   { name: "Maintenance", icon: Wrench, href: "/admin/maintenance", permission: "maintenance" },

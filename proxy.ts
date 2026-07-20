@@ -51,6 +51,7 @@ const protectedRoutes = [
   '/admin/reports',
   '/admin/security',
   '/admin/loyalty',
+  '/admin/support',
   '/rewards',
   '/payment/failed',
   '/delivery/dashboard',

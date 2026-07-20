@@ -568,6 +568,72 @@ async function ensureSchema() {
     await q(`ALTER TABLE reward_history ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP WITH TIME ZONE`);
 
     await q(`
+      CREATE TABLE IF NOT EXISTS support_live_chats (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        agent_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        status VARCHAR(30) DEFAULT 'waiting' CHECK (status IN ('waiting', 'active', 'closed')),
+        subject VARCHAR(200),
+        satisfaction_score INTEGER CHECK (satisfaction_score IS NULL OR (satisfaction_score >= 1 AND satisfaction_score <= 5)),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        closed_at TIMESTAMP WITH TIME ZONE
+      )
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS support_live_messages (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        chat_id UUID NOT NULL REFERENCES support_live_chats(id) ON DELETE CASCADE,
+        sender_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        sender_role VARCHAR(20) NOT NULL DEFAULT 'customer',
+        message TEXT NOT NULL,
+        attachment_url TEXT,
+        attachment_type VARCHAR(40),
+        is_read BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_support_live_messages_chat
+        ON support_live_messages(chat_id, created_at ASC)
+    `);
+
+    await q(`
+      ALTER TABLE support_tickets
+        ADD COLUMN IF NOT EXISTS priority VARCHAR(20) DEFAULT 'normal',
+        ADD COLUMN IF NOT EXISTS assigned_agent_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        ADD COLUMN IF NOT EXISTS satisfaction_score INTEGER,
+        ADD COLUMN IF NOT EXISTS ai_session_id UUID,
+        ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMP WITH TIME ZONE
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS support_auto_responses (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        trigger_pattern VARCHAR(200) NOT NULL UNIQUE,
+        response TEXT NOT NULL,
+        category VARCHAR(60) DEFAULT 'general',
+        is_active BOOLEAN DEFAULT TRUE,
+        sort_order INTEGER DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      INSERT INTO support_auto_responses (trigger_pattern, response, category, sort_order) VALUES
+        ('where is my order|track order|order status', 'You can track your order in real time from My Orders → select your active order. I can also look up your latest order if you are signed in.', 'order', 1),
+        ('how do i cancel|cancel order', 'Cancel from My Orders while status is Pending or within 60 seconds of placing. If the restaurant has started preparing, a small fee may apply.', 'order', 2),
+        ('refund|get refund|money back', 'Refunds are initiated automatically for cancelled orders. UPI/wallets: 2–4 hours. Cards: 5–7 business days.', 'refund', 3),
+        ('coupon|promo code|discount code', 'Apply coupons at checkout under Apply Coupon, or visit /rewards for membership offers. Enter the code and tap Apply.', 'coupon', 4),
+        ('membership|loyalty|reward points|silver|gold|platinum', 'Foodiq Rewards offers Silver, Gold, and Platinum tiers. Earn points on orders, referrals, and reviews. Visit /rewards for your wallet and benefits.', 'membership', 5),
+        ('payment|upi|card|razorpay', 'We accept UPI, credit/debit cards, net banking, wallets, and COD where enabled. Payment issues? Share your order ID and we will investigate.', 'payment', 6),
+        ('delivery|late|driver|rider', 'For delivery delays, check live tracking on your order. If the order is significantly late, submit a Delivery Complaint ticket and we will assist.', 'delivery', 7)
+      ON CONFLICT DO NOTHING
+    `);
+
+    await q(`
       INSERT INTO membership_tiers (slug, name, min_lifetime_points, benefits, sort_order) VALUES
         ('silver', 'Foodiq Silver', 0, '{"free_delivery": false, "extra_discount_percent": 0, "priority_support": false, "exclusive_coupons": false, "birthday_reward_points": 50}'::jsonb, 1),
         ('gold', 'Foodiq Gold', 1000, '{"free_delivery": true, "extra_discount_percent": 5, "priority_support": true, "exclusive_coupons": true, "birthday_reward_points": 150}'::jsonb, 2),

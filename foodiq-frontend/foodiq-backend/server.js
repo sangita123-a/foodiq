@@ -216,6 +216,7 @@ app.use('/api/v4', require('./routes/v4Routes'));
 app.use('/api/contact', contactRoutes);
 app.use('/api/site-settings', siteSettingsRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api/help-center', require('./routes/helpCenterRoutes'));
 app.use('/api/feedback', require('./routes/feedbackRoutes'));
 app.use('/api/bugs', require('./routes/bugRoutes'));
 app.use('/api/partner', partnerRoutes);

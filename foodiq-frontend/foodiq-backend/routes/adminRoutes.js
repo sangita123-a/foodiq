@@ -82,6 +82,15 @@ router.post('/loyalty/adjust', requirePermission('loyalty'), c.postLoyaltyAdjust
 router.post('/loyalty/expire', requirePermission('loyalty'), c.postLoyaltyExpire);
 router.post('/loyalty/campaign', requirePermission('loyalty'), c.postLoyaltyCampaign);
 
+router.get('/support', requirePermission('feedback'), c.getSupportCenter);
+router.get('/support/tickets', requirePermission('feedback'), c.getSupportTickets);
+router.put('/support/tickets/:id/assign', requirePermission('feedback'), c.assignSupportTicket);
+router.put('/support/tickets/:id/resolve', requirePermission('feedback'), c.resolveSupportTicket);
+router.get('/support/live-chats', requirePermission('feedback'), c.getSupportLiveChats);
+router.get('/support/live-chats/:id', requirePermission('feedback'), c.getSupportLiveChatDetail);
+router.post('/support/live-chats/:id/messages', requirePermission('feedback'), c.postSupportAgentMessage);
+router.get('/support/ai-sessions', requirePermission('feedback'), c.getSupportAiSessions);
+
 const feedbackAdmin = require('../controllers/feedbackController');
 const bugAdmin = require('../controllers/bugController');
 const maintenance = require('../controllers/maintenanceController');

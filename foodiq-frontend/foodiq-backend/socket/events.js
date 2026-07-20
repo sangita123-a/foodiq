@@ -24,4 +24,11 @@ module.exports = {
   LEAVE_ORDER: 'leaveOrder',
   UPDATE_LOCATION: 'updateLocation',
   PING: 'ping',
+
+  // Support live chat
+  SUPPORT_MESSAGE: 'supportMessage',
+  SUPPORT_TYPING: 'supportTyping',
+  SUPPORT_AGENT_STATUS: 'supportAgentStatus',
+  JOIN_SUPPORT: 'joinSupport',
+  LEAVE_SUPPORT: 'leaveSupport',
 };

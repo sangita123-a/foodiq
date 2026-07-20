@@ -254,6 +254,46 @@ const initSocket = (httpServer, { allowedOrigins = [], isOriginAllowed, corsStri
       socket.data.watchingOrders?.delete(orderId);
     });
 
+    socket.on('joinSupport', async (payload, ack) => {
+      try {
+        const chatId = payload?.chat_id || payload?.chatId;
+        if (!chatId) {
+          if (typeof ack === 'function') ack({ ok: false, error: 'CHAT_ID_REQUIRED' });
+          return;
+        }
+        const helpCenter = require('../models/helpCenterModel');
+        const chat = await helpCenter.getLiveChat(chatId);
+        if (!chat) {
+          if (typeof ack === 'function') ack({ ok: false, error: 'NOT_FOUND' });
+          return;
+        }
+        const allowed = role === 'admin' || chat.user_id === userId;
+        if (!allowed) {
+          if (typeof ack === 'function') ack({ ok: false, error: 'FORBIDDEN' });
+          return;
+        }
+        socket.join(`support:${chatId}`);
+        if (typeof ack === 'function') ack({ ok: true, chat_id: chatId });
+      } catch (err) {
+        if (typeof ack === 'function') ack({ ok: false, error: 'SERVER_ERROR' });
+      }
+    });
+
+    socket.on('leaveSupport', (payload) => {
+      const chatId = payload?.chat_id || payload?.chatId;
+      if (chatId) socket.leave(`support:${chatId}`);
+    });
+
+    socket.on('supportTyping', (payload) => {
+      const chatId = payload?.chat_id || payload?.chatId;
+      if (!chatId) return;
+      socket.to(`support:${chatId}`).emit('supportTyping', {
+        chat_id: chatId,
+        user_id: userId,
+        typing: payload?.typing !== false,
+      });
+    });
+
     /**
      * Delivery partner pushes GPS (also accepted via HTTP; socket is preferred for live map).
      */
