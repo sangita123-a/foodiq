@@ -10,6 +10,7 @@ const {
   mockCompletePayment,
   handleRazorpayWebhook,
   downloadInvoice,
+  getPaymentForOrder,
 } = require('../controllers/paymentController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -21,6 +22,7 @@ router.use(protect);
 router.post('/create', createPayment);
 router.post('/verify', verifyPayment);
 router.get('/history', getHistory);
+router.get('/by-order/:orderId', getPaymentForOrder);
 router.get('/:id/invoice', downloadInvoice);
 
 router.post('/razorpay/order', createRazorpayCheckoutOrder);

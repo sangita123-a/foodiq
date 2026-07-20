@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import useSWR from "swr";
-import { CheckCircle2, Navigation, Package, Clock, ShoppingBag, MapPin } from "lucide-react";
+import { CheckCircle2, Navigation, Package, Clock, ShoppingBag, MapPin, FileDown } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { downloadInvoiceFile } from "@/services/paymentApi";
+import { useToast } from "@/contexts/ToastContext";
 
 type OrderSuccessProps = {
   orderId: string;
@@ -20,6 +23,10 @@ type OrderDetails = {
   discount_amount?: string | number;
   estimated_delivery_time?: number;
   payment_method?: string;
+  payment_status?: string;
+  payment_id?: string;
+  razorpay_payment_id?: string;
+  transaction_time?: string;
   street?: string;
   house_no?: string;
   city?: string;
@@ -41,6 +48,8 @@ const paymentLabels: Record<string, string> = {
 
 export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false }: OrderSuccessProps) {
   const { data: order } = useSWR<OrderDetails>(orderId ? `/api/orders/${orderId}` : null);
+  const { showToast } = useToast();
+  const [downloading, setDownloading] = useState(false);
   const displayId = orderId.length > 12 ? `ORD-${orderId.slice(0, 8).toUpperCase()}` : orderId;
   const eta = order?.estimated_delivery_time || etaMinutes;
   const etaLabel = `${Math.max(10, eta - 5)} - ${eta + 5} Minutes`;
@@ -49,6 +58,22 @@ export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false 
     : "";
   const total = Number(order?.total_amount || 0);
   const items = order?.items || [];
+  const canDownloadInvoice =
+    Boolean(order?.payment_id) &&
+    order?.payment_status === "completed" &&
+    order?.payment_method !== "cod";
+
+  const handleDownloadInvoice = async () => {
+    if (!order?.payment_id) return;
+    setDownloading(true);
+    try {
+      await downloadInvoiceFile(order.payment_id, orderId);
+    } catch {
+      showToast("Could not download invoice", "error");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const content = (
     <motion.div
@@ -131,10 +156,32 @@ export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false 
               <div className="font-bold text-[#111827] text-sm">
                 {paymentLabels[order.payment_method] || order.payment_method}
               </div>
+              {order.razorpay_payment_id && (
+                <div className="text-[10px] text-[#9CA3AF] font-mono mt-1 max-w-[140px] truncate">
+                  {order.razorpay_payment_id}
+                </div>
+              )}
             </div>
           )}
         </div>
+        {order?.transaction_time && (
+          <p className="text-xs text-[#9CA3AF] mt-3">
+            Paid on {new Date(order.transaction_time).toLocaleString("en-IN")}
+          </p>
+        )}
       </div>
+
+      {canDownloadInvoice && (
+        <button
+          type="button"
+          disabled={downloading}
+          onClick={handleDownloadInvoice}
+          className="w-full mb-4 bg-white border border-[#E5E7EB] hover:bg-[#F8FAFC] text-[#111827] py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all relative z-10 disabled:opacity-60"
+        >
+          <FileDown className="w-5 h-5" />
+          {downloading ? "Preparing invoice..." : "Download Invoice (PDF)"}
+        </button>
+      )}
 
       <Link
         href={`/track-order?id=${orderId}`}

@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CreditCard, Plus, Trash2, Star, Wallet, Smartphone } from "lucide-react";
+import { CreditCard, Plus, Trash2, Star, Wallet, Smartphone, FileDown } from "lucide-react";
+import Link from "next/link";
 import useSWR from "swr";
 import api from "@/services/api";
+import { downloadInvoiceFile } from "@/services/paymentApi";
 import { useToast } from "@/contexts/ToastContext";
 
 const TYPE_LABELS: Record<string, string> = {
@@ -169,7 +171,12 @@ export default function PaymentMethodsPanel() {
         </div>
       )}
 
-      <h3 className="text-lg font-bold text-white mb-4">Recent Transactions</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold text-[#111827]">Recent Transactions</h3>
+        <Link href="/payment-methods" className="text-sm font-bold text-primary hover:underline">
+          View all & invoices →
+        </Link>
+      </div>
       {history.length === 0 ? (
         <p className="text-[#9CA3AF] text-sm">No payment history yet.</p>
       ) : (
@@ -180,16 +187,28 @@ export default function PaymentMethodsPanel() {
               className="bg-white rounded-xl px-4 py-3 flex justify-between items-center border border-[#E5E7EB]"
             >
               <div>
-                <p className="text-white text-sm font-bold">
+                <p className="text-[#111827] text-sm font-bold">
                   {(p.method || "").replace(/_/g, " ")}
                 </p>
                 <p className="text-[#9CA3AF] text-xs">
-                  {new Date(p.created_at).toLocaleString()}
+                  {new Date(p.transaction_time || p.created_at).toLocaleString()}
                 </p>
               </div>
-              <div className="text-right">
-                <p className="text-white font-bold">₹{parseFloat(p.amount).toFixed(2)}</p>
-                <p className="text-xs text-green-400 capitalize">{p.status}</p>
+              <div className="text-right flex flex-col items-end gap-1">
+                <p className="text-[#111827] font-bold">₹{parseFloat(p.amount).toFixed(2)}</p>
+                <p className="text-xs text-green-600 capitalize">{p.status}</p>
+                {(p.status === "completed" ||
+                  p.status === "refunded" ||
+                  p.status === "partially_refunded") && (
+                  <button
+                    type="button"
+                    onClick={() => downloadInvoiceFile(p.id, p.order_id).catch(() => showToast("Could not download invoice", "error"))}
+                    className="text-xs font-bold text-primary flex items-center gap-1 hover:underline"
+                  >
+                    <FileDown className="w-3 h-3" />
+                    Invoice
+                  </button>
+                )}
               </div>
             </div>
           ))}

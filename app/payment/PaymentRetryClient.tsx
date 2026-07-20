@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import { useToast } from "@/contexts/ToastContext";
 import {
   mockCompleteRazorpay,
+  markRazorpayFailed,
   retryOrderPayment,
   verifyRazorpayPayment,
 } from "@/services/paymentApi";
@@ -60,17 +61,38 @@ export default function PaymentRetryClient() {
         description: "Retry Foodiq payment",
         preferredMethod: rz.prefill_method,
         onSuccess: async (response) => {
-          const verified = await verifyRazorpayPayment(response);
-          showToast("Payment successful", "success");
-          router.push(`/order-success?orderId=${verified.order_id || orderId}&eta=30`);
+          try {
+            const verified = await verifyRazorpayPayment(response);
+            showToast("Payment successful", "success");
+            router.push(`/order-success?orderId=${verified.order_id || orderId}&eta=30`);
+          } catch (err: unknown) {
+            const message =
+              err && typeof err === "object" && "response" in err
+                ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+                : undefined;
+            showToast(message || "Payment verification failed", "error");
+            router.push(
+              `/payment/failed?order=${encodeURIComponent(rz.razorpay_order_id)}&reason=verification_failed`
+            );
+          } finally {
+            setLoading(false);
+          }
         },
-        onDismiss: () => {
+        onDismiss: async () => {
+          await markRazorpayFailed(rz.razorpay_order_id, "Retry checkout dismissed");
           setLoading(false);
           showToast("Payment cancelled", "error");
+          router.push(
+            `/payment/failed?order=${encodeURIComponent(rz.razorpay_order_id)}&reason=cancelled`
+          );
         },
-        onError: (msg) => {
+        onError: async (msg) => {
+          await markRazorpayFailed(rz.razorpay_order_id, msg);
           setLoading(false);
           showToast(msg, "error");
+          router.push(
+            `/payment/failed?order=${encodeURIComponent(rz.razorpay_order_id)}&reason=${encodeURIComponent(msg)}`
+          );
         },
       });
     } catch (err: unknown) {

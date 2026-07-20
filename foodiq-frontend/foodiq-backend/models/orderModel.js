@@ -89,7 +89,9 @@ const getOrderById = async (orderId) => {
       [orderId]
     ),
     pool.query(
-      'SELECT method, status FROM payments WHERE order_id = $1 ORDER BY created_at DESC LIMIT 1',
+      `SELECT id, method, status, amount, razorpay_payment_id, razorpay_order_id,
+              provider_transaction_id, transaction_time, created_at
+       FROM payments WHERE order_id = $1 ORDER BY created_at DESC LIMIT 1`,
       [orderId]
     ),
   ]);
@@ -99,8 +101,14 @@ const getOrderById = async (orderId) => {
   const order = rows[0];
   order.items = itemsRes.rows;
   if (paymentRes.rows[0]) {
-    order.payment_method = paymentRes.rows[0].method;
-    order.payment_status = paymentRes.rows[0].status;
+    const payment = paymentRes.rows[0];
+    order.payment_id = payment.id;
+    order.payment_method = payment.method;
+    order.payment_status = payment.status;
+    order.payment_amount = payment.amount;
+    order.razorpay_payment_id = payment.razorpay_payment_id;
+    order.razorpay_order_id = payment.razorpay_order_id;
+    order.transaction_time = payment.transaction_time || payment.created_at;
   }
 
   return order;

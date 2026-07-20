@@ -168,6 +168,10 @@ const getAdminPaymentStats = async () => {
   const { rows } = await pool.query(
     `SELECT
        COALESCE(SUM(amount) FILTER (WHERE status = 'completed'), 0)::float AS total_revenue,
+       COALESCE(SUM(amount) FILTER (
+         WHERE status = 'completed'
+           AND COALESCE(transaction_time, created_at)::date = CURRENT_DATE
+       ), 0)::float AS todays_revenue,
        COUNT(*) FILTER (WHERE status = 'completed')::int AS successful_payments,
        COUNT(*) FILTER (WHERE status = 'failed')::int AS failed_payments,
        COUNT(*) FILTER (WHERE status = 'pending')::int AS pending_payments,

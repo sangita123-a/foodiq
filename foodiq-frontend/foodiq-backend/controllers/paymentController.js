@@ -1057,10 +1057,23 @@ const adminCreateRefund = async (req, res) => {
   }
 };
 
+const getPaymentForOrder = async (req, res) => {
+  try {
+    const payment = await getPaymentByOrderId(req.params.orderId);
+    if (!payment || payment.user_id !== req.user.id) {
+      return fail(res, 404, 'Payment not found');
+    }
+    return ok(res, 'Payment retrieved', payment);
+  } catch (error) {
+    return fail(res, 500, 'Server Error retrieving payment', error.message);
+  }
+};
+
 module.exports = {
   createPayment,
   verifyPayment,
   getHistory,
+  getPaymentForOrder,
   createRazorpayCheckoutOrder,
   verifyRazorpayPayment,
   markPaymentFailed,

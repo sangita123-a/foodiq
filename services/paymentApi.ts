@@ -86,6 +86,29 @@ export async function fetchPaymentHistory() {
   return res.data.data as Array<Record<string, unknown>>;
 }
 
+export async function fetchPaymentForOrder(orderId: string) {
+  const res = await api.get(`/api/payments/by-order/${orderId}`);
+  return res.data.data as {
+    id: string;
+    order_id: string;
+    amount: number;
+    status: string;
+    method: string;
+    razorpay_payment_id?: string;
+    transaction_time?: string;
+  };
+}
+
+export async function downloadInvoiceFile(paymentId: string, orderId?: string) {
+  const blob = await downloadInvoice(paymentId);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `foodiq-invoice-${String(orderId || paymentId).slice(0, 8)}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export function invoiceUrl(paymentId: string) {
   const base = process.env.NEXT_PUBLIC_API_URL || "https://foodiq-2.onrender.com";
   return `${base}/api/payments/${paymentId}/invoice`;

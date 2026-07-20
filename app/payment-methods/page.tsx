@@ -311,16 +311,10 @@ export default function PaymentMethodsPage() {
                               className="text-xs font-bold text-[#E23744] hover:underline"
                               onClick={async () => {
                                 try {
-                                  const { downloadInvoice } = await import("@/services/paymentApi");
-                                  const blob = await downloadInvoice(payment.id);
-                                  const url = URL.createObjectURL(blob);
-                                  const a = document.createElement("a");
-                                  a.href = url;
-                                  a.download = `foodiq-invoice-${String(payment.order_id || payment.id).slice(0, 8)}.pdf`;
-                                  a.click();
-                                  URL.revokeObjectURL(url);
+                                  const { downloadInvoiceFile } = await import("@/services/paymentApi");
+                                  await downloadInvoiceFile(payment.id, payment.order_id);
                                 } catch {
-                                  /* ignore */
+                                  showToast("Could not download invoice", "error");
                                 }
                               }}
                             >

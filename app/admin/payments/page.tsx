@@ -9,6 +9,7 @@ import { useAuthToken } from "@/hooks/useAuthToken";
 type PaymentsOverview = {
   stats: {
     total_revenue: number;
+    todays_revenue: number;
     successful_payments: number;
     failed_payments: number;
     pending_payments: number;
@@ -60,10 +61,12 @@ export default function AdminPaymentsPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
         {[
           { label: "Total Revenue", value: formatCurrency(stats?.total_revenue || 0) },
+          { label: "Today's Revenue", value: formatCurrency(stats?.todays_revenue || 0) },
           { label: "Successful", value: String(stats?.successful_payments || 0) },
+          { label: "Pending", value: String(stats?.pending_payments || 0) },
           { label: "Failed", value: String(stats?.failed_payments || 0) },
           { label: "Refunds", value: formatCurrency(stats?.refund_total || 0) },
         ].map((card) => (
