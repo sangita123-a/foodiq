@@ -43,6 +43,7 @@ const protectedRoutes = [
   '/admin/payments',
   '/admin/analytics',
   '/admin/notifications',
+  '/admin/push-notifications',
   '/admin/settings',
   '/admin/live',
   '/admin/monitoring',

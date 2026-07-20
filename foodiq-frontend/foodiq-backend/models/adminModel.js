@@ -535,29 +535,31 @@ const getAnalytics = async () => {
   };
 };
 
-const broadcastNotification = async ({ audience, title, message }) => {
-  let userQuery = 'SELECT id, role FROM users';
-  if (audience === 'customers') userQuery += ` WHERE role = 'customer'`;
-  else if (audience === 'restaurants') userQuery += ` WHERE role = 'restaurant_owner'`;
-  else if (audience === 'delivery') userQuery += ` WHERE role = 'delivery_partner'`;
-  else userQuery += ` WHERE role IN ('customer', 'restaurant_owner', 'delivery_partner')`;
-
-  const users = await pool.query(userQuery);
-  const { notify } = require('../services/notificationService');
-  let created = 0;
-  for (const u of users.rows) {
-    await notify({
-      userId: u.id,
-      type: 'coupon_alert',
-      title,
-      message,
-      role: u.role,
-      link: '/notifications',
-      dedupeKey: `broadcast:${u.id}:${Date.now()}`,
-    });
-    created += 1;
-  }
-  return { sent: created };
+const broadcastNotification = async ({
+  audience,
+  title,
+  message,
+  user_ids,
+  city,
+  restaurant_id,
+  type,
+  link,
+  schedule_at,
+  created_by,
+}) => {
+  const { sendPushCampaign } = require('../services/pushNotificationService');
+  return sendPushCampaign({
+    audience: audience || 'all',
+    user_ids,
+    city,
+    restaurant_id,
+    title,
+    message,
+    type: type || 'coupon_alert',
+    link: link || '/notifications',
+    schedule_at,
+    created_by,
+  });
 };
 
 const getSettings = async () => {

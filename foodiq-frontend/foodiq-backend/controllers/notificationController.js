@@ -187,8 +187,14 @@ const adminSend = async (req, res) => {
       });
       // Also use existing broadcast for all users if requested
       if (req.body.all_users) {
-        const { broadcastNotification } = require('../models/adminModel');
-        await broadcastNotification(title, message);
+        const { sendPushCampaign } = require('../services/pushNotificationService');
+        await sendPushCampaign({
+          audience: 'all',
+          title,
+          message,
+          type: type || 'alert',
+          created_by: req.user.id,
+        });
       }
       return ok(res, 'Admin notification sent', { count: results.length });
     }

@@ -273,12 +273,14 @@ const updatePartnerOrderStatus = async (req, res) => {
       /* non-blocking */
     }
 
+    const { customerOrderNotification } = require('../services/orderStatusNotifications');
+    const orderNotif = customerOrderNotification(dbStatus, order.id, restaurant?.name || '');
     await createNotification(
       order.user_id,
-      require('../services/notificationTypes').statusToCustomerType(dbStatus),
-      'Order Update',
-      `Your order #${String(order.id).slice(0, 8)} is now ${dbStatus}.`,
-      { order_id: order.id, status: dbStatus }
+      orderNotif.type,
+      orderNotif.title,
+      orderNotif.message,
+      { order_id: order.id, status: dbStatus, link: `/track-order?id=${order.id}` }
     ).catch(() => {});
 
     if (dbStatus === 'Ready for Pickup') {
@@ -330,10 +332,10 @@ const updatePartnerOrderStatus = async (req, res) => {
         if (assigned.rows[0]) {
           await createNotification(
             assigned.rows[0].user_id,
-            'alert',
+            'order_cancelled',
             'Order Cancelled',
             `Order #${String(req.params.id).slice(0, 8)} was cancelled.`,
-            { order_id: req.params.id }
+            { order_id: req.params.id, link: '/delivery/orders' }
           );
           await pool.query(
             `UPDATE delivery_assignments

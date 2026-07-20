@@ -24,15 +24,31 @@ const isUserOnline = (userId) => {
   }
 };
 
-const pushEnabledForUser = async (userId) => {
+const pushEnabledForUser = async (userId, type = null) => {
   try {
     const { rows } = await pool.query(
-      `SELECT COALESCE(push_notifications, TRUE) AS push_notifications
+      `SELECT COALESCE(push_notifications, TRUE) AS push_notifications,
+              COALESCE(notify_orders, TRUE) AS notify_orders,
+              COALESCE(notify_offers, TRUE) AS notify_offers,
+              COALESCE(notify_order_updates, TRUE) AS notify_order_updates
        FROM user_settings WHERE user_id = $1`,
       [userId]
     );
     if (!rows[0]) return true;
-    return Boolean(rows[0].push_notifications);
+    if (!rows[0].push_notifications) return false;
+
+    const t = String(type || '').toLowerCase();
+    const category = require('./notificationTypes').typeToCategory(t);
+
+    if (category === 'Offers' && rows[0].notify_offers === false) return false;
+    if (category === 'Orders') {
+      if (rows[0].notify_orders === false && rows[0].notify_order_updates === false) return false;
+      if (t.includes('update') || t.includes('preparing') || t.includes('delivery') || t.includes('accepted')) {
+        if (rows[0].notify_order_updates === false) return false;
+      }
+    }
+
+    return true;
   } catch {
     return true;
   }
@@ -108,7 +124,7 @@ const notify = async ({
     }
   }
 
-  const shouldPush = push && (await pushEnabledForUser(userId));
+  const shouldPush = push && (await pushEnabledForUser(userId, type));
   if (shouldPush) {
     const tokens = await getActiveTokensForUser(userId);
     if (!online || tokens.length > 0) {

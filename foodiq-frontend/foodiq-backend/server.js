@@ -349,6 +349,11 @@ pool
       /* ignore */
     }
     startListening();
+    try {
+      require('./services/scheduledPushService').startScheduledPushWorker();
+    } catch (err) {
+      log.warn('Scheduled push worker skipped', { error: err.message });
+    }
   })
   .catch((err) => {
     log.error('Database connection failed', { error: err.message });

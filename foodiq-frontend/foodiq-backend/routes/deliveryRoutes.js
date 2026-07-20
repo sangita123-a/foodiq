@@ -20,6 +20,7 @@ router.get('/orders/:id', c.getOrder);
 router.post('/orders/:id/accept', c.accept);
 router.post('/orders/:id/reject', c.reject);
 router.put('/orders/:id/status', c.updateStatus);
+router.post('/orders/:id/customer-call', c.notifyCustomerCalling);
 router.get('/orders/:id/route', c.getRoute);
 router.get('/earnings', c.getEarnings);
 router.get('/wallet', c.getWallet);

@@ -81,7 +81,7 @@ const notifyInventoryAlerts = async (restaurantId) => {
     if (lowStock.length) {
       await createNotification(
         ownerId,
-        'inventory_alert',
+        'low_stock',
         'Low Stock Alert',
         `${lowStock.length} ingredient(s) running low. Restock soon.`,
         { link: '/partner/inventory', restaurant_id: restaurantId, alert_type: 'low_stock' }

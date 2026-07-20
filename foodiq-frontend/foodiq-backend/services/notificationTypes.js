@@ -21,10 +21,13 @@ module.exports = {
   REFUND_COMPLETED: 'refund_completed',
   NEW_OFFER: 'new_offer',
   COUPON_ALERT: 'coupon_alert',
+  FESTIVAL_DISCOUNT: 'festival_discount',
+  FLASH_SALE: 'flash_sale',
 
   // Restaurant
   NEW_ORDER: 'new_order',
   PAYMENT_RECEIVED: 'payment_received',
+  LOW_STOCK: 'low_stock',
   DELIVERY_ASSIGNED: 'delivery_assigned',
   PICKUP_COMPLETED: 'pickup_completed',
   CUSTOMER_REVIEW: 'customer_review',
@@ -34,6 +37,7 @@ module.exports = {
   DELIVERY_ACCEPTED: 'delivery_accepted',
   PICKUP_REMINDER: 'pickup_reminder',
   CUSTOMER_NOT_REACHABLE: 'customer_not_reachable',
+  CUSTOMER_CALLING: 'customer_calling',
   DELIVERY_COMPLETED: 'delivery_completed',
   DAILY_EARNINGS: 'daily_earnings',
 
@@ -77,7 +81,7 @@ const statusToCustomerType = (status) => {
 /** UI category for filters */
 const typeToCategory = (type) => {
   const t = String(type || '').toLowerCase();
-  if (t.includes('offer') || t.includes('coupon')) return 'Offers';
+  if (t.includes('offer') || t.includes('coupon') || t.includes('flash') || t.includes('festival')) return 'Offers';
   if (t.includes('payment') || t.includes('refund') || t.includes('earning')) return 'Payments';
   if (
     t.includes('order') ||

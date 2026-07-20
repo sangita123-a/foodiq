@@ -313,6 +313,19 @@ const postCoupon = async (req, res) => {
       return fail(res, 400, 'Code and discount_amount are required');
     }
     const data = await admin.createCoupon(req.body);
+    try {
+      const { sendMarketingByType } = require('../services/pushNotificationService');
+      const couponType = req.body.coupon_type || 'coupon_alert';
+      const marketingType =
+        couponType === 'festival' ? 'festival_discount' : couponType === 'first_order' ? 'new_offer' : 'coupon_alert';
+      await sendMarketingByType(marketingType, {
+        title: `New Coupon: ${data.code}`,
+        message: req.body.title || `Use code ${data.code} on your next order!`,
+        link: '/coupons',
+      });
+    } catch (pushErr) {
+      console.warn('[admin] coupon push skipped:', pushErr.message);
+    }
     res.status(201).json({ success: true, message: 'Coupon created', data });
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
@@ -357,10 +370,80 @@ const getAnalytics = async (req, res) => {
 
 const postBroadcast = async (req, res) => {
   try {
-    const { audience = 'all', title, message } = req.body;
+    const {
+      audience = 'all',
+      title,
+      message,
+      user_ids,
+      city,
+      restaurant_id,
+      type,
+      link,
+      schedule_at,
+    } = req.body;
     if (!title || !message) return fail(res, 400, 'Title and message are required');
-    const data = await admin.broadcastNotification({ audience, title, message });
-    ok(res, 'Notifications sent', data);
+    const data = await admin.broadcastNotification({
+      audience,
+      title,
+      message,
+      user_ids,
+      city,
+      restaurant_id,
+      type,
+      link,
+      schedule_at,
+      created_by: req.user.id,
+    });
+    ok(res, data.scheduled ? 'Notification scheduled' : 'Notifications sent', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const postPushCampaign = async (req, res) => {
+  try {
+    const data = await admin.broadcastNotification({
+      ...req.body,
+      created_by: req.user.id,
+    });
+    ok(res, data.scheduled ? 'Push notification scheduled' : 'Push notifications sent', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getScheduledPushCampaigns = async (req, res) => {
+  try {
+    const { rows } = await require('../config/db').pool.query(
+      `SELECT id, name, audience, subject, message, status, scheduled_at, sent_count, created_at
+       FROM marketing_campaigns
+       WHERE channel = 'push'
+       ORDER BY created_at DESC
+       LIMIT 50`
+    );
+    ok(res, 'Scheduled push campaigns retrieved', rows);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getPushTargetOptions = async (req, res) => {
+  try {
+    const { pool } = require('../config/db');
+    const [cities, restaurants] = await Promise.all([
+      pool.query(
+        `SELECT DISTINCT TRIM(city) AS city FROM addresses
+         WHERE city IS NOT NULL AND TRIM(city) <> ''
+         ORDER BY city LIMIT 100`
+      ),
+      pool.query(
+        `SELECT id, name, city FROM restaurants ORDER BY name LIMIT 200`
+      ),
+    ]);
+    ok(res, 'Push target options retrieved', {
+      cities: cities.rows.map((r) => r.city),
+      restaurants: restaurants.rows,
+    });
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
   }
@@ -927,6 +1010,9 @@ module.exports = {
   getCouponAnalytics,
   getAnalytics,
   postBroadcast,
+  postPushCampaign,
+  getScheduledPushCampaigns,
+  getPushTargetOptions,
   getSettings,
   putSettings,
   getSalesReports,

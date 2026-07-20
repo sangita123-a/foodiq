@@ -298,7 +298,12 @@ const acceptOrder = async (orderId, partnerId) => {
   } catch {
     /* non-blocking */
   }
-  await notifyStakeholders(orderId, 'Delivery partner assigned', 'A delivery partner has accepted your order.');
+  await notifyStakeholders(
+    orderId,
+    'Delivery partner assigned',
+    'A delivery partner has accepted your order.',
+    'Delivery Partner Assigned'
+  );
 
   return getOrderForPartner(orderId, partnerId);
 };
@@ -424,11 +429,7 @@ const updateDeliveryStatus = async (orderId, partnerId, status) => {
   }
 
   await recordHistory(rows[0].id, orderId, partnerId, status, `Status updated to ${trackingStatus}`);
-  await notifyStakeholders(
-    orderId,
-    'Order Update',
-    `Your order is now: ${trackingStatus}.`
-  );
+  await notifyStakeholders(orderId, 'Order Update', `Your order is now: ${trackingStatus}.`, orderStatus || trackingStatus);
 
   // Notify restaurant owner
   const rest = await pool.query(
@@ -542,10 +543,28 @@ const recordHistory = async (assignmentId, orderId, partnerId, status, note) => 
   );
 };
 
-const notifyStakeholders = async (orderId, title, message) => {
-  const { rows } = await pool.query('SELECT user_id FROM orders WHERE id = $1', [orderId]);
+const notifyStakeholders = async (orderId, title, message, status = null) => {
+  const { rows } = await pool.query(
+    `SELECT o.user_id, r.name AS restaurant_name
+     FROM orders o
+     LEFT JOIN restaurants r ON r.id = o.restaurant_id
+     WHERE o.id = $1`,
+    [orderId]
+  );
   if (rows[0]) {
-    await createNotification(rows[0].user_id, 'order', title, message, { order_id: orderId });
+    if (status) {
+      const { customerOrderNotification } = require('../services/orderStatusNotifications');
+      const n = customerOrderNotification(status, orderId, rows[0].restaurant_name || '');
+      await createNotification(rows[0].user_id, n.type, n.title, n.message, {
+        order_id: orderId,
+        link: `/track-order?id=${orderId}`,
+      });
+    } else {
+      await createNotification(rows[0].user_id, 'order', title, message, {
+        order_id: orderId,
+        link: `/track-order?id=${orderId}`,
+      });
+    }
   }
 };
 

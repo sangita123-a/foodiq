@@ -47,6 +47,9 @@ router.put('/coupons/:id', requirePermission('coupons'), c.patchCoupon);
 router.delete('/coupons/:id', requirePermission('coupons'), c.removeCoupon);
 
 router.post('/notifications/broadcast', requirePermission('notifications', 'marketing'), c.postBroadcast);
+router.post('/notifications/push', requirePermission('notifications', 'marketing'), c.postPushCampaign);
+router.get('/notifications/push/scheduled', requirePermission('notifications', 'marketing'), c.getScheduledPushCampaigns);
+router.get('/notifications/push/targets', requirePermission('notifications', 'marketing'), c.getPushTargetOptions);
 
 router.get('/settings', requirePermission('settings'), c.getSettings);
 router.put('/settings', requirePermission('settings'), c.putSettings);

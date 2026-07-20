@@ -512,6 +512,29 @@ const getHistory = async (req, res) => {
   }
 };
 
+const notifyCustomerCalling = async (req, res) => {
+  try {
+    const partner = await requirePartner(req, res);
+    if (!partner) return;
+    const orderId = req.params.id;
+    const order = await delivery.getOrderForPartner(orderId, partner.id);
+    if (!order) return fail(res, 404, 'Order not found or not assigned to you');
+
+    const { createNotification } = require('../models/notificationModel');
+    await createNotification(
+      partner.user_id,
+      'customer_calling',
+      'Customer Calling',
+      `Customer is trying to reach you for order #${String(orderId).slice(0, 8)}.`,
+      { order_id: orderId, link: `/delivery/orders/${orderId}` }
+    );
+
+    ok(res, 'Customer calling alert recorded', { order_id: orderId });
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
 module.exports = {
   register,
   getMe,
@@ -532,6 +555,7 @@ module.exports = {
   getWallet,
   requestWithdrawal,
   getHistory,
+  notifyCustomerCalling,
 };
   updateProfile,
   getRoute,
