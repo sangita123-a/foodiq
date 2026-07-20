@@ -24,7 +24,7 @@ export default function FloatingCart() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md"
+          className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-24px)] sm:w-[90%] max-w-md safe-bottom"
         >
           <button
             type="button"

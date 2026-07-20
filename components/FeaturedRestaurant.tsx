@@ -32,8 +32,8 @@ export default function FeaturedRestaurant() {
   if (!restaurant) return null;
 
   return (
-    <section className="bg-[#F8F9FA] w-full py-[100px] overflow-hidden border-y border-[#ECECEC]">
-      <div className="w-[90%] max-w-7xl mx-auto">
+    <section className="bg-[#F8F9FA] w-full py-12 sm:py-16 md:py-20 lg:py-[100px] overflow-hidden border-y border-[#ECECEC]">
+      <div className="w-[94%] sm:w-[90%] max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-12 xl:gap-16 items-center">
           
           {/* Left Side - Image (55%) */}

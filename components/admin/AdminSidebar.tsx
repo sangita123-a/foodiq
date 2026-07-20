@@ -83,7 +83,12 @@ const menuItems: MenuItem[] = [
   { name: "Settings", icon: Settings, href: "/admin/settings", permission: "settings" },
 ];
 
-export default function AdminSidebar() {
+type AdminSidebarProps = {
+  variant?: "fixed" | "drawer";
+  onNavigate?: () => void;
+};
+
+export default function AdminSidebar({ variant = "fixed", onNavigate }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const adminRole = getStoredAdminRole();
@@ -100,7 +105,11 @@ export default function AdminSidebar() {
   };
 
   return (
-    <div className="w-64 bg-[#FFFFFF] h-screen border-r border-[#E5E7EB] flex flex-col fixed left-0 top-0 z-40">
+    <div
+      className={`w-64 bg-[#FFFFFF] h-full border-r border-[#E5E7EB] flex flex-col ${
+        variant === "fixed" ? "h-screen fixed left-0 top-0 z-40" : "relative"
+      }`}
+    >
       <div className="h-20 flex items-center px-6 border-b border-[#E5E7EB]">
         <Link href="/admin/dashboard" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-[#E23744] rounded-lg flex items-center justify-center font-black text-white text-xl">
@@ -135,6 +144,7 @@ export default function AdminSidebar() {
             <Link
               key={item.name}
               href={item.href}
+              onClick={onNavigate}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
                 isActive
                   ? "bg-[#E23744] text-white shadow-[0_0_15px_rgba(226,55,68,0.3)]"

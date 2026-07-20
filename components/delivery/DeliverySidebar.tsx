@@ -18,7 +18,13 @@ import {
 } from "lucide-react";
 import { clearClientAuth } from "@/lib/authSession";
 
-export default function DeliverySidebar() {
+export default function DeliverySidebar({
+  variant = "fixed",
+  onNavigate,
+}: {
+  variant?: "fixed" | "drawer";
+  onNavigate?: () => void;
+} = {}) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -42,7 +48,11 @@ export default function DeliverySidebar() {
   };
 
   return (
-    <div className="w-64 bg-[#FFFFFF] h-screen border-r border-[#E5E7EB] flex flex-col fixed left-0 top-0 z-40">
+    <div
+      className={`w-64 bg-[#FFFFFF] h-full border-r border-[#E5E7EB] flex flex-col ${
+        variant === "fixed" ? "h-screen fixed left-0 top-0 z-40" : "relative"
+      }`}
+    >
       <div className="h-20 flex items-center px-6 border-b border-[#E5E7EB]">
         <Link href="/delivery/dashboard" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-[#E23744] rounded-lg flex items-center justify-center font-black text-white text-xl">
@@ -65,6 +75,7 @@ export default function DeliverySidebar() {
             <Link
               key={item.name}
               href={item.href}
+              onClick={onNavigate}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                 isActive
                   ? "bg-[#E23744] text-white shadow-[0_0_15px_rgba(226, 55, 68,0.3)]"

@@ -23,7 +23,13 @@ import {
 } from "lucide-react";
 import { clearClientAuth } from "@/lib/authSession";
 
-export default function PartnerSidebar() {
+export default function PartnerSidebar({
+  variant = "fixed",
+  onNavigate,
+}: {
+  variant?: "fixed" | "drawer";
+  onNavigate?: () => void;
+} = {}) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -51,7 +57,11 @@ export default function PartnerSidebar() {
   };
 
   return (
-    <div className="w-64 bg-[#FFFFFF] h-screen border-r border-[#E5E7EB] flex flex-col fixed left-0 top-0 z-40">
+    <div
+      className={`w-64 bg-[#FFFFFF] h-full border-r border-[#E5E7EB] flex flex-col ${
+        variant === "fixed" ? "h-screen fixed left-0 top-0 z-40" : "relative"
+      }`}
+    >
 
       <div className="h-20 flex items-center px-6 border-b border-[#E5E7EB]">
         <Link href="/partner/dashboard" className="flex items-center gap-2">
@@ -69,6 +79,7 @@ export default function PartnerSidebar() {
             <Link
               key={item.name}
               href={item.href}
+              onClick={onNavigate}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                 isActive
                   ? "bg-[#E23744] text-white shadow-[0_0_15px_rgba(226, 55, 68,0.3)]"
@@ -84,6 +95,7 @@ export default function PartnerSidebar() {
         <div className="pt-6 mt-6 border-t border-[#E5E7EB] space-y-1">
           <Link
             href="/partner/settings"
+            onClick={onNavigate}
             className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#6B7280] hover:text-[#111827] hover:bg-[#F8FAFC] group"
           >
             <Settings className="w-5 h-5 text-[#9CA3AF] group-hover:text-[#111827]" />

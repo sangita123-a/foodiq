@@ -33,7 +33,7 @@ export default function CheckoutSummary({
   const etaHigh = estimatedDeliveryMinutes + 5;
 
   return (
-    <div className="sticky top-[100px] rounded-2xl border border-[#ECECEC] bg-white p-6 shadow-[0_12px_32px_rgba(28,28,28,0.08)] md:p-8">
+    <div className="sticky top-[72px] lg:top-[100px] rounded-2xl border border-[#ECECEC] bg-white p-4 sm:p-6 shadow-[0_12px_32px_rgba(28,28,28,0.08)] md:p-8 lg:sticky">
       <div className="mb-6 flex items-start gap-4 border-b border-[#ECECEC] pb-6">
         <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-[#F8F9FA]">
           <Utensils className="h-6 w-6 text-[#E23744]" />
@@ -94,7 +94,7 @@ export default function CheckoutSummary({
         type="button"
         onClick={onPlaceOrder}
         disabled={isSubmitting || items.length === 0}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#E23744] py-4 font-bold text-white shadow-[0_8px_20px_rgba(226, 55, 68,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#E23744] hover:shadow-[0_12px_26px_rgba(239,79,95,0.22)] disabled:opacity-50"
+        className="hidden lg:flex w-full items-center justify-center gap-2 rounded-xl bg-[#E23744] py-4 min-h-[52px] font-bold text-white shadow-[0_8px_20px_rgba(226,55,68,0.18)] transition-all duration-300 hover:bg-[#E23744] hover:shadow-[0_12px_26px_rgba(239,79,95,0.22)] disabled:opacity-50 touch-target text-sm sm:text-base"
       >
         {buttonLabel}
         {!isSubmitting && <ArrowRight className="w-5 h-5" />}

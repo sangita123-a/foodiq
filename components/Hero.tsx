@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchBar from "./SearchBar";
 import { ArrowDown } from "lucide-react";
+import { usePrefersReducedMotion } from "@/hooks/useMediaQuery";
 
 const words = [
   "Restaurants",
@@ -20,6 +21,7 @@ const words = [
 export default function Hero() {
   const [index, setIndex] = useState(0);
   const [videoReady, setVideoReady] = useState(false);
+  const prefersReduced = usePrefersReducedMotion();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -60,7 +62,7 @@ export default function Hero() {
   };
 
   return (
-    <div className="relative w-full h-[calc(100vh-80px)] min-h-[640px] flex flex-col items-center justify-center overflow-hidden bg-[#F8F9FA]">
+    <div className="relative w-full h-[calc(100dvh-64px)] md:h-[calc(100dvh-72px)] lg:h-[calc(100dvh-80px)] min-h-[480px] sm:min-h-[560px] lg:min-h-[640px] flex flex-col items-center justify-center overflow-hidden bg-[#F8F9FA]">
       {/* Background Video — deferred until idle to improve LCP */}
       <div className="absolute top-0 left-0 w-full h-full z-0">
         {videoReady ? (
@@ -96,26 +98,26 @@ export default function Hero() {
         <motion.h1 
           className="text-[#1C1C1C] font-extrabold text-center flex flex-col items-center justify-center m-0 p-0 tracking-[-0.055em] leading-none drop-shadow-[0_2px_18px_rgba(255,255,255,0.5)]"
         >
-          <span className="block text-[clamp(40px,5vw,72px)]">Find the Best</span>
-          <span className="block text-[var(--color-primary)] text-[clamp(46px,6vw,78px)] relative overflow-hidden w-full h-[1.1em]">
-            <AnimatePresence>
+          <span className="block text-[clamp(28px,8vw,72px)]">Find the Best</span>
+          <span className="block text-[var(--color-primary)] text-[clamp(32px,9vw,78px)] relative overflow-hidden w-full h-[1.1em]">
+            <AnimatePresence mode="wait">
               <motion.span
                 key={index}
-                initial={{ y: 50, opacity: 0 }}
+                initial={prefersReduced ? false : { y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -50, opacity: 0 }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
+                exit={prefersReduced ? undefined : { y: -30, opacity: 0 }}
+                transition={{ duration: prefersReduced ? 0 : 0.4, ease: "easeInOut" }}
                 className="absolute left-0 right-0 text-center"
               >
                 {words[index]}
               </motion.span>
             </AnimatePresence>
           </span>
-          <span className="block text-[clamp(40px,5vw,72px)]">Near You</span>
+          <span className="block text-[clamp(28px,8vw,72px)]">Near You</span>
         </motion.h1>
 
         <motion.p 
-          className="text-[#424242] text-base sm:text-lg md:text-xl text-center max-w-[700px] mt-6 mb-9 sm:mb-12 font-medium leading-relaxed"
+          className="text-[#424242] text-sm sm:text-base md:text-lg lg:text-xl text-center max-w-[700px] mt-4 sm:mt-6 mb-6 sm:mb-9 md:mb-12 font-medium leading-relaxed px-2"
         >
           Discover amazing restaurants and delicious food delivered straight to your doorstep.
         </motion.p>
@@ -128,7 +130,7 @@ export default function Hero() {
           type="button"
           onClick={scrollToContent}
           aria-label="Scroll to explore restaurants and food"
-          animate={{ 
+          animate={prefersReduced ? undefined : { 
             y: [0, -10, 0],
             boxShadow: [
               "0 0 15px rgba(226, 55, 68, 0.35)", 
@@ -136,9 +138,9 @@ export default function Hero() {
               "0 0 15px rgba(226, 55, 68, 0.35)"
             ]
           }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          whileHover={{ scale: 1.1, boxShadow: "0 0 40px rgba(226, 55, 68, 0.65)" }}
-          className="mt-12 sm:mt-16 flex items-center justify-center w-10 h-10 rounded-full bg-white/95 backdrop-blur-md border border-[var(--color-primary)] cursor-pointer z-20 shrink-0"
+          transition={prefersReduced ? undefined : { duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          whileHover={prefersReduced ? undefined : { scale: 1.1, boxShadow: "0 0 40px rgba(226, 55, 68, 0.65)" }}
+          className="mt-8 sm:mt-12 md:mt-16 flex items-center justify-center w-11 h-11 sm:w-10 sm:h-10 rounded-full bg-white/95 backdrop-blur-md border border-[var(--color-primary)] cursor-pointer z-20 shrink-0 touch-target"
         >
           <ArrowDown className="text-[var(--color-primary)] w-4 h-4" />
         </motion.button>

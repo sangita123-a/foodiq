@@ -14,7 +14,13 @@ const FILTER_CUISINES = [
   { label: "Pizza", slug: "pizza" },
 ];
 
-export default function FilterSidebar() {
+export default function FilterSidebar({
+  className = "",
+  onClose,
+}: {
+  className?: string;
+  onClose?: () => void;
+} = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -44,10 +50,12 @@ export default function FilterSidebar() {
 
     params.delete("page");
     router.push(`/order-online?${params.toString()}`, { scroll: false });
+    onClose?.();
   };
 
   const clearFilters = () => {
     router.push("/order-online", { scroll: false });
+    onClose?.();
   };
 
   return (
@@ -55,7 +63,7 @@ export default function FilterSidebar() {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.6 }}
-      className="w-full md:w-[280px] shrink-0 bg-white border border-[var(--color-border)] rounded-2xl p-6 h-fit sticky top-[110px]"
+      className={`w-full md:w-[280px] shrink-0 bg-white border border-[var(--color-border)] rounded-2xl p-4 sm:p-6 h-fit lg:sticky lg:top-[110px] ${className}`}
     >
       <div className="flex items-center justify-between mb-8">
         <h3 className="text-xl font-bold text-[#111827]">Filters</h3>

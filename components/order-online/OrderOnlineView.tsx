@@ -20,6 +20,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingCart from "@/components/FloatingCart";
 import FilterSidebar from "@/components/FilterSidebar";
+import MobileDrawer from "@/components/ui/MobileDrawer";
 import RestaurantCard from "@/components/RestaurantCard";
 import CompactSearchBar from "@/components/CompactSearchBar";
 import SafeImage from "@/components/ui/SafeImage";
@@ -63,6 +64,7 @@ export default function OrderOnlineView() {
   const [menuSearch, setMenuSearch] = useState(foodQuery);
   const [menuSort, setMenuSort] = useState<"rating" | "price_low" | "price_high" | "delivery">("rating");
   const [menuCategory, setMenuCategory] = useState(categoryFilter);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   const { data: searchData, isLoading: menuLoading } = useSWR(
     view === "menu" && menuSearch.trim().length >= 2
@@ -202,7 +204,7 @@ export default function OrderOnlineView() {
   const cartTotal = subtotal + deliveryFee + taxAmount;
 
   return (
-    <main className="relative min-h-screen bg-white pt-[90px] selection:bg-[#E23744]/20">
+    <main className="relative min-h-screen bg-white pt-[72px] sm:pt-[80px] md:pt-[90px] selection:bg-[#E23744]/20 overflow-x-hidden">
       <Navbar />
       <FloatingCart />
 
@@ -265,13 +267,24 @@ export default function OrderOnlineView() {
 
         {view === "restaurants" ? (
           <div className="flex flex-col gap-6 lg:flex-row">
-            <FilterSidebar />
-            <div className="flex-1">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-[#222222]">All Restaurants</h2>
-                <span className="text-sm text-[#555555]">
-                  {isLoading ? "Loading…" : `${restaurants.length} places`}
-                </span>
+            <div className="hidden lg:block">
+              <FilterSidebar />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="mb-4 sm:mb-6 flex items-center justify-between gap-3">
+                <h2 className="text-xl sm:text-2xl font-bold text-[#222222]">All Restaurants</h2>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setFilterOpen(true)}
+                    className="lg:hidden touch-target inline-flex items-center gap-1.5 rounded-xl border border-[#ECECEC] bg-white px-3 py-2 text-xs font-bold text-[#555555]"
+                  >
+                    <SlidersHorizontal className="h-4 w-4" /> Filters
+                  </button>
+                  <span className="text-xs sm:text-sm text-[#555555]">
+                    {isLoading ? "Loading…" : `${restaurants.length} places`}
+                  </span>
+                </div>
               </div>
 
               {isLoading ? (
@@ -451,6 +464,10 @@ export default function OrderOnlineView() {
           </div>
         )}
       </div>
+
+      <MobileDrawer open={filterOpen} onClose={() => setFilterOpen(false)} side="left" title="Filters" width="w-[min(300px,90vw)]">
+        <FilterSidebar onClose={() => setFilterOpen(false)} className="border-0 rounded-none shadow-none sticky top-0" />
+      </MobileDrawer>
 
       <Footer />
     </main>

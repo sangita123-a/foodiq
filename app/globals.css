@@ -30,6 +30,7 @@
 html {
   background: var(--background);
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -40,6 +41,8 @@ body {
   letter-spacing: -0.01em;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-width: 320px;
 }
 
 button,
@@ -74,11 +77,114 @@ textarea:focus-visible {
   outline-offset: 3px;
 }
 
+/* Responsive layout primitives */
+.app-container {
+  width: min(100% - 32px, 1440px);
+  margin-inline: auto;
+  padding-inline: clamp(12px, 4vw, 32px);
+}
+
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.line-clamp-safe {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+/* Horizontal scroll sections (categories, tabs) */
+.scroll-row {
+  display: flex;
+  gap: clamp(12px, 3vw, 28px);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 4px;
+}
+
+.scroll-row::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-row > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* Responsive table wrapper — horizontal scroll fallback */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 767px) {
+  .table-responsive-cards thead {
+    display: none;
+  }
+
+  .table-responsive-cards tbody,
+  .table-responsive-cards tr,
+  .table-responsive-cards td {
+    display: block;
+    width: 100%;
+  }
+
+  .table-responsive-cards tr {
+    margin-bottom: 12px;
+    border: 1px solid #ECECEC;
+    border-radius: 14px;
+    padding: 12px;
+    background: #FFFFFF;
+  }
+
+  .table-responsive-cards td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+    border: none;
+    text-align: right;
+  }
+
+  .table-responsive-cards td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: #686B78;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: left;
+    flex-shrink: 0;
+  }
+}
+
+/* Safe area for notched devices */
+.safe-bottom {
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+}
+
+.safe-top {
+  padding-top: max(0px, env(safe-area-inset-top, 0px));
+}
+
 /* Shared premium food marketplace primitives */
 .food-section {
   width: min(100% - 32px, 1280px);
   margin-inline: auto;
-  padding-block: clamp(40px, 5vw, 80px);
+  padding-block: clamp(32px, 5vw, 80px);
 }
 
 .food-section-heading {
@@ -101,7 +207,7 @@ textarea:focus-visible {
 .food-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: clamp(10px, 2.5vw, 16px);
   align-items: stretch;
 }
 
@@ -109,8 +215,28 @@ textarea:focus-visible {
 .restaurant-menu-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: clamp(10px, 2.5vw, 16px);
   align-items: stretch;
+}
+
+@media (max-width: 359px) {
+  .food-grid,
+  .popular-restaurants-grid,
+  .restaurant-menu-grid {
+    gap: 8px;
+  }
+
+  .food-card-body {
+    padding: 12px;
+  }
+
+  .food-card-title {
+    font-size: 0.95rem;
+  }
+
+  .food-card-image {
+    height: clamp(120px, 38vw, 150px);
+  }
 }
 
 .food-card {
@@ -218,6 +344,12 @@ textarea:focus-visible {
   transform: translateY(-1px);
 }
 
+@media (min-width: 480px) {
+  .food-section {
+    width: min(100% - 40px, 1280px);
+  }
+}
+
 @media (min-width: 768px) {
   .food-section {
     width: min(100% - 48px, 1280px);
@@ -265,6 +397,24 @@ textarea:focus-visible {
   .popular-restaurants-grid {
     grid-template-columns: repeat(5, minmax(220px, 1fr));
     gap: 24px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .popular-restaurants-grid {
+    grid-template-columns: repeat(6, minmax(200px, 1fr));
+  }
+}
+
+/* Reduce hover transforms on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .food-card:hover {
+    transform: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  }
+
+  .food-card:hover .food-card-image img {
+    transform: none;
   }
 }
 

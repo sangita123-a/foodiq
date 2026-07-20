@@ -397,15 +397,15 @@ export default function CheckoutPage() {
   const restaurantName = cartItems[0]?.restaurant_name || "Your Order";
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[72px] sm:pt-[80px] md:pt-[90px] overflow-x-hidden">
       <Navbar />
 
-      <div className="container mx-auto px-4 md:px-8 py-12">
-        <div className="mb-10 text-center md:text-left border-b border-[#E5E7EB] pb-8">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-[#111827] mb-3">
+      <div className="container mx-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8 md:py-12 pb-28 lg:pb-12">
+        <div className="mb-6 sm:mb-10 text-center md:text-left border-b border-[#E5E7EB] pb-6 sm:pb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[#111827] mb-2 sm:mb-3">
             Secure Checkout
           </h1>
-          <p className="text-[#6B7280] text-lg">
+          <p className="text-[#6B7280] text-sm sm:text-base md:text-lg">
             Complete your order details and pay securely.
           </p>
         </div>
@@ -474,6 +474,22 @@ export default function CheckoutPage() {
               estimatedDeliveryMinutes={30}
             />
           </div>
+        </div>
+
+        {/* Mobile sticky checkout bar */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-[#ECECEC] bg-white/95 backdrop-blur-md px-4 py-3 safe-bottom shadow-[0_-8px_24px_rgba(0,0,0,0.08)]">
+          <div className="flex items-center justify-between gap-4 mb-2">
+            <span className="text-sm font-bold text-[#686B78]">Total</span>
+            <span className="text-xl font-black text-[#E23744]">₹{totals.grandTotal}</span>
+          </div>
+          <button
+            type="button"
+            onClick={handlePlaceOrder}
+            disabled={isSubmitting || cartItems.length === 0}
+            className="w-full touch-target min-h-[52px] rounded-xl bg-[#E23744] font-bold text-white text-sm disabled:opacity-50"
+          >
+            {buttonLabel}
+          </button>
         </div>
       </div>
 

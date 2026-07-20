@@ -35,7 +35,7 @@ export default function RestaurantCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay }}
       whileHover={{ y: -5 }}
-      className="food-card group flex flex-col h-full"
+      className="food-card group flex flex-col h-full min-h-0"
     >
       <Link href={`/restaurant/${id}`} className="flex flex-col flex-grow">
         <div className="food-card-image">
