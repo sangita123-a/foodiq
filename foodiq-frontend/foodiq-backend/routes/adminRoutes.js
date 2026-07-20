@@ -75,6 +75,13 @@ router.post('/marketing/seasonal', requirePermission('marketing'), c.postSeasona
 
 router.get('/security', requirePermission('security'), c.getSecurity);
 
+router.get('/loyalty', requirePermission('loyalty'), c.getLoyaltyOverview);
+router.put('/loyalty/rules/:key', requirePermission('loyalty'), c.patchLoyaltyRule);
+router.put('/loyalty/tiers/:slug', requirePermission('loyalty'), c.patchLoyaltyTier);
+router.post('/loyalty/adjust', requirePermission('loyalty'), c.postLoyaltyAdjust);
+router.post('/loyalty/expire', requirePermission('loyalty'), c.postLoyaltyExpire);
+router.post('/loyalty/campaign', requirePermission('loyalty'), c.postLoyaltyCampaign);
+
 const feedbackAdmin = require('../controllers/feedbackController');
 const bugAdmin = require('../controllers/bugController');
 const maintenance = require('../controllers/maintenanceController');

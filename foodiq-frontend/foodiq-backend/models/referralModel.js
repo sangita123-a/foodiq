@@ -54,35 +54,27 @@ const applyReferralOnSignup = async ({ refereeId, code }) => {
     throw err;
   }
 
-  // Credit referrer + referee welcome bonus
-  await pool.query(
-    `INSERT INTO rewards (user_id, points_balance, total_earned)
-     VALUES ($1, $2, $2)
-     ON CONFLICT (user_id) DO UPDATE SET
-       points_balance = rewards.points_balance + $2,
-       total_earned = rewards.total_earned + $2`,
-    [ref.user_id, points]
-  );
-  await pool.query(
-    `INSERT INTO reward_history (user_id, points, transaction_type)
-     VALUES ($1, $2, 'earned')`,
-    [ref.user_id, points]
-  ).catch(() => {});
+  // Credit referrer + referee welcome bonus via loyalty engine
+  const loyaltyEngine = require('../services/loyaltyEngine');
+  const referralRule = await require('../models/loyaltyModel').getRule('referral');
+  const welcomeRule = await require('../models/loyaltyModel').getRule('referral_welcome');
 
-  const refereeBonus = Math.round(points / 2);
-  await pool.query(
-    `INSERT INTO rewards (user_id, points_balance, total_earned)
-     VALUES ($1, $2, $2)
-     ON CONFLICT (user_id) DO UPDATE SET
-       points_balance = rewards.points_balance + $2,
-       total_earned = rewards.total_earned + $2`,
-    [refereeId, refereeBonus]
-  );
-  await pool.query(
-    `INSERT INTO reward_history (user_id, points, transaction_type)
-     VALUES ($1, $2, 'earned')`,
-    [refereeId, refereeBonus]
-  ).catch(() => {});
+  await loyaltyEngine.credit({
+    userId: ref.user_id,
+    points: Number(referralRule?.points || points),
+    source: 'referral',
+    referenceId: refereeId,
+    description: `Referral bonus for new customer`,
+  });
+
+  const refereeBonus = Number(welcomeRule?.points || Math.round(points / 2));
+  await loyaltyEngine.credit({
+    userId: refereeId,
+    points: refereeBonus,
+    source: 'referral_welcome',
+    referenceId: ref.user_id,
+    description: 'Welcome referral bonus',
+  });
 
   return { referrer_id: ref.user_id, points, referee_bonus: refereeBonus, code: ref.code };
 };

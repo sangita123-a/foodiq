@@ -474,6 +474,121 @@ async function ensureSchema() {
       )
     `);
 
+    await q(`
+      CREATE TABLE IF NOT EXISTS rewards (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        points_balance INTEGER DEFAULT 0,
+        total_earned INTEGER DEFAULT 0,
+        total_redeemed INTEGER DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS reward_history (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+        points INTEGER NOT NULL,
+        transaction_type VARCHAR(20) NOT NULL CHECK (transaction_type IN ('earned', 'redeemed', 'expired', 'adjusted')),
+        source VARCHAR(60),
+        reference_id VARCHAR(120),
+        expires_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_reward_history_order_earn
+        ON reward_history(user_id, order_id, source)
+        WHERE order_id IS NOT NULL AND transaction_type = 'earned' AND source = 'order_delivered'
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS membership_tiers (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        slug VARCHAR(40) NOT NULL UNIQUE,
+        name VARCHAR(80) NOT NULL,
+        min_lifetime_points INTEGER NOT NULL DEFAULT 0,
+        benefits JSONB DEFAULT '{}'::jsonb,
+        sort_order INTEGER DEFAULT 0,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS loyalty_rules (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        rule_key VARCHAR(60) NOT NULL UNIQUE,
+        label VARCHAR(120) NOT NULL,
+        points INTEGER NOT NULL DEFAULT 0,
+        multiplier NUMERIC(5,2) DEFAULT 1,
+        conditions JSONB DEFAULT '{}'::jsonb,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS loyalty_ledger (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        delta INTEGER NOT NULL,
+        balance_after INTEGER NOT NULL,
+        source VARCHAR(60) NOT NULL,
+        reference_id VARCHAR(120),
+        description TEXT,
+        expires_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_loyalty_ledger_user ON loyalty_ledger(user_id, created_at DESC)
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS loyalty_redemptions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+        points_used INTEGER NOT NULL,
+        discount_amount NUMERIC(10,2) NOT NULL,
+        redemption_type VARCHAR(30) DEFAULT 'points',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`ALTER TABLE reward_history ADD COLUMN IF NOT EXISTS source VARCHAR(60)`);
+    await q(`ALTER TABLE reward_history ADD COLUMN IF NOT EXISTS reference_id VARCHAR(120)`);
+    await q(`ALTER TABLE reward_history ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP WITH TIME ZONE`);
+
+    await q(`
+      INSERT INTO membership_tiers (slug, name, min_lifetime_points, benefits, sort_order) VALUES
+        ('silver', 'Foodiq Silver', 0, '{"free_delivery": false, "extra_discount_percent": 0, "priority_support": false, "exclusive_coupons": false, "birthday_reward_points": 50}'::jsonb, 1),
+        ('gold', 'Foodiq Gold', 1000, '{"free_delivery": true, "extra_discount_percent": 5, "priority_support": true, "exclusive_coupons": true, "birthday_reward_points": 150}'::jsonb, 2),
+        ('platinum', 'Foodiq Platinum', 5000, '{"free_delivery": true, "extra_discount_percent": 10, "priority_support": true, "exclusive_coupons": true, "birthday_reward_points": 300}'::jsonb, 3)
+      ON CONFLICT (slug) DO NOTHING
+    `);
+
+    await q(`
+      INSERT INTO loyalty_rules (rule_key, label, points, multiplier, conditions) VALUES
+        ('order_delivered', 'Every Order', 0, 1, '{"rate_per_100": 1}'::jsonb),
+        ('referral', 'Referral Bonus', 100, 1, '{}'::jsonb),
+        ('referral_welcome', 'Referral Welcome', 50, 1, '{}'::jsonb),
+        ('first_order', 'First Order Bonus', 200, 1, '{}'::jsonb),
+        ('campaign', 'Festival Campaign', 0, 1.5, '{}'::jsonb),
+        ('birthday', 'Birthday Order', 250, 1, '{}'::jsonb),
+        ('review', 'Product Review', 50, 1, '{}'::jsonb),
+        ('daily_login', 'Daily Login', 10, 1, '{}'::jsonb),
+        ('signup', 'Welcome Bonus', 50, 1, '{}'::jsonb)
+      ON CONFLICT (rule_key) DO NOTHING
+    `);
+
     await q(`ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS admin_reply TEXT`);
     await q(`ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT FALSE`);
 

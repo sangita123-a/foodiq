@@ -29,6 +29,7 @@ import {
   FileText,
   Shield,
   UserCog,
+  Gift,
   ClipboardList,
 } from "lucide-react";
 import { clearClientAuth } from "@/lib/authSession";
@@ -60,6 +61,7 @@ const menuItems: MenuItem[] = [
   { name: "Menu", icon: UtensilsCrossed, href: "/admin/menu", permission: "menu" },
   { name: "Payments", icon: Wallet, href: "/admin/payments", permission: "payments" },
   { name: "Coupons", icon: Ticket, href: "/admin/coupons", permission: "coupons" },
+  { name: "Loyalty", icon: Gift, href: "/admin/loyalty", permission: "loyalty" },
   { name: "Marketing", icon: Megaphone, href: "/admin/marketing", permission: "marketing" },
   { name: "CMS", icon: FileText, href: "/admin/cms", permission: "cms" },
   { name: "Reports", icon: ClipboardList, href: "/admin/reports", permission: "reports" },

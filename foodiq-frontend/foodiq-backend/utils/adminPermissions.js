@@ -38,6 +38,7 @@ const ROLE_PERMISSIONS = {
     'cms',
     'security',
     'staff',
+    'loyalty',
   ],
   support_executive: [
     'dashboard',

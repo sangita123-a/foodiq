@@ -705,6 +705,82 @@ const exportReport = async (req, res) => {
   }
 };
 
+const getLoyaltyOverview = async (req, res) => {
+  try {
+    const loyaltyModel = require('../models/loyaltyModel');
+    const [analytics, rules, tiers] = await Promise.all([
+      loyaltyModel.getAnalytics(),
+      loyaltyModel.listRules(),
+      loyaltyModel.listTiers(),
+    ]);
+    ok(res, 'Loyalty overview retrieved', { analytics, rules, tiers });
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const patchLoyaltyRule = async (req, res) => {
+  try {
+    const loyaltyModel = require('../models/loyaltyModel');
+    const data = await loyaltyModel.updateRule(req.params.key, req.body);
+    if (!data) return fail(res, 404, 'Rule not found');
+    ok(res, 'Loyalty rule updated', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const patchLoyaltyTier = async (req, res) => {
+  try {
+    const loyaltyModel = require('../models/loyaltyModel');
+    const data = await loyaltyModel.updateTier(req.params.slug, req.body);
+    if (!data) return fail(res, 404, 'Tier not found');
+    ok(res, 'Membership tier updated', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const postLoyaltyAdjust = async (req, res) => {
+  try {
+    const loyaltyModel = require('../models/loyaltyModel');
+    const { user_id, points, reason } = req.body;
+    if (!user_id || !points) return fail(res, 400, 'user_id and points are required');
+    const result = await loyaltyModel.adminAdjustPoints(user_id, Number(points), reason, req.user.id);
+    ok(res, 'Points adjusted', result);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const postLoyaltyExpire = async (req, res) => {
+  try {
+    const loyaltyModel = require('../models/loyaltyModel');
+    const result = await loyaltyModel.expirePoints(req.body.user_id || null);
+    ok(res, 'Expired points processed', result);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const postLoyaltyCampaign = async (req, res) => {
+  try {
+    const loyaltyEngine = require('../services/loyaltyEngine');
+    const { user_ids = [], points, campaign_id } = req.body;
+    if (!Array.isArray(user_ids) || !user_ids.length) {
+      return fail(res, 400, 'user_ids array required');
+    }
+    let credited = 0;
+    for (const uid of user_ids) {
+      const r = await loyaltyEngine.creditCampaign(uid, campaign_id || `campaign:${Date.now()}`, points);
+      if (r && !r.duplicate) credited += 1;
+    }
+    ok(res, 'Campaign rewards credited', { credited, total: user_ids.length });
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
 module.exports = {
   getDashboard,
   getLiveDeliveries,
@@ -760,4 +836,10 @@ module.exports = {
   getDeliveryReportHandler,
   getSettlements,
   exportReport,
+  getLoyaltyOverview,
+  patchLoyaltyRule,
+  patchLoyaltyTier,
+  postLoyaltyAdjust,
+  postLoyaltyExpire,
+  postLoyaltyCampaign,
 };

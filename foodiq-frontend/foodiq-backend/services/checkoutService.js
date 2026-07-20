@@ -59,6 +59,8 @@ const prepareCheckout = async (userId, body) => {
     delivery_mode,
     scheduled_for,
     payment_method,
+    points_to_redeem,
+    redemption_type,
   } = body;
 
   if (!address_id) {
@@ -150,8 +152,13 @@ const prepareCheckout = async (userId, body) => {
   let couponId = null;
   let offerId = null;
   let normalizedCode = null;
+  let pointsRedeemed = 0;
+  let pointsDiscount = 0;
 
-  if (coupon_code) {
+  const usePoints = redemption_type === 'points' && Number(points_to_redeem) > 0;
+  const useCoupon = !usePoints && coupon_code;
+
+  if (useCoupon) {
     normalizedCode = String(coupon_code).trim().toUpperCase();
     const coupon = await getCouponByCode(normalizedCode);
 
@@ -219,9 +226,39 @@ const prepareCheckout = async (userId, body) => {
     }
   }
 
+  if (usePoints) {
+    const loyaltyEngine = require('./loyaltyEngine');
+    const loyaltyModel = require('../models/loyaltyModel');
+    const pts = Number(points_to_redeem);
+    const preview = loyaltyEngine.previewRedemption(pts, subtotal);
+    if (!preview.valid) {
+      const err = new Error(preview.message || 'Invalid points redemption');
+      err.status = 400;
+      throw err;
+    }
+    pointsRedeemed = preview.points_required || pts;
+    pointsDiscount = preview.discount_amount;
+    discount = pointsDiscount;
+
+    const wallet = await loyaltyModel.getWallet(userId);
+    if (wallet.points_balance < pointsRedeemed) {
+      const err = new Error('Insufficient loyalty points');
+      err.status = 400;
+      throw err;
+    }
+  }
+
   let deliveryCharge = subtotal > 0 ? (subtotal > 500 ? 0 : 50) : 0;
   if (normalizedCode === 'FREEDEL' && couponId) {
     deliveryCharge = 0;
+  }
+  if (usePoints) {
+    const loyaltyModel = require('../models/loyaltyModel');
+    const wallet = await loyaltyModel.getWallet(userId);
+    const benefits = wallet.tier?.current?.benefits || {};
+    if (benefits.free_delivery) {
+      deliveryCharge = 0;
+    }
   }
   const taxResult = await require('./taxEngine')
     .calculateTax(subtotal, { countryCode: 'IN' })
@@ -273,9 +310,14 @@ const prepareCheckout = async (userId, body) => {
     scheduled_for:
       delivery_mode === 'Schedule' && scheduled_for ? new Date(scheduled_for) : null,
     payment_method: normalizedPaymentMethod,
+    points_redeemed: pointsRedeemed,
+    points_discount: pointsDiscount,
+    redemption_type: usePoints ? 'points' : useCoupon ? 'coupon' : null,
     checkout_payload: {
       address_id,
       coupon_code: normalizedCode,
+      points_to_redeem: pointsRedeemed || undefined,
+      redemption_type: usePoints ? 'points' : undefined,
       delivery_instructions: delivery_instructions || null,
       delivery_mode: delivery_mode === 'Schedule' ? 'Schedule' : 'Now',
       scheduled_for:
@@ -355,6 +397,16 @@ const commitCheckoutOrder = async (userId, prepared, paymentMeta = {}, client = 
       userId,
       newOrder.id,
       prepared.discount,
+      client
+    );
+  }
+
+  if (prepared.points_redeemed > 0) {
+    const loyaltyEngine = require('./loyaltyEngine');
+    await loyaltyEngine.redeemAtCheckout(
+      userId,
+      prepared.points_redeemed,
+      newOrder.id,
       client
     );
   }

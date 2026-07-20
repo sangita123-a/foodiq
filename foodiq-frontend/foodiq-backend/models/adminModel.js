@@ -651,8 +651,13 @@ const deleteAdminStaff = async (id) => {
 
 const getUserWallet = async (userId) => {
   const { rows } = await pool.query(
-    `SELECT COALESCE(SUM(points_awarded), 0)::int AS reward_points,
-            COUNT(*)::int AS referral_count
+    `SELECT points_balance, total_earned, total_redeemed FROM rewards WHERE user_id = $1`,
+    [userId]
+  );
+  const reward = rows[0] || { points_balance: 0, total_earned: 0, total_redeemed: 0 };
+  const referrals = await pool.query(
+    `SELECT COUNT(*)::int AS referral_count,
+            COALESCE(SUM(points_awarded), 0)::int AS referral_points
      FROM referral_redemptions WHERE referrer_id = $1`,
     [userId]
   );
@@ -663,8 +668,11 @@ const getUserWallet = async (userId) => {
     [userId]
   );
   return {
-    reward_points: rows[0]?.reward_points || 0,
-    referral_count: rows[0]?.referral_count || 0,
+    reward_points: reward.points_balance || 0,
+    lifetime_points: reward.total_earned || 0,
+    redeemed_points: reward.total_redeemed || 0,
+    referral_count: referrals.rows[0]?.referral_count || 0,
+    referral_points: referrals.rows[0]?.referral_points || 0,
     total_spent: payments.rows[0]?.total_spent || 0,
     order_count: payments.rows[0]?.order_count || 0,
   };

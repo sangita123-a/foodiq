@@ -97,10 +97,23 @@ const registerUser = async (req, res) => {
         'INSERT INTO user_settings (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING',
         [user.id]
       );
-      await pool.query(
-        'INSERT INTO rewards (user_id, points_balance, total_earned) VALUES ($1, 50, 50) ON CONFLICT (user_id) DO NOTHING',
-        [user.id]
-      );
+      try {
+        const loyaltyEngine = require('../services/loyaltyEngine');
+        const loyaltyModel = require('../models/loyaltyModel');
+        const signupRule = await loyaltyModel.getRule('signup');
+        await loyaltyEngine.credit({
+          userId: user.id,
+          points: Number(signupRule?.points || 50),
+          source: 'signup',
+          referenceId: user.id,
+          description: 'Welcome bonus',
+        });
+      } catch {
+        await pool.query(
+          'INSERT INTO rewards (user_id, points_balance, total_earned) VALUES ($1, 50, 50) ON CONFLICT (user_id) DO NOTHING',
+          [user.id]
+        );
+      }
       await pool.query(
         'INSERT INTO notifications (user_id, title, message) VALUES ($1, $2, $3)',
         [user.id, 'Welcome to Foodiq!', 'Thanks for joining. Explore restaurants and place your first order.']
@@ -267,6 +280,15 @@ const loginUser = async (req, res) => {
       message: 'User logged in',
       req,
     }).catch(() => {});
+
+    if (user.role === 'customer') {
+      try {
+        const loyaltyEngine = require('../services/loyaltyEngine');
+        await loyaltyEngine.creditDailyLogin(user.id);
+      } catch {
+        /* daily login already credited */
+      }
+    }
 
     setAuthCookies(res, { accessToken: token, refreshToken: refresh_token });
 

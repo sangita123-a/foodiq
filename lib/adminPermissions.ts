@@ -41,6 +41,7 @@ const ROLE_PERMISSIONS: Record<AdminRole, string[]> = {
     "cms",
     "security",
     "staff",
+    "loyalty",
   ],
   support_executive: [
     "dashboard",
@@ -65,6 +66,7 @@ const ROLE_PERMISSIONS: Record<AdminRole, string[]> = {
   marketing_manager: [
     "dashboard",
     "coupons",
+    "loyalty",
     "marketing",
     "cms",
     "notifications",

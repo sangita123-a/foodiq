@@ -54,6 +54,14 @@ const create = async (req, res) => {
     });
 
     await updateRestaurantRating(restaurantId);
+
+    try {
+      const loyaltyEngine = require('../services/loyaltyEngine');
+      await loyaltyEngine.creditReview(user_id, newReview.id);
+    } catch {
+      /* review points already credited or skipped */
+    }
+
     return ok(res, 'Review created', newReview, 201);
   } catch (error) {
     if (error.code === '23505') {

@@ -104,22 +104,11 @@ const updateStatus = async (req, res) => {
     const updated = await updateOrderStatus(req.params.id, status);
 
     if (status === 'Delivered') {
-      const points = Math.floor(Number(updated.total_amount || 0) / 100);
-      if (points > 0) {
-        await pool.query(
-          'INSERT INTO reward_history (user_id, order_id, points, transaction_type) VALUES ($1, $2, $3, $4)',
-          [updated.user_id, updated.id, points, 'earned']
-        );
-        await pool.query(
-          `
-          INSERT INTO rewards (user_id, points_balance, total_earned)
-          VALUES ($1, $2, $2)
-          ON CONFLICT (user_id) DO UPDATE SET
-            points_balance = rewards.points_balance + $2,
-            total_earned = rewards.total_earned + $2
-        `,
-          [updated.user_id, points]
-        );
+      try {
+        const loyaltyEngine = require('../services/loyaltyEngine');
+        await loyaltyEngine.creditForOrderDelivered(updated);
+      } catch (loyaltyErr) {
+        console.warn('[order] loyalty credit skipped:', loyaltyErr.message);
       }
     }
 
