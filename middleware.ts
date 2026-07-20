@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+export const runtime = 'edge';
+
 // Define which routes require authentication
 const protectedRoutes = [
   '/profile',
@@ -83,7 +85,7 @@ const protectedRoutes = [
 // Define which routes should redirect away if already authenticated
 const authRoutes = ['/login', '/register', '/forgot-password', '/partner/login', '/admin/login', '/delivery/login', '/delivery/register', '/delivery/forgot-password'];
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value || request.cookies.get('foodiq_session')?.value;
   const { pathname } = request.nextUrl;
 
@@ -120,7 +122,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Apply middleware to all routes except api, _next/static, _next/image, favicon.ico
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };
