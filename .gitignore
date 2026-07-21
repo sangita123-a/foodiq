@@ -36,8 +36,9 @@ yarn-error.log*
 !.env.example
 !.env.production
 
-# vercel
+# vercel & cloudflare
 .vercel
+.wrangler/
 
 # typescript
 *.tsbuildinfo

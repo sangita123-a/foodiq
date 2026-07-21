@@ -12,11 +12,21 @@ import {
   websiteJsonLd,
 } from "@/lib/seo/jsonld";
 import { HOME_FAQS } from "@/lib/seo/faq";
-import { buildRootLayoutMetadata } from "@/lib/seo/metadata";
+import { buildOpenGraphImages, buildRootIcons } from "@/lib/seo/metadata";
 import {
+  absoluteUrl,
   DEFAULT_OG_IMAGE,
+  DEFAULT_TWITTER_IMAGE,
+  getSiteUrl,
   PREFETCH_ROUTES,
+  SITE_KEYWORDS,
+  SITE_LOCALE,
   SITE_NAME,
+  SITE_OG_DESCRIPTION,
+  SITE_OG_IMAGE_ALT,
+  SITE_OG_LOCALE,
+  SITE_OG_TITLE,
+  SITE_TWITTER_HANDLE,
   getApiBaseUrl,
 } from "@/lib/seo/site";
 
@@ -30,6 +40,12 @@ const poppins = Poppins({
 });
 
 const apiBase = getApiBaseUrl();
+const siteUrl = getSiteUrl();
+const metadataBase = new URL(siteUrl);
+const canonicalUrl = absoluteUrl("/");
+const ogImage = absoluteUrl(DEFAULT_OG_IMAGE);
+const twitterImage = absoluteUrl(DEFAULT_TWITTER_IMAGE);
+const imageAlt = `${SITE_OG_TITLE} — ${SITE_OG_IMAGE_ALT}`;
 
 function buildSiteVerification(): Metadata["verification"] | undefined {
   const google = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
@@ -44,7 +60,70 @@ function buildSiteVerification(): Metadata["verification"] | undefined {
 }
 
 export const metadata: Metadata = {
-  ...buildRootLayoutMetadata(),
+  metadataBase,
+  title: {
+    default: SITE_OG_TITLE,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_OG_DESCRIPTION,
+  keywords: [...SITE_KEYWORDS],
+  authors: [{ name: SITE_NAME, url: canonicalUrl }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  applicationName: SITE_NAME,
+  category: "food",
+  alternates: {
+    canonical: canonicalUrl,
+    languages: {
+      [SITE_LOCALE]: canonicalUrl,
+      en: canonicalUrl,
+      "x-default": canonicalUrl,
+    },
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: SITE_OG_LOCALE,
+    alternateLocale: ["en"],
+    url: canonicalUrl,
+    title: SITE_OG_TITLE,
+    description: SITE_OG_DESCRIPTION,
+    siteName: SITE_NAME,
+    images: buildOpenGraphImages(ogImage, imageAlt),
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_OG_TITLE,
+    description: SITE_OG_DESCRIPTION,
+    site: SITE_TWITTER_HANDLE,
+    creator: SITE_TWITTER_HANDLE,
+    images: [
+      {
+        url: twitterImage,
+        width: 1200,
+        height: 630,
+        alt: imageAlt,
+      },
+    ],
+  },
+  icons: buildRootIcons(),
+  manifest: "/manifest.webmanifest",
+  referrer: "origin-when-cross-origin",
+  other: {
+    "og:image:alt": imageAlt,
+    "twitter:image:alt": imageAlt,
+    "content-language": SITE_LOCALE,
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

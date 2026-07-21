@@ -1,10 +1,10 @@
 import { buildPageMetadata } from "@/lib/seo/metadata";
-import { SITE_KEYWORDS } from "@/lib/seo/site";
+import { SITE_KEYWORDS, SITE_OG_TITLE } from "@/lib/seo/site";
 
 /** Static public route SEO copy (titles/descriptions). */
 export const PUBLIC_PAGE_SEO = {
   home: {
-    title: "Foodiq | Online Food Delivery",
+    title: SITE_OG_TITLE,
     description:
       "Order delicious food from top restaurants with fast delivery, exciting offers, and premium dining experience.",
     path: "/",

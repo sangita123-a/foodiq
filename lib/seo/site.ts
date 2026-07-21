@@ -6,7 +6,7 @@ export const SITE_TAGLINE = "Online Food Delivery Platform";
 export const SITE_CITY = "Hyderabad";
 export const SITE_DESCRIPTION =
   "Order delicious food online from top restaurants with fast delivery only on Foodiq.";
-export const SITE_OG_TITLE = "Foodiq | Online Food Delivery";
+export const SITE_OG_TITLE = "Foodiq | Online Food Delivery Platform";
 export const SITE_OG_DESCRIPTION =
   "Order delicious food from top restaurants with fast delivery, exciting offers, and premium dining experience.";
 export const SITE_OG_IMAGE_ALT = "Foodiq — Order Delicious Food Anytime";
@@ -71,6 +71,9 @@ export const ORGANIZATION_SAME_AS = [
 export const SITE_SUPPORT_EMAIL = "support@foodiq.com";
 export const SITE_SUPPORT_PHONE = "+91-40-4010-0100";
 export const SITE_LOCALE = "en-IN";
+/** Open Graph locale format (BCP 47 with underscore). */
+export const SITE_OG_LOCALE = "en_IN";
+export const SITE_TWITTER_HANDLE = "@foodiq";
 
 /** Primary routes prefetched for faster navigation (no UI change). */
 export const PREFETCH_ROUTES = [

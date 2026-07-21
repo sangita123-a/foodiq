@@ -8,7 +8,9 @@ import {
   SITE_NAME,
   SITE_OG_DESCRIPTION,
   SITE_OG_IMAGE_ALT,
+  SITE_OG_LOCALE,
   SITE_OG_TITLE,
+  SITE_TWITTER_HANDLE,
   absoluteUrl,
   getSiteUrl,
 } from "./site";
@@ -40,7 +42,7 @@ function resolveTwitterImage(image?: string | null, fallback?: string | null): s
   return absoluteUrl(DEFAULT_TWITTER_IMAGE);
 }
 
-function buildOpenGraphImages(ogImage: string, alt: string) {
+export function buildOpenGraphImages(ogImage: string, alt: string) {
   return [
     {
       url: ogImage,
@@ -116,7 +118,7 @@ export function buildPageMetadata({
         },
     openGraph: {
       type,
-      locale: "en_IN",
+      locale: SITE_OG_LOCALE,
       alternateLocale: ["en"],
       url,
       title: ogTitle,
@@ -136,8 +138,8 @@ export function buildPageMetadata({
           alt: imageAlt,
         },
       ],
-      creator: "@foodiq",
-      site: "@foodiq",
+      creator: SITE_TWITTER_HANDLE,
+      site: SITE_TWITTER_HANDLE,
     },
     other: {
       "og:image:alt": imageAlt,
@@ -145,6 +147,7 @@ export function buildPageMetadata({
       "content-language": SITE_LOCALE,
     },
     metadataBase: new URL(getSiteUrl()),
+    referrer: "origin-when-cross-origin",
   };
 }
 
@@ -170,7 +173,7 @@ export const noIndexMetadata = buildPageMetadata({
 
 const ROOT_ICON_SIZES = [16, 32, 72, 96, 128, 192, 512] as const;
 
-function buildRootIcons(): NonNullable<Metadata["icons"]> {
+export function buildRootIcons(): NonNullable<Metadata["icons"]> {
   const pngIcons = ROOT_ICON_SIZES.map((size) => ({
     url: `/icons/${size <= 32 ? `favicon-${size}` : `icon-${size}`}.png`,
     sizes: `${size}x${size}`,
@@ -242,7 +245,7 @@ export function buildRootLayoutMetadata(): Metadata {
     },
     openGraph: {
       type: "website",
-      locale: "en_IN",
+      locale: SITE_OG_LOCALE,
       alternateLocale: ["en"],
       url: canonicalUrl,
       title: SITE_OG_TITLE,
@@ -272,5 +275,6 @@ export function buildRootLayoutMetadata(): Metadata {
     },
     icons: buildRootIcons(),
     manifest: "/manifest.webmanifest",
+    referrer: "origin-when-cross-origin",
   };
 }
