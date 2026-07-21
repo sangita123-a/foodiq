@@ -19,6 +19,12 @@ const SiteSettingsContext = createContext<SiteSettingsContextValue>({
   isLoading: false,
 });
 
+function siteSettingsEqual(a?: SiteSettings, b?: SiteSettings): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 async function fetchSiteSettings(): Promise<SiteSettings> {
   try {
     const res = await api.get("/api/site-settings");
@@ -56,11 +62,13 @@ export function SiteSettingsProvider({
     revalidateOnFocus: false,
     revalidateOnMount: false,
     dedupingInterval: 60000,
+    compare: siteSettingsEqual,
   });
 
+  const settingsSnapshot = JSON.stringify(data ?? bootstrapSettings);
   const settings = useMemo(
     () => mergeSiteSettings(data ?? bootstrapSettings),
-    [data, bootstrapSettings]
+    [settingsSnapshot]
   );
 
   const value = useMemo(
@@ -68,21 +76,21 @@ export function SiteSettingsProvider({
     [settings, isLoading]
   );
 
+  const themeColor = settings.theme_color || DEFAULT_SITE_SETTINGS.theme_color;
+
   useEffect(() => {
-    const color = settings.theme_color || DEFAULT_SITE_SETTINGS.theme_color;
     const isDefault =
-      color.toLowerCase() === DEFAULT_SITE_SETTINGS.theme_color.toLowerCase();
+      themeColor.toLowerCase() === DEFAULT_SITE_SETTINGS.theme_color.toLowerCase();
 
     if (isDefault) {
-      // Let app/globals.css own primary + hover tokens when using the default theme.
       document.documentElement.style.removeProperty("--color-primary");
       document.documentElement.style.removeProperty("--color-primary-hover");
       return;
     }
 
-    document.documentElement.style.setProperty("--color-primary", color);
-    document.documentElement.style.setProperty("--color-primary-hover", color);
-  }, [settings.theme_color]);
+    document.documentElement.style.setProperty("--color-primary", themeColor);
+    document.documentElement.style.setProperty("--color-primary-hover", themeColor);
+  }, [themeColor]);
 
   return (
     <SiteSettingsContext.Provider value={value}>

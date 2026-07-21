@@ -143,11 +143,17 @@ export function getRestaurantImage(url?: string | null): string {
   return DEFAULT_RESTAURANT_IMAGE;
 }
 
-export function getUniqueTrendingImage(staticImage: string, apiImage?: string | null): string {
-  if (staticImage?.trim()) return resolveBackendUrl(staticImage) ?? staticImage;
-  const resolved = resolveBackendUrl(apiImage);
-  if (resolved && !isGenericFoodImage(resolved)) return resolved;
-  return DEFAULT_FOOD_IMAGE;
+import { resolveTrendingDishImagePath } from "@/lib/data/trendingDishImages";
+
+export function getUniqueTrendingImage(
+  name: string,
+  category: string,
+  apiImage?: string | null,
+  staticImage?: string | null,
+  dishId?: string | null
+): string {
+  const path = resolveTrendingDishImagePath(name, category, dishId, apiImage, staticImage);
+  return resolveBackendUrl(path) ?? path;
 }
 
 export function getFoodImage(url?: string | null): string {

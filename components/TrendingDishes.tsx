@@ -254,7 +254,13 @@ export default function TrendingDishes() {
           rating: String(d.rating || d.restaurant_rating || fallbackObj.rating),
           price: d.discount_price ? Number(d.discount_price) : Number(d.price || fallbackObj.price),
           originalPrice: d.price ? Number(d.price) : fallbackObj.originalPrice,
-          image: getUniqueTrendingImage(fallbackObj.image, (d.image_url || d.image) as string),
+          image: getUniqueTrendingImage(
+            (d.name as string) || fallbackObj.name,
+            (d.category_name as string) || fallbackObj.category,
+            (d.image_url || d.image) as string,
+            fallbackObj.image,
+            String(d.id || fallbackObj.id)
+          ),
           description: (d.description as string) || fallbackObj.description,
           isVeg: Boolean(d.is_vegetarian ?? d.is_veg ?? fallbackObj.isVeg),
           isBestseller: Boolean(d.is_bestseller ?? fallbackObj.isBestseller),
