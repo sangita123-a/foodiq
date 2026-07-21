@@ -26,27 +26,27 @@ export default function HelpFaqSection() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search FAQs…"
-          className="w-full border border-[#E5E7EB] rounded-2xl pl-11 pr-4 py-3 text-sm bg-white"
+          className="w-full border border-border rounded-2xl pl-11 pr-4 py-3 text-sm bg-white"
         />
       </div>
 
       <div className="space-y-3">
         {filtered.map((section) => (
-          <div key={section.id} className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden">
+          <div key={section.id} className="bg-white rounded-2xl border border-border overflow-hidden">
             <button
               type="button"
               onClick={() => setOpen(open === section.id ? null : section.id)}
-              className="w-full flex items-center justify-between px-5 py-4 text-left font-black text-[#111827]"
+              className="w-full flex items-center justify-between px-5 py-4 text-left font-black text-foreground"
             >
               {section.title}
               <ChevronDown className={`w-5 h-5 transition ${open === section.id ? "rotate-180" : ""}`} />
             </button>
             {open === section.id && (
-              <div className="px-5 pb-4 space-y-3 border-t border-[#E5E7EB] pt-3">
+              <div className="px-5 pb-4 space-y-3 border-t border-border pt-3">
                 {section.items.map((item, i) => (
                   <div key={i}>
-                    <p className="font-bold text-sm text-[#111827] mb-1">{item.q}</p>
-                    <p className="text-sm text-[#6B7280]">{item.a}</p>
+                    <p className="font-bold text-sm text-foreground mb-1">{item.q}</p>
+                    <p className="text-sm text-gray-text">{item.a}</p>
                   </div>
                 ))}
               </div>

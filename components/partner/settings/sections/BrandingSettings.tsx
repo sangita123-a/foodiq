@@ -14,7 +14,7 @@ interface BrandingSettingsProps {
 export default function BrandingSettings({ data, onChange }: BrandingSettingsProps) {
   
   const presetColors = [
-    "#C81E34", // Foodiq Red
+    "var(--color-primary-hover)", // Foodiq Red
     "#3b82f6", // Blue
     "#10b981", // Emerald
     "#f59e0b", // Amber
@@ -26,18 +26,18 @@ export default function BrandingSettings({ data, onChange }: BrandingSettingsPro
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-black text-[#111827] flex items-center gap-2 mb-2">
-          <Palette className="w-6 h-6 text-[#E23744]" /> Branding
+        <h2 className="text-2xl font-black text-foreground flex items-center gap-2 mb-2">
+          <Palette className="w-6 h-6 text-primary" /> Branding
         </h2>
-        <p className="text-[#6B7280] text-sm mb-6">Customize how your restaurant appears to customers on Foodiq.</p>
+        <p className="text-gray-text text-sm mb-6">Customize how your restaurant appears to customers on Foodiq.</p>
       </div>
 
       {/* Theme Color */}
-      <div className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-3xl p-6 md:p-8">
-        <h3 className="text-[#111827] font-bold mb-4 flex items-center gap-2">
+      <div className="bg-section border border-border rounded-3xl p-6 md:p-8">
+        <h3 className="text-foreground font-bold mb-4 flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-yellow-400" /> Restaurant Theme Color
         </h3>
-        <p className="text-sm text-[#6B7280] mb-6">This color will be used for buttons, links, and highlights on your restaurant's menu page.</p>
+        <p className="text-sm text-gray-text mb-6">This color will be used for buttons, links, and highlights on your restaurant's menu page.</p>
         
         <div className="flex flex-wrap items-center gap-4">
           {presetColors.map((color) => (
@@ -51,23 +51,23 @@ export default function BrandingSettings({ data, onChange }: BrandingSettingsPro
             </button>
           ))}
           
-          <div className="flex items-center gap-2 ml-4 border-l border-[#E5E7EB] pl-4">
-            <span className="text-sm font-bold text-[#6B7280]">Custom Hex:</span>
+          <div className="flex items-center gap-2 ml-4 border-l border-border pl-4">
+            <span className="text-sm font-bold text-gray-text">Custom Hex:</span>
             <input 
               type="text" 
               value={data.themeColor}
               onChange={(e) => onChange({ themeColor: e.target.value })}
-              className="w-24 bg-[#FFFFFF] border border-[#E5E7EB] rounded-lg px-3 py-2 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm font-mono"
+              className="w-24 bg-background border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-primary transition-colors text-sm font-mono"
             />
           </div>
         </div>
         
         {/* Preview */}
-        <div className="mt-8 p-6 bg-[#FFFFFF] rounded-2xl border border-[#E5E7EB]">
+        <div className="mt-8 p-6 bg-background rounded-2xl border border-border">
           <p className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider mb-4">Live Preview</p>
           <div className="flex items-center gap-4">
             <button 
-              className="px-6 py-2.5 rounded-xl text-[#111827] font-bold transition-all shadow-lg"
+              className="px-6 py-2.5 rounded-xl text-foreground font-bold transition-all shadow-lg"
               style={{ backgroundColor: data.themeColor, boxShadow: `0 4px 20px ${data.themeColor}40` }}
             >
               Order Now
@@ -80,11 +80,11 @@ export default function BrandingSettings({ data, onChange }: BrandingSettingsPro
       {/* Banners */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
-        <div className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-3xl p-6">
-          <h3 className="text-[#111827] font-bold mb-2">Primary Banner</h3>
-          <p className="text-xs text-[#6B7280] mb-4">Displayed at the top of your menu.</p>
+        <div className="bg-section border border-border rounded-3xl p-6">
+          <h3 className="text-foreground font-bold mb-2">Primary Banner</h3>
+          <p className="text-xs text-gray-text mb-4">Displayed at the top of your menu.</p>
           
-          <div className="h-32 w-full bg-[#FFFFFF] rounded-2xl border border-dashed border-[#E5E7EB] flex flex-col items-center justify-center text-[#9CA3AF] hover:border-[#E5E7EB] hover:bg-[#F8FAFC] transition-all cursor-pointer group relative overflow-hidden">
+          <div className="h-32 w-full bg-background rounded-2xl border border-dashed border-border flex flex-col items-center justify-center text-[#9CA3AF] hover:border-border hover:bg-section transition-all cursor-pointer group relative overflow-hidden">
             {data.primaryBanner ? (
               <SafeImage src={data.primaryBanner} fallback={RESTAURANT_FALLBACK} alt="Primary" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
             ) : null}
@@ -95,11 +95,11 @@ export default function BrandingSettings({ data, onChange }: BrandingSettingsPro
           </div>
         </div>
 
-        <div className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-3xl p-6">
-          <h3 className="text-[#111827] font-bold mb-2">Promotional Banner</h3>
-          <p className="text-xs text-[#6B7280] mb-4">Displayed below the featured dishes.</p>
+        <div className="bg-section border border-border rounded-3xl p-6">
+          <h3 className="text-foreground font-bold mb-2">Promotional Banner</h3>
+          <p className="text-xs text-gray-text mb-4">Displayed below the featured dishes.</p>
           
-          <div className="h-32 w-full bg-[#FFFFFF] rounded-2xl border border-dashed border-[#E5E7EB] flex flex-col items-center justify-center text-[#9CA3AF] hover:border-[#E5E7EB] hover:bg-[#F8FAFC] transition-all cursor-pointer group relative overflow-hidden">
+          <div className="h-32 w-full bg-background rounded-2xl border border-dashed border-border flex flex-col items-center justify-center text-[#9CA3AF] hover:border-border hover:bg-section transition-all cursor-pointer group relative overflow-hidden">
             {data.promoBanner ? (
               <SafeImage src={data.promoBanner} fallback={RESTAURANT_FALLBACK} alt="Promo" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
             ) : null}

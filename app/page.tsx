@@ -17,7 +17,7 @@ export const metadata: Metadata = publicMetadata("home");
 function SectionSkeleton({ height = "h-64" }: { height?: string }) {
   return (
     <div
-      className={`mx-auto my-8 max-w-7xl animate-pulse rounded-2xl bg-[#FAFAFA] ${height}`}
+      className={`mx-auto my-8 max-w-7xl animate-pulse rounded-2xl bg-section ${height}`}
       aria-hidden
     />
   );
@@ -65,7 +65,7 @@ export default function Home() {
     <main
       id="main-content"
       tabIndex={-1}
-      className="min-h-screen bg-white text-[#1C1C1C] relative selection:bg-[#E23744]/15 selection:text-[#1C1C1C]"
+      className="min-h-screen bg-white text-foreground relative selection:bg-primary/15 selection:text-foreground"
     >
       <InternalSeoLinks
         links={getContextualInternalLinks("home")}

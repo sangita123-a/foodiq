@@ -101,10 +101,10 @@ export default function AdminTicketsPanel() {
   return (
     <AdminShell title="Support Tickets">
       <div className="mb-6 flex items-center gap-2">
-        <Headphones className="w-6 h-6 text-[#E23744]" />
+        <Headphones className="w-6 h-6 text-primary" />
         <div>
-          <h1 className="text-2xl font-black text-[#111827]">Customer Support Tickets</h1>
-          <p className="text-sm text-[#6B7280]">Assign agents, reply, and manage ticket lifecycle.</p>
+          <h1 className="text-2xl font-black text-foreground">Customer Support Tickets</h1>
+          <p className="text-sm text-gray-text">Assign agents, reply, and manage ticket lifecycle.</p>
         </div>
       </div>
 
@@ -112,7 +112,7 @@ export default function AdminTicketsPanel() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm"
+          className="border border-border rounded-xl px-3 py-2 text-sm"
         >
           <option value="">All statuses</option>
           {TICKET_STATUSES.map((s) => (
@@ -124,18 +124,18 @@ export default function AdminTicketsPanel() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden max-h-[70vh] overflow-y-auto">
+        <div className="bg-white border border-border rounded-2xl overflow-hidden max-h-[70vh] overflow-y-auto">
           {(tickets as SupportTicket[]).map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => openTicket(t.id)}
-              className={`w-full text-left p-4 border-b border-[#F3F4F6] hover:bg-[#F8FAFC] ${
-                selectedId === t.id ? "bg-[#E23744]/5" : ""
+              className={`w-full text-left p-4 border-b border-[#F3F4F6] hover:bg-section ${
+                selectedId === t.id ? "bg-primary/5" : ""
               }`}
             >
               <div className="flex justify-between gap-2 mb-1">
-                <p className="font-bold text-sm text-[#111827]">{t.subject}</p>
+                <p className="font-bold text-sm text-foreground">{t.subject}</p>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusColor(t.status)}`}>
                   {t.status}
                 </span>
@@ -149,17 +149,17 @@ export default function AdminTicketsPanel() {
           {!tickets.length && <p className="p-6 text-sm text-[#9CA3AF]">No tickets found.</p>}
         </div>
 
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 min-h-[400px]">
+        <div className="bg-white border border-border rounded-2xl p-5 min-h-[400px]">
           {!detail ? (
             <p className="text-sm text-[#9CA3AF]">Select a ticket to view history and reply.</p>
           ) : busy === "load" ? (
-            <div className="h-40 bg-[#F8FAFC] animate-pulse rounded-xl" />
+            <div className="h-40 bg-section animate-pulse rounded-xl" />
           ) : (
             <>
-              <div className="mb-4 pb-4 border-b border-[#E5E7EB]">
+              <div className="mb-4 pb-4 border-b border-border">
                 <p className="text-xs text-[#9CA3AF]">{ticketDisplayId(detail.ticket)}</p>
                 <h2 className="text-lg font-black">{detail.ticket.subject}</h2>
-                <p className="text-xs text-[#6B7280] mt-1">
+                <p className="text-xs text-gray-text mt-1">
                   {detail.ticket.user_name} · {detail.ticket.user_email}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-3">
@@ -177,7 +177,7 @@ export default function AdminTicketsPanel() {
                       type="button"
                       disabled={!!busy}
                       onClick={() => setStatus(detail.ticket.id, s)}
-                      className="text-xs font-bold px-3 py-1.5 rounded-lg border border-[#E5E7EB]"
+                      className="text-xs font-bold px-3 py-1.5 rounded-lg border border-border"
                     >
                       Mark {s}
                     </button>
@@ -197,13 +197,13 @@ export default function AdminTicketsPanel() {
 
               <div className="space-y-3 max-h-64 overflow-y-auto mb-4">
                 {detail.messages.map((m) => (
-                  <div key={m.id} className="text-sm bg-[#F8FAFC] rounded-xl p-3 border border-[#E5E7EB]">
+                  <div key={m.id} className="text-sm bg-section rounded-xl p-3 border border-border">
                     <p className="text-[10px] font-bold uppercase text-[#9CA3AF] mb-1">
                       {m.sender_name || m.sender_role}
                     </p>
                     <p>{m.message}</p>
                     {(m.attachment_urls || []).map((url, i) => (
-                      <a key={i} href={url} target="_blank" rel="noreferrer" className="block mt-1 text-xs text-[#E23744]">
+                      <a key={i} href={url} target="_blank" rel="noreferrer" className="block mt-1 text-xs text-primary">
                         View attachment
                       </a>
                     ))}
@@ -217,11 +217,11 @@ export default function AdminTicketsPanel() {
                     value={reply}
                     onChange={(e) => setReply(e.target.value)}
                     rows={3}
-                    className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm mb-2"
+                    className="w-full border border-border rounded-xl px-3 py-2 text-sm mb-2"
                     placeholder="Reply to customer..."
                   />
                   <div className="flex gap-2">
-                    <label className="text-xs font-bold text-[#E23744] cursor-pointer">
+                    <label className="text-xs font-bold text-primary cursor-pointer">
                       + Image
                       <input
                         type="file"
@@ -240,7 +240,7 @@ export default function AdminTicketsPanel() {
                       type="button"
                       onClick={sendReply}
                       disabled={busy === "reply"}
-                      className="ml-auto flex items-center gap-1 bg-[#E23744] text-white font-black px-4 py-2 rounded-xl text-sm"
+                      className="ml-auto flex items-center gap-1 bg-primary text-white font-black px-4 py-2 rounded-xl text-sm"
                     >
                       <Send className="w-3.5 h-3.5" /> Send
                     </button>

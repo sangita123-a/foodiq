@@ -45,21 +45,21 @@ export default function AddressFormModal({ isOpen, onClose, onSave, initialData 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#F8FAFC] backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-section backdrop-blur-sm">
       <motion.div 
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="bg-[#F8FAFC] rounded-3xl w-full max-w-2xl border border-[#E5E7EB] shadow-[0_20px_60px_rgba(226, 55, 68,0.15)] overflow-hidden max-h-[90vh] flex flex-col"
+        className="bg-section rounded-3xl w-full max-w-2xl border border-border shadow-[0_20px_60px_rgba(226, 55, 68,0.15)] overflow-hidden max-h-[90vh] flex flex-col"
       >
         {/* Modal Header */}
-        <div className="p-6 md:p-8 border-b border-[#E5E7EB] flex justify-between items-center bg-[#F8FAFC]">
-          <h2 className="text-2xl font-bold text-[#111827]">
+        <div className="p-6 md:p-8 border-b border-border flex justify-between items-center bg-section">
+          <h2 className="text-2xl font-bold text-foreground">
             {initialData ? "Edit Address" : "Add New Address"}
           </h2>
           <button 
             onClick={onClose}
-            className="w-10 h-10 bg-[#F8FAFC] hover:bg-[#F8FAFC] rounded-full flex items-center justify-center text-[#6B7280] hover:text-[#111827] transition-colors"
+            className="w-10 h-10 bg-section hover:bg-section rounded-full flex items-center justify-center text-gray-text hover:text-foreground transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -70,48 +70,48 @@ export default function AddressFormModal({ isOpen, onClose, onSave, initialData 
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div>
-              <label className="block text-sm font-bold text-[#6B7280] mb-2">Full Name</label>
-              <input required type="text" name="name" value={formData.name || ''} onChange={handleChange} className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. John Doe" />
+              <label className="block text-sm font-bold text-gray-text mb-2">Full Name</label>
+              <input required type="text" name="name" value={formData.name || ''} onChange={handleChange} className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. John Doe" />
             </div>
             <div>
-              <label className="block text-sm font-bold text-[#6B7280] mb-2">Mobile Number</label>
-              <input required type="text" name="phone" value={formData.phone || ''} onChange={handleChange} className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. 9876543210" />
+              <label className="block text-sm font-bold text-gray-text mb-2">Mobile Number</label>
+              <input required type="text" name="phone" value={formData.phone || ''} onChange={handleChange} className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. 9876543210" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-6 mb-8">
             <div>
-              <label className="block text-sm font-bold text-[#6B7280] mb-2">House / Flat No.</label>
-              <input required type="text" name="flat" value={formData.flat || ''} onChange={handleChange} className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. Flat 402, Block A" />
+              <label className="block text-sm font-bold text-gray-text mb-2">House / Flat No.</label>
+              <input required type="text" name="flat" value={formData.flat || ''} onChange={handleChange} className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. Flat 402, Block A" />
             </div>
             <div>
-              <label className="block text-sm font-bold text-[#6B7280] mb-2">Street / Area</label>
-              <input required type="text" name="street" value={formData.street || ''} onChange={handleChange} className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. MG Road" />
+              <label className="block text-sm font-bold text-gray-text mb-2">Street / Area</label>
+              <input required type="text" name="street" value={formData.street || ''} onChange={handleChange} className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. MG Road" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div>
-              <label className="block text-sm font-bold text-[#6B7280] mb-2">Landmark (Optional)</label>
-              <input type="text" name="landmark" value={formData.landmark || ''} onChange={handleChange} className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. Near City Mall" />
+              <label className="block text-sm font-bold text-gray-text mb-2">Landmark (Optional)</label>
+              <input type="text" name="landmark" value={formData.landmark || ''} onChange={handleChange} className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. Near City Mall" />
             </div>
             <div>
-              <label className="block text-sm font-bold text-[#6B7280] mb-2">Pincode</label>
-              <input required type="text" name="pincode" value={formData.pincode || ''} onChange={handleChange} className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. 560001" />
+              <label className="block text-sm font-bold text-gray-text mb-2">Pincode</label>
+              <input required type="text" name="pincode" value={formData.pincode || ''} onChange={handleChange} className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. 560001" />
             </div>
             <div>
-              <label className="block text-sm font-bold text-[#6B7280] mb-2">City</label>
-              <input required type="text" name="city" value={formData.city || ''} onChange={handleChange} className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. Bangalore" />
+              <label className="block text-sm font-bold text-gray-text mb-2">City</label>
+              <input required type="text" name="city" value={formData.city || ''} onChange={handleChange} className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. Bangalore" />
             </div>
             <div>
-              <label className="block text-sm font-bold text-[#6B7280] mb-2">State</label>
-              <input required type="text" name="state" value={formData.state || ''} onChange={handleChange} className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. Karnataka" />
+              <label className="block text-sm font-bold text-gray-text mb-2">State</label>
+              <input required type="text" name="state" value={formData.state || ''} onChange={handleChange} className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g. Karnataka" />
             </div>
           </div>
 
           {/* Address Type Selection */}
           <div className="mb-8">
-            <label className="block text-sm font-bold text-[#6B7280] mb-4">Save Address As</label>
+            <label className="block text-sm font-bold text-gray-text mb-4">Save Address As</label>
             <div className="flex flex-wrap gap-4">
               {['Home', 'Work', 'Other'].map((type) => {
                 const isSelected = formData.type === type;
@@ -123,7 +123,7 @@ export default function AddressFormModal({ isOpen, onClose, onSave, initialData 
                     className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all border ${
                       isSelected 
                         ? 'bg-primary/10 border-primary text-primary' 
-                        : 'border-[#ECECEC] bg-white text-[#686B78] hover:border-[#E23744]/40 hover:text-[#1C1C1C]'
+                        : 'border-border bg-white text-muted hover:border-primary/40 hover:text-foreground'
                     }`}
                   >
                     {type === 'Home' && <Home className="w-4 h-4" />}
@@ -140,7 +140,7 @@ export default function AddressFormModal({ isOpen, onClose, onSave, initialData 
           <div className="mb-8">
             <label className="flex items-center gap-3 cursor-pointer group w-max">
               <div className={`w-6 h-6 rounded border flex items-center justify-center transition-colors ${
-                formData.isDefault ? 'bg-primary border-primary' : 'border-[#ECECEC] group-hover:border-[#E23744]/40 bg-white'
+                formData.isDefault ? 'bg-primary border-primary' : 'border-border group-hover:border-primary/40 bg-white'
               }`}>
                 {formData.isDefault && <Check className="h-4 w-4 text-white" />}
               </div>
@@ -150,22 +150,22 @@ export default function AddressFormModal({ isOpen, onClose, onSave, initialData 
                 checked={formData.isDefault}
                 onChange={(e) => setFormData(prev => ({ ...prev, isDefault: e.target.checked }))}
               />
-              <span className="select-none font-bold text-[#1C1C1C]">Set as Default Address</span>
+              <span className="select-none font-bold text-foreground">Set as Default Address</span>
             </label>
           </div>
 
           {/* Form Actions */}
-          <div className="flex gap-4 border-t border-[#ECECEC] pt-6">
+          <div className="flex gap-4 border-t border-border pt-6">
             <button 
               type="button" 
               onClick={onClose}
-              className="flex-1 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] py-4 font-bold text-[#1C1C1C] transition-all hover:border-[#E23744]/30 hover:bg-white"
+              className="flex-1 rounded-xl border border-border bg-[#F8F9FA] py-4 font-bold text-foreground transition-all hover:border-primary/30 hover:bg-white"
             >
               Cancel
             </button>
             <button 
               type="submit"
-              className="flex-1 rounded-xl bg-[#E23744] py-4 font-bold text-white shadow-[0_10px_24px_rgba(226, 55, 68,0.20)] transition-all hover:bg-[#E23744]"
+              className="flex-1 rounded-xl bg-primary py-4 font-bold text-white shadow-[0_10px_24px_rgba(226, 55, 68,0.20)] transition-all hover:bg-primary"
             >
               Save Address
             </button>

@@ -55,7 +55,7 @@ export default function HeroContent() {
         <span className="block text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold">
           Find the Best
         </span>
-        <span className="relative my-1 block h-[1.25em] w-full max-w-[500px] overflow-hidden text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-[#E23744]">
+        <span className="relative my-1 block h-[1.25em] w-full max-w-[500px] overflow-hidden text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-primary">
           <span
             key={index}
             className={`absolute inset-0 flex items-center justify-center text-center ${
@@ -82,7 +82,7 @@ export default function HeroContent() {
         type="button"
         onClick={scrollToContent}
         aria-label="Scroll down to explore categories and dishes"
-        className={`mt-8 sm:mt-12 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/30 bg-white/20 text-white backdrop-blur-sm transition-all hover:bg-white hover:text-[#E23744] hover:shadow-lg ${
+        className={`mt-8 sm:mt-12 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/30 bg-white/20 text-white backdrop-blur-sm transition-all hover:bg-white hover:text-primary hover:shadow-lg ${
           prefersReduced ? "" : "hero-scroll-bounce"
         }`}
       >

@@ -66,13 +66,13 @@ export default function ProfileSettingsPanel() {
       exit={{ opacity: 0, y: -10 }}
       className="flex flex-col gap-6"
     >
-      <div className="bg-[#F8FAFC] rounded-[24px] p-6 border border-[#E5E7EB] flex items-center gap-3">
+      <div className="bg-section rounded-[24px] p-6 border border-border flex items-center gap-3">
         <Settings className="w-6 h-6 text-primary" />
-        <h2 className="text-2xl font-bold text-[#111827]">Settings</h2>
+        <h2 className="text-2xl font-bold text-foreground">Settings</h2>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="w-full lg:w-64 flex-shrink-0 bg-[#F8FAFC] rounded-2xl border border-[#E5E7EB] p-3 space-y-1">
+        <div className="w-full lg:w-64 flex-shrink-0 bg-section rounded-2xl border border-border p-3 space-y-1">
           {SECTIONS.map((s) => (
             <button
               key={s}
@@ -80,7 +80,7 @@ export default function ProfileSettingsPanel() {
               className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-colors ${
                 active === s
                   ? "bg-primary text-white"
-                  : "text-[#6B7280] hover:text-[#111827] hover:bg-[#F8FAFC]"
+                  : "text-gray-text hover:text-foreground hover:bg-section"
               }`}
             >
               {s}
@@ -96,7 +96,7 @@ export default function ProfileSettingsPanel() {
               <button
                 type="submit"
                 form="settings-form"
-                className="bg-primary hover:bg-[#C81E34] text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(226, 55, 68,0.3)]"
+                className="bg-primary hover:bg-primary-hover text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(226, 55, 68,0.3)]"
               >
                 Save Changes
               </button>

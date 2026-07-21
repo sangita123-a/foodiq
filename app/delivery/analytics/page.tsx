@@ -15,21 +15,21 @@ export default function DeliveryAnalyticsPage() {
     <DeliveryShell>
       <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#E23744]/10 flex items-center justify-center">
-            <BarChart3 className="w-5 h-5 text-[#E23744]" />
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <BarChart3 className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-[#111827]">
+            <h1 className="text-2xl font-black text-foreground">
               Delivery analytics
             </h1>
-            <p className="text-sm text-[#6B7280]">
+            <p className="text-sm text-gray-text">
               Performance over the last 30 days
             </p>
           </div>
         </div>
 
         {isLoading ? (
-          <p className="text-sm text-[#6B7280]">Loading…</p>
+          <p className="text-sm text-gray-text">Loading…</p>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
@@ -43,12 +43,12 @@ export default function DeliveryAnalyticsPage() {
             ].map((k) => (
               <div
                 key={k.label}
-                className="bg-white rounded-3xl border border-[#E5E7EB] p-5"
+                className="bg-white rounded-3xl border border-border p-5"
               >
                 <p className="text-xs font-bold text-[#9CA3AF] uppercase">
                   {k.label}
                 </p>
-                <p className="text-2xl font-black text-[#111827] mt-1">
+                <p className="text-2xl font-black text-foreground mt-1">
                   {k.value}
                 </p>
               </div>
@@ -56,7 +56,7 @@ export default function DeliveryAnalyticsPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
+        <div className="bg-white rounded-3xl border border-border p-6">
           <h2 className="font-bold text-lg mb-4">Top partners</h2>
           <div className="space-y-2">
             {(data?.top_partners || []).map(
@@ -68,17 +68,17 @@ export default function DeliveryAnalyticsPage() {
               }) => (
                 <div
                   key={p.id}
-                  className="flex justify-between text-sm border-b border-[#E5E7EB] py-2"
+                  className="flex justify-between text-sm border-b border-border py-2"
                 >
                   <span className="font-bold">{p.full_name}</span>
-                  <span className="text-[#6B7280]">
+                  <span className="text-gray-text">
                     {p.delivered} delivered · ★ {Number(p.rating || 0).toFixed(1)}
                   </span>
                 </div>
               )
             )}
             {!data?.top_partners?.length && (
-              <p className="text-sm text-[#6B7280]">No partner stats yet.</p>
+              <p className="text-sm text-gray-text">No partner stats yet.</p>
             )}
           </div>
         </div>

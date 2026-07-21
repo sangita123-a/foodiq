@@ -73,14 +73,14 @@ export default function SecuritySettings() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="bg-[#F8FAFC] rounded-3xl p-6 md:p-10 border border-[#E5E7EB] shadow-2xl"
+      className="bg-section rounded-3xl p-6 md:p-10 border border-border shadow-2xl"
     >
       <h2 className="text-2xl font-bold text-white mb-8">Security Settings</h2>
 
-      <div className="mb-10 pb-8 border-b border-[#E5E7EB]">
+      <div className="mb-10 pb-8 border-b border-border">
         <div className="flex items-center gap-3 mb-6">
           <Key className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-bold text-[#111827]">Change Password</h3>
+          <h3 className="text-lg font-bold text-foreground">Change Password</h3>
         </div>
         <form onSubmit={handlePassword} className="space-y-4 max-w-md">
           <input
@@ -88,7 +88,7 @@ export default function SecuritySettings() {
             name="old_password"
             required
             placeholder="Current Password"
-            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 focus:outline-none focus:border-primary transition-colors"
+            className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-primary transition-colors"
           />
           <input
             type="password"
@@ -96,7 +96,7 @@ export default function SecuritySettings() {
             required
             minLength={8}
             placeholder="New Password"
-            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 focus:outline-none focus:border-primary transition-colors"
+            className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-primary transition-colors"
           />
           <input
             type="password"
@@ -104,30 +104,30 @@ export default function SecuritySettings() {
             required
             minLength={8}
             placeholder="Confirm New Password"
-            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 focus:outline-none focus:border-primary transition-colors"
+            className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-primary transition-colors"
           />
           <button
             type="submit"
-            className="bg-[#F8FAFC] hover:bg-[#F8FAFC] text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors mt-2"
+            className="bg-section hover:bg-section text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors mt-2"
           >
             Update Password
           </button>
         </form>
       </div>
 
-      <div className="mb-10 pb-8 border-b border-[#E5E7EB] flex items-center justify-between">
+      <div className="mb-10 pb-8 border-b border-border flex items-center justify-between">
         <div className="max-w-md">
           <div className="flex items-center gap-3 mb-2">
             <ShieldCheck className="w-5 h-5 text-green-400" />
-            <h3 className="text-lg font-bold text-[#111827]">Two-Factor Authentication</h3>
+            <h3 className="text-lg font-bold text-foreground">Two-Factor Authentication</h3>
           </div>
-          <p className="text-[#6B7280] text-sm leading-relaxed">
+          <p className="text-gray-text text-sm leading-relaxed">
             Add an extra layer of security to your account by requiring a code from your mobile app when logging in.
           </p>
         </div>
         <button
           onClick={toggle2FA}
-          className={`w-14 h-8 rounded-full p-1 transition-colors relative flex-shrink-0 ${twoFactorEnabled ? "bg-primary" : "bg-white border border-[#E5E7EB]"}`}
+          className={`w-14 h-8 rounded-full p-1 transition-colors relative flex-shrink-0 ${twoFactorEnabled ? "bg-primary" : "bg-white border border-border"}`}
         >
           <motion.div
             layout
@@ -138,9 +138,9 @@ export default function SecuritySettings() {
         </button>
       </div>
 
-      <div className="mb-10 pb-8 border-b border-[#E5E7EB]">
+      <div className="mb-10 pb-8 border-b border-border">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-bold text-[#111827]">Active Sessions</h3>
+          <h3 className="text-lg font-bold text-foreground">Active Sessions</h3>
           <button
             onClick={logoutOthers}
             className="text-red-400 hover:text-red-300 text-sm font-bold flex items-center gap-2 transition-colors"
@@ -151,9 +151,9 @@ export default function SecuritySettings() {
 
         <div className="space-y-3">
           {sessionList.length === 0 ? (
-            <div className="flex items-center gap-4 bg-[#F8FAFC] border border-[#E5E7EB] rounded-2xl p-4">
-              <div className="w-12 h-12 bg-[#F8FAFC] rounded-xl flex items-center justify-center">
-                <Laptop className="w-6 h-6 text-[#6B7280]" />
+            <div className="flex items-center gap-4 bg-section border border-border rounded-2xl p-4">
+              <div className="w-12 h-12 bg-section rounded-xl flex items-center justify-center">
+                <Laptop className="w-6 h-6 text-gray-text" />
               </div>
               <div className="flex-1">
                 <h4 className="text-white font-bold">This Browser</h4>
@@ -167,13 +167,13 @@ export default function SecuritySettings() {
             sessionList.map((s: any) => (
               <div
                 key={s.id}
-                className="flex items-center gap-4 bg-[#F8FAFC] border border-[#E5E7EB] rounded-2xl p-4"
+                className="flex items-center gap-4 bg-section border border-border rounded-2xl p-4"
               >
-                <div className="w-12 h-12 bg-[#F8FAFC] rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-section rounded-xl flex items-center justify-center">
                   {s.device_type === "mobile" ? (
-                    <Smartphone className="w-6 h-6 text-[#6B7280]" />
+                    <Smartphone className="w-6 h-6 text-gray-text" />
                   ) : (
-                    <Laptop className="w-6 h-6 text-[#6B7280]" />
+                    <Laptop className="w-6 h-6 text-gray-text" />
                   )}
                 </div>
                 <div className="flex-1">
@@ -209,9 +209,9 @@ export default function SecuritySettings() {
             (history || []).map((h: any) => (
               <div
                 key={h.id}
-                className="flex justify-between text-sm bg-[#F8FAFC] rounded-xl px-4 py-2 border border-[#E5E7EB]"
+                className="flex justify-between text-sm bg-section rounded-xl px-4 py-2 border border-border"
               >
-                <span className="text-[#6B7280]">{h.device_name}</span>
+                <span className="text-gray-text">{h.device_name}</span>
                 <span className="text-[#9CA3AF]">{new Date(h.created_at).toLocaleString()}</span>
               </div>
             ))

@@ -97,12 +97,12 @@ export default function MobileDrawer({
               </div>
             )}
             {title && (
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[#ECECEC] shrink-0">
-                <h2 className="text-base font-bold text-[#1C1C1C]">{title}</h2>
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+                <h2 className="text-base font-bold text-foreground">{title}</h2>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#F8F9FA] text-[#686B78] hover:text-[#1C1C1C]"
+                  className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#F8F9FA] text-muted hover:text-foreground"
                   aria-label="Close menu"
                 >
                   <X className="h-5 w-5" />

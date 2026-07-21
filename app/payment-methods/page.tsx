@@ -175,17 +175,17 @@ export default function PaymentMethodsPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] pt-[90px]">
+      <main className="min-h-screen bg-background pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 py-12 max-w-5xl">
-          <div className="h-64 bg-[#F8FAFC] animate-pulse rounded-3xl" />
+          <div className="h-64 bg-section animate-pulse rounded-3xl" />
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-background relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-5xl">
@@ -195,7 +195,7 @@ export default function PaymentMethodsPage() {
           <div className="flex flex-col gap-12">
             {cards.length > 0 && (
               <section>
-                <h3 className="text-2xl font-bold text-[#111827] mb-6">Credit & Debit Cards</h3>
+                <h3 className="text-2xl font-bold text-foreground mb-6">Credit & Debit Cards</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                   <AnimatePresence>
                     {cards.map((card) => (
@@ -214,7 +214,7 @@ export default function PaymentMethodsPage() {
 
             {upis.length > 0 && (
               <section>
-                <h3 className="text-2xl font-bold text-[#111827] mb-6">UPI Accounts</h3>
+                <h3 className="text-2xl font-bold text-foreground mb-6">UPI Accounts</h3>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <AnimatePresence>
                     {upis.map((upi) => (
@@ -226,7 +226,7 @@ export default function PaymentMethodsPage() {
             )}
 
             <section>
-              <h3 className="text-2xl font-bold text-[#111827] mb-6">Wallets</h3>
+              <h3 className="text-2xl font-bold text-foreground mb-6">Wallets</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {wallets.map((wallet) => (
                   <WalletItem key={wallet.id} wallet={wallet} onToggleConnect={handleToggleWallet} />
@@ -239,18 +239,18 @@ export default function PaymentMethodsPage() {
         )}
 
         <div className="mt-16 mb-12">
-          <h3 className="text-2xl font-bold text-[#111827] mb-6">Payment History</h3>
+          <h3 className="text-2xl font-bold text-foreground mb-6">Payment History</h3>
           {isLoadingHistory ? (
-            <div className="h-64 bg-[#F8FAFC] animate-pulse rounded-2xl border border-[#E5E7EB]"></div>
+            <div className="h-64 bg-section animate-pulse rounded-2xl border border-border"></div>
           ) : historyError ? (
             <div className="p-6 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl text-center">
               Failed to load payment history
             </div>
           ) : paymentHistory.length > 0 ? (
-            <div className="bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden">
+            <div className="bg-white rounded-3xl border border-border overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-[#6B7280]">
-                  <thead className="bg-[#F8FAFC] text-[#6B7280] uppercase font-bold text-xs tracking-wide">
+                <table className="w-full text-left text-sm text-gray-text">
+                  <thead className="bg-section text-gray-text uppercase font-bold text-xs tracking-wide">
                     <tr>
                       <th className="px-6 py-4">Transaction ID</th>
                       <th className="px-6 py-4">Restaurant</th>
@@ -263,13 +263,13 @@ export default function PaymentMethodsPage() {
                   </thead>
                   <tbody>
                     {paymentHistory.map((payment: any) => (
-                      <tr key={payment.id} className="border-b border-[#E5E7EB] hover:bg-[#F8FAFC] transition-colors">
-                        <td className="px-6 py-4 font-mono text-xs text-[#111827]">
+                      <tr key={payment.id} className="border-b border-border hover:bg-section transition-colors">
+                        <td className="px-6 py-4 font-mono text-xs text-foreground">
                           {payment.razorpay_payment_id ||
                             payment.provider_transaction_id ||
                             "Pending..."}
                         </td>
-                        <td className="px-6 py-4 text-[#111827]">
+                        <td className="px-6 py-4 text-foreground">
                           {payment.restaurant_name || "—"}
                         </td>
                         <td className="px-6 py-4">
@@ -281,7 +281,7 @@ export default function PaymentMethodsPage() {
                         <td className="px-6 py-4 capitalize">
                           {(payment.method || "").replace(/_/g, " ")}
                         </td>
-                        <td className="px-6 py-4 text-[#111827] font-bold">
+                        <td className="px-6 py-4 text-foreground font-bold">
                           ₹{parseFloat(payment.amount).toFixed(2)}
                         </td>
                         <td className="px-6 py-4">
@@ -308,7 +308,7 @@ export default function PaymentMethodsPage() {
                             payment.status === "partially_refunded") && (
                             <button
                               type="button"
-                              className="text-xs font-bold text-[#E23744] hover:underline"
+                              className="text-xs font-bold text-primary hover:underline"
                               onClick={async () => {
                                 try {
                                   const { downloadInvoiceFile } = await import("@/services/paymentApi");
@@ -326,7 +326,7 @@ export default function PaymentMethodsPage() {
                             payment.order_id && (
                               <a
                                 href={`/payment?orderId=${payment.order_id}&amount=${payment.amount}&method=${payment.method}`}
-                                className="text-xs font-bold text-[#111827] hover:underline"
+                                className="text-xs font-bold text-foreground hover:underline"
                               >
                                 Retry
                               </a>
@@ -339,7 +339,7 @@ export default function PaymentMethodsPage() {
               </div>
             </div>
           ) : (
-            <div className="text-center text-[#9CA3AF] py-10 bg-[#F8FAFC] rounded-3xl border border-[#E5E7EB]">
+            <div className="text-center text-[#9CA3AF] py-10 bg-section rounded-3xl border border-border">
               No recent transactions found.
             </div>
           )}

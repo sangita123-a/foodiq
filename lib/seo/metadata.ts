@@ -280,7 +280,7 @@ export function buildRootIcons(): NonNullable<Metadata["icons"]> {
       {
         rel: "mask-icon",
         url: "/icons/icon-maskable-512.png",
-        color: "#E23744",
+        color: "#0F766E",
       },
     ],
   };

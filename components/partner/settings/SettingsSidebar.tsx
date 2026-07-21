@@ -34,8 +34,8 @@ export default function SettingsSidebar({ activeTab, setActiveTab }: SettingsSid
   ];
 
   return (
-    <div className="bg-[#FFFFFF] rounded-3xl border border-[#E5E7EB] shadow-xl overflow-hidden flex flex-col md:w-64 shrink-0">
-      <div className="p-4 hidden md:block border-b border-[#E5E7EB] bg-[#F8FAFC]">
+    <div className="bg-background rounded-3xl border border-border shadow-xl overflow-hidden flex flex-col md:w-64 shrink-0">
+      <div className="p-4 hidden md:block border-b border-border bg-section">
         <span className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">Categories</span>
       </div>
       
@@ -47,17 +47,17 @@ export default function SettingsSidebar({ activeTab, setActiveTab }: SettingsSid
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all relative text-left whitespace-nowrap md:whitespace-normal ${isActive ? 'text-[#111827]' : 'text-[#6B7280] hover:text-[#111827] hover:bg-[#F8FAFC]'}`}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all relative text-left whitespace-nowrap md:whitespace-normal ${isActive ? 'text-foreground' : 'text-gray-text hover:text-foreground hover:bg-section'}`}
             >
               {isActive && (
                 <motion.div 
                   layoutId="settings-sidebar-active"
-                  className="absolute inset-0 bg-[#E23744]/10 border border-[#E23744]/20 rounded-xl"
+                  className="absolute inset-0 bg-primary/10 border border-primary/20 rounded-xl"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
               
-              <tab.icon className={`w-5 h-5 shrink-0 z-10 ${isActive ? 'text-[#E23744]' : ''}`} />
+              <tab.icon className={`w-5 h-5 shrink-0 z-10 ${isActive ? 'text-primary' : ''}`} />
               <span className={`text-sm font-bold z-10 ${isActive ? '' : 'font-medium'}`}>{tab.label}</span>
             </button>
           );

@@ -23,8 +23,8 @@ type Props = {
 export default function OrderTimeline({ currentStageId, cancelled = false }: Props) {
   if (cancelled || currentStageId === 0) {
     return (
-      <div className="bg-[#F8FAFC] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] mb-8">
-        <h3 className="text-xl font-bold text-[#111827] mb-2">Order Status</h3>
+      <div className="bg-section rounded-3xl p-6 md:p-8 border border-border mb-8">
+        <h3 className="text-xl font-bold text-foreground mb-2">Order Status</h3>
         <p className="text-red-600 font-bold">This order was cancelled.</p>
       </div>
     );
@@ -34,8 +34,8 @@ export default function OrderTimeline({ currentStageId, cancelled = false }: Pro
   const progress = ((clamped - 1) / (stages.length - 1)) * 100;
 
   return (
-    <div className="bg-[#F8FAFC] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] mb-8">
-      <h3 className="text-xl font-bold text-[#111827] mb-8">Live Order Timeline</h3>
+    <div className="bg-section rounded-3xl p-6 md:p-8 border border-border mb-8">
+      <h3 className="text-xl font-bold text-foreground mb-8">Live Order Timeline</h3>
 
       <div className="relative pl-4">
         <div className="absolute top-2 bottom-2 left-[23px] w-0.5 bg-[#E5E7EB] rounded-full" />
@@ -44,7 +44,7 @@ export default function OrderTimeline({ currentStageId, cancelled = false }: Pro
           initial={{ height: 0 }}
           animate={{ height: `${progress}%` }}
           transition={{ duration: 0.6, ease: "easeInOut" }}
-          className="absolute top-2 left-[23px] w-0.5 bg-[#E23744] rounded-full z-0"
+          className="absolute top-2 left-[23px] w-0.5 bg-primary rounded-full z-0"
           style={{ maxHeight: "calc(100% - 1rem)" }}
         />
 
@@ -55,7 +55,7 @@ export default function OrderTimeline({ currentStageId, cancelled = false }: Pro
 
             return (
               <div key={stage.id} className="flex gap-6 items-start">
-                <div className="bg-[#F8FAFC] rounded-full p-1 relative z-10">
+                <div className="bg-section rounded-full p-1 relative z-10">
                   {isCompleted ? (
                     <motion.div
                       key={`done-${stage.id}-${clamped}`}
@@ -66,19 +66,19 @@ export default function OrderTimeline({ currentStageId, cancelled = false }: Pro
                       <CheckCircle2
                         className={`w-6 h-6 ${
                           isCurrent
-                            ? "text-[#E23744] drop-shadow-[0_0_10px_rgba(226, 55, 68,0.8)]"
+                            ? "text-primary drop-shadow-[0_0_10px_rgba(226, 55, 68,0.8)]"
                             : "text-green-500"
                         }`}
                       />
                     </motion.div>
                   ) : (
-                    <Circle className="w-6 h-6 text-[#111827]/20" />
+                    <Circle className="w-6 h-6 text-foreground/20" />
                   )}
                 </div>
                 <div className={`mt-0.5 ${isCompleted ? "opacity-100" : "opacity-40"}`}>
                   <h4
                     className={`font-bold ${
-                      isCurrent ? "text-[#111827] text-lg" : "text-[#6B7280]"
+                      isCurrent ? "text-foreground text-lg" : "text-gray-text"
                     }`}
                   >
                     {stage.title}

@@ -37,11 +37,11 @@ export default function FavoritesPanel() {
 
   if (isLoading) {
     return (
-      <div className="bg-[#F8FAFC] rounded-[24px] p-6 md:p-8 border border-[#E5E7EB]">
-        <div className="h-8 w-40 bg-[#F8FAFC] animate-pulse rounded mb-8" />
+      <div className="bg-section rounded-[24px] p-6 md:p-8 border border-border">
+        <div className="h-8 w-40 bg-section animate-pulse rounded mb-8" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-28 bg-[#F8FAFC] animate-pulse rounded-2xl" />
+            <div key={i} className="h-28 bg-section animate-pulse rounded-2xl" />
           ))}
         </div>
       </div>
@@ -53,14 +53,14 @@ export default function FavoritesPanel() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="bg-[#F8FAFC] rounded-[24px] p-6 md:p-8 border border-[#E5E7EB]"
+      className="bg-section rounded-[24px] p-6 md:p-8 border border-border"
     >
-      <div className="flex items-center justify-between mb-8 pb-6 border-b border-[#E5E7EB]">
+      <div className="flex items-center justify-between mb-8 pb-6 border-b border-border">
         <div className="flex items-center gap-3">
           <Heart className="w-6 h-6 text-primary" />
-          <h2 className="text-2xl font-bold text-[#111827]">Favorites</h2>
+          <h2 className="text-2xl font-bold text-foreground">Favorites</h2>
         </div>
-        <Link href="/favorites" className="text-primary text-sm font-bold hover:text-[#111827]">
+        <Link href="/favorites" className="text-primary text-sm font-bold hover:text-foreground">
           Open full page
         </Link>
       </div>
@@ -72,7 +72,7 @@ export default function FavoritesPanel() {
             {restaurants.map((r: any) => (
               <div
                 key={r.id}
-                className="bg-white border border-[#E5E7EB] rounded-2xl p-4 flex gap-4 items-center"
+                className="bg-white border border-border rounded-2xl p-4 flex gap-4 items-center"
               >
                 <SafeImage
                   src={r.image_url}
@@ -101,7 +101,7 @@ export default function FavoritesPanel() {
       <div>
         <h3 className="text-lg font-bold text-white mb-4">Dishes</h3>
         {items.length === 0 ? (
-          <div className="text-center py-12 text-[#6B7280]">
+          <div className="text-center py-12 text-gray-text">
             <Heart className="w-10 h-10 mx-auto mb-3 opacity-40" />
             <p>No favorite dishes yet.</p>
             <Link href="/order-online" className="text-primary text-sm font-bold mt-2 inline-block">
@@ -113,7 +113,7 @@ export default function FavoritesPanel() {
             {items.map((item: any) => (
               <div
                 key={item.id}
-                className="bg-white border border-[#E5E7EB] rounded-2xl p-4 flex gap-4 items-center"
+                className="bg-white border border-border rounded-2xl p-4 flex gap-4 items-center"
               >
                 <SafeImage
                   src={item.image_url}

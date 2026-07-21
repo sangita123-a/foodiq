@@ -18,13 +18,13 @@ export default function DishPreviewCard({ dish }: DishPreviewCardProps) {
 
   return (
     <div className="sticky top-24">
-      <div className="bg-[#FFFFFF] rounded-3xl border border-[#E5E7EB] overflow-hidden shadow-2xl relative">
+      <div className="bg-background rounded-3xl border border-border overflow-hidden shadow-2xl relative">
         
         {/* Availability Overlay */}
         {dish.availability !== "Available" && (
           <div className="absolute inset-0 z-20 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-            <div className="bg-[#F8FAFC] px-6 py-3 rounded-full border border-[#E5E7EB]">
-              <span className="text-[#111827] font-black tracking-widest uppercase text-sm">
+            <div className="bg-section px-6 py-3 rounded-full border border-border">
+              <span className="text-foreground font-black tracking-widest uppercase text-sm">
                 {dish.availability === "Out of Stock" ? "Out of Stock" : "Hidden from Menu"}
               </span>
             </div>
@@ -32,7 +32,7 @@ export default function DishPreviewCard({ dish }: DishPreviewCardProps) {
         )}
 
         {/* Image Area */}
-        <div className="h-56 relative bg-[#F8FAFC] overflow-hidden">
+        <div className="h-56 relative bg-section overflow-hidden">
           {dish.image ? (
             <SafeImage src={dish.image} fallback={FOOD_FALLBACK} alt={dish.name || "Preview"} className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
           ) : (
@@ -51,7 +51,7 @@ export default function DishPreviewCard({ dish }: DishPreviewCardProps) {
               </span>
             )}
             {dish.badges.trending && (
-              <span className="bg-[#E23744] text-white text-xs font-black px-3 py-1 rounded-full shadow-lg">
+              <span className="bg-primary text-white text-xs font-black px-3 py-1 rounded-full shadow-lg">
                 Trending
               </span>
             )}
@@ -73,7 +73,7 @@ export default function DishPreviewCard({ dish }: DishPreviewCardProps) {
           </div>
 
           {/* Top Right: Food Type Icon */}
-          <div className="absolute top-4 right-4 z-10 bg-[#F8FAFC] backdrop-blur-md p-1.5 rounded shadow-lg">
+          <div className="absolute top-4 right-4 z-10 bg-section backdrop-blur-md p-1.5 rounded shadow-lg">
             {dish.foodType === "Veg" && (
               <div className="w-4 h-4 border-2 border-green-500 flex items-center justify-center">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -90,7 +90,7 @@ export default function DishPreviewCard({ dish }: DishPreviewCardProps) {
               </div>
             )}
             {!dish.foodType && (
-              <div className="w-4 h-4 border-2 border-[#E5E7EB] border-dashed rounded-sm"></div>
+              <div className="w-4 h-4 border-2 border-border border-dashed rounded-sm"></div>
             )}
           </div>
         </div>
@@ -98,38 +98,38 @@ export default function DishPreviewCard({ dish }: DishPreviewCardProps) {
         {/* Content Area */}
         <div className="p-6 relative z-10 -mt-6">
           <div className="flex justify-between items-start gap-4 mb-2">
-            <h2 className="text-xl font-black text-[#111827] leading-tight break-words flex-1">
+            <h2 className="text-xl font-black text-foreground leading-tight break-words flex-1">
               {dish.name || "Dish Name"}
             </h2>
-            <div className="flex items-center gap-1 bg-[#F8FAFC] backdrop-blur-md px-2 py-1 rounded shadow-sm border border-[#E5E7EB] shrink-0">
+            <div className="flex items-center gap-1 bg-section backdrop-blur-md px-2 py-1 rounded shadow-sm border border-border shrink-0">
               <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-              <span className="text-[#111827] font-bold text-xs">4.5</span>
+              <span className="text-foreground font-bold text-xs">4.5</span>
             </div>
           </div>
 
           <div className="flex items-end gap-2 mb-4">
-            <span className="text-2xl font-black text-[#111827]">₹{displayPrice}</span>
+            <span className="text-2xl font-black text-foreground">₹{displayPrice}</span>
             {hasDiscount && (
               <span className="text-sm font-bold text-[#9CA3AF] line-through mb-1">₹{dish.regularPrice}</span>
             )}
           </div>
 
-          <p className="text-[#6B7280] text-sm leading-relaxed mb-6 line-clamp-2">
+          <p className="text-gray-text text-sm leading-relaxed mb-6 line-clamp-2">
             {dish.shortDesc || "A short description of the dish will appear here to tempt your customers."}
           </p>
 
           {/* Meta Info */}
           <div className="flex flex-wrap gap-2 mb-6">
             {dish.prepTime && (
-              <div className="flex items-center gap-1.5 bg-[#F8FAFC] border border-[#E5E7EB] px-2.5 py-1 rounded-md">
-                <Clock className="w-3 h-3 text-[#6B7280]" />
-                <span className="text-xs font-bold text-[#6B7280]">{dish.prepTime}</span>
+              <div className="flex items-center gap-1.5 bg-section border border-border px-2.5 py-1 rounded-md">
+                <Clock className="w-3 h-3 text-gray-text" />
+                <span className="text-xs font-bold text-gray-text">{dish.prepTime}</span>
               </div>
             )}
             {dish.calories && (
-              <div className="flex items-center gap-1.5 bg-[#F8FAFC] border border-[#E5E7EB] px-2.5 py-1 rounded-md">
-                <Flame className="w-3 h-3 text-[#E23744]" />
-                <span className="text-xs font-bold text-[#6B7280]">{dish.calories} kcal</span>
+              <div className="flex items-center gap-1.5 bg-section border border-border px-2.5 py-1 rounded-md">
+                <Flame className="w-3 h-3 text-primary" />
+                <span className="text-xs font-bold text-gray-text">{dish.calories} kcal</span>
               </div>
             )}
             {/* Spice Level Indicator */}
@@ -142,7 +142,7 @@ export default function DishPreviewCard({ dish }: DishPreviewCardProps) {
             )}
           </div>
 
-          <button className="w-full bg-[#F8FAFC] hover:bg-[#E23744]/20 hover:text-[#E23744] border border-[#E5E7EB] hover:border-[#E23744]/50 text-[#111827] py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 group">
+          <button className="w-full bg-section hover:bg-primary/20 hover:text-primary border border-border hover:border-primary/50 text-foreground py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 group">
             <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" /> Add to Cart
           </button>
 

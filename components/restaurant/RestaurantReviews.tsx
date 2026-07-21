@@ -73,8 +73,8 @@ export default function RestaurantReviews({ restaurantId }: RestaurantReviewsPro
   if (!restaurantId) return null;
 
   return (
-    <div className="mt-16 pt-12 border-t border-[#E5E7EB] container mx-auto px-4 md:px-8 max-w-[1440px]">
-      <h2 className="text-2xl font-bold text-[#111827] mb-8">Customer Reviews</h2>
+    <div className="mt-16 pt-12 border-t border-border container mx-auto px-4 md:px-8 max-w-[1440px]">
+      <h2 className="text-2xl font-bold text-foreground mb-8">Customer Reviews</h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         {summary && (
@@ -94,17 +94,17 @@ export default function RestaurantReviews({ restaurantId }: RestaurantReviewsPro
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
-                className="bg-white rounded-2xl p-6 border border-[#E5E7EB]"
+                className="bg-white rounded-2xl p-6 border border-border"
               >
                 <div className="flex items-center gap-4 mb-4">
                   <SafeImage
                     src={review.image}
                     fallback={AVATAR_FALLBACK}
                     alt={review.name}
-                    className="w-12 h-12 rounded-full object-cover border border-[#E5E7EB]"
+                    className="w-12 h-12 rounded-full object-cover border border-border"
                   />
                   <div>
-                    <h4 className="text-[#111827] font-bold">{review.name}</h4>
+                    <h4 className="text-foreground font-bold">{review.name}</h4>
                     <span className="text-[#9CA3AF] text-xs">{review.date}</span>
                   </div>
                   <div className="ml-auto flex items-center gap-1 bg-green-500/10 px-2 py-1 rounded border border-green-500/20">
@@ -112,7 +112,7 @@ export default function RestaurantReviews({ restaurantId }: RestaurantReviewsPro
                     <Star className="w-3 h-3 text-green-500 fill-green-500" />
                   </div>
                 </div>
-                <p className="text-[#6B7280] text-sm leading-relaxed mb-3">
+                <p className="text-gray-text text-sm leading-relaxed mb-3">
                   &quot;{review.review}&quot;
                 </p>
                 {review.images && review.images.length > 0 && (
@@ -126,21 +126,21 @@ export default function RestaurantReviews({ restaurantId }: RestaurantReviewsPro
                         width={64}
                         height={64}
                         sizes={THUMBNAIL_IMAGE_SIZES}
-                        className="w-16 h-16 rounded-lg object-cover border border-[#E5E7EB]"
+                        className="w-16 h-16 rounded-lg object-cover border border-border"
                       />
                     ))}
                   </div>
                 )}
                 {review.reply && (
-                  <div className="mt-3 rounded-xl bg-[#F8FAFC] border border-[#E5E7EB] px-3 py-2 text-xs text-[#6B7280]">
-                    <span className="font-bold text-[#111827]">Restaurant reply: </span>
+                  <div className="mt-3 rounded-xl bg-section border border-border px-3 py-2 text-xs text-gray-text">
+                    <span className="font-bold text-foreground">Restaurant reply: </span>
                     {review.reply}
                   </div>
                 )}
               </motion.div>
             ))
           ) : (
-            <p className="text-[#6B7280] text-sm col-span-full">No reviews yet. Be the first after your order!</p>
+            <p className="text-gray-text text-sm col-span-full">No reviews yet. Be the first after your order!</p>
           )}
         </div>
       </div>
@@ -149,7 +149,7 @@ export default function RestaurantReviews({ restaurantId }: RestaurantReviewsPro
         <button
           type="button"
           onClick={() => setShowAll((prev) => !prev)}
-          className="w-full py-4 border-2 border-[#E5E7EB] rounded-xl text-[#111827] font-bold hover:bg-[#F8FAFC] transition-colors"
+          className="w-full py-4 border-2 border-border rounded-xl text-foreground font-bold hover:bg-section transition-colors"
         >
           {showAll ? "Show Less" : `See All Reviews (${allReviews.length})`}
         </button>

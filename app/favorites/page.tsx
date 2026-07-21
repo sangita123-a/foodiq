@@ -127,24 +127,24 @@ export default function FavoritesPage() {
 
   if (authenticated && isLoading) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+      <main className="min-h-screen bg-background relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 md:px-8 py-12">
           {/* Header Skeleton */}
           <div className="flex justify-between items-center mb-8">
-            <div className="w-64 h-10 bg-[#F8FAFC] animate-pulse rounded-lg"></div>
-            <div className="w-64 h-10 bg-[#F8FAFC] animate-pulse rounded-lg"></div>
+            <div className="w-64 h-10 bg-section animate-pulse rounded-lg"></div>
+            <div className="w-64 h-10 bg-section animate-pulse rounded-lg"></div>
           </div>
           {/* Tabs Skeleton */}
           <div className="flex gap-4 mb-8">
-            <div className="w-24 h-10 bg-[#F8FAFC] animate-pulse rounded-full"></div>
-            <div className="w-24 h-10 bg-[#F8FAFC] animate-pulse rounded-full"></div>
-            <div className="w-24 h-10 bg-[#F8FAFC] animate-pulse rounded-full"></div>
+            <div className="w-24 h-10 bg-section animate-pulse rounded-full"></div>
+            <div className="w-24 h-10 bg-section animate-pulse rounded-full"></div>
+            <div className="w-24 h-10 bg-section animate-pulse rounded-full"></div>
           </div>
           {/* Grid Skeleton */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="h-40 bg-[#F8FAFC] animate-pulse rounded-2xl border border-[#E5E7EB]"></div>
+              <div key={i} className="h-40 bg-section animate-pulse rounded-2xl border border-border"></div>
             ))}
           </div>
         </div>
@@ -154,7 +154,7 @@ export default function FavoritesPage() {
 
   if (authenticated && error) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] flex flex-col items-center justify-center gap-4 pt-[90px]">
+      <main className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 pt-[90px]">
         <Navbar />
         <div className="text-white text-xl">Failed to load favorites</div>
         <button onClick={() => mutate()} className="px-6 py-2 bg-primary text-white rounded-lg">Retry</button>
@@ -163,7 +163,7 @@ export default function FavoritesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-background relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12">
@@ -179,7 +179,7 @@ export default function FavoritesPage() {
             
             {showRestaurants && filteredRestaurants.length > 0 && (
               <div>
-                {activeTab === "All Favorites" && <h3 className="text-2xl font-bold text-[#111827] mb-6">Restaurants</h3>}
+                {activeTab === "All Favorites" && <h3 className="text-2xl font-bold text-foreground mb-6">Restaurants</h3>}
                 <div className="food-grid">
                   <AnimatePresence>
                     {filteredRestaurants.map((r: any) => (
@@ -192,7 +192,7 @@ export default function FavoritesPage() {
 
             {showDishes && filteredDishes.length > 0 && (
               <div>
-                {activeTab === "All Favorites" && <h3 className="text-2xl font-bold text-[#111827] mb-6">Dishes</h3>}
+                {activeTab === "All Favorites" && <h3 className="text-2xl font-bold text-foreground mb-6">Dishes</h3>}
                 <div className="food-grid">
                   <AnimatePresence>
                     {filteredDishes.map((d: any) => (

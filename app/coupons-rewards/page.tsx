@@ -71,18 +71,18 @@ export default function CouponsRewardsPage() {
 
   if (isLoadingCoupons || isLoadingRewards) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] relative pt-[90px]">
+      <main className="min-h-screen bg-background relative pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 md:px-8 py-12 max-w-6xl">
-          <div className="w-full h-64 bg-[#F8FAFC] animate-pulse rounded-3xl border border-[#E5E7EB] mb-12"></div>
-          <div className="w-full h-48 bg-[#F8FAFC] animate-pulse rounded-3xl border border-[#E5E7EB] mb-12"></div>
+          <div className="w-full h-64 bg-section animate-pulse rounded-3xl border border-border mb-12"></div>
+          <div className="w-full h-48 bg-section animate-pulse rounded-3xl border border-border mb-12"></div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-background relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-6xl">
@@ -107,7 +107,7 @@ export default function CouponsRewardsPage() {
             
             {/* Active Coupons */}
             <section className="mb-12">
-              <h2 className="text-2xl font-bold text-[#111827] mb-6">Available Coupons</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-6">Available Coupons</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {activeCoupons.map(coupon => (
                   <CouponCard key={coupon.id} coupon={coupon} />

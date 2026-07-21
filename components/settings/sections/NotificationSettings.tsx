@@ -12,7 +12,7 @@ function ToggleSwitch({ checked, onClick }: { checked: boolean; onClick: () => v
     <button
       type="button"
       onClick={onClick}
-      className={`w-12 h-6 rounded-full p-1 transition-colors relative flex-shrink-0 ${checked ? "bg-primary" : "bg-white border border-[#E5E7EB]"}`}
+      className={`w-12 h-6 rounded-full p-1 transition-colors relative flex-shrink-0 ${checked ? "bg-primary" : "bg-white border border-border"}`}
     >
       <motion.div
         layout
@@ -90,7 +90,7 @@ export default function NotificationSettings() {
   };
 
   if (isLoading) {
-    return <div className="text-[#111827] animate-pulse h-64 bg-[#F8FAFC] rounded-3xl"></div>;
+    return <div className="text-foreground animate-pulse h-64 bg-section rounded-3xl"></div>;
   }
 
   return (
@@ -98,24 +98,24 @@ export default function NotificationSettings() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="bg-[#F8FAFC] rounded-3xl p-6 md:p-10 border border-[#E5E7EB] shadow-2xl"
+      className="bg-section rounded-3xl p-6 md:p-10 border border-border shadow-2xl"
     >
-      <h2 className="text-2xl font-bold text-[#111827] mb-2">Notification Preferences</h2>
-      <p className="text-sm text-[#6B7280] mb-8">
+      <h2 className="text-2xl font-bold text-foreground mb-2">Notification Preferences</h2>
+      <p className="text-sm text-gray-text mb-8">
         Control email, SMS, push, and marketing messages. Transactional security emails (OTP, password reset) always send.
       </p>
 
       <form id="settings-form" onSubmit={handleSave}>
-        <div className="mb-10 pb-8 border-b border-[#E5E7EB]">
+        <div className="mb-10 pb-8 border-b border-border">
           <div className="flex items-center gap-3 mb-6">
             <BellRing className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-bold text-[#111827]">In-app &amp; Push</h3>
+            <h3 className="text-lg font-bold text-foreground">In-app &amp; Push</h3>
           </div>
 
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-[#111827] font-bold mb-1">Push Notifications</h4>
+                <h4 className="text-foreground font-bold mb-1">Push Notifications</h4>
                 <p className="text-[#9CA3AF] text-sm">Browser and device push alerts.</p>
               </div>
               <ToggleSwitch checked={toggles.push} onClick={() => toggle("push")} />
@@ -123,7 +123,7 @@ export default function NotificationSettings() {
 
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-[#111827] font-bold mb-1">Order Updates</h4>
+                <h4 className="text-foreground font-bold mb-1">Order Updates</h4>
                 <p className="text-[#9CA3AF] text-sm">Tracking, delivery, and status changes.</p>
               </div>
               <ToggleSwitch checked={toggles.orderUpdates} onClick={() => toggle("orderUpdates")} />
@@ -131,7 +131,7 @@ export default function NotificationSettings() {
 
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-[#111827] font-bold mb-1">Order Alerts</h4>
+                <h4 className="text-foreground font-bold mb-1">Order Alerts</h4>
                 <p className="text-[#9CA3AF] text-sm">New orders and confirmation summaries.</p>
               </div>
               <ToggleSwitch checked={toggles.orders} onClick={() => toggle("orders")} />
@@ -139,7 +139,7 @@ export default function NotificationSettings() {
 
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-[#111827] font-bold mb-1">Offers &amp; Promotions</h4>
+                <h4 className="text-foreground font-bold mb-1">Offers &amp; Promotions</h4>
                 <p className="text-[#9CA3AF] text-sm">Flash sales and daily discounts (in-app).</p>
               </div>
               <ToggleSwitch checked={toggles.offers} onClick={() => toggle("offers")} />
@@ -147,7 +147,7 @@ export default function NotificationSettings() {
 
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-[#111827] font-bold mb-1">Reward Notifications</h4>
+                <h4 className="text-foreground font-bold mb-1">Reward Notifications</h4>
                 <p className="text-[#9CA3AF] text-sm">Points and loyalty updates.</p>
               </div>
               <ToggleSwitch checked={toggles.rewards} onClick={() => toggle("rewards")} />
@@ -156,15 +156,15 @@ export default function NotificationSettings() {
         </div>
 
         <div>
-          <h3 className="text-lg font-bold text-[#111827] mb-6">Email &amp; SMS</h3>
+          <h3 className="text-lg font-bold text-foreground mb-6">Email &amp; SMS</h3>
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-[#E5E7EB]">
-                  <Mail className="w-5 h-5 text-[#6B7280]" />
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-border">
+                  <Mail className="w-5 h-5 text-gray-text" />
                 </div>
                 <div>
-                  <h4 className="text-[#111827] font-bold mb-1">Email Notifications</h4>
+                  <h4 className="text-foreground font-bold mb-1">Email Notifications</h4>
                   <p className="text-[#9CA3AF] text-sm">Order, payment, and account emails.</p>
                 </div>
               </div>
@@ -173,11 +173,11 @@ export default function NotificationSettings() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-[#E5E7EB]">
-                  <MessageSquare className="w-5 h-5 text-[#6B7280]" />
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-border">
+                  <MessageSquare className="w-5 h-5 text-gray-text" />
                 </div>
                 <div>
-                  <h4 className="text-[#111827] font-bold mb-1">SMS Notifications</h4>
+                  <h4 className="text-foreground font-bold mb-1">SMS Notifications</h4>
                   <p className="text-[#9CA3AF] text-sm">OTP and critical order updates by text.</p>
                 </div>
               </div>
@@ -186,20 +186,20 @@ export default function NotificationSettings() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-[#E5E7EB]">
-                  <Megaphone className="w-5 h-5 text-[#6B7280]" />
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-border">
+                  <Megaphone className="w-5 h-5 text-gray-text" />
                 </div>
                 <div>
-                  <h4 className="text-[#111827] font-bold mb-1">Marketing Emails</h4>
+                  <h4 className="text-foreground font-bold mb-1">Marketing Emails</h4>
                   <p className="text-[#9CA3AF] text-sm">Promotional campaigns and newsletters.</p>
                 </div>
               </div>
               <ToggleSwitch checked={toggles.marketing} onClick={() => toggle("marketing")} />
             </div>
 
-            <div className="flex items-start gap-3 p-4 rounded-2xl bg-white border border-[#E5E7EB]">
+            <div className="flex items-start gap-3 p-4 rounded-2xl bg-white border border-border">
               <Package className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-[#6B7280]">
+              <p className="text-sm text-gray-text">
                 PDF invoices are emailed after successful payment when email notifications are on.
                 You can also download invoices from Payment Methods.
               </p>

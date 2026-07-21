@@ -46,7 +46,7 @@ export default function WhyChooseUs() {
             <motion.div 
               key={idx}
               variants={itemVariants}
-              className="bg-[#F8FAFC] rounded-3xl p-6 md:p-8 flex flex-col items-center justify-center text-center border border-[#E5E7EB] hover:border-primary/50 transition-colors group shadow-lg"
+              className="bg-section rounded-3xl p-6 md:p-8 flex flex-col items-center justify-center text-center border border-border hover:border-primary/50 transition-colors group shadow-lg"
             >
               <feature.icon className="w-10 h-10 text-primary mb-4 group-hover:scale-110 transition-transform" />
               <h4 className="text-white font-bold md:text-lg">{feature.title}</h4>

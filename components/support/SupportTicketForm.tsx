@@ -76,9 +76,9 @@ export default function SupportTicketForm() {
   };
 
   return (
-    <div className="bg-[#F8FAFC] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] h-full">
-      <h2 className="text-2xl font-bold text-[#111827] mb-2">Get help</h2>
-      <p className="text-[#6B7280] text-sm mb-6">
+    <div className="bg-section rounded-3xl p-6 md:p-8 border border-border h-full">
+      <h2 className="text-2xl font-bold text-foreground mb-2">Get help</h2>
+      <p className="text-gray-text text-sm mb-6">
         Submit a support ticket, report a bug, or share product feedback.
       </p>
 
@@ -96,8 +96,8 @@ export default function SupportTicketForm() {
             onClick={() => setMode(key)}
             className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
               mode === key
-                ? "bg-[#E23744] text-white"
-                : "bg-white border border-[#E5E7EB] text-[#6B7280] hover:text-[#111827]"
+                ? "bg-primary text-white"
+                : "bg-white border border-border text-gray-text hover:text-foreground"
             }`}
           >
             {label}
@@ -108,7 +108,7 @@ export default function SupportTicketForm() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {mode !== "feedback" && (
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">
+            <label className="block text-sm font-bold text-gray-text mb-2">
               {mode === "bug" ? "Title" : "Subject"}
             </label>
             <input
@@ -120,20 +120,20 @@ export default function SupportTicketForm() {
                   ? "Short bug title…"
                   : "Briefly describe the issue…"
               }
-              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
             />
           </div>
         )}
 
         {mode === "support" && (
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">
+            <label className="block text-sm font-bold text-gray-text mb-2">
               Category
             </label>
             <select
               name="category"
               required
-              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer"
+              className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer"
             >
               <option>Order Issue</option>
               <option>Payment / Refund</option>
@@ -146,12 +146,12 @@ export default function SupportTicketForm() {
 
         {mode === "feedback" && (
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">
+            <label className="block text-sm font-bold text-gray-text mb-2">
               Category
             </label>
             <select
               name="category"
-              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer"
+              className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer"
             >
               <option value="general">General</option>
               <option value="feature">Feature idea</option>
@@ -163,12 +163,12 @@ export default function SupportTicketForm() {
 
         {mode === "bug" && (
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">
+            <label className="block text-sm font-bold text-gray-text mb-2">
               Severity
             </label>
             <select
               name="severity"
-              className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer"
+              className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer"
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -179,7 +179,7 @@ export default function SupportTicketForm() {
         )}
 
         <div>
-          <label className="block text-sm font-bold text-[#6B7280] mb-2">
+          <label className="block text-sm font-bold text-gray-text mb-2">
             Description
           </label>
           <textarea
@@ -187,14 +187,14 @@ export default function SupportTicketForm() {
             required
             rows={4}
             placeholder="Please provide as much detail as possible…"
-            className="w-full bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
+            className="w-full bg-white text-foreground border border-border rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
           />
         </div>
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-[#E23744] hover:bg-[#C81E34] disabled:opacity-60 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors"
+          className="w-full bg-primary hover:bg-primary-hover disabled:opacity-60 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors"
         >
           <Send className="w-4 h-4" />
           {isSubmitting ? "Submitting…" : "Submit"}

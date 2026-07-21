@@ -165,14 +165,14 @@ export default function AdminBiPage() {
     <AdminShell title="Business Intelligence">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#E23744]/10 flex items-center justify-center">
-            <LineChart className="w-5 h-5 text-[#E23744]" />
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <LineChart className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-3xl font-black text-[#111827]">
+            <h1 className="text-3xl font-black text-foreground">
               Analytics & Business Intelligence
             </h1>
-            <p className="text-[#6B7280]">
+            <p className="text-gray-text">
               Sales, growth, funnel, CLV, campaigns — last {days} days.
             </p>
           </div>
@@ -185,8 +185,8 @@ export default function AdminBiPage() {
               onClick={() => setDays(d)}
               className={`px-3 py-1.5 rounded-xl text-sm font-bold border ${
                 days === d
-                  ? "bg-[#E23744] text-white border-[#E23744]"
-                  : "bg-white text-[#6B7280] border-[#E5E7EB]"
+                  ? "bg-primary text-white border-primary"
+                  : "bg-white text-gray-text border-border"
               }`}
             >
               {d}d
@@ -195,7 +195,7 @@ export default function AdminBiPage() {
           <button
             type="button"
             onClick={() => mutate()}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-[#E5E7EB] text-sm font-bold text-[#6B7280]"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border text-sm font-bold text-gray-text"
           >
             <RefreshCw className="w-3.5 h-3.5" /> Refresh
           </button>
@@ -203,7 +203,7 @@ export default function AdminBiPage() {
             type="button"
             disabled={busy}
             onClick={() => void exportReport("csv")}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-[#E5E7EB] text-sm font-bold text-[#6B7280]"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border text-sm font-bold text-gray-text"
           >
             <Download className="w-3.5 h-3.5" /> CSV
           </button>
@@ -211,7 +211,7 @@ export default function AdminBiPage() {
             type="button"
             disabled={busy}
             onClick={() => void exportReport("excel")}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-[#E5E7EB] text-sm font-bold text-[#6B7280]"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border text-sm font-bold text-gray-text"
           >
             Excel
           </button>
@@ -219,7 +219,7 @@ export default function AdminBiPage() {
             type="button"
             disabled={busy}
             onClick={() => void exportReport("pdf")}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-[#E5E7EB] text-sm font-bold text-[#6B7280]"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border text-sm font-bold text-gray-text"
           >
             PDF
           </button>
@@ -227,14 +227,14 @@ export default function AdminBiPage() {
             type="button"
             disabled={busy}
             onClick={() => void emailReport()}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#E23744] text-white text-sm font-bold"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-primary text-white text-sm font-bold"
           >
             <Mail className="w-3.5 h-3.5" /> Email
           </button>
         </div>
       </div>
 
-      {isLoading && <p className="text-sm text-[#6B7280] mb-4">Loading…</p>}
+      {isLoading && <p className="text-sm text-gray-text mb-4">Loading…</p>}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-6">
         <BiKpi label="Revenue" value={rev ? formatCurrency(rev.revenue) : "—"} />
@@ -253,11 +253,11 @@ export default function AdminBiPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
+        <div className="bg-white rounded-3xl border border-border p-6">
           <h2 className="font-bold text-lg mb-4">Revenue trend</h2>
           <BiLineChart data={salesPoints} />
         </div>
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
+        <div className="bg-white rounded-3xl border border-border p-6">
           <h2 className="font-bold text-lg mb-4">
             Peak hours
             {data?.peak_hours?.peak_hour != null
@@ -269,20 +269,20 @@ export default function AdminBiPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
+        <div className="bg-white rounded-3xl border border-border p-6">
           <h2 className="font-bold text-lg mb-4">Conversion funnel</h2>
           <div className="space-y-3">
             {(data?.conversion_funnel?.stages || []).map((s) => (
               <div key={s.stage}>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="font-bold text-[#111827]">{s.stage}</span>
-                  <span className="text-[#6B7280]">
+                  <span className="font-bold text-foreground">{s.stage}</span>
+                  <span className="text-gray-text">
                     {s.count} · {s.conversion_from_prev}%
                   </span>
                 </div>
-                <div className="h-2 bg-[#F8FAFC] rounded-full overflow-hidden">
+                <div className="h-2 bg-section rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#E23744] rounded-full"
+                    className="h-full bg-primary rounded-full"
                     style={{
                       width: `${Math.min(100, s.conversion_from_prev || 0)}%`,
                     }}
@@ -292,24 +292,24 @@ export default function AdminBiPage() {
             ))}
           </div>
         </div>
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
+        <div className="bg-white rounded-3xl border border-border p-6">
           <h2 className="font-bold text-lg mb-4">Growth & delivery</h2>
-          <ul className="text-sm space-y-2 text-[#6B7280]">
+          <ul className="text-sm space-y-2 text-gray-text">
             <li>
               New customers:{" "}
-              <strong className="text-[#111827]">
+              <strong className="text-foreground">
                 {data?.customer_growth?.summary?.new_customers ?? "—"}
               </strong>
             </li>
             <li>
               New restaurants:{" "}
-              <strong className="text-[#111827]">
+              <strong className="text-foreground">
                 {data?.restaurant_growth?.summary?.new_in_period ?? "—"}
               </strong>
             </li>
             <li>
               Avg delivery:{" "}
-              <strong className="text-[#111827]">
+              <strong className="text-foreground">
                 {Math.round(
                   data?.delivery_performance?.summary?.avg_delivery_minutes || 0
                 )}{" "}
@@ -318,19 +318,19 @@ export default function AdminBiPage() {
             </li>
             <li>
               Cart abandon:{" "}
-              <strong className="text-[#111827]">
+              <strong className="text-foreground">
                 {data?.cart_abandonment?.abandonment_rate ?? "—"}%
               </strong>
             </li>
             <li>
               Avg CLV:{" "}
-              <strong className="text-[#111827]">
+              <strong className="text-foreground">
                 {formatCurrency(data?.clv?.averages?.avg_clv || 0)}
               </strong>
             </li>
           </ul>
         </div>
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
+        <div className="bg-white rounded-3xl border border-border p-6">
           <h2 className="font-bold text-lg mb-4">AI insights</h2>
           <div className="space-y-2 max-h-56 overflow-y-auto">
             {(data?.ai_insights?.insights || []).map((i, idx) => (
@@ -343,31 +343,31 @@ export default function AdminBiPage() {
                       ? "bg-red-50 text-red-700"
                       : i.severity === "positive"
                         ? "bg-green-50 text-green-700"
-                        : "bg-[#F8FAFC] text-[#6B7280]"
+                        : "bg-section text-gray-text"
                 }`}
               >
                 {i.message}
               </p>
             ))}
             {!data?.ai_insights?.insights?.length && (
-              <p className="text-sm text-[#6B7280]">No insights yet.</p>
+              <p className="text-sm text-gray-text">No insights yet.</p>
             )}
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
+        <div className="bg-white rounded-3xl border border-border p-6">
           <h2 className="font-bold text-lg mb-4">Most popular restaurants</h2>
           <div className="space-y-2">
             {(data?.popular_restaurants || []).map((r) => (
               <div
                 key={r.id}
-                className="flex justify-between text-sm border-b border-[#E5E7EB] py-2"
+                className="flex justify-between text-sm border-b border-border py-2"
               >
                 <div>
                   <p className="font-bold">{r.name}</p>
-                  <p className="text-xs text-[#6B7280]">
+                  <p className="text-xs text-gray-text">
                     ★ {r.rating || 0} · {r.orders} orders
                   </p>
                 </div>
@@ -378,17 +378,17 @@ export default function AdminBiPage() {
             ))}
           </div>
         </div>
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
+        <div className="bg-white rounded-3xl border border-border p-6">
           <h2 className="font-bold text-lg mb-4">Most popular dishes</h2>
           <div className="space-y-2">
             {(data?.popular_dishes || []).map((d) => (
               <div
                 key={d.id}
-                className="flex justify-between text-sm border-b border-[#E5E7EB] py-2"
+                className="flex justify-between text-sm border-b border-border py-2"
               >
                 <div>
                   <p className="font-bold">{d.name}</p>
-                  <p className="text-xs text-[#6B7280]">{d.restaurant_name}</p>
+                  <p className="text-xs text-gray-text">{d.restaurant_name}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-black">{d.orders_count}</p>
@@ -403,13 +403,13 @@ export default function AdminBiPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
+        <div className="bg-white rounded-3xl border border-border p-6">
           <h2 className="font-bold text-lg mb-4">City-wise sales</h2>
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {(data?.city_sales?.cities || []).map((c, i) => (
               <div
                 key={`${c.city}-${i}`}
-                className="flex justify-between text-sm border-b border-[#E5E7EB] py-2"
+                className="flex justify-between text-sm border-b border-border py-2"
               >
                 <span className="font-bold">{c.city}</span>
                 <span className="text-green-600 font-black">
@@ -418,33 +418,33 @@ export default function AdminBiPage() {
               </div>
             ))}
             {!data?.city_sales?.cities?.length && (
-              <p className="text-sm text-[#6B7280]">No city data.</p>
+              <p className="text-sm text-gray-text">No city data.</p>
             )}
           </div>
         </div>
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
+        <div className="bg-white rounded-3xl border border-border p-6">
           <h2 className="font-bold text-lg mb-4">Coupon performance</h2>
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {(data?.coupon_performance?.coupons || []).map((c) => (
               <div
                 key={c.code}
-                className="flex justify-between text-sm border-b border-[#E5E7EB] py-2"
+                className="flex justify-between text-sm border-b border-border py-2"
               >
                 <span className="font-mono font-bold">{c.code}</span>
-                <span className="text-[#6B7280]">
+                <span className="text-gray-text">
                   {c.redemptions} · {formatCurrency(c.order_gmv)}
                 </span>
               </div>
             ))}
           </div>
         </div>
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
+        <div className="bg-white rounded-3xl border border-border p-6">
           <h2 className="font-bold text-lg mb-4">Campaigns & anomalies</h2>
           <div className="space-y-2 mb-4">
             {(data?.campaign_analytics?.campaigns || []).slice(0, 5).map((c) => (
               <p key={c.title} className="text-sm">
                 <span className="font-bold">{c.title}</span>
-                <span className="text-[#6B7280]">
+                <span className="text-gray-text">
                   {" "}
                   · {c.attributed_orders} orders
                 </span>
@@ -454,7 +454,7 @@ export default function AdminBiPage() {
           {(data?.anomalies?.anomalies || []).slice(-4).map((a) => (
             <p
               key={String(a.day)}
-              className="text-xs text-[#6B7280] border-t border-[#E5E7EB] py-1"
+              className="text-xs text-gray-text border-t border-border py-1"
             >
               {a.day}: {a.direction} ({a.severity}) — {a.orders} orders
             </p>
@@ -462,18 +462,18 @@ export default function AdminBiPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
+      <div className="bg-white rounded-3xl border border-border p-6">
         <h2 className="font-bold text-lg mb-4">Top customers by CLV</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {(data?.clv?.top_customers || []).map((u) => (
             <div
               key={u.email}
-              className="rounded-xl bg-[#F8FAFC] border border-[#E5E7EB] p-3"
+              className="rounded-xl bg-section border border-border p-3"
             >
-              <p className="font-bold text-sm text-[#111827]">
+              <p className="font-bold text-sm text-foreground">
                 {u.full_name || u.email}
               </p>
-              <p className="text-xs text-[#6B7280]">
+              <p className="text-xs text-gray-text">
                 {u.orders} orders · {formatCurrency(u.clv)}
               </p>
             </div>

@@ -71,7 +71,7 @@ export default function PartnerSuppliersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex">
+    <div className="min-h-screen bg-section flex">
       <div className="hidden lg:block w-64 flex-shrink-0">
         <PartnerSidebar />
       </div>
@@ -80,8 +80,8 @@ export default function PartnerSuppliersPage() {
         <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
           <div className="max-w-6xl mx-auto space-y-6">
             <div>
-              <h1 className="text-3xl font-black text-[#111827]">Suppliers & Purchases</h1>
-              <p className="text-[#6B7280]">Manage suppliers and receive stock into inventory.</p>
+              <h1 className="text-3xl font-black text-foreground">Suppliers & Purchases</h1>
+              <p className="text-gray-text">Manage suppliers and receive stock into inventory.</p>
             </div>
 
             <div className="flex gap-2">
@@ -91,7 +91,7 @@ export default function PartnerSuppliersPage() {
                   type="button"
                   onClick={() => setTab(t)}
                   className={`px-4 py-2 rounded-xl text-sm font-bold capitalize ${
-                    tab === t ? "bg-[#E23744] text-white" : "bg-white border border-[#E5E7EB] text-[#6B7280]"
+                    tab === t ? "bg-primary text-white" : "bg-white border border-border text-gray-text"
                   }`}
                 >
                   {t}
@@ -101,8 +101,8 @@ export default function PartnerSuppliersPage() {
 
             {tab === "suppliers" && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <form onSubmit={saveSupplier} className="bg-white rounded-3xl border border-[#E5E7EB] p-6 space-y-3">
-                  <h2 className="font-black flex items-center gap-2"><Truck className="w-5 h-5 text-[#E23744]" /> {editSupplierId ? "Edit" : "Add"} Supplier</h2>
+                <form onSubmit={saveSupplier} className="bg-white rounded-3xl border border-border p-6 space-y-3">
+                  <h2 className="font-black flex items-center gap-2"><Truck className="w-5 h-5 text-primary" /> {editSupplierId ? "Edit" : "Add"} Supplier</h2>
                   {(["name", "contact_person", "phone", "email"] as const).map((f) => (
                     <input
                       key={f}
@@ -110,7 +110,7 @@ export default function PartnerSuppliersPage() {
                       onChange={(e) => setSupplierForm({ ...supplierForm, [f]: e.target.value })}
                       placeholder={f.replace("_", " ")}
                       required={f === "name"}
-                      className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm capitalize"
+                      className="w-full border border-border rounded-xl px-4 py-2.5 text-sm capitalize"
                     />
                   ))}
                   <textarea
@@ -118,13 +118,13 @@ export default function PartnerSuppliersPage() {
                     onChange={(e) => setSupplierForm({ ...supplierForm, address: e.target.value })}
                     placeholder="Address"
                     rows={2}
-                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+                    className="w-full border border-border rounded-xl px-4 py-2.5 text-sm"
                   />
                   <button type="submit" className="w-full bg-[#111827] text-white font-black py-3 rounded-xl">Save Supplier</button>
                 </form>
-                <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6 space-y-3">
+                <div className="bg-white rounded-3xl border border-border p-6 space-y-3">
                   {(suppliers || []).map((s) => (
-                    <div key={s.id} className="flex justify-between items-start border border-[#E5E7EB] rounded-xl p-4">
+                    <div key={s.id} className="flex justify-between items-start border border-border rounded-xl p-4">
                       <div>
                         <p className="font-bold">{s.name}</p>
                         <p className="text-xs text-[#9CA3AF]">{s.phone} · {s.purchase_count || 0} orders</p>
@@ -141,27 +141,27 @@ export default function PartnerSuppliersPage() {
 
             {tab === "purchases" && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <form onSubmit={createPo} className="bg-white rounded-3xl border border-[#E5E7EB] p-6 space-y-3">
-                  <h2 className="font-black flex items-center gap-2"><ShoppingCart className="w-5 h-5 text-[#E23744]" /> Create Purchase Order</h2>
-                  <select value={poForm.supplier_id} onChange={(e) => setPoForm({ ...poForm, supplier_id: e.target.value })} className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm">
+                <form onSubmit={createPo} className="bg-white rounded-3xl border border-border p-6 space-y-3">
+                  <h2 className="font-black flex items-center gap-2"><ShoppingCart className="w-5 h-5 text-primary" /> Create Purchase Order</h2>
+                  <select value={poForm.supplier_id} onChange={(e) => setPoForm({ ...poForm, supplier_id: e.target.value })} className="w-full border border-border rounded-xl px-4 py-2.5 text-sm">
                     <option value="">Select supplier</option>
                     {(suppliers || []).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
-                  <select value={poForm.item_id} onChange={(e) => setPoForm({ ...poForm, item_id: e.target.value })} required className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm">
+                  <select value={poForm.item_id} onChange={(e) => setPoForm({ ...poForm, item_id: e.target.value })} required className="w-full border border-border rounded-xl px-4 py-2.5 text-sm">
                     <option value="">Select inventory item</option>
                     {(items || []).map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
                   </select>
                   <div className="grid grid-cols-2 gap-2">
-                    <input type="number" value={poForm.quantity} onChange={(e) => setPoForm({ ...poForm, quantity: Number(e.target.value) })} placeholder="Qty" className="border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm" />
-                    <input type="number" value={poForm.unit_price} onChange={(e) => setPoForm({ ...poForm, unit_price: Number(e.target.value) })} placeholder="Unit price ₹" className="border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm" />
+                    <input type="number" value={poForm.quantity} onChange={(e) => setPoForm({ ...poForm, quantity: Number(e.target.value) })} placeholder="Qty" className="border border-border rounded-xl px-4 py-2.5 text-sm" />
+                    <input type="number" value={poForm.unit_price} onChange={(e) => setPoForm({ ...poForm, unit_price: Number(e.target.value) })} placeholder="Unit price ₹" className="border border-border rounded-xl px-4 py-2.5 text-sm" />
                   </div>
-                  <textarea value={poForm.notes} onChange={(e) => setPoForm({ ...poForm, notes: e.target.value })} placeholder="Notes" rows={2} className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm" />
-                  <button type="submit" className="w-full bg-[#E23744] text-white font-black py-3 rounded-xl">Create PO</button>
+                  <textarea value={poForm.notes} onChange={(e) => setPoForm({ ...poForm, notes: e.target.value })} placeholder="Notes" rows={2} className="w-full border border-border rounded-xl px-4 py-2.5 text-sm" />
+                  <button type="submit" className="w-full bg-primary text-white font-black py-3 rounded-xl">Create PO</button>
                 </form>
-                <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6 space-y-3">
-                  <h2 className="font-black text-[#111827]">Purchase History</h2>
+                <div className="bg-white rounded-3xl border border-border p-6 space-y-3">
+                  <h2 className="font-black text-foreground">Purchase History</h2>
                   {(purchases || []).map((p) => (
-                    <div key={p.id} className="border border-[#E5E7EB] rounded-xl p-4 flex justify-between items-center">
+                    <div key={p.id} className="border border-border rounded-xl p-4 flex justify-between items-center">
                       <div>
                         <p className="font-bold text-sm">#{String(p.id).slice(0, 8)} · {p.supplier_name || "No supplier"}</p>
                         <p className="text-xs text-[#9CA3AF]">₹{Number(p.total_amount).toFixed(0)} · {p.status} · {p.item_count} items</p>

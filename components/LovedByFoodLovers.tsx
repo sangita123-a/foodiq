@@ -111,7 +111,7 @@ export default function LovedByFoodLovers() {
   }, [isHovered, isPaused, cardsToShow]);
 
   return (
-    <section className="bg-[#FAFAFA] w-full py-14 sm:py-20 md:py-[100px] overflow-hidden border-t border-[#EAEAEA] mt-6 sm:mt-8">
+    <section className="bg-section w-full py-14 sm:py-20 md:py-[100px] overflow-hidden border-t border-border mt-6 sm:mt-8">
       <div className="w-[90%] max-w-7xl mx-auto">
         
         {/* Header */}
@@ -124,11 +124,11 @@ export default function LovedByFoodLovers() {
         >
           <div className="flex items-center justify-center gap-3 mb-4">
             <span className="text-3xl md:text-4xl" aria-hidden="true">❤️</span>
-            <h2 className="text-3xl md:text-5xl font-bold text-[#1C1C1C] tracking-[-0.045em]">
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground tracking-[-0.045em]">
               Loved by Food Lovers
             </h2>
           </div>
-          <p className="text-[#686B78] text-base md:text-lg">
+          <p className="text-muted text-base md:text-lg">
             See why thousands of customers choose Foodiq every day.
           </p>
         </motion.div>
@@ -146,7 +146,7 @@ export default function LovedByFoodLovers() {
               type="button"
               onClick={() => setIsPaused((value) => !value)}
               aria-pressed={isPaused}
-              className="touch-target rounded-lg border border-[#EAEAEA] bg-white px-4 py-2.5 text-xs font-semibold text-[#1C1C1C] transition-colors hover:border-[#D4D4D4] hover:bg-[#FAFAFA] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E23744]"
+              className="touch-target rounded-lg border border-border bg-white px-4 py-2.5 text-xs font-semibold text-foreground transition-colors hover:border-border hover:bg-section focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               {isPaused ? "Play testimonials" : "Pause testimonials"}
             </button>
@@ -162,14 +162,14 @@ export default function LovedByFoodLovers() {
                 className="flex-shrink-0"
                 style={{ width: `calc(${100 / cardsToShow}% - ${(6 * (cardsToShow - 1)) / cardsToShow}rem)` }}
               >
-                <div className="bg-white rounded-[20px] p-8 h-full border border-[#EAEAEA] shadow-[0_4px_20px_rgba(0,0,0,0.08)] relative group hover:-translate-y-1 hover:border-[#E0E0E0] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] transition-all duration-300">
+                <div className="bg-white rounded-[20px] p-8 h-full border border-border shadow-card relative group hover:-translate-y-1 hover:border-border hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] transition-all duration-300">
                   {/* Background Quote Icon */}
-                  <Quote className="absolute top-6 right-6 w-16 h-16 text-[#E23744]/10 group-hover:text-[#E23744]/20 transition-colors duration-300 pointer-events-none" aria-hidden="true" />
+                  <Quote className="absolute top-6 right-6 w-16 h-16 text-primary/10 group-hover:text-primary/20 transition-colors duration-300 pointer-events-none" aria-hidden="true" />
 
                   {/* Header: Rating & Profile */}
                   <div className="flex justify-between items-start mb-6 relative z-10">
                     <div
-                      className="flex gap-1 bg-[#F8FAFC] px-3 py-1.5 rounded-full border border-[#E5E7EB]"
+                      className="flex gap-1 bg-section px-3 py-1.5 rounded-full border border-border"
                       role="img"
                       aria-label={`${testimonial.rating} out of 5 stars`}
                     >
@@ -184,21 +184,21 @@ export default function LovedByFoodLovers() {
                   </div>
 
                   {/* Review Text */}
-                  <p className="text-[#686B78] text-sm leading-relaxed mb-8 italic relative z-10">
+                  <p className="text-muted text-sm leading-relaxed mb-8 italic relative z-10">
                     "{testimonial.review}"
                   </p>
 
                   {/* Order Details */}
-                  <div className="bg-[#F8F9FA] rounded-xl p-4 mb-8 border border-[#ECECEC]">
-                    <div className="flex items-center gap-2 text-sm text-[#6B7280] mb-2">
+                  <div className="bg-[#F8F9FA] rounded-xl p-4 mb-8 border border-border">
+                    <div className="flex items-center gap-2 text-sm text-gray-text mb-2">
                       <Store className="w-4 h-4 text-primary" />
                       <span className="font-semibold text-[#374151]">Ordered From:</span> 
-                      <span className="text-[#111827] truncate">{testimonial.restaurant}</span>
+                      <span className="text-foreground truncate">{testimonial.restaurant}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-[#6B7280] mb-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-text mb-2">
                       <Utensils className="w-4 h-4 text-primary" />
                       <span className="font-semibold text-[#374151]">Dish:</span> 
-                      <span className="text-[#111827] truncate">{testimonial.dish}</span>
+                      <span className="text-foreground truncate">{testimonial.dish}</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-[#9CA3AF]">
                       <Calendar className="w-3.5 h-3.5" />
@@ -208,7 +208,7 @@ export default function LovedByFoodLovers() {
 
                   {/* Customer Info */}
                   <div className="flex items-center gap-4 mt-auto">
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-[#E5E7EB]">
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-border">
                       <SafeImage 
                         src={testimonial.image} 
                         fallback={AVATAR_FALLBACK}
@@ -217,8 +217,8 @@ export default function LovedByFoodLovers() {
                       />
                     </div>
                     <div>
-                      <h3 className="text-[#1C1C1C] font-bold text-sm md:text-base">{testimonial.name}</h3>
-                      <p className="text-[#686B78] text-xs md:text-sm">{testimonial.city}</p>
+                      <h3 className="text-foreground font-bold text-sm md:text-base">{testimonial.name}</h3>
+                      <p className="text-muted text-xs md:text-sm">{testimonial.city}</p>
                     </div>
                   </div>
                 </div>
@@ -237,13 +237,13 @@ export default function LovedByFoodLovers() {
               onClick={() => setCurrentIndex(idx)}
               aria-label={`Go to testimonial slide ${idx + 1}`}
               aria-selected={currentIndex === idx}
-              className="carousel-control focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E23744]"
+              className="carousel-control focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               <span
                 aria-hidden="true"
                 className={`block h-2 rounded-full transition-all duration-300 ${
                   currentIndex === idx
-                    ? "w-8 bg-[#E23744]"
+                    ? "w-8 bg-primary"
                     : "w-2 bg-[#D1D5DB] hover:bg-[#9CA3AF]"
                 }`}
               />

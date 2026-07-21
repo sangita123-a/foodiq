@@ -41,10 +41,10 @@ function CircularProgress({ percentage, color, label, icon: Icon }: { percentage
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <Icon className="w-5 h-5 mb-0.5" style={{ color }} />
-          <span className="text-[#111827] font-black text-sm">{percentage}%</span>
+          <span className="text-foreground font-black text-sm">{percentage}%</span>
         </div>
       </div>
-      <span className="text-[#6B7280] text-xs font-bold uppercase tracking-wider text-center">{label}</span>
+      <span className="text-gray-text text-xs font-bold uppercase tracking-wider text-center">{label}</span>
     </div>
   );
 }
@@ -55,9 +55,9 @@ export default function OrderAnalytics({ data }: OrderAnalyticsProps) {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
       
       {/* Orders by Hour Chart */}
-      <div className="lg:col-span-2 bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-xl">
+      <div className="lg:col-span-2 bg-background rounded-3xl p-6 md:p-8 border border-border shadow-xl">
         <div className="flex items-center justify-between mb-8">
-          <h3 className="text-xl font-black text-[#111827] flex items-center gap-2">
+          <h3 className="text-xl font-black text-foreground flex items-center gap-2">
             <Activity className="w-6 h-6 text-purple-500" /> Hourly Order Volume
           </h3>
           <div className="bg-purple-500/10 text-purple-400 text-xs font-bold px-3 py-1.5 rounded-lg border border-purple-500/20 flex items-center gap-2">
@@ -65,10 +65,10 @@ export default function OrderAnalytics({ data }: OrderAnalyticsProps) {
           </div>
         </div>
         
-        <div className="h-48 flex items-end justify-between gap-1 pt-4 border-b border-[#E5E7EB] pb-2">
+        <div className="h-48 flex items-end justify-between gap-1 pt-4 border-b border-border pb-2">
           {data.ordersByHour.map((d, idx) => (
             <div key={idx} className="flex-1 flex flex-col items-center justify-end h-full group relative">
-              <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity bg-[#F8FAFC] border border-[#E5E7EB] text-[#111827] text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap z-20">
+              <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity bg-section border border-border text-foreground text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap z-20">
                 {d.count} Orders
               </div>
               
@@ -76,7 +76,7 @@ export default function OrderAnalytics({ data }: OrderAnalyticsProps) {
                 initial={{ height: 0 }}
                 animate={{ height: d.height }}
                 transition={{ duration: 1, delay: idx * 0.05, type: "spring" }}
-                className={`w-full max-w-[20px] rounded-t-sm transition-colors ${d.hour === data.peakHour.split(' ')[0] ? 'bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.4)]' : 'bg-[#F8FAFC] border-t border-x border-[#E5E7EB] group-hover:bg-purple-500/50'}`}
+                className={`w-full max-w-[20px] rounded-t-sm transition-colors ${d.hour === data.peakHour.split(' ')[0] ? 'bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.4)]' : 'bg-section border-t border-x border-border group-hover:bg-purple-500/50'}`}
               />
             </div>
           ))}
@@ -93,8 +93,8 @@ export default function OrderAnalytics({ data }: OrderAnalyticsProps) {
       </div>
 
       {/* Completion Rates */}
-      <div className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-xl flex flex-col">
-        <h3 className="text-xl font-black text-[#111827] flex items-center gap-2 mb-8">
+      <div className="bg-background rounded-3xl p-6 md:p-8 border border-border shadow-xl flex flex-col">
+        <h3 className="text-xl font-black text-foreground flex items-center gap-2 mb-8">
           <CheckCircle2 className="w-6 h-6 text-green-500" /> Order Fulfillment
         </h3>
         
@@ -113,8 +113,8 @@ export default function OrderAnalytics({ data }: OrderAnalyticsProps) {
           />
         </div>
         
-        <div className="mt-8 bg-[#F8FAFC] p-4 rounded-xl border border-[#E5E7EB]">
-          <p className="text-sm text-[#6B7280] text-center leading-relaxed">
+        <div className="mt-8 bg-section p-4 rounded-xl border border-border">
+          <p className="text-sm text-gray-text text-center leading-relaxed">
             Your completion rate is <strong className="text-green-400">Excellent</strong>. You are in the top 5% of restaurants in your area.
           </p>
         </div>

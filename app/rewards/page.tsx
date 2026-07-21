@@ -47,13 +47,13 @@ export default function RewardsPage() {
 
   if (!hasToken) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] pt-[90px]">
+      <main className="min-h-screen bg-background pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 py-20 text-center max-w-lg">
-          <Sparkles className="w-12 h-12 text-[#E23744] mx-auto mb-4" />
-          <h1 className="text-3xl font-black text-[#111827] mb-3">Foodiq Rewards</h1>
-          <p className="text-[#6B7280] mb-6">Sign in to view your membership, points wallet, and exclusive benefits.</p>
-          <Link href="/login" className="inline-block bg-[#E23744] text-white font-black px-8 py-3 rounded-xl">
+          <Sparkles className="w-12 h-12 text-primary mx-auto mb-4" />
+          <h1 className="text-3xl font-black text-foreground mb-3">Foodiq Rewards</h1>
+          <p className="text-gray-text mb-6">Sign in to view your membership, points wallet, and exclusive benefits.</p>
+          <Link href="/login" className="inline-block bg-primary text-white font-black px-8 py-3 rounded-xl">
             Sign In
           </Link>
         </div>
@@ -63,22 +63,22 @@ export default function RewardsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative pt-[90px]">
+    <main className="min-h-screen bg-background relative pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-10 max-w-6xl">
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-6 h-6 text-[#E23744]" />
-            <h1 className="text-3xl md:text-4xl font-black text-[#111827]">Foodiq Rewards</h1>
+            <Sparkles className="w-6 h-6 text-primary" />
+            <h1 className="text-3xl md:text-4xl font-black text-foreground">Foodiq Rewards</h1>
           </div>
-          <p className="text-[#6B7280]">Your membership, points wallet, referrals, and exclusive benefits.</p>
+          <p className="text-gray-text">Your membership, points wallet, referrals, and exclusive benefits.</p>
         </div>
 
         {isLoading && (
           <div className="space-y-4 animate-pulse">
-            <div className="h-48 bg-[#F8FAFC] rounded-3xl border border-[#E5E7EB]" />
-            <div className="h-32 bg-[#F8FAFC] rounded-3xl border border-[#E5E7EB]" />
+            <div className="h-48 bg-section rounded-3xl border border-border" />
+            <div className="h-32 bg-section rounded-3xl border border-border" />
           </div>
         )}
 
@@ -97,24 +97,24 @@ export default function RewardsPage() {
                 />
               </div>
 
-              <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6 flex flex-col justify-between">
+              <div className="bg-white rounded-3xl border border-border p-6 flex flex-col justify-between">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF] mb-4">Points Wallet</p>
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-sm text-[#6B7280]">Current Points</span>
-                      <span className="font-black text-[#111827]">{wallet.points_balance.toLocaleString("en-IN")}</span>
+                      <span className="text-sm text-gray-text">Current Points</span>
+                      <span className="font-black text-foreground">{wallet.points_balance.toLocaleString("en-IN")}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-[#6B7280]">Lifetime Points</span>
-                      <span className="font-black text-[#111827]">{wallet.lifetime_points.toLocaleString("en-IN")}</span>
+                      <span className="text-sm text-gray-text">Lifetime Points</span>
+                      <span className="font-black text-foreground">{wallet.lifetime_points.toLocaleString("en-IN")}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-[#6B7280]">Redeemed</span>
-                      <span className="font-black text-[#111827]">{wallet.redeemed_points.toLocaleString("en-IN")}</span>
+                      <span className="text-sm text-gray-text">Redeemed</span>
+                      <span className="font-black text-foreground">{wallet.redeemed_points.toLocaleString("en-IN")}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-[#6B7280]">Redeemable Value</span>
+                      <span className="text-sm text-gray-text">Redeemable Value</span>
                       <span className="font-black text-emerald-600">₹{pointsToRupees(wallet.points_balance).toFixed(0)}</span>
                     </div>
                   </div>
@@ -123,7 +123,7 @@ export default function RewardsPage() {
                   type="button"
                   disabled={redeeming || wallet.points_balance < 100}
                   onClick={() => handleRedeem(100)}
-                  className="mt-6 w-full bg-[#E23744] text-white font-black py-3.5 rounded-xl disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="mt-6 w-full bg-primary text-white font-black py-3.5 rounded-xl disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <Coins className="w-4 h-4" />
                   {redeeming ? "Redeeming…" : "Redeem 100 Points"}
@@ -144,7 +144,7 @@ export default function RewardsPage() {
                   type="button"
                   onClick={() => setTab(id)}
                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition ${
-                    tab === id ? "bg-[#E23744] text-white" : "bg-white border border-[#E5E7EB] text-[#6B7280]"
+                    tab === id ? "bg-primary text-white" : "bg-white border border-border text-gray-text"
                   }`}
                 >
                   <Icon className="w-4 h-4" /> {label}
@@ -155,52 +155,52 @@ export default function RewardsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 {tab === "benefits" && (
-                  <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
-                    <h2 className="text-lg font-black text-[#111827] mb-4">Your {tier.name} Benefits</h2>
+                  <div className="bg-white rounded-3xl border border-border p-6">
+                    <h2 className="text-lg font-black text-foreground mb-4">Your {tier.name} Benefits</h2>
                     <TierBenefitsList benefits={benefits} />
                   </div>
                 )}
 
                 {tab === "coupons" && (
-                  <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
-                    <h2 className="text-lg font-black text-[#111827] mb-4">Available Coupons</h2>
+                  <div className="bg-white rounded-3xl border border-border p-6">
+                    <h2 className="text-lg font-black text-foreground mb-4">Available Coupons</h2>
                     <div className="space-y-3">
                       {(data?.coupons || []).map((c: Record<string, unknown>) => (
-                        <div key={String(c.id)} className="border border-[#E5E7EB] rounded-xl p-4 flex justify-between items-center">
+                        <div key={String(c.id)} className="border border-border rounded-xl p-4 flex justify-between items-center">
                           <div>
-                            <p className="font-mono font-black text-[#E23744]">{String(c.code)}</p>
-                            <p className="text-xs text-[#6B7280]">
+                            <p className="font-mono font-black text-primary">{String(c.code)}</p>
+                            <p className="text-xs text-gray-text">
                               {c.discount_type === "percentage"
                                 ? `${c.discount_amount}% off`
                                 : `₹${c.discount_amount} off`}
                               {" · Min ₹"}{String(c.min_order_amount || 0)}
                             </p>
                           </div>
-                          <Link href="/checkout" className="text-xs font-bold text-[#111827] bg-[#F8FAFC] px-3 py-1.5 rounded-lg border">
+                          <Link href="/checkout" className="text-xs font-bold text-foreground bg-section px-3 py-1.5 rounded-lg border">
                             Use at Checkout
                           </Link>
                         </div>
                       ))}
-                      {!data?.coupons?.length && <p className="text-sm text-[#6B7280]">No coupons available right now.</p>}
+                      {!data?.coupons?.length && <p className="text-sm text-gray-text">No coupons available right now.</p>}
                     </div>
                   </div>
                 )}
 
                 {tab === "history" && (
-                  <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
-                    <h2 className="text-lg font-black text-[#111827] mb-4">Reward History</h2>
+                  <div className="bg-white rounded-3xl border border-border p-6">
+                    <h2 className="text-lg font-black text-foreground mb-4">Reward History</h2>
                     <LoyaltyHistoryList items={data?.history || []} />
                   </div>
                 )}
 
                 {tab === "earn" && (
-                  <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
-                    <h2 className="text-lg font-black text-[#111827] mb-4">How to Earn Points</h2>
+                  <div className="bg-white rounded-3xl border border-border p-6">
+                    <h2 className="text-lg font-black text-foreground mb-4">How to Earn Points</h2>
                     <div className="space-y-3">
                       {(data?.earn_rules || []).map((rule) => (
-                        <div key={rule.rule_key} className="flex justify-between items-center border border-[#E5E7EB] rounded-xl px-4 py-3">
-                          <span className="text-sm font-bold text-[#111827]">{rule.label}</span>
-                          <span className="text-sm font-black text-[#E23744]">
+                        <div key={rule.rule_key} className="flex justify-between items-center border border-border rounded-xl px-4 py-3">
+                          <span className="text-sm font-bold text-foreground">{rule.label}</span>
+                          <span className="text-sm font-black text-primary">
                             {rule.rule_key === "order_delivered" ? "1 pt / ₹100" : `+${rule.points} pts`}
                           </span>
                         </div>
@@ -217,10 +217,10 @@ export default function RewardsPage() {
               />
             </div>
 
-            <div className="mt-8 bg-[#F8FAFC] rounded-2xl border border-[#E5E7EB] p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="mt-8 bg-section rounded-2xl border border-border p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <p className="font-bold text-[#111827]">Redeem at Checkout</p>
-                <p className="text-sm text-[#6B7280]">Choose coupon, wallet, or loyalty points when placing your order.</p>
+                <p className="font-bold text-foreground">Redeem at Checkout</p>
+                <p className="text-sm text-gray-text">Choose coupon, wallet, or loyalty points when placing your order.</p>
               </div>
               <Link href="/checkout" className="bg-[#111827] text-white font-black px-6 py-3 rounded-xl text-center text-sm">
                 Go to Checkout

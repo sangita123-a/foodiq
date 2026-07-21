@@ -69,13 +69,13 @@ export default function AdminDeliveryPartnersPage() {
     <AdminShell title="Delivery Partners">
       <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-[#111827]">Delivery Partners</h1>
-          <p className="text-[#6B7280]">Approve, suspend, track live, and view earnings.</p>
+          <h1 className="text-3xl font-black text-foreground">Delivery Partners</h1>
+          <p className="text-gray-text">Approve, suspend, track live, and view earnings.</p>
         </div>
         <div className="flex gap-3 flex-wrap">
           <Link
             href="/admin/live"
-            className="text-sm font-bold bg-[#E23744] text-white px-4 py-2.5 rounded-xl"
+            className="text-sm font-bold bg-primary text-white px-4 py-2.5 rounded-xl"
           >
             Live Deliveries
           </Link>
@@ -83,9 +83,9 @@ export default function AdminDeliveryPartnersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search partners…"
-            className="bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+            className="bg-white border border-border rounded-xl px-4 py-2.5 text-sm"
           />
-          <select value={status} onChange={(e) => setStatus(e.target.value)} className="bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm">
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className="bg-white border border-border rounded-xl px-4 py-2.5 text-sm">
             <option value="">All</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
@@ -95,15 +95,15 @@ export default function AdminDeliveryPartnersPage() {
         </div>
       </div>
 
-      {isLoading && <p className="text-sm text-[#6B7280] mb-4">Loading…</p>}
+      {isLoading && <p className="text-sm text-gray-text mb-4">Loading…</p>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {partners.map((p) => (
-          <div key={p.id} className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-sm">
+          <div key={p.id} className="bg-white rounded-2xl border border-border p-5 shadow-sm">
             <div className="flex justify-between items-start mb-3">
               <div>
-                <h3 className="font-black text-[#111827]">{p.full_name || "Partner"}</h3>
-                <p className="text-xs text-[#6B7280]">{p.email}</p>
+                <h3 className="font-black text-foreground">{p.full_name || "Partner"}</h3>
+                <p className="text-xs text-gray-text">{p.email}</p>
                 <p className="text-xs text-[#9CA3AF]">{p.phone_number}</p>
               </div>
               <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full ${
@@ -112,24 +112,24 @@ export default function AdminDeliveryPartnersPage() {
                 {p.is_available ? "Online" : "Offline"}
               </span>
             </div>
-            <p className="text-sm text-[#6B7280] mb-1">
+            <p className="text-sm text-gray-text mb-1">
               {p.vehicle_type || "Vehicle"} — {p.vehicle_details || "—"}
             </p>
             <p className="text-xs text-[#9CA3AF] mb-2">
               Status: {p.approval_status || "approved"} · Deliveries: {p.delivery_count || 0} · Rating: {p.rating || 0}
             </p>
-            <p className="text-xs font-bold text-[#111827] mb-4">
+            <p className="text-xs font-bold text-foreground mb-4">
               Earnings: {formatCurrency(Number(p.total_earnings || 0))} · Wallet: {formatCurrency(Number(p.wallet_balance || 0))}
             </p>
             {(p.profile_photo_url || p.license_photo_url) && (
               <div className="flex gap-2 mb-4">
                 {p.profile_photo_url && (
-                  <a href={p.profile_photo_url} target="_blank" rel="noreferrer" className="text-xs font-bold text-[#E23744]">
+                  <a href={p.profile_photo_url} target="_blank" rel="noreferrer" className="text-xs font-bold text-primary">
                     Photo
                   </a>
                 )}
                 {p.license_photo_url && (
-                  <a href={p.license_photo_url} target="_blank" rel="noreferrer" className="text-xs font-bold text-[#E23744]">
+                  <a href={p.license_photo_url} target="_blank" rel="noreferrer" className="text-xs font-bold text-primary">
                     License
                   </a>
                 )}
@@ -152,7 +152,7 @@ export default function AdminDeliveryPartnersPage() {
                   Reactivate
                 </button>
               )}
-              <button type="button" onClick={() => toggleAvailable(p)} className="text-xs font-bold border border-[#E5E7EB] px-3 py-1.5 rounded-lg">
+              <button type="button" onClick={() => toggleAvailable(p)} className="text-xs font-bold border border-border px-3 py-1.5 rounded-lg">
                 {p.is_available ? "Set Offline" : "Set Available"}
               </button>
             </div>

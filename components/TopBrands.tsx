@@ -57,17 +57,17 @@ const brands = [
 
 export default function TopBrands() {
   return (
-    <section className="py-20 bg-[#FAFAFA] overflow-hidden relative border-y border-[#EAEAEA] mt-8">
+    <section className="py-20 bg-section overflow-hidden relative border-y border-border mt-8">
       <div className="mb-14 px-4 md:px-8 max-w-7xl mx-auto flex items-end justify-between">
         <div>
-          <h2 className="text-3xl md:text-5xl font-bold text-[#1C1C1C] mb-3 tracking-[-0.045em]">Top Food Brands</h2>
-          <p className="text-[#686B78] text-base md:text-lg">Order from India's Most Loved Restaurants</p>
+          <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-3 tracking-[-0.045em]">Top Food Brands</h2>
+          <p className="text-muted text-base md:text-lg">Order from India's Most Loved Restaurants</p>
         </div>
         <div className="hidden md:flex gap-3" aria-hidden="true">
-          <button type="button" tabIndex={-1} className="w-12 h-12 rounded-full border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:bg-white hover:text-[#111827] transition-all">
+          <button type="button" tabIndex={-1} className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-gray-text hover:bg-white hover:text-foreground transition-all">
             <ChevronLeft className="w-6 h-6" aria-hidden="true" />
           </button>
-          <button type="button" tabIndex={-1} className="w-12 h-12 rounded-full border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:bg-white hover:text-[#111827] transition-all">
+          <button type="button" tabIndex={-1} className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-gray-text hover:bg-white hover:text-foreground transition-all">
             <ChevronRight className="w-6 h-6" aria-hidden="true" />
           </button>
         </div>
@@ -83,7 +83,7 @@ export default function TopBrands() {
           {[...brands, ...brands].map((brand, index) => (
             <div 
               key={index} 
-              className="w-[200px] md:w-[220px] bg-white rounded-[20px] flex flex-col items-center p-5 cursor-pointer border border-[#ECECEC] shadow-[0_6px_22px_rgba(28,28,28,0.05)] hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(28,28,28,0.1)] transition-all duration-300 ease-out flex-shrink-0 group relative overflow-hidden"
+              className="w-[200px] md:w-[220px] bg-white rounded-[20px] flex flex-col items-center p-5 cursor-pointer border border-border shadow-[0_6px_22px_rgba(28,28,28,0.05)] hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(28,28,28,0.1)] transition-all duration-300 ease-out flex-shrink-0 group relative overflow-hidden"
             >
               {/* Premium Circular Food Image */}
               <div className="w-36 h-36 md:w-40 md:h-40 rounded-full mb-8 relative overflow-hidden shadow-[0_10px_30px_rgba(15,23,42,0.14)] border-4 border-[#F8FAFC] group-hover:border-primary/30 transition-colors duration-300">
@@ -111,7 +111,7 @@ export default function TopBrands() {
               </div>
 
               {/* Brand Name */}
-              <h3 className="text-[#1C1C1C] font-bold text-center text-lg mt-2 group-hover:text-primary transition-colors">{brand.name}</h3>
+              <h3 className="text-foreground font-bold text-center text-lg mt-2 group-hover:text-primary transition-colors">{brand.name}</h3>
             </div>
           ))}
         </div>

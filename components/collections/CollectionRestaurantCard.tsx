@@ -24,8 +24,8 @@ export default function CollectionRestaurantCard({
   onToggleFavorite,
 }: Props) {
   return (
-    <div className="group relative flex flex-col justify-between overflow-hidden rounded-[20px] border border-[#EAEAEA] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]">
-      <div className="relative h-[160px] w-full shrink-0 overflow-hidden bg-[#F8F8F8]">
+    <div className="group relative flex flex-col justify-between overflow-hidden rounded-[20px] border border-border bg-white shadow-card transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]">
+      <div className="relative h-[160px] w-full shrink-0 overflow-hidden bg-footer">
         <SafeImage
           src={item.image}
           fallback={RESTAURANT_FALLBACK || FOOD_FALLBACK}
@@ -49,7 +49,7 @@ export default function CollectionRestaurantCard({
         >
           <Heart
             className={`h-3.5 w-3.5 transition-colors ${
-              isFavorite ? "fill-[#E23744] text-[#E23744]" : "text-gray-600 hover:text-[#E23744]"
+              isFavorite ? "fill-primary text-primary" : "text-gray-600 hover:text-primary"
             }`}
           />
         </button>
@@ -57,13 +57,13 @@ export default function CollectionRestaurantCard({
 
       <div className="flex min-w-0 flex-1 flex-col justify-between bg-white p-4">
         <div>
-          <h4 className="line-clamp-1 text-base font-black text-[#1C1C1C] transition-colors group-hover:text-[#696969]">
+          <h4 className="line-clamp-1 text-base font-black text-foreground transition-colors group-hover:text-gray-text">
             {item.restaurantName}
           </h4>
           <p className="mt-1 line-clamp-1 text-[11px] font-medium text-[#888888]">
             {item.description}
           </p>
-          <div className="mt-2 flex items-center gap-1 text-[11px] font-medium text-[#666666]">
+          <div className="mt-2 flex items-center gap-1 text-[11px] font-medium text-gray-text">
             <Clock className="h-3 w-3" />
             <span>{item.deliveryTime}</span>
           </div>
@@ -72,7 +72,7 @@ export default function CollectionRestaurantCard({
         <div className="mt-3">
           <div className="mb-3 flex items-baseline gap-2">
             <span className="text-xs font-semibold text-[#888888]">from</span>
-            <span className="text-lg font-black text-[#E23744]">₹{item.price}</span>
+            <span className="text-lg font-black text-primary">₹{item.price}</span>
             {item.originalPrice > item.price && (
               <span className="text-xs font-medium text-[#8E8E8E] line-through">
                 ₹{item.originalPrice}
@@ -82,11 +82,11 @@ export default function CollectionRestaurantCard({
 
           <div className="grid grid-cols-2 gap-2">
             {quantity > 0 ? (
-              <div className="flex items-center justify-between rounded-xl border border-[#E23744] bg-white p-1 text-[#E23744] shadow-sm">
+              <div className="flex items-center justify-between rounded-xl border border-primary bg-white p-1 text-primary shadow-sm">
                 <button
                   type="button"
                   onClick={() => onUpdateQuantity(item.id, -1)}
-                  className="touch-target flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-[#FFF5F6] active:scale-90"
+                  className="touch-target flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-primary-soft active:scale-90"
                 >
                   <Minus className="h-3.5 w-3.5" />
                 </button>
@@ -94,7 +94,7 @@ export default function CollectionRestaurantCard({
                 <button
                   type="button"
                   onClick={() => onUpdateQuantity(item.id, 1)}
-                  className="touch-target flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-[#FFF5F6] active:scale-90"
+                  className="touch-target flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-primary-soft active:scale-90"
                 >
                   <Plus className="h-3.5 w-3.5" />
                 </button>
@@ -103,7 +103,7 @@ export default function CollectionRestaurantCard({
               <button
                 type="button"
                 onClick={() => onAddToCart(item)}
-                className="inline-flex w-full items-center justify-center gap-1 rounded-xl bg-[#E23744] py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#C81E32] active:scale-95"
+                className="inline-flex w-full items-center justify-center gap-1 rounded-xl bg-primary py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-primary-hover active:scale-95"
               >
                 <ShoppingCart className="h-3.5 w-3.5" />
                 <span>Add to Cart</span>
@@ -112,9 +112,9 @@ export default function CollectionRestaurantCard({
 
             <Link
               href={`/restaurant/${item.restaurantId}`}
-              className="inline-flex w-full items-center justify-center gap-1 rounded-xl border border-[#ECECEC] bg-[#F8F8F8] py-2 text-xs font-bold text-[#1A1A1A] transition-all hover:bg-[#ECECEC] active:scale-95"
+              className="inline-flex w-full items-center justify-center gap-1 rounded-xl border border-border bg-footer py-2 text-xs font-bold text-foreground transition-all hover:bg-[#ECECEC] active:scale-95"
             >
-              <Eye className="h-3.5 w-3.5 text-[#666666]" />
+              <Eye className="h-3.5 w-3.5 text-gray-text" />
               <span>View Details</span>
             </Link>
           </div>

@@ -25,18 +25,18 @@ export default function AdminHeader({ title = "Admin Console" }: AdminHeaderProp
 
   return (
     <>
-      <div className="h-16 sm:h-20 bg-[#FFFFFF] border-b border-[#E5E7EB] flex items-center justify-between px-3 sm:px-4 lg:px-8 sticky top-0 z-30 safe-top">
+      <div className="h-16 sm:h-20 bg-background border-b border-border flex items-center justify-between px-3 sm:px-4 lg:px-8 sticky top-0 z-30 safe-top">
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden touch-target flex items-center justify-center text-[#6B7280] hover:text-[#111827] p-2 -ml-1"
+            className="lg:hidden touch-target flex items-center justify-center text-gray-text hover:text-foreground p-2 -ml-1"
             aria-label="Open navigation menu"
           >
             <Menu className="w-6 h-6" />
           </button>
           <div className="min-w-0">
-            <h2 className="text-[#111827] font-black leading-none text-sm sm:text-base truncate">{title}</h2>
+            <h2 className="text-foreground font-black leading-none text-sm sm:text-base truncate">{title}</h2>
             <p className="text-[#9CA3AF] text-[10px] sm:text-xs mt-0.5 sm:mt-1 flex items-center gap-1">
               <Shield className="w-3 h-3 shrink-0" /> Platform administration
             </p>
@@ -45,11 +45,11 @@ export default function AdminHeader({ title = "Admin Console" }: AdminHeaderProp
 
         <div className="flex items-center gap-2 sm:gap-4 shrink-0">
           <NotificationBell endpoint="/api/notifications" inboxHref="/admin/notifications" />
-          <div className="flex items-center gap-2 bg-[#F8FAFC] border border-[#E5E7EB] rounded-full pl-2 pr-3 sm:pr-4 py-1.5">
-            <div className="w-8 h-8 rounded-full bg-[#E23744]/15 flex items-center justify-center text-[#E23744] font-black text-sm shrink-0">
+          <div className="flex items-center gap-2 bg-section border border-border rounded-full pl-2 pr-3 sm:pr-4 py-1.5">
+            <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center text-primary font-black text-sm shrink-0">
               {adminName.charAt(0).toUpperCase()}
             </div>
-            <span className="text-sm font-bold text-[#111827] hidden sm:block max-w-[100px] truncate">{adminName}</span>
+            <span className="text-sm font-bold text-foreground hidden sm:block max-w-[100px] truncate">{adminName}</span>
           </div>
         </div>
       </div>

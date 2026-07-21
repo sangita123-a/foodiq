@@ -12,7 +12,7 @@ import AboutCTA from "@/components/about/AboutCTA";
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-background relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
 
       <AboutHero />

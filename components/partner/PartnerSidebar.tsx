@@ -58,17 +58,17 @@ export default function PartnerSidebar({
 
   return (
     <div
-      className={`w-64 bg-[#FFFFFF] h-full border-r border-[#E5E7EB] flex flex-col ${
+      className={`w-64 bg-background h-full border-r border-border flex flex-col ${
         variant === "fixed" ? "h-screen fixed left-0 top-0 z-40" : "relative"
       }`}
     >
 
-      <div className="h-20 flex items-center px-6 border-b border-[#E5E7EB]">
+      <div className="h-20 flex items-center px-6 border-b border-border">
         <Link href="/partner/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#E23744] rounded-lg flex items-center justify-center font-black text-white text-xl">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-black text-white text-xl">
             F
           </div>
-          <span className="text-xl font-black text-[#111827] tracking-tight">Foodiq <span className="text-[#E23744] text-sm uppercase tracking-widest font-bold ml-1 border border-[#E23744]/30 px-1.5 py-0.5 rounded">Partner</span></span>
+          <span className="text-xl font-black text-foreground tracking-tight">Foodiq <span className="text-primary text-sm uppercase tracking-widest font-bold ml-1 border border-primary/30 px-1.5 py-0.5 rounded">Partner</span></span>
         </Link>
       </div>
 
@@ -82,23 +82,23 @@ export default function PartnerSidebar({
               onClick={onNavigate}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                 isActive
-                  ? "bg-[#E23744] text-white shadow-[0_0_15px_rgba(226, 55, 68,0.3)]"
-                  : "text-[#6B7280] hover:text-[#111827] hover:bg-[#F8FAFC]"
+                  ? "bg-primary text-white shadow-[0_0_15px_rgba(226, 55, 68,0.3)]"
+                  : "text-gray-text hover:text-foreground hover:bg-section"
               }`}
             >
-              <item.icon className={`w-5 h-5 ${isActive ? "text-[#111827]" : "text-[#9CA3AF] group-hover:text-[#111827]"}`} />
+              <item.icon className={`w-5 h-5 ${isActive ? "text-foreground" : "text-[#9CA3AF] group-hover:text-foreground"}`} />
               <span className="font-bold text-sm">{item.name}</span>
             </Link>
           );
         })}
 
-        <div className="pt-6 mt-6 border-t border-[#E5E7EB] space-y-1">
+        <div className="pt-6 mt-6 border-t border-border space-y-1">
           <Link
             href="/partner/settings"
             onClick={onNavigate}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#6B7280] hover:text-[#111827] hover:bg-[#F8FAFC] group"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-gray-text hover:text-foreground hover:bg-section group"
           >
-            <Settings className="w-5 h-5 text-[#9CA3AF] group-hover:text-[#111827]" />
+            <Settings className="w-5 h-5 text-[#9CA3AF] group-hover:text-foreground" />
             <span className="font-bold text-sm">Restaurant Settings</span>
           </Link>
 

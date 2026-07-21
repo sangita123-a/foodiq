@@ -34,26 +34,26 @@ export default function WishlistPage() {
     <main className="min-h-screen bg-white">
       <Navbar />
       <div className="max-w-5xl mx-auto px-4 py-10">
-        <h1 className="text-2xl sm:text-3xl font-black text-[#111827] flex items-center gap-2">
-          <Heart className="w-7 h-7 text-[#E23744]" /> Wishlist
+        <h1 className="text-2xl sm:text-3xl font-black text-foreground flex items-center gap-2">
+          <Heart className="w-7 h-7 text-primary" /> Wishlist
         </h1>
-        <p className="text-sm text-[#6B7280] mt-1 mb-8">
+        <p className="text-sm text-gray-text mt-1 mb-8">
           Dishes you saved for later. Separate from favorites restaurants.
         </p>
 
         {!authenticated ? (
-          <p className="text-[#6B7280]">
-            <Link href="/login" className="text-[#E23744] font-bold">
+          <p className="text-gray-text">
+            <Link href="/login" className="text-primary font-bold">
               Sign in
             </Link>{" "}
             to view your wishlist.
           </p>
         ) : isLoading ? (
-          <p className="text-[#6B7280]">Loading…</p>
+          <p className="text-gray-text">Loading…</p>
         ) : items.length === 0 ? (
-          <p className="text-[#6B7280]">
+          <p className="text-gray-text">
             Your wishlist is empty.{" "}
-            <Link href="/order-online" className="text-[#E23744] font-bold">
+            <Link href="/order-online" className="text-primary font-bold">
               Browse restaurants
             </Link>
           </p>
@@ -62,7 +62,7 @@ export default function WishlistPage() {
             {items.map((item) => (
               <div
                 key={String(item.wishlist_id || item.id)}
-                className="border border-[#E5E7EB] rounded-2xl overflow-hidden bg-white"
+                className="border border-border rounded-2xl overflow-hidden bg-white"
               >
                 <div className="relative h-40 bg-[#F8F9FA]">
                   <SafeImage
@@ -73,18 +73,18 @@ export default function WishlistPage() {
                   />
                 </div>
                 <div className="p-4">
-                  <p className="font-bold text-[#111827]">{String(item.name)}</p>
-                  <p className="text-xs text-[#6B7280] mt-1">
+                  <p className="font-bold text-foreground">{String(item.name)}</p>
+                  <p className="text-xs text-gray-text mt-1">
                     {String(item.restaurant_name || "")}
                   </p>
                   <div className="flex items-center justify-between mt-3">
-                    <span className="font-bold text-[#111827]">
+                    <span className="font-bold text-foreground">
                       ₹{String(item.discount_price || item.price)}
                     </span>
                     <button
                       type="button"
                       onClick={() => void remove(String(item.id))}
-                      className="text-xs font-bold text-[#E23744]"
+                      className="text-xs font-bold text-primary"
                     >
                       Remove
                     </button>

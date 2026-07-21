@@ -12,7 +12,7 @@ import { Wifi, WifiOff } from "lucide-react";
 const UnifiedTrackingMap = dynamic(() => import("@/components/tracking/UnifiedTrackingMap"), {
   ssr: false,
   loading: () => (
-    <div className="h-[300px] md:h-[400px] mb-8 rounded-3xl border border-[#E5E7EB] bg-[#F8FAFC] animate-pulse" />
+    <div className="h-[300px] md:h-[400px] mb-8 rounded-3xl border border-border bg-section animate-pulse" />
   ),
 });
 
@@ -38,7 +38,7 @@ export default function TrackOrderView({ orderId }: Props) {
       <div className="container mx-auto px-4 md:px-8 py-12 flex items-center justify-center min-h-[50vh]">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
-          <div className="text-[#111827] text-xl">Loading live tracking…</div>
+          <div className="text-foreground text-xl">Loading live tracking…</div>
         </div>
       </div>
     );
@@ -47,7 +47,7 @@ export default function TrackOrderView({ orderId }: Props) {
   if (error) {
     return (
       <div className="container mx-auto px-4 md:px-8 py-12 flex items-center justify-center min-h-[50vh]">
-        <div className="text-[#111827] text-xl bg-red-500/10 border border-red-500/20 p-6 rounded-2xl">
+        <div className="text-foreground text-xl bg-red-500/10 border border-red-500/20 p-6 rounded-2xl">
           Failed to load tracking data.
         </div>
       </div>
@@ -57,7 +57,7 @@ export default function TrackOrderView({ orderId }: Props) {
   if (!orderData) {
     return (
       <div className="container mx-auto px-4 md:px-8 py-12 flex items-center justify-center min-h-[50vh]">
-        <div className="text-[#111827] text-xl">Order not found.</div>
+        <div className="text-foreground text-xl">Order not found.</div>
       </div>
     );
   }
@@ -158,15 +158,15 @@ export default function TrackOrderView({ orderId }: Props) {
       {(location?.distance_km != null || location?.eta_minutes != null) && (
         <div className="mb-6 grid grid-cols-2 gap-3 max-w-md">
           {location.distance_km != null && (
-            <div className="rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3">
+            <div className="rounded-2xl border border-border bg-white px-4 py-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF]">Distance</p>
-              <p className="text-lg font-black text-[#111827]">{location.distance_km.toFixed(1)} km</p>
+              <p className="text-lg font-black text-foreground">{location.distance_km.toFixed(1)} km</p>
             </div>
           )}
           {location.eta_minutes != null && (
-            <div className="rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3">
+            <div className="rounded-2xl border border-border bg-white px-4 py-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF]">ETA</p>
-              <p className="text-lg font-black text-[#E23744]">{location.eta_minutes} min</p>
+              <p className="text-lg font-black text-primary">{location.eta_minutes} min</p>
             </div>
           )}
         </div>
@@ -188,7 +188,7 @@ export default function TrackOrderView({ orderId }: Props) {
               )}
               <TrackingActions orderId={orderId} currentStageId={Math.min(5, Math.max(1, actionsStage))} />
               <p className="text-xs text-[#9CA3AF]">
-                Status: <span className="font-bold text-[#111827]">{status || "—"}</span>
+                Status: <span className="font-bold text-foreground">{status || "—"}</span>
               </p>
             </div>
           </div>

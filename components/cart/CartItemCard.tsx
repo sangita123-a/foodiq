@@ -25,7 +25,7 @@ export default function CartItemCard({ item, onUpdateQuantity, onRemove, isUpdat
   const itemTotal = item.price * item.quantity;
 
   return (
-    <div className="bg-[#F8FAFC] rounded-[22px] p-4 md:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-6 shadow-md border border-[#E5E7EB] hover:border-[#E5E7EB] transition-colors">
+    <div className="bg-section rounded-[22px] p-4 md:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-6 shadow-md border border-border hover:border-border transition-colors">
       
       {/* Item Image */}
       <div className="w-full sm:w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 relative">
@@ -56,13 +56,13 @@ export default function CartItemCard({ item, onUpdateQuantity, onRemove, isUpdat
       <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-4 mt-2 sm:mt-0">
         
         {/* Quantity Selector */}
-        <div className="flex items-center bg-[#FFFFFF] border border-[#E5E7EB] rounded-lg overflow-hidden h-10 w-28">
+        <div className="flex items-center bg-background border border-border rounded-lg overflow-hidden h-10 w-28">
           <button 
             type="button"
             onClick={() => onUpdateQuantity(item.id, -1)}
             disabled={item.quantity <= 1}
             aria-label={`Decrease quantity of ${item.name}`}
-            className="w-1/3 h-full flex items-center justify-center text-[#E23744] hover:bg-[#F8FAFC] transition-colors disabled:opacity-50 disabled:hover:bg-transparent"
+            className="w-1/3 h-full flex items-center justify-center text-primary hover:bg-section transition-colors disabled:opacity-50 disabled:hover:bg-transparent"
           >
             <Minus className="w-4 h-4" />
           </button>
@@ -73,7 +73,7 @@ export default function CartItemCard({ item, onUpdateQuantity, onRemove, isUpdat
             type="button"
             onClick={() => onUpdateQuantity(item.id, 1)}
             aria-label={`Increase quantity of ${item.name}`}
-            className="w-1/3 h-full flex items-center justify-center text-green-500 hover:bg-[#F8FAFC] transition-colors"
+            className="w-1/3 h-full flex items-center justify-center text-green-500 hover:bg-section transition-colors"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -89,7 +89,7 @@ export default function CartItemCard({ item, onUpdateQuantity, onRemove, isUpdat
           <button 
             type="button"
             onClick={() => onRemove(item.id)}
-            className="w-10 h-10 rounded-full bg-[#F8FAFC] flex items-center justify-center text-[#6B7280] hover:text-[#E23744] hover:bg-[#E23744]/10 transition-colors"
+            className="w-10 h-10 rounded-full bg-section flex items-center justify-center text-gray-text hover:text-primary hover:bg-primary/10 transition-colors"
             title="Remove Item"
             aria-label={`Remove ${item.name} from cart`}
           >

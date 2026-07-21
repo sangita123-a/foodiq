@@ -46,14 +46,14 @@ export default function OfferFoodCard({ item, quantity, isUpdating, onUpdateQuan
         <Link href={foodHref} className="food-card-title text-white mb-1 line-clamp-1 hover:text-primary transition-colors block">
           {item.name}
         </Link>
-        <p className="text-[#6B7280] text-sm mb-3 line-clamp-1">{item.restaurant_name}</p>
+        <p className="text-gray-text text-sm mb-3 line-clamp-1">{item.restaurant_name}</p>
 
         <div className="flex items-center gap-3 mb-4 text-sm">
           <div className="flex items-center gap-1 text-yellow-400">
             <Star className="w-4 h-4 fill-yellow-400" />
             <span className="text-white font-medium">{rating}</span>
           </div>
-          <div className="flex items-center gap-1 text-[#6B7280]">
+          <div className="flex items-center gap-1 text-gray-text">
             <Clock className="w-3.5 h-3.5" />
             <span>{item.delivery_time || "30 min"}</span>
           </div>
@@ -61,7 +61,7 @@ export default function OfferFoodCard({ item, quantity, isUpdating, onUpdateQuan
 
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-baseline gap-2">
-            <span className="food-price text-[#E23744]">₹{item.discounted_price}</span>
+            <span className="food-price text-primary">₹{item.discounted_price}</span>
             {hasDiscount && (
               <span className="text-sm text-[#9CA3AF] line-through">₹{item.original_price}</span>
             )}
@@ -71,17 +71,17 @@ export default function OfferFoodCard({ item, quantity, isUpdating, onUpdateQuan
             <button
               onClick={() => onUpdateQuantity(item.menu_item_id, 1)}
               disabled={isUpdating}
-              className="food-button min-h-0 flex items-center gap-1.5 bg-[#E23744] hover:bg-[#C81E34] disabled:opacity-50 text-white px-3 py-2 rounded-xl text-sm font-bold"
+              className="food-button min-h-0 flex items-center gap-1.5 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white px-3 py-2 rounded-xl text-sm font-bold"
             >
               <Plus className="w-4 h-4" />
               Add
             </button>
           ) : (
-            <div className="flex items-center gap-3 bg-[#F8FAFC] rounded-xl px-2 py-1.5">
+            <div className="flex items-center gap-3 bg-section rounded-xl px-2 py-1.5">
               <button
                 onClick={() => onUpdateQuantity(item.menu_item_id, -1)}
                 disabled={isUpdating}
-                className="w-8 h-8 flex items-center justify-center text-white hover:bg-[#F8FAFC] rounded-lg transition-colors disabled:opacity-50"
+                className="w-8 h-8 flex items-center justify-center text-white hover:bg-section rounded-lg transition-colors disabled:opacity-50"
               >
                 <Minus className="w-4 h-4" />
               </button>
@@ -89,7 +89,7 @@ export default function OfferFoodCard({ item, quantity, isUpdating, onUpdateQuan
               <button
                 onClick={() => onUpdateQuantity(item.menu_item_id, 1)}
                 disabled={isUpdating}
-                className="w-8 h-8 flex items-center justify-center text-white hover:bg-[#F8FAFC] rounded-lg transition-colors disabled:opacity-50"
+                className="w-8 h-8 flex items-center justify-center text-white hover:bg-section rounded-lg transition-colors disabled:opacity-50"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -99,7 +99,7 @@ export default function OfferFoodCard({ item, quantity, isUpdating, onUpdateQuan
 
         <Link
           href={foodHref}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#6B7280] hover:text-[#111827]"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-text hover:text-foreground"
         >
           <Eye className="w-3.5 h-3.5" />
           View Details

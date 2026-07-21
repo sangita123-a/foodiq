@@ -30,16 +30,16 @@ export default function WishlistPanel() {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm md:p-8"
+      className="rounded-[24px] border border-border bg-white p-6 shadow-sm md:p-8"
     >
-      <h2 className="mb-2 flex items-center gap-2 text-2xl font-bold text-[#222222]">
-        <Heart className="h-6 w-6 text-[#E23744]" /> Wishlist
+      <h2 className="mb-2 flex items-center gap-2 text-2xl font-bold text-foreground">
+        <Heart className="h-6 w-6 text-primary" /> Wishlist
       </h2>
       <p className="mb-8 text-sm text-[#555555]">Dishes you saved for later.</p>
 
       {!authenticated ? (
         <p className="text-[#555555]">
-          <Link href="/login" className="font-bold text-[#E23744]">
+          <Link href="/login" className="font-bold text-primary">
             Sign in
           </Link>{" "}
           to view your wishlist.
@@ -49,7 +49,7 @@ export default function WishlistPanel() {
       ) : items.length === 0 ? (
         <p className="text-[#555555]">
           Your wishlist is empty.{" "}
-          <Link href="/order-online" className="font-bold text-[#E23744]">
+          <Link href="/order-online" className="font-bold text-primary">
             Order online
           </Link>
         </p>
@@ -58,7 +58,7 @@ export default function WishlistPanel() {
           {items.map((item) => (
             <div
               key={String(item.menu_item_id || item.id)}
-              className="flex gap-4 rounded-2xl border border-[#E5E7EB] p-4"
+              className="flex gap-4 rounded-2xl border border-border p-4"
             >
               <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl">
                 <SafeImage
@@ -73,12 +73,12 @@ export default function WishlistPanel() {
               <div className="min-w-0 flex-1">
                 <Link
                   href={`/food/${item.menu_item_id || item.id}`}
-                  className="line-clamp-1 font-bold text-[#222222] hover:text-[#E23744]"
+                  className="line-clamp-1 font-bold text-foreground hover:text-primary"
                 >
                   {String(item.name || "Dish")}
                 </Link>
                 <p className="text-xs text-[#555555]">{String(item.restaurant_name || "")}</p>
-                <p className="mt-1 font-black text-[#E23744]">₹{String(item.price || "—")}</p>
+                <p className="mt-1 font-black text-primary">₹{String(item.price || "—")}</p>
                 <button
                   type="button"
                   onClick={() => remove(String(item.menu_item_id || item.id))}

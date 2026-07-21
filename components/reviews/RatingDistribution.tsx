@@ -18,10 +18,10 @@ export default function RatingDistribution({
   const stars = [5, 4, 3, 2, 1] as const;
 
   return (
-    <div className={`rounded-2xl border border-[#E5E7EB] bg-white p-5 ${className}`}>
+    <div className={`rounded-2xl border border-border bg-white p-5 ${className}`}>
       <div className="flex items-center gap-4 mb-4">
         <div>
-          <p className="text-4xl font-black text-[#111827]">{Number(averageRating).toFixed(1)}</p>
+          <p className="text-4xl font-black text-foreground">{Number(averageRating).toFixed(1)}</p>
           <p className="text-xs text-[#9CA3AF]">{totalReviews} review{totalReviews === 1 ? "" : "s"}</p>
         </div>
       </div>
@@ -31,10 +31,10 @@ export default function RatingDistribution({
           const pct = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
           return (
             <div key={star} className="flex items-center gap-2 text-sm">
-              <span className="w-8 font-bold text-[#6B7280]">{star}★</span>
+              <span className="w-8 font-bold text-gray-text">{star}★</span>
               <div className="flex-1 h-2 bg-[#F3F4F6] rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#E23744] rounded-full transition-all"
+                  className="h-full bg-primary rounded-full transition-all"
                   style={{ width: `${Math.max(pct, count > 0 ? 4 : 0)}%` }}
                 />
               </div>

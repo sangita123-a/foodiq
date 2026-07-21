@@ -17,18 +17,18 @@ export default function AdminAiPage() {
   return (
     <AdminShell title="AI Assistants">
       <div className="mb-6 flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-[#E23744]/10 flex items-center justify-center">
-          <Bot className="w-5 h-5 text-[#E23744]" />
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <Bot className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-3xl font-black text-[#111827]">AI Assistants</h1>
-          <p className="text-[#6B7280]">
+          <h1 className="text-3xl font-black text-foreground">AI Assistants</h1>
+          <p className="text-gray-text">
             Voice, chatbot, and forecast foundation stats (Foodiq 4.0).
           </p>
         </div>
       </div>
 
-      {isLoading && <p className="text-sm text-[#6B7280] mb-4">Loading…</p>}
+      {isLoading && <p className="text-sm text-gray-text mb-4">Loading…</p>}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
@@ -42,12 +42,12 @@ export default function AdminAiPage() {
         ].map((k) => (
           <div
             key={k.label}
-            className="bg-white rounded-3xl border border-[#E5E7EB] p-5"
+            className="bg-white rounded-3xl border border-border p-5"
           >
             <p className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">
               {k.label}
             </p>
-            <p className="text-2xl font-black text-[#111827] mt-1">{k.value}</p>
+            <p className="text-2xl font-black text-foreground mt-1">{k.value}</p>
           </div>
         ))}
       </div>

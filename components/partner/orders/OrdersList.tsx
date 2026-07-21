@@ -16,11 +16,11 @@ export default function OrdersList({ orders, onUpdateStatus, onViewDetails }: Or
   if (orders.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="w-16 h-16 bg-[#F8FAFC] rounded-full flex items-center justify-center mb-4">
+        <div className="w-16 h-16 bg-section rounded-full flex items-center justify-center mb-4">
           <Inbox className="w-8 h-8 text-[#9CA3AF]" />
         </div>
-        <h3 className="text-xl font-bold text-[#111827] mb-2">No Orders Found</h3>
-        <p className="text-[#6B7280] max-w-md">Try adjusting your filters or wait for new orders to arrive.</p>
+        <h3 className="text-xl font-bold text-foreground mb-2">No Orders Found</h3>
+        <p className="text-gray-text max-w-md">Try adjusting your filters or wait for new orders to arrive.</p>
       </div>
     );
   }

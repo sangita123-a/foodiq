@@ -121,7 +121,7 @@ function CollectionSection({
     <section className="mb-16">
       <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-[#111827] mb-2">{title}</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{title}</h2>
           <p className="text-[var(--color-gray-text)]">{description}</p>
         </div>
         {fallback && (
@@ -133,15 +133,15 @@ function CollectionSection({
       {loading ? (
         <div className="food-grid">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-[280px] bg-[#F8FAFC] rounded-2xl animate-pulse border border-[#E5E7EB]" />
+            <div key={i} className="h-[280px] bg-section rounded-2xl animate-pulse border border-border" />
           ))}
         </div>
       ) : fetchFailed ? (
-        <div className="text-center py-12 bg-[#FFFFFF] rounded-2xl border border-[#E5E7EB] text-[#6B7280]">
+        <div className="text-center py-12 bg-background rounded-2xl border border-border text-gray-text">
           Unable to load restaurants. Please check your connection and try again.
         </div>
       ) : restaurants.length === 0 ? (
-        <div className="text-center py-12 bg-[#FFFFFF] rounded-2xl border border-[#E5E7EB] text-[#6B7280]">
+        <div className="text-center py-12 bg-background rounded-2xl border border-border text-gray-text">
           No restaurants in this collection yet.
           {fallback && (
             <div className="mt-4">
@@ -164,12 +164,12 @@ function CollectionSection({
 
 export default function CollectionsPage() {
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[#E23744]/15 selection:text-[#1C1C1C] pt-[90px]">
+    <main className="min-h-screen bg-background relative selection:bg-primary/15 selection:text-foreground pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12">
-        <div className="mb-10 text-center md:text-left border-b border-[#E5E7EB] pb-8">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3">Collections</h1>
+        <div className="mb-10 text-center md:text-left border-b border-border pb-8">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-3">Collections</h1>
           <p className="text-[var(--color-gray-text)] text-lg">
             Curated restaurant lists to help you discover your next meal.
           </p>

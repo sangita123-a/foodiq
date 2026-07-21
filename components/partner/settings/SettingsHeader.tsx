@@ -13,15 +13,15 @@ export default function SettingsHeader() {
       className="mb-8"
     >
       <div className="flex items-center gap-2 text-sm text-[#9CA3AF] font-bold uppercase tracking-wider mb-4">
-        <Link href="/partner/dashboard" className="hover:text-[#E23744] transition-colors">Dashboard</Link>
+        <Link href="/partner/dashboard" className="hover:text-primary transition-colors">Dashboard</Link>
         <ChevronRight className="w-4 h-4" />
-        <span className="text-[#111827]">Settings</span>
+        <span className="text-foreground">Settings</span>
       </div>
       
-      <h1 className="text-3xl md:text-4xl font-black text-[#111827] mb-2 flex items-center gap-3">
+      <h1 className="text-3xl md:text-4xl font-black text-foreground mb-2 flex items-center gap-3">
         ⚙️ Restaurant Settings
       </h1>
-      <p className="text-[#6B7280]">
+      <p className="text-gray-text">
         Manage your restaurant profile, business information, delivery preferences, and account settings.
       </p>
     </motion.div>

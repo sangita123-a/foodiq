@@ -64,8 +64,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               exiting.has(toast.id) ? "toast-exit" : "toast-enter"
             } ${
               toast.type === "success"
-                ? "border-[#E23744]/30 text-[#E23744]"
-                : "border-[#E23744]/30 text-[#E23744]"
+                ? "border-primary/30 text-primary"
+                : "border-primary/30 text-primary"
             }`}
           >
             {toast.type === "success" ? (
@@ -73,11 +73,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             ) : (
               <XCircle className="w-5 h-5 shrink-0" />
             )}
-            <span className="flex-1 text-sm font-semibold text-[#1C1C1C]">{toast.message}</span>
+            <span className="flex-1 text-sm font-semibold text-foreground">{toast.message}</span>
             <button
               onClick={() => removeToast(toast.id)}
               aria-label="Dismiss notification"
-              className="flex h-8 w-8 items-center justify-center rounded-xl text-[#686B78] opacity-70 hover:bg-[#F8F9FA] hover:opacity-100 transition-all"
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-muted opacity-70 hover:bg-section hover:opacity-100 transition-all"
             >
               <X className="w-4 h-4" />
             </button>

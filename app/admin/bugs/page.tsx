@@ -115,10 +115,10 @@ export default function AdminBugsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-black text-[#111827] flex items-center gap-2">
-              <Bug className="w-6 h-6 text-[#E23744]" /> Bug management
+            <h1 className="text-2xl font-black text-foreground flex items-center gap-2">
+              <Bug className="w-6 h-6 text-primary" /> Bug management
             </h1>
-            <p className="text-sm text-[#6B7280] mt-1">
+            <p className="text-sm text-gray-text mt-1">
               Track production crashes and user-reported bugs. Update status as
               you resolve issues.
             </p>
@@ -127,14 +127,14 @@ export default function AdminBugsPage() {
             <button
               type="button"
               onClick={() => void loadWeekly(false)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#E5E7EB] text-sm font-bold text-[#6B7280]"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm font-bold text-gray-text"
             >
               <FileBarChart className="w-4 h-4" /> Weekly report
             </button>
             <button
               type="button"
               onClick={() => void load()}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#E5E7EB] text-sm font-bold text-[#6B7280]"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm font-bold text-gray-text"
             >
               <RefreshCw className="w-4 h-4" /> Refresh
             </button>
@@ -157,8 +157,8 @@ export default function AdminBugsPage() {
                 className={[
                   "px-3 py-1.5 rounded-xl text-sm font-bold border transition-colors",
                   active
-                    ? "bg-[#E23744] text-white border-[#E23744]"
-                    : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#E23744]",
+                    ? "bg-primary text-white border-primary"
+                    : "bg-white text-gray-text border-border hover:border-primary",
                 ].join(" ")}
               >
                 {chip.label}
@@ -172,14 +172,14 @@ export default function AdminBugsPage() {
 
         <div className="flex flex-wrap gap-3 items-end">
           <label className="text-sm">
-            <span className="block text-xs font-bold text-[#6B7280] mb-1">Status</span>
+            <span className="block text-xs font-bold text-gray-text mb-1">Status</span>
             <select
               value={status}
               onChange={(e) => {
                 setStatus(e.target.value);
                 setFilter("");
               }}
-              className="border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm bg-white"
+              className="border border-border rounded-xl px-3 py-2 text-sm bg-white"
             >
               <option value="">All</option>
               {STATUSES.map((s) => (
@@ -190,14 +190,14 @@ export default function AdminBugsPage() {
             </select>
           </label>
           <label className="text-sm">
-            <span className="block text-xs font-bold text-[#6B7280] mb-1">Severity</span>
+            <span className="block text-xs font-bold text-gray-text mb-1">Severity</span>
             <select
               value={severity}
               onChange={(e) => {
                 setSeverity(e.target.value);
                 setFilter("");
               }}
-              className="border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm bg-white"
+              className="border border-border rounded-xl px-3 py-2 text-sm bg-white"
             >
               <option value="">All</option>
               {SEVERITIES.map((s) => (
@@ -212,12 +212,12 @@ export default function AdminBugsPage() {
               value={errorId}
               onChange={(e) => setErrorId(e.target.value)}
               placeholder="Error event UUID"
-              className="border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm bg-white min-w-[220px]"
+              className="border border-border rounded-xl px-3 py-2 text-sm bg-white min-w-[220px]"
             />
             <button
               type="button"
               onClick={() => void createFromError()}
-              className="bg-[#E23744] text-white text-sm font-bold px-4 py-2 rounded-xl"
+              className="bg-primary text-white text-sm font-bold px-4 py-2 rounded-xl"
             >
               Create from error
             </button>
@@ -225,9 +225,9 @@ export default function AdminBugsPage() {
         </div>
 
         {weekly && (
-          <div className="bg-white rounded-3xl border border-[#E5E7EB] p-5 space-y-3">
+          <div className="bg-white rounded-3xl border border-border p-5 space-y-3">
             <div className="flex items-center justify-between gap-3 flex-wrap">
-              <h2 className="font-black text-[#111827] text-sm">
+              <h2 className="font-black text-foreground text-sm">
                 Weekly bug report ({String(weekly.period_start)} →{" "}
                 {String(weekly.period_end)})
               </h2>
@@ -235,7 +235,7 @@ export default function AdminBugsPage() {
                 type="button"
                 disabled={weeklyLoading}
                 onClick={() => void loadWeekly(true)}
-                className="text-xs font-bold text-[#E23744]"
+                className="text-xs font-bold text-primary"
               >
                 {weeklyLoading ? "Saving…" : "Persist report"}
               </button>
@@ -244,9 +244,9 @@ export default function AdminBugsPage() {
               {Object.entries(
                 (weekly.summary as Record<string, number>) || {}
               ).map(([k, v]) => (
-                <div key={k} className="rounded-xl bg-[#F8FAFC] p-3">
-                  <p className="text-xs font-bold text-[#6B7280] uppercase">{k}</p>
-                  <p className="font-black text-[#111827] mt-1">{v}</p>
+                <div key={k} className="rounded-xl bg-section p-3">
+                  <p className="text-xs font-bold text-gray-text uppercase">{k}</p>
+                  <p className="font-black text-foreground mt-1">{v}</p>
                 </div>
               ))}
             </div>
@@ -254,11 +254,11 @@ export default function AdminBugsPage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          <div className="lg:col-span-3 bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden">
+          <div className="lg:col-span-3 bg-white rounded-3xl border border-border overflow-hidden">
             {loading ? (
-              <p className="p-6 text-sm text-[#6B7280]">Loading…</p>
+              <p className="p-6 text-sm text-gray-text">Loading…</p>
             ) : bugs.length === 0 ? (
-              <p className="p-6 text-sm text-[#6B7280]">No bugs found.</p>
+              <p className="p-6 text-sm text-gray-text">No bugs found.</p>
             ) : (
               <div className="divide-y divide-[#E5E7EB]">
                 <p className="px-5 py-3 text-xs font-bold text-[#9CA3AF]">
@@ -272,15 +272,15 @@ export default function AdminBugsPage() {
                       setSelected(b);
                       setNotes(String(b.admin_notes || ""));
                     }}
-                    className="w-full text-left p-5 hover:bg-[#F8FAFC] transition-colors"
+                    className="w-full text-left p-5 hover:bg-section transition-colors"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <p className="font-bold text-[#111827]">{String(b.title)}</p>
-                      <span className="text-xs font-bold uppercase text-[#E23744]">
+                      <p className="font-bold text-foreground">{String(b.title)}</p>
+                      <span className="text-xs font-bold uppercase text-primary">
                         {String(b.severity)}
                       </span>
                     </div>
-                    <p className="text-sm text-[#6B7280] mt-1 line-clamp-2">
+                    <p className="text-sm text-gray-text mt-1 line-clamp-2">
                       {String(b.description)}
                     </p>
                     <p className="text-xs text-[#9CA3AF] mt-2">
@@ -299,13 +299,13 @@ export default function AdminBugsPage() {
             )}
           </div>
 
-          <div className="lg:col-span-2 bg-white rounded-3xl border border-[#E5E7EB] p-6">
+          <div className="lg:col-span-2 bg-white rounded-3xl border border-border p-6">
             {!selected ? (
-              <p className="text-sm text-[#6B7280]">Select a bug to manage.</p>
+              <p className="text-sm text-gray-text">Select a bug to manage.</p>
             ) : (
               <div className="space-y-4">
-                <h2 className="font-black text-[#111827]">{String(selected.title)}</h2>
-                <p className="text-sm text-[#6B7280] whitespace-pre-wrap">
+                <h2 className="font-black text-foreground">{String(selected.title)}</h2>
+                <p className="text-sm text-gray-text whitespace-pre-wrap">
                   {String(selected.description)}
                 </p>
                 {Boolean(
@@ -313,7 +313,7 @@ export default function AdminBugsPage() {
                     selected.stack_trace ||
                     selected.browser
                 ) && (
-                  <div className="rounded-xl bg-[#F8FAFC] p-3 text-xs text-[#6B7280] space-y-1 break-all">
+                  <div className="rounded-xl bg-section p-3 text-xs text-gray-text space-y-1 break-all">
                     {selected.api_endpoint ? (
                       <p>
                         <span className="font-bold">Endpoint:</span>{" "}
@@ -342,13 +342,13 @@ export default function AdminBugsPage() {
                   </div>
                 )}
                 <label className="block text-sm">
-                  <span className="text-xs font-bold text-[#6B7280]">Status</span>
+                  <span className="text-xs font-bold text-gray-text">Status</span>
                   <select
                     value={String(selected.status || "open")}
                     onChange={(e) =>
                       setSelected({ ...selected, status: e.target.value })
                     }
-                    className="mt-1 w-full border border-[#E5E7EB] rounded-xl px-3 py-2"
+                    className="mt-1 w-full border border-border rounded-xl px-3 py-2"
                   >
                     {STATUSES.map((s) => (
                       <option key={s} value={s}>
@@ -358,13 +358,13 @@ export default function AdminBugsPage() {
                   </select>
                 </label>
                 <label className="block text-sm">
-                  <span className="text-xs font-bold text-[#6B7280]">Severity</span>
+                  <span className="text-xs font-bold text-gray-text">Severity</span>
                   <select
                     value={String(selected.severity || "medium")}
                     onChange={(e) =>
                       setSelected({ ...selected, severity: e.target.value })
                     }
-                    className="mt-1 w-full border border-[#E5E7EB] rounded-xl px-3 py-2"
+                    className="mt-1 w-full border border-border rounded-xl px-3 py-2"
                   >
                     {SEVERITIES.map((s) => (
                       <option key={s} value={s}>
@@ -374,18 +374,18 @@ export default function AdminBugsPage() {
                   </select>
                 </label>
                 <label className="block text-sm">
-                  <span className="text-xs font-bold text-[#6B7280]">Admin notes</span>
+                  <span className="text-xs font-bold text-gray-text">Admin notes</span>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows={4}
-                    className="mt-1 w-full border border-[#E5E7EB] rounded-xl px-3 py-2 resize-none"
+                    className="mt-1 w-full border border-border rounded-xl px-3 py-2 resize-none"
                   />
                 </label>
                 <button
                   type="button"
                   onClick={() => void saveBug()}
-                  className="w-full bg-[#E23744] text-white font-bold py-3 rounded-xl"
+                  className="w-full bg-primary text-white font-bold py-3 rounded-xl"
                 >
                   Save changes
                 </button>

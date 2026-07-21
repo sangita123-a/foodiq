@@ -27,8 +27,8 @@ export default function MembershipCard({
   const gradient = TIER_COLORS[slug] || TIER_COLORS.silver;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[#E5E7EB] bg-gradient-to-br from-[#111827] to-[#1F2937] p-6 md:p-8 text-white shadow-2xl">
-      <div className="absolute -top-16 -right-16 w-48 h-48 bg-[#E23744]/20 rounded-full blur-3xl pointer-events-none" />
+    <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-[#111827] to-[#1F2937] p-6 md:p-8 text-white shadow-2xl">
+      <div className="absolute -top-16 -right-16 w-48 h-48 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
       <div className="relative z-10">
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
@@ -64,7 +64,7 @@ export default function MembershipCard({
             </div>
             <div className="h-2.5 bg-white/10 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-[#E23744] to-orange-400 rounded-full transition-all duration-700"
+                className="h-full bg-gradient-to-r from-primary to-orange-400 rounded-full transition-all duration-700"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -92,7 +92,7 @@ export function TierBenefitsList({ benefits }: { benefits: MembershipTier["benef
           className={`flex items-center gap-3 rounded-2xl border p-4 ${
             item.active
               ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-              : "border-[#E5E7EB] bg-[#F8FAFC] text-[#9CA3AF]"
+              : "border-border bg-section text-[#9CA3AF]"
           }`}
         >
           <item.icon className="w-5 h-5 shrink-0" />

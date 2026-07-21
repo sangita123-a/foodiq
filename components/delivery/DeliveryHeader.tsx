@@ -36,12 +36,12 @@ export default function DeliveryHeader({ title, online }: DeliveryHeaderProps) {
 
   return (
     <>
-      <div className="h-16 sm:h-20 bg-[#FFFFFF] border-b border-[#E5E7EB] flex items-center justify-between px-3 sm:px-4 lg:px-8 sticky top-0 z-30 safe-top">
+      <div className="h-16 sm:h-20 bg-background border-b border-border flex items-center justify-between px-3 sm:px-4 lg:px-8 sticky top-0 z-30 safe-top">
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden touch-target flex items-center justify-center text-[#6B7280] hover:text-[#111827] p-2 -ml-1"
+            className="lg:hidden touch-target flex items-center justify-center text-gray-text hover:text-foreground p-2 -ml-1"
             aria-label="Open navigation menu"
           >
             <Menu className="w-6 h-6" />
@@ -50,7 +50,7 @@ export default function DeliveryHeader({ title, online }: DeliveryHeaderProps) {
             <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#9CA3AF]">
               Delivery Partner
             </p>
-            <h1 className="text-sm sm:text-lg font-black text-[#111827] truncate">
+            <h1 className="text-sm sm:text-lg font-black text-foreground truncate">
               {title || `Hi, ${name.split(" ")[0]}`}
             </h1>
           </div>
@@ -64,7 +64,7 @@ export default function DeliveryHeader({ title, online }: DeliveryHeaderProps) {
             className={`touch-target flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-colors ${
               isOnline
                 ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                : "bg-[#F8FAFC] text-[#6B7280] border border-[#E5E7EB]"
+                : "bg-section text-gray-text border border-border"
             }`}
           >
             <span

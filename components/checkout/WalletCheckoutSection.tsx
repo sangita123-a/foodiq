@@ -36,19 +36,19 @@ export default function WalletCheckoutSection({ grandTotal, walletAmount, onWall
   };
 
   return (
-    <section className="mb-6 rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm">
+    <section className="mb-6 rounded-2xl border border-border bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Wallet className="h-5 w-5 text-[#E23744]" />
-          <h3 className="text-lg font-black text-[#111827]">Foodiq Wallet</h3>
+          <Wallet className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-black text-foreground">Foodiq Wallet</h3>
         </div>
-        <button type="button" onClick={toggle} className="text-[#E23744]" aria-label="Toggle wallet">
+        <button type="button" onClick={toggle} className="text-primary" aria-label="Toggle wallet">
           {enabled ? <ToggleRight className="h-8 w-8" /> : <ToggleLeft className="h-8 w-8 text-[#9CA3AF]" />}
         </button>
       </div>
 
-      <p className="mb-3 text-sm text-[#6B7280]">
-        Available balance: <span className="font-bold text-[#111827]">₹{balance.toFixed(2)}</span>
+      <p className="mb-3 text-sm text-gray-text">
+        Available balance: <span className="font-bold text-foreground">₹{balance.toFixed(2)}</span>
       </p>
 
       {enabled && (
@@ -63,7 +63,7 @@ export default function WalletCheckoutSection({ grandTotal, walletAmount, onWall
             step={1}
             value={walletAmount || maxUsable}
             onChange={(e) => adjustAmount(Number(e.target.value))}
-            className="w-full rounded-xl border border-[#E5E7EB] px-4 py-2.5 text-sm font-bold text-[#111827]"
+            className="w-full rounded-xl border border-border px-4 py-2.5 text-sm font-bold text-foreground"
           />
         </div>
       )}

@@ -65,10 +65,10 @@ export default function OrderSummary({
   };
 
   return (
-    <div className="bg-[#F8FAFC] rounded-[24px] p-6 md:p-8 shadow-xl border border-[#E5E7EB] sticky top-[100px]">
+    <div className="bg-section rounded-[24px] p-6 md:p-8 shadow-xl border border-border sticky top-[100px]">
       <h3 className="text-xl font-bold text-white mb-6">Order Summary</h3>
 
-      <div className="flex flex-col gap-4 text-[#A1A1A1] text-sm mb-6 pb-6 border-b border-[#E5E7EB]">
+      <div className="flex flex-col gap-4 text-[#A1A1A1] text-sm mb-6 pb-6 border-b border-border">
         <div className="flex justify-between items-center">
           <span>Subtotal</span>
           <span className="text-white font-medium">₹{subtotal}</span>
@@ -95,7 +95,7 @@ export default function OrderSummary({
         </label>
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]" />
+            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-text" />
             <input
               type="text"
               placeholder="Enter Code (e.g. WELCOME50)"
@@ -104,12 +104,12 @@ export default function OrderSummary({
                 setCouponCode(e.target.value);
                 setCouponError("");
               }}
-              className="w-full bg-[#FFFFFF] text-[#111827] border border-[#E5E7EB] rounded-xl py-2.5 pl-9 pr-3 text-sm focus:outline-none focus:border-[#E23744]/50 transition-colors uppercase"
+              className="w-full bg-background text-foreground border border-border rounded-xl py-2.5 pl-9 pr-3 text-sm focus:outline-none focus:border-primary/50 transition-colors uppercase"
             />
           </div>
           <button
             onClick={handleApplyCoupon}
-            className="bg-[#F8FAFC] hover:bg-[#F8FAFC] text-white px-4 rounded-xl text-sm font-bold transition-colors"
+            className="bg-section hover:bg-section text-white px-4 rounded-xl text-sm font-bold transition-colors"
           >
             Apply
           </button>
@@ -119,12 +119,12 @@ export default function OrderSummary({
 
       <div className="flex justify-between items-center mb-8">
         <span className="text-lg text-white font-bold">Grand Total</span>
-        <span className="text-2xl font-black text-[#E23744]">₹{grandTotal}</span>
+        <span className="text-2xl font-black text-primary">₹{grandTotal}</span>
       </div>
 
       <Link
         href="/checkout"
-        className="w-full bg-[#E23744] hover:bg-[#C81E32] text-white py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:-translate-y-0.5"
+        className="w-full bg-primary hover:bg-primary-hover text-white py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:-translate-y-0.5"
       >
         Proceed to Checkout
         <ArrowRight className="w-5 h-5" />

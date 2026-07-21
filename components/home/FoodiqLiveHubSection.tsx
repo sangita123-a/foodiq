@@ -6,7 +6,7 @@ import FoodiqLiveHub from "@/components/FoodiqLiveHub";
 function SectionSkeleton() {
   return (
     <div
-      className="mx-auto my-8 h-56 max-w-7xl animate-pulse rounded-2xl bg-[#FAFAFA]"
+      className="mx-auto my-8 h-56 max-w-7xl animate-pulse rounded-2xl bg-section"
       aria-hidden
     />
   );

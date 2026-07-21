@@ -34,7 +34,7 @@ function MessageBubble({ msg }: { msg: TicketMessage }) {
     <div className={`flex ${isCustomer ? "justify-end" : "justify-start"}`}>
       <div
         className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${
-          isCustomer ? "bg-[#E23744] text-white" : "bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB]"
+          isCustomer ? "bg-primary text-white" : "bg-section text-foreground border border-border"
         }`}
       >
         <p className="text-[10px] font-bold uppercase opacity-70 mb-1">
@@ -184,13 +184,13 @@ export default function HelpSupportView() {
 
   if (!hasToken) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] pt-[90px]">
+      <main className="min-h-screen bg-background pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 py-20 text-center max-w-lg">
-          <Headphones className="w-12 h-12 text-[#E23744] mx-auto mb-4" />
-          <h1 className="text-3xl font-black text-[#111827] mb-3">Help & Support</h1>
-          <p className="text-[#6B7280] mb-6">Sign in to create support tickets and track your requests.</p>
-          <Link href="/login" className="inline-block bg-[#E23744] text-white font-black px-8 py-3 rounded-xl">
+          <Headphones className="w-12 h-12 text-primary mx-auto mb-4" />
+          <h1 className="text-3xl font-black text-foreground mb-3">Help & Support</h1>
+          <p className="text-gray-text mb-6">Sign in to create support tickets and track your requests.</p>
+          <Link href="/login" className="inline-block bg-primary text-white font-black px-8 py-3 rounded-xl">
             Sign In
           </Link>
         </div>
@@ -200,23 +200,23 @@ export default function HelpSupportView() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] pt-[90px]">
+    <main className="min-h-screen bg-background pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-10 max-w-4xl">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Headphones className="w-7 h-7 text-[#E23744]" />
-              <h1 className="text-3xl md:text-4xl font-black text-[#111827]">Help & Support</h1>
+              <Headphones className="w-7 h-7 text-primary" />
+              <h1 className="text-3xl md:text-4xl font-black text-foreground">Help & Support</h1>
             </div>
-            <p className="text-[#6B7280]">Create tickets, upload photos, and track resolution status.</p>
+            <p className="text-gray-text">Create tickets, upload photos, and track resolution status.</p>
           </div>
           {view === "list" && (
             <button
               type="button"
               onClick={() => setView("create")}
-              className="flex items-center gap-2 bg-[#E23744] text-white font-black px-5 py-2.5 rounded-xl text-sm"
+              className="flex items-center gap-2 bg-primary text-white font-black px-5 py-2.5 rounded-xl text-sm"
             >
               <Plus className="w-4 h-4" /> New Ticket
             </button>
@@ -229,7 +229,7 @@ export default function HelpSupportView() {
                 setSelectedId(null);
                 setDetail(null);
               }}
-              className="text-sm font-bold text-[#6B7280]"
+              className="text-sm font-bold text-gray-text"
             >
               ← Back to tickets
             </button>
@@ -238,15 +238,15 @@ export default function HelpSupportView() {
 
         {view === "list" && (
           <div className="space-y-3">
-            {isLoading && <div className="h-32 bg-[#F8FAFC] animate-pulse rounded-2xl" />}
+            {isLoading && <div className="h-32 bg-section animate-pulse rounded-2xl" />}
             {!isLoading && tickets.length === 0 && (
-              <div className="text-center py-16 bg-[#F8FAFC] rounded-2xl border border-[#E5E7EB]">
+              <div className="text-center py-16 bg-section rounded-2xl border border-border">
                 <MessageSquare className="w-10 h-10 text-[#9CA3AF] mx-auto mb-3" />
-                <p className="text-[#6B7280] mb-4">No support tickets yet.</p>
+                <p className="text-gray-text mb-4">No support tickets yet.</p>
                 <button
                   type="button"
                   onClick={() => setView("create")}
-                  className="bg-[#E23744] text-white font-black px-6 py-2.5 rounded-xl text-sm"
+                  className="bg-primary text-white font-black px-6 py-2.5 rounded-xl text-sm"
                 >
                   Create your first ticket
                 </button>
@@ -257,18 +257,18 @@ export default function HelpSupportView() {
                 key={t.id}
                 type="button"
                 onClick={() => openDetail(t.id)}
-                className="w-full text-left border border-[#E5E7EB] rounded-2xl p-5 hover:border-[#E23744]/40 transition-colors"
+                className="w-full text-left border border-border rounded-2xl p-5 hover:border-primary/40 transition-colors"
               >
                 <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
                   <div>
                     <p className="text-xs font-bold text-[#9CA3AF]">{ticketDisplayId(t)}</p>
-                    <p className="font-black text-[#111827]">{t.subject}</p>
+                    <p className="font-black text-foreground">{t.subject}</p>
                   </div>
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${statusColor(t.status)}`}>
                     {t.status}
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-3 text-xs text-[#6B7280]">
+                <div className="flex flex-wrap gap-3 text-xs text-gray-text">
                   <span>{t.category}</span>
                   <span className={priorityColor(t.priority)}>Priority: {t.priority || "Medium"}</span>
                   <span>{t.created_at ? new Date(t.created_at).toLocaleDateString("en-IN") : ""}</span>
@@ -280,13 +280,13 @@ export default function HelpSupportView() {
         )}
 
         {view === "create" && (
-          <form onSubmit={handleCreate} className="bg-white border border-[#E5E7EB] rounded-2xl p-6 space-y-4">
+          <form onSubmit={handleCreate} className="bg-white border border-border rounded-2xl p-6 space-y-4">
             <div>
               <label className="block text-xs font-bold uppercase text-[#9CA3AF] mb-1">Issue type</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as typeof category)}
-                className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+                className="w-full border border-border rounded-xl px-4 py-2.5 text-sm"
               >
                 {TICKET_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -300,7 +300,7 @@ export default function HelpSupportView() {
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
-                className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+                className="w-full border border-border rounded-xl px-4 py-2.5 text-sm"
               >
                 {TICKET_PRIORITIES.map((p) => (
                   <option key={p} value={p}>
@@ -314,7 +314,7 @@ export default function HelpSupportView() {
               <input
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+                className="w-full border border-border rounded-xl px-4 py-2.5 text-sm"
                 placeholder="Brief summary of your issue"
                 required
               />
@@ -324,7 +324,7 @@ export default function HelpSupportView() {
               <input
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
-                className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+                className="w-full border border-border rounded-xl px-4 py-2.5 text-sm"
                 placeholder="Paste order ID for order-related issues"
               />
             </div>
@@ -334,13 +334,13 @@ export default function HelpSupportView() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={5}
-                className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+                className="w-full border border-border rounded-xl px-4 py-2.5 text-sm"
                 placeholder="Describe your issue in detail..."
                 required
               />
             </div>
             <div>
-              <label className="inline-flex items-center gap-2 cursor-pointer text-sm font-bold text-[#E23744]">
+              <label className="inline-flex items-center gap-2 cursor-pointer text-sm font-bold text-primary">
                 <ImagePlus className="w-4 h-4" />
                 Attach images
                 <input
@@ -383,7 +383,7 @@ export default function HelpSupportView() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-[#E23744] text-white font-black py-3 rounded-xl disabled:opacity-50"
+              className="w-full bg-primary text-white font-black py-3 rounded-xl disabled:opacity-50"
             >
               {submitting ? "Submitting..." : "Submit Ticket"}
             </button>
@@ -393,20 +393,20 @@ export default function HelpSupportView() {
         {view === "detail" && (
           <div className="space-y-4">
             {loadingDetail || !detail ? (
-              <div className="h-64 bg-[#F8FAFC] animate-pulse rounded-2xl" />
+              <div className="h-64 bg-section animate-pulse rounded-2xl" />
             ) : (
               <>
-                <div className="border border-[#E5E7EB] rounded-2xl p-5">
+                <div className="border border-border rounded-2xl p-5">
                   <div className="flex flex-wrap justify-between gap-2 mb-3">
                     <div>
                       <p className="text-xs font-bold text-[#9CA3AF]">{ticketDisplayId(detail.ticket)}</p>
-                      <h2 className="text-xl font-black text-[#111827]">{detail.ticket.subject}</h2>
+                      <h2 className="text-xl font-black text-foreground">{detail.ticket.subject}</h2>
                     </div>
                     <span className={`text-xs font-bold px-2.5 py-1 rounded-full h-fit ${statusColor(detail.ticket.status)}`}>
                       {detail.ticket.status}
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-3 text-xs text-[#6B7280] mb-2">
+                  <div className="flex flex-wrap gap-3 text-xs text-gray-text mb-2">
                     <span>{detail.ticket.category}</span>
                     <span className={priorityColor(detail.ticket.priority)}>
                       Priority: {detail.ticket.priority || "Medium"}
@@ -417,7 +417,7 @@ export default function HelpSupportView() {
                     <button
                       type="button"
                       onClick={handleClose}
-                      className="text-xs font-bold text-[#6B7280] underline"
+                      className="text-xs font-bold text-gray-text underline"
                     >
                       Close ticket
                     </button>
@@ -431,16 +431,16 @@ export default function HelpSupportView() {
                 </div>
 
                 {!["Closed"].includes(detail.ticket.status) && (
-                  <div className="border border-[#E5E7EB] rounded-2xl p-4">
+                  <div className="border border-border rounded-2xl p-4">
                     <textarea
                       value={reply}
                       onChange={(e) => setReply(e.target.value)}
                       rows={3}
-                      className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm mb-3"
+                      className="w-full border border-border rounded-xl px-4 py-2.5 text-sm mb-3"
                       placeholder="Write a reply..."
                     />
                     <div className="flex flex-wrap items-center justify-between gap-3">
-                      <label className="inline-flex items-center gap-2 cursor-pointer text-sm font-bold text-[#E23744]">
+                      <label className="inline-flex items-center gap-2 cursor-pointer text-sm font-bold text-primary">
                         <ImagePlus className="w-4 h-4" />
                         Add image
                         <input
@@ -459,7 +459,7 @@ export default function HelpSupportView() {
                         type="button"
                         onClick={handleReply}
                         disabled={submitting}
-                        className="flex items-center gap-2 bg-[#E23744] text-white font-black px-5 py-2 rounded-xl text-sm disabled:opacity-50"
+                        className="flex items-center gap-2 bg-primary text-white font-black px-5 py-2 rounded-xl text-sm disabled:opacity-50"
                       >
                         <Send className="w-4 h-4" /> Send Reply
                       </button>

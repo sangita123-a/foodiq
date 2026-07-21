@@ -59,34 +59,36 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4 pt-24">
-      <div className="max-w-md w-full bg-white border border-[#EAEAEA] p-8 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
-        <h2 className="text-3xl font-bold text-[#1C1C1C] text-center mb-6">Welcome Back</h2>
-        {error && <div className="bg-[#FFF8E6] border border-[#F4B400]/40 text-[#1C1C1C] p-3 rounded-lg mb-6 text-sm">{error}</div>}
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 pt-24">
+      <div className="max-w-md w-full bg-background border border-border p-8 rounded-2xl shadow-card">
+        <h2 className="text-3xl font-bold text-foreground text-center mb-6">Welcome Back</h2>
+        {error && <div className="bg-[#FFFBEB] border border-warning/30 text-foreground p-3 rounded-lg mb-6 text-sm">{error}</div>}
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-[#696969] mb-2">Email Address</label>
+            <label htmlFor="login-email" className="food-label">Email Address</label>
             <input 
+              id="login-email"
               type="email" 
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-white border border-[#EAEAEA] rounded-xl px-4 py-3 text-[#1C1C1C] focus:outline-none focus:border-[#D4D4D4] transition-colors"
+              className="food-input"
               placeholder="Enter your email"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#696969] mb-2">Password</label>
+            <label htmlFor="login-password" className="food-label">Password</label>
             <input 
+              id="login-password"
               type="password" 
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-white border border-[#EAEAEA] rounded-xl px-4 py-3 text-[#1C1C1C] focus:outline-none focus:border-[#D4D4D4] transition-colors"
+              className="food-input"
               placeholder="Enter your password"
             />
             <div className="mt-2 text-right">
-              <Link href="/forgot-password" className="text-sm text-[var(--color-primary)] hover:underline">
+              <Link href="/forgot-password" className="text-sm text-primary hover:underline">
                 Forgot password?
               </Link>
             </div>
@@ -94,13 +96,13 @@ export default function LoginPage() {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold py-2.5 rounded-xl text-sm transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 disabled:hover:scale-100"
+            className="food-button food-button-primary w-full py-2.5 text-sm disabled:opacity-70"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-        <div className="mt-6 text-center text-[#6B7280] text-sm">
-          Don't have an account? <Link href="/register" className="text-[var(--color-primary)] hover:underline">Register here</Link>
+        <div className="mt-6 text-center text-gray-text text-sm">
+          Don&apos;t have an account? <Link href="/register" className="text-primary hover:underline">Register here</Link>
         </div>
       </div>
     </div>

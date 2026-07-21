@@ -179,13 +179,13 @@ export default function SearchBar() {
     <div ref={wrapRef} className="relative w-full max-w-[900px]">
       <form
         onSubmit={handleSearch}
-        className="w-full h-[52px] sm:h-[60px] md:h-[66px] bg-white/95 backdrop-blur-md border border-[#EAEAEA] rounded-[14px] sm:rounded-[18px] flex items-center shadow-[0_4px_20px_rgba(0,0,0,0.08)] overflow-hidden relative transition-shadow focus-within:border-[#D4D4D4] focus-within:shadow-[0_8px_28px_rgba(0,0,0,0.1)]"
+        className="w-full h-[52px] sm:h-[60px] md:h-[66px] bg-white/95 backdrop-blur-md border border-border rounded-[14px] sm:rounded-[18px] flex items-center shadow-card overflow-hidden relative transition-shadow focus-within:border-[#D4D4D4] focus-within:shadow-[0_8px_28px_rgba(0,0,0,0.1)]"
       >
         <div ref={cityRef} className="relative hidden sm:block h-full shrink-0">
           <button
             type="button"
             onClick={() => setCityOpen((v) => !v)}
-            className="flex items-center h-full px-4 border-r border-[#ECECEC] w-[210px] text-[#1C1C1C] cursor-pointer hover:bg-[#F8F9FA] rounded-l-[18px] transition-colors text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E23744]"
+            className="flex items-center h-full px-4 border-r border-border w-[210px] text-foreground cursor-pointer hover:bg-section rounded-l-[18px] transition-colors text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             aria-expanded={cityOpen}
             aria-haspopup="listbox"
             aria-label={`Select delivery city, currently ${city}`}
@@ -216,7 +216,7 @@ export default function SearchBar() {
           {cityOpen ? (
             <ul
               role="listbox"
-              className="absolute left-0 top-[calc(100%+6px)] z-[60] w-[210px] bg-white border border-[#E5E7EB] rounded-2xl shadow-lg overflow-hidden max-h-60 overflow-y-auto"
+              className="absolute left-0 top-[calc(100%+6px)] z-[60] w-[210px] bg-white border border-border rounded-2xl shadow-lg overflow-hidden max-h-60 overflow-y-auto"
             >
               {HERO_CITIES.map((c) => (
                 <li key={c}>
@@ -225,8 +225,8 @@ export default function SearchBar() {
                     role="option"
                     aria-selected={city === c}
                     onClick={() => selectCity(c)}
-                    className={`w-full text-left px-4 py-2.5 text-sm font-semibold hover:bg-[#F8F9FA] ${
-                      city === c ? "text-[var(--color-primary)] bg-[#FAFAFA]" : "text-[#1C1C1C]"
+                    className={`w-full text-left px-4 py-2.5 text-sm font-semibold hover:bg-section ${
+                      city === c ? "text-[var(--color-primary)] bg-section" : "text-foreground"
                     }`}
                   >
                     {c}
@@ -237,7 +237,7 @@ export default function SearchBar() {
           ) : null}
         </div>
 
-        <div className="flex min-w-0 items-center h-full flex-grow px-4 sm:px-5 text-[#1C1C1C] group">
+        <div className="flex min-w-0 items-center h-full flex-grow px-4 sm:px-5 text-foreground group">
           <Search className="text-[var(--color-gray-text)] group-focus-within:text-[var(--color-primary)] w-4 h-4 mr-3 shrink-0 transition-colors" aria-hidden="true" />
           <label htmlFor="hero-search-input" className="sr-only">
             Search restaurants or dishes
@@ -253,7 +253,7 @@ export default function SearchBar() {
               if (normalizeSearchQuery(query).length > 0) setOpen(true);
             }}
             placeholder="Search restaurants or dishes..."
-            className="w-full min-w-0 h-full bg-transparent outline-none text-[#1C1C1C] placeholder:text-[#686B78] text-base sm:text-[16px] font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E23744]"
+            className="w-full min-w-0 h-full bg-transparent outline-none text-foreground placeholder:text-muted text-base sm:text-[16px] font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             autoComplete="off"
             aria-autocomplete="list"
             {...(showDropdown
@@ -264,7 +264,7 @@ export default function SearchBar() {
 
         <button
           type="submit"
-          className="h-[40px] sm:h-[46px] md:h-[52px] w-[68px] sm:w-[86px] md:w-[158px] bg-[#E23744] hover:bg-[#C81E32] text-white font-semibold text-xs sm:text-sm rounded-xl transition-all active:translate-y-0 shadow-[0_4px_12px_rgba(0,0,0,0.08)] shrink-0 mr-1 touch-target"
+          className="h-[40px] sm:h-[46px] md:h-[52px] w-[68px] sm:w-[86px] md:w-[158px] bg-primary hover:bg-primary-hover text-white font-semibold text-xs sm:text-sm rounded-xl transition-all active:translate-y-0 shadow-[0_4px_12px_rgba(0,0,0,0.08)] shrink-0 mr-1 touch-target"
         >
           <span className="hidden sm:inline">Search</span>
           <span className="sm:hidden">Go</span>
@@ -275,7 +275,7 @@ export default function SearchBar() {
         <ul
           id="hero-search-suggestions"
           role="listbox"
-          className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 bg-white border border-[#E5E7EB] rounded-2xl shadow-lg overflow-hidden max-h-72 overflow-y-auto"
+          className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 bg-white border border-border rounded-2xl shadow-lg overflow-hidden max-h-72 overflow-y-auto"
         >
           {suggestions.length > 0 ? (
             suggestions.map((s) => (
@@ -285,9 +285,9 @@ export default function SearchBar() {
                   role="option"
                   aria-selected={false}
                   onClick={() => goSuggestion(s)}
-                  className="touch-target w-full text-left px-4 py-3 hover:bg-[#F8F9FA] flex items-center justify-between gap-3"
+                  className="touch-target w-full text-left px-4 py-3 hover:bg-section flex items-center justify-between gap-3"
                 >
-                  <span className="font-semibold text-sm text-[#111827] truncate">{s.name}</span>
+                  <span className="font-semibold text-sm text-foreground truncate">{s.name}</span>
                   <span className="text-[10px] font-bold uppercase text-[#9CA3AF] shrink-0">
                     {s.type}
                     {s.subtitle ? ` · ${s.subtitle}` : ""}
@@ -296,7 +296,7 @@ export default function SearchBar() {
               </li>
             ))
           ) : noResults ? (
-            <li className="px-4 py-4 text-sm font-medium text-[#6B7280] text-center">
+            <li className="px-4 py-4 text-sm font-medium text-gray-text text-center">
               No matching restaurants or dishes found.
             </li>
           ) : null}

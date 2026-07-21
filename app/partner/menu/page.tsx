@@ -101,7 +101,7 @@ export default function PartnerMenuPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#E23744] selection:text-white">
+    <div className="min-h-screen bg-section flex selection:bg-primary selection:text-white">
       
       <div className="hidden lg:block w-64 flex-shrink-0">
         <PartnerSidebar />
@@ -122,7 +122,7 @@ export default function PartnerMenuPage() {
               </div>
             )}
             {isLoading && !items.length && (
-              <p className="text-[#6B7280] mb-4 text-sm">Loading menu…</p>
+              <p className="text-gray-text mb-4 text-sm">Loading menu…</p>
             )}
             
             <MenuSummary {...summary} />

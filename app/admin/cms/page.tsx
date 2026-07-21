@@ -76,8 +76,8 @@ export default function AdminCmsPage() {
   return (
     <AdminShell title="CMS">
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-[#111827]">Content Management</h1>
-        <p className="text-[#6B7280]">Manage homepage banners, collections, offers, legal pages, and FAQs.</p>
+        <h1 className="text-3xl font-black text-foreground">Content Management</h1>
+        <p className="text-gray-text">Manage homepage banners, collections, offers, legal pages, and FAQs.</p>
       </div>
 
       {msg && (
@@ -87,7 +87,7 @@ export default function AdminCmsPage() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-4">
+        <div className="bg-white rounded-3xl border border-border p-4">
           <h2 className="text-sm font-black uppercase tracking-widest text-[#9CA3AF] mb-3 px-2">Pages</h2>
           <div className="space-y-1">
             {PRESET_KEYS.map((p) => (
@@ -97,8 +97,8 @@ export default function AdminCmsPage() {
                 onClick={() => loadPreset(p)}
                 className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold transition ${
                   selected.key === p.key
-                    ? "bg-[#E23744] text-white"
-                    : "text-[#6B7280] hover:bg-[#F8FAFC]"
+                    ? "bg-primary text-white"
+                    : "text-gray-text hover:bg-section"
                 }`}
               >
                 {p.label}
@@ -107,23 +107,23 @@ export default function AdminCmsPage() {
           </div>
         </div>
 
-        <form onSubmit={save} className="lg:col-span-3 bg-white rounded-3xl border border-[#E5E7EB] p-6 space-y-4">
-          <h2 className="text-lg font-black text-[#111827]">{selected.label}</h2>
+        <form onSubmit={save} className="lg:col-span-3 bg-white rounded-3xl border border-border p-6 space-y-4">
+          <h2 className="text-lg font-black text-foreground">{selected.label}</h2>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Title"
-            className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+            className="w-full border border-border rounded-xl px-4 py-3 text-sm"
           />
           <textarea
             value={bodyJson}
             onChange={(e) => setBodyJson(e.target.value)}
             rows={14}
-            className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-mono"
+            className="w-full border border-border rounded-xl px-4 py-3 text-sm font-mono"
             placeholder='{"content": "..."}'
           />
           <div className="flex gap-3">
-            <button type="submit" disabled={busy} className="bg-[#E23744] text-white font-black px-6 py-3 rounded-xl">
+            <button type="submit" disabled={busy} className="bg-primary text-white font-black px-6 py-3 rounded-xl">
               Save Content
             </button>
           </div>
@@ -131,13 +131,13 @@ export default function AdminCmsPage() {
       </div>
 
       {isLoading ? null : items.length > 0 && (
-        <div className="mt-8 bg-white rounded-3xl border border-[#E5E7EB] p-6">
-          <h2 className="text-lg font-black text-[#111827] mb-4">Published Blocks</h2>
+        <div className="mt-8 bg-white rounded-3xl border border-border p-6">
+          <h2 className="text-lg font-black text-foreground mb-4">Published Blocks</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {items.map((item) => (
-              <div key={item.id} className="border border-[#E5E7EB] rounded-xl p-4 flex justify-between items-start">
+              <div key={item.id} className="border border-border rounded-xl p-4 flex justify-between items-start">
                 <div>
-                  <p className="font-bold text-[#111827]">{item.title || item.content_key}</p>
+                  <p className="font-bold text-foreground">{item.title || item.content_key}</p>
                   <p className="text-xs text-[#9CA3AF]">{item.content_key} · {item.content_type}</p>
                 </div>
                 <button type="button" onClick={() => remove(item.content_key)} className="text-xs text-red-500 font-bold">

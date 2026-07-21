@@ -27,7 +27,7 @@ export default function AboutHero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="mb-6 text-5xl font-black tracking-[-0.045em] text-[#1C1C1C] md:text-6xl lg:text-7xl"
+          className="mb-6 text-5xl font-black tracking-[-0.045em] text-foreground md:text-6xl lg:text-7xl"
         >
           About <span className="text-primary">Foodiq</span>
         </motion.h1>
@@ -36,7 +36,7 @@ export default function AboutHero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-[#686B78] md:text-xl"
+          className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-muted md:text-xl"
         >
           Connecting food lovers with the best restaurants, delivered fast and fresh straight to your door.
         </motion.p>
@@ -48,7 +48,7 @@ export default function AboutHero() {
         >
           <Link 
             href="/"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#E23744] px-8 py-4 font-bold text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#C81E32] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-4 font-bold text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1 hover:bg-primary-hover hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
           >
             Explore Restaurants <ArrowRight className="w-5 h-5" />
           </Link>

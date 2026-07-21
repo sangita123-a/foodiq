@@ -13,7 +13,7 @@ import { formatCurrency } from "@/services/partnerApi";
 import { FOOD_FALLBACK } from "@/lib/images";
 
 const PanelSkeleton = () => (
-  <div className="mb-8 h-64 animate-pulse rounded-2xl bg-white border border-[#E5E7EB]" aria-hidden />
+  <div className="mb-8 h-64 animate-pulse rounded-2xl bg-white border border-border" aria-hidden />
 );
 
 const RevenueAnalytics = dynamic(
@@ -239,7 +239,7 @@ export default function PartnerAnalyticsPage() {
   }, [analytics, dashboard]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#E23744] selection:text-white">
+    <div className="min-h-screen bg-section flex selection:bg-primary selection:text-white">
       
       <div className="hidden lg:block w-64 flex-shrink-0">
         <PartnerSidebar />

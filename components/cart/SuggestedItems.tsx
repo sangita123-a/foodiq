@@ -34,7 +34,7 @@ const suggestedItems = [
 
 export default function SuggestedItems() {
   return (
-    <div className="mt-16 pt-12 border-t border-[#E5E7EB]">
+    <div className="mt-16 pt-12 border-t border-border">
       <h3 className="text-2xl font-bold text-white mb-6">You May Also Like</h3>
       
       <div className="food-grid">
@@ -61,7 +61,7 @@ export default function SuggestedItems() {
               <div className="text-[#A1A1A1] font-bold text-sm">₹{item.price}</div>
             </div>
             
-            <button className="w-8 h-8 rounded-full bg-[#F8FAFC] flex items-center justify-center text-white hover:bg-[#E23744] transition-colors">
+            <button className="w-8 h-8 rounded-full bg-section flex items-center justify-center text-white hover:bg-primary transition-colors">
               <Plus className="w-4 h-4" />
             </button>
           </motion.div>

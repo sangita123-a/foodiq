@@ -41,7 +41,7 @@ export default function PartnerNotificationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex">
+    <div className="min-h-screen bg-section flex">
       <div className="hidden lg:block w-64 flex-shrink-0">
         <PartnerSidebar />
       </div>
@@ -51,13 +51,13 @@ export default function PartnerNotificationsPage() {
           <div className="max-w-3xl mx-auto">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <div>
-                <h1 className="text-3xl font-black text-[#111827]">Notifications</h1>
-                <p className="text-[#6B7280]">New orders, payments, and delivery updates</p>
+                <h1 className="text-3xl font-black text-foreground">Notifications</h1>
+                <p className="text-gray-text">New orders, payments, and delivery updates</p>
               </div>
               <button
                 type="button"
                 onClick={markAll}
-                className="inline-flex items-center gap-2 border border-[#E5E7EB] bg-white px-4 py-2 rounded-xl text-sm font-bold"
+                className="inline-flex items-center gap-2 border border-border bg-white px-4 py-2 rounded-xl text-sm font-bold"
               >
                 <CheckCheck className="w-4 h-4" /> Mark all read
               </button>
@@ -69,13 +69,13 @@ export default function PartnerNotificationsPage() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search…"
-                className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2.5 text-sm bg-white"
+                className="w-full border border-border rounded-xl pl-9 pr-3 py-2.5 text-sm bg-white"
               />
             </div>
 
-            {isLoading && <p className="text-sm text-[#6B7280]">Loading…</p>}
+            {isLoading && <p className="text-sm text-gray-text">Loading…</p>}
             {!isLoading && items.length === 0 && (
-              <p className="text-sm text-[#6B7280] bg-white border border-[#E5E7EB] rounded-2xl p-8 text-center">
+              <p className="text-sm text-gray-text bg-white border border-border rounded-2xl p-8 text-center">
                 No notifications yet.
               </p>
             )}
@@ -90,13 +90,13 @@ export default function PartnerNotificationsPage() {
               }) => (
                 <div
                   key={n.id}
-                  className={`bg-white border border-[#E5E7EB] rounded-2xl p-4 flex gap-3 ${
-                    !n.is_read ? "border-l-4 border-l-[#E23744]" : ""
+                  className={`bg-white border border-border rounded-2xl p-4 flex gap-3 ${
+                    !n.is_read ? "border-l-4 border-l-primary" : ""
                   }`}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-[#111827]">{n.title}</p>
-                    <p className="text-sm text-[#6B7280] mt-1">
+                    <p className="font-bold text-foreground">{n.title}</p>
+                    <p className="text-sm text-gray-text mt-1">
                       {cleanNotificationMessage(n.message)}
                     </p>
                     <p className="text-[10px] text-[#9CA3AF] mt-2">

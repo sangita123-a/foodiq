@@ -118,9 +118,9 @@ export default function LiveSupportChat() {
 
   if (!hasToken) {
     return (
-      <div className="bg-white rounded-3xl border border-[#E5E7EB] p-8 text-center">
-        <p className="text-[#6B7280] mb-4">Sign in to start a live chat with our support team.</p>
-        <a href="/login" className="inline-block bg-[#E23744] text-white font-black px-6 py-3 rounded-xl">
+      <div className="bg-white rounded-3xl border border-border p-8 text-center">
+        <p className="text-gray-text mb-4">Sign in to start a live chat with our support team.</p>
+        <a href="/login" className="inline-block bg-primary text-white font-black px-6 py-3 rounded-xl">
           Sign In
         </a>
       </div>
@@ -129,15 +129,15 @@ export default function LiveSupportChat() {
 
   if (!chatId) {
     return (
-      <div className="bg-white rounded-3xl border border-[#E5E7EB] p-8 text-center">
+      <div className="bg-white rounded-3xl border border-border p-8 text-center">
         <div className="flex items-center justify-center gap-2 mb-4">
           <Circle className={`w-3 h-3 fill-current ${agentOnline ? "text-emerald-500" : "text-[#9CA3AF]"}`} />
-          <span className="text-sm font-bold text-[#6B7280]">
+          <span className="text-sm font-bold text-gray-text">
             {agentOnline ? "Agents online" : "Agents offline — we'll respond via ticket"}
           </span>
         </div>
-        <h3 className="text-xl font-black text-[#111827] mb-2">Live Support Chat</h3>
-        <p className="text-sm text-[#6B7280] mb-6">Chat with a real agent. Share screenshots and get real-time help.</p>
+        <h3 className="text-xl font-black text-foreground mb-2">Live Support Chat</h3>
+        <p className="text-sm text-gray-text mb-6">Chat with a real agent. Share screenshots and get real-time help.</p>
         <button
           type="button"
           onClick={beginChat}
@@ -151,34 +151,34 @@ export default function LiveSupportChat() {
   }
 
   return (
-    <div className="flex flex-col h-[520px] bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3 border-b border-[#E5E7EB]">
+    <div className="flex flex-col h-[520px] bg-white rounded-3xl border border-border overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border">
         <div className="flex items-center gap-2">
-          <User className="w-5 h-5 text-[#E23744]" />
-          <span className="font-black text-[#111827]">Live Support</span>
+          <User className="w-5 h-5 text-primary" />
+          <span className="font-black text-foreground">Live Support</span>
         </div>
         <div className="flex items-center gap-2">
           <Circle className={`w-2.5 h-2.5 fill-current ${agentOnline ? "text-emerald-500" : "text-[#9CA3AF]"}`} />
           <button
             type="button"
             onClick={() => closeLiveChat(chatId).then(() => setChatId(null))}
-            className="text-xs font-bold text-[#6B7280] hover:text-[#E23744]"
+            className="text-xs font-bold text-gray-text hover:text-primary"
           >
             End chat
           </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-[#F8FAFC]">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-section">
         {messages.map((m) => (
           <div key={m.id} className={`flex ${m.sender_role === "customer" ? "justify-end" : "justify-start"}`}>
             <div
               className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
                 m.sender_role === "customer"
-                  ? "bg-[#E23744] text-white"
+                  ? "bg-primary text-white"
                   : m.sender_role === "agent"
                     ? "bg-[#111827] text-white"
-                    : "bg-white border border-[#E5E7EB] text-[#6B7280]"
+                    : "bg-white border border-border text-gray-text"
               }`}
             >
               {m.attachment_url && m.attachment_type === "image" ? (
@@ -202,12 +202,12 @@ export default function LiveSupportChat() {
         <div ref={bottomRef} />
       </div>
 
-      <div className="flex items-center gap-2 p-3 border-t border-[#E5E7EB]">
-        <label className="cursor-pointer p-2 text-[#6B7280] hover:text-[#E23744]">
+      <div className="flex items-center gap-2 p-3 border-t border-border">
+        <label className="cursor-pointer p-2 text-gray-text hover:text-primary">
           <ImagePlus className="w-5 h-5" />
           <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
         </label>
-        <label className="cursor-pointer p-2 text-[#6B7280] hover:text-[#E23744]">
+        <label className="cursor-pointer p-2 text-gray-text hover:text-primary">
           <Paperclip className="w-5 h-5" />
           <input type="file" className="hidden" onChange={handleFile} />
         </label>
@@ -216,9 +216,9 @@ export default function LiveSupportChat() {
           onChange={(e) => handleTyping(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), send())}
           placeholder="Type a message…"
-          className="flex-1 border border-[#E5E7EB] rounded-xl px-4 py-2 text-sm"
+          className="flex-1 border border-border rounded-xl px-4 py-2 text-sm"
         />
-        <button type="button" onClick={send} disabled={sending} className="bg-[#E23744] text-white p-2 rounded-xl">
+        <button type="button" onClick={send} disabled={sending} className="bg-primary text-white p-2 rounded-xl">
           <Send className="w-5 h-5" />
         </button>
       </div>

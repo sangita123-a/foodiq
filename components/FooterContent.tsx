@@ -18,10 +18,10 @@ import { DEFAULT_RESTAURANT_IMAGE } from "@/lib/images";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const linkClass =
-  "rounded-sm text-[#696969] transition-colors hover:text-[#E23744] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E23744] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F8F8]";
+  "rounded-sm text-gray-text transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-footer";
 
 const sectionTitleClass =
-  "mb-4 text-sm font-bold uppercase tracking-wider text-[#1C1C1C]";
+  "mb-4 text-sm font-bold uppercase tracking-wider text-foreground";
 
 function telHref(phone: string) {
   return `tel:${phone.replace(/\s/g, "")}`;
@@ -240,7 +240,7 @@ export default function FooterContent() {
   return (
     <>
       <footer
-        className="mt-12 w-full border-t border-[#E8E8E8] bg-[#F8F8F8] py-10 text-[#1C1C1C] sm:mt-16 sm:py-14 lg:mt-20"
+        className="mt-12 w-full border-t border-border bg-footer py-10 text-foreground sm:mt-16 sm:py-14 lg:mt-20"
         role="contentinfo"
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-16">
@@ -257,19 +257,18 @@ export default function FooterContent() {
                     className="mr-3 h-10 w-auto max-w-[120px] !object-contain"
                   />
                 ) : null}
-                <span className="text-[#1C1C1C]">Food</span>
-                <span className="text-[#E23744]">iq</span>
+                <span className="text-foreground">Foodiq</span>
               </div>
-              <p className="mt-3 max-w-sm text-xs text-[#696969] sm:text-sm">
+              <p className="mt-3 max-w-sm text-xs text-gray-text sm:text-sm">
                 {settings.footer_content ||
                   "Discover amazing restaurants and delicious food delivered straight to your doorstep."}
               </p>
-              <p className="mt-2 text-xs text-[#9C9C9C]">
+              <p className="mt-2 text-xs text-muted">
                 {settings.business_hours}
               </p>
 
               <div className="mt-6">
-                <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[#9C9C9C]">
+                <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted">
                   Follow Us
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -280,7 +279,7 @@ export default function FooterContent() {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`Foodiq on ${label}`}
-                      className="flex h-10 w-10 items-center justify-center rounded-full border border-[#E8E8E8] bg-white text-[#696969] transition-colors hover:border-[#E23744] hover:text-[#E23744] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E23744] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F8F8]"
+                      className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-gray-text transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-footer"
                     >
                       <Icon className="h-4 w-4" />
                     </a>
@@ -294,7 +293,7 @@ export default function FooterContent() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Download Foodiq on the App Store"
-                  className="flex items-center gap-2 rounded-xl border border-[#E8E8E8] bg-white px-4 py-2.5 text-[#1C1C1C] transition-colors hover:border-[#D4D4D4] hover:bg-[#FAFAFA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E23744] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F8F8]"
+                  className="flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-2.5 text-foreground transition-colors hover:border-border hover:bg-section focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-footer"
                 >
                   <Apple className="h-6 w-6 shrink-0" aria-hidden="true" />
                   <span className="flex flex-col text-left leading-none">
@@ -307,7 +306,7 @@ export default function FooterContent() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Get Foodiq on Google Play"
-                  className="flex items-center gap-2 rounded-xl border border-[#E8E8E8] bg-white px-4 py-2.5 text-[#1C1C1C] transition-colors hover:border-[#D4D4D4] hover:bg-[#FAFAFA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E23744] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F8F8]"
+                  className="flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-2.5 text-foreground transition-colors hover:border-border hover:bg-section focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-footer"
                 >
                   <Play
                     className="h-5 w-5 shrink-0 fill-current"
@@ -350,11 +349,11 @@ export default function FooterContent() {
             />
           </div>
 
-          <div className="mt-10 border-t border-[#E8E8E8] pt-8 lg:mt-12">
+          <div className="mt-10 border-t border-border pt-8 lg:mt-12">
             <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
               <div>
                 <h3 className={sectionTitleClass}>Newsletter</h3>
-                <p className="mb-4 text-xs text-[#696969] sm:text-sm">
+                <p className="mb-4 text-xs text-gray-text sm:text-sm">
                   Subscribe for exclusive offers, new restaurant launches, and
                   food inspiration.
                 </p>
@@ -382,13 +381,13 @@ export default function FooterContent() {
                       aria-describedby={
                         emailError ? "footer-newsletter-error" : undefined
                       }
-                      className="w-full rounded-xl border border-[#E8E8E8] bg-white px-4 py-2.5 text-sm text-[#1C1C1C] placeholder:text-[#9C9C9C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E23744]"
+                      className="w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     />
                     {emailError ? (
                       <p
                         id="footer-newsletter-error"
                         role="alert"
-                        className="mt-1 text-xs text-[#E23744]"
+                        className="mt-1 text-xs text-primary"
                       >
                         {emailError}
                       </p>
@@ -397,7 +396,7 @@ export default function FooterContent() {
                   <button
                     type="submit"
                     disabled={subscribing}
-                    className="shrink-0 rounded-xl bg-[#E23744] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#C81E32] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E23744] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F8F8] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="shrink-0 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-footer disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {subscribing ? "Subscribing…" : "Subscribe"}
                   </button>
@@ -414,7 +413,7 @@ export default function FooterContent() {
                       className={`inline-flex items-start gap-3 ${linkClass}`}
                     >
                       <Mail
-                        className="mt-0.5 h-4 w-4 shrink-0 text-[#E23744]"
+                        className="mt-0.5 h-4 w-4 shrink-0 text-primary"
                         aria-hidden="true"
                       />
                       <span suppressHydrationWarning>{settings.support_email}</span>
@@ -427,7 +426,7 @@ export default function FooterContent() {
                       className={`inline-flex items-start gap-3 ${linkClass}`}
                     >
                       <Phone
-                        className="mt-0.5 h-4 w-4 shrink-0 text-[#E23744]"
+                        className="mt-0.5 h-4 w-4 shrink-0 text-primary"
                         aria-hidden="true"
                       />
                       <span suppressHydrationWarning>{settings.support_phone}</span>
@@ -441,7 +440,7 @@ export default function FooterContent() {
                       className={`inline-flex items-start gap-3 ${linkClass}`}
                     >
                       <MapPin
-                        className="mt-0.5 h-4 w-4 shrink-0 text-[#E23744]"
+                        className="mt-0.5 h-4 w-4 shrink-0 text-primary"
                         aria-hidden="true"
                       />
                       <span suppressHydrationWarning>{settings.office_address}</span>
@@ -452,7 +451,7 @@ export default function FooterContent() {
             </div>
           </div>
 
-          <p className="mt-10 border-t border-[#E8E8E8] pt-6 text-center text-xs text-[#9C9C9C]">
+          <p className="mt-10 border-t border-border pt-6 text-center text-xs text-muted">
             &copy; {year} Foodiq. All Rights Reserved.
           </p>
         </div>
@@ -463,7 +462,7 @@ export default function FooterContent() {
           type="button"
           onClick={scrollToTop}
           aria-label="Back to top"
-          className="fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-[#E23744] text-white shadow-lg transition-all hover:bg-[#C81E32] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E23744] focus-visible:ring-offset-2"
+          className="fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-all hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           <ArrowUp className="h-5 w-5" aria-hidden="true" />
         </button>

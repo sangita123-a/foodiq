@@ -57,15 +57,15 @@ export default function ContactInfo() {
   ].filter((s) => s.url);
 
   return (
-    <div className="flex h-full flex-col justify-between rounded-3xl border border-[#E5E7EB] bg-white p-8 shadow-sm md:p-10">
+    <div className="flex h-full flex-col justify-between rounded-3xl border border-border bg-white p-8 shadow-sm md:p-10">
       <div>
-        <h2 className="mb-8 text-2xl font-bold text-[#222222]">Contact Information</h2>
+        <h2 className="mb-8 text-2xl font-bold text-foreground">Contact Information</h2>
 
         <div className="space-y-6">
           {infoCards.map((info, idx) => (
             <div key={idx} className="flex items-start gap-5">
-              <div className="mt-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#E5E7EB] bg-[#F8F9FA]">
-                <info.icon className="h-5 w-5 text-[#E23744]" />
+              <div className="mt-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-[#F8F9FA]">
+                <info.icon className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="mb-1 text-xs font-bold uppercase tracking-widest text-[#555555]">
@@ -76,12 +76,12 @@ export default function ContactInfo() {
                     href={info.href}
                     target={info.title === "Office Address" ? "_blank" : undefined}
                     rel="noopener noreferrer"
-                    className="font-bold leading-relaxed text-[#222222] transition hover:text-[#E23744]"
+                    className="font-bold leading-relaxed text-foreground transition hover:text-primary"
                   >
                     {info.value}
                   </a>
                 ) : (
-                  <p className="font-bold leading-relaxed text-[#222222]">{info.value}</p>
+                  <p className="font-bold leading-relaxed text-foreground">{info.value}</p>
                 )}
               </div>
             </div>
@@ -89,13 +89,13 @@ export default function ContactInfo() {
         </div>
 
         {contact.whatsapp_number && (
-          <div className="mt-8 rounded-xl border border-[#E5E7EB] bg-[#F0FDF4] p-4">
+          <div className="mt-8 rounded-xl border border-border bg-[#F0FDF4] p-4">
             <p className="text-xs font-bold uppercase tracking-widest text-[#555555]">WhatsApp</p>
             <a
               href={`https://wa.me/${contact.whatsapp_number.replace(/\D/g, "")}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-1 inline-block font-bold text-[#222222] hover:text-[#E23744]"
+              className="mt-1 inline-block font-bold text-foreground hover:text-primary"
             >
               {contact.whatsapp_number}
             </a>
@@ -104,8 +104,8 @@ export default function ContactInfo() {
       </div>
 
       {socials.length > 0 && (
-        <div className="mt-12 border-t border-[#E5E7EB] pt-8">
-          <h3 className="mb-4 font-bold text-[#222222]">Connect with us</h3>
+        <div className="mt-12 border-t border-border pt-8">
+          <h3 className="mb-4 font-bold text-foreground">Connect with us</h3>
           <div className="flex flex-wrap gap-3">
             {socials.map((s) => (
               <a
@@ -113,7 +113,7 @@ export default function ContactInfo() {
                 href={s.url!}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full border border-[#E5E7EB] bg-[#F8F9FA] px-4 py-2 text-xs font-bold text-[#555555] transition hover:border-[#E23744] hover:text-[#E23744]"
+                className="rounded-full border border-border bg-[#F8F9FA] px-4 py-2 text-xs font-bold text-[#555555] transition hover:border-primary hover:text-primary"
               >
                 {s.label}
               </a>

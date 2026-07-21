@@ -51,9 +51,9 @@ export default function CuisineCard({
           opacity: { duration: 0.4, delay: (index % 6) * 0.04 },
           y: { duration: 0.3, ease: "easeOut" },
         }}
-        className="group flex h-[232px] flex-col items-center overflow-hidden rounded-[18px] border border-[#EAEAEA] bg-white px-3.5 py-4 text-center shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-[border-color,box-shadow,background-color] duration-300 hover:border-[#D4D4D4] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
+        className="group flex h-[232px] flex-col items-center overflow-hidden rounded-[18px] border border-border bg-white px-3.5 py-4 text-center shadow-card transition-[border-color,box-shadow,background-color] duration-300 hover:border-border hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
       >
-        <div className="relative mb-3 h-[76px] w-[76px] shrink-0 overflow-hidden rounded-full bg-[#F8FAFC] shadow-[0_6px_18px_rgba(0,0,0,0.35)] ring-2 ring-[#E5E7EB]">
+        <div className="relative mb-3 h-[76px] w-[76px] shrink-0 overflow-hidden rounded-full bg-section shadow-[0_6px_18px_rgba(0,0,0,0.35)] ring-2 ring-[#E5E7EB]">
           <SafeImage
             src={image}
             fallback={fallbackImage}
@@ -62,17 +62,17 @@ export default function CuisineCard({
           />
         </div>
 
-        <h3 className="line-clamp-1 text-base font-bold leading-5 tracking-[-0.02em] text-[#1C1C1C] transition-colors duration-300 group-hover:text-[#696969]">
+        <h3 className="line-clamp-1 text-base font-bold leading-5 tracking-[-0.02em] text-foreground transition-colors duration-300 group-hover:text-gray-text">
           {cuisine.name}
         </h3>
         <p className="mt-1 text-xs font-medium text-[#9CA3AF]">
           {restaurantCount} {restaurantCount === 1 ? "Restaurant" : "Restaurants"}
         </p>
-        <p className="mt-2 line-clamp-2 text-xs leading-[18px] text-[#6B7280]">
+        <p className="mt-2 line-clamp-2 text-xs leading-[18px] text-gray-text">
           {cuisine.description || fallbackDescription}
         </p>
 
-        <span className="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-[#696969] transition-colors duration-300 group-hover:text-[#9C9C9C]">
+        <span className="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-gray-text transition-colors duration-300 group-hover:text-muted">
           Explore
           <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
         </span>

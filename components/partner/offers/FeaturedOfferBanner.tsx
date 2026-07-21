@@ -21,7 +21,7 @@ export default function FeaturedOfferBanner({ offer }: FeaturedOfferBannerProps)
       className="relative w-full h-64 md:h-80 rounded-3xl overflow-hidden mb-8 group"
     >
       {/* Background Image */}
-      <div className="absolute inset-0 bg-[#F8FAFC]">
+      <div className="absolute inset-0 bg-section">
         {offer.bannerImage ? (
           <SafeImage
             src={offer.bannerImage}
@@ -30,7 +30,7 @@ export default function FeaturedOfferBanner({ offer }: FeaturedOfferBannerProps)
             className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-r from-[#FFFFFF] to-[#E23744]/20"></div>
+          <div className="w-full h-full bg-gradient-to-r from-[#FFFFFF] to-primary/20"></div>
         )}
       </div>
 
@@ -41,28 +41,28 @@ export default function FeaturedOfferBanner({ offer }: FeaturedOfferBannerProps)
       {/* Content */}
       <div className="absolute inset-0 p-8 md:p-12 flex flex-col justify-end">
         <div className="flex items-center gap-2 mb-4">
-          <span className="bg-[#E23744] text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex items-center gap-1">
+          <span className="bg-primary text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex items-center gap-1">
             <Sparkles className="w-3 h-3" /> Featured Campaign
           </span>
-          <span className="bg-[#F8FAFC] backdrop-blur-md text-[#111827] text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full border border-[#E5E7EB]">
+          <span className="bg-section backdrop-blur-md text-foreground text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full border border-border">
             {offer.type}
           </span>
         </div>
 
-        <h2 className="text-3xl md:text-5xl font-black text-[#111827] mb-2 max-w-2xl leading-tight">
+        <h2 className="text-3xl md:text-5xl font-black text-foreground mb-2 max-w-2xl leading-tight">
           {offer.name}
         </h2>
-        <p className="text-[#6B7280] max-w-xl mb-6 line-clamp-2">
+        <p className="text-gray-text max-w-xl mb-6 line-clamp-2">
           {offer.description}
         </p>
 
         <div className="flex items-center gap-4">
-          <div className="bg-[#F8FAFC] backdrop-blur-md border border-[#E5E7EB] rounded-xl px-5 py-3 flex flex-col">
-            <span className="text-[10px] text-[#6B7280] font-bold uppercase tracking-wider">Coupon Code</span>
-            <span className="text-xl font-black text-[#111827] uppercase tracking-widest">{offer.code}</span>
+          <div className="bg-section backdrop-blur-md border border-border rounded-xl px-5 py-3 flex flex-col">
+            <span className="text-[10px] text-gray-text font-bold uppercase tracking-wider">Coupon Code</span>
+            <span className="text-xl font-black text-foreground uppercase tracking-widest">{offer.code}</span>
           </div>
 
-          <button className="bg-[#E23744] hover:bg-[#C81E34] text-white px-6 py-4 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg shadow-[#E23744]/20 h-full">
+          <button className="bg-primary hover:bg-primary-hover text-white px-6 py-4 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg shadow-primary/20 h-full">
             View Analytics <ArrowRight className="w-4 h-4" />
           </button>
         </div>

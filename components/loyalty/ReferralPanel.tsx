@@ -35,23 +35,23 @@ export default function ReferralPanel({ code, rewardPoints, history = [] }: Prop
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
+    <div className="bg-white rounded-3xl border border-border p-6">
       <div className="flex items-center gap-2 mb-4">
-        <Users className="w-5 h-5 text-[#E23744]" />
-        <h2 className="text-lg font-black text-[#111827]">Refer & Earn</h2>
+        <Users className="w-5 h-5 text-primary" />
+        <h2 className="text-lg font-black text-foreground">Refer & Earn</h2>
       </div>
-      <p className="text-sm text-[#6B7280] mb-4">
+      <p className="text-sm text-gray-text mb-4">
         Share your code. You earn <strong>{rewardPoints} points</strong> and your friend gets a welcome bonus.
       </p>
 
       <div className="flex gap-2 mb-6">
-        <div className="flex-1 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 font-mono font-black text-[#111827] tracking-widest">
+        <div className="flex-1 bg-section border border-border rounded-xl px-4 py-3 font-mono font-black text-foreground tracking-widest">
           {code}
         </div>
-        <button type="button" onClick={copy} className="px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white hover:bg-[#F8FAFC]">
+        <button type="button" onClick={copy} className="px-4 py-3 rounded-xl border border-border bg-white hover:bg-section">
           <Copy className="w-4 h-4" />
         </button>
-        <button type="button" onClick={share} className="px-4 py-3 rounded-xl bg-[#E23744] text-white">
+        <button type="button" onClick={share} className="px-4 py-3 rounded-xl bg-primary text-white">
           <Share2 className="w-4 h-4" />
         </button>
       </div>
@@ -61,9 +61,9 @@ export default function ReferralPanel({ code, rewardPoints, history = [] }: Prop
           <p className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF] mb-3">Referral History</p>
           <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
             {history.map((h, i) => (
-              <div key={i} className="flex justify-between text-sm border border-[#E5E7EB] rounded-xl px-3 py-2">
-                <span className="font-bold text-[#111827]">{h.referee_name || "New user"}</span>
-                <span className="text-[#E23744] font-bold">+{h.points_awarded || rewardPoints} pts</span>
+              <div key={i} className="flex justify-between text-sm border border-border rounded-xl px-3 py-2">
+                <span className="font-bold text-foreground">{h.referee_name || "New user"}</span>
+                <span className="text-primary font-bold">+{h.points_awarded || rewardPoints} pts</span>
               </div>
             ))}
           </div>

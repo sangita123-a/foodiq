@@ -84,33 +84,33 @@ export default function AdminReportsPage() {
     <AdminShell title="Reports">
       <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-[#111827]">Reports</h1>
-          <p className="text-[#6B7280]">Generate and export sales, order, customer, delivery, and payment reports.</p>
+          <h1 className="text-3xl font-black text-foreground">Reports</h1>
+          <p className="text-gray-text">Generate and export sales, order, customer, delivery, and payment reports.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => exportReport("csv")}
-            className="inline-flex items-center gap-2 bg-white border border-[#E5E7EB] px-4 py-2.5 rounded-xl text-sm font-bold text-[#111827]"
+            className="inline-flex items-center gap-2 bg-white border border-border px-4 py-2.5 rounded-xl text-sm font-bold text-foreground"
           >
             <FileSpreadsheet className="w-4 h-4" /> Export Excel (CSV)
           </button>
           <button
             type="button"
             onClick={() => exportReport("json")}
-            className="inline-flex items-center gap-2 bg-[#E23744] text-white px-4 py-2.5 rounded-xl text-sm font-bold"
+            className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-xl text-sm font-bold"
           >
             <Download className="w-4 h-4" /> Export PDF/JSON
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6 mb-6">
+      <div className="bg-white rounded-3xl border border-border p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <select
             value={type}
             onChange={(e) => setType(e.target.value)}
-            className="border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+            className="border border-border rounded-xl px-4 py-3 text-sm"
           >
             {REPORT_TYPES.map((r) => (
               <option key={r.id} value={r.id}>{r.label}</option>
@@ -120,13 +120,13 @@ export default function AdminReportsPage() {
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+            className="border border-border rounded-xl px-4 py-3 text-sm"
           />
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+            className="border border-border rounded-xl px-4 py-3 text-sm"
           />
           <button
             type="button"
@@ -143,10 +143,10 @@ export default function AdminReportsPage() {
         <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
       )}
 
-      <div className="bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden">
+      <div className="bg-white rounded-3xl border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[600px] text-left">
-            <thead className="bg-[#F8FAFC] border-b border-[#E5E7EB]">
+            <thead className="bg-section border-b border-border">
               <tr>
                 {columns.map((col) => (
                   <th key={col} className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">
@@ -158,15 +158,15 @@ export default function AdminReportsPage() {
             <tbody>
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={Math.max(columns.length, 1)} className="p-8 text-center text-sm text-[#6B7280]">
+                  <td colSpan={Math.max(columns.length, 1)} className="p-8 text-center text-sm text-gray-text">
                     Select a report type and click Generate Report.
                   </td>
                 </tr>
               )}
               {rows.map((row, i) => (
-                <tr key={i} className="border-b border-[#E5E7EB] last:border-0">
+                <tr key={i} className="border-b border-border last:border-0">
                   {columns.map((col) => (
-                    <td key={col} className="p-4 text-sm text-[#111827]">
+                    <td key={col} className="p-4 text-sm text-foreground">
                       {formatCell(col, row[col])}
                     </td>
                   ))}

@@ -64,23 +64,22 @@ export default function Navbar() {
     <>
       <nav
         aria-label="Main navigation"
-        className={`sticky top-0 left-0 w-full h-[64px] md:h-[72px] lg:h-[80px] z-50 flex items-center justify-between px-3 sm:px-6 lg:px-16 bg-white/95 backdrop-blur-xl border-b border-[#ECECEC] shadow-[0_2px_12px_rgba(0,0,0,0.04)] supports-[backdrop-filter]:bg-white/90 safe-top ${
+        className={`sticky top-0 left-0 w-full h-[64px] md:h-[72px] lg:h-[80px] z-50 flex items-center justify-between px-3 sm:px-6 lg:px-16 bg-white/95 backdrop-blur-xl border-b border-border shadow-nav supports-[backdrop-filter]:bg-white/90 safe-top ${
           reducedMotion ? "" : "nav-enter-motion"
         }`}
       >
         <div className="flex items-center gap-2 md:gap-3 min-w-0">
           <button
             type="button"
-            className="md:hidden touch-target flex items-center justify-center text-[#1C1C1C] p-2 rounded-xl border border-[#ECECEC] bg-white hover:bg-[#FAFAFA] transition-colors shrink-0"
+            className="md:hidden touch-target flex items-center justify-center text-foreground p-2 rounded-xl border border-border bg-white hover:bg-section transition-colors shrink-0"
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
           >
             <Menu className="w-5 h-5" />
           </button>
 
-          <Link href="/" className="touch-target flex items-center text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-[-0.045em] transition-opacity hover:opacity-80 truncate py-1">
-            <span className="text-[#1C1C1C]">Food</span>
-            <span className="text-[var(--color-primary)]">iq</span>
+          <Link href="/" className="touch-target flex items-center text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-[-0.045em] text-foreground transition-opacity hover:opacity-80 truncate py-1">
+            Foodiq
           </Link>
         </div>
 
@@ -94,12 +93,12 @@ export default function Navbar() {
                 href={link.href}
                 aria-current={active ? "page" : undefined}
                 className={`font-medium text-sm relative py-2 transition-colors ${
-                  active ? "text-[var(--color-primary)]" : "text-[#696969] hover:text-[#1C1C1C]"
+                  active ? "text-foreground font-semibold" : "text-gray-text hover:text-foreground"
                 }`}
               >
                 {link.label}
                 {active && (
-                  <span className="absolute bottom-0 left-0 w-full h-0.5 rounded-full bg-[var(--color-primary)]" />
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 rounded-full bg-foreground" />
                 )}
               </Link>
             );
@@ -116,7 +115,7 @@ export default function Navbar() {
                 href={link.href}
                 aria-current={active ? "page" : undefined}
                 className={`font-medium text-sm relative py-2.5 px-1 touch-target inline-flex items-center transition-colors ${
-                  active ? "text-[var(--color-primary)]" : "text-[#696969] hover:text-[#1C1C1C]"
+                  active ? "text-foreground font-semibold" : "text-gray-text hover:text-foreground"
                 }`}
               >
                 {link.label}
@@ -129,7 +128,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center space-x-2 lg:space-x-3 shrink-0">
           <Link
             href="/search"
-            className="touch-target h-10 w-10 rounded-xl border border-[#EAEAEA] bg-white hover:border-[#D4D4D4] hover:bg-[#FAFAFA] text-[#1C1C1C] flex items-center justify-center transition-all"
+            className="touch-target h-10 w-10 rounded-xl border border-border bg-white hover:border-border hover:bg-section text-foreground flex items-center justify-center transition-all"
             aria-label="Search"
           >
             <Search className="w-4 h-4" />
@@ -139,7 +138,7 @@ export default function Navbar() {
             <>
               <Link
                 href="/cart"
-                className="relative touch-target h-10 w-10 rounded-xl border border-[#EAEAEA] bg-white hover:border-[#D4D4D4] hover:bg-[#FAFAFA] text-[#1C1C1C] flex items-center justify-center transition-all"
+                className="relative touch-target h-10 w-10 rounded-xl border border-border bg-white hover:border-border hover:bg-section text-foreground flex items-center justify-center transition-all"
                 aria-label={`Cart with ${cartCount} items`}
               >
                 <ShoppingCart className="w-4 h-4" />
@@ -162,20 +161,20 @@ export default function Navbar() {
             Order Online
           </Link>
 
-          <div className="hidden lg:block h-6 w-px bg-[#EAEAEA] mx-1" />
+          <div className="hidden lg:block h-6 w-px bg-border mx-1" />
 
           {user ? (
             <div className="flex items-center space-x-2 lg:space-x-3">
               <Link
                 href="/profile"
-                className="text-[#1C1C1C] hover:text-[var(--color-primary)] font-medium text-sm transition-colors max-w-[100px] lg:max-w-[120px] truncate"
+                className="text-foreground hover:text-foreground font-medium text-sm transition-colors max-w-[100px] lg:max-w-[120px] truncate"
               >
                 {user.full_name}
               </Link>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="h-10 px-4 lg:px-5 rounded-xl border border-[#EAEAEA] hover:border-[#D4D4D4] hover:bg-[#FAFAFA] text-[#1C1C1C] font-medium text-sm transition-all"
+                className="h-10 px-4 lg:px-5 rounded-xl border border-border hover:border-border hover:bg-section text-foreground font-medium text-sm transition-all"
               >
                 Logout
               </button>
@@ -194,7 +193,7 @@ export default function Navbar() {
         <div className="flex md:hidden items-center gap-2 shrink-0">
           <Link
             href="/search"
-            className="touch-target flex h-11 w-11 items-center justify-center rounded-xl border border-[#EAEAEA] bg-white text-[#1C1C1C]"
+            className="touch-target flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-foreground"
             aria-label="Search"
           >
             <Search className="w-4 h-4" />
@@ -202,7 +201,7 @@ export default function Navbar() {
           {isLoggedIn && (
             <Link
               href="/cart"
-              className="relative touch-target flex h-11 w-11 items-center justify-center rounded-xl border border-[#ECECEC] bg-white text-[#1C1C1C]"
+              className="relative touch-target flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-foreground"
               aria-label={`Cart with ${cartCount} items`}
             >
               <ShoppingCart className="w-4 h-4" />
@@ -227,7 +226,7 @@ export default function Navbar() {
                 onClick={() => setMobileOpen(false)}
                 aria-current={link.isActive(pathname) ? "page" : undefined}
                 className={`touch-target flex items-center px-4 py-3 rounded-xl font-medium text-sm ${
-                  link.isActive(pathname) ? "bg-[#E23744]/10 text-[var(--color-primary)]" : "text-[#696969] hover:bg-[#FAFAFA] hover:text-[#1C1C1C]"
+                  link.isActive(pathname) ? "bg-section text-foreground font-semibold" : "text-gray-text hover:bg-section hover:text-foreground"
                 }`}
               >
                 {link.label}
@@ -236,19 +235,19 @@ export default function Navbar() {
 
             {isLoggedIn && (
               <>
-                <Link href="/my-orders" onClick={() => setMobileOpen(false)} className="touch-target flex items-center px-4 py-3 rounded-xl text-[#696969] hover:bg-[#FAFAFA] font-medium text-sm">
+                <Link href="/my-orders" onClick={() => setMobileOpen(false)} className="touch-target flex items-center px-4 py-3 rounded-xl text-gray-text hover:bg-section font-medium text-sm">
                   My Orders
                 </Link>
-                <Link href="/favorites" onClick={() => setMobileOpen(false)} className="touch-target flex items-center px-4 py-3 rounded-xl text-[#696969] hover:bg-[#FAFAFA] font-medium text-sm">
+                <Link href="/favorites" onClick={() => setMobileOpen(false)} className="touch-target flex items-center px-4 py-3 rounded-xl text-gray-text hover:bg-section font-medium text-sm">
                   Favorites
                 </Link>
-                <Link href="/profile" onClick={() => setMobileOpen(false)} className="touch-target flex items-center px-4 py-3 rounded-xl text-[#696969] hover:bg-[#FAFAFA] font-medium text-sm">
+                <Link href="/profile" onClick={() => setMobileOpen(false)} className="touch-target flex items-center px-4 py-3 rounded-xl text-gray-text hover:bg-section font-medium text-sm">
                   Profile
                 </Link>
               </>
             )}
 
-            <div className="border-t border-[#EAEAEA] mt-3 pt-3 space-y-2">
+            <div className="border-t border-border mt-3 pt-3 space-y-2">
               <Link
                 href="/order-online"
                 onClick={() => setMobileOpen(false)}
@@ -260,7 +259,7 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full touch-target px-4 py-3 rounded-xl bg-[#FAFAFA] text-[#1C1C1C] font-medium text-sm"
+                  className="w-full touch-target px-4 py-3 rounded-xl bg-section text-foreground font-medium text-sm"
                 >
                   Logout
                 </button>

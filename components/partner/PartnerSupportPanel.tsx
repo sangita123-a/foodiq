@@ -49,20 +49,20 @@ export default function PartnerSupportPanel() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F8FAFC] pt-[90px]">
+    <main className="min-h-screen bg-section pt-[90px]">
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-black text-[#111827]">Restaurant Complaints</h1>
-            <p className="text-sm text-[#6B7280]">Respond to customer complaints about your restaurant.</p>
+            <h1 className="text-2xl font-black text-foreground">Restaurant Complaints</h1>
+            <p className="text-sm text-gray-text">Respond to customer complaints about your restaurant.</p>
           </div>
-          <Link href="/partner/dashboard" className="text-sm font-bold text-[#E23744]">
+          <Link href="/partner/dashboard" className="text-sm font-bold text-primary">
             ← Dashboard
           </Link>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] divide-y max-h-[70vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl border border-border divide-y max-h-[70vh] overflow-y-auto">
             {(tickets as SupportTicket[]).length === 0 ? (
               <p className="p-6 text-sm text-[#9CA3AF]">No restaurant complaints.</p>
             ) : (
@@ -71,7 +71,7 @@ export default function PartnerSupportPanel() {
                   key={t.id}
                   type="button"
                   onClick={() => open(t.id)}
-                  className={`w-full text-left p-4 hover:bg-[#F8FAFC] ${selectedId === t.id ? "bg-[#E23744]/5" : ""}`}
+                  className={`w-full text-left p-4 hover:bg-section ${selectedId === t.id ? "bg-primary/5" : ""}`}
                 >
                   <p className="font-bold text-sm">{t.subject}</p>
                   <p className="text-xs text-[#9CA3AF]">
@@ -85,7 +85,7 @@ export default function PartnerSupportPanel() {
             )}
           </div>
 
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 min-h-[360px]">
+          <div className="bg-white rounded-2xl border border-border p-5 min-h-[360px]">
             {!detail ? (
               <div className="flex flex-col items-center justify-center h-full text-[#9CA3AF]">
                 <MessageSquare className="w-10 h-10 mb-2" />
@@ -97,7 +97,7 @@ export default function PartnerSupportPanel() {
                 <p className="text-xs text-[#9CA3AF] mb-4">{ticketDisplayId(detail.ticket)}</p>
                 <div className="space-y-2 max-h-52 overflow-y-auto mb-4">
                   {detail.messages.map((m) => (
-                    <div key={m.id} className="text-sm bg-[#F8FAFC] rounded-xl p-3">
+                    <div key={m.id} className="text-sm bg-section rounded-xl p-3">
                       <p className="text-[10px] font-bold text-[#9CA3AF]">{m.sender_role}</p>
                       <p>{m.message}</p>
                     </div>
@@ -109,14 +109,14 @@ export default function PartnerSupportPanel() {
                       value={reply}
                       onChange={(e) => setReply(e.target.value)}
                       rows={2}
-                      className="flex-1 border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm"
+                      className="flex-1 border border-border rounded-xl px-3 py-2 text-sm"
                       placeholder="Your response..."
                     />
                     <button
                       type="button"
                       onClick={send}
                       disabled={busy}
-                      className="bg-[#E23744] text-white px-4 rounded-xl"
+                      className="bg-primary text-white px-4 rounded-xl"
                     >
                       <Send className="w-4 h-4" />
                     </button>

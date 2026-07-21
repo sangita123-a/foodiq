@@ -38,24 +38,24 @@ export default function DeliveryNotificationsPage() {
         <button
           type="button"
           onClick={markAll}
-          className="inline-flex items-center gap-2 border border-[#E5E7EB] bg-white px-4 py-2 rounded-xl text-sm font-bold"
+          className="inline-flex items-center gap-2 border border-border bg-white px-4 py-2 rounded-xl text-sm font-bold"
         >
           <CheckCheck className="w-4 h-4" /> Mark all read
         </button>
       </div>
 
-      <section className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
+      <section className="bg-white border border-border rounded-2xl overflow-hidden">
         {isLoading && !data && (
-          <p className="p-6 text-sm text-[#6B7280]">Loading notifications...</p>
+          <p className="p-6 text-sm text-gray-text">Loading notifications...</p>
         )}
         <div className="divide-y divide-[#F3F4F6]">
           {(data || []).map((n) => (
-            <div key={n.id} className={`px-5 py-4 flex gap-3 ${!n.is_read ? "bg-[#E23744]/5" : ""}`}>
+            <div key={n.id} className={`px-5 py-4 flex gap-3 ${!n.is_read ? "bg-primary/5" : ""}`}>
               <div className="flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-bold text-[#111827]">{n.title}</p>
-                    <p className="text-sm text-[#6B7280] mt-1">
+                    <p className="font-bold text-foreground">{n.title}</p>
+                    <p className="text-sm text-gray-text mt-1">
                       {cleanNotificationMessage(n.message)}
                     </p>
                   </div>
@@ -74,7 +74,7 @@ export default function DeliveryNotificationsPage() {
             </div>
           ))}
           {!data?.length && !isLoading && (
-            <p className="p-8 text-sm text-[#6B7280] text-center">
+            <p className="p-8 text-sm text-gray-text text-center">
               No notifications yet. New delivery requests and payment alerts will appear here.
             </p>
           )}

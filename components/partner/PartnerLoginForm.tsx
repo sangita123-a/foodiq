@@ -48,19 +48,19 @@ export default function PartnerLoginForm() {
   };
 
   return (
-    <div className="w-full h-full min-h-[50vh] lg:min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6 lg:p-16 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-[#E23744]/10 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#E23744]/5 rounded-full blur-[100px] pointer-events-none"></div>
+    <div className="w-full h-full min-h-[50vh] lg:min-h-screen bg-section flex items-center justify-center p-6 lg:p-16 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md bg-[#FFFFFF]/80 backdrop-blur-xl border border-[#E5E7EB] rounded-[24px] p-8 lg:p-10 shadow-2xl relative z-10"
+        className="w-full max-w-md bg-background/80 backdrop-blur-xl border border-border rounded-[24px] p-8 lg:p-10 shadow-2xl relative z-10"
       >
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-black text-[#111827] mb-2">Partner Portal</h2>
-          <p className="text-[#6B7280]">Sign in to manage your restaurant.</p>
+          <h2 className="text-3xl font-black text-foreground mb-2">Partner Portal</h2>
+          <p className="text-gray-text">Sign in to manage your restaurant.</p>
         </div>
 
         {error && (
@@ -71,7 +71,7 @@ export default function PartnerLoginForm() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Restaurant Email</label>
+            <label className="block text-sm font-bold text-gray-text mb-2">Restaurant Email</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Mail className="h-5 w-5 text-[#9CA3AF]" />
@@ -82,15 +82,15 @@ export default function PartnerLoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="partner@restaurant.com"
                 required
-                className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-[#E23744] focus:ring-1 focus:ring-[#E23744] transition-colors"
+                className="w-full bg-section text-foreground border border-border rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
               />
             </div>
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-bold text-[#6B7280]">Password</label>
-              <Link href="/forgot-password" className="text-xs text-[#E23744] hover:text-[#C81E34] font-bold transition-colors">
+              <label className="block text-sm font-bold text-gray-text">Password</label>
+              <Link href="/forgot-password" className="text-xs text-primary hover:text-[var(--color-primary-hover)] font-bold transition-colors">
                 Forgot Password?
               </Link>
             </div>
@@ -104,7 +104,7 @@ export default function PartnerLoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-[#E23744] focus:ring-1 focus:ring-[#E23744] transition-colors"
+                className="w-full bg-section text-foreground border border-border rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
               />
             </div>
           </div>
@@ -113,9 +113,9 @@ export default function PartnerLoginForm() {
             <input
               type="checkbox"
               id="remember"
-              className="w-4 h-4 rounded border-[#E5E7EB] text-[#E23744] focus:ring-[#E23744] focus:ring-offset-[#FFFFFF] bg-[#F8FAFC]"
+              className="w-4 h-4 rounded border-border text-primary focus:ring-primary focus:ring-offset-[#FFFFFF] bg-section"
             />
-            <label htmlFor="remember" className="ml-2 block text-sm text-[#6B7280] cursor-pointer">
+            <label htmlFor="remember" className="ml-2 block text-sm text-gray-text cursor-pointer">
               Remember me on this device
             </label>
           </div>
@@ -123,7 +123,7 @@ export default function PartnerLoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#E23744] hover:bg-[#C81E34] text-white py-4 rounded-xl font-black transition-all shadow-[0_0_20px_rgba(226, 55, 68,0.2)] hover:shadow-[0_0_30px_rgba(226, 55, 68,0.4)] flex items-center justify-center gap-2 group disabled:opacity-70"
+            className="w-full bg-primary hover:bg-primary-hover text-white py-4 rounded-xl font-black transition-all shadow-[0_0_20px_rgba(226, 55, 68,0.2)] hover:shadow-[0_0_30px_rgba(226, 55, 68,0.4)] flex items-center justify-center gap-2 group disabled:opacity-70"
           >
             {loading ? "Signing in..." : "Sign In"}
             {!loading && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
@@ -131,23 +131,23 @@ export default function PartnerLoginForm() {
         </form>
 
         <div className="mt-8 flex items-center justify-center space-x-4">
-          <div className="h-px bg-[#F8FAFC] w-full"></div>
+          <div className="h-px bg-section w-full"></div>
           <span className="text-[#9CA3AF] text-sm font-bold">OR</span>
-          <div className="h-px bg-[#F8FAFC] w-full"></div>
+          <div className="h-px bg-section w-full"></div>
         </div>
 
         <div className="mt-8">
           <button
             type="button"
-            className="w-full bg-white hover:bg-[#F8FAFC] text-black py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-3"
+            className="w-full bg-white hover:bg-section text-black py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-3"
           >
             Continue with Google
           </button>
         </div>
 
-        <p className="text-center text-[#6B7280] mt-8 text-sm">
+        <p className="text-center text-gray-text mt-8 text-sm">
           Customer account?{" "}
-          <Link href="/login" className="text-[#111827] font-bold hover:text-[#E23744] transition-colors">
+          <Link href="/login" className="text-foreground font-bold hover:text-primary transition-colors">
             Customer Login
           </Link>
         </p>

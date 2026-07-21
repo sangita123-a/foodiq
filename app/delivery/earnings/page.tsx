@@ -26,21 +26,21 @@ export default function DeliveryEarningsPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {cards.map((card) => (
-          <div key={card.label} className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
+          <div key={card.label} className="bg-white border border-border rounded-2xl p-5">
             <p className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF] mb-2">
               {card.label}
             </p>
-            <p className="text-2xl font-black text-[#111827]">{card.value}</p>
+            <p className="text-2xl font-black text-foreground">{card.value}</p>
           </div>
         ))}
       </div>
 
-      <section className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#E5E7EB]">
-          <h2 className="text-lg font-black text-[#111827]">Delivery History</h2>
+      <section className="bg-white border border-border rounded-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-border">
+          <h2 className="text-lg font-black text-foreground">Delivery History</h2>
         </div>
         {isLoading && !data && (
-          <p className="p-6 text-sm text-[#6B7280]">Loading history...</p>
+          <p className="p-6 text-sm text-gray-text">Loading history...</p>
         )}
         <div className="divide-y divide-[#F3F4F6]">
           {(data?.history || []).map((row) => (
@@ -49,15 +49,15 @@ export default function DeliveryEarningsPage() {
               className="px-5 py-4 flex flex-wrap items-center justify-between gap-3"
             >
               <div>
-                <p className="font-bold text-[#111827]">
+                <p className="font-bold text-foreground">
                   {row.restaurant_name || `Order #${row.order_id.slice(0, 8)}`}
                 </p>
-                <p className="text-xs text-[#6B7280] mt-1">
+                <p className="text-xs text-gray-text mt-1">
                   {row.note || "Delivery fee"} · {formatRelativeTime(row.earned_at)}
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-black text-[#111827]">{formatCurrency(Number(row.amount))}</p>
+                <p className="font-black text-foreground">{formatCurrency(Number(row.amount))}</p>
                 {Number(row.incentive) > 0 && (
                   <p className="text-xs font-bold text-emerald-600">
                     +{formatCurrency(Number(row.incentive))} incentive
@@ -67,7 +67,7 @@ export default function DeliveryEarningsPage() {
             </div>
           ))}
           {!data?.history?.length && !isLoading && (
-            <p className="p-8 text-sm text-[#6B7280] text-center">
+            <p className="p-8 text-sm text-gray-text text-center">
               Complete deliveries to see earnings here.
             </p>
           )}

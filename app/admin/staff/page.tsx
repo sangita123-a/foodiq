@@ -67,8 +67,8 @@ export default function AdminStaffPage() {
   return (
     <AdminShell title="Admin Staff">
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-[#111827]">Admin Staff Management</h1>
-        <p className="text-[#6B7280]">Create and manage platform admin users with role-based access.</p>
+        <h1 className="text-3xl font-black text-foreground">Admin Staff Management</h1>
+        <p className="text-gray-text">Create and manage platform admin users with role-based access.</p>
       </div>
 
       {msg && (
@@ -78,14 +78,14 @@ export default function AdminStaffPage() {
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <form onSubmit={create} className="bg-white rounded-3xl border border-[#E5E7EB] p-6 space-y-4">
-          <h2 className="text-lg font-black text-[#111827]">Add Admin User</h2>
+        <form onSubmit={create} className="bg-white rounded-3xl border border-border p-6 space-y-4">
+          <h2 className="text-lg font-black text-foreground">Add Admin User</h2>
           <input
             value={form.full_name}
             onChange={(e) => setForm({ ...form, full_name: e.target.value })}
             placeholder="Full name"
             required
-            className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+            className="w-full border border-border rounded-xl px-4 py-3 text-sm"
           />
           <input
             type="email"
@@ -93,7 +93,7 @@ export default function AdminStaffPage() {
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             placeholder="Email"
             required
-            className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+            className="w-full border border-border rounded-xl px-4 py-3 text-sm"
           />
           <input
             type="password"
@@ -101,33 +101,33 @@ export default function AdminStaffPage() {
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             placeholder="Password"
             required
-            className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+            className="w-full border border-border rounded-xl px-4 py-3 text-sm"
           />
           <input
             value={form.phone_number}
             onChange={(e) => setForm({ ...form, phone_number: e.target.value })}
             placeholder="Phone (optional)"
-            className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+            className="w-full border border-border rounded-xl px-4 py-3 text-sm"
           />
           <select
             value={form.admin_role}
             onChange={(e) => setForm({ ...form, admin_role: e.target.value as AdminRole })}
-            className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+            className="w-full border border-border rounded-xl px-4 py-3 text-sm"
           >
             {ROLES.map((r) => (
               <option key={r} value={r}>{ADMIN_ROLE_LABELS[r]}</option>
             ))}
           </select>
-          <button type="submit" disabled={busy} className="w-full bg-[#E23744] text-white font-black py-3 rounded-xl">
+          <button type="submit" disabled={busy} className="w-full bg-primary text-white font-black py-3 rounded-xl">
             Create Admin
           </button>
         </form>
 
-        <div className="xl:col-span-2 bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden">
-          {isLoading && <p className="p-6 text-sm text-[#6B7280]">Loading…</p>}
+        <div className="xl:col-span-2 bg-white rounded-3xl border border-border overflow-hidden">
+          {isLoading && <p className="p-6 text-sm text-gray-text">Loading…</p>}
           <div className="overflow-x-auto">
             <table className="w-full min-w-[600px] text-left">
-              <thead className="bg-[#F8FAFC] border-b border-[#E5E7EB]">
+              <thead className="bg-section border-b border-border">
                 <tr>
                   {["Name", "Email", "Role", "Created", "Actions"].map((h) => (
                     <th key={h} className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">{h}</th>
@@ -136,14 +136,14 @@ export default function AdminStaffPage() {
               </thead>
               <tbody>
                 {staff.map((s) => (
-                  <tr key={s.id} className="border-b border-[#E5E7EB] last:border-0">
-                    <td className="p-4 font-bold text-sm text-[#111827]">{s.full_name}</td>
-                    <td className="p-4 text-sm text-[#6B7280]">{s.email}</td>
+                  <tr key={s.id} className="border-b border-border last:border-0">
+                    <td className="p-4 font-bold text-sm text-foreground">{s.full_name}</td>
+                    <td className="p-4 text-sm text-gray-text">{s.email}</td>
                     <td className="p-4">
                       <select
                         value={s.admin_role || "admin"}
                         onChange={(e) => updateRole(s.id, e.target.value as AdminRole)}
-                        className="border border-[#E5E7EB] rounded-lg px-2 py-1 text-xs font-bold"
+                        className="border border-border rounded-lg px-2 py-1 text-xs font-bold"
                       >
                         {ROLES.map((r) => (
                           <option key={r} value={r}>{ADMIN_ROLE_LABELS[r]}</option>

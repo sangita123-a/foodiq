@@ -76,8 +76,8 @@ export default function DeliveryProfilePage() {
     <DeliveryShell title="Profile">
       <div className="max-w-3xl space-y-8">
         <div>
-          <h1 className="text-2xl font-black text-[#111827]">Driver Profile</h1>
-          <p className="text-sm text-[#6B7280] mt-1">
+          <h1 className="text-2xl font-black text-foreground">Driver Profile</h1>
+          <p className="text-sm text-gray-text mt-1">
             Manage your photo, KYC documents, vehicle, and payout details.
           </p>
           {verification === "pending" && (
@@ -88,48 +88,48 @@ export default function DeliveryProfilePage() {
         </div>
 
         {loading ? (
-          <div className="h-48 animate-pulse bg-[#F8FAFC] rounded-2xl" />
+          <div className="h-48 animate-pulse bg-section rounded-2xl" />
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <label className="block">
-                <span className="text-xs font-bold text-[#6B7280] uppercase">Full Name</span>
+                <span className="text-xs font-bold text-gray-text uppercase">Full Name</span>
                 <input
                   value={data.full_name || ""}
                   onChange={(e) => setData((d) => ({ ...d, full_name: e.target.value }))}
-                  className="mt-1 w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+                  className="mt-1 w-full border border-border rounded-xl px-4 py-3 text-sm"
                 />
               </label>
               <label className="block">
-                <span className="text-xs font-bold text-[#6B7280] uppercase">Phone</span>
+                <span className="text-xs font-bold text-gray-text uppercase">Phone</span>
                 <input
                   value={data.phone_number || ""}
                   onChange={(e) => setData((d) => ({ ...d, phone_number: e.target.value }))}
-                  className="mt-1 w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+                  className="mt-1 w-full border border-border rounded-xl px-4 py-3 text-sm"
                 />
               </label>
               <label className="block">
-                <span className="text-xs font-bold text-[#6B7280] uppercase">Vehicle Type</span>
+                <span className="text-xs font-bold text-gray-text uppercase">Vehicle Type</span>
                 <input
                   value={data.vehicle_type || ""}
                   onChange={(e) => setData((d) => ({ ...d, vehicle_type: e.target.value }))}
-                  className="mt-1 w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+                  className="mt-1 w-full border border-border rounded-xl px-4 py-3 text-sm"
                 />
               </label>
               <label className="block">
-                <span className="text-xs font-bold text-[#6B7280] uppercase">License Number</span>
+                <span className="text-xs font-bold text-gray-text uppercase">License Number</span>
                 <input
                   value={data.license_number || ""}
                   onChange={(e) => setData((d) => ({ ...d, license_number: e.target.value }))}
-                  className="mt-1 w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+                  className="mt-1 w-full border border-border rounded-xl px-4 py-3 text-sm"
                 />
               </label>
               <label className="block md:col-span-2">
-                <span className="text-xs font-bold text-[#6B7280] uppercase">Vehicle Details</span>
+                <span className="text-xs font-bold text-gray-text uppercase">Vehicle Details</span>
                 <input
                   value={data.vehicle_details || ""}
                   onChange={(e) => setData((d) => ({ ...d, vehicle_details: e.target.value }))}
-                  className="mt-1 w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+                  className="mt-1 w-full border border-border rounded-xl px-4 py-3 text-sm"
                 />
               </label>
             </div>
@@ -166,50 +166,50 @@ export default function DeliveryProfilePage() {
               />
             </div>
 
-            <section className="bg-white border border-[#E5E7EB] rounded-2xl p-5 space-y-4">
-              <h2 className="text-lg font-black text-[#111827]">Bank & UPI</h2>
+            <section className="bg-white border border-border rounded-2xl p-5 space-y-4">
+              <h2 className="text-lg font-black text-foreground">Bank & UPI</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <label className="block">
-                  <span className="text-xs font-bold text-[#6B7280] uppercase">Account Name</span>
+                  <span className="text-xs font-bold text-gray-text uppercase">Account Name</span>
                   <input
                     value={data.bank_account_name || ""}
                     onChange={(e) => setData((d) => ({ ...d, bank_account_name: e.target.value }))}
-                    className="mt-1 w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+                    className="mt-1 w-full border border-border rounded-xl px-4 py-3 text-sm"
                   />
                 </label>
                 <label className="block">
-                  <span className="text-xs font-bold text-[#6B7280] uppercase">Account Number</span>
+                  <span className="text-xs font-bold text-gray-text uppercase">Account Number</span>
                   <input
                     value={data.bank_account_number || ""}
                     onChange={(e) => setData((d) => ({ ...d, bank_account_number: e.target.value }))}
-                    className="mt-1 w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+                    className="mt-1 w-full border border-border rounded-xl px-4 py-3 text-sm"
                   />
                 </label>
                 <label className="block">
-                  <span className="text-xs font-bold text-[#6B7280] uppercase">IFSC</span>
+                  <span className="text-xs font-bold text-gray-text uppercase">IFSC</span>
                   <input
                     value={data.bank_ifsc || ""}
                     onChange={(e) => setData((d) => ({ ...d, bank_ifsc: e.target.value }))}
-                    className="mt-1 w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+                    className="mt-1 w-full border border-border rounded-xl px-4 py-3 text-sm"
                   />
                 </label>
                 <label className="block">
-                  <span className="text-xs font-bold text-[#6B7280] uppercase">UPI ID</span>
+                  <span className="text-xs font-bold text-gray-text uppercase">UPI ID</span>
                   <input
                     value={data.upi_id || ""}
                     onChange={(e) => setData((d) => ({ ...d, upi_id: e.target.value }))}
-                    className="mt-1 w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+                    className="mt-1 w-full border border-border rounded-xl px-4 py-3 text-sm"
                   />
                 </label>
                 <label className="block">
-                  <span className="text-xs font-bold text-[#6B7280] uppercase">Aadhaar (last 4)</span>
+                  <span className="text-xs font-bold text-gray-text uppercase">Aadhaar (last 4)</span>
                   <input
                     value={data.aadhaar_last4 || ""}
                     maxLength={4}
                     onChange={(e) =>
                       setData((d) => ({ ...d, aadhaar_last4: e.target.value.replace(/\D/g, "") }))
                     }
-                    className="mt-1 w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+                    className="mt-1 w-full border border-border rounded-xl px-4 py-3 text-sm"
                   />
                 </label>
               </div>
@@ -219,7 +219,7 @@ export default function DeliveryProfilePage() {
               type="button"
               onClick={save}
               disabled={saving}
-              className="bg-[#E23744] hover:bg-[#C81E34] text-white font-bold px-6 py-3 rounded-xl disabled:opacity-60"
+              className="bg-primary hover:bg-primary-hover text-white font-bold px-6 py-3 rounded-xl disabled:opacity-60"
             >
               {saving ? "Saving..." : "Save Profile"}
             </button>

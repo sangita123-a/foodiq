@@ -28,7 +28,7 @@ export default function HistoryFilterBar({
   const [showExportMenu, setShowExportMenu] = useState(false);
 
   return (
-    <div className="bg-[#FFFFFF] p-4 rounded-2xl border border-[#E5E7EB] flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6 shadow-xl sticky top-24 z-30">
+    <div className="bg-background p-4 rounded-2xl border border-border flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6 shadow-xl sticky top-24 z-30">
       
       <div className="flex flex-col md:flex-row items-center gap-4 flex-1 flex-wrap">
         <div className="relative w-full md:max-w-xs xl:max-w-md shrink-0">
@@ -38,14 +38,14 @@ export default function HistoryFilterBar({
             placeholder="Search Order ID or Customer..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm"
+            className="w-full bg-section border border-border rounded-xl pl-12 pr-4 py-2.5 text-foreground focus:outline-none focus:border-primary transition-colors text-sm"
           />
         </div>
         
         <select 
           value={dateRange}
           onChange={(e) => setDateRange(e.target.value)}
-          className="w-full md:w-36 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors appearance-none cursor-pointer text-sm shrink-0"
+          className="w-full md:w-36 bg-section border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary transition-colors appearance-none cursor-pointer text-sm shrink-0"
         >
           <option value="Today">Today</option>
           <option value="Last 7 Days">Last 7 Days</option>
@@ -57,7 +57,7 @@ export default function HistoryFilterBar({
         <select 
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="w-full md:w-36 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors appearance-none cursor-pointer text-sm shrink-0"
+          className="w-full md:w-36 bg-section border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary transition-colors appearance-none cursor-pointer text-sm shrink-0"
         >
           <option value="All">All Statuses</option>
           <option value="Completed">Completed</option>
@@ -69,7 +69,7 @@ export default function HistoryFilterBar({
         <select 
           value={paymentFilter}
           onChange={(e) => setPaymentFilter(e.target.value)}
-          className="w-full md:w-36 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors appearance-none cursor-pointer text-sm shrink-0"
+          className="w-full md:w-36 bg-section border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary transition-colors appearance-none cursor-pointer text-sm shrink-0"
         >
           <option value="All">All Payments</option>
           <option value="Card">Card</option>
@@ -81,7 +81,7 @@ export default function HistoryFilterBar({
         <select 
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="w-full md:w-40 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors appearance-none cursor-pointer text-sm shrink-0"
+          className="w-full md:w-40 bg-section border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary transition-colors appearance-none cursor-pointer text-sm shrink-0"
         >
           <option value="Date (Newest)">Date (Newest)</option>
           <option value="Date (Oldest)">Date (Oldest)</option>
@@ -93,7 +93,7 @@ export default function HistoryFilterBar({
       <div className="relative self-end xl:self-auto shrink-0">
         <button 
           onClick={() => setShowExportMenu(!showExportMenu)}
-          className="flex items-center gap-2 bg-[#E23744] hover:bg-[#C81E34] text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-lg shadow-[#E23744]/20"
+          className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-lg shadow-primary/20"
         >
           <Download className="w-4 h-4" />
           Export
@@ -106,12 +106,12 @@ export default function HistoryFilterBar({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="absolute right-0 mt-2 w-48 bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl shadow-2xl overflow-hidden z-50"
+              className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-xl shadow-2xl overflow-hidden z-50"
             >
-              <button className="w-full text-left px-4 py-3 text-sm text-[#111827] hover:bg-[#F8FAFC] flex items-center gap-2 transition-colors border-b border-[#E5E7EB]">
+              <button className="w-full text-left px-4 py-3 text-sm text-foreground hover:bg-section flex items-center gap-2 transition-colors border-b border-border">
                 <FileText className="w-4 h-4 text-green-400" /> Export as CSV
               </button>
-              <button className="w-full text-left px-4 py-3 text-sm text-[#111827] hover:bg-[#F8FAFC] flex items-center gap-2 transition-colors">
+              <button className="w-full text-left px-4 py-3 text-sm text-foreground hover:bg-section flex items-center gap-2 transition-colors">
                 <FileText className="w-4 h-4 text-red-400" /> Export as PDF
               </button>
             </motion.div>

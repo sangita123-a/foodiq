@@ -25,16 +25,16 @@ export default function HelpCenterPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] pt-[90px]">
+    <main className="min-h-screen bg-background pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-10 max-w-6xl">
         <div className="mb-8 text-center md:text-left">
-          <div className="inline-flex items-center gap-2 bg-[#E23744]/10 text-[#E23744] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
             <Headphones className="w-3.5 h-3.5" /> AI Support Center
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-[#111827] mb-2">How can we help?</h1>
-          <p className="text-[#6B7280] max-w-2xl">
+          <h1 className="text-3xl md:text-4xl font-black text-foreground mb-2">How can we help?</h1>
+          <p className="text-gray-text max-w-2xl">
             Get instant answers from Foodiq AI, chat with a support agent, browse FAQs, or create a ticket.
           </p>
         </div>
@@ -47,8 +47,8 @@ export default function HelpCenterPage() {
               onClick={() => setTab(t.id)}
               className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition ${
                 tab === t.id
-                  ? "bg-[#E23744] text-white shadow-lg shadow-[#E23744]/20"
-                  : "bg-white border border-[#E5E7EB] text-[#6B7280] hover:border-[#E23744]/30"
+                  ? "bg-primary text-white shadow-lg shadow-primary/20"
+                  : "bg-white border border-border text-gray-text hover:border-primary/30"
               }`}
             >
               <t.icon className="w-4 h-4" /> {t.label}

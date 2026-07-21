@@ -31,7 +31,7 @@ export const SETTINGS_SECTIONS: { id: SettingsSection, icon: any }[] = [
 export default function SettingsSidebar({ activeSection, setActiveSection }: Props) {
   return (
     <div className="w-full lg:w-[280px] flex-shrink-0">
-      <div className="sticky top-[100px] bg-white border border-[#E5E7EB] rounded-3xl p-4 md:p-6 overflow-x-auto lg:overflow-visible flex lg:flex-col gap-2 custom-scrollbar-hide">
+      <div className="sticky top-[100px] bg-white border border-border rounded-3xl p-4 md:p-6 overflow-x-auto lg:overflow-visible flex lg:flex-col gap-2 custom-scrollbar-hide">
         
         {SETTINGS_SECTIONS.map((section) => {
           const isActive = activeSection === section.id;
@@ -48,7 +48,7 @@ export default function SettingsSidebar({ activeSection, setActiveSection }: Pro
                     : "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(226, 55, 68,0.1)]"
                   : isDanger 
                     ? "text-red-400 hover:bg-red-500/5 hover:text-red-300 border border-transparent"
-                    : "text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827] border border-transparent"
+                    : "text-gray-text hover:bg-section hover:text-foreground border border-transparent"
               }`}
             >
               <section.icon className={`w-5 h-5 flex-shrink-0 ${isActive && isDanger ? 'animate-pulse' : ''}`} />

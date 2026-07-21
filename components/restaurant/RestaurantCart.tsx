@@ -20,13 +20,13 @@ export default function RestaurantCart({ totalItems, totalPrice }: RestaurantCar
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
           className="fixed bottom-6 right-4 md:right-8 z-50 w-[calc(100%-2rem)] md:w-auto"
         >
-          <Link href="/checkout" className="bg-[#E23744] text-white rounded-2xl shadow-[0_10px_40px_rgba(226, 55, 68,0.4)] flex items-center justify-between px-6 py-4 border border-[#E5E7EB] md:min-w-[320px] overflow-hidden group cursor-pointer hover:bg-[#C81E34] transition-colors block">
+          <Link href="/checkout" className="bg-primary text-white rounded-2xl shadow-[0_10px_40px_rgba(226, 55, 68,0.4)] flex items-center justify-between px-6 py-4 border border-border md:min-w-[320px] overflow-hidden group cursor-pointer hover:bg-primary-hover transition-colors block">
             
             {/* Ambient background glow */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
 
             <div className="flex flex-col relative z-10">
-              <span className="text-sm font-medium text-[#111827]/80">
+              <span className="text-sm font-medium text-foreground/80">
                 {totalItems} {totalItems === 1 ? 'Item' : 'Items'}
               </span>
               <span className="font-bold text-lg">
@@ -36,7 +36,7 @@ export default function RestaurantCart({ totalItems, totalPrice }: RestaurantCar
 
             <div className="flex items-center gap-2 font-bold relative z-10">
               Order Now
-              <div className="w-8 h-8 rounded-full bg-[#F8FAFC] flex items-center justify-center transform group-hover:translate-x-1 transition-transform">
+              <div className="w-8 h-8 rounded-full bg-section flex items-center justify-center transform group-hover:translate-x-1 transition-transform">
                 <ChevronRight className="w-5 h-5" />
               </div>
             </div>

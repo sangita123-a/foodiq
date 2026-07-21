@@ -49,15 +49,15 @@ export default function MenuSummary({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: idx * 0.1 }}
           whileHover={{ y: -5 }}
-          className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#E5E7EB] shadow-lg group hover:border-[#E5E7EB] transition-all cursor-pointer relative overflow-hidden"
+          className="bg-background rounded-2xl p-6 border border-border shadow-lg group hover:border-border transition-all cursor-pointer relative overflow-hidden"
         >
           {/* subtle background glow on hover */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFC] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           
           <div className="flex items-center justify-between relative z-10">
             <div>
-              <p className="text-[#6B7280] text-sm font-bold mb-1">{stat.title}</p>
-              <h3 className="text-3xl font-black text-[#111827]">
+              <p className="text-gray-text text-sm font-bold mb-1">{stat.title}</p>
+              <h3 className="text-3xl font-black text-foreground">
                 <Counter from={0} to={stat.value} />
               </h3>
             </div>

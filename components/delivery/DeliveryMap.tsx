@@ -21,22 +21,22 @@ export default function DeliveryMap({
     "https://www.openstreetmap.org/export/embed.html?bbox=77.57%2C12.96%2C77.62%2C12.99&layer=mapnik";
 
   return (
-    <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-[#E5E7EB] flex flex-wrap items-center justify-between gap-2">
+    <div className="bg-white border border-border rounded-2xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="text-sm font-black text-[#111827]">Route Map</p>
-          <p className="text-xs text-[#6B7280]">
+          <p className="text-sm font-black text-foreground">Route Map</p>
+          <p className="text-xs text-gray-text">
             {restaurantName || "Restaurant"} → {customerAddress || "Customer"}
           </p>
         </div>
         <div className="flex items-center gap-3 text-sm font-bold">
           {distanceKm != null && (
-            <span className="px-3 py-1 rounded-lg bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB]">
+            <span className="px-3 py-1 rounded-lg bg-section text-foreground border border-border">
               {distanceKm} km
             </span>
           )}
           {durationMin != null && (
-            <span className="px-3 py-1 rounded-lg bg-[#E23744]/10 text-[#E23744] border border-[#E23744]/20">
+            <span className="px-3 py-1 rounded-lg bg-primary/10 text-primary border border-primary/20">
               ~{durationMin} min
             </span>
           )}
@@ -45,7 +45,7 @@ export default function DeliveryMap({
               href={directionsUrl}
               target="_blank"
               rel="noreferrer"
-              className="px-3 py-1 rounded-lg bg-[#E23744] text-white hover:bg-[#C81E34]"
+              className="px-3 py-1 rounded-lg bg-primary text-white hover:bg-primary-hover"
             >
               Navigate
             </a>

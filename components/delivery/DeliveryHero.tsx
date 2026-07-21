@@ -25,16 +25,16 @@ export default function DeliveryHero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-4xl md:text-5xl lg:text-6xl font-black text-[#111827] mb-6 leading-tight"
+          className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground mb-6 leading-tight"
         >
-          Deliver with <span className="text-[#E23744]">Foodiq</span>
+          Deliver with <span className="text-primary">Foodiq</span>
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="text-[#6B7280] text-lg mb-12 leading-relaxed"
+          className="text-gray-text text-lg mb-12 leading-relaxed"
         >
           Accept nearby orders, navigate pickups and drop-offs, and track your earnings from one simple delivery dashboard.
         </motion.p>
@@ -46,13 +46,13 @@ export default function DeliveryHero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 + idx * 0.1 }}
-              className="bg-[#FFFFFF]/70 backdrop-blur-md border border-[#E5E7EB] rounded-2xl p-6 hover:bg-[#F8FAFC] transition-colors"
+              className="bg-background/70 backdrop-blur-md border border-border rounded-2xl p-6 hover:bg-section transition-colors"
             >
-              <div className="w-12 h-12 bg-[#F8FAFC] rounded-xl flex items-center justify-center mb-4 border border-[#E5E7EB]">
+              <div className="w-12 h-12 bg-section rounded-xl flex items-center justify-center mb-4 border border-border">
                 <feature.icon className={`w-6 h-6 ${feature.color}`} />
               </div>
-              <h3 className="text-[#111827] font-bold mb-2">{feature.title}</h3>
-              <p className="text-[#6B7280] text-sm leading-relaxed">{feature.desc}</p>
+              <h3 className="text-foreground font-bold mb-2">{feature.title}</h3>
+              <p className="text-gray-text text-sm leading-relaxed">{feature.desc}</p>
             </motion.div>
           ))}
         </div>

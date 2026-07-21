@@ -130,7 +130,7 @@ export default function PartnerOffersPage() {
   const featuredOffer = offers.find(o => o.status === "Active" && o.bannerImage);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#E23744] selection:text-white">
+    <div className="min-h-screen bg-section flex selection:bg-primary selection:text-white">
       
       {/* Sidebar - Fixed on left for desktop */}
       <div className="hidden lg:block w-64 flex-shrink-0">

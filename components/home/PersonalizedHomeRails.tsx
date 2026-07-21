@@ -53,20 +53,20 @@ export default function PersonalizedHomeRails() {
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-10">
       {campaigns[0] ? (
-        <div className="rounded-2xl bg-[#FAFAFA] border border-[#EAEAEA] p-5 sm:p-6">
-          <p className="text-xs font-bold uppercase tracking-wide text-[#E23744]">
+        <div className="rounded-2xl bg-section border border-border p-5 sm:p-6">
+          <p className="text-xs font-bold uppercase tracking-wide text-primary">
             Seasonal
           </p>
-          <h2 className="text-xl sm:text-2xl font-black text-[#111827] mt-1">
+          <h2 className="text-xl sm:text-2xl font-black text-foreground mt-1">
             {String(campaigns[0].title)}
           </h2>
           {campaigns[0].subtitle ? (
-            <p className="text-sm text-[#6B7280] mt-1">
+            <p className="text-sm text-gray-text mt-1">
               {String(campaigns[0].subtitle)}
             </p>
           ) : null}
           {campaigns[0].offer_code ? (
-            <p className="mt-3 text-sm font-bold text-[#111827]">
+            <p className="mt-3 text-sm font-bold text-foreground">
               Code: {String(campaigns[0].offer_code)}
             </p>
           ) : null}
@@ -76,12 +76,12 @@ export default function PersonalizedHomeRails() {
       {token && restaurants.length > 0 ? (
         <div>
           <div className="flex items-end justify-between mb-4">
-            <h2 className="text-xl sm:text-2xl font-black text-[#111827]">
+            <h2 className="text-xl sm:text-2xl font-black text-foreground">
               Recommended for you
             </h2>
             <Link
               href="/order-online"
-              className="text-sm font-bold text-[#E23744]"
+              className="text-sm font-bold text-primary"
             >
               See all
             </Link>
@@ -102,11 +102,11 @@ export default function PersonalizedHomeRails() {
                     className="object-cover"
                   />
                 </div>
-                <p className="mt-2 text-sm font-bold text-[#111827] line-clamp-1">
+                <p className="mt-2 text-sm font-bold text-foreground line-clamp-1">
                   {String(r.name)}
                 </p>
                 {r.rating != null ? (
-                  <p className="text-xs text-[#6B7280]">★ {String(r.rating)}</p>
+                  <p className="text-xs text-gray-text">★ {String(r.rating)}</p>
                 ) : null}
               </Link>
             ))}
@@ -116,7 +116,7 @@ export default function PersonalizedHomeRails() {
 
       {dishes.length > 0 ? (
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-[#111827] mb-4">
+          <h2 className="text-xl sm:text-2xl font-black text-foreground mb-4">
             Dishes you may like
           </h2>
           <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1">
@@ -131,10 +131,10 @@ export default function PersonalizedHomeRails() {
                     className="object-cover"
                   />
                 </div>
-                <p className="mt-2 text-sm font-bold text-[#111827] line-clamp-1">
+                <p className="mt-2 text-sm font-bold text-foreground line-clamp-1">
                   {String(d.name)}
                 </p>
-                <p className="text-xs text-[#6B7280] line-clamp-1">
+                <p className="text-xs text-gray-text line-clamp-1">
                   {String(d.restaurant_name || "")}
                 </p>
               </div>
@@ -145,7 +145,7 @@ export default function PersonalizedHomeRails() {
 
       {recentItems.length > 0 ? (
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-[#111827] mb-4">
+          <h2 className="text-xl sm:text-2xl font-black text-foreground mb-4">
             Recently viewed
           </h2>
           <div className="flex gap-4 overflow-x-auto pb-2">
@@ -168,7 +168,7 @@ export default function PersonalizedHomeRails() {
                     className="object-cover"
                   />
                 </div>
-                <p className="mt-2 text-sm font-bold text-[#111827] line-clamp-1">
+                <p className="mt-2 text-sm font-bold text-foreground line-clamp-1">
                   {String(item.name)}
                 </p>
               </Link>

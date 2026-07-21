@@ -4,7 +4,7 @@ import { absoluteUrl } from "./site";
 export const SOCIAL_IMAGE_SIZE = { width: 1200, height: 630 } as const;
 export const SOCIAL_IMAGE_CONTENT_TYPE = "image/png";
 
-const BRAND_RED = "#E23744";
+const BRAND_RED = "#0F766E";
 const BRAND_MUTED = "#686B78";
 
 export type SocialImageInput = {

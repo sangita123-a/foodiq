@@ -31,11 +31,11 @@ export default function ConnectedDevices() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="bg-[#F8FAFC] rounded-3xl p-6 md:p-10 border border-[#E5E7EB] shadow-2xl"
+      className="bg-section rounded-3xl p-6 md:p-10 border border-border shadow-2xl"
     >
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-white mb-2">Connected Devices</h2>
-        <p className="text-[#6B7280] text-sm">
+        <p className="text-gray-text text-sm">
           You are currently logged into Foodiq on these devices. If you don't recognize a device, remove it immediately.
         </p>
       </div>
@@ -43,7 +43,7 @@ export default function ConnectedDevices() {
       {isLoading ? (
         <div className="space-y-4">
           {[1, 2].map((i) => (
-            <div key={i} className="h-24 bg-[#F8FAFC] animate-pulse rounded-2xl" />
+            <div key={i} className="h-24 bg-section animate-pulse rounded-2xl" />
           ))}
         </div>
       ) : (
@@ -66,19 +66,19 @@ export default function ConnectedDevices() {
               <div
                 key={s.id}
                 className={`bg-white border rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-                  s.is_current ? "border-primary/20" : "border-[#E5E7EB]"
+                  s.is_current ? "border-primary/20" : "border-border"
                 }`}
               >
                 <div className="flex items-start gap-4">
                   <div
                     className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                      s.is_current ? "bg-primary/10" : "bg-[#F8FAFC]"
+                      s.is_current ? "bg-primary/10" : "bg-section"
                     }`}
                   >
                     {s.device_type === "mobile" ? (
-                      <Smartphone className={`w-6 h-6 ${s.is_current ? "text-primary" : "text-[#6B7280]"}`} />
+                      <Smartphone className={`w-6 h-6 ${s.is_current ? "text-primary" : "text-gray-text"}`} />
                     ) : (
-                      <Laptop className={`w-6 h-6 ${s.is_current ? "text-primary" : "text-[#6B7280]"}`} />
+                      <Laptop className={`w-6 h-6 ${s.is_current ? "text-primary" : "text-gray-text"}`} />
                     )}
                   </div>
                   <div>

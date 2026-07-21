@@ -44,10 +44,10 @@ export default function OurStory() {
             <h2 className="text-3xl md:text-5xl font-black text-white mb-6">Our Story</h2>
             <div className="w-20 h-1.5 bg-primary rounded-full mb-8"></div>
             
-            <p className="text-[#6B7280] text-lg leading-relaxed mb-6">
+            <p className="text-gray-text text-lg leading-relaxed mb-6">
               Foodiq was built with one simple mission — to make food ordering faster, easier, and more enjoyable for everyone.
             </p>
-            <p className="text-[#6B7280] leading-relaxed">
+            <p className="text-gray-text leading-relaxed">
               We connect customers with their favorite restaurants through a seamless digital experience, ensuring every meal arrives fresh, fast, and completely hassle-free. What started as a small idea has grown into a vast network of passionate food lovers and dedicated culinary partners.
             </p>
           </motion.div>

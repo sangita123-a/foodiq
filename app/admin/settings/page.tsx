@@ -92,7 +92,7 @@ export default function AdminSettingsPage() {
   return (
     <AdminShell title="Platform Settings">
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-[#222222]">Admin Settings</h1>
+        <h1 className="text-3xl font-black text-foreground">Admin Settings</h1>
         <p className="text-[#555555]">
           Changes apply across the website — contact page, footer, theme, and checkout fees.
         </p>
@@ -105,7 +105,7 @@ export default function AdminSettingsPage() {
             type="button"
             onClick={() => setTab(t.id)}
             className={`rounded-xl px-4 py-2 text-sm font-bold ${
-              tab === t.id ? "bg-[#E23744] text-white" : "border border-[#E5E7EB] bg-white text-[#555555]"
+              tab === t.id ? "bg-primary text-white" : "border border-border bg-white text-[#555555]"
             }`}
           >
             {t.label}
@@ -113,7 +113,7 @@ export default function AdminSettingsPage() {
         ))}
       </div>
 
-      <form onSubmit={save} className="max-w-4xl space-y-6 rounded-3xl border border-[#E5E7EB] bg-white p-6">
+      <form onSubmit={save} className="max-w-4xl space-y-6 rounded-3xl border border-border bg-white p-6">
         {tab === "general" && (
           <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Input label="Website Name" value={form.app_name || ""} onChange={(v) => set("app_name", v)} />
@@ -147,7 +147,7 @@ export default function AdminSettingsPage() {
                 onClear={() => set("logo_url", "")}
               />
             </div>
-            <Input label="Theme Color" value={form.theme_color || "#E23744"} onChange={(v) => set("theme_color", v)} />
+            <Input label="Theme Color" value={form.theme_color || "#0F766E"} onChange={(v) => set("theme_color", v)} />
           </section>
         )}
 
@@ -196,7 +196,7 @@ export default function AdminSettingsPage() {
           </section>
         )}
 
-        <button type="submit" disabled={saving} className="rounded-xl bg-[#E23744] px-8 py-3 font-black text-white disabled:opacity-60">
+        <button type="submit" disabled={saving} className="rounded-xl bg-primary px-8 py-3 font-black text-white disabled:opacity-60">
           {saving ? "Saving…" : "Save Settings"}
         </button>
         {saved && <p className="text-sm font-bold text-green-600">Settings saved — changes reflect site-wide.</p>}
@@ -222,7 +222,7 @@ function Input({
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 w-full rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm font-normal text-[#222222]"
+        className="mt-1 w-full rounded-xl border border-border px-4 py-3 text-sm font-normal text-foreground"
       />
     </label>
   );
@@ -247,7 +247,7 @@ function NumberInput({
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="mt-1 w-full rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm font-normal text-[#222222]"
+        className="mt-1 w-full rounded-xl border border-border px-4 py-3 text-sm font-normal text-foreground"
       />
     </label>
   );
@@ -273,7 +273,7 @@ function TextArea({
         value={value}
         rows={rows}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 w-full resize-y rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm font-normal text-[#222222]"
+        className="mt-1 w-full resize-y rounded-xl border border-border px-4 py-3 text-sm font-normal text-foreground"
       />
     </label>
   );

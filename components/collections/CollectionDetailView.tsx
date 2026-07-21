@@ -74,20 +74,20 @@ export default function CollectionDetailView({ slug }: Props) {
   }
 
   return (
-    <main className="relative min-h-screen bg-white pt-[90px] selection:bg-[#E23744]/20 selection:text-[#1A1A1A]">
+    <main className="relative min-h-screen bg-white pt-[90px] selection:bg-primary/20 selection:text-foreground">
       <Navbar />
       <FloatingCart />
 
       <div className="container mx-auto max-w-[1440px] px-4 py-8 md:px-8">
         <Link
           href="/"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-[#666666] transition-colors hover:text-[#1A1A1A]"
+          className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-gray-text transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Home
         </Link>
 
-        <div className="relative mb-10 overflow-hidden rounded-3xl border border-[#E8E8E8] bg-white">
+        <div className="relative mb-10 overflow-hidden rounded-3xl border border-border bg-white">
           <div className="absolute inset-0">
             <SafeImage
               src={collection.bannerImage}
@@ -100,11 +100,11 @@ export default function CollectionDetailView({ slug }: Props) {
           </div>
           <div className="relative z-10 bg-gradient-to-r from-white/95 via-white/80 to-transparent p-8 md:p-12">
             <span className="mb-3 inline-block text-3xl">{collection.emoji}</span>
-            <h1 className="mb-3 text-3xl font-black text-[#1C1C1C] md:text-5xl">{collection.title}</h1>
-            <p className="mb-4 max-w-2xl text-sm font-medium text-[#696969] md:text-lg">
+            <h1 className="mb-3 text-3xl font-black text-foreground md:text-5xl">{collection.title}</h1>
+            <p className="mb-4 max-w-2xl text-sm font-medium text-gray-text md:text-lg">
               {collection.description}
             </p>
-            <span className="inline-flex items-center gap-2 rounded-xl border border-[#E8E8E8] bg-white px-4 py-2 text-xs font-bold text-[#1C1C1C] shadow-sm">
+            <span className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-2 text-xs font-bold text-foreground shadow-sm">
               {collection.itemCount} · {items.length} spots listed
             </span>
           </div>
@@ -119,12 +119,12 @@ export default function CollectionDetailView({ slug }: Props) {
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search restaurants..."
-              className="h-11 w-full rounded-xl border border-[#ECECEC] bg-[#F8F8F8] pl-10 pr-4 text-sm text-[#1A1A1A] outline-none transition-colors placeholder:text-gray-500 focus:border-[#E23744]"
+              className="h-11 w-full rounded-xl border border-border bg-footer pl-10 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-gray-500 focus:border-primary"
             />
           </label>
 
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1 rounded-xl border border-[#ECECEC] bg-[#F8F8F8] p-1">
+            <div className="flex items-center gap-1 rounded-xl border border-border bg-footer p-1">
               {(["all", "veg", "nonveg"] as const).map((value) => (
                 <button
                   key={value}
@@ -132,8 +132,8 @@ export default function CollectionDetailView({ slug }: Props) {
                   onClick={() => setDiet(value)}
                   className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition-colors ${
                     diet === value
-                      ? "border border-[#E23744] bg-[#FFF5F6] text-[#E23744]"
-                      : "text-[#696969] hover:text-[#1C1C1C]"
+                      ? "border border-primary bg-primary-soft text-primary"
+                      : "text-gray-text hover:text-foreground"
                   }`}
                 >
                   {value === "nonveg" ? "Non-Veg" : value}
@@ -146,7 +146,7 @@ export default function CollectionDetailView({ slug }: Props) {
               <select
                 value={sort}
                 onChange={(event) => setSort(event.target.value as typeof sort)}
-                className="h-10 appearance-none rounded-xl border border-[#ECECEC] bg-[#F8F8F8] pl-9 pr-8 text-xs font-bold text-[#1A1A1A] outline-none focus:border-[#E23744]"
+                className="h-10 appearance-none rounded-xl border border-border bg-footer pl-9 pr-8 text-xs font-bold text-foreground outline-none focus:border-primary"
               >
                 <option value="popular">Sort: Popular</option>
                 <option value="rating">Sort: Rating</option>
@@ -158,9 +158,9 @@ export default function CollectionDetailView({ slug }: Props) {
         </div>
 
         {filteredItems.length === 0 ? (
-          <div className="rounded-2xl border border-[#ECECEC] bg-[#FFF5F6] px-6 py-16 text-center">
-            <p className="text-lg font-black text-[#1A1A1A]">No restaurants found</p>
-            <p className="mt-2 text-sm text-[#666666]">Try adjusting search or filters.</p>
+          <div className="rounded-2xl border border-border bg-primary-soft px-6 py-16 text-center">
+            <p className="text-lg font-black text-foreground">No restaurants found</p>
+            <p className="mt-2 text-sm text-gray-text">Try adjusting search or filters.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 md:gap-6">

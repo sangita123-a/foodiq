@@ -46,13 +46,13 @@ export default function OurMission() {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6, delay: idx * 0.2 }}
               whileHover={{ y: -10 }}
-              className="bg-[#F8FAFC] rounded-3xl p-8 border border-[#E5E7EB] hover:border-[#E5E7EB] transition-all duration-300 shadow-xl group text-center"
+              className="bg-section rounded-3xl p-8 border border-border hover:border-border transition-all duration-300 shadow-xl group text-center"
             >
-              <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-8 border transition-colors ${mission.bg} group-hover:bg-[#F8FAFC] group-hover:border-[#E5E7EB]`}>
+              <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-8 border transition-colors ${mission.bg} group-hover:bg-section group-hover:border-border`}>
                 <mission.icon className={`w-10 h-10 ${mission.color}`} />
               </div>
               <h3 className="text-2xl font-bold text-white mb-4">{mission.title}</h3>
-              <p className="text-[#6B7280] leading-relaxed">{mission.desc}</p>
+              <p className="text-gray-text leading-relaxed">{mission.desc}</p>
             </motion.div>
           ))}
         </div>

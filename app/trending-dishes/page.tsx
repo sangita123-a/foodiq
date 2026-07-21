@@ -5,7 +5,7 @@ import FloatingCart from "@/components/FloatingCart";
 
 export default function TrendingDishesRoute() {
   return (
-    <main className="min-h-screen bg-white relative selection:bg-[#E23744]/15 selection:text-[#1C1C1C] pt-[90px]">
+    <main className="min-h-screen bg-white relative selection:bg-primary/15 selection:text-foreground pt-[90px]">
       <Navbar />
       <FloatingCart />
       <TrendingDishesPage />

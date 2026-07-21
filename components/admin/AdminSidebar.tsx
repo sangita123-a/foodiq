@@ -108,20 +108,20 @@ export default function AdminSidebar({ variant = "fixed", onNavigate }: AdminSid
 
   return (
     <div
-      className={`w-64 bg-[#FFFFFF] h-full border-r border-[#E5E7EB] flex flex-col ${
+      className={`w-64 bg-background h-full border-r border-border flex flex-col ${
         variant === "fixed" ? "h-screen fixed left-0 top-0 z-40" : "relative"
       }`}
     >
-      <div className="h-20 flex items-center px-6 border-b border-[#E5E7EB]">
+      <div className="h-20 flex items-center px-6 border-b border-border">
         <Link href="/admin/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#E23744] rounded-lg flex items-center justify-center font-black text-white text-xl">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-black text-white text-xl">
             F
           </div>
           <div>
-            <span className="text-xl font-black text-[#111827] tracking-tight block">
+            <span className="text-xl font-black text-foreground tracking-tight block">
               Foodiq
             </span>
-            <span className="text-[10px] uppercase tracking-widest font-bold text-[#E23744]">
+            <span className="text-[10px] uppercase tracking-widest font-bold text-primary">
               Enterprise Admin
             </span>
           </div>
@@ -129,11 +129,11 @@ export default function AdminSidebar({ variant = "fixed", onNavigate }: AdminSid
       </div>
 
       {adminRole && (
-        <div className="px-4 py-3 border-b border-[#E5E7EB]">
+        <div className="px-4 py-3 border-b border-border">
           <p className="text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF] mb-1">
             Role
           </p>
-          <p className="text-xs font-black text-[#111827]">
+          <p className="text-xs font-black text-foreground">
             {ADMIN_ROLE_LABELS[adminRole as AdminRole] || adminRole}
           </p>
         </div>
@@ -149,19 +149,19 @@ export default function AdminSidebar({ variant = "fixed", onNavigate }: AdminSid
               onClick={onNavigate}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
                 isActive
-                  ? "bg-[#E23744] text-white shadow-[0_0_15px_rgba(226,55,68,0.3)]"
-                  : "text-[#6B7280] hover:text-[#111827] hover:bg-[#F8FAFC]"
+                  ? "bg-primary text-white shadow-[0_0_15px_rgba(226,55,68,0.3)]"
+                  : "text-gray-text hover:text-foreground hover:bg-section"
               }`}
             >
               <item.icon
-                className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-[#9CA3AF] group-hover:text-[#111827]"}`}
+                className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-[#9CA3AF] group-hover:text-foreground"}`}
               />
               <span className="font-bold text-xs">{item.name}</span>
             </Link>
           );
         })}
 
-        <div className="pt-4 mt-4 border-t border-[#E5E7EB]">
+        <div className="pt-4 mt-4 border-t border-border">
           <button
             type="button"
             onClick={handleLogout}

@@ -65,8 +65,8 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
   };
 
   return (
-    <div className="sticky top-[100px] overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm">
-      <div className="relative overflow-hidden border-b border-[#E5E7EB] p-6 md:p-8">
+    <div className="sticky top-[100px] overflow-hidden rounded-[24px] border border-border bg-white shadow-sm">
+      <div className="relative overflow-hidden border-b border-border p-6 md:p-8">
         {profile?.profile_banner_url && (
           <div
             className="absolute inset-0 bg-cover bg-center opacity-20"
@@ -74,7 +74,7 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
           />
         )}
         <div className="relative z-10 flex flex-col items-center">
-          <div className="mb-4 h-24 w-24 overflow-hidden rounded-full border-2 border-[#EAEAEA] shadow-md">
+          <div className="mb-4 h-24 w-24 overflow-hidden rounded-full border-2 border-border shadow-md">
             <SafeImage
               src={profile?.profile_image_url}
               fallback={AVATAR_FALLBACK}
@@ -82,7 +82,7 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
               className="h-full w-full object-cover"
             />
           </div>
-          <h2 className="mb-1 text-xl font-bold text-[#222222]">
+          <h2 className="mb-1 text-xl font-bold text-foreground">
             {profile?.full_name || "Loading..."}
           </h2>
           <p className="mb-4 text-sm text-[#555555]">{profile?.email || ""}</p>
@@ -92,7 +92,7 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
           </div>
           <button
             onClick={() => setActiveTab("Account Settings")}
-            className="w-full rounded-xl border border-[#EAEAEA] bg-white py-2 text-sm font-bold text-[#1C1C1C] transition hover:bg-[#FAFAFA]"
+            className="w-full rounded-xl border border-border bg-white py-2 text-sm font-bold text-foreground transition hover:bg-section"
           >
             Edit Profile
           </button>
@@ -108,12 +108,12 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
               onClick={() => setActiveTab(item.id)}
               className={`relative flex items-center gap-3 px-6 py-3.5 text-left transition-colors md:px-8 ${
                 isActive
-                  ? "bg-[#FAFAFA] font-bold text-[#E23744]"
-                  : "font-medium text-[#555555] hover:bg-[#F8F9FA] hover:text-[#222222]"
+                  ? "bg-section font-bold text-primary"
+                  : "font-medium text-[#555555] hover:bg-section hover:text-foreground"
               }`}
             >
               {isActive && (
-                <div className="absolute bottom-0 left-0 top-0 w-1 rounded-r-md bg-[#E23744]" />
+                <div className="absolute bottom-0 left-0 top-0 w-1 rounded-r-md bg-primary" />
               )}
               {item.icon}
               {item.label}
@@ -122,7 +122,7 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: Props) {
         })}
       </div>
 
-      <div className="border-t border-[#E5E7EB] p-4">
+      <div className="border-t border-border p-4">
         <button
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 font-bold text-red-500 transition hover:bg-red-50"

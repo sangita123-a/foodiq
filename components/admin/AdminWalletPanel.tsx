@@ -113,35 +113,35 @@ export default function AdminWalletPanel() {
   return (
     <AdminShell title="Customer Wallet">
       {message && (
-        <div className="mb-4 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3 text-sm font-bold text-[#111827]">
+        <div className="mb-4 rounded-xl border border-border bg-section px-4 py-3 text-sm font-bold text-foreground">
           {message}
         </div>
       )}
 
       <div className="mb-8 grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-[#E5E7EB] bg-white p-6">
+        <section className="rounded-2xl border border-border bg-white p-6">
           <div className="mb-4 flex items-center gap-2">
-            <Wallet className="h-5 w-5 text-[#E23744]" />
-            <h2 className="text-lg font-black text-[#111827]">Manual Credit / Debit</h2>
+            <Wallet className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-black text-foreground">Manual Credit / Debit</h2>
           </div>
           <div className="space-y-3">
             <input
               placeholder="User ID"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
-              className="w-full rounded-xl border border-[#E5E7EB] px-4 py-2.5 text-sm"
+              className="w-full rounded-xl border border-border px-4 py-2.5 text-sm"
             />
             <input
               placeholder="Amount (₹)"
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full rounded-xl border border-[#E5E7EB] px-4 py-2.5 text-sm"
+              className="w-full rounded-xl border border-border px-4 py-2.5 text-sm"
             />
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full rounded-xl border border-[#E5E7EB] px-4 py-2.5 text-sm"
+              className="w-full rounded-xl border border-border px-4 py-2.5 text-sm"
             >
               <option value="admin">Admin credit</option>
               <option value="cashback">Cashback</option>
@@ -151,7 +151,7 @@ export default function AdminWalletPanel() {
               placeholder="Note (optional)"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              className="w-full rounded-xl border border-[#E5E7EB] px-4 py-2.5 text-sm"
+              className="w-full rounded-xl border border-border px-4 py-2.5 text-sm"
             />
             <div className="flex gap-3">
               <button
@@ -174,21 +174,21 @@ export default function AdminWalletPanel() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-[#E5E7EB] bg-white p-6">
+        <section className="rounded-2xl border border-border bg-white p-6">
           <div className="mb-4 flex items-center gap-2">
-            <RotateCcw className="h-5 w-5 text-[#E23744]" />
-            <h2 className="text-lg font-black text-[#111827]">Pending Refund Requests</h2>
+            <RotateCcw className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-black text-foreground">Pending Refund Requests</h2>
           </div>
           <div className="max-h-80 space-y-3 overflow-y-auto">
             {(refunds as RefundRequest[]).length === 0 ? (
               <p className="text-sm text-[#9CA3AF]">No pending refund requests.</p>
             ) : (
               (refunds as RefundRequest[]).map((r) => (
-                <div key={r.id} className="rounded-xl border border-[#E5E7EB] p-4">
-                  <p className="text-sm font-bold text-[#111827]">
+                <div key={r.id} className="rounded-xl border border-border p-4">
+                  <p className="text-sm font-bold text-foreground">
                     ₹{Number(r.amount).toFixed(2)} · {r.refund_type} → {r.refund_method}
                   </p>
-                  <p className="text-xs text-[#6B7280]">
+                  <p className="text-xs text-gray-text">
                     {r.full_name || r.email} · Order {String(r.order_id).slice(0, 8)}
                   </p>
                   {r.reason && <p className="mt-1 text-xs text-[#9CA3AF]">{r.reason}</p>}
@@ -217,20 +217,20 @@ export default function AdminWalletPanel() {
         </section>
       </div>
 
-      <section className="rounded-2xl border border-[#E5E7EB] bg-white p-6">
+      <section className="rounded-2xl border border-border bg-white p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-black text-[#111827]">All Wallet Transactions</h2>
+          <h2 className="text-lg font-black text-foreground">All Wallet Transactions</h2>
           <input
             placeholder="Filter by user ID"
             value={filterUserId}
             onChange={(e) => setFilterUserId(e.target.value)}
-            className="rounded-xl border border-[#E5E7EB] px-3 py-2 text-sm"
+            className="rounded-xl border border-border px-3 py-2 text-sm"
           />
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead>
-              <tr className="border-b border-[#E5E7EB] text-xs uppercase text-[#9CA3AF]">
+              <tr className="border-b border-border text-xs uppercase text-[#9CA3AF]">
                 <th className="py-2 pr-4">Type</th>
                 <th className="py-2 pr-4">Amount</th>
                 <th className="py-2 pr-4">Balance</th>
@@ -246,7 +246,7 @@ export default function AdminWalletPanel() {
                     {Number(t.amount) >= 0 ? "+" : ""}₹{Math.abs(Number(t.amount)).toFixed(2)}
                   </td>
                   <td className="py-2 pr-4">₹{Number(t.balance_after).toFixed(2)}</td>
-                  <td className="py-2 pr-4 text-[#6B7280]">{t.note || "—"}</td>
+                  <td className="py-2 pr-4 text-gray-text">{t.note || "—"}</td>
                   <td className="py-2 text-[#9CA3AF]">{new Date(t.created_at).toLocaleString("en-IN")}</td>
                 </tr>
               ))}

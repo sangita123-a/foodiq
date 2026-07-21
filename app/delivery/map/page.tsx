@@ -22,7 +22,7 @@ export default function DeliveryMapPage() {
     <DeliveryShell title="Navigation" online={dashboard?.is_online}>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-3">
-          <h2 className="text-lg font-black text-[#111827]">Active Routes</h2>
+          <h2 className="text-lg font-black text-foreground">Active Routes</h2>
           {(assigned || []).map((order) => (
             <button
               key={order.id}
@@ -30,17 +30,17 @@ export default function DeliveryMapPage() {
               onClick={() => setSelectedId(order.id)}
               className={`w-full text-left border rounded-xl p-4 transition-colors ${
                 activeId === order.id
-                  ? "border-[#E23744] bg-[#E23744]/5"
-                  : "border-[#E5E7EB] bg-white hover:bg-[#F8FAFC]"
+                  ? "border-primary bg-primary/5"
+                  : "border-border bg-white hover:bg-section"
               }`}
             >
-              <p className="font-bold text-[#111827]">{order.restaurant.name}</p>
-              <p className="text-xs text-[#6B7280] mt-1 line-clamp-2">
+              <p className="font-bold text-foreground">{order.restaurant.name}</p>
+              <p className="text-xs text-gray-text mt-1 line-clamp-2">
                 {order.customer.address}
               </p>
               <Link
                 href={`/delivery/orders/${order.id}`}
-                className="inline-block mt-2 text-xs font-bold text-[#E23744]"
+                className="inline-block mt-2 text-xs font-bold text-primary"
                 onClick={(e) => e.stopPropagation()}
               >
                 Order details
@@ -48,7 +48,7 @@ export default function DeliveryMapPage() {
             </button>
           ))}
           {!assigned?.length && (
-            <p className="text-sm text-[#6B7280] bg-white border border-[#E5E7EB] rounded-xl p-6 text-center">
+            <p className="text-sm text-gray-text bg-white border border-border rounded-xl p-6 text-center">
               Accept an order to see navigation.
             </p>
           )}

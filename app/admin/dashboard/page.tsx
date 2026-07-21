@@ -46,7 +46,7 @@ export default function AdminDashboardPage() {
   const platformCards = useMemo(
     () => [
       { title: "Total Customers", value: stats?.totalUsers ?? 0, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
-      { title: "Total Restaurants", value: stats?.totalRestaurants ?? 0, icon: Store, color: "text-[#E23744]", bg: "bg-[#E23744]/10" },
+      { title: "Total Restaurants", value: stats?.totalRestaurants ?? 0, icon: Store, color: "text-primary", bg: "bg-primary/10" },
       { title: "Delivery Partners", value: stats?.totalDeliveryPartners ?? 0, icon: Bike, color: "text-violet-500", bg: "bg-violet-500/10" },
       { title: "Total Menu Items", value: stats?.totalMenuItems ?? 0, icon: UtensilsCrossed, color: "text-orange-500", bg: "bg-orange-500/10" },
       {
@@ -82,11 +82,11 @@ export default function AdminDashboardPage() {
           Unable to load admin dashboard. Sign in as an admin.
         </div>
       )}
-      {loading && !stats && <p className="text-[#6B7280] mb-4 text-sm">Loading…</p>}
+      {loading && !stats && <p className="text-gray-text mb-4 text-sm">Loading…</p>}
 
       <div className="mb-8">
-        <h1 className="text-3xl font-black text-[#111827] mb-1">Enterprise Overview</h1>
-        <p className="text-[#6B7280]">Real-time platform analytics across revenue, orders, and operations.</p>
+        <h1 className="text-3xl font-black text-foreground mb-1">Enterprise Overview</h1>
+        <p className="text-gray-text">Real-time platform analytics across revenue, orders, and operations.</p>
       </div>
 
       <section className="mb-8">
@@ -95,9 +95,9 @@ export default function AdminDashboardPage() {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {revenueCards.map((c) => (
-            <div key={c.title} className="bg-white rounded-2xl p-5 border border-[#E5E7EB] shadow-sm">
-              <p className="text-sm font-bold text-[#6B7280] mb-2">{c.title}</p>
-              <p className="text-2xl font-black text-[#111827]">{formatCurrency(c.value)}</p>
+            <div key={c.title} className="bg-white rounded-2xl p-5 border border-border shadow-sm">
+              <p className="text-sm font-bold text-gray-text mb-2">{c.title}</p>
+              <p className="text-2xl font-black text-foreground">{formatCurrency(c.value)}</p>
             </div>
           ))}
         </div>
@@ -109,14 +109,14 @@ export default function AdminDashboardPage() {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {orderCards.map((c) => (
-            <div key={c.title} className="bg-white rounded-2xl p-5 border border-[#E5E7EB] shadow-sm">
+            <div key={c.title} className="bg-white rounded-2xl p-5 border border-border shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-bold text-[#6B7280]">{c.title}</p>
+                <p className="text-sm font-bold text-gray-text">{c.title}</p>
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${c.bg}`}>
                   <c.icon className={`w-4 h-4 ${c.color}`} />
                 </div>
               </div>
-              <p className="text-2xl font-black text-[#111827]">{c.value.toLocaleString("en-IN")}</p>
+              <p className="text-2xl font-black text-foreground">{c.value.toLocaleString("en-IN")}</p>
             </div>
           ))}
         </div>
@@ -128,14 +128,14 @@ export default function AdminDashboardPage() {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {platformCards.map((c) => (
-            <div key={c.title} className="bg-white rounded-2xl p-5 border border-[#E5E7EB] shadow-sm">
+            <div key={c.title} className="bg-white rounded-2xl p-5 border border-border shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-bold text-[#6B7280]">{c.title}</p>
+                <p className="text-sm font-bold text-gray-text">{c.title}</p>
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${c.bg}`}>
                   <c.icon className={`w-4 h-4 ${c.color}`} />
                 </div>
               </div>
-              <p className="text-2xl font-black text-[#111827]">
+              <p className="text-2xl font-black text-foreground">
                 {"raw" in c && c.raw ? c.value : Number(c.value).toLocaleString("en-IN")}
               </p>
             </div>
@@ -144,11 +144,11 @@ export default function AdminDashboardPage() {
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-3xl p-6 border border-[#E5E7EB] shadow-sm">
-          <h2 className="text-lg font-bold text-[#111827] mb-4">Weekly Revenue</h2>
+        <div className="bg-white rounded-3xl p-6 border border-border shadow-sm">
+          <h2 className="text-lg font-bold text-foreground mb-4">Weekly Revenue</h2>
           <div className="h-48 flex items-end gap-2">
             {(stats?.weekly || []).length === 0 && (
-              <p className="text-sm text-[#6B7280]">No weekly data yet.</p>
+              <p className="text-sm text-gray-text">No weekly data yet.</p>
             )}
             {(stats?.weekly || []).map((d) => (
               <div key={d.day} className="flex-1 flex flex-col items-center gap-2">
@@ -157,7 +157,7 @@ export default function AdminDashboardPage() {
                   style={{ height: `${Math.max(8, Math.round((d.revenue / weeklyMax) * 100))}%` }}
                   title={formatCurrency(d.revenue)}
                 />
-                <span className="text-[10px] font-bold text-[#6B7280]">
+                <span className="text-[10px] font-bold text-gray-text">
                   {new Date(d.day).toLocaleDateString("en-US", { weekday: "short" })}
                 </span>
               </div>
@@ -165,23 +165,23 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl p-6 border border-[#E5E7EB] shadow-sm">
-          <h2 className="text-lg font-bold text-[#111827] mb-4">Monthly Analytics</h2>
+        <div className="bg-white rounded-3xl p-6 border border-border shadow-sm">
+          <h2 className="text-lg font-bold text-foreground mb-4">Monthly Analytics</h2>
           <div className="space-y-3 max-h-48 overflow-y-auto custom-scrollbar">
             {(stats?.monthly || []).length === 0 && (
-              <p className="text-sm text-[#6B7280]">No monthly data yet.</p>
+              <p className="text-sm text-gray-text">No monthly data yet.</p>
             )}
             {(stats?.monthly || []).map((m) => (
               <div
                 key={m.month}
-                className="flex items-center justify-between bg-[#F8FAFC] rounded-xl px-4 py-3 border border-[#E5E7EB]"
+                className="flex items-center justify-between bg-section rounded-xl px-4 py-3 border border-border"
               >
-                <span className="text-sm font-bold text-[#111827]">
+                <span className="text-sm font-bold text-foreground">
                   {new Date(m.month).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
                 </span>
                 <div className="text-right">
-                  <p className="text-sm font-black text-[#111827]">{formatCurrency(m.revenue)}</p>
-                  <p className="text-xs text-[#6B7280]">{m.orders} orders</p>
+                  <p className="text-sm font-black text-foreground">{formatCurrency(m.revenue)}</p>
+                  <p className="text-xs text-gray-text">{m.orders} orders</p>
                 </div>
               </div>
             ))}

@@ -23,8 +23,8 @@ export default function DeliveryTimeSection({
   onTimeChange
 }: Props) {
   return (
-    <div className="mb-6 rounded-2xl border border-[#ECECEC] bg-white p-6 shadow-[0_8px_24px_rgba(28,28,28,0.06)]">
-      <h3 className="mb-6 flex items-center gap-2 text-xl font-bold text-[#1C1C1C]">
+    <div className="mb-6 rounded-2xl border border-border bg-white p-6 shadow-[0_8px_24px_rgba(28,28,28,0.06)]">
+      <h3 className="mb-6 flex items-center gap-2 text-xl font-bold text-foreground">
         <Clock className="w-5 h-5 text-primary" />
         Delivery Time
       </h3>
@@ -34,8 +34,8 @@ export default function DeliveryTimeSection({
           onClick={() => onModeChange("Now")}
           className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
             mode === "Now" 
-            ? 'border border-[#E23744] bg-[#FFF5F6] text-[#E23744] shadow-sm' 
-            : 'border border-[#E8E8E8] bg-white text-[#696969] hover:bg-[#FAFAFA]'
+            ? 'border border-primary bg-primary-soft text-primary shadow-sm' 
+            : 'border border-border bg-white text-gray-text hover:bg-section'
           }`}
         >
           Deliver Now
@@ -44,8 +44,8 @@ export default function DeliveryTimeSection({
           onClick={() => onModeChange("Schedule")}
           className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
             mode === "Schedule" 
-            ? 'border border-[#E23744] bg-[#FFF5F6] text-[#E23744] shadow-sm' 
-            : 'border border-[#E8E8E8] bg-white text-[#696969] hover:bg-[#FAFAFA]'
+            ? 'border border-primary bg-primary-soft text-primary shadow-sm' 
+            : 'border border-border bg-white text-gray-text hover:bg-section'
           }`}
         >
           Schedule
@@ -62,14 +62,14 @@ export default function DeliveryTimeSection({
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               <div>
-                <label className="mb-2 block text-xs font-bold uppercase text-[#686B78]">Date</label>
+                <label className="mb-2 block text-xs font-bold uppercase text-muted">Date</label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#686B78]" />
+                  <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
                   {/* Custom styled select to match dark theme instead of raw native input */}
                   <select 
                     value={selectedDate}
                     onChange={(e) => onDateChange(e.target.value)}
-                    className="w-full appearance-none rounded-xl border border-[#ECECEC] bg-white py-3 pl-10 pr-4 text-[#1C1C1C] transition-colors focus:border-primary focus:outline-none"
+                    className="w-full appearance-none rounded-xl border border-border bg-white py-3 pl-10 pr-4 text-foreground transition-colors focus:border-primary focus:outline-none"
                   >
                     <option value="Today">Today</option>
                     <option value="Tomorrow">Tomorrow</option>
@@ -78,13 +78,13 @@ export default function DeliveryTimeSection({
               </div>
               
               <div>
-                <label className="mb-2 block text-xs font-bold uppercase text-[#686B78]">Time</label>
+                <label className="mb-2 block text-xs font-bold uppercase text-muted">Time</label>
                 <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#686B78]" />
+                  <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
                   <select 
                     value={selectedTime}
                     onChange={(e) => onTimeChange(e.target.value)}
-                    className="w-full appearance-none rounded-xl border border-[#ECECEC] bg-white py-3 pl-10 pr-4 text-[#1C1C1C] transition-colors focus:border-primary focus:outline-none"
+                    className="w-full appearance-none rounded-xl border border-border bg-white py-3 pl-10 pr-4 text-foreground transition-colors focus:border-primary focus:outline-none"
                   >
                     <option value="12:00 PM - 12:30 PM">12:00 PM - 12:30 PM</option>
                     <option value="12:30 PM - 01:00 PM">12:30 PM - 01:00 PM</option>

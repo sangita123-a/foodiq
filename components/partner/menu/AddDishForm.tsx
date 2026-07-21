@@ -113,14 +113,14 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
     <form className="space-y-8" onSubmit={handlePublish}>
       
       {/* 1. Image Upload Section */}
-      <section className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-xl">
-        <h3 className="text-xl font-bold text-[#111827] mb-6 flex items-center gap-2">
+      <section className="bg-background rounded-3xl p-6 md:p-8 border border-border shadow-xl">
+        <h3 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
           Dish Image
         </h3>
         
         <div 
           className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300
-            ${dragActive ? 'border-[#E23744] bg-[#E23744]/5' : 'border-[#E5E7EB] bg-[#F8FAFC] hover:border-[#E5E7EB]'}
+            ${dragActive ? 'border-primary bg-primary/5' : 'border-border bg-section hover:border-border'}
             ${showValidation && !dish.image ? 'border-red-500/50' : ''}
           `}
           onDragEnter={handleDrag}
@@ -138,7 +138,7 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
 
           {dish.image ? (
             <div className="flex flex-col items-center">
-              <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-[#E5E7EB] mb-4 shadow-lg">
+              <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-border mb-4 shadow-lg">
                 <SafeImage src={dish.image} fallback={FOOD_FALLBACK} alt="Preview" className="w-full h-full object-cover" />
                 <button 
                   type="button"
@@ -151,17 +151,17 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
               <button 
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="text-[#E23744] font-bold text-sm hover:text-[#111827] transition-colors"
+                className="text-primary font-bold text-sm hover:text-foreground transition-colors"
               >
                 Replace Image
               </button>
             </div>
           ) : (
             <div className="flex flex-col items-center pointer-events-none">
-              <div className="w-16 h-16 rounded-full bg-[#F8FAFC] flex items-center justify-center mb-4">
-                <Upload className="w-8 h-8 text-[#6B7280]" />
+              <div className="w-16 h-16 rounded-full bg-section flex items-center justify-center mb-4">
+                <Upload className="w-8 h-8 text-gray-text" />
               </div>
-              <p className="text-[#111827] font-bold mb-2">Drag & drop an image here, or <span className="text-[#E23744] pointer-events-auto cursor-pointer" onClick={() => fileInputRef.current?.click()}>browse</span></p>
+              <p className="text-foreground font-bold mb-2">Drag & drop an image here, or <span className="text-primary pointer-events-auto cursor-pointer" onClick={() => fileInputRef.current?.click()}>browse</span></p>
               <p className="text-[#9CA3AF] text-xs font-bold uppercase tracking-wider">JPG, PNG, WEBP (Max 5MB)</p>
             </div>
           )}
@@ -169,33 +169,33 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
       </section>
 
       {/* 2. Basic Information */}
-      <section className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-xl space-y-6">
-        <h3 className="text-xl font-bold text-[#111827] flex items-center gap-2">Basic Information</h3>
+      <section className="bg-background rounded-3xl p-6 md:p-8 border border-border shadow-xl space-y-6">
+        <h3 className="text-xl font-bold text-foreground flex items-center gap-2">Basic Information</h3>
         
         <div>
-          <label className="block text-sm font-bold text-[#6B7280] mb-2">Dish Name *</label>
+          <label className="block text-sm font-bold text-gray-text mb-2">Dish Name *</label>
           <input 
             type="text" 
             value={dish.name}
             onChange={(e) => handleChange("name", e.target.value)}
             placeholder="e.g. Hyderabadi Dum Biryani"
-            className={`w-full bg-[#F8FAFC] text-[#111827] border rounded-xl px-4 py-3 focus:outline-none transition-colors
-              ${showValidation && !dish.name ? 'border-red-500 focus:border-red-500' : 'border-[#E5E7EB] focus:border-[#E23744]'}
+            className={`w-full bg-section text-foreground border rounded-xl px-4 py-3 focus:outline-none transition-colors
+              ${showValidation && !dish.name ? 'border-red-500 focus:border-red-500' : 'border-border focus:border-primary'}
             `}
           />
           {showValidation && !dish.name && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> Dish Name is required</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-[#6B7280] mb-2">Short Description * (Max 100 chars)</label>
+          <label className="block text-sm font-bold text-gray-text mb-2">Short Description * (Max 100 chars)</label>
           <textarea 
             value={dish.shortDesc}
             onChange={(e) => handleChange("shortDesc", e.target.value)}
             maxLength={100}
             rows={2}
             placeholder="A punchy, tempting description for the menu card."
-            className={`w-full bg-[#F8FAFC] text-[#111827] border rounded-xl px-4 py-3 focus:outline-none transition-colors resize-none
-              ${showValidation && !dish.shortDesc ? 'border-red-500 focus:border-red-500' : 'border-[#E5E7EB] focus:border-[#E23744]'}
+            className={`w-full bg-section text-foreground border rounded-xl px-4 py-3 focus:outline-none transition-colors resize-none
+              ${showValidation && !dish.shortDesc ? 'border-red-500 focus:border-red-500' : 'border-border focus:border-primary'}
             `}
           />
           {showValidation && !dish.shortDesc && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> Short description is required</p>}
@@ -203,12 +203,12 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Category *</label>
+            <label className="block text-sm font-bold text-gray-text mb-2">Category *</label>
             <select 
               value={dish.category}
               onChange={(e) => handleChange("category", e.target.value)}
-              className={`w-full bg-[#F8FAFC] text-[#111827] border rounded-xl px-4 py-3 focus:outline-none transition-colors appearance-none cursor-pointer
-                ${showValidation && !dish.category ? 'border-red-500 focus:border-red-500' : 'border-[#E5E7EB] focus:border-[#E23744]'}
+              className={`w-full bg-section text-foreground border rounded-xl px-4 py-3 focus:outline-none transition-colors appearance-none cursor-pointer
+                ${showValidation && !dish.category ? 'border-red-500 focus:border-red-500' : 'border-border focus:border-primary'}
               `}
             >
               <option value="" disabled>Select Category</option>
@@ -220,8 +220,8 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
             </select>
           </div>
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Food Type</label>
-            <div className="flex bg-[#F8FAFC] rounded-xl p-1 border border-[#E5E7EB] h-[50px]">
+            <label className="block text-sm font-bold text-gray-text mb-2">Food Type</label>
+            <div className="flex bg-section rounded-xl p-1 border border-border h-[50px]">
               {["Veg", "Non-Veg", "Egg"].map((type) => (
                 <button
                   key={type}
@@ -230,7 +230,7 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
                   className={`flex-1 rounded-lg text-sm font-bold transition-colors ${
                     dish.foodType === type 
                       ? (type === 'Veg' ? 'bg-green-500/20 text-green-400' : type === 'Non-Veg' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400')
-                      : 'text-[#9CA3AF] hover:text-[#111827] hover:bg-[#F8FAFC]'
+                      : 'text-[#9CA3AF] hover:text-foreground hover:bg-section'
                   }`}
                 >
                   {type}
@@ -242,36 +242,36 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
       </section>
 
       {/* 3. Pricing */}
-      <section className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-xl space-y-6">
-        <h3 className="text-xl font-bold text-[#111827] flex items-center gap-2">Pricing</h3>
+      <section className="bg-background rounded-3xl p-6 md:p-8 border border-border shadow-xl space-y-6">
+        <h3 className="text-xl font-bold text-foreground flex items-center gap-2">Pricing</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Regular Price (₹)</label>
+            <label className="block text-sm font-bold text-gray-text mb-2">Regular Price (₹)</label>
             <input 
               type="number" 
               value={dish.regularPrice || ""}
               onChange={(e) => handleChange("regularPrice", parseFloat(e.target.value))}
-              className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 focus:outline-none focus:border-[#E23744] transition-colors"
+              className="w-full bg-section text-foreground border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-primary transition-colors"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Discount Price (₹)</label>
+            <label className="block text-sm font-bold text-gray-text mb-2">Discount Price (₹)</label>
             <input 
               type="number" 
               value={dish.discountPrice || ""}
               onChange={(e) => handleChange("discountPrice", parseFloat(e.target.value))}
-              className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 focus:outline-none focus:border-[#E23744] transition-colors"
+              className="w-full bg-section text-foreground border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-primary transition-colors"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Cost Price (₹)</label>
+            <label className="block text-sm font-bold text-gray-text mb-2">Cost Price (₹)</label>
             <input 
               type="number" 
               value={dish.costPrice || ""}
               onChange={(e) => handleChange("costPrice", parseFloat(e.target.value))}
               placeholder="Optional"
-              className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 focus:outline-none focus:border-[#E23744] transition-colors"
+              className="w-full bg-section text-foreground border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-primary transition-colors"
             />
           </div>
         </div>
@@ -291,21 +291,21 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
       </section>
 
       {/* 4. Details & Spice */}
-      <section className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-xl space-y-6">
-        <h3 className="text-xl font-bold text-[#111827] flex items-center gap-2">Details & Properties</h3>
+      <section className="bg-background rounded-3xl p-6 md:p-8 border border-border shadow-xl space-y-6">
+        <h3 className="text-xl font-bold text-foreground flex items-center gap-2">Details & Properties</h3>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-xs font-bold text-[#9CA3AF] uppercase tracking-wider mb-2">Serving Size</label>
-            <input type="text" placeholder="e.g. 2 Persons" value={dish.servingSize} onChange={e => handleChange("servingSize", e.target.value)} className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-2 text-sm focus:border-[#E23744] outline-none" />
+            <input type="text" placeholder="e.g. 2 Persons" value={dish.servingSize} onChange={e => handleChange("servingSize", e.target.value)} className="w-full bg-section text-foreground border border-border rounded-xl px-4 py-2 text-sm focus:border-primary outline-none" />
           </div>
           <div>
             <label className="block text-xs font-bold text-[#9CA3AF] uppercase tracking-wider mb-2">Prep Time</label>
-            <input type="text" placeholder="e.g. 20 Mins" value={dish.prepTime} onChange={e => handleChange("prepTime", e.target.value)} className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-2 text-sm focus:border-[#E23744] outline-none" />
+            <input type="text" placeholder="e.g. 20 Mins" value={dish.prepTime} onChange={e => handleChange("prepTime", e.target.value)} className="w-full bg-section text-foreground border border-border rounded-xl px-4 py-2 text-sm focus:border-primary outline-none" />
           </div>
           <div>
             <label className="block text-xs font-bold text-[#9CA3AF] uppercase tracking-wider mb-2">Calories</label>
-            <input type="text" placeholder="e.g. 450" value={dish.calories} onChange={e => handleChange("calories", e.target.value)} className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-2 text-sm focus:border-[#E23744] outline-none" />
+            <input type="text" placeholder="e.g. 450" value={dish.calories} onChange={e => handleChange("calories", e.target.value)} className="w-full bg-section text-foreground border border-border rounded-xl px-4 py-2 text-sm focus:border-primary outline-none" />
           </div>
           <div>
             <label className="block text-xs font-bold text-[#9CA3AF] uppercase tracking-wider mb-2">Spice Level</label>
@@ -314,7 +314,7 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
               min="1" max="4" step="1"
               value={dish.spiceLevel}
               onChange={(e) => handleChange("spiceLevel", parseInt(e.target.value))}
-              className="w-full h-2 bg-[#F8FAFC] rounded-lg appearance-none cursor-pointer accent-[#E23744]"
+              className="w-full h-2 bg-section rounded-lg appearance-none cursor-pointer accent-primary"
             />
             <div className="flex justify-between text-xs mt-1 text-[#9CA3AF]">
               <span>Mild</span><span>Extra</span>
@@ -324,16 +324,16 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
       </section>
 
       {/* 5. Customization */}
-      <section className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-xl space-y-6">
+      <section className="bg-background rounded-3xl p-6 md:p-8 border border-border shadow-xl space-y-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-bold text-[#111827] flex items-center gap-2">Customizations</h3>
-          <button type="button" onClick={addCustomization} className="text-[#E23744] font-bold text-sm hover:text-[#111827] transition-colors flex items-center gap-1">
+          <h3 className="text-xl font-bold text-foreground flex items-center gap-2">Customizations</h3>
+          <button type="button" onClick={addCustomization} className="text-primary font-bold text-sm hover:text-foreground transition-colors flex items-center gap-1">
             <Plus className="w-4 h-4"/> Add Option
           </button>
         </div>
         
         {dish.customizations.length === 0 ? (
-          <div className="text-center py-6 border-2 border-dashed border-[#E5E7EB] rounded-xl">
+          <div className="text-center py-6 border-2 border-dashed border-border rounded-xl">
             <p className="text-[#9CA3AF] text-sm">No customization options added. Add toppings, add-ons, or variants.</p>
           </div>
         ) : (
@@ -345,14 +345,14 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
                   placeholder="Option Name (e.g. Extra Cheese)" 
                   value={cust.name}
                   onChange={(e) => updateCustomization(cust.id, "name", e.target.value)}
-                  className="flex-1 bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#E23744] outline-none"
+                  className="flex-1 bg-section text-foreground border border-border rounded-lg px-3 py-2 text-sm focus:border-primary outline-none"
                 />
                 <input 
                   type="number" 
                   placeholder="Additional Price (₹)" 
                   value={cust.price || ""}
                   onChange={(e) => updateCustomization(cust.id, "price", parseFloat(e.target.value))}
-                  className="w-32 bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#E23744] outline-none"
+                  className="w-32 bg-section text-foreground border border-border rounded-lg px-3 py-2 text-sm focus:border-primary outline-none"
                 />
                 <button type="button" onClick={() => removeCustomization(cust.id)} className="p-2 text-[#9CA3AF] hover:text-red-500 transition-colors">
                   <X className="w-5 h-5"/>
@@ -364,15 +364,15 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
       </section>
 
       {/* 6. Settings & Badges */}
-      <section className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-xl space-y-6">
-        <h3 className="text-xl font-bold text-[#111827] flex items-center gap-2">Settings & Badges</h3>
+      <section className="bg-background rounded-3xl p-6 md:p-8 border border-border shadow-xl space-y-6">
+        <h3 className="text-xl font-bold text-foreground flex items-center gap-2">Settings & Badges</h3>
         
         <div>
-          <label className="block text-sm font-bold text-[#6B7280] mb-3">Promotional Badges</label>
+          <label className="block text-sm font-bold text-gray-text mb-3">Promotional Badges</label>
           <div className="flex flex-wrap gap-3">
             {[
               { key: 'bestseller', label: "Bestseller", color: "hover:border-yellow-500 hover:text-yellow-500", active: "border-yellow-500 bg-yellow-500/10 text-yellow-500" },
-              { key: 'trending', label: "Trending", color: "hover:border-[#E23744] hover:text-[#E23744]", active: "border-[#E23744] bg-[#E23744]/10 text-[#E23744]" },
+              { key: 'trending', label: "Trending", color: "hover:border-primary hover:text-primary", active: "border-primary bg-primary/10 text-primary" },
               { key: 'chefsSpecial', label: "Chef's Special", color: "hover:border-red-500 hover:text-red-500", active: "border-red-500 bg-red-500/10 text-red-500" },
               { key: 'healthyChoice', label: "Healthy Choice", color: "hover:border-green-500 hover:text-green-500", active: "border-green-500 bg-green-500/10 text-green-500" },
               { key: 'newArrival', label: "New Arrival", color: "hover:border-blue-500 hover:text-blue-500", active: "border-blue-500 bg-blue-500/10 text-blue-500" }
@@ -383,7 +383,7 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
                   key={badge.key}
                   type="button"
                   onClick={() => handleBadgeChange(badge.key as keyof DishState["badges"])}
-                  className={`px-4 py-2 rounded-full border text-sm font-bold transition-all ${isActive ? badge.active : `border-[#E5E7EB] text-[#6B7280] bg-[#F8FAFC] ${badge.color}`}`}
+                  className={`px-4 py-2 rounded-full border text-sm font-bold transition-all ${isActive ? badge.active : `border-border text-gray-text bg-section ${badge.color}`}`}
                 >
                   {badge.label}
                 </button>
@@ -393,8 +393,8 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-[#6B7280] mb-3">Availability Status</label>
-          <div className="flex bg-[#F8FAFC] rounded-xl p-1 border border-[#E5E7EB]">
+          <label className="block text-sm font-bold text-gray-text mb-3">Availability Status</label>
+          <div className="flex bg-section rounded-xl p-1 border border-border">
             {["Available", "Out of Stock", "Hidden"].map((status) => (
               <button
                 key={status}
@@ -403,7 +403,7 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
                 className={`flex-1 rounded-lg text-sm font-bold py-2 transition-colors ${
                   dish.availability === status 
                     ? (status === 'Available' ? 'bg-green-500/20 text-green-400' : status === 'Out of Stock' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400')
-                    : 'text-[#9CA3AF] hover:text-[#111827] hover:bg-[#F8FAFC]'
+                    : 'text-[#9CA3AF] hover:text-foreground hover:bg-section'
                 }`}
               >
                 {status}
@@ -415,16 +415,16 @@ export default function AddDishForm({ dish, setDish, onPublish, saving }: AddDis
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row items-center justify-end gap-4 pt-4">
-        <button type="button" className="w-full sm:w-auto px-6 py-4 rounded-xl font-bold text-[#6B7280] bg-[#FFFFFF] hover:bg-[#F8FAFC] border border-[#E5E7EB] transition-colors">
+        <button type="button" className="w-full sm:w-auto px-6 py-4 rounded-xl font-bold text-gray-text bg-background hover:bg-section border border-border transition-colors">
           Cancel
         </button>
-        <button type="button" className="w-full sm:w-auto px-6 py-4 rounded-xl font-bold text-[#111827] bg-[#FFFFFF] hover:bg-[#F8FAFC] border border-[#E5E7EB] transition-colors">
+        <button type="button" className="w-full sm:w-auto px-6 py-4 rounded-xl font-bold text-foreground bg-background hover:bg-section border border-border transition-colors">
           Save Draft
         </button>
         <button 
           type="submit" 
           disabled={saving || (showValidation && !isFormValid)}
-          className="w-full sm:w-auto px-8 py-4 rounded-xl font-black text-white bg-[#E23744] hover:bg-[#C81E34] transition-colors shadow-[0_0_20px_rgba(226, 55, 68,0.3)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+          className="w-full sm:w-auto px-8 py-4 rounded-xl font-black text-white bg-primary hover:bg-primary-hover transition-colors shadow-[0_0_20px_rgba(226, 55, 68,0.3)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
         >
           {saving ? "Saving..." : "Publish Dish"} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
         </button>

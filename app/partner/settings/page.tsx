@@ -82,7 +82,7 @@ const EMPTY_SETTINGS: SettingsState = {
     twoFactorAuth: false,
   },
   branding: {
-    themeColor: "#C81E34",
+    themeColor: "var(--color-primary-hover)",
     primaryBanner: "",
     promoBanner: "",
   },
@@ -247,7 +247,7 @@ export default function PartnerSettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#E23744] selection:text-white">
+    <div className="min-h-screen bg-section flex selection:bg-primary selection:text-white">
       
       <div className="hidden lg:block w-64 flex-shrink-0">
         <PartnerSidebar />
@@ -268,9 +268,9 @@ export default function PartnerSettingsPage() {
                 <SettingsSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
               </div>
 
-              <div className="flex-1 w-full bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-2xl relative overflow-hidden min-h-[600px]">
+              <div className="flex-1 w-full bg-background rounded-3xl p-6 md:p-8 border border-border shadow-2xl relative overflow-hidden min-h-[600px]">
                 
-                <div className="absolute top-0 right-0 w-64 h-64 bg-[#E23744]/5 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
 
                 <AnimatePresence mode="wait">
                   <motion.div

@@ -171,8 +171,8 @@ export default function FoodDetailView({ id }: { id: string }) {
       <main className="min-h-screen bg-white pt-[90px]">
         <Navbar />
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 lg:grid-cols-2">
-          <div className="aspect-[4/3] animate-pulse rounded-3xl bg-[#F8FAFC]" />
-          <div className="h-[520px] animate-pulse rounded-3xl bg-[#F8FAFC]" />
+          <div className="aspect-[4/3] animate-pulse rounded-3xl bg-section" />
+          <div className="h-[520px] animate-pulse rounded-3xl bg-section" />
         </div>
       </main>
     );
@@ -183,8 +183,8 @@ export default function FoodDetailView({ id }: { id: string }) {
       <main className="min-h-screen bg-white pt-[90px]">
         <Navbar />
         <div className="mx-auto max-w-xl px-4 py-24 text-center">
-          <h1 className="mb-3 text-3xl font-black text-[#111827]">Dish not found</h1>
-          <p className="mb-8 text-[#6B7280]">This dish is unavailable or has been removed.</p>
+          <h1 className="mb-3 text-3xl font-black text-foreground">Dish not found</h1>
+          <p className="mb-8 text-gray-text">This dish is unavailable or has been removed.</p>
           <Link href="/" className="rounded-xl bg-primary px-6 py-3 font-bold text-white">
             Browse categories
           </Link>
@@ -242,7 +242,7 @@ export default function FoodDetailView({ id }: { id: string }) {
   };
 
   return (
-    <main className="min-h-screen bg-white pt-[90px] text-[#111827]">
+    <main className="min-h-screen bg-white pt-[90px] text-foreground">
       <CatalogViewTracker
         type="menu_item"
         ready
@@ -255,14 +255,14 @@ export default function FoodDetailView({ id }: { id: string }) {
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-8">
         <Link
           href={backHref}
-          className="mb-8 inline-flex items-center gap-2 text-[#6B7280] hover:text-[#111827]"
+          className="mb-8 inline-flex items-center gap-2 text-gray-text hover:text-foreground"
         >
           <ChevronLeft className="h-4 w-4" /> {isStaticDish ? "Back to collection" : "Back to dishes"}
         </Link>
 
         <section className="grid gap-10 lg:grid-cols-2">
           <div>
-            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-[#E5E7EB]">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-border">
               <SafeImage
                 src={heroImage || FOOD_FALLBACK}
                 fallback={FOOD_FALLBACK}
@@ -277,7 +277,7 @@ export default function FoodDetailView({ id }: { id: string }) {
                 {gallery.slice(0, 3).map((image, index) => (
                   <div
                     key={`${image}-${index}`}
-                    className="relative aspect-[4/3] overflow-hidden rounded-xl border border-[#E5E7EB]"
+                    className="relative aspect-[4/3] overflow-hidden rounded-xl border border-border"
                   >
                     <SafeImage
                       src={image || FOOD_FALLBACK}
@@ -291,7 +291,7 @@ export default function FoodDetailView({ id }: { id: string }) {
             ) : null}
           </div>
 
-          <div className="rounded-3xl border border-[#E5E7EB] bg-white p-6 md:p-9">
+          <div className="rounded-3xl border border-border bg-white p-6 md:p-9">
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <div className={`mb-3 inline-flex items-center gap-2 rounded-lg px-3 py-1 text-xs font-bold ${
@@ -301,19 +301,19 @@ export default function FoodDetailView({ id }: { id: string }) {
                   {food.is_vegetarian ? "VEGETARIAN" : "NON-VEGETARIAN"}
                 </div>
                 <h1 className="text-3xl font-black md:text-5xl">{food.name}</h1>
-                <Link href={`/restaurant/${food.restaurant_id}`} className="mt-2 block text-[#6B7280] hover:text-primary">
+                <Link href={`/restaurant/${food.restaurant_id}`} className="mt-2 block text-gray-text hover:text-primary">
                   {food.restaurant_name}
                 </Link>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => toggleItem(food.id)}
-                  className="rounded-full border border-[#E5E7EB] bg-[#F8FAFC] p-3 hover:bg-[#F8FAFC]"
+                  className="rounded-full border border-border bg-section p-3 hover:bg-section"
                   aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
                 >
                   <Heart className={`h-5 w-5 ${isFavorite ? "fill-primary text-primary" : ""}`} />
                 </button>
-                <button onClick={shareFood} className="rounded-full border border-[#E5E7EB] bg-[#F8FAFC] p-3 hover:bg-[#F8FAFC]" aria-label="Share dish">
+                <button onClick={shareFood} className="rounded-full border border-border bg-section p-3 hover:bg-section" aria-label="Share dish">
                   <Share2 className="h-5 w-5" />
                 </button>
               </div>
@@ -326,7 +326,7 @@ export default function FoodDetailView({ id }: { id: string }) {
                   <span className="text-[#9CA3AF]">({food.review_count} reviews)</span>
                 )}
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#F8FAFC] px-3 py-2 text-[#6B7280]">
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-section px-3 py-2 text-gray-text">
                 <Clock className="h-4 w-4 text-primary" /> {food.preparation_time || 20} min
               </span>
               {food.cuisines?.map((cuisine) => {
@@ -340,7 +340,7 @@ export default function FoodDetailView({ id }: { id: string }) {
                   <Link
                     key={cuisine.slug}
                     href={href}
-                    className="rounded-lg bg-[#F8FAFC] px-3 py-2 text-[#6B7280] hover:text-[#111827]"
+                    className="rounded-lg bg-section px-3 py-2 text-gray-text hover:text-foreground"
                   >
                     {cuisine.name}
                   </Link>
@@ -348,13 +348,13 @@ export default function FoodDetailView({ id }: { id: string }) {
               })}
             </div>
 
-            <p className="mb-7 leading-7 text-[#6B7280]">{food.description}</p>
+            <p className="mb-7 leading-7 text-gray-text">{food.description}</p>
 
             <div className="mb-8">
               <h2 className="mb-3 text-lg font-bold">Ingredients</h2>
               <div className="flex flex-wrap gap-2">
                 {(food.ingredients?.length ? food.ingredients : ["Chef-selected fresh ingredients"]).map((ingredient) => (
-                  <span key={ingredient} className="rounded-full border border-[#E5E7EB] bg-[#F8FAFC] px-3 py-1.5 text-sm text-[#6B7280]">
+                  <span key={ingredient} className="rounded-full border border-border bg-section px-3 py-1.5 text-sm text-gray-text">
                     {ingredient}
                   </span>
                 ))}
@@ -381,7 +381,7 @@ export default function FoodDetailView({ id }: { id: string }) {
                 <button
                   onClick={handleAddToCart}
                   disabled={updatingId === food.id}
-                  className="rounded-xl border border-primary bg-primary/10 px-6 py-3 font-bold text-primary hover:bg-primary hover:text-[#111827]"
+                  className="rounded-xl border border-primary bg-primary/10 px-6 py-3 font-bold text-primary hover:bg-primary hover:text-foreground"
                 >
                   Add to Cart
                 </button>
@@ -417,12 +417,12 @@ export default function FoodDetailView({ id }: { id: string }) {
           {food.reviews?.length ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {food.reviews.map((review) => (
-                <article key={review.id} className="rounded-2xl border border-[#E5E7EB] bg-white p-5">
+                <article key={review.id} className="rounded-2xl border border-border bg-white p-5">
                   <div className="mb-3 flex items-center justify-between">
                     <span className="font-bold">{review.full_name}</span>
                     <span className="flex items-center gap-1 text-yellow-400"><Star className="h-4 w-4 fill-current" />{review.rating}</span>
                   </div>
-                  <p className="text-sm leading-6 text-[#6B7280]">{review.comment || "Enjoyed this order."}</p>
+                  <p className="text-sm leading-6 text-gray-text">{review.comment || "Enjoyed this order."}</p>
                   {review.image_urls && review.image_urls.length > 0 && (
                     <div className="mt-3 flex gap-2 flex-wrap">
                       {review.image_urls.slice(0, 3).map((img, i) => (
@@ -434,14 +434,14 @@ export default function FoodDetailView({ id }: { id: string }) {
                           width={56}
                           height={56}
                           sizes={THUMBNAIL_IMAGE_SIZES}
-                          className="w-14 h-14 rounded-lg object-cover border border-[#E5E7EB]"
+                          className="w-14 h-14 rounded-lg object-cover border border-border"
                         />
                       ))}
                     </div>
                   )}
                   {review.admin_reply && (
                     <p className="mt-2 text-xs text-[#9CA3AF]">
-                      <span className="font-bold text-[#111827]">Restaurant: </span>
+                      <span className="font-bold text-foreground">Restaurant: </span>
                       {review.admin_reply}
                     </p>
                   )}
@@ -449,7 +449,7 @@ export default function FoodDetailView({ id }: { id: string }) {
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-8 text-[#6B7280]">
+            <div className="rounded-2xl border border-border bg-white p-8 text-gray-text">
               No reviews yet. Order this dish and be the first to review it.
             </div>
           )}
@@ -460,7 +460,7 @@ export default function FoodDetailView({ id }: { id: string }) {
           {food.related_items?.length ? (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {food.related_items.map((item) => (
-                <Link key={item.id} href={`/food/${item.id}`} className="group overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white">
+                <Link key={item.id} href={`/food/${item.id}`} className="group overflow-hidden rounded-2xl border border-border bg-white">
                   <div className="relative h-44 overflow-hidden">
                     <SafeImage
                       src={getFoodImage(item.image_url)}
@@ -478,7 +478,7 @@ export default function FoodDetailView({ id }: { id: string }) {
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-8 text-[#6B7280]">
+            <div className="rounded-2xl border border-border bg-white p-8 text-gray-text">
               No related dishes available right now.
             </div>
           )}

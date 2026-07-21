@@ -35,8 +35,8 @@ export default function CouponCard({ coupon }: Props) {
       animate={{ opacity: 1, y: 0 }}
       className={`relative rounded-3xl p-6 border-2 transition-all duration-300 flex flex-col h-full ${
         coupon.isExpired 
-          ? "bg-white border-[#E5E7EB] opacity-60 grayscale" 
-          : "bg-[#F8FAFC] border-dashed border-primary/40 hover:border-primary shadow-[0_0_15px_rgba(226, 55, 68,0.05)] hover:shadow-[0_0_20px_rgba(226, 55, 68,0.15)]"
+          ? "bg-white border-border opacity-60 grayscale" 
+          : "bg-section border-dashed border-primary/40 hover:border-primary shadow-[0_0_15px_rgba(226, 55, 68,0.05)] hover:shadow-[0_0_20px_rgba(226, 55, 68,0.15)]"
       }`}
     >
       {coupon.isExpired && (
@@ -48,7 +48,7 @@ export default function CouponCard({ coupon }: Props) {
       {/* Top Badges */}
       <div className="flex justify-between items-start mb-4">
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border font-bold text-sm ${
-          coupon.isExpired ? "bg-[#F8FAFC] border-[#E5E7EB] text-[#6B7280]" : "bg-primary/10 border-primary/20 text-primary"
+          coupon.isExpired ? "bg-section border-border text-gray-text" : "bg-primary/10 border-primary/20 text-primary"
         }`}>
           <Tag className="w-4 h-4" />
           {coupon.code}
@@ -58,7 +58,7 @@ export default function CouponCard({ coupon }: Props) {
           onClick={handleCopy}
           disabled={coupon.isExpired}
           className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-            copied ? "bg-green-500/20 text-green-400" : "bg-[#F8FAFC] hover:bg-[#F8FAFC] text-[#6B7280]"
+            copied ? "bg-green-500/20 text-green-400" : "bg-section hover:bg-section text-gray-text"
           } ${coupon.isExpired ? "opacity-50 cursor-not-allowed" : ""}`}
           title="Copy Code"
         >
@@ -71,20 +71,20 @@ export default function CouponCard({ coupon }: Props) {
         <h3 className="text-xl font-bold text-white mb-2">{coupon.title}</h3>
         <div className="text-2xl font-black text-green-400 mb-4">{coupon.discountValue}</div>
         
-        <ul className="space-y-2 text-xs font-bold text-[#6B7280]">
+        <ul className="space-y-2 text-xs font-bold text-gray-text">
           <li>• Min. Order: {coupon.minOrder}</li>
           <li>• Valid till: {coupon.expiry}</li>
         </ul>
       </div>
 
-      <div className="border-t border-[#E5E7EB] pt-4 mt-auto">
+      <div className="border-t border-border pt-4 mt-auto">
         <p className="text-[10px] text-[#9CA3AF] leading-tight mb-4">{coupon.terms}</p>
         <button 
           disabled={coupon.isExpired}
           className={`w-full py-3 rounded-xl font-bold transition-colors ${
             coupon.isExpired 
-              ? "bg-[#F8FAFC] text-[#9CA3AF] cursor-not-allowed" 
-              : "bg-[#F8FAFC] hover:bg-primary text-[#111827] border border-[#E5E7EB] hover:border-primary"
+              ? "bg-section text-[#9CA3AF] cursor-not-allowed" 
+              : "bg-section hover:bg-primary text-foreground border border-border hover:border-primary"
           }`}
         >
           Apply Coupon

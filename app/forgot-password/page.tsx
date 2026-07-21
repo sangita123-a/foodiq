@@ -60,9 +60,9 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4 pt-24">
-      <div className="max-w-md w-full bg-[#F8FAFC] border border-[#E5E7EB] p-8 rounded-2xl backdrop-blur-md">
-        <h2 className="text-3xl font-bold text-[#111827] text-center mb-2">Forgot Password</h2>
-        <p className="text-[#6B7280] text-sm text-center mb-6">
+      <div className="max-w-md w-full bg-section border border-border p-8 rounded-2xl backdrop-blur-md">
+        <h2 className="text-3xl font-bold text-foreground text-center mb-2">Forgot Password</h2>
+        <p className="text-gray-text text-sm text-center mb-6">
           {step === "request"
             ? "Enter your email to receive reset instructions."
             : "Enter reset code FOODIQ and your new password."}
@@ -77,13 +77,13 @@ export default function ForgotPasswordPage() {
         {step === "request" ? (
           <form onSubmit={handleRequestReset} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-[#6B7280] mb-2">Email Address</label>
+              <label className="block text-sm font-medium text-gray-text mb-2">Email Address</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[var(--color-primary)]"
+                className="w-full bg-section border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-[var(--color-primary)]"
                 placeholder="Enter your email"
               />
             </div>
@@ -98,35 +98,35 @@ export default function ForgotPasswordPage() {
         ) : (
           <form onSubmit={handleResetPassword} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-[#6B7280] mb-2">Email</label>
+              <label className="block text-sm font-medium text-gray-text mb-2">Email</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[var(--color-primary)]"
+                className="w-full bg-section border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-[var(--color-primary)]"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#6B7280] mb-2">Reset Code</label>
+              <label className="block text-sm font-medium text-gray-text mb-2">Reset Code</label>
               <input
                 type="text"
                 required
                 value={resetCode}
                 onChange={(e) => setResetCode(e.target.value)}
-                className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[var(--color-primary)]"
+                className="w-full bg-section border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-[var(--color-primary)]"
                 placeholder="FOODIQ"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#6B7280] mb-2">New Password</label>
+              <label className="block text-sm font-medium text-gray-text mb-2">New Password</label>
               <input
                 type="password"
                 required
                 minLength={8}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[var(--color-primary)]"
+                className="w-full bg-section border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-[var(--color-primary)]"
                 placeholder="At least 8 characters"
               />
             </div>
@@ -140,14 +140,14 @@ export default function ForgotPasswordPage() {
             <button
               type="button"
               onClick={() => setStep("request")}
-              className="w-full text-[#6B7280] hover:text-[#111827] text-sm"
+              className="w-full text-gray-text hover:text-foreground text-sm"
             >
               Back to email step
             </button>
           </form>
         )}
 
-        <div className="mt-6 text-center text-[#6B7280] text-sm">
+        <div className="mt-6 text-center text-gray-text text-sm">
           Remember your password?{" "}
           <Link href="/login" className="text-[var(--color-primary)] hover:underline">
             Login here

@@ -37,7 +37,7 @@ export default function DeleteAccount() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="bg-[#F8FAFC] rounded-3xl p-6 md:p-10 border border-red-500/20 shadow-2xl relative overflow-hidden"
+      className="bg-section rounded-3xl p-6 md:p-10 border border-red-500/20 shadow-2xl relative overflow-hidden"
     >
       <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 rounded-full blur-[80px] pointer-events-none"></div>
 
@@ -49,7 +49,7 @@ export default function DeleteAccount() {
       </div>
 
       <div className="relative z-10">
-        <p className="text-[#6B7280] font-bold mb-2">Are you sure you want to delete your account?</p>
+        <p className="text-gray-text font-bold mb-2">Are you sure you want to delete your account?</p>
         <p className="text-[#9CA3AF] text-sm max-w-xl mb-8 leading-relaxed">
           This action is permanent and cannot be undone. All your data, including order history, saved addresses, favorite restaurants, and reward points will be permanently erased.
         </p>
@@ -61,7 +61,7 @@ export default function DeleteAccount() {
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             placeholder="Type here..."
-            className="w-full bg-[#F8FAFC] text-white border border-red-500/30 rounded-xl px-4 py-3 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors"
+            className="w-full bg-section text-white border border-red-500/30 rounded-xl px-4 py-3 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors"
           />
         </div>
 

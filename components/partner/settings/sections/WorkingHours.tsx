@@ -19,18 +19,18 @@ export default function WorkingHours({ data, onChange }: WorkingHoursProps) {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-black text-[#111827] flex items-center gap-2 mb-2">
-          <Clock className="w-6 h-6 text-[#E23744]" /> Working Hours
+        <h2 className="text-2xl font-black text-foreground flex items-center gap-2 mb-2">
+          <Clock className="w-6 h-6 text-primary" /> Working Hours
         </h2>
-        <p className="text-[#6B7280] text-sm mb-6">Define your restaurant's operating schedule.</p>
+        <p className="text-gray-text text-sm mb-6">Define your restaurant's operating schedule.</p>
       </div>
 
       <div className="space-y-4">
         {data.map((day, idx) => (
-          <div key={day.day} className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 group hover:border-[#E5E7EB] transition-colors">
+          <div key={day.day} className="bg-section border border-border rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 group hover:border-border transition-colors">
             
             <div className="flex items-center justify-between md:w-48 shrink-0">
-              <span className={`font-bold ${day.isOpen ? 'text-[#111827]' : 'text-[#9CA3AF]'}`}>{day.day}</span>
+              <span className={`font-bold ${day.isOpen ? 'text-foreground' : 'text-[#9CA3AF]'}`}>{day.day}</span>
               
               {/* Custom Checkbox Toggle */}
               <label className="flex items-center cursor-pointer md:mr-4">
@@ -41,10 +41,10 @@ export default function WorkingHours({ data, onChange }: WorkingHoursProps) {
                     checked={!day.isOpen}
                     onChange={() => handleUpdateDay(idx, { isOpen: !day.isOpen })}
                   />
-                  <div className={`block w-10 h-6 rounded-full transition-colors ${!day.isOpen ? 'bg-red-500' : 'bg-[#FFFFFF] border border-[#E5E7EB]'}`}></div>
+                  <div className={`block w-10 h-6 rounded-full transition-colors ${!day.isOpen ? 'bg-red-500' : 'bg-background border border-border'}`}></div>
                   <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${!day.isOpen ? 'transform translate-x-4' : ''}`}></div>
                 </div>
-                <span className="ml-3 text-xs font-bold text-[#6B7280] uppercase tracking-wider hidden md:block">
+                <span className="ml-3 text-xs font-bold text-gray-text uppercase tracking-wider hidden md:block">
                   {day.isOpen ? 'Open' : 'Closed'}
                 </span>
               </label>
@@ -57,7 +57,7 @@ export default function WorkingHours({ data, onChange }: WorkingHoursProps) {
                   type="time" 
                   value={day.openTime}
                   onChange={(e) => handleUpdateDay(idx, { openTime: e.target.value })}
-                  className="bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm flex-1 sm:w-36"
+                  className="bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary transition-colors text-sm flex-1 sm:w-36"
                 />
               </div>
               
@@ -69,7 +69,7 @@ export default function WorkingHours({ data, onChange }: WorkingHoursProps) {
                   type="time" 
                   value={day.closeTime}
                   onChange={(e) => handleUpdateDay(idx, { closeTime: e.target.value })}
-                  className="bg-[#FFFFFF] border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-[#111827] focus:outline-none focus:border-[#E23744] transition-colors text-sm flex-1 sm:w-36"
+                  className="bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary transition-colors text-sm flex-1 sm:w-36"
                 />
               </div>
             </div>

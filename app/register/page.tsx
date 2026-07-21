@@ -63,69 +63,73 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4 pt-24 pb-12">
-      <div className="max-w-md w-full bg-white border border-[#EAEAEA] p-8 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
-        <h2 className="text-3xl font-bold text-[#1C1C1C] text-center mb-6">Create Account</h2>
-        {error && <div className="bg-[#FFF8E6] border border-[#F4B400]/40 text-[#1C1C1C] p-3 rounded-lg mb-6 text-sm">{error}</div>}
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 pt-24 pb-12">
+      <div className="max-w-md w-full bg-background border border-border p-8 rounded-2xl shadow-card">
+        <h2 className="text-3xl font-bold text-foreground text-center mb-6">Create Account</h2>
+        {error && <div className="bg-[#FFFBEB] border border-warning/30 text-foreground p-3 rounded-lg mb-6 text-sm">{error}</div>}
         <form onSubmit={handleRegister} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-[#696969] mb-2">Full Name</label>
+            <label htmlFor="register-name" className="food-label">Full Name</label>
             <input 
+              id="register-name"
               type="text" 
               name="full_name"
               required
               value={formData.full_name}
               onChange={handleChange}
-              className="w-full bg-white border border-[#EAEAEA] rounded-xl px-4 py-3 text-[#1C1C1C] focus:outline-none focus:border-[#D4D4D4] transition-colors"
+              className="food-input"
               placeholder="John Doe"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#696969] mb-2">Email Address</label>
+            <label htmlFor="register-email" className="food-label">Email Address</label>
             <input 
+              id="register-email"
               type="email" 
               name="email"
               required
               value={formData.email}
               onChange={handleChange}
-              className="w-full bg-white border border-[#EAEAEA] rounded-xl px-4 py-3 text-[#1C1C1C] focus:outline-none focus:border-[#D4D4D4] transition-colors"
+              className="food-input"
               placeholder="john@example.com"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#696969] mb-2">Phone Number</label>
+            <label htmlFor="register-phone" className="food-label">Phone Number</label>
             <input 
+              id="register-phone"
               type="tel" 
               name="phone"
               required
               value={formData.phone}
               onChange={handleChange}
-              className="w-full bg-white border border-[#EAEAEA] rounded-xl px-4 py-3 text-[#1C1C1C] focus:outline-none focus:border-[#D4D4D4] transition-colors"
+              className="food-input"
               placeholder="+1 234 567 8900"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#696969] mb-2">Password</label>
+            <label htmlFor="register-password" className="food-label">Password</label>
             <input 
+              id="register-password"
               type="password" 
               name="password"
               required
               value={formData.password}
               onChange={handleChange}
-              className="w-full bg-white border border-[#EAEAEA] rounded-xl px-4 py-3 text-[#1C1C1C] focus:outline-none focus:border-[#D4D4D4] transition-colors"
+              className="food-input"
               placeholder="Create a password"
             />
           </div>
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold py-2.5 rounded-xl text-sm transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 disabled:hover:scale-100"
+            className="food-button food-button-primary w-full py-2.5 text-sm disabled:opacity-70"
           >
             {loading ? "Creating account..." : "Register"}
           </button>
         </form>
-        <div className="mt-6 text-center text-[#6B7280] text-sm">
-          Already have an account? <Link href="/login" className="text-[var(--color-primary)] hover:underline">Login here</Link>
+        <div className="mt-6 text-center text-gray-text text-sm">
+          Already have an account? <Link href="/login" className="text-primary hover:underline">Login here</Link>
         </div>
       </div>
     </div>

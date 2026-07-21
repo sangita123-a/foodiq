@@ -48,39 +48,39 @@ export default function AdminMenuPage() {
     <AdminShell title="Menu Management">
       <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-[#111827]">Platform Menu</h1>
-          <p className="text-[#6B7280]">Review dishes and manage cuisine categories.</p>
+          <h1 className="text-3xl font-black text-foreground">Platform Menu</h1>
+          <p className="text-gray-text">Review dishes and manage cuisine categories.</p>
         </div>
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search dishes…"
-          className="bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+          className="bg-white border border-border rounded-xl px-4 py-2.5 text-sm"
         />
       </div>
 
       <div className="mb-8">
-        <h2 className="text-lg font-bold text-[#111827] mb-3">Categories</h2>
+        <h2 className="text-lg font-bold text-foreground mb-3">Categories</h2>
         <div className="flex flex-wrap gap-2">
           {(categories || []).map((c) => (
-            <span key={c.id} className="bg-white border border-[#E5E7EB] rounded-full px-4 py-2 text-sm font-bold text-[#6B7280]">
-              {c.name} <span className="text-[#E23744]">({c.restaurant_count || 0})</span>
+            <span key={c.id} className="bg-white border border-border rounded-full px-4 py-2 text-sm font-bold text-gray-text">
+              {c.name} <span className="text-primary">({c.restaurant_count || 0})</span>
             </span>
           ))}
         </div>
       </div>
 
-      {isLoading && <p className="text-sm text-[#6B7280] mb-4">Loading…</p>}
+      {isLoading && <p className="text-sm text-gray-text mb-4">Loading…</p>}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {items.map((item) => (
-          <div key={item.id} className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden flex gap-3 p-3">
+          <div key={item.id} className="bg-white rounded-2xl border border-border overflow-hidden flex gap-3 p-3">
             <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
               <SafeImage src={item.image_url || FOOD_FALLBACK} fallback={FOOD_FALLBACK} alt={item.name} className="w-full h-full object-cover" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-[#111827] truncate">{item.name}</p>
-              <p className="text-xs text-[#6B7280] truncate">{item.restaurant_name}</p>
+              <p className="font-bold text-foreground truncate">{item.name}</p>
+              <p className="text-xs text-gray-text truncate">{item.restaurant_name}</p>
               <p className="text-xs text-[#9CA3AF]">{item.category_name || "Uncategorized"} · {item.is_vegetarian ? "Veg" : "Non-Veg"}</p>
               <div className="flex items-center justify-between mt-2">
                 <span className="font-black text-sm">{formatCurrency(item.price)}</span>

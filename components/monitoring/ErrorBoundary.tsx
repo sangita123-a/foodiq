@@ -39,13 +39,13 @@ export default class ErrorBoundary extends Component<Props, State> {
         this.props.fallback || (
           <div className="min-h-[40vh] flex items-center justify-center p-8">
             <div className="text-center max-w-md">
-              <h2 className="text-xl font-bold text-[#111827] mb-2">Something went wrong</h2>
-              <p className="text-sm text-[#6B7280] mb-4">
+              <h2 className="text-xl font-bold text-foreground mb-2">Something went wrong</h2>
+              <p className="text-sm text-gray-text mb-4">
                 The error was logged. Please refresh the page.
               </p>
               <button
                 type="button"
-                className="px-4 py-2 rounded-xl bg-[#E23744] text-white font-bold text-sm"
+                className="px-4 py-2 rounded-xl bg-primary text-white font-bold text-sm"
                 onClick={() => {
                   this.setState({ hasError: false });
                   window.location.reload();

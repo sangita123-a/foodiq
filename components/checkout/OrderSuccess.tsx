@@ -80,7 +80,7 @@ export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false 
       initial={{ scale: 0.9, y: 50 }}
       animate={{ scale: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
-      className="bg-white rounded-3xl p-8 md:p-12 max-w-lg w-full border border-[#EAEAEA] shadow-[0_8px_28px_rgba(0,0,0,0.08)] text-center relative overflow-hidden"
+      className="bg-white rounded-3xl p-8 md:p-12 max-w-lg w-full border border-border shadow-[0_8px_28px_rgba(0,0,0,0.08)] text-center relative overflow-hidden"
     >
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-green-500/20 rounded-full blur-[80px] pointer-events-none" />
 
@@ -93,32 +93,32 @@ export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false 
         <CheckCircle2 className="w-12 h-12 text-green-500" />
       </motion.div>
 
-      <h2 className="text-3xl font-black text-[#111827] mb-2 relative z-10">Order Placed!</h2>
-      <p className="text-[#6B7280] mb-8 relative z-10">
+      <h2 className="text-3xl font-black text-foreground mb-2 relative z-10">Order Placed!</h2>
+      <p className="text-gray-text mb-8 relative z-10">
         Your food is being prepared and will be with you shortly.
       </p>
 
-      <div className="bg-white rounded-2xl p-4 mb-6 border border-[#E5E7EB] relative z-10 text-left">
-        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[#E5E7EB]">
+      <div className="bg-white rounded-2xl p-4 mb-6 border border-border relative z-10 text-left">
+        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-border">
           <Package className="w-5 h-5 text-primary" />
           <div>
             <div className="text-xs text-[#9CA3AF]">Order ID</div>
-            <div className="font-bold text-[#111827]">{displayId}</div>
+            <div className="font-bold text-foreground">{displayId}</div>
           </div>
         </div>
-        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[#E5E7EB]">
+        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-border">
           <Clock className="w-5 h-5 text-blue-400" />
           <div>
             <div className="text-xs text-[#9CA3AF]">Estimated Delivery</div>
-            <div className="font-bold text-[#111827]">{etaLabel}</div>
+            <div className="font-bold text-foreground">{etaLabel}</div>
           </div>
         </div>
         {addressLine && (
-          <div className="flex items-start gap-3 mb-4 pb-4 border-b border-[#E5E7EB]">
+          <div className="flex items-start gap-3 mb-4 pb-4 border-b border-border">
             <MapPin className="w-5 h-5 text-primary mt-0.5" />
             <div>
               <div className="text-xs text-[#9CA3AF]">Delivery Address</div>
-              <div className="font-bold text-[#111827] text-sm leading-relaxed">
+              <div className="font-bold text-foreground text-sm leading-relaxed">
                 {order?.full_name ? `${order.full_name} · ` : ""}
                 {addressLine}
               </div>
@@ -126,16 +126,16 @@ export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false 
           </div>
         )}
         {items.length > 0 && (
-          <div className="mb-4 pb-4 border-b border-[#E5E7EB]">
+          <div className="mb-4 pb-4 border-b border-border">
             <div className="text-xs text-[#9CA3AF] mb-2">Ordered Items</div>
             <div className="flex flex-col gap-2">
               {items.map((item, index) => (
                 <div key={`${item.name}-${index}`} className="flex justify-between text-sm">
-                  <span className="text-[#6B7280]">
-                    <span className="text-[#111827] font-medium mr-2">{item.quantity}x</span>
+                  <span className="text-gray-text">
+                    <span className="text-foreground font-medium mr-2">{item.quantity}x</span>
                     {item.name}
                   </span>
-                  <span className="text-[#111827] font-medium">
+                  <span className="text-foreground font-medium">
                     ₹{Number(item.price_at_time || 0) * item.quantity}
                   </span>
                 </div>
@@ -153,7 +153,7 @@ export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false 
           {order?.payment_method && (
             <div className="text-right">
               <div className="text-xs text-[#9CA3AF]">Payment</div>
-              <div className="font-bold text-[#111827] text-sm">
+              <div className="font-bold text-foreground text-sm">
                 {paymentLabels[order.payment_method] || order.payment_method}
               </div>
               {order.razorpay_payment_id && (
@@ -176,7 +176,7 @@ export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false 
           type="button"
           disabled={downloading}
           onClick={handleDownloadInvoice}
-          className="w-full mb-4 bg-white border border-[#E5E7EB] hover:bg-[#F8FAFC] text-[#111827] py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all relative z-10 disabled:opacity-60"
+          className="w-full mb-4 bg-white border border-border hover:bg-section text-foreground py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all relative z-10 disabled:opacity-60"
         >
           <FileDown className="w-5 h-5" />
           {downloading ? "Preparing invoice..." : "Download Invoice (PDF)"}
@@ -185,7 +185,7 @@ export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false 
 
       <Link
         href={`/track-order?id=${orderId}`}
-        className="w-full bg-[#E23744] hover:bg-[#C81E34] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:-translate-y-1 relative z-10"
+        className="w-full bg-primary hover:bg-primary-hover text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:-translate-y-1 relative z-10"
       >
         <Navigation className="w-5 h-5" />
         Track Your Order
@@ -193,7 +193,7 @@ export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false 
 
       <Link
         href="/order-online"
-        className="w-full mt-4 bg-white border border-[#E5E7EB] hover:bg-[#F8FAFC] text-[#111827] py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all relative z-10"
+        className="w-full mt-4 bg-white border border-border hover:bg-section text-foreground py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all relative z-10"
       >
         <ShoppingBag className="w-5 h-5" />
         Continue Shopping

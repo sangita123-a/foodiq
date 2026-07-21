@@ -54,7 +54,7 @@ export default function PartnerDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#E23744] selection:text-white">
+    <div className="min-h-screen bg-section flex selection:bg-primary selection:text-white">
       
       <div className="hidden lg:block w-64 flex-shrink-0">
         <PartnerSidebar />
@@ -79,7 +79,7 @@ export default function PartnerDashboardPage() {
             )}
 
             {isLoading && !data && (
-              <p className="text-[#6B7280] mb-6 text-sm">Loading dashboard…</p>
+              <p className="text-gray-text mb-6 text-sm">Loading dashboard…</p>
             )}
 
             <PartnerWelcome restaurantName={restaurant?.name || "Partner"} />

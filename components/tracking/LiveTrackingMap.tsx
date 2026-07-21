@@ -112,7 +112,7 @@ export default function LiveTrackingMap({
     };
 
     upsert("restaurant", restaurant, "#6B7280", "R");
-    upsert("customer", customer, "#E23744", "H");
+    upsert("customer", customer, "#0F766E", "H");
     upsert("rider", rider, "#111827", "🛵");
 
     // Route line restaurant → rider → customer (when available)
@@ -127,7 +127,7 @@ export default function LiveTrackingMap({
     }
     if (linePts.length >= 2) {
       markersRef.current.route = L.polyline(linePts, {
-        color: "#E23744",
+        color: "#0F766E",
         weight: 4,
         opacity: 0.75,
         dashArray: "8 10",
@@ -144,15 +144,15 @@ export default function LiveTrackingMap({
 
   return (
     <div
-      className={`bg-white rounded-3xl w-full border border-[#E5E7EB] relative overflow-hidden mb-8 ${heightClass} ${className}`}
+      className={`bg-white rounded-3xl w-full border border-border relative overflow-hidden mb-8 ${heightClass} ${className}`}
     >
       <div ref={containerRef} className="absolute inset-0 z-0" />
       {!hasAny && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#F8FAFC]/80 text-sm font-bold text-[#6B7280]">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-section/80 text-sm font-bold text-gray-text">
           Waiting for live location…
         </div>
       )}
-      <div className="absolute bottom-3 right-3 z-10 text-[10px] font-bold uppercase tracking-widest bg-white/90 text-[#6B7280] px-2 py-1 rounded-lg border border-[#E5E7EB]">
+      <div className="absolute bottom-3 right-3 z-10 text-[10px] font-bold uppercase tracking-widest bg-white/90 text-gray-text px-2 py-1 rounded-lg border border-border">
         Live · OpenStreetMap
       </div>
     </div>

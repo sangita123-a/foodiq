@@ -46,7 +46,7 @@ export default function CategoryFilter() {
             onClick={() => handleCategoryClick(cat.slug)}
             aria-pressed={isActive}
             aria-label={`Filter by ${cat.name}`}
-            className="flex flex-col items-center gap-3 cursor-pointer group bg-transparent border-0 p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#E23744]"
+            className="flex flex-col items-center gap-3 cursor-pointer group bg-transparent border-0 p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
           >
             <div
               className={`w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 transition-colors shadow-lg relative ${
@@ -72,7 +72,7 @@ export default function CategoryFilter() {
             </div>
             <span
               className={`font-medium text-sm md:text-base transition-colors ${
-                isActive ? "text-[var(--color-primary)]" : "text-[#111827] group-hover:text-[var(--color-primary)]"
+                isActive ? "text-[var(--color-primary)]" : "text-foreground group-hover:text-[var(--color-primary)]"
               }`}
             >
               {cat.name}

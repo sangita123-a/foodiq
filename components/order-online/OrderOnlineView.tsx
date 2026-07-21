@@ -204,11 +204,11 @@ export default function OrderOnlineView() {
   const cartTotal = subtotal + deliveryFee + taxAmount;
 
   return (
-    <main className="relative min-h-screen bg-white pt-[72px] sm:pt-[80px] md:pt-[90px] selection:bg-[#E23744]/20 overflow-x-hidden">
+    <main className="relative min-h-screen bg-white pt-[72px] sm:pt-[80px] md:pt-[90px] selection:bg-primary/20 overflow-x-hidden">
       <Navbar />
       <FloatingCart />
 
-      <div className="border-b border-[#E8E8E8] bg-[#FAFAFA] py-8">
+      <div className="border-b border-border bg-section py-8">
         <div className="container mx-auto max-w-[1600px] px-4 md:px-8">
           <CompactSearchBar />
         </div>
@@ -217,7 +217,7 @@ export default function OrderOnlineView() {
       <div className="container mx-auto max-w-[1600px] px-4 py-10 md:px-8">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-3xl font-black tracking-tight text-[#1C1C1C] md:text-4xl">
+            <h1 className="text-3xl font-black tracking-tight text-foreground md:text-4xl">
               Order Online
             </h1>
             <p className="mt-1 text-sm font-medium text-[#555555] md:text-base">
@@ -225,8 +225,8 @@ export default function OrderOnlineView() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="rounded-xl border border-[#ECECEC] bg-white px-4 py-2 text-xs font-bold text-[#555555] shadow-sm">
-              <Clock className="mr-1 inline h-3.5 w-3.5 text-[#E23744]" />
+            <div className="rounded-xl border border-border bg-white px-4 py-2 text-xs font-bold text-[#555555] shadow-sm">
+              <Clock className="mr-1 inline h-3.5 w-3.5 text-primary" />
               Est. delivery: {estimatedDelivery}
             </div>
             {totalQuantity > 0 && (
@@ -272,12 +272,12 @@ export default function OrderOnlineView() {
             </div>
             <div className="flex-1 min-w-0">
               <div className="mb-4 sm:mb-6 flex items-center justify-between gap-3">
-                <h2 className="text-xl sm:text-2xl font-bold text-[#222222]">All Restaurants</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground">All Restaurants</h2>
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     type="button"
                     onClick={() => setFilterOpen(true)}
-                    className="lg:hidden touch-target inline-flex items-center gap-1.5 rounded-xl border border-[#ECECEC] bg-white px-3 py-2 text-xs font-bold text-[#555555]"
+                    className="lg:hidden touch-target inline-flex items-center gap-1.5 rounded-xl border border-border bg-white px-3 py-2 text-xs font-bold text-[#555555]"
                   >
                     <SlidersHorizontal className="h-4 w-4" /> Filters
                   </button>
@@ -292,13 +292,13 @@ export default function OrderOnlineView() {
                   {[1, 2, 3, 4, 5, 6].map((i) => (
                     <div
                       key={i}
-                      className="h-[300px] animate-pulse rounded-2xl border border-[#ECECEC] bg-[#F8F9FA]"
+                      className="h-[300px] animate-pulse rounded-2xl border border-border bg-[#F8F9FA]"
                     />
                   ))}
                 </div>
               ) : restaurants.length === 0 ? (
-                <div className="rounded-2xl border border-[#ECECEC] bg-white py-20 text-center shadow-sm">
-                  <p className="text-lg font-bold text-[#222222]">No restaurants found</p>
+                <div className="rounded-2xl border border-border bg-white py-20 text-center shadow-sm">
+                  <p className="text-lg font-bold text-foreground">No restaurants found</p>
                   <p className="mt-2 text-sm text-[#555555]">Try adjusting filters or search.</p>
                 </div>
               ) : (
@@ -326,14 +326,14 @@ export default function OrderOnlineView() {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="flex flex-col gap-4 rounded-2xl border border-[#ECECEC] bg-[#F8F9FA] p-4 lg:flex-row lg:items-center">
+            <div className="flex flex-col gap-4 rounded-2xl border border-border bg-[#F8F9FA] p-4 lg:flex-row lg:items-center">
               <form onSubmit={handleMenuSearch} className="relative flex-1">
                 <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#888888]" />
                 <input
                   value={menuSearch}
                   onChange={(e) => setMenuSearch(e.target.value)}
                   placeholder="Search food, dishes, restaurants…"
-                  className="h-11 w-full rounded-xl border border-[#ECECEC] bg-white pl-10 pr-4 text-sm text-[#222222] outline-none focus:border-[#E23744]"
+                  className="h-11 w-full rounded-xl border border-border bg-white pl-10 pr-4 text-sm text-foreground outline-none focus:border-primary"
                 />
               </form>
               <div className="flex flex-wrap gap-2">
@@ -355,7 +355,7 @@ export default function OrderOnlineView() {
                 <select
                   value={menuSort}
                   onChange={(e) => setMenuSort(e.target.value as typeof menuSort)}
-                  className="h-10 appearance-none rounded-xl border border-[#ECECEC] bg-white pl-9 pr-8 text-xs font-bold text-[#222222]"
+                  className="h-10 appearance-none rounded-xl border border-border bg-white pl-9 pr-8 text-xs font-bold text-foreground"
                 >
                   <option value="rating">Sort: Rating</option>
                   <option value="price_low">Sort: Price Low</option>
@@ -368,8 +368,8 @@ export default function OrderOnlineView() {
             {menuLoading ? (
               <p className="text-sm text-[#555555]">Searching menu…</p>
             ) : searchResults.length === 0 ? (
-              <div className="rounded-2xl border border-[#ECECEC] bg-white py-16 text-center">
-                <p className="font-bold text-[#222222]">No dishes found</p>
+              <div className="rounded-2xl border border-border bg-white py-16 text-center">
+                <p className="font-bold text-foreground">No dishes found</p>
                 <p className="mt-1 text-sm text-[#555555]">Try a different search term or category.</p>
               </div>
             ) : (
@@ -380,9 +380,9 @@ export default function OrderOnlineView() {
                   return (
                     <div
                       key={String(item.id)}
-                      className="group overflow-hidden rounded-[20px] border border-[#ECECEC] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
+                      className="group overflow-hidden rounded-[20px] border border-border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
                     >
-                      <div className="relative h-40 overflow-hidden bg-[#F8F8F8]">
+                      <div className="relative h-40 overflow-hidden bg-footer">
                         <SafeImage
                           src={getFoodImage(item.image_url || item.image)}
                           fallback={FOOD_FALLBACK}
@@ -398,7 +398,7 @@ export default function OrderOnlineView() {
                           aria-label="Favourite"
                         >
                           <Heart
-                            className={`h-4 w-4 ${fav ? "fill-[#E23744] text-[#E23744]" : "text-gray-600"}`}
+                            className={`h-4 w-4 ${fav ? "fill-primary text-primary" : "text-gray-600"}`}
                           />
                         </button>
                         <div className="absolute bottom-3 left-3 flex items-center gap-1 rounded-md bg-[#16A34A] px-2 py-0.5 text-[11px] font-black text-white">
@@ -406,7 +406,7 @@ export default function OrderOnlineView() {
                         </div>
                       </div>
                       <div className="p-4">
-                        <h3 className="line-clamp-1 font-black text-[#1C1C1C] group-hover:text-[#696969]">
+                        <h3 className="line-clamp-1 font-black text-foreground group-hover:text-gray-text">
                           {item.name}
                         </h3>
                         <p className="mt-1 line-clamp-1 text-xs text-[#555555]">
@@ -416,19 +416,19 @@ export default function OrderOnlineView() {
                           <span className="text-lg font-black text-[var(--color-price)]">₹{item.price}</span>
                           <Link
                             href={`/food/${item.id}`}
-                            className="text-xs font-bold text-[#696969] hover:text-[#1C1C1C]"
+                            className="text-xs font-bold text-gray-text hover:text-foreground"
                           >
                             View Details
                           </Link>
                         </div>
                         <div className="mt-3">
                           {qty > 0 ? (
-                            <div className="flex items-center justify-between rounded-xl border border-[#ECECEC] bg-white p-1 text-[#1C1C1C]">
+                            <div className="flex items-center justify-between rounded-xl border border-border bg-white p-1 text-foreground">
                               <button
                                 type="button"
                                 disabled={updatingId === String(item.id)}
                                 onClick={() => updateQuantity(String(item.id), -1)}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[#FAFAFA]"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-section"
                               >
                                 <Minus className="h-4 w-4" />
                               </button>

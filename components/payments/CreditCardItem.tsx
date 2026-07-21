@@ -26,15 +26,15 @@ export default function CreditCardItem({ card, onEdit, onRemove, onSetDefault }:
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className={`bg-[#F8FAFC] rounded-[24px] p-6 md:p-8 border hover:border-[#E5E7EB] transition-all duration-300 relative flex flex-col h-full group shadow-lg ${
-        card.isDefault ? "border-primary/50 shadow-[0_0_15px_rgba(226, 55, 68,0.1)]" : "border-[#E5E7EB]"
+      className={`bg-section rounded-[24px] p-6 md:p-8 border hover:border-border transition-all duration-300 relative flex flex-col h-full group shadow-lg ${
+        card.isDefault ? "border-primary/50 shadow-[0_0_15px_rgba(226, 55, 68,0.1)]" : "border-border"
       }`}
     >
       
       {/* Physical Card Representation */}
-      <div className="bg-gradient-to-br from-[#222] to-[#111] border border-[#E5E7EB] rounded-2xl p-6 mb-8 relative overflow-hidden shadow-2xl">
+      <div className="bg-gradient-to-br from-[#222] to-[#111] border border-border rounded-2xl p-6 mb-8 relative overflow-hidden shadow-2xl">
         {/* Glow effect inside card */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-[#F8FAFC] rounded-full blur-[40px] pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-section rounded-full blur-[40px] pointer-events-none"></div>
 
         <div className="flex justify-between items-start mb-8 relative z-10">
           <div className="w-12 h-8 bg-yellow-600/30 border border-yellow-500/20 rounded-md"></div>
@@ -49,11 +49,11 @@ export default function CreditCardItem({ card, onEdit, onRemove, onSetDefault }:
 
         <div className="flex justify-between items-end relative z-10">
           <div>
-            <div className="text-[10px] text-[#6B7280] uppercase tracking-widest mb-1">Card Holder</div>
+            <div className="text-[10px] text-gray-text uppercase tracking-widest mb-1">Card Holder</div>
             <div className="text-white font-bold uppercase tracking-widest text-sm">{card.name}</div>
           </div>
           <div className="text-right">
-            <div className="text-[10px] text-[#6B7280] uppercase tracking-widest mb-1">Expires</div>
+            <div className="text-[10px] text-gray-text uppercase tracking-widest mb-1">Expires</div>
             <div className="text-white font-bold tracking-widest text-sm">{card.expiry}</div>
           </div>
         </div>
@@ -70,7 +70,7 @@ export default function CreditCardItem({ card, onEdit, onRemove, onSetDefault }:
       <div className="flex flex-wrap items-center gap-3 mt-auto">
         <button 
           onClick={() => onEdit(card)}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-4 py-3 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#E23744]/30 hover:bg-white"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-[#F8F9FA] px-4 py-3 text-sm font-bold text-foreground transition-all hover:border-primary/30 hover:bg-white"
         >
           <Edit2 className="w-4 h-4" /> Edit
         </button>

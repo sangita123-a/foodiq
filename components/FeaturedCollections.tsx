@@ -14,10 +14,10 @@ export default function FeaturedCollections() {
     <section className="w-full overflow-hidden bg-white py-10 md:py-12" id="featured-collections">
       <div className="container mx-auto max-w-[1440px] px-4 md:px-8">
         <div className="mb-8">
-          <h2 className="text-2xl font-black tracking-tight text-[#1C1C1C] md:text-3xl">
+          <h2 className="text-2xl font-black tracking-tight text-foreground md:text-3xl">
             ✨ Featured Collections
           </h2>
-          <p className="mt-1 text-sm font-medium text-[#666666] md:text-base">
+          <p className="mt-1 text-sm font-medium text-gray-text md:text-base">
             Handpicked experiences curated just for you.
           </p>
         </div>
@@ -27,7 +27,7 @@ export default function FeaturedCollections() {
             <Link
               key={collection.slug}
               href={`/collections/${collection.slug}`}
-              className="group/card relative block shrink-0 cursor-pointer overflow-hidden rounded-[20px] border border-[#E8E8E8] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
+              className="group/card relative block shrink-0 cursor-pointer overflow-hidden rounded-[20px] border border-border bg-white shadow-card transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
               style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
             >
               <SafeImage
@@ -52,7 +52,7 @@ export default function FeaturedCollections() {
                 <p className="mt-1 line-clamp-2 text-[11px] font-medium text-white/80 md:text-xs">
                   {collection.description}
                 </p>
-                <span className="mt-2.5 inline-flex items-center gap-1 text-xs font-bold text-white transition-all duration-300 group-hover/card:gap-2 group-hover/card:text-[#E23744]">
+                <span className="mt-2.5 inline-flex items-center gap-1 text-xs font-bold text-white transition-all duration-300 group-hover/card:gap-2 group-hover/card:text-primary">
                   Explore
                   <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/card:translate-x-1" />
                 </span>

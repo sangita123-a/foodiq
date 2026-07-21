@@ -81,13 +81,13 @@ function DishCard({
   onUpdateQty,
 }: DishCardProps) {
   const cardClassName =
-    "group flex shrink-0 flex-col overflow-hidden rounded-2xl border border-[#ECECEC] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]";
+    "group flex shrink-0 flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]";
   const cardStyle = { width: CARD_WIDTH, height: CARD_HEIGHT };
 
   const cardBody = (
     <>
       <div
-        className="relative w-full shrink-0 overflow-hidden rounded-t-2xl bg-[#F8F8F8]"
+        className="relative w-full shrink-0 overflow-hidden rounded-t-2xl bg-footer"
         style={{ height: IMAGE_HEIGHT }}
       >
         <Link href={`/food/${dish.id}`} className="relative block h-full w-full">
@@ -108,15 +108,15 @@ function DishCard({
             e.stopPropagation();
             onFavoriteToggle(dish);
           }}
-          className="touch-target-expand absolute right-0 top-0 z-10 text-[#666666] transition-colors hover:text-[#E23744]"
+          className="touch-target-expand absolute right-0 top-0 z-10 text-gray-text transition-colors hover:text-primary"
           aria-label={isFavorite ? `Remove ${dish.name} from favorites` : `Add ${dish.name} to favorites`}
           aria-pressed={isFavorite}
         >
           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/90 shadow-sm">
             <Heart
               className="h-3 w-3"
-              fill={isFavorite ? "#E23744" : "none"}
-              stroke={isFavorite ? "#E23744" : "currentColor"}
+              fill={isFavorite ? "var(--color-primary)" : "none"}
+              stroke={isFavorite ? "var(--color-primary)" : "currentColor"}
             />
           </span>
         </button>
@@ -125,14 +125,14 @@ function DishCard({
       <div className="flex min-h-0 flex-1 flex-col p-[10px]">
         <Link
           href={`/food/${dish.id}`}
-          className="line-clamp-1 text-[13px] font-extrabold leading-tight text-[#1C1C1C] transition-colors hover:text-[#1C1C1C]"
+          className="line-clamp-1 text-[13px] font-extrabold leading-tight text-foreground transition-colors hover:text-foreground"
         >
           {dish.name}
         </Link>
 
-        <div className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-[#696969]">
+        <div className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-gray-text">
           <Star className="h-3 w-3 food-rating-star" fill="#F4B400" stroke="#F4B400" aria-hidden />
-          <span className="text-[#1C1C1C]">{dish.rating}</span>
+          <span className="text-foreground">{dish.rating}</span>
           <span className="text-[#CCCCCC]">·</span>
           <Clock className="h-2.5 w-2.5" />
           <span>{deliveryTime}</span>
@@ -164,17 +164,17 @@ function DishCard({
               <span>Add</span>
             </button>
           ) : (
-            <div className="flex h-[34px] shrink-0 items-center gap-0.5 rounded-lg border border-[#ECECEC] bg-white px-1">
+            <div className="flex h-[34px] shrink-0 items-center gap-0.5 rounded-lg border border-border bg-white px-1">
               <button
                 type="button"
                 onClick={() => onUpdateQty(dish.id, -1)}
                 disabled={isUpdating}
                 aria-label={`Decrease quantity of ${dish.name}`}
-                className="touch-target-expand flex h-6 w-6 items-center justify-center rounded-md border border-[#ECECEC] text-[#696969] transition-colors hover:bg-[#FAFAFA] disabled:opacity-50"
+                className="touch-target-expand flex h-6 w-6 items-center justify-center rounded-md border border-border text-gray-text transition-colors hover:bg-section disabled:opacity-50"
               >
                 <Minus className="h-3 w-3" aria-hidden="true" />
               </button>
-              <span className="min-w-[12px] text-center text-[10px] font-black text-[#1C1C1C]" aria-live="polite">
+              <span className="min-w-[12px] text-center text-[10px] font-black text-foreground" aria-live="polite">
                 {qty}
               </span>
               <button
@@ -192,7 +192,7 @@ function DishCard({
 
         <Link
           href={`/food/${dish.id}`}
-          className="mt-1 inline-flex items-center justify-center gap-0.5 text-[9px] font-bold text-[#696969] transition-colors hover:text-[#1C1C1C]"
+          className="mt-1 inline-flex items-center justify-center gap-0.5 text-[9px] font-bold text-gray-text transition-colors hover:text-foreground"
         >
           <Eye className="h-2.5 w-2.5" aria-hidden="true" />
           <span>View Details</span>
@@ -341,14 +341,14 @@ export default function TrendingDishes() {
       <div className="container mx-auto max-w-7xl px-4 md:px-8">
         <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#ECECEC] bg-[#FAFAFA] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#696969]">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-border bg-section px-3 py-1 text-xs font-bold uppercase tracking-wider text-gray-text">
               <Flame className="h-4 w-4 text-[var(--color-primary)]" fill="var(--color-primary)" stroke="var(--color-primary)" aria-hidden />
               <span>60 Trending Delicacies</span>
             </div>
-            <h2 className="mb-2 text-3xl font-extrabold tracking-tight text-[#1C1C1C] md:text-4xl">
+            <h2 className="mb-2 text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
               Trending Dishes Right Now
             </h2>
-            <p className="text-base text-[#696969] md:text-lg">
+            <p className="text-base text-gray-text md:text-lg">
               Most ordered dishes across Foodiq with instant delivery.
             </p>
           </div>
@@ -387,7 +387,7 @@ export default function TrendingDishes() {
               ? Array.from({ length: initialVisible }).map((_, i) => (
                   <div
                     key={i}
-                    className="animate-pulse rounded-2xl bg-[#F8F8F8]"
+                    className="animate-pulse rounded-2xl bg-footer"
                     style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
                   />
                 ))

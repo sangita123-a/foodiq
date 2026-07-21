@@ -84,10 +84,10 @@ function SearchContent() {
         }));
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-background relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
 
-      <div className="w-full bg-[#FFFFFF] py-8 border-b border-[#E5E7EB]">
+      <div className="w-full bg-background py-8 border-b border-border">
         <div className="container mx-auto px-4 md:px-8">
           <CompactSearchBar />
         </div>
@@ -95,10 +95,10 @@ function SearchContent() {
 
       <div className="container mx-auto max-w-[1600px] px-4 md:px-8 py-10">
         <div className="food-section-heading text-center md:text-left">
-          <h1 className="text-3xl md:text-4xl font-black text-[#111827] mb-2">
+          <h1 className="text-3xl md:text-4xl font-black text-foreground mb-2">
             Search Results for &quot;{query}&quot;
           </h1>
-          <p className="text-[#6B7280]">
+          <p className="text-gray-text">
             {!query
               ? "Enter a search term above."
               : isLoading && restaurants.length === 0
@@ -110,7 +110,7 @@ function SearchContent() {
         {isLoading && restaurants.length === 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-64 bg-[#F8FAFC] rounded-2xl animate-pulse border border-[#E5E7EB]" />
+              <div key={i} className="h-64 bg-section rounded-2xl animate-pulse border border-border" />
             ))}
           </div>
         )}
@@ -119,16 +119,16 @@ function SearchContent() {
           <>
             {cuisines.length > 0 && (
               <div className="mb-16">
-                <h2 className="text-2xl md:text-3xl font-bold text-[#111827] mb-8">Cuisines</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-8">Cuisines</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                   {cuisines.map((cuisine: any) => (
                     <Link
                       key={cuisine.id || cuisine.slug}
                       href={`/cuisine/${cuisine.slug}`}
-                      className="p-4 rounded-2xl border border-[#E5E7EB] bg-white hover:border-primary transition-all shadow-sm"
+                      className="p-4 rounded-2xl border border-border bg-white hover:border-primary transition-all shadow-sm"
                     >
-                      <h3 className="text-lg font-bold text-[#111827]">{cuisine.name}</h3>
-                      <p className="mt-2 text-sm text-[#6B7280] line-clamp-2">{cuisine.description}</p>
+                      <h3 className="text-lg font-bold text-foreground">{cuisine.name}</h3>
+                      <p className="mt-2 text-sm text-gray-text line-clamp-2">{cuisine.description}</p>
                     </Link>
                   ))}
                 </div>
@@ -137,7 +137,7 @@ function SearchContent() {
 
             {restaurants.length > 0 && (
               <div className="mb-16">
-                <h2 className="text-2xl md:text-3xl font-bold text-[#111827] mb-8">Restaurants</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-8">Restaurants</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {restaurants.map((restaurant: any, idx: number) => (
                     <RestaurantCard
@@ -164,7 +164,7 @@ function SearchContent() {
 
             {menuItems.length > 0 && (
               <div className="mb-16">
-                <h2 className="text-2xl md:text-3xl font-bold text-[#111827] mb-8">Dishes</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-8">Dishes</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {menuItems.map((item: any) => {
                     const mappedItem = {
@@ -187,7 +187,7 @@ function SearchContent() {
                         />
                         <div className="px-4 pb-3 flex items-center justify-between text-xs mt-2">
                           <span className="text-primary font-bold">From: {item.restaurant_name}</span>
-                          <Link href={`/food/${item.id}`} className="font-bold text-[#6B7280] hover:text-[#111827]">
+                          <Link href={`/food/${item.id}`} className="font-bold text-gray-text hover:text-foreground">
                             View Details
                           </Link>
                         </div>
@@ -199,10 +199,10 @@ function SearchContent() {
             )}
 
             {restaurants.length === 0 && menuItems.length === 0 && cuisines.length === 0 && (
-              <div className="text-center py-20 bg-[#FFFFFF] rounded-2xl border border-[#E5E7EB]">
+              <div className="text-center py-20 bg-background rounded-2xl border border-border">
                 <div className="text-6xl mb-4">🍽️</div>
-                <h3 className="text-2xl font-bold text-[#111827] mb-2">No results found</h3>
-                <p className="text-[#6B7280]">Try searching for something else like &quot;Biryani&quot; or &quot;Pizza&quot;.</p>
+                <h3 className="text-2xl font-bold text-foreground mb-2">No results found</h3>
+                <p className="text-gray-text">Try searching for something else like &quot;Biryani&quot; or &quot;Pizza&quot;.</p>
               </div>
             )}
           </>
@@ -216,7 +216,7 @@ function SearchContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center text-[#111827]">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center text-foreground">Loading...</div>}>
       <SearchContent />
     </Suspense>
   );

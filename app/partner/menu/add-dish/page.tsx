@@ -99,17 +99,17 @@ function AddDishContent() {
     <div className="max-w-7xl mx-auto">
       <div className="mb-8">
         <div className="flex items-center gap-2 text-sm text-[#9CA3AF] font-bold uppercase tracking-wider mb-4">
-          <Link href="/partner/dashboard" className="hover:text-[#E23744] transition-colors">Dashboard</Link>
+          <Link href="/partner/dashboard" className="hover:text-primary transition-colors">Dashboard</Link>
           <ChevronRight className="w-4 h-4" />
-          <Link href="/partner/menu" className="hover:text-[#E23744] transition-colors">Menu Management</Link>
+          <Link href="/partner/menu" className="hover:text-primary transition-colors">Menu Management</Link>
           <ChevronRight className="w-4 h-4" />
-          <span className="text-[#111827]">{editId ? "Edit Dish" : "Add New Dish"}</span>
+          <span className="text-foreground">{editId ? "Edit Dish" : "Add New Dish"}</span>
         </div>
         
-        <h1 className="text-3xl md:text-4xl font-black text-[#111827] mb-2 flex items-center gap-3">
+        <h1 className="text-3xl md:text-4xl font-black text-foreground mb-2 flex items-center gap-3">
           {editId ? "Edit Dish" : "Add New Dish"}
         </h1>
-        <p className="text-[#6B7280]">
+        <p className="text-gray-text">
           Create and manage delicious menu items for your restaurant.
         </p>
         {error && (
@@ -136,14 +136,14 @@ function AddDishContent() {
 
 export default function AddDishPage() {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#E23744] selection:text-white">
+    <div className="min-h-screen bg-section flex selection:bg-primary selection:text-white">
       <div className="hidden lg:block w-64 flex-shrink-0">
         <PartnerSidebar />
       </div>
       <div className="flex-1 flex flex-col min-w-0">
         <PartnerHeader />
         <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
-          <Suspense fallback={<p className="text-[#6B7280] text-center py-20">Loading…</p>}>
+          <Suspense fallback={<p className="text-gray-text text-center py-20">Loading…</p>}>
             <AddDishContent />
           </Suspense>
         </main>

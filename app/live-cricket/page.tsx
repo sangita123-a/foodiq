@@ -4,7 +4,7 @@ import LiveCricketView from "@/components/cricket/LiveCricketView";
 
 export default function LiveCricketPage() {
   return (
-    <main className="min-h-screen bg-[#F8F8F8] text-[#1A1A1A]">
+    <main className="min-h-screen bg-footer text-foreground">
       <Navbar />
       <LiveCricketView />
       <Footer />

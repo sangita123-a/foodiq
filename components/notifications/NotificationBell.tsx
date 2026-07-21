@@ -99,7 +99,7 @@ export default function NotificationBell({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="relative h-10 w-10 rounded-xl border border-[#ECECEC] bg-white hover:border-[#E23744]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] flex items-center justify-center transition-all"
+        className="relative h-10 w-10 rounded-xl border border-border bg-white hover:border-primary/30 hover:bg-section text-foreground flex items-center justify-center transition-all"
         aria-label="Notifications"
         aria-expanded={open}
       >
@@ -124,15 +124,15 @@ export default function NotificationBell({
               initial={{ opacity: 0, y: 8, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.98 }}
-              className="absolute right-0 top-full mt-2 z-50 w-[min(100vw-2rem,380px)] bg-white border border-[#E5E7EB] rounded-2xl shadow-[0_20px_50px_rgba(28,28,28,0.15)] overflow-hidden"
+              className="absolute right-0 top-full mt-2 z-50 w-[min(100vw-2rem,380px)] bg-white border border-border rounded-2xl shadow-[0_20px_50px_rgba(28,28,28,0.15)] overflow-hidden"
             >
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[#E5E7EB]">
-                <p className="font-black text-[#111827]">Notifications</p>
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <p className="font-black text-foreground">Notifications</p>
                 <div className="flex items-center gap-1">
                   <button
                     type="button"
                     onClick={markAll}
-                    className="p-1.5 rounded-lg text-[#6B7280] hover:bg-[#F8FAFC]"
+                    className="p-1.5 rounded-lg text-gray-text hover:bg-section"
                     title="Mark all read"
                   >
                     <CheckCheck className="w-4 h-4" />
@@ -140,7 +140,7 @@ export default function NotificationBell({
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
-                    className="p-1.5 rounded-lg text-[#6B7280] hover:bg-[#F8FAFC]"
+                    className="p-1.5 rounded-lg text-gray-text hover:bg-section"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -149,7 +149,7 @@ export default function NotificationBell({
 
               <div className="max-h-[360px] overflow-y-auto">
                 {preview.length === 0 && (
-                  <p className="text-sm text-[#6B7280] px-4 py-8 text-center">
+                  <p className="text-sm text-gray-text px-4 py-8 text-center">
                     No notifications yet.
                   </p>
                 )}
@@ -161,8 +161,8 @@ export default function NotificationBell({
                   return (
                     <div
                       key={n.id}
-                      className={`px-4 py-3 border-b border-[#F3F4F6] hover:bg-[#F8FAFC] ${
-                        !n.is_read ? "bg-[#E23744]/5" : ""
+                      className={`px-4 py-3 border-b border-[#F3F4F6] hover:bg-section ${
+                        !n.is_read ? "bg-primary/5" : ""
                       }`}
                     >
                       <div className="flex gap-2">
@@ -174,8 +174,8 @@ export default function NotificationBell({
                           }}
                           className="flex-1 min-w-0"
                         >
-                          <p className="text-sm font-bold text-[#111827] truncate">{n.title}</p>
-                          <p className="text-xs text-[#6B7280] line-clamp-2 mt-0.5">
+                          <p className="text-sm font-bold text-foreground truncate">{n.title}</p>
+                          <p className="text-xs text-gray-text line-clamp-2 mt-0.5">
                             {cleanNotificationMessage(n.message)}
                           </p>
                           <p className="text-[10px] text-[#9CA3AF] mt-1">
@@ -196,18 +196,18 @@ export default function NotificationBell({
                 })}
               </div>
 
-              <div className="px-4 py-3 border-t border-[#E5E7EB] flex flex-col gap-2">
+              <div className="px-4 py-3 border-t border-border flex flex-col gap-2">
                 <button
                   type="button"
                   onClick={enablePush}
-                  className="text-xs font-bold text-[#E23744] text-left hover:underline"
+                  className="text-xs font-bold text-primary text-left hover:underline"
                 >
                   Enable push notifications
                 </button>
                 <Link
                   href={inboxHref}
                   onClick={() => setOpen(false)}
-                  className="text-sm font-bold text-[#111827] text-center py-2 rounded-xl bg-[#F8FAFC] hover:bg-[#E23744]/10"
+                  className="text-sm font-bold text-foreground text-center py-2 rounded-xl bg-section hover:bg-primary/10"
                 >
                   View all
                 </Link>

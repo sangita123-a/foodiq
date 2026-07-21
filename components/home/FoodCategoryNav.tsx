@@ -26,11 +26,11 @@ export default function FoodCategoryNav() {
   return (
     <section className="bg-white py-6 sm:py-8" id="food-category-nav">
       <div className="mx-auto max-w-[1440px] px-4 md:px-8">
-        <h2 className="text-xl sm:text-2xl font-black tracking-tight text-[#1C1C1C] md:text-3xl">
+        <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground md:text-3xl">
           <span aria-hidden="true">🍽 </span>
           Order Our Best Food Options
         </h2>
-        <p className="mt-1 text-xs font-medium text-[#666666] md:text-sm">
+        <p className="mt-1 text-xs font-medium text-gray-text md:text-sm">
           Choose your favourite food category
         </p>
 
@@ -52,7 +52,7 @@ export default function FoodCategoryNav() {
                   className="h-full w-full object-cover"
                 />
               </div>
-              <span className="w-full text-center text-xs sm:text-xs font-black text-[#1C1C1C] line-clamp-2 leading-tight">
+              <span className="w-full text-center text-xs sm:text-xs font-black text-foreground line-clamp-2 leading-tight">
                 {item.label}
               </span>
             </Link>

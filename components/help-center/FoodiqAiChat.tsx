@@ -58,9 +58,9 @@ export default function FoodiqAiChat({ onSessionId }: Props) {
   };
 
   return (
-    <div className="flex flex-col h-[520px] bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden shadow-sm">
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-[#E5E7EB] bg-gradient-to-r from-[#111827] to-[#1F2937] text-white">
-        <div className="w-10 h-10 rounded-xl bg-[#E23744] flex items-center justify-center">
+    <div className="flex flex-col h-[520px] bg-white rounded-3xl border border-border overflow-hidden shadow-sm">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-gradient-to-r from-[#111827] to-[#1F2937] text-white">
+        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
           <Bot className="w-5 h-5" />
         </div>
         <div>
@@ -71,14 +71,14 @@ export default function FoodiqAiChat({ onSessionId }: Props) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-[#F8FAFC]">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-section">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
                 m.role === "user"
-                  ? "bg-[#E23744] text-white rounded-br-md"
-                  : "bg-white border border-[#E5E7EB] text-[#111827] rounded-bl-md"
+                  ? "bg-primary text-white rounded-br-md"
+                  : "bg-white border border-border text-foreground rounded-bl-md"
               }`}
             >
               <p className="whitespace-pre-wrap">{m.content.replace(/\*\*/g, "")}</p>
@@ -95,13 +95,13 @@ export default function FoodiqAiChat({ onSessionId }: Props) {
         <div ref={bottomRef} />
       </div>
 
-      <div className="px-3 py-2 border-t border-[#E5E7EB] flex flex-wrap gap-1.5">
+      <div className="px-3 py-2 border-t border-border flex flex-wrap gap-1.5">
         {QUICK_PROMPTS.map((p) => (
           <button
             key={p}
             type="button"
             onClick={() => send(p)}
-            className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#F8FAFC] border border-[#E5E7EB] text-[#6B7280] hover:border-[#E23744] hover:text-[#E23744]"
+            className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-section border border-border text-gray-text hover:border-primary hover:text-primary"
           >
             {p}
           </button>
@@ -113,18 +113,18 @@ export default function FoodiqAiChat({ onSessionId }: Props) {
           e.preventDefault();
           send(input);
         }}
-        className="flex gap-2 p-3 border-t border-[#E5E7EB] bg-white"
+        className="flex gap-2 p-3 border-t border-border bg-white"
       >
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask Foodiq AI anything…"
-          className="flex-1 border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#E23744]"
+          className="flex-1 border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
         />
         <button
           type="submit"
           disabled={loading || !input.trim()}
-          className="bg-[#E23744] text-white p-2.5 rounded-xl disabled:opacity-50"
+          className="bg-primary text-white p-2.5 rounded-xl disabled:opacity-50"
         >
           <Send className="w-5 h-5" />
         </button>

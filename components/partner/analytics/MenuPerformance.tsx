@@ -24,14 +24,14 @@ function MenuCard({ item, title, icon: Icon, colorClass, gradientClass, delay }:
 
       <div className="absolute inset-0 p-5 flex flex-col justify-between">
         <div className="flex items-start justify-between">
-          <span className="bg-black/50 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full border border-[#E5E7EB] flex items-center gap-1.5">
+          <span className="bg-black/50 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full border border-border flex items-center gap-1.5">
             <Icon className={`w-3 h-3 ${colorClass}`} /> {title}
           </span>
         </div>
 
         <div>
           <h4 className="text-xl font-black text-white mb-1 line-clamp-1 group-hover:-translate-y-1 transition-transform">{item.name}</h4>
-          <p className="text-white text-sm font-bold bg-black/30 w-max px-2 py-1 rounded backdrop-blur-sm border border-[#E5E7EB] group-hover:-translate-y-1 transition-transform delay-75">
+          <p className="text-white text-sm font-bold bg-black/30 w-max px-2 py-1 rounded backdrop-blur-sm border border-border group-hover:-translate-y-1 transition-transform delay-75">
             <span className="text-[10px] uppercase tracking-wider text-white/80 mr-1">{item.metricLabel}:</span>
             <span className={colorClass}>{item.metricValue}</span>
           </p>
@@ -48,8 +48,8 @@ export default function MenuPerformance({ data }: MenuPerformanceProps) {
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-black text-[#111827] flex items-center gap-2">
-          <Utensils className="w-6 h-6 text-[#E23744]" /> Menu Performance
+        <h3 className="text-xl font-black text-foreground flex items-center gap-2">
+          <Utensils className="w-6 h-6 text-primary" /> Menu Performance
         </h3>
       </div>
 

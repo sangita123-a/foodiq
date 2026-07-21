@@ -13,7 +13,7 @@ export default function TrackOrderByIdPage({
   const { orderId } = use(params);
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-background relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
       <TrackOrderView orderId={orderId} />
       <Footer />

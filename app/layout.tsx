@@ -83,8 +83,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#E23744" },
-    { media: "(prefers-color-scheme: dark)", color: "#E23744" },
+    { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
+    { media: "(prefers-color-scheme: dark)", color: "#FFFFFF" },
   ],
   colorScheme: "light",
   width: "device-width",
@@ -119,7 +119,7 @@ export default async function RootLayout({
           </>
         ) : null}
       </head>
-      <body className="min-h-full flex flex-col bg-white text-[#1C1C1C]">
+      <body className="min-h-full flex flex-col bg-background text-foreground">
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>

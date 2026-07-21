@@ -31,8 +31,8 @@ export default function AdminInventoryPage() {
   return (
     <AdminShell title="Inventory Monitor">
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-[#111827]">Restaurant Inventory Health</h1>
-        <p className="text-[#6B7280]">Platform-wide stock levels and food availability.</p>
+        <h1 className="text-3xl font-black text-foreground">Restaurant Inventory Health</h1>
+        <p className="text-gray-text">Platform-wide stock levels and food availability.</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
@@ -43,18 +43,18 @@ export default function AdminInventoryPage() {
           { label: "Inventory Value", value: `₹${totals.value.toLocaleString()}` },
           { label: "Unavailable Dishes", value: totals.unavailable },
         ].map((c) => (
-          <div key={c.label} className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
+          <div key={c.label} className="bg-white border border-border rounded-2xl p-5">
             <p className="text-xs font-bold uppercase text-[#9CA3AF] mb-1">{c.label}</p>
-            <p className="text-2xl font-black text-[#111827]">{c.value}</p>
+            <p className="text-2xl font-black text-foreground">{c.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden">
-        {isLoading && <p className="p-6 text-sm text-[#6B7280]">Loading…</p>}
+      <div className="bg-white rounded-3xl border border-border overflow-hidden">
+        {isLoading && <p className="p-6 text-sm text-gray-text">Loading…</p>}
         <div className="overflow-x-auto">
           <table className="w-full min-w-[700px] text-left">
-            <thead className="bg-[#F8FAFC] border-b border-[#E5E7EB]">
+            <thead className="bg-section border-b border-border">
               <tr>
                 {["Restaurant", "Items", "Out of Stock", "Low Stock", "Value", "Unavailable Dishes", "Status"].map((h) => (
                   <th key={h} className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">{h}</th>
@@ -63,7 +63,7 @@ export default function AdminInventoryPage() {
             </thead>
             <tbody>
               {(data || []).map((r) => (
-                <tr key={r.id} className="border-b border-[#E5E7EB]">
+                <tr key={r.id} className="border-b border-border">
                   <td className="p-4 font-bold text-sm">{r.name}</td>
                   <td className="p-4 text-sm">{r.item_count}</td>
                   <td className="p-4 text-sm text-red-600 font-bold">{r.out_of_stock}</td>

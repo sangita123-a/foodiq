@@ -57,20 +57,20 @@ export default function AdminRestaurantsPage() {
     <AdminShell title="Restaurant Management">
       <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-[#111827]">Restaurants</h1>
-          <p className="text-[#6B7280]">Approve, suspend, and manage restaurant partners.</p>
+          <h1 className="text-3xl font-black text-foreground">Restaurants</h1>
+          <p className="text-gray-text">Approve, suspend, and manage restaurant partners.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search restaurants…"
-            className="bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#E23744]"
+            className="bg-white border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
           />
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+            className="bg-white border border-border rounded-xl px-4 py-2.5 text-sm"
           >
             <option value="">All statuses</option>
             <option value="pending">Pending</option>
@@ -81,12 +81,12 @@ export default function AdminRestaurantsPage() {
       </div>
 
       {error && <p className="text-red-600 text-sm mb-4">Failed to load restaurants.</p>}
-      {isLoading && <p className="text-[#6B7280] text-sm mb-4">Loading…</p>}
+      {isLoading && <p className="text-gray-text text-sm mb-4">Loading…</p>}
 
-      <div className="bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden shadow-sm">
+      <div className="bg-white rounded-3xl border border-border overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left min-w-[900px]">
-            <thead className="bg-[#F8FAFC] border-b border-[#E5E7EB]">
+            <thead className="bg-section border-b border-border">
               <tr>
                 <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">Restaurant</th>
                 <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">Owner</th>
@@ -98,15 +98,15 @@ export default function AdminRestaurantsPage() {
             </thead>
             <tbody>
               {restaurants.map((r) => (
-                <tr key={r.id} className="border-b border-[#E5E7EB] hover:bg-[#F8FAFC]">
+                <tr key={r.id} className="border-b border-border hover:bg-section">
                   <td className="p-4">
-                    <p className="font-bold text-[#111827]">{r.name}</p>
-                    <p className="text-xs text-[#6B7280] mt-0.5">{r.address || "—"}</p>
+                    <p className="font-bold text-foreground">{r.name}</p>
+                    <p className="text-xs text-gray-text mt-0.5">{r.address || "—"}</p>
                     <p className="text-[10px] text-[#9CA3AF] mt-1">{formatDate(r.created_at)}</p>
                   </td>
                   <td className="p-4 text-sm">
-                    <p className="font-bold text-[#111827]">{r.owner_name || "—"}</p>
-                    <p className="text-xs text-[#6B7280]">{r.owner_email}</p>
+                    <p className="font-bold text-foreground">{r.owner_name || "—"}</p>
+                    <p className="text-xs text-gray-text">{r.owner_email}</p>
                   </td>
                   <td className="p-4">
                     <span className={`text-xs font-bold px-2 py-1 rounded-full border ${
@@ -118,7 +118,7 @@ export default function AdminRestaurantsPage() {
                     }`}>
                       {r.approval_status || "approved"}
                     </span>
-                    <p className="text-[10px] mt-1 text-[#6B7280]">
+                    <p className="text-[10px] mt-1 text-gray-text">
                       {r.is_active ? "Active" : "Suspended"}
                     </p>
                   </td>
@@ -131,7 +131,7 @@ export default function AdminRestaurantsPage() {
                         <button type="button" onClick={() => setApproval(r.id, "rejected")} className="text-xs font-bold text-red-500">Reject</button>
                       </>
                     )}
-                    <button type="button" onClick={() => toggleActive(r)} className="text-xs font-bold text-[#E23744]">
+                    <button type="button" onClick={() => toggleActive(r)} className="text-xs font-bold text-primary">
                       {r.is_active ? "Suspend" : "Activate"}
                     </button>
                     <button type="button" onClick={() => remove(r.id)} className="text-xs font-bold text-red-500">Delete</button>

@@ -58,36 +58,36 @@ export default function DeliveryReviewsPage() {
     <DeliveryShell>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-black text-[#111827]">Your ratings</h1>
-          <p className="text-sm text-[#6B7280] mt-1">
+          <h1 className="text-2xl font-black text-foreground">Your ratings</h1>
+          <p className="text-sm text-gray-text mt-1">
             Feedback from customers after completed deliveries.
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6 flex items-center gap-3">
+        <div className="bg-white rounded-3xl border border-border p-6 flex items-center gap-3">
           <Star className="w-8 h-8 fill-yellow-400 text-yellow-400" />
           <div>
-            <p className="text-xs font-bold text-[#6B7280] uppercase tracking-wider">
+            <p className="text-xs font-bold text-gray-text uppercase tracking-wider">
               Average rating
             </p>
-            <p className="text-3xl font-black text-[#111827]">
+            <p className="text-3xl font-black text-foreground">
               {rating != null ? rating.toFixed(1) : "—"}
             </p>
             <p className="text-xs text-[#9CA3AF] mt-1">{total} reviews</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden">
+        <div className="bg-white rounded-3xl border border-border overflow-hidden">
           {loading ? (
-            <p className="p-6 text-sm text-[#6B7280]">Loading…</p>
+            <p className="p-6 text-sm text-gray-text">Loading…</p>
           ) : reviews.length === 0 ? (
-            <p className="p-6 text-sm text-[#6B7280]">No delivery reviews yet.</p>
+            <p className="p-6 text-sm text-gray-text">No delivery reviews yet.</p>
           ) : (
             <ul className="divide-y divide-[#E5E7EB]">
               {reviews.map((r) => (
                 <li key={r.id} className="p-5">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="font-bold text-[#111827]">
+                    <p className="font-bold text-foreground">
                       {r.full_name || "Customer"}
                     </p>
                     <span className="flex items-center gap-1 text-sm font-bold text-yellow-500">
@@ -95,7 +95,7 @@ export default function DeliveryReviewsPage() {
                       {r.rating}
                     </span>
                   </div>
-                  <p className="text-sm text-[#6B7280] mt-2">
+                  <p className="text-sm text-gray-text mt-2">
                     {r.comment || "No comment."}
                   </p>
                   {r.created_at && (
@@ -108,23 +108,23 @@ export default function DeliveryReviewsPage() {
             </ul>
           )}
           {total > PAGE && (
-            <div className="flex justify-between gap-2 px-5 py-4 border-t border-[#E5E7EB]">
+            <div className="flex justify-between gap-2 px-5 py-4 border-t border-border">
               <button
                 type="button"
                 disabled={page <= 0}
                 onClick={() => setPage((p) => p - 1)}
-                className="text-xs font-bold border border-[#E5E7EB] px-3 py-1.5 rounded-lg disabled:opacity-40"
+                className="text-xs font-bold border border-border px-3 py-1.5 rounded-lg disabled:opacity-40"
               >
                 Previous
               </button>
-              <span className="text-xs text-[#6B7280]">
+              <span className="text-xs text-gray-text">
                 Page {page + 1} / {pages}
               </span>
               <button
                 type="button"
                 disabled={page + 1 >= pages}
                 onClick={() => setPage((p) => p + 1)}
-                className="text-xs font-bold border border-[#E5E7EB] px-3 py-1.5 rounded-lg disabled:opacity-40"
+                className="text-xs font-bold border border-border px-3 py-1.5 rounded-lg disabled:opacity-40"
               >
                 Next
               </button>

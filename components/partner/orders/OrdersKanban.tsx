@@ -18,7 +18,7 @@ export default function OrdersKanban({ orders, onUpdateStatus, onViewDetails }: 
 
   const columns: { id: OrderStatus; title: string; icon: any; color: string }[] = [
     { id: "New", title: "New Orders", icon: Bell, color: "text-yellow-400 border-yellow-400/20 bg-yellow-400/5" },
-    { id: "Preparing", title: "Preparing", icon: ChefHat, color: "text-[#E23744] border-[#E23744]/20 bg-[#E23744]/5" },
+    { id: "Preparing", title: "Preparing", icon: ChefHat, color: "text-primary border-primary/20 bg-primary/5" },
     { id: "Ready for Pickup", title: "Ready", icon: PackageCheck, color: "text-purple-400 border-purple-400/20 bg-purple-400/5" },
     { id: "Picked Up", title: "Picked Up", icon: Bike, color: "text-indigo-400 border-indigo-400/20 bg-indigo-400/5" }
   ];
@@ -56,7 +56,7 @@ export default function OrdersKanban({ orders, onUpdateStatus, onViewDetails }: 
         return (
           <div 
             key={column.id} 
-            className="flex-shrink-0 w-80 bg-[#FFFFFF] rounded-3xl border border-[#E5E7EB] flex flex-col overflow-hidden"
+            className="flex-shrink-0 w-80 bg-background rounded-3xl border border-border flex flex-col overflow-hidden"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, column.id)}
           >
@@ -94,7 +94,7 @@ export default function OrdersKanban({ orders, onUpdateStatus, onViewDetails }: 
               </AnimatePresence>
 
               {columnOrders.length === 0 && (
-                <div className="h-32 flex flex-col items-center justify-center border-2 border-dashed border-[#E5E7EB] rounded-xl text-[#9CA3AF]">
+                <div className="h-32 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl text-[#9CA3AF]">
                   <span className="text-sm font-bold">Drop here</span>
                 </div>
               )}

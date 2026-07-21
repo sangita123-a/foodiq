@@ -23,13 +23,13 @@ export default function PartnerWelcome({ restaurantName = "Partner" }: PartnerWe
     >
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black text-[#111827] mb-2">
+          <h1 className="text-3xl md:text-4xl font-black text-foreground mb-2">
             Welcome Back, {restaurantName}! 👋
           </h1>
-          <p className="text-[#6B7280]">Here&apos;s what&apos;s happening with your restaurant today.</p>
+          <p className="text-gray-text">Here&apos;s what&apos;s happening with your restaurant today.</p>
         </div>
-        <div className="bg-[#FFFFFF] px-5 py-2.5 rounded-xl border border-[#E5E7EB] inline-flex self-start md:self-auto">
-          <span className="text-sm font-bold text-[#6B7280]">{currentDate}</span>
+        <div className="bg-background px-5 py-2.5 rounded-xl border border-border inline-flex self-start md:self-auto">
+          <span className="text-sm font-bold text-gray-text">{currentDate}</span>
         </div>
       </div>
     </motion.div>

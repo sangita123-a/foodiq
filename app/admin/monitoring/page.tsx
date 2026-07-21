@@ -96,17 +96,17 @@ export default function AdminMonitoringPage() {
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black text-[#111827] flex items-center gap-2">
-              <Activity className="w-6 h-6 text-[#E23744]" /> Monitoring & Security
+            <h1 className="text-2xl font-black text-foreground flex items-center gap-2">
+              <Activity className="w-6 h-6 text-primary" /> Monitoring & Security
             </h1>
-            <p className="text-sm text-[#6B7280] mt-1">
+            <p className="text-sm text-gray-text mt-1">
               Server health, audits, errors, logs, and backups
             </p>
           </div>
           <button
             type="button"
             onClick={loadOverview}
-            className="px-4 py-2 rounded-xl border border-[#E5E7EB] font-bold text-sm inline-flex items-center gap-2"
+            className="px-4 py-2 rounded-xl border border-border font-bold text-sm inline-flex items-center gap-2"
           >
             <RefreshCw className="w-4 h-4" /> Refresh
           </button>
@@ -127,7 +127,7 @@ export default function AdminMonitoringPage() {
               type="button"
               onClick={() => setTab(id)}
               className={`px-4 py-2 rounded-xl text-sm font-bold ${
-                tab === id ? "bg-[#E23744] text-white" : "bg-white border border-[#E5E7EB] text-[#111827]"
+                tab === id ? "bg-primary text-white" : "bg-white border border-border text-foreground"
               }`}
             >
               {label}
@@ -138,7 +138,7 @@ export default function AdminMonitoringPage() {
         {tab === "overview" && (
           <>
             {loading && !data ? (
-              <div className="h-40 animate-pulse bg-[#F8FAFC] rounded-2xl" />
+              <div className="h-40 animate-pulse bg-section rounded-2xl" />
             ) : !data ? (
               <p className="text-red-600 text-sm">Unable to load monitoring data. Sign in as admin.</p>
             ) : (
@@ -154,19 +154,19 @@ export default function AdminMonitoringPage() {
                       icon: CheckCircle2,
                     },
                   ].map((c) => (
-                    <div key={c.label} className="bg-white border border-[#E5E7EB] rounded-2xl p-4">
-                      <div className="flex items-center gap-2 text-[#6B7280] text-xs font-bold uppercase mb-2">
-                        <c.icon className="w-4 h-4 text-[#E23744]" /> {c.label}
+                    <div key={c.label} className="bg-white border border-border rounded-2xl p-4">
+                      <div className="flex items-center gap-2 text-gray-text text-xs font-bold uppercase mb-2">
+                        <c.icon className="w-4 h-4 text-primary" /> {c.label}
                       </div>
-                      <div className="text-2xl font-black text-[#111827]">{c.value}</div>
+                      <div className="text-2xl font-black text-foreground">{c.value}</div>
                     </div>
                   ))}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 space-y-3">
-                    <h3 className="font-bold text-[#111827] flex items-center gap-2">
-                      <Server className="w-4 h-4 text-[#E23744]" /> Server Health
+                  <div className="bg-white border border-border rounded-2xl p-5 space-y-3">
+                    <h3 className="font-bold text-foreground flex items-center gap-2">
+                      <Server className="w-4 h-4 text-primary" /> Server Health
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       <StatusPill ok={data.status === "healthy"} label={data.status} />
@@ -183,7 +183,7 @@ export default function AdminMonitoringPage() {
                       <StatusPill ok label={`SMS ${svc.sms?.provider}`} />
                       <StatusPill ok label={`Storage ${svc.storage?.provider || "—"}`} />
                     </div>
-                    <div className="text-sm text-[#6B7280] grid grid-cols-2 gap-2 pt-2">
+                    <div className="text-sm text-gray-text grid grid-cols-2 gap-2 pt-2">
                       <div>Uptime: {proc.uptime_sec}s</div>
                       <div>CPU load 1m: {proc.cpu?.load_1m}</div>
                       <div>Heap: {proc.memory?.heap_used_mb} MB</div>
@@ -195,22 +195,22 @@ export default function AdminMonitoringPage() {
                     </div>
                   </div>
 
-                  <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
-                    <h3 className="font-bold text-[#111827] mb-3 flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-[#E23744]" /> Alerts
+                  <div className="bg-white border border-border rounded-2xl p-5">
+                    <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-primary" /> Alerts
                     </h3>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                       {(data.alerts || []).length === 0 && (
-                        <p className="text-sm text-[#6B7280]">No alerts</p>
+                        <p className="text-sm text-gray-text">No alerts</p>
                       )}
                       {(data.alerts || []).map((a: any) => (
                         <div
                           key={a.id}
-                          className="flex items-start justify-between gap-2 p-3 rounded-xl bg-[#F8FAFC] border border-[#E5E7EB]"
+                          className="flex items-start justify-between gap-2 p-3 rounded-xl bg-section border border-border"
                         >
                           <div>
-                            <p className="text-sm font-bold text-[#111827]">{a.title}</p>
-                            <p className="text-xs text-[#6B7280]">{a.message}</p>
+                            <p className="text-sm font-bold text-foreground">{a.title}</p>
+                            <p className="text-xs text-gray-text">{a.message}</p>
                             <p className="text-[10px] text-[#9CA3AF] mt-1">
                               {a.severity} · {a.status} · {new Date(a.created_at).toLocaleString()}
                             </p>
@@ -218,7 +218,7 @@ export default function AdminMonitoringPage() {
                           {a.status === "open" && (
                             <button
                               type="button"
-                              className="text-xs font-bold text-[#E23744]"
+                              className="text-xs font-bold text-primary"
                               onClick={async () => {
                                 await ackAlert(a.id);
                                 loadOverview();
@@ -234,12 +234,12 @@ export default function AdminMonitoringPage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
+                  <div className="bg-white border border-border rounded-2xl p-5">
                     <h3 className="font-bold mb-3">Recent Errors</h3>
                     <ul className="space-y-2 text-sm max-h-56 overflow-y-auto">
                       {(data.recent_errors || []).map((e: any) => (
                         <li key={e.id} className="border-b border-[#F3F4F6] pb-2">
-                          <span className="font-bold text-[#111827]">{e.source}</span> — {e.message}
+                          <span className="font-bold text-foreground">{e.source}</span> — {e.message}
                           <div className="text-[10px] text-[#9CA3AF]">
                             {e.path} · {new Date(e.created_at).toLocaleString()}
                           </div>
@@ -247,7 +247,7 @@ export default function AdminMonitoringPage() {
                       ))}
                     </ul>
                   </div>
-                  <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
+                  <div className="bg-white border border-border rounded-2xl p-5">
                     <h3 className="font-bold mb-3">Recent Audits</h3>
                     <ul className="space-y-2 text-sm max-h-56 overflow-y-auto">
                       {(data.recent_audits || []).map((a: any) => (
@@ -273,7 +273,7 @@ export default function AdminMonitoringPage() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search…"
-              className="flex-1 px-4 py-2 rounded-xl border border-[#E5E7EB] text-sm"
+              className="flex-1 px-4 py-2 rounded-xl border border-border text-sm"
             />
             {tab === "audits" && (
               <a
@@ -309,9 +309,9 @@ export default function AdminMonitoringPage() {
         )}
 
         {tab === "audits" && (
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
+          <div className="bg-white border border-border rounded-2xl overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-[#F8FAFC] text-left text-xs uppercase text-[#6B7280]">
+              <thead className="bg-section text-left text-xs uppercase text-gray-text">
                 <tr>
                   <th className="p-3">Time</th>
                   <th className="p-3">User</th>
@@ -321,13 +321,13 @@ export default function AdminMonitoringPage() {
               </thead>
               <tbody>
                 {audits.map((a) => (
-                  <tr key={a.id as string} className="border-t border-[#E5E7EB]">
+                  <tr key={a.id as string} className="border-t border-border">
                     <td className="p-3 whitespace-nowrap">
                       {new Date(String(a.created_at)).toLocaleString()}
                     </td>
                     <td className="p-3">{String(a.user_email || a.role || "—")}</td>
                     <td className="p-3 font-bold">{String(a.action)}</td>
-                    <td className="p-3 text-[#6B7280]">
+                    <td className="p-3 text-gray-text">
                       {String(a.ip_address || "—")} · {String(a.browser || "")}/{String(a.device || "")}
                     </td>
                   </tr>
@@ -340,20 +340,20 @@ export default function AdminMonitoringPage() {
         {tab === "errors" && (
           <div className="space-y-2">
             {errors.map((e) => (
-              <div key={e.id as string} className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+              <div key={e.id as string} className="bg-white border border-border rounded-xl p-4">
                 <div className="flex justify-between gap-2">
-                  <p className="font-bold text-[#111827] text-sm">
+                  <p className="font-bold text-foreground text-sm">
                     [{String(e.source)}] {String(e.message)}
                   </p>
                   <span className="text-[10px] text-[#9CA3AF]">
                     {new Date(String(e.created_at)).toLocaleString()}
                   </span>
                 </div>
-                <p className="text-xs text-[#6B7280] mt-1">
+                <p className="text-xs text-gray-text mt-1">
                   {String(e.method || "")} {String(e.path || "")}
                 </p>
                 {e.stack ? (
-                  <pre className="mt-2 text-[10px] bg-[#F8FAFC] p-2 rounded-lg overflow-x-auto max-h-32">
+                  <pre className="mt-2 text-[10px] bg-section p-2 rounded-lg overflow-x-auto max-h-32">
                     {String(e.stack).slice(0, 1200)}
                   </pre>
                 ) : null}
@@ -364,14 +364,14 @@ export default function AdminMonitoringPage() {
 
         {tab === "logs" && (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            <div className="bg-white border border-[#E5E7EB] rounded-2xl p-3 space-y-1">
+            <div className="bg-white border border-border rounded-2xl p-3 space-y-1">
               {logFiles.map((f) => (
                 <button
                   key={f.name}
                   type="button"
                   onClick={() => setSelectedLog(f.name)}
                   className={`w-full text-left text-xs px-3 py-2 rounded-lg ${
-                    selectedLog === f.name ? "bg-[#E23744]/10 font-bold" : "hover:bg-[#F8FAFC]"
+                    selectedLog === f.name ? "bg-primary/10 font-bold" : "hover:bg-section"
                   }`}
                 >
                   {f.name}
@@ -395,21 +395,21 @@ export default function AdminMonitoringPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {(backups?.health || []).map((h: any) => (
-                <div key={h.type} className="bg-white border border-[#E5E7EB] rounded-2xl p-4">
+                <div key={h.type} className="bg-white border border-border rounded-2xl p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Database className="w-4 h-4 text-[#E23744]" />
+                    <Database className="w-4 h-4 text-primary" />
                     <span className="font-bold capitalize">{h.type}</span>
                   </div>
                   <StatusPill ok={!h.stale} label={h.stale ? "Stale / failed" : "Healthy"} />
-                  <p className="text-xs text-[#6B7280] mt-2">
+                  <p className="text-xs text-gray-text mt-2">
                     Last: {h.last_run ? new Date(h.last_run).toLocaleString() : "never"} ({h.last_status})
                   </p>
                 </div>
               ))}
             </div>
-            <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
+            <div className="bg-white border border-border rounded-2xl overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-[#F8FAFC] text-xs uppercase text-[#6B7280] text-left">
+                <thead className="bg-section text-xs uppercase text-gray-text text-left">
                   <tr>
                     <th className="p-3">When</th>
                     <th className="p-3">Type</th>
@@ -419,7 +419,7 @@ export default function AdminMonitoringPage() {
                 </thead>
                 <tbody>
                   {(backups?.runs || []).map((r: any) => (
-                    <tr key={r.id} className="border-t border-[#E5E7EB]">
+                    <tr key={r.id} className="border-t border-border">
                       <td className="p-3">{new Date(r.created_at).toLocaleString()}</td>
                       <td className="p-3">{r.type}</td>
                       <td className="p-3">{r.status}</td>

@@ -42,7 +42,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   google_play_url:
     "https://play.google.com/store/apps/details?id=com.foodiq.app",
   app_store_url: "https://apps.apple.com/app/foodiq/id6470000000",
-  theme_color: "#E23744",
+  theme_color: "#0F766E",
   footer_content:
     "Discover amazing restaurants and delicious food delivered straight to your doorstep.",
   delivery_charge: 35,

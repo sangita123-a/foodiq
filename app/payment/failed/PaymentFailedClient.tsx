@@ -32,15 +32,15 @@ export default function PaymentFailedPage() {
   }, [reason]);
 
   return (
-    <main className="min-h-screen bg-[#F8FAFC] pt-[90px]">
+    <main className="min-h-screen bg-section pt-[90px]">
       <Navbar />
       <div className="container mx-auto px-4 md:px-8 py-16 max-w-xl">
-        <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 md:p-10 text-center shadow-sm">
+        <div className="bg-white border border-border rounded-3xl p-8 md:p-10 text-center shadow-sm">
           <div className="w-16 h-16 rounded-full bg-red-50 border border-red-100 flex items-center justify-center mx-auto mb-6">
             <AlertCircle className="w-8 h-8 text-red-500" />
           </div>
-          <h1 className="text-3xl font-black text-[#111827] mb-3">Payment Failed</h1>
-          <p className="text-[#6B7280] mb-2 leading-relaxed">{friendly}</p>
+          <h1 className="text-3xl font-black text-foreground mb-3">Payment Failed</h1>
+          <p className="text-gray-text mb-2 leading-relaxed">{friendly}</p>
           {orderRef && (
             <p className="text-xs text-[#9CA3AF] mb-8 font-mono break-all">Ref: {orderRef}</p>
           )}
@@ -50,14 +50,14 @@ export default function PaymentFailedPage() {
             <button
               type="button"
               onClick={() => router.push("/checkout")}
-              className="inline-flex items-center justify-center gap-2 bg-[#E23744] hover:bg-[#C81E34] text-white font-bold px-6 py-3 rounded-xl"
+              className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white font-bold px-6 py-3 rounded-xl"
             >
               <RefreshCw className="w-4 h-4" />
               Retry Payment
             </button>
             <Link
               href="/cart"
-              className="inline-flex items-center justify-center gap-2 border border-[#E5E7EB] text-[#111827] font-bold px-6 py-3 rounded-xl hover:bg-[#F8FAFC]"
+              className="inline-flex items-center justify-center gap-2 border border-border text-foreground font-bold px-6 py-3 rounded-xl hover:bg-section"
             >
               <ShoppingBag className="w-4 h-4" />
               Back to Cart

@@ -26,7 +26,7 @@ function StarRow({
 }) {
   return (
     <div>
-      <p className="text-sm font-bold text-[#6B7280] mb-2">{label}</p>
+      <p className="text-sm font-bold text-gray-text mb-2">{label}</p>
       <div className="flex items-center gap-1 flex-wrap">
         {[1, 2, 3, 4, 5].map((n) => (
           <button
@@ -173,7 +173,7 @@ export default function OrderFeedbackForm({
     return (
       <div
         id="feedback"
-        className="mt-8 bg-white rounded-3xl border border-[#E5E7EB] p-6 md:p-8 animate-pulse h-48"
+        className="mt-8 bg-white rounded-3xl border border-border p-6 md:p-8 animate-pulse h-48"
       />
     );
   }
@@ -183,12 +183,12 @@ export default function OrderFeedbackForm({
   return (
     <div
       id="feedback"
-      className="mt-8 bg-white rounded-3xl border border-[#E5E7EB] p-6 md:p-8"
+      className="mt-8 bg-white rounded-3xl border border-border p-6 md:p-8"
     >
-      <h2 className="text-xl font-black text-[#111827] mb-1">
+      <h2 className="text-xl font-black text-foreground mb-1">
         Rate your order
       </h2>
-      <p className="text-sm text-[#6B7280] mb-6">
+      <p className="text-sm text-gray-text mb-6">
         Help restaurants and delivery partners improve with your honest rating.
       </p>
 
@@ -203,7 +203,7 @@ export default function OrderFeedbackForm({
             <button
               type="button"
               onClick={() => setEditing(true)}
-              className="bg-[#E23744] hover:bg-[#C81E34] text-white px-5 py-2.5 rounded-xl text-sm font-bold"
+              className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl text-sm font-bold"
             >
               Edit feedback
             </button>
@@ -211,7 +211,7 @@ export default function OrderFeedbackForm({
               type="button"
               onClick={() => void handleDelete()}
               disabled={submitting}
-              className="border border-[#E5E7EB] text-[#6B7280] hover:text-red-600 px-5 py-2.5 rounded-xl text-sm font-bold"
+              className="border border-border text-gray-text hover:text-red-600 px-5 py-2.5 rounded-xl text-sm font-bold"
             >
               Delete
             </button>
@@ -232,11 +232,11 @@ export default function OrderFeedbackForm({
             rows={2}
             maxLength={2000}
             placeholder="How was the food and restaurant?"
-            className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E23744] resize-none"
+            className="w-full bg-section text-foreground border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary resize-none"
           />
 
           <div>
-            <p className="text-sm font-bold text-[#6B7280] mb-2">Photos (up to 3)</p>
+            <p className="text-sm font-bold text-gray-text mb-2">Photos (up to 3)</p>
             <div className="flex flex-wrap gap-2 items-center">
               {images.map((img, i) => (
                 <div key={i} className="relative">
@@ -248,7 +248,7 @@ export default function OrderFeedbackForm({
                     width={80}
                     height={80}
                     sizes={ATTACHMENT_PREVIEW_SIZES}
-                    className="w-20 h-20 rounded-xl object-cover border border-[#E5E7EB]"
+                    className="w-20 h-20 rounded-xl object-cover border border-border"
                   />
                   <button
                     type="button"
@@ -260,7 +260,7 @@ export default function OrderFeedbackForm({
                 </div>
               ))}
               {images.length < 3 && (
-                <label className="w-20 h-20 rounded-xl border-2 border-dashed border-[#E5E7EB] flex items-center justify-center text-xs text-[#9CA3AF] cursor-pointer hover:border-[#E23744]">
+                <label className="w-20 h-20 rounded-xl border-2 border-dashed border-border flex items-center justify-center text-xs text-[#9CA3AF] cursor-pointer hover:border-primary">
                   + Photo
                   <input
                     type="file"
@@ -297,7 +297,7 @@ export default function OrderFeedbackForm({
                 rows={2}
                 maxLength={2000}
                 placeholder="How was the delivery experience?"
-                className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E23744] resize-none"
+                className="w-full bg-section text-foreground border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary resize-none"
               />
             </>
           )}
@@ -313,14 +313,14 @@ export default function OrderFeedbackForm({
             rows={3}
             maxLength={2000}
             placeholder="Any other feedback about this order?"
-            className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E23744] resize-none"
+            className="w-full bg-section text-foreground border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary resize-none"
           />
 
           <div className="flex flex-wrap gap-2">
             <button
               type="submit"
               disabled={submitting}
-              className="bg-[#E23744] hover:bg-[#C81E34] disabled:opacity-60 text-white px-6 py-3 rounded-xl text-sm font-bold transition-colors"
+              className="bg-primary hover:bg-primary-hover disabled:opacity-60 text-white px-6 py-3 rounded-xl text-sm font-bold transition-colors"
             >
               {submitting
                 ? "Saving…"
@@ -332,7 +332,7 @@ export default function OrderFeedbackForm({
               <button
                 type="button"
                 onClick={() => setEditing(false)}
-                className="border border-[#E5E7EB] text-[#6B7280] px-6 py-3 rounded-xl text-sm font-bold"
+                className="border border-border text-gray-text px-6 py-3 rounded-xl text-sm font-bold"
               >
                 Cancel
               </button>

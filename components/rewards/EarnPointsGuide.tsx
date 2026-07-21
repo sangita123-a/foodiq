@@ -9,8 +9,8 @@ export default function EarnPointsGuide() {
       icon: Utensils,
       title: "Place Orders",
       desc: "Earn 10 points for every ₹100 spent on any food order.",
-      color: "text-[#E23744]",
-      bg: "bg-[#E23744]/10"
+      color: "text-primary",
+      bg: "bg-primary/10"
     },
     {
       icon: Star,
@@ -44,13 +44,13 @@ export default function EarnPointsGuide() {
           <motion.div 
             key={idx}
             whileHover={{ y: -5 }}
-            className="bg-[#F8FAFC] rounded-3xl p-6 border border-[#E5E7EB] hover:border-[#E5E7EB] transition-colors shadow-lg"
+            className="bg-section rounded-3xl p-6 border border-border hover:border-border transition-colors shadow-lg"
           >
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-6 ${item.bg}`}>
               <item.icon className={`w-6 h-6 ${item.color}`} />
             </div>
             <h4 className="text-lg font-bold text-white mb-2">{item.title}</h4>
-            <p className="text-sm text-[#6B7280] leading-relaxed">{item.desc}</p>
+            <p className="text-sm text-gray-text leading-relaxed">{item.desc}</p>
           </motion.div>
         ))}
       </div>

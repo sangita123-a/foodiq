@@ -13,7 +13,7 @@ function TrackOrderContent() {
   if (!id) {
     return (
       <div className="container mx-auto px-4 md:px-8 py-12 flex items-center justify-center min-h-[50vh]">
-        <div className="text-[#111827] text-xl">Missing order ID.</div>
+        <div className="text-foreground text-xl">Missing order ID.</div>
       </div>
     );
   }
@@ -23,9 +23,9 @@ function TrackOrderContent() {
 
 export default function TrackOrderPage() {
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-background relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
-      <Suspense fallback={<div className="text-[#111827] p-10 text-center">Loading...</div>}>
+      <Suspense fallback={<div className="text-foreground p-10 text-center">Loading...</div>}>
         <TrackOrderContent />
       </Suspense>
       <Footer />

@@ -14,7 +14,7 @@ export default function EmptyCart() {
       className="flex flex-col items-center justify-center py-20 px-4 text-center"
     >
       <div className="w-48 h-48 mb-8 relative">
-        <div className="absolute inset-0 bg-[#FAFAFA] rounded-full blur-3xl"></div>
+        <div className="absolute inset-0 bg-section rounded-full blur-3xl"></div>
         <SafeImage 
           src={FOOD_FALLBACK}
           fallback={FOOD_FALLBACK}
@@ -23,12 +23,12 @@ export default function EmptyCart() {
         />
       </div>
       
-      <h2 className="text-3xl font-bold text-[#1C1C1C] mb-4">Your cart is empty</h2>
-      <p className="text-[#696969] max-w-md mb-8">
+      <h2 className="text-3xl font-bold text-foreground mb-4">Your cart is empty</h2>
+      <p className="text-gray-text max-w-md mb-8">
         Looks like you haven't added anything to your cart yet. Discover delicious food around you and satisfy your cravings!
       </p>
       
-      <Link href="/" className="bg-[#E23744] hover:bg-[#C81E32] text-white px-8 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 flex items-center gap-2">
+      <Link href="/" className="bg-primary hover:bg-primary-hover text-white px-8 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 flex items-center gap-2">
         <ShoppingBag className="w-5 h-5" />
         Explore Restaurants
       </Link>

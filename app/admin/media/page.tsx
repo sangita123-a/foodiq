@@ -72,18 +72,18 @@ export default function AdminMediaPage() {
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black text-[#111827] flex items-center gap-2">
-              <Images className="w-6 h-6 text-[#E23744]" /> Media Library
+            <h1 className="text-2xl font-black text-foreground flex items-center gap-2">
+              <Images className="w-6 h-6 text-primary" /> Media Library
             </h1>
-            <p className="text-sm text-[#6B7280] mt-1">
-              Provider: <span className="font-bold text-[#111827]">{info?.provider || "…"}</span>
+            <p className="text-sm text-gray-text mt-1">
+              Provider: <span className="font-bold text-foreground">{info?.provider || "…"}</span>
             </p>
           </div>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={load}
-              className="px-4 py-2 rounded-xl border border-[#E5E7EB] font-bold text-sm flex items-center gap-2"
+              className="px-4 py-2 rounded-xl border border-border font-bold text-sm flex items-center gap-2"
             >
               <RefreshCw className="w-4 h-4" /> Refresh
             </button>
@@ -115,13 +115,13 @@ export default function AdminMediaPage() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search URL, purpose, uploader…"
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E5E7EB] bg-white text-sm"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-white text-sm"
             />
           </div>
           <select
             value={purpose}
             onChange={(e) => setPurpose(e.target.value)}
-            className="px-3 py-2.5 rounded-xl border border-[#E5E7EB] text-sm"
+            className="px-3 py-2.5 rounded-xl border border-border text-sm"
           >
             <option value="">All purposes</option>
             <option value="food">Food</option>
@@ -136,7 +136,7 @@ export default function AdminMediaPage() {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="px-3 py-2.5 rounded-xl border border-[#E5E7EB] text-sm"
+            className="px-3 py-2.5 rounded-xl border border-border text-sm"
           >
             <option value="">All statuses</option>
             <option value="approved">Approved</option>
@@ -146,19 +146,19 @@ export default function AdminMediaPage() {
           <button
             type="button"
             onClick={load}
-            className="px-5 py-2.5 rounded-xl bg-[#E23744] text-white font-bold text-sm"
+            className="px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-sm"
           >
             Filter
           </button>
         </div>
 
         {loading ? (
-          <div className="h-48 animate-pulse bg-[#F8FAFC] rounded-2xl" />
+          <div className="h-48 animate-pulse bg-section rounded-2xl" />
         ) : items.length === 0 ? (
-          <div className="text-center py-16 text-[#6B7280]">No media found.</div>
+          <div className="text-center py-16 text-gray-text">No media found.</div>
         ) : (
           <>
-            <label className="flex items-center gap-2 text-sm font-bold text-[#6B7280]">
+            <label className="flex items-center gap-2 text-sm font-bold text-gray-text">
               <input
                 type="checkbox"
                 checked={allSelected}
@@ -174,16 +174,16 @@ export default function AdminMediaPage() {
                 <div
                   key={item.id}
                   className={`rounded-2xl border overflow-hidden bg-white ${
-                    selected.has(item.id) ? "border-[#E23744] ring-2 ring-[#E23744]/30" : "border-[#E5E7EB]"
+                    selected.has(item.id) ? "border-primary ring-2 ring-primary/30" : "border-border"
                   }`}
                 >
                   <button
                     type="button"
-                    className="relative w-full aspect-square bg-[#F8FAFC]"
+                    className="relative w-full aspect-square bg-section"
                     onClick={() => setPreview(item)}
                   >
                     {item.file_type === "document" || item.mime_type === "application/pdf" ? (
-                      <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-[#6B7280]">
+                      <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-gray-text">
                         PDF
                       </div>
                     ) : (
@@ -206,7 +206,7 @@ export default function AdminMediaPage() {
                         checked={selected.has(item.id)}
                         onChange={() => toggle(item.id)}
                       />
-                      <span className="text-xs font-bold text-[#111827] truncate">{item.purpose}</span>
+                      <span className="text-xs font-bold text-foreground truncate">{item.purpose}</span>
                     </div>
                     <p className="text-[10px] text-[#9CA3AF] truncate">{item.uploader_name || "—"}</p>
                     <div className="flex gap-1 flex-wrap">
@@ -264,7 +264,7 @@ export default function AdminMediaPage() {
               className="bg-white rounded-2xl max-w-2xl w-full overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="aspect-video bg-[#F8FAFC] relative">
+              <div className="aspect-video bg-section relative">
                 {preview.file_type === "document" &&
                 typeof preview.url === "string" &&
                 /^https?:\/\//i.test(preview.url) &&
@@ -277,7 +277,7 @@ export default function AdminMediaPage() {
                     referrerPolicy="no-referrer"
                   />
                 ) : preview.file_type === "document" ? (
-                  <div className="w-full h-full flex items-center justify-center text-sm text-[#6B7280]">
+                  <div className="w-full h-full flex items-center justify-center text-sm text-gray-text">
                     Preview unavailable for this document URL
                   </div>
                 ) : (
@@ -290,8 +290,8 @@ export default function AdminMediaPage() {
                 )}
               </div>
               <div className="p-4 space-y-1 text-sm">
-                <p className="font-bold text-[#111827]">{preview.purpose}</p>
-                <p className="text-[#6B7280] break-all text-xs">{preview.url}</p>
+                <p className="font-bold text-foreground">{preview.purpose}</p>
+                <p className="text-gray-text break-all text-xs">{preview.url}</p>
                 <p className="text-[#9CA3AF] text-xs">
                   {preview.provider} · {(Number(preview.file_size || 0) / 1024).toFixed(1)} KB
                 </p>

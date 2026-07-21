@@ -48,7 +48,7 @@ export default function OrderCard({ order }: Props) {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group mb-6 rounded-2xl border border-[#EAEAEA] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#D4D4D4] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] md:p-8"
+      className="group mb-6 rounded-2xl border border-border bg-white p-6 shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:border-border hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] md:p-8"
     >
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-6">
@@ -59,8 +59,8 @@ export default function OrderCard({ order }: Props) {
             <SafeImage src={order.image} fallback={RESTAURANT_FALLBACK} alt={order.restaurant} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
           </div>
           <div>
-            <h3 className="mb-1 text-xl font-bold tracking-[-0.025em] text-[#1C1C1C] md:text-2xl">{order.restaurant}</h3>
-            <p className="mb-2 text-sm text-[#686B78]">{order.date} • {order.id}</p>
+            <h3 className="mb-1 text-xl font-bold tracking-[-0.025em] text-foreground md:text-2xl">{order.restaurant}</h3>
+            <p className="mb-2 text-sm text-muted">{order.date} • {order.id}</p>
             <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border ${statusBadge}`}>
               {order.status === "Delivered" && "🟢"}
               {order.status === "Preparing" && "🟡"}
@@ -73,13 +73,13 @@ export default function OrderCard({ order }: Props) {
 
         {/* Pricing Summary (always visible) */}
         <div className="text-left md:text-right">
-          <p className="mb-1 text-sm text-[#686B78]">Total Amount</p>
-          <p className="text-2xl font-black text-[#1C1C1C]">₹{order.total}</p>
+          <p className="mb-1 text-sm text-muted">Total Amount</p>
+          <p className="text-2xl font-black text-foreground">₹{order.total}</p>
         </div>
 
       </div>
 
-      <div className="mb-6 flex items-center gap-2 border-b border-[#EAEAEA] pb-6 text-sm text-[#686B78]">
+      <div className="mb-6 flex items-center gap-2 border-b border-border pb-6 text-sm text-muted">
         <MapPin className="w-4 h-4" />
         <span className="line-clamp-1">{order.address}</span>
       </div>
@@ -89,7 +89,7 @@ export default function OrderCard({ order }: Props) {
         
         <button 
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-2 rounded-lg text-sm font-bold text-[#686B78] transition-colors hover:text-[#1C1C1C]"
+          className="flex items-center gap-2 rounded-lg text-sm font-bold text-muted transition-colors hover:text-foreground"
         >
           View Details
           <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -99,7 +99,7 @@ export default function OrderCard({ order }: Props) {
 
         <Link
           href={`/my-orders/${order.id}`}
-          className="text-primary hover:text-[#111827] font-bold text-sm transition-colors"
+          className="text-primary hover:text-foreground font-bold text-sm transition-colors"
         >
           Full Details →
         </Link>
@@ -125,7 +125,7 @@ export default function OrderCard({ order }: Props) {
 
           <Link
             href={`/my-orders/${order.id}`}
-              className="flex items-center gap-2 rounded-xl border border-[#EAEAEA] bg-white px-5 py-2.5 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#D4D4D4] hover:bg-[#FAFAFA]"
+              className="flex items-center gap-2 rounded-xl border border-border bg-white px-5 py-2.5 text-sm font-bold text-foreground transition-all hover:border-border hover:bg-section"
           >
             <Download className="w-4 h-4" /> Invoice
           </Link>
@@ -133,7 +133,7 @@ export default function OrderCard({ order }: Props) {
           {order.status === "Pending" && order.onCancel && (
             <button 
               onClick={() => order.onCancel!(order.id)}
-              className="bg-[#E23744]/10 hover:bg-[#E23744]/20 text-[#E23744] border border-[#E23744]/20 px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors"
+              className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors"
             >
               Cancel Order
             </button>
@@ -142,7 +142,7 @@ export default function OrderCard({ order }: Props) {
           {(order.status === "Delivered" || order.status === "Cancelled") && (
             <Link
               href="/order-online"
-              className="bg-[#E23744] hover:bg-[#C81E32] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
+              className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
             >
               <RefreshCw className="w-4 h-4" /> Reorder
             </Link>
@@ -159,36 +159,36 @@ export default function OrderCard({ order }: Props) {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="mt-6 flex flex-col gap-8 border-t border-[#EAEAEA] pt-6 md:flex-row">
+            <div className="mt-6 flex flex-col gap-8 border-t border-border pt-6 md:flex-row">
               
               {/* Items List */}
               <div className="flex-1">
-                <h4 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-[#686B78]">
+                <h4 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted">
                   <Receipt className="w-4 h-4" /> Itemized Bill
                 </h4>
                 <div className="flex flex-col gap-3">
                   {order.items.map((item, idx) => (
                     <div key={idx} className="flex justify-between text-sm">
-                      <span className="text-[#686B78]">
-                        <span className="mr-2 font-bold text-[#1C1C1C]">{item.qty}x</span> 
+                      <span className="text-muted">
+                        <span className="mr-2 font-bold text-foreground">{item.qty}x</span> 
                         {item.name}
                       </span>
-                      <span className="text-[#1C1C1C]">₹{item.price}</span>
+                      <span className="text-foreground">₹{item.price}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Cost Breakdown */}
-              <div className="flex-1 rounded-2xl border border-[#EAEAEA] bg-[#F8F9FA] p-6">
-                <div className="mb-4 flex flex-col gap-3 border-b border-[#EAEAEA] pb-4 text-sm text-[#686B78]">
+              <div className="flex-1 rounded-2xl border border-border bg-[#F8F9FA] p-6">
+                <div className="mb-4 flex flex-col gap-3 border-b border-border pb-4 text-sm text-muted">
                   <div className="flex justify-between items-center">
                     <span>Subtotal</span>
-                    <span className="text-[#1C1C1C]">₹{order.subtotal}</span>
+                    <span className="text-foreground">₹{order.subtotal}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>Taxes & Fees</span>
-                    <span className="text-[#1C1C1C]">₹{order.taxes}</span>
+                    <span className="text-foreground">₹{order.taxes}</span>
                   </div>
                   {order.discount > 0 && (
                     <div className="flex justify-between items-center text-green-400">
@@ -199,13 +199,13 @@ export default function OrderCard({ order }: Props) {
                 </div>
                 
                 <div className="flex justify-between items-center mb-2">
-                  <span className="font-bold text-[#1C1C1C]">Final Total</span>
-                  <span className="text-xl font-black text-[#1C1C1C]">₹{order.total}</span>
+                  <span className="font-bold text-foreground">Final Total</span>
+                  <span className="text-xl font-black text-foreground">₹{order.total}</span>
                 </div>
                 
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-[#686B78]">Payment Method</span>
-                  <span className="font-bold text-[#686B78]">{order.paymentMethod}</span>
+                  <span className="text-muted">Payment Method</span>
+                  <span className="font-bold text-muted">{order.paymentMethod}</span>
                 </div>
               </div>
 

@@ -64,18 +64,18 @@ export default function MyOrdersPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] relative pt-[90px]">
+      <main className="min-h-screen bg-background relative pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 md:px-8 py-12 max-w-5xl">
-          <div className="w-48 h-10 bg-[#F8FAFC] animate-pulse rounded-lg mb-8"></div>
+          <div className="w-48 h-10 bg-section animate-pulse rounded-lg mb-8"></div>
           <div className="flex gap-4 mb-10">
-            <div className="w-24 h-10 bg-[#F8FAFC] animate-pulse rounded-full"></div>
-            <div className="w-24 h-10 bg-[#F8FAFC] animate-pulse rounded-full"></div>
-            <div className="w-24 h-10 bg-[#F8FAFC] animate-pulse rounded-full"></div>
+            <div className="w-24 h-10 bg-section animate-pulse rounded-full"></div>
+            <div className="w-24 h-10 bg-section animate-pulse rounded-full"></div>
+            <div className="w-24 h-10 bg-section animate-pulse rounded-full"></div>
           </div>
           <div className="flex flex-col gap-6">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-64 bg-[#F8FAFC] animate-pulse rounded-3xl border border-[#E5E7EB]"></div>
+              <div key={i} className="h-64 bg-section animate-pulse rounded-3xl border border-border"></div>
             ))}
           </div>
         </div>
@@ -85,7 +85,7 @@ export default function MyOrdersPage() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] flex flex-col items-center justify-center gap-4 pt-[90px]">
+      <main className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 pt-[90px]">
         <Navbar />
         <div className="text-white text-xl">Failed to load orders</div>
         <button onClick={() => mutate()} className="px-6 py-2 bg-primary text-white rounded-lg">Retry</button>
@@ -94,7 +94,7 @@ export default function MyOrdersPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-background relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-5xl">

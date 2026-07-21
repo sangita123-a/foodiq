@@ -96,7 +96,7 @@ export default function GoogleTrackingMap({
     };
 
     upsert("restaurant", restaurant, "#6B7280", "Restaurant");
-    upsert("customer", customer, "#E23744", "You");
+    upsert("customer", customer, "#0F766E", "You");
     upsert("rider", rider, "#111827", "Rider");
 
     routeRef.current?.setMap(null);
@@ -108,7 +108,7 @@ export default function GoogleTrackingMap({
       routeRef.current = new google.maps.Polyline({
         path,
         geodesic: true,
-        strokeColor: "#E23744",
+        strokeColor: "#0F766E",
         strokeOpacity: 0.85,
         strokeWeight: 4,
         map,
@@ -128,15 +128,15 @@ export default function GoogleTrackingMap({
 
   return (
     <div
-      className={`bg-white rounded-3xl w-full border border-[#E5E7EB] relative overflow-hidden mb-8 ${heightClass} ${className}`}
+      className={`bg-white rounded-3xl w-full border border-border relative overflow-hidden mb-8 ${heightClass} ${className}`}
     >
       <div ref={containerRef} className="absolute inset-0 z-0" />
       {!hasAny && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#F8FAFC]/80 text-sm font-bold text-[#6B7280]">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-section/80 text-sm font-bold text-gray-text">
           Waiting for live location…
         </div>
       )}
-      <div className="absolute bottom-3 right-3 z-10 text-[10px] font-bold uppercase tracking-widest bg-white/90 text-[#6B7280] px-2 py-1 rounded-lg border border-[#E5E7EB]">
+      <div className="absolute bottom-3 right-3 z-10 text-[10px] font-bold uppercase tracking-widest bg-white/90 text-gray-text px-2 py-1 rounded-lg border border-border">
         Live · Google Maps
       </div>
     </div>

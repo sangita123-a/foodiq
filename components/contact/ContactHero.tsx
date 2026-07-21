@@ -29,16 +29,16 @@ export default function ContactHero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mb-6 text-5xl font-black text-[#1C1C1C] md:text-6xl lg:text-7xl"
+          className="mb-6 text-5xl font-black text-foreground md:text-6xl lg:text-7xl"
         >
-          Contact <span className="text-[#E23744]">{company}</span>
+          Contact <span className="text-primary">{company}</span>
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mx-auto max-w-3xl text-lg leading-relaxed text-[#696969] md:text-xl"
+          className="mx-auto max-w-3xl text-lg leading-relaxed text-gray-text md:text-xl"
         >
           We&apos;re here to help. Reach out anytime for support, feedback, partnerships, or business inquiries.
         </motion.p>

@@ -85,17 +85,17 @@ export default function PushNotificationPanel() {
     <div className="space-y-8">
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <Bell className="w-7 h-7 text-[#E23744]" />
-          <h1 className="text-3xl font-black text-[#111827]">Push Notifications</h1>
+          <Bell className="w-7 h-7 text-primary" />
+          <h1 className="text-3xl font-black text-foreground">Push Notifications</h1>
         </div>
-        <p className="text-[#6B7280]">
+        <p className="text-gray-text">
           Send FCM web push + in-app notifications to all users, selected users, by city, or by restaurant. Schedule for later delivery.
         </p>
       </div>
 
-      <form onSubmit={submit} className="bg-white rounded-3xl border border-[#E5E7EB] p-6 space-y-5">
+      <form onSubmit={submit} className="bg-white rounded-3xl border border-border p-6 space-y-5">
         <div>
-          <label className="block text-sm font-bold text-[#6B7280] mb-2">Target</label>
+          <label className="block text-sm font-bold text-gray-text mb-2">Target</label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {([
               ["audience", "Audience", Users],
@@ -109,8 +109,8 @@ export default function PushNotificationPanel() {
                 onClick={() => setTargetMode(mode)}
                 className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold border ${
                   targetMode === mode
-                    ? "bg-[#E23744] text-white border-[#E23744]"
-                    : "bg-white text-[#6B7280] border-[#E5E7EB]"
+                    ? "bg-primary text-white border-primary"
+                    : "bg-white text-gray-text border-border"
                 }`}
               >
                 <Icon className="w-4 h-4" /> {label}
@@ -121,11 +121,11 @@ export default function PushNotificationPanel() {
 
         {targetMode === "audience" && (
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Audience</label>
+            <label className="block text-sm font-bold text-gray-text mb-2">Audience</label>
             <select
               value={audience}
               onChange={(e) => setAudience(e.target.value)}
-              className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+              className="w-full border border-border rounded-xl px-4 py-3 text-sm"
             >
               {PUSH_AUDIENCES.map((a) => (
                 <option key={a.value} value={a.value}>{a.label}</option>
@@ -136,24 +136,24 @@ export default function PushNotificationPanel() {
 
         {targetMode === "users" && (
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">User IDs (comma-separated UUIDs)</label>
+            <label className="block text-sm font-bold text-gray-text mb-2">User IDs (comma-separated UUIDs)</label>
             <textarea
               value={userIdsRaw}
               onChange={(e) => setUserIdsRaw(e.target.value)}
               rows={3}
               placeholder="uuid-1, uuid-2, ..."
-              className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-mono"
+              className="w-full border border-border rounded-xl px-4 py-3 text-sm font-mono"
             />
           </div>
         )}
 
         {targetMode === "city" && (
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">City</label>
+            <label className="block text-sm font-bold text-gray-text mb-2">City</label>
             <select
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+              className="w-full border border-border rounded-xl px-4 py-3 text-sm"
             >
               <option value="">Select city</option>
               {(targets?.cities || []).map((c) => (
@@ -165,11 +165,11 @@ export default function PushNotificationPanel() {
 
         {targetMode === "restaurant" && (
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Restaurant</label>
+            <label className="block text-sm font-bold text-gray-text mb-2">Restaurant</label>
             <select
               value={restaurantId}
               onChange={(e) => setRestaurantId(e.target.value)}
-              className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+              className="w-full border border-border rounded-xl px-4 py-3 text-sm"
             >
               <option value="">Select restaurant</option>
               {(targets?.restaurants || []).map((r) => (
@@ -181,11 +181,11 @@ export default function PushNotificationPanel() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Notification Type</label>
+            <label className="block text-sm font-bold text-gray-text mb-2">Notification Type</label>
             <select
               value={notificationType}
               onChange={(e) => setNotificationType(e.target.value)}
-              className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+              className="w-full border border-border rounded-xl px-4 py-3 text-sm"
             >
               {MARKETING_NOTIFICATION_TYPES.map((t) => (
                 <option key={t.value} value={t.value}>{t.label}</option>
@@ -193,68 +193,68 @@ export default function PushNotificationPanel() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Deep Link</label>
+            <label className="block text-sm font-bold text-gray-text mb-2">Deep Link</label>
             <input
               value={link}
               onChange={(e) => setLink(e.target.value)}
-              className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+              className="w-full border border-border rounded-xl px-4 py-3 text-sm"
               placeholder="/offers"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-[#6B7280] mb-2">Title</label>
+          <label className="block text-sm font-bold text-gray-text mb-2">Title</label>
           <input
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+            className="w-full border border-border rounded-xl px-4 py-3 text-sm"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-[#6B7280] mb-2">Message</label>
+          <label className="block text-sm font-bold text-gray-text mb-2">Message</label>
           <textarea
             required
             rows={4}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+            className="w-full border border-border rounded-xl px-4 py-3 text-sm"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-[#6B7280] mb-2 flex items-center gap-2">
+          <label className="block text-sm font-bold text-gray-text mb-2 flex items-center gap-2">
             <Calendar className="w-4 h-4" /> Schedule (optional)
           </label>
           <input
             type="datetime-local"
             value={scheduleAt}
             onChange={(e) => setScheduleAt(e.target.value)}
-            className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+            className="w-full border border-border rounded-xl px-4 py-3 text-sm"
           />
         </div>
 
         <button
           type="submit"
           disabled={sending}
-          className="bg-[#E23744] text-white font-black px-8 py-3 rounded-xl disabled:opacity-60"
+          className="bg-primary text-white font-black px-8 py-3 rounded-xl disabled:opacity-60"
         >
           {sending ? "Sending…" : scheduleAt ? "Schedule Push Notification" : "Send Push Notification"}
         </button>
 
-        {result ? <p className="text-sm font-bold text-[#111827]">{result}</p> : null}
+        {result ? <p className="text-sm font-bold text-foreground">{result}</p> : null}
       </form>
 
-      <section className="bg-white rounded-3xl border border-[#E5E7EB] p-6">
-        <h2 className="text-lg font-black text-[#111827] mb-4">Scheduled Campaigns</h2>
+      <section className="bg-white rounded-3xl border border-border p-6">
+        <h2 className="text-lg font-black text-foreground mb-4">Scheduled Campaigns</h2>
         <div className="space-y-3 max-h-80 overflow-y-auto">
           {scheduled.map((c) => (
-            <div key={c.id} className="border border-[#E5E7EB] rounded-xl px-4 py-3 flex justify-between gap-4">
+            <div key={c.id} className="border border-border rounded-xl px-4 py-3 flex justify-between gap-4">
               <div>
-                <p className="font-bold text-[#111827]">{c.subject || c.name}</p>
-                <p className="text-xs text-[#6B7280]">{c.message}</p>
+                <p className="font-bold text-foreground">{c.subject || c.name}</p>
+                <p className="text-xs text-gray-text">{c.message}</p>
               </div>
               <div className="text-right shrink-0">
                 <span className={`text-xs font-bold uppercase ${

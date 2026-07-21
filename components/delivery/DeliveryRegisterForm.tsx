@@ -55,17 +55,17 @@ export default function DeliveryRegisterForm() {
   };
 
   return (
-    <div className="w-full h-full min-h-[50vh] lg:min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6 lg:p-16 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-[#E23744]/10 rounded-full blur-[100px] pointer-events-none" />
+    <div className="w-full h-full min-h-[50vh] lg:min-h-screen bg-section flex items-center justify-center p-6 lg:p-16 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md bg-[#FFFFFF]/80 backdrop-blur-xl border border-[#E5E7EB] rounded-[24px] p-8 lg:p-10 shadow-2xl relative z-10"
+        className="w-full max-w-md bg-background/80 backdrop-blur-xl border border-border rounded-[24px] p-8 lg:p-10 shadow-2xl relative z-10"
       >
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-black text-[#111827] mb-2">Join as Rider</h2>
-          <p className="text-[#6B7280]">Create your delivery partner account.</p>
+          <h2 className="text-3xl font-black text-foreground mb-2">Join as Rider</h2>
+          <p className="text-gray-text">Create your delivery partner account.</p>
         </div>
 
         {error && (
@@ -84,7 +84,7 @@ export default function DeliveryRegisterForm() {
             { key: "license_number", label: "License Number", icon: Bike, type: "text", placeholder: "DL-XXXX" },
           ].map((field) => (
             <div key={field.key}>
-              <label className="block text-sm font-bold text-[#6B7280] mb-2">{field.label}</label>
+              <label className="block text-sm font-bold text-gray-text mb-2">{field.label}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <field.icon className="h-5 w-5 text-[#9CA3AF]" />
@@ -95,18 +95,18 @@ export default function DeliveryRegisterForm() {
                   onChange={(e) => update(field.key, e.target.value)}
                   placeholder={field.placeholder}
                   required={!["vehicle_details", "license_number"].includes(field.key)}
-                  className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-[#E23744] focus:ring-1 focus:ring-[#E23744]"
+                  className="w-full bg-section text-foreground border border-border rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
           ))}
 
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Vehicle Type</label>
+            <label className="block text-sm font-bold text-gray-text mb-2">Vehicle Type</label>
             <select
               value={form.vehicle_type}
               onChange={(e) => update("vehicle_type", e.target.value)}
-              className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl px-4 py-3 focus:outline-none focus:border-[#E23744]"
+              className="w-full bg-section text-foreground border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-primary"
             >
               <option value="Bike">Bike</option>
               <option value="Scooter">Scooter</option>
@@ -118,16 +118,16 @@ export default function DeliveryRegisterForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#E23744] hover:bg-[#C81E34] text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-60 mt-2"
+            className="w-full bg-primary hover:bg-primary-hover text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-60 mt-2"
           >
             {loading ? "Creating account..." : "Register"}
             <ArrowRight className="w-5 h-5" />
           </button>
         </form>
 
-        <p className="text-center text-sm text-[#6B7280] mt-6">
+        <p className="text-center text-sm text-gray-text mt-6">
           Already a rider?{" "}
-          <Link href="/delivery/login" className="text-[#E23744] font-bold hover:underline">
+          <Link href="/delivery/login" className="text-primary font-bold hover:underline">
             Sign in
           </Link>
         </p>

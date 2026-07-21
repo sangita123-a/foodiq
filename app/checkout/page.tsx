@@ -343,18 +343,18 @@ export default function CheckoutPage() {
 
   if (isLoadingCart || isLoadingAddr) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] relative pt-[90px]">
+      <main className="min-h-screen bg-background relative pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 md:px-8 py-12">
-          <div className="w-64 h-12 bg-[#F8FAFC] animate-pulse rounded-lg mb-10" />
+          <div className="w-64 h-12 bg-section animate-pulse rounded-lg mb-10" />
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="w-full lg:w-[60%] xl:w-[65%] flex flex-col gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-48 bg-[#F8FAFC] animate-pulse rounded-2xl" />
+                <div key={i} className="h-48 bg-section animate-pulse rounded-2xl" />
               ))}
             </div>
             <div className="w-full lg:w-[40%] xl:w-[35%]">
-              <div className="h-96 bg-[#F8FAFC] animate-pulse rounded-2xl" />
+              <div className="h-96 bg-section animate-pulse rounded-2xl" />
             </div>
           </div>
         </div>
@@ -364,22 +364,22 @@ export default function CheckoutPage() {
 
   if (cartError || addrError) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] flex flex-col items-center justify-center gap-4 pt-[90px]">
+      <main className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 pt-[90px]">
         <Navbar />
-        <div className="text-[#111827] text-xl">Failed to load checkout details</div>
+        <div className="text-foreground text-xl">Failed to load checkout details</div>
       </main>
     );
   }
 
   if (!isLoadingCart && cartItems.length === 0) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] flex flex-col items-center justify-center gap-4 pt-[90px]">
+      <main className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 pt-[90px]">
         <Navbar />
-        <div className="text-[#111827] text-xl">Your cart is empty</div>
+        <div className="text-foreground text-xl">Your cart is empty</div>
         <button
           type="button"
           onClick={() => router.push("/order-online")}
-          className="rounded-xl bg-[#E23744] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#C81E32]"
+          className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
         >
           Browse restaurants
         </button>
@@ -397,21 +397,21 @@ export default function CheckoutPage() {
   const restaurantName = cartItems[0]?.restaurant_name || "Your Order";
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[#E23744]/15 selection:text-[#1C1C1C] pt-[72px] sm:pt-[80px] md:pt-[90px] overflow-x-hidden">
+    <main className="min-h-screen bg-background relative selection:bg-primary/15 selection:text-foreground pt-[72px] sm:pt-[80px] md:pt-[90px] overflow-x-hidden">
       <Navbar />
 
       <div className="container mx-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8 md:py-12 pb-28 lg:pb-12">
-        <div className="mb-6 sm:mb-10 text-center md:text-left border-b border-[#E5E7EB] pb-6 sm:pb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[#111827] mb-2 sm:mb-3">
+        <div className="mb-6 sm:mb-10 text-center md:text-left border-b border-border pb-6 sm:pb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-2 sm:mb-3">
             Secure Checkout
           </h1>
-          <p className="text-[#6B7280] text-sm sm:text-base md:text-lg">
+          <p className="text-gray-text text-sm sm:text-base md:text-lg">
             Complete your order details and pay securely.
           </p>
         </div>
 
         {(paymentStep === "verifying" || paymentStep === "creating") && (
-          <div className="mb-6 rounded-xl border border-[#EAEAEA] bg-[#FAFAFA] px-4 py-3 text-sm font-bold text-[#1C1C1C]">
+          <div className="mb-6 rounded-xl border border-border bg-section px-4 py-3 text-sm font-bold text-foreground">
             {paymentStep === "creating"
               ? "Creating secure payment session..."
               : "Verifying payment signature on server..."}
@@ -477,16 +477,16 @@ export default function CheckoutPage() {
         </div>
 
         {/* Mobile sticky checkout bar */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-[#EAEAEA] bg-white/95 backdrop-blur-md px-4 py-3 safe-bottom shadow-[0_-8px_24px_rgba(0,0,0,0.08)]">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-white/95 backdrop-blur-md px-4 py-3 safe-bottom shadow-[0_-8px_24px_rgba(0,0,0,0.08)]">
           <div className="flex items-center justify-between gap-4 mb-2">
-            <span className="text-sm font-bold text-[#686B78]">Total</span>
-            <span className="text-xl font-black text-[#1C1C1C]">₹{totals.grandTotal}</span>
+            <span className="text-sm font-bold text-muted">Total</span>
+            <span className="text-xl font-black text-foreground">₹{totals.grandTotal}</span>
           </div>
           <button
             type="button"
             onClick={handlePlaceOrder}
             disabled={isSubmitting || cartItems.length === 0}
-            className="w-full touch-target min-h-[48px] rounded-xl bg-[#E23744] font-semibold text-white text-sm shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:bg-[#C81E32] disabled:opacity-50"
+            className="w-full touch-target min-h-[48px] rounded-xl bg-primary font-semibold text-white text-sm shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:bg-primary-hover disabled:opacity-50"
           >
             {buttonLabel}
           </button>

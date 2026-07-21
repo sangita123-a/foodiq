@@ -61,12 +61,12 @@ export default function DownloadReports() {
   };
 
   return (
-    <div className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="bg-background rounded-3xl p-6 md:p-8 border border-border shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
       <div>
-        <h3 className="text-xl font-black text-[#111827] flex items-center gap-2 mb-2">
-          <Download className="w-6 h-6 text-[#6B7280]" /> Download Reports
+        <h3 className="text-xl font-black text-foreground flex items-center gap-2 mb-2">
+          <Download className="w-6 h-6 text-gray-text" /> Download Reports
         </h3>
-        <p className="text-[#6B7280] text-sm">
+        <p className="text-gray-text text-sm">
           Export your analytics data for accounting or offline review.
         </p>
       </div>
@@ -77,7 +77,7 @@ export default function DownloadReports() {
           whileTap={{ scale: 0.98 }}
           type="button"
           onClick={() => void download("pdf")}
-          className="flex items-center gap-2 bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] text-[#111827] px-6 py-3 rounded-xl font-bold transition-colors shadow-lg"
+          className="flex items-center gap-2 bg-section hover:bg-section border border-border text-foreground px-6 py-3 rounded-xl font-bold transition-colors shadow-lg"
         >
           <FileText className="w-5 h-5 text-red-400" />
           PDF Report
@@ -88,7 +88,7 @@ export default function DownloadReports() {
           whileTap={{ scale: 0.98 }}
           type="button"
           onClick={() => void download("csv")}
-          className="flex items-center gap-2 bg-[#F8FAFC] hover:bg-[#F8FAFC] border border-[#E5E7EB] text-[#111827] px-6 py-3 rounded-xl font-bold transition-colors shadow-lg"
+          className="flex items-center gap-2 bg-section hover:bg-section border border-border text-foreground px-6 py-3 rounded-xl font-bold transition-colors shadow-lg"
         >
           <FileSpreadsheet className="w-5 h-5 text-green-400" />
           CSV Export

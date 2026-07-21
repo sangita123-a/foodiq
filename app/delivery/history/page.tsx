@@ -47,8 +47,8 @@ export default function DeliveryHistoryPage() {
             onClick={() => setTab(t.id)}
             className={`px-4 py-2 rounded-xl text-sm font-bold ${
               tab === t.id
-                ? "bg-[#E23744] text-white"
-                : "bg-white border border-[#E5E7EB] text-[#6B7280]"
+                ? "bg-primary text-white"
+                : "bg-white border border-border text-gray-text"
             }`}
           >
             {t.label}
@@ -56,9 +56,9 @@ export default function DeliveryHistoryPage() {
         ))}
       </div>
 
-      <section className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
+      <section className="bg-white border border-border rounded-2xl overflow-hidden">
         {isLoading && !data && (
-          <p className="p-6 text-sm text-[#6B7280]">Loading history...</p>
+          <p className="p-6 text-sm text-gray-text">Loading history...</p>
         )}
         <div className="divide-y divide-[#F3F4F6]">
           {(data || []).map((row) => (
@@ -67,11 +67,11 @@ export default function DeliveryHistoryPage() {
                 <div>
                   <Link
                     href={`/delivery/orders/${row.order_id}`}
-                    className="font-bold text-[#111827] hover:text-[#E23744]"
+                    className="font-bold text-foreground hover:text-primary"
                   >
                     {row.restaurant_name}
                   </Link>
-                  <p className="text-xs text-[#6B7280] mt-1">
+                  <p className="text-xs text-gray-text mt-1">
                     {row.customer_name} · {row.customer_address || "Delivery address"}
                   </p>
                   <p className="text-xs text-[#9CA3AF] mt-1">
@@ -80,7 +80,7 @@ export default function DeliveryHistoryPage() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs font-bold px-2 py-1 rounded-lg bg-[#F8FAFC] text-[#6B7280]">
+                  <span className="text-xs font-bold px-2 py-1 rounded-lg bg-section text-gray-text">
                     {STATUS_LABELS[row.status] || row.status}
                   </span>
                   {row.customer_rating != null && (
@@ -92,12 +92,12 @@ export default function DeliveryHistoryPage() {
                 </div>
               </div>
               {row.customer_comment && (
-                <p className="text-sm text-[#6B7280] mt-2 italic">&ldquo;{row.customer_comment}&rdquo;</p>
+                <p className="text-sm text-gray-text mt-2 italic">&ldquo;{row.customer_comment}&rdquo;</p>
               )}
             </div>
           ))}
           {!data?.length && !isLoading && (
-            <p className="p-8 text-sm text-[#6B7280] text-center">No deliveries in this category.</p>
+            <p className="p-8 text-sm text-gray-text text-center">No deliveries in this category.</p>
           )}
         </div>
       </section>

@@ -12,7 +12,7 @@ export default function MapSection() {
 
   return (
     <div className="container mx-auto px-4 py-20 md:px-8">
-      <div className="relative h-[400px] overflow-hidden rounded-3xl border border-[#E5E7EB] bg-white md:h-[500px]">
+      <div className="relative h-[400px] overflow-hidden rounded-3xl border border-border bg-white md:h-[500px]">
         <iframe
           title="Office location map"
           src={embedUrl}

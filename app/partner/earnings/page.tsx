@@ -58,7 +58,7 @@ export default function PartnerEarningsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#E23744] selection:text-white">
+    <div className="min-h-screen bg-section flex selection:bg-primary selection:text-white">
       <div className="hidden lg:block w-64 flex-shrink-0">
         <PartnerSidebar />
       </div>
@@ -67,8 +67,8 @@ export default function PartnerEarningsPage() {
         <main className="flex-1 overflow-y-auto p-4 md:p-8">
           <div className="max-w-5xl mx-auto">
             <div className="mb-8">
-              <h1 className="text-3xl font-black text-[#111827] mb-2">Earnings & Settlements</h1>
-              <p className="text-[#6B7280]">
+              <h1 className="text-3xl font-black text-foreground mb-2">Earnings & Settlements</h1>
+              <p className="text-gray-text">
                 Paid orders, payment status, and settlement estimates
               </p>
             </div>
@@ -81,12 +81,12 @@ export default function PartnerEarningsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               {cards.map((item) => (
-                <div key={item.label} className="bg-[#FFFFFF] rounded-2xl border border-[#E5E7EB] p-6">
+                <div key={item.label} className="bg-background rounded-2xl border border-border p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <item.icon className={`w-5 h-5 ${item.tone}`} />
-                    <span className="text-[#6B7280] text-sm font-medium">{item.label}</span>
+                    <span className="text-gray-text text-sm font-medium">{item.label}</span>
                   </div>
-                  <p className="text-3xl font-black text-[#111827]">
+                  <p className="text-3xl font-black text-foreground">
                     {isLoading ? "…" : item.value}
                   </p>
                 </div>
@@ -94,34 +94,34 @@ export default function PartnerEarningsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-              <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
+              <div className="bg-white border border-border rounded-2xl p-5">
                 <p className="text-xs font-bold text-[#9CA3AF] uppercase mb-1">Commission</p>
-                <p className="text-xl font-black text-[#111827]">
+                <p className="text-xl font-black text-foreground">
                   {summary?.commission_percent || 0}% ·{" "}
                   {formatCurrency(summary?.commission_amount || 0)}
                 </p>
               </div>
-              <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
+              <div className="bg-white border border-border rounded-2xl p-5">
                 <p className="text-xs font-bold text-[#9CA3AF] uppercase mb-1">Net Payout (Month)</p>
                 <p className="text-xl font-black text-emerald-600">
                   {formatCurrency(summary?.net_payout || 0)}
                 </p>
               </div>
-              <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
+              <div className="bg-white border border-border rounded-2xl p-5">
                 <p className="text-xs font-bold text-[#9CA3AF] uppercase mb-1">Paid / Pending</p>
-                <p className="text-xl font-black text-[#111827]">
+                <p className="text-xl font-black text-foreground">
                   {summary?.paid_orders || 0} / {summary?.pending_payments || 0}
                 </p>
               </div>
             </div>
 
-            <div className="bg-[#FFFFFF] rounded-2xl border border-[#E5E7EB] overflow-hidden">
-              <div className="px-6 py-4 border-b border-[#E5E7EB]">
-                <h2 className="text-xl font-bold text-[#111827]">Paid Orders</h2>
+            <div className="bg-background rounded-2xl border border-border overflow-hidden">
+              <div className="px-6 py-4 border-b border-border">
+                <h2 className="text-xl font-bold text-foreground">Paid Orders</h2>
               </div>
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-[#E5E7EB] text-[#6B7280] text-sm">
+                  <tr className="border-b border-border text-gray-text text-sm">
                     <th className="px-6 py-4 font-medium">Order</th>
                     <th className="px-6 py-4 font-medium">Method</th>
                     <th className="px-6 py-4 font-medium">Payment</th>
@@ -131,11 +131,11 @@ export default function PartnerEarningsPage() {
                 </thead>
                 <tbody>
                   {(data?.paid_orders || []).map((o) => (
-                    <tr key={o.id} className="border-b border-[#E5E7EB] hover:bg-[#F8FAFC]">
-                      <td className="px-6 py-4 text-[#111827] font-mono text-sm">
+                    <tr key={o.id} className="border-b border-border hover:bg-section">
+                      <td className="px-6 py-4 text-foreground font-mono text-sm">
                         #{o.id.slice(0, 8)}
                       </td>
-                      <td className="px-6 py-4 text-[#6B7280] capitalize">
+                      <td className="px-6 py-4 text-gray-text capitalize">
                         {(o.payment_method || "").replace(/_/g, " ")}
                       </td>
                       <td className="px-6 py-4">
@@ -149,15 +149,15 @@ export default function PartnerEarningsPage() {
                           {o.payment_status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-[#111827] font-bold">
+                      <td className="px-6 py-4 text-foreground font-bold">
                         {formatCurrency(Number(o.total_amount))}
                       </td>
-                      <td className="px-6 py-4 text-[#6B7280]">{o.status}</td>
+                      <td className="px-6 py-4 text-gray-text">{o.status}</td>
                     </tr>
                   ))}
                   {!data?.paid_orders?.length && !isLoading && (
                     <tr>
-                      <td colSpan={5} className="px-6 py-10 text-center text-[#6B7280] text-sm">
+                      <td colSpan={5} className="px-6 py-10 text-center text-gray-text text-sm">
                         No paid orders yet
                       </td>
                     </tr>

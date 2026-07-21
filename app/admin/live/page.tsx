@@ -23,37 +23,37 @@ function LiveDeliveriesPanel() {
   );
 
   return (
-    <section className="bg-white border border-[#E5E7EB] rounded-2xl p-5 mb-6">
-      <h2 className="text-lg font-black text-[#111827] mb-4 flex items-center gap-2">
-        <MapPin className="w-4 h-4 text-[#E23744]" />
+    <section className="bg-white border border-border rounded-2xl p-5 mb-6">
+      <h2 className="text-lg font-black text-foreground mb-4 flex items-center gap-2">
+        <MapPin className="w-4 h-4 text-primary" />
         Live Deliveries
       </h2>
-      {isLoading && <p className="text-sm text-[#6B7280]">Loading active deliveries…</p>}
+      {isLoading && <p className="text-sm text-gray-text">Loading active deliveries…</p>}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-2 max-h-[320px] overflow-y-auto">
           {(data?.live_deliveries || []).length === 0 && !isLoading && (
-            <p className="text-sm text-[#6B7280]">No active deliveries right now.</p>
+            <p className="text-sm text-gray-text">No active deliveries right now.</p>
           )}
           {(data?.live_deliveries || []).map((d) => (
             <div
               key={String(d.order_id)}
-              className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-sm"
+              className="rounded-xl border border-border bg-section px-3 py-2 text-sm"
             >
               <div className="flex justify-between gap-2">
-                <span className="font-bold text-[#111827]">
+                <span className="font-bold text-foreground">
                   #{String(d.order_id).slice(0, 8)} · {String(d.restaurant_name || "")}
                 </span>
-                <span className="text-xs font-bold text-[#E23744]">
+                <span className="text-xs font-bold text-primary">
                   {String(d.tracking_status || d.order_status || "")}
                 </span>
               </div>
-              <p className="text-xs text-[#6B7280] mt-1">
+              <p className="text-xs text-gray-text mt-1">
                 Driver: {String(d.driver_name || "Unassigned")}
                 {d.rider_lat != null ? ` · ${Number(d.rider_lat).toFixed(4)}, ${Number(d.rider_lng).toFixed(4)}` : ""}
               </p>
               <Link
                 href={`/track-order/${String(d.order_id)}`}
-                className="text-xs font-bold text-[#E23744] hover:underline mt-1 inline-block"
+                className="text-xs font-bold text-primary hover:underline mt-1 inline-block"
               >
                 Open tracking →
               </Link>
@@ -68,7 +68,7 @@ function LiveDeliveriesPanel() {
             </h3>
             <div className="space-y-1 max-h-[140px] overflow-y-auto">
               {(data?.delayed_orders || []).slice(0, 5).map((o) => (
-                <p key={String(o.id)} className="text-xs text-[#6B7280]">
+                <p key={String(o.id)} className="text-xs text-gray-text">
                   #{String(o.id).slice(0, 8)} · {String(o.restaurant_name)}
                 </p>
               ))}
@@ -80,7 +80,7 @@ function LiveDeliveriesPanel() {
             </h3>
             <div className="space-y-1 max-h-[140px] overflow-y-auto">
               {(data?.cancelled_orders || []).slice(0, 5).map((o) => (
-                <p key={String(o.id)} className="text-xs text-[#6B7280]">
+                <p key={String(o.id)} className="text-xs text-gray-text">
                   #{String(o.id).slice(0, 8)} · {String(o.restaurant_name)}
                 </p>
               ))}
@@ -136,8 +136,8 @@ export default function AdminLivePage() {
     <AdminShell title="Live Ops">
       <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-black text-[#111827] mb-1">Live Operations</h1>
-          <p className="text-[#6B7280]">
+          <h1 className="text-3xl font-black text-foreground mb-1">Live Operations</h1>
+          <p className="text-gray-text">
             Active orders, riders, and revenue — updated over Socket.IO without refresh.
           </p>
         </div>
@@ -158,17 +158,17 @@ export default function AdminLivePage() {
           Unable to load admin live data.
         </div>
       )}
-      {isLoading && !data && <p className="text-sm text-[#6B7280] mb-4">Loading…</p>}
+      {isLoading && !data && <p className="text-sm text-gray-text mb-4">Loading…</p>}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {cards.map((c) => (
-          <div key={c.label} className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
+          <div key={c.label} className="bg-white border border-border rounded-2xl p-5">
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF]">{c.label}</p>
-              <c.icon className="w-4 h-4 text-[#E23744]" />
+              <c.icon className="w-4 h-4 text-primary" />
             </div>
-            <p className="text-2xl font-black text-[#111827]">{c.value}</p>
-            <p className="text-xs text-[#6B7280] mt-1">{c.hint}</p>
+            <p className="text-2xl font-black text-foreground">{c.value}</p>
+            <p className="text-xs text-gray-text mt-1">{c.hint}</p>
           </div>
         ))}
       </div>
@@ -176,29 +176,29 @@ export default function AdminLivePage() {
       <LiveDeliveriesPanel />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <section className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
-          <h2 className="text-lg font-black text-[#111827] mb-4 flex items-center gap-2">
-            <Radio className="w-4 h-4 text-[#E23744]" />
+        <section className="bg-white border border-border rounded-2xl p-5">
+          <h2 className="text-lg font-black text-foreground mb-4 flex items-center gap-2">
+            <Radio className="w-4 h-4 text-primary" />
             Live Event Feed
           </h2>
           <div className="space-y-2 max-h-[420px] overflow-y-auto">
             {ticks.length === 0 && (
-              <p className="text-sm text-[#6B7280]">Waiting for live events…</p>
+              <p className="text-sm text-gray-text">Waiting for live events…</p>
             )}
             {ticks.map((t, i) => (
               <div
                 key={`${t.at}-${i}`}
-                className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-sm"
+                className="rounded-xl border border-border bg-section px-3 py-2 text-sm"
               >
                 <div className="flex justify-between gap-2">
-                  <span className="font-bold text-[#111827] capitalize">
+                  <span className="font-bold text-foreground capitalize">
                     {(t.event || t.type || "event").replace(/_/g, " ")}
                   </span>
                   <span className="text-[10px] text-[#9CA3AF]">
                     {t.at ? new Date(t.at).toLocaleTimeString() : ""}
                   </span>
                 </div>
-                <p className="text-xs text-[#6B7280] mt-1">
+                <p className="text-xs text-gray-text mt-1">
                   {t.order_id ? `Order #${String(t.order_id).slice(0, 8)}` : "Platform"}
                   {t.status ? ` · ${t.status}` : ""}
                   {t.total_amount != null ? ` · ₹${Number(t.total_amount).toFixed(0)}` : ""}
@@ -209,26 +209,26 @@ export default function AdminLivePage() {
           </div>
         </section>
 
-        <section className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
-          <h2 className="text-lg font-black text-[#111827] mb-4">Snapshot</h2>
-          <ul className="space-y-3 text-sm text-[#6B7280]">
+        <section className="bg-white border border-border rounded-2xl p-5">
+          <h2 className="text-lg font-black text-foreground mb-4">Snapshot</h2>
+          <ul className="space-y-3 text-sm text-gray-text">
             <li className="flex justify-between">
               <span>Delivered orders</span>
-              <span className="font-bold text-[#111827]">{data?.deliveredOrders ?? 0}</span>
+              <span className="font-bold text-foreground">{data?.deliveredOrders ?? 0}</span>
             </li>
             <li className="flex justify-between">
               <span>Pending restaurant approvals</span>
-              <span className="font-bold text-[#111827]">
+              <span className="font-bold text-foreground">
                 {data?.pendingRestaurantApprovals ?? 0}
               </span>
             </li>
             <li className="flex justify-between">
               <span>Total users</span>
-              <span className="font-bold text-[#111827]">{data?.totalUsers ?? 0}</span>
+              <span className="font-bold text-foreground">{data?.totalUsers ?? 0}</span>
             </li>
             <li className="flex justify-between">
               <span>Today&apos;s orders</span>
-              <span className="font-bold text-[#111827]">{data?.todaysOrders ?? 0}</span>
+              <span className="font-bold text-foreground">{data?.todaysOrders ?? 0}</span>
             </li>
           </ul>
           <p className="mt-6 text-xs text-[#9CA3AF]">

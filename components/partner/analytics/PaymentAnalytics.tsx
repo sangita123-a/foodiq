@@ -22,8 +22,8 @@ export default function PaymentAnalytics({ data }: PaymentAnalyticsProps) {
   });
 
   return (
-    <div className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-xl flex flex-col h-full">
-      <h3 className="text-xl font-black text-[#111827] flex items-center gap-2 mb-8">
+    <div className="bg-background rounded-3xl p-6 md:p-8 border border-border shadow-xl flex flex-col h-full">
+      <h3 className="text-xl font-black text-foreground flex items-center gap-2 mb-8">
         <WalletCards className="w-6 h-6 text-green-500" /> Payment Methods
       </h3>
 
@@ -48,8 +48,8 @@ export default function PaymentAnalytics({ data }: PaymentAnalyticsProps) {
             ))}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-            <span className="text-[#6B7280] text-[10px] font-bold uppercase tracking-wider">Top Method</span>
-            <span className="text-[#111827] font-black text-sm">{data[0].method}</span>
+            <span className="text-gray-text text-[10px] font-bold uppercase tracking-wider">Top Method</span>
+            <span className="text-foreground font-black text-sm">{data[0].method}</span>
           </div>
         </div>
 
@@ -61,13 +61,13 @@ export default function PaymentAnalytics({ data }: PaymentAnalyticsProps) {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
-              className="flex items-center justify-between p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E5E7EB] group hover:border-[#E5E7EB] transition-colors"
+              className="flex items-center justify-between p-2.5 rounded-xl bg-section border border-border group hover:border-border transition-colors"
             >
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color, boxShadow: `0 0 10px ${item.color}` }}></div>
-                <span className="text-sm font-bold text-[#6B7280] group-hover:text-[#111827] transition-colors">{item.method}</span>
+                <span className="text-sm font-bold text-gray-text group-hover:text-foreground transition-colors">{item.method}</span>
               </div>
-              <span className="text-[#111827] font-black">{item.percentage}%</span>
+              <span className="text-foreground font-black">{item.percentage}%</span>
             </motion.div>
           ))}
         </div>

@@ -70,13 +70,13 @@ export default function AdminContactSettingsPage() {
   return (
     <AdminShell title="Contact Settings">
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-[#222222]">Contact Settings</h1>
+        <h1 className="text-3xl font-black text-foreground">Contact Settings</h1>
         <p className="text-[#555555]">
           Manage the contact information shown on the Contact Us page. Changes appear instantly for all visitors.
         </p>
       </div>
 
-      <form onSubmit={save} className="max-w-4xl space-y-6 rounded-3xl border border-[#E5E7EB] bg-white p-6">
+      <form onSubmit={save} className="max-w-4xl space-y-6 rounded-3xl border border-border bg-white p-6">
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Input
             label="Phone Number"
@@ -112,7 +112,7 @@ export default function AdminContactSettingsPage() {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-xl bg-[#E23744] px-8 py-3 font-black text-white disabled:opacity-60"
+          className="rounded-xl bg-primary px-8 py-3 font-black text-white disabled:opacity-60"
         >
           {saving ? "Saving…" : "Save Changes"}
         </button>
@@ -146,7 +146,7 @@ function Input({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required
-        className="mt-1 w-full rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm font-normal text-[#222222]"
+        className="mt-1 w-full rounded-xl border border-border px-4 py-3 text-sm font-normal text-foreground"
       />
     </label>
   );
@@ -173,7 +173,7 @@ function TextArea({
         rows={rows}
         onChange={(e) => onChange(e.target.value)}
         required
-        className="mt-1 w-full resize-y rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm font-normal text-[#222222]"
+        className="mt-1 w-full resize-y rounded-xl border border-border px-4 py-3 text-sm font-normal text-foreground"
       />
     </label>
   );

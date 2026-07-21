@@ -13,7 +13,7 @@ const MOCK_CUSTOMERS = [
 
 export default function PartnerCustomersPage() {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#E23744] selection:text-white">
+    <div className="min-h-screen bg-section flex selection:bg-primary selection:text-white">
       <div className="hidden lg:block w-64 flex-shrink-0">
         <PartnerSidebar />
       </div>
@@ -22,19 +22,19 @@ export default function PartnerCustomersPage() {
         <main className="flex-1 overflow-y-auto p-4 md:p-8">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 rounded-xl bg-[#E23744]/15 flex items-center justify-center">
-                <Users className="w-6 h-6 text-[#E23744]" />
+              <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center">
+                <Users className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-3xl font-black text-[#111827]">Customers</h1>
-                <p className="text-[#6B7280]">People who ordered from your restaurant</p>
+                <h1 className="text-3xl font-black text-foreground">Customers</h1>
+                <p className="text-gray-text">People who ordered from your restaurant</p>
               </div>
             </div>
 
-            <div className="bg-[#FFFFFF] rounded-2xl border border-[#E5E7EB] overflow-hidden">
+            <div className="bg-background rounded-2xl border border-border overflow-hidden">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-[#E5E7EB] text-[#6B7280] text-sm">
+                  <tr className="border-b border-border text-gray-text text-sm">
                     <th className="px-6 py-4 font-medium">Customer</th>
                     <th className="px-6 py-4 font-medium">Orders</th>
                     <th className="px-6 py-4 font-medium">Total Spent</th>
@@ -43,11 +43,11 @@ export default function PartnerCustomersPage() {
                 </thead>
                 <tbody>
                   {MOCK_CUSTOMERS.map((c) => (
-                    <tr key={c.id} className="border-b border-[#E5E7EB] hover:bg-[#F8FAFC]">
-                      <td className="px-6 py-4 text-[#111827] font-medium">{c.name}</td>
-                      <td className="px-6 py-4 text-[#6B7280]">{c.orders}</td>
-                      <td className="px-6 py-4 text-[#111827] font-bold">{c.spent}</td>
-                      <td className="px-6 py-4 text-[#6B7280]">{c.lastOrder}</td>
+                    <tr key={c.id} className="border-b border-border hover:bg-section">
+                      <td className="px-6 py-4 text-foreground font-medium">{c.name}</td>
+                      <td className="px-6 py-4 text-gray-text">{c.orders}</td>
+                      <td className="px-6 py-4 text-foreground font-bold">{c.spent}</td>
+                      <td className="px-6 py-4 text-gray-text">{c.lastOrder}</td>
                     </tr>
                   ))}
                 </tbody>

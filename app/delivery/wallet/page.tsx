@@ -56,26 +56,26 @@ export default function DeliveryWalletPage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6">
+        <div className="bg-white border border-border rounded-2xl p-6">
           <p className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF] mb-2">
             Wallet Balance
           </p>
-          <p className="text-3xl font-black text-[#111827]">
+          <p className="text-3xl font-black text-foreground">
             {formatCurrency(data?.balance || dashboard?.wallet_balance || 0)}
           </p>
         </div>
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6">
+        <div className="bg-white border border-border rounded-2xl p-6">
           <p className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF] mb-2">
             Total Earned
           </p>
-          <p className="text-3xl font-black text-[#E23744]">
+          <p className="text-3xl font-black text-primary">
             {formatCurrency(data?.total_earned || dashboard?.total_earnings || 0)}
           </p>
         </div>
       </div>
 
-      <section className="bg-white border border-[#E5E7EB] rounded-2xl p-5 mb-8">
-        <h2 className="text-lg font-black text-[#111827] mb-4">Request Withdrawal</h2>
+      <section className="bg-white border border-border rounded-2xl p-5 mb-8">
+        <h2 className="text-lg font-black text-foreground mb-4">Request Withdrawal</h2>
         <form onSubmit={handleWithdraw} className="flex flex-col sm:flex-row gap-3">
           <input
             type="number"
@@ -84,13 +84,13 @@ export default function DeliveryWalletPage() {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="Amount (min ₹100)"
-            className="flex-1 border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+            className="flex-1 border border-border rounded-xl px-4 py-3 text-sm"
             required
           />
           <button
             type="submit"
             disabled={submitting}
-            className="bg-[#E23744] hover:bg-[#C81E34] text-white font-bold px-6 py-3 rounded-xl disabled:opacity-60"
+            className="bg-primary hover:bg-primary-hover text-white font-bold px-6 py-3 rounded-xl disabled:opacity-60"
           >
             {submitting ? "Submitting..." : "Withdraw"}
           </button>
@@ -101,25 +101,25 @@ export default function DeliveryWalletPage() {
       </section>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <section className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#E5E7EB]">
-            <h2 className="text-lg font-black text-[#111827]">Transaction History</h2>
+        <section className="bg-white border border-border rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-border">
+            <h2 className="text-lg font-black text-foreground">Transaction History</h2>
           </div>
           {isLoading && !data && (
-            <p className="p-6 text-sm text-[#6B7280]">Loading transactions...</p>
+            <p className="p-6 text-sm text-gray-text">Loading transactions...</p>
           )}
           <div className="divide-y divide-[#F3F4F6]">
             {(data?.transactions || []).map((tx) => (
               <div key={tx.id} className="px-5 py-4 flex justify-between gap-3">
                 <div>
-                  <p className="font-bold text-[#111827] capitalize">{tx.type}</p>
-                  <p className="text-xs text-[#6B7280] mt-1">
+                  <p className="font-bold text-foreground capitalize">{tx.type}</p>
+                  <p className="text-xs text-gray-text mt-1">
                     {tx.note || tx.status} · {formatRelativeTime(tx.created_at)}
                   </p>
                 </div>
                 <p
                   className={`font-black ${
-                    tx.type === "credit" ? "text-emerald-600" : "text-[#111827]"
+                    tx.type === "credit" ? "text-emerald-600" : "text-foreground"
                   }`}
                 >
                   {tx.type === "credit" ? "+" : "-"}
@@ -128,31 +128,31 @@ export default function DeliveryWalletPage() {
               </div>
             ))}
             {!data?.transactions?.length && !isLoading && (
-              <p className="p-8 text-sm text-[#6B7280] text-center">No transactions yet.</p>
+              <p className="p-8 text-sm text-gray-text text-center">No transactions yet.</p>
             )}
           </div>
         </section>
 
-        <section className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#E5E7EB]">
-            <h2 className="text-lg font-black text-[#111827]">Withdrawal Requests</h2>
+        <section className="bg-white border border-border rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-border">
+            <h2 className="text-lg font-black text-foreground">Withdrawal Requests</h2>
           </div>
           <div className="divide-y divide-[#F3F4F6]">
             {(data?.withdrawals || []).map((w) => (
               <div key={w.id} className="px-5 py-4 flex justify-between gap-3">
                 <div>
-                  <p className="font-bold text-[#111827]">{formatCurrency(Number(w.amount))}</p>
-                  <p className="text-xs text-[#6B7280] mt-1">
+                  <p className="font-bold text-foreground">{formatCurrency(Number(w.amount))}</p>
+                  <p className="text-xs text-gray-text mt-1">
                     {w.status} · {formatRelativeTime(w.created_at)}
                   </p>
                 </div>
-                <span className="text-xs font-bold px-2 py-1 rounded-lg bg-[#F8FAFC] text-[#6B7280] uppercase">
+                <span className="text-xs font-bold px-2 py-1 rounded-lg bg-section text-gray-text uppercase">
                   {w.status}
                 </span>
               </div>
             ))}
             {!data?.withdrawals?.length && !isLoading && (
-              <p className="p-8 text-sm text-[#6B7280] text-center">No withdrawal requests.</p>
+              <p className="p-8 text-sm text-gray-text text-center">No withdrawal requests.</p>
             )}
           </div>
         </section>

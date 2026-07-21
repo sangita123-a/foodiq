@@ -148,17 +148,17 @@ export default function AdminFeedbackPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-black text-[#111827] flex items-center gap-2">
-              <MessageSquare className="w-6 h-6 text-[#E23744]" /> Feedback
+            <h1 className="text-2xl font-black text-foreground flex items-center gap-2">
+              <MessageSquare className="w-6 h-6 text-primary" /> Feedback
             </h1>
-            <p className="text-sm text-[#6B7280] mt-1">
+            <p className="text-sm text-gray-text mt-1">
               Order ratings, analytics, product feedback, and review moderation.
             </p>
           </div>
           <button
             type="button"
             onClick={() => void load()}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#E5E7EB] text-sm font-bold text-[#6B7280] hover:text-[#111827]"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm font-bold text-gray-text hover:text-foreground"
           >
             <RefreshCw className="w-4 h-4" /> Refresh
           </button>
@@ -172,8 +172,8 @@ export default function AdminFeedbackPage() {
               onClick={() => setTab(t.id)}
               className={`px-4 py-2 rounded-xl text-sm font-bold ${
                 tab === t.id
-                  ? "bg-[#E23744] text-white"
-                  : "bg-white border border-[#E5E7EB] text-[#6B7280]"
+                  ? "bg-primary text-white"
+                  : "bg-white border border-border text-gray-text"
               }`}
             >
               {t.label}
@@ -182,14 +182,14 @@ export default function AdminFeedbackPage() {
         </div>
 
         {(tab === "orders" || tab === "reviews") && (
-          <div className="bg-white rounded-3xl border border-[#E5E7EB] p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div className="bg-white rounded-3xl border border-border p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             <input
               value={filters.restaurant_id}
               onChange={(e) =>
                 setFilters((f) => ({ ...f, restaurant_id: e.target.value }))
               }
               placeholder="Restaurant ID"
-              className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm"
+              className="bg-section border border-border rounded-xl px-3 py-2 text-sm"
             />
             {tab === "orders" && (
               <input
@@ -201,7 +201,7 @@ export default function AdminFeedbackPage() {
                   }))
                 }
                 placeholder="Delivery partner ID"
-                className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm"
+                className="bg-section border border-border rounded-xl px-3 py-2 text-sm"
               />
             )}
             <select
@@ -209,7 +209,7 @@ export default function AdminFeedbackPage() {
               onChange={(e) =>
                 setFilters((f) => ({ ...f, rating: e.target.value }))
               }
-              className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm"
+              className="bg-section border border-border rounded-xl px-3 py-2 text-sm"
             >
               <option value="">All ratings</option>
               {[5, 4, 3, 2, 1].map((n) => (
@@ -224,7 +224,7 @@ export default function AdminFeedbackPage() {
               onChange={(e) =>
                 setFilters((f) => ({ ...f, from: e.target.value }))
               }
-              className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm"
+              className="bg-section border border-border rounded-xl px-3 py-2 text-sm"
             />
             <input
               type="date"
@@ -232,19 +232,19 @@ export default function AdminFeedbackPage() {
               onChange={(e) =>
                 setFilters((f) => ({ ...f, to: e.target.value }))
               }
-              className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm"
+              className="bg-section border border-border rounded-xl px-3 py-2 text-sm"
             />
           </div>
         )}
 
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden">
+        <div className="bg-white rounded-3xl border border-border overflow-hidden">
           {loading ? (
-            <div className="p-8 text-sm text-[#6B7280]">Loading…</div>
+            <div className="p-8 text-sm text-gray-text">Loading…</div>
           ) : tab === "orders" ? (
             <div>
               <div className="divide-y divide-[#E5E7EB]">
                 {orderRows.length === 0 && (
-                  <p className="p-6 text-sm text-[#6B7280]">
+                  <p className="p-6 text-sm text-gray-text">
                     No order feedback yet.
                   </p>
                 )}
@@ -254,7 +254,7 @@ export default function AdminFeedbackPage() {
                     className="p-5 flex flex-col md:flex-row md:items-start gap-3 justify-between"
                   >
                     <div>
-                      <p className="font-bold text-[#111827]">
+                      <p className="font-bold text-foreground">
                         {String(r.restaurant_name || "Restaurant")}
                         {r.restaurant_rating != null
                           ? ` · ${String(r.restaurant_rating)}★ food`
@@ -266,13 +266,13 @@ export default function AdminFeedbackPage() {
                           ? ` · ${String(r.overall_rating)}★ overall`
                           : ""}
                       </p>
-                      <p className="text-sm text-[#6B7280] mt-1">
+                      <p className="text-sm text-gray-text mt-1">
                         {String(r.customer_name || "Customer")}
                         {r.delivery_partner_name
                           ? ` · DP: ${String(r.delivery_partner_name)}`
                           : ""}
                       </p>
-                      <p className="text-sm text-[#6B7280] mt-1">
+                      <p className="text-sm text-gray-text mt-1">
                         {String(
                           r.overall_comment ||
                             r.restaurant_comment ||
@@ -321,12 +321,12 @@ export default function AdminFeedbackPage() {
                 ].map((k) => (
                   <div
                     key={k.label}
-                    className="rounded-2xl border border-[#E5E7EB] p-4"
+                    className="rounded-2xl border border-border p-4"
                   >
                     <p className="text-xs font-bold text-[#9CA3AF] uppercase">
                       {k.label}
                     </p>
-                    <p className="text-2xl font-black text-[#111827] mt-1">
+                    <p className="text-2xl font-black text-foreground mt-1">
                       {String(k.value)}
                     </p>
                   </div>
@@ -339,16 +339,16 @@ export default function AdminFeedbackPage() {
                     {topRestaurants.map((r) => (
                       <div
                         key={r.name}
-                        className="flex justify-between text-sm border-b border-[#E5E7EB] py-2"
+                        className="flex justify-between text-sm border-b border-border py-2"
                       >
                         <span className="font-bold">{r.name}</span>
-                        <span className="text-[#6B7280]">
+                        <span className="text-gray-text">
                           {r.review_count} · {r.avg_rating}★
                         </span>
                       </div>
                     ))}
                     {!topRestaurants.length && (
-                      <p className="text-sm text-[#6B7280]">No data yet.</p>
+                      <p className="text-sm text-gray-text">No data yet.</p>
                     )}
                   </div>
                 </div>
@@ -358,16 +358,16 @@ export default function AdminFeedbackPage() {
                     {topDishes.map((d) => (
                       <div
                         key={d.dish_name}
-                        className="flex justify-between text-sm border-b border-[#E5E7EB] py-2"
+                        className="flex justify-between text-sm border-b border-border py-2"
                       >
                         <span className="font-bold">{d.dish_name}</span>
-                        <span className="text-[#6B7280]">
+                        <span className="text-gray-text">
                           {d.review_count} · {d.avg_rating}★
                         </span>
                       </div>
                     ))}
                     {!topDishes.length && (
-                      <p className="text-sm text-[#6B7280]">No data yet.</p>
+                      <p className="text-sm text-gray-text">No data yet.</p>
                     )}
                   </div>
                 </div>
@@ -394,7 +394,7 @@ export default function AdminFeedbackPage() {
             <div>
               <div className="divide-y divide-[#E5E7EB]">
                 {reviews.length === 0 && (
-                  <p className="p-6 text-sm text-[#6B7280]">No reviews yet.</p>
+                  <p className="p-6 text-sm text-gray-text">No reviews yet.</p>
                 )}
                 {reviews.map((r) => (
                   <div
@@ -402,11 +402,11 @@ export default function AdminFeedbackPage() {
                     className="p-5 flex flex-col md:flex-row md:items-center gap-4 justify-between"
                   >
                     <div>
-                      <p className="font-bold text-[#111827]">
+                      <p className="font-bold text-foreground">
                         {String(r.restaurant_name || "Restaurant")} ·{" "}
                         {String(r.rating)}★
                       </p>
-                      <p className="text-sm text-[#6B7280] mt-1">
+                      <p className="text-sm text-gray-text mt-1">
                         {String(r.full_name || "User")}:{" "}
                         {String(r.comment || "—")}
                       </p>
@@ -468,8 +468,8 @@ function Pagination({
 }) {
   if (total <= PAGE_SIZE) return null;
   return (
-    <div className="flex items-center justify-between gap-3 px-5 py-4 border-t border-[#E5E7EB] flex-wrap">
-      <p className="text-xs text-[#6B7280]">
+    <div className="flex items-center justify-between gap-3 px-5 py-4 border-t border-border flex-wrap">
+      <p className="text-xs text-gray-text">
         {total} total · Page {page + 1} / {totalPages}
       </p>
       <div className="flex gap-2">
@@ -477,7 +477,7 @@ function Pagination({
           type="button"
           disabled={page <= 0}
           onClick={() => onPage(page - 1)}
-          className="px-3 py-1.5 rounded-lg text-xs font-bold border border-[#E5E7EB] disabled:opacity-40"
+          className="px-3 py-1.5 rounded-lg text-xs font-bold border border-border disabled:opacity-40"
         >
           Previous
         </button>
@@ -485,7 +485,7 @@ function Pagination({
           type="button"
           disabled={page + 1 >= totalPages}
           onClick={() => onPage(page + 1)}
-          className="px-3 py-1.5 rounded-lg text-xs font-bold border border-[#E5E7EB] disabled:opacity-40"
+          className="px-3 py-1.5 rounded-lg text-xs font-bold border border-border disabled:opacity-40"
         >
           Next
         </button>
@@ -504,12 +504,12 @@ function FeedbackTable({
   onStatus: (id: string, status: string) => void;
 }) {
   if (!rows.length) {
-    return <p className="p-6 text-sm text-[#6B7280]">No items.</p>;
+    return <p className="p-6 text-sm text-gray-text">No items.</p>;
   }
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
-        <thead className="bg-[#F8FAFC] text-[#6B7280] text-xs uppercase tracking-wider">
+        <thead className="bg-section text-gray-text text-xs uppercase tracking-wider">
           <tr>
             {columns.map((c) => (
               <th key={c} className="px-4 py-3 font-bold">
@@ -521,11 +521,11 @@ function FeedbackTable({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={String(row.id)} className="border-t border-[#E5E7EB]">
+            <tr key={String(row.id)} className="border-t border-border">
               {columns.map((c) => (
                 <td
                   key={c}
-                  className="px-4 py-3 text-[#111827] max-w-xs truncate"
+                  className="px-4 py-3 text-foreground max-w-xs truncate"
                 >
                   {c === "created_at"
                     ? formatDate(String(row[c] || ""))
@@ -536,7 +536,7 @@ function FeedbackTable({
                 <button
                   type="button"
                   onClick={() => onStatus(String(row.id), "resolved")}
-                  className="text-xs font-bold text-[#E23744] hover:underline"
+                  className="text-xs font-bold text-primary hover:underline"
                 >
                   Mark resolved
                 </button>

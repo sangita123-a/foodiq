@@ -88,7 +88,7 @@ export async function openRazorpayCheckout(params: {
       ...params.prefill,
       ...(params.preferredMethod ? { method: params.preferredMethod } : {}),
     },
-    theme: { color: "#E23744" },
+    theme: { color: "#0F766E" },
     handler: params.onSuccess,
     modal: {
       ondismiss: () => params.onDismiss?.(),

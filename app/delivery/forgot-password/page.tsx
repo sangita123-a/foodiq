@@ -61,10 +61,10 @@ export default function DeliveryForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6">
-      <div className="w-full max-w-md bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm">
-        <h1 className="text-2xl font-black text-[#111827] mb-2">Reset Rider Password</h1>
-        <p className="text-sm text-[#6B7280] mb-6">
+    <div className="min-h-screen bg-section flex items-center justify-center p-6">
+      <div className="w-full max-w-md bg-white border border-border rounded-2xl p-8 shadow-sm">
+        <h1 className="text-2xl font-black text-foreground mb-2">Reset Rider Password</h1>
+        <p className="text-sm text-gray-text mb-6">
           {step === "request"
             ? "Enter your registered email to receive a reset code."
             : "Enter the reset code and your new password."}
@@ -84,12 +84,12 @@ export default function DeliveryForgotPasswordPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="rider@foodiq.com"
               required
-              className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+              className="w-full border border-border rounded-xl px-4 py-3 text-sm"
             />
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#E23744] hover:bg-[#C81E34] text-white font-bold py-3 rounded-xl disabled:opacity-60"
+              className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl disabled:opacity-60"
             >
               {loading ? "Sending..." : "Send Reset Code"}
             </button>
@@ -102,7 +102,7 @@ export default function DeliveryForgotPasswordPage() {
               onChange={(e) => setResetCode(e.target.value)}
               placeholder="Reset code"
               required
-              className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+              className="w-full border border-border rounded-xl px-4 py-3 text-sm"
             />
             <input
               type="password"
@@ -111,20 +111,20 @@ export default function DeliveryForgotPasswordPage() {
               placeholder="New password"
               required
               minLength={8}
-              className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm"
+              className="w-full border border-border rounded-xl px-4 py-3 text-sm"
             />
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#E23744] hover:bg-[#C81E34] text-white font-bold py-3 rounded-xl disabled:opacity-60"
+              className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl disabled:opacity-60"
             >
               {loading ? "Resetting..." : "Reset Password"}
             </button>
           </form>
         )}
 
-        <p className="text-center text-sm text-[#6B7280] mt-6">
-          <Link href="/delivery/login" className="text-[#E23744] font-bold hover:underline">
+        <p className="text-center text-sm text-gray-text mt-6">
+          <Link href="/delivery/login" className="text-primary font-bold hover:underline">
             Back to rider login
           </Link>
         </p>

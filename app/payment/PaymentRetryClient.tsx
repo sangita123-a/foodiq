@@ -25,13 +25,13 @@ export default function PaymentRetryClient() {
 
   if (!orderId || !amount) {
     return (
-      <main className="min-h-screen bg-[#F8FAFC] pt-[90px] flex flex-col items-center justify-center gap-4">
+      <main className="min-h-screen bg-section pt-[90px] flex flex-col items-center justify-center gap-4">
         <Navbar />
-        <p className="text-[#6B7280]">Missing order details.</p>
+        <p className="text-gray-text">Missing order details.</p>
         <button
           type="button"
           onClick={() => router.push("/checkout")}
-          className="bg-[#E23744] text-white font-bold px-5 py-2 rounded-xl"
+          className="bg-primary text-white font-bold px-5 py-2 rounded-xl"
         >
           Go to Checkout
         </button>
@@ -106,22 +106,22 @@ export default function PaymentRetryClient() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F8FAFC] pt-[90px]">
+    <main className="min-h-screen bg-section pt-[90px]">
       <Navbar />
       <div className="container mx-auto px-4 max-w-lg py-16">
-        <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 text-center">
-          <h1 className="text-3xl font-black text-[#111827] mb-3">Retry Payment</h1>
-          <p className="text-[#6B7280] mb-2">
+        <div className="bg-white border border-border rounded-3xl p-8 text-center">
+          <h1 className="text-3xl font-black text-foreground mb-3">Retry Payment</h1>
+          <p className="text-gray-text mb-2">
             Complete payment for order #{orderId.slice(0, 8)}
           </p>
-          <p className="text-2xl font-black text-[#E23744] mb-8">
+          <p className="text-2xl font-black text-primary mb-8">
             ₹{amount.toLocaleString("en-IN")}
           </p>
           <button
             type="button"
             disabled={loading}
             onClick={handleRetry}
-            className="inline-flex items-center gap-2 bg-[#E23744] hover:bg-[#C81E34] text-white font-bold px-6 py-3 rounded-xl disabled:opacity-60"
+            className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white font-bold px-6 py-3 rounded-xl disabled:opacity-60"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
             {loading ? "Processing..." : "Pay with Razorpay"}

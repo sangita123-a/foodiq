@@ -67,8 +67,8 @@ export default function AdminSupportPage() {
   return (
     <AdminShell title="Support Center">
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-[#111827]">AI Customer Support</h1>
-        <p className="text-[#6B7280]">Tickets, live chat, Foodiq AI sessions, and satisfaction analytics.</p>
+        <h1 className="text-3xl font-black text-foreground">AI Customer Support</h1>
+        <p className="text-gray-text">Tickets, live chat, Foodiq AI sessions, and satisfaction analytics.</p>
       </div>
 
       <div className="flex gap-2 mb-6 flex-wrap">
@@ -78,7 +78,7 @@ export default function AdminSupportPage() {
             type="button"
             onClick={() => setTab(t)}
             className={`px-4 py-2 rounded-xl text-sm font-bold capitalize ${
-              tab === t ? "bg-[#E23744] text-white" : "bg-white border border-[#E5E7EB] text-[#6B7280]"
+              tab === t ? "bg-primary text-white" : "bg-white border border-border text-gray-text"
             }`}
           >
             {t === "ai" ? "AI Chat History" : t}
@@ -104,20 +104,20 @@ export default function AdminSupportPage() {
             { label: "Agents Online", value: String(analytics.agents_online ?? 0) },
             { label: "Total Tickets", value: String(analytics.tickets?.total ?? 0) },
           ].map((c) => (
-            <div key={c.label} className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
+            <div key={c.label} className="bg-white border border-border rounded-2xl p-5">
               <p className="text-xs font-bold uppercase text-[#9CA3AF] mb-1">{c.label}</p>
-              <p className="text-2xl font-black text-[#111827]">{c.value}</p>
+              <p className="text-2xl font-black text-foreground">{c.value}</p>
             </div>
           ))}
         </div>
       )}
 
       {tab === "tickets" && (
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden">
-          {isLoading && <p className="p-6 text-sm text-[#6B7280]">Loading…</p>}
+        <div className="bg-white rounded-3xl border border-border overflow-hidden">
+          {isLoading && <p className="p-6 text-sm text-gray-text">Loading…</p>}
           <div className="overflow-x-auto">
             <table className="w-full min-w-[700px] text-left">
-              <thead className="bg-[#F8FAFC] border-b border-[#E5E7EB]">
+              <thead className="bg-section border-b border-border">
                 <tr>
                   {["Subject", "Category", "Customer", "Status", "Agent", "Actions"].map((h) => (
                     <th key={h} className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">{h}</th>
@@ -126,17 +126,17 @@ export default function AdminSupportPage() {
               </thead>
               <tbody>
                 {(tickets || []).map((t) => (
-                  <tr key={t.id} className="border-b border-[#E5E7EB]">
+                  <tr key={t.id} className="border-b border-border">
                     <td className="p-4 text-sm font-bold">{t.subject}</td>
-                    <td className="p-4 text-xs text-[#6B7280]">{t.category}</td>
+                    <td className="p-4 text-xs text-gray-text">{t.category}</td>
                     <td className="p-4 text-sm">{t.user_name || t.user_email}</td>
                     <td className="p-4">
-                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-[#F8FAFC]">{t.status}</span>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-section">{t.status}</span>
                     </td>
                     <td className="p-4 text-xs">{t.agent_name || "—"}</td>
                     <td className="p-4 space-x-2">
                       {!t.agent_name && (
-                        <button type="button" onClick={() => assign(t.id)} className="text-xs font-bold text-[#111827]">
+                        <button type="button" onClick={() => assign(t.id)} className="text-xs font-bold text-foreground">
                           Assign me
                         </button>
                       )}
@@ -156,15 +156,15 @@ export default function AdminSupportPage() {
 
       {tab === "live" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-white rounded-3xl border border-[#E5E7EB] p-4 space-y-2">
-            <h2 className="font-black text-[#111827] mb-2 px-2">Active Chats</h2>
+          <div className="bg-white rounded-3xl border border-border p-4 space-y-2">
+            <h2 className="font-black text-foreground mb-2 px-2">Active Chats</h2>
             {(liveChats || []).map((c) => (
               <button
                 key={c.id}
                 type="button"
                 onClick={() => setSelectedChat(c.id)}
                 className={`w-full text-left px-4 py-3 rounded-xl border ${
-                  selectedChat === c.id ? "border-[#E23744] bg-[#E23744]/5" : "border-[#E5E7EB]"
+                  selectedChat === c.id ? "border-primary bg-primary/5" : "border-border"
                 }`}
               >
                 <p className="font-bold text-sm">{c.user_name || "Customer"}</p>
@@ -172,23 +172,23 @@ export default function AdminSupportPage() {
               </button>
             ))}
           </div>
-          <div className="lg:col-span-2 bg-white rounded-3xl border border-[#E5E7EB] p-6">
+          <div className="lg:col-span-2 bg-white rounded-3xl border border-border p-6">
             {selectedChat ? (
               <div>
-                <p className="text-sm font-bold text-[#6B7280] mb-4">Reply as agent</p>
+                <p className="text-sm font-bold text-gray-text mb-4">Reply as agent</p>
                 <textarea
                   value={agentMsg}
                   onChange={(e) => setAgentMsg(e.target.value)}
                   rows={3}
-                  className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm mb-3"
+                  className="w-full border border-border rounded-xl px-4 py-3 text-sm mb-3"
                   placeholder="Type your reply…"
                 />
-                <button type="button" onClick={sendAgentMsg} className="bg-[#E23744] text-white font-black px-6 py-2 rounded-xl text-sm">
+                <button type="button" onClick={sendAgentMsg} className="bg-primary text-white font-black px-6 py-2 rounded-xl text-sm">
                   Send Reply
                 </button>
               </div>
             ) : (
-              <p className="text-sm text-[#6B7280]">Select a chat to respond.</p>
+              <p className="text-sm text-gray-text">Select a chat to respond.</p>
             )}
           </div>
         </div>
@@ -206,14 +206,14 @@ function AiSessionsTab() {
     "/api/admin/support/ai-sessions"
   );
   return (
-    <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6 space-y-3">
+    <div className="bg-white rounded-3xl border border-border p-6 space-y-3">
       {(data || []).map((s) => (
-        <div key={s.id} className="border border-[#E5E7EB] rounded-xl p-4">
+        <div key={s.id} className="border border-border rounded-xl p-4">
           <p className="font-bold text-sm">{s.full_name || s.email || "Guest"}</p>
           <p className="text-xs text-[#9CA3AF]">{Array.isArray(s.messages) ? s.messages.length : 0} messages · {s.updated_at ? new Date(s.updated_at).toLocaleString() : ""}</p>
         </div>
       ))}
-      {!data?.length && <p className="text-sm text-[#6B7280]">No AI sessions yet.</p>}
+      {!data?.length && <p className="text-sm text-gray-text">No AI sessions yet.</p>}
     </div>
   );
 }

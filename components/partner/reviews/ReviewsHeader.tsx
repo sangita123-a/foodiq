@@ -13,15 +13,15 @@ export default function ReviewsHeader() {
       className="mb-8"
     >
       <div className="flex items-center gap-2 text-sm text-[#9CA3AF] font-bold uppercase tracking-wider mb-4">
-        <Link href="/partner/dashboard" className="hover:text-[#E23744] transition-colors">Dashboard</Link>
+        <Link href="/partner/dashboard" className="hover:text-primary transition-colors">Dashboard</Link>
         <ChevronRight className="w-4 h-4" />
-        <span className="text-[#111827]">Customer Reviews</span>
+        <span className="text-foreground">Customer Reviews</span>
       </div>
       
-      <h1 className="text-3xl md:text-4xl font-black text-[#111827] mb-2 flex items-center gap-3">
+      <h1 className="text-3xl md:text-4xl font-black text-foreground mb-2 flex items-center gap-3">
         ⭐ Customer Reviews & Ratings
       </h1>
-      <p className="text-[#6B7280]">
+      <p className="text-gray-text">
         Monitor customer feedback, improve service quality, and respond to reviews.
       </p>
     </motion.div>

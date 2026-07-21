@@ -58,20 +58,20 @@ export default function CategoryDetailView({ slug }: Props) {
   }
 
   return (
-    <main className="relative min-h-screen bg-white pt-[90px] selection:bg-[#E23744]/20 selection:text-[#1A1A1A]">
+    <main className="relative min-h-screen bg-white pt-[90px] selection:bg-primary/20 selection:text-foreground">
       <Navbar />
       <FloatingCart />
 
       <div className="container mx-auto max-w-[1440px] px-4 py-8 md:px-8">
         <Link
           href="/"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-[#666666] transition-colors hover:text-[#1A1A1A]"
+          className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-gray-text transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Home
         </Link>
 
-        <div className="relative mb-10 overflow-hidden rounded-3xl border border-[#ECECEC] bg-[#1A1A1A]">
+        <div className="relative mb-10 overflow-hidden rounded-3xl border border-border bg-[#1A1A1A]">
           <div className="absolute inset-0">
             <SafeImage
               src={category.image}
@@ -100,15 +100,15 @@ export default function CategoryDetailView({ slug }: Props) {
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder={`Search ${category.name.toLowerCase()}...`}
-              className="h-11 w-full rounded-xl border border-[#ECECEC] bg-[#F8F8F8] pl-10 pr-4 text-sm text-[#1A1A1A] outline-none transition-colors placeholder:text-gray-500 focus:border-[#E23744]"
+              className="h-11 w-full rounded-xl border border-border bg-footer pl-10 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-gray-500 focus:border-primary"
             />
           </label>
         </div>
 
         {filteredDishes.length === 0 ? (
-          <div className="rounded-2xl border border-[#ECECEC] bg-[#FFF5F6] px-6 py-16 text-center">
-            <p className="text-lg font-black text-[#1A1A1A]">No dishes found</p>
-            <p className="mt-2 text-sm text-[#666666]">Try a different search term.</p>
+          <div className="rounded-2xl border border-border bg-primary-soft px-6 py-16 text-center">
+            <p className="text-lg font-black text-foreground">No dishes found</p>
+            <p className="mt-2 text-sm text-gray-text">Try a different search term.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 md:gap-6">

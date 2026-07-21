@@ -66,14 +66,14 @@ export default function FilterSidebar({
       className={`w-full md:w-[280px] shrink-0 bg-white border border-[var(--color-border)] rounded-2xl p-4 sm:p-6 h-fit lg:sticky lg:top-[110px] ${className}`}
     >
       <div className="flex items-center justify-between mb-8">
-        <h3 className="text-xl font-bold text-[#111827]">Filters</h3>
+        <h3 className="text-xl font-bold text-foreground">Filters</h3>
         <button onClick={clearFilters} className="text-[var(--color-primary)] text-sm font-medium hover:underline">
           Clear all
         </button>
       </div>
 
       <div className="mb-8">
-        <h4 className="text-[#111827] font-semibold mb-4 text-lg">Cuisine</h4>
+        <h4 className="text-foreground font-semibold mb-4 text-lg">Cuisine</h4>
         <div className="flex flex-col gap-3">
           {FILTER_CUISINES.map(({ label, slug }) => {
             const isChecked = currentCuisines.includes(slug);
@@ -94,14 +94,14 @@ export default function FilterSidebar({
                   }`}
                 >
                   {isChecked && (
-                    <svg className="w-3 h-3 text-[#111827]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-3 h-3 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
                   )}
                 </div>
                 <span
                   className={`transition-colors ${
-                    isChecked ? "text-[#111827]" : "text-[var(--color-gray-text)] group-hover:text-[#111827]"
+                    isChecked ? "text-foreground" : "text-[var(--color-gray-text)] group-hover:text-foreground"
                   }`}
                 >
                   {label}
@@ -115,7 +115,7 @@ export default function FilterSidebar({
       <div className="h-px w-full bg-[#E5E7EB] mb-8" />
 
       <div className="mb-8">
-        <h4 className="text-[#111827] font-semibold mb-4 text-lg">Rating</h4>
+        <h4 className="text-foreground font-semibold mb-4 text-lg">Rating</h4>
         <div className="flex flex-col gap-3">
           {["4.5", "4.0", "3.5"].map((rating) => {
             const isSelected = currentRating === rating;
@@ -137,7 +137,7 @@ export default function FilterSidebar({
                 </div>
                 <span
                   className={`transition-colors ${
-                    isSelected ? "text-[#111827]" : "text-[var(--color-gray-text)] group-hover:text-[#111827]"
+                    isSelected ? "text-foreground" : "text-[var(--color-gray-text)] group-hover:text-foreground"
                   }`}
                 >
                   ⭐ {rating}+
@@ -151,7 +151,7 @@ export default function FilterSidebar({
       <div className="h-px w-full bg-[#E5E7EB] mb-8" />
 
       <div className="mb-8">
-        <h4 className="text-[#111827] font-semibold mb-4 text-lg">Delivery Time</h4>
+        <h4 className="text-foreground font-semibold mb-4 text-lg">Delivery Time</h4>
         <div className="flex flex-col gap-3">
           {[
             { label: "Under 30 min", value: "30" },
@@ -176,7 +176,7 @@ export default function FilterSidebar({
                 </div>
                 <span
                   className={`transition-colors ${
-                    isSelected ? "text-[#111827]" : "text-[var(--color-gray-text)] group-hover:text-[#111827]"
+                    isSelected ? "text-foreground" : "text-[var(--color-gray-text)] group-hover:text-foreground"
                   }`}
                 >
                   {time.label}
@@ -188,7 +188,7 @@ export default function FilterSidebar({
       </div>
 
       <div className="mb-8">
-        <h4 className="text-[#111827] font-semibold mb-4 text-lg">More</h4>
+        <h4 className="text-foreground font-semibold mb-4 text-lg">More</h4>
         <div className="flex flex-col gap-3">
           <label
             className="flex items-center gap-3 cursor-pointer group"
@@ -205,12 +205,12 @@ export default function FilterSidebar({
               }`}
             >
               {isVeg && (
-                <svg className="w-3 h-3 text-[#111827]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-3 h-3 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               )}
             </div>
-            <span className={isVeg ? "text-[#111827]" : "text-[var(--color-gray-text)]"}>
+            <span className={isVeg ? "text-foreground" : "text-[var(--color-gray-text)]"}>
               Pure veg
             </span>
           </label>
@@ -229,12 +229,12 @@ export default function FilterSidebar({
               }`}
             >
               {offersOnly && (
-                <svg className="w-3 h-3 text-[#111827]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-3 h-3 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               )}
             </div>
-            <span className={offersOnly ? "text-[#111827]" : "text-[var(--color-gray-text)]"}>
+            <span className={offersOnly ? "text-foreground" : "text-[var(--color-gray-text)]"}>
               Offers only
             </span>
           </label>
@@ -244,7 +244,7 @@ export default function FilterSidebar({
       <div className="h-px w-full bg-[#E5E7EB] mb-8" />
 
       <div className="mb-8">
-        <h4 className="text-[#111827] font-semibold mb-4 text-lg">Sort</h4>
+        <h4 className="text-foreground font-semibold mb-4 text-lg">Sort</h4>
         <div className="flex flex-col gap-2">
           {[
             { label: "Rating", value: "rating" },
@@ -269,7 +269,7 @@ export default function FilterSidebar({
       </div>
 
       <div>
-        <h4 className="text-[#111827] font-semibold mb-4 text-lg">Price</h4>
+        <h4 className="text-foreground font-semibold mb-4 text-lg">Price</h4>
         <div className="flex items-center gap-2">
           {["₹", "₹₹", "₹₹₹"].map((price, idx) => {
             const val = (idx + 1).toString();
@@ -281,7 +281,7 @@ export default function FilterSidebar({
                 className={`flex-1 py-2 rounded-lg border transition-colors ${
                   isSelected
                     ? "bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)]"
-                    : "border-[#E5E7EB] text-[var(--color-gray-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                    : "border-border text-[var(--color-gray-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
                 }`}
               >
                 {price}

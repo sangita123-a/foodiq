@@ -151,86 +151,86 @@ export default function AdminCouponsPage() {
   return (
     <AdminShell title="Coupons & Offers">
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-[#111827]">Coupons & Referrals</h1>
-        <p className="text-[#6B7280]">
+        <h1 className="text-3xl font-black text-foreground">Coupons & Referrals</h1>
+        <p className="text-gray-text">
           Create flat, percentage, free delivery, first-order, and festival coupons with usage rules.
         </p>
       </div>
 
       {summary ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4">
+          <div className="bg-white border border-border rounded-2xl p-4">
             <p className="text-xs font-bold text-[#9CA3AF] uppercase">Total</p>
-            <p className="text-2xl font-black text-[#111827]">{summary.total_coupons || 0}</p>
+            <p className="text-2xl font-black text-foreground">{summary.total_coupons || 0}</p>
           </div>
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4">
+          <div className="bg-white border border-border rounded-2xl p-4">
             <p className="text-xs font-bold text-[#9CA3AF] uppercase">Active</p>
             <p className="text-2xl font-black text-emerald-600">{summary.active_coupons || 0}</p>
           </div>
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4">
+          <div className="bg-white border border-border rounded-2xl p-4">
             <p className="text-xs font-bold text-[#9CA3AF] uppercase">Festival</p>
-            <p className="text-2xl font-black text-[#111827]">{summary.festival_coupons || 0}</p>
+            <p className="text-2xl font-black text-foreground">{summary.festival_coupons || 0}</p>
           </div>
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4">
+          <div className="bg-white border border-border rounded-2xl p-4">
             <p className="text-xs font-bold text-[#9CA3AF] uppercase">Total Uses</p>
-            <p className="text-2xl font-black text-[#E23744]">
+            <p className="text-2xl font-black text-primary">
               {(analytics?.usage_by_coupon || []).reduce((s, c) => s + c.total_uses, 0)}
             </p>
           </div>
         </div>
       ) : null}
 
-      <form onSubmit={save} className="bg-white rounded-3xl border border-[#E5E7EB] p-6 mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input required value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="CODE" className="border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm uppercase" />
-        <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title" className="border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm" />
-        <select value={form.coupon_type} onChange={(e) => setForm({ ...form, coupon_type: e.target.value })} className="border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm">
+      <form onSubmit={save} className="bg-white rounded-3xl border border-border p-6 mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <input required value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="CODE" className="border border-border rounded-xl px-4 py-3 text-sm uppercase" />
+        <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title" className="border border-border rounded-xl px-4 py-3 text-sm" />
+        <select value={form.coupon_type} onChange={(e) => setForm({ ...form, coupon_type: e.target.value })} className="border border-border rounded-xl px-4 py-3 text-sm">
           {COUPON_TYPES.map((t) => (
             <option key={t.value} value={t.value}>{t.label}</option>
           ))}
         </select>
-        <input required type="number" value={form.discount_amount} onChange={(e) => setForm({ ...form, discount_amount: Number(e.target.value) })} placeholder="Discount amount" className="border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm" />
-        <input type="number" value={form.min_order_amount} onChange={(e) => setForm({ ...form, min_order_amount: Number(e.target.value) })} placeholder="Min order ₹" className="border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm" />
-        <input type="number" value={form.max_discount_amount} onChange={(e) => setForm({ ...form, max_discount_amount: e.target.value })} placeholder="Max discount (optional)" className="border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm" />
-        <input type="number" value={form.usage_limit} onChange={(e) => setForm({ ...form, usage_limit: e.target.value })} placeholder="Global usage limit" className="border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm" />
-        <input type="date" value={form.valid_until} onChange={(e) => setForm({ ...form, valid_until: e.target.value })} className="border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm" />
-        <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Terms / description" className="border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm md:col-span-2" />
-        <label className="flex items-center gap-2 text-sm font-bold text-[#6B7280]">
+        <input required type="number" value={form.discount_amount} onChange={(e) => setForm({ ...form, discount_amount: Number(e.target.value) })} placeholder="Discount amount" className="border border-border rounded-xl px-4 py-3 text-sm" />
+        <input type="number" value={form.min_order_amount} onChange={(e) => setForm({ ...form, min_order_amount: Number(e.target.value) })} placeholder="Min order ₹" className="border border-border rounded-xl px-4 py-3 text-sm" />
+        <input type="number" value={form.max_discount_amount} onChange={(e) => setForm({ ...form, max_discount_amount: e.target.value })} placeholder="Max discount (optional)" className="border border-border rounded-xl px-4 py-3 text-sm" />
+        <input type="number" value={form.usage_limit} onChange={(e) => setForm({ ...form, usage_limit: e.target.value })} placeholder="Global usage limit" className="border border-border rounded-xl px-4 py-3 text-sm" />
+        <input type="date" value={form.valid_until} onChange={(e) => setForm({ ...form, valid_until: e.target.value })} className="border border-border rounded-xl px-4 py-3 text-sm" />
+        <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Terms / description" className="border border-border rounded-xl px-4 py-3 text-sm md:col-span-2" />
+        <label className="flex items-center gap-2 text-sm font-bold text-gray-text">
           <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} /> Active
         </label>
-        <label className="flex items-center gap-2 text-sm font-bold text-[#6B7280]">
+        <label className="flex items-center gap-2 text-sm font-bold text-gray-text">
           <input type="checkbox" checked={form.one_time_per_user} onChange={(e) => setForm({ ...form, one_time_per_user: e.target.checked })} /> One-time per user
         </label>
-        <button type="submit" disabled={saving} className="bg-[#E23744] text-white font-black rounded-xl py-3 disabled:opacity-60">
+        <button type="submit" disabled={saving} className="bg-primary text-white font-black rounded-xl py-3 disabled:opacity-60">
           {saving ? "Saving…" : editingId ? "Update Coupon" : "Create Coupon"}
         </button>
       </form>
 
-      {isLoading && <p className="text-sm text-[#6B7280] mb-4">Loading…</p>}
+      {isLoading && <p className="text-sm text-gray-text mb-4">Loading…</p>}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
-          <h2 className="text-lg font-black text-[#111827] mb-4">All Coupons</h2>
+          <h2 className="text-lg font-black text-foreground mb-4">All Coupons</h2>
           <div className="space-y-3">
             {coupons.map((c) => (
-              <div key={c.id} className="bg-white border border-[#E5E7EB] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div key={c.id} className="bg-white border border-border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="font-black text-[#111827] tracking-wider">{c.code}</p>
+                    <p className="font-black text-foreground tracking-wider">{c.code}</p>
                     {!c.is_active ? (
                       <span className="text-[10px] font-bold uppercase bg-[#FEF3C7] text-amber-700 px-2 py-0.5 rounded">Disabled</span>
                     ) : null}
                   </div>
-                  <p className="text-sm text-[#6B7280]">
+                  <p className="text-sm text-gray-text">
                     {c.title || c.coupon_type} ·{" "}
                     {c.discount_type === "percentage" ? `${c.discount_amount}%` : `₹${c.discount_amount}`} · Used {c.usage_count || 0}
                     {c.usage_limit != null ? ` / ${c.usage_limit}` : ""} · Expires {c.valid_until ? formatDate(c.valid_until) : "never"}
                   </p>
                 </div>
                 <div className="flex gap-3 flex-wrap">
-                  <button type="button" onClick={() => toggleActive(c)} className="text-xs font-bold text-[#6B7280]">
+                  <button type="button" onClick={() => toggleActive(c)} className="text-xs font-bold text-gray-text">
                     {c.is_active ? "Disable" : "Enable"}
                   </button>
-                  <button type="button" onClick={() => edit(c)} className="text-xs font-bold text-[#E23744]">Edit</button>
+                  <button type="button" onClick={() => edit(c)} className="text-xs font-bold text-primary">Edit</button>
                   <button type="button" onClick={() => remove(c.id)} className="text-xs font-bold text-red-500">Delete</button>
                 </div>
               </div>
@@ -240,26 +240,26 @@ export default function AdminCouponsPage() {
         </div>
 
         <div>
-          <h2 className="text-lg font-black text-[#111827] mb-4">Usage Analytics</h2>
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 mb-4">
+          <h2 className="text-lg font-black text-foreground mb-4">Usage Analytics</h2>
+          <div className="bg-white border border-border rounded-2xl p-4 mb-4">
             <p className="text-xs font-bold uppercase text-[#9CA3AF] mb-3">Top Coupons</p>
             <div className="space-y-2">
               {(analytics?.usage_by_coupon || []).slice(0, 8).map((c) => (
                 <div key={c.id} className="flex justify-between text-sm border-b border-[#F3F4F6] pb-2">
-                  <span className="font-bold text-[#111827]">{c.code}</span>
-                  <span className="text-[#6B7280]">
+                  <span className="font-bold text-foreground">{c.code}</span>
+                  <span className="text-gray-text">
                     {c.total_uses} uses · ₹{Number(c.total_discount_given).toFixed(0)} saved
                   </span>
                 </div>
               ))}
             </div>
           </div>
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4">
+          <div className="bg-white border border-border rounded-2xl p-4">
             <p className="text-xs font-bold uppercase text-[#9CA3AF] mb-3">Recent Redemptions</p>
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {(analytics?.recent_usage || []).map((u, i) => (
                 <div key={i} className="text-sm border-b border-[#F3F4F6] pb-2">
-                  <p className="font-bold text-[#111827]">{u.coupon_code} · {u.user_name}</p>
+                  <p className="font-bold text-foreground">{u.coupon_code} · {u.user_name}</p>
                   <p className="text-xs text-[#9CA3AF]">
                     −₹{u.discount_amount} · {formatDate(u.created_at)}
                   </p>

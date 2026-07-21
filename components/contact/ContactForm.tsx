@@ -38,8 +38,8 @@ export default function ContactForm() {
   };
 
   return (
-    <div className="h-full rounded-3xl border border-[#E5E7EB] bg-white p-8 shadow-sm md:p-10">
-      <h2 className="mb-2 text-2xl font-bold text-[#222222]">Send us a Message</h2>
+    <div className="h-full rounded-3xl border border-border bg-white p-8 shadow-sm md:p-10">
+      <h2 className="mb-2 text-2xl font-bold text-foreground">Send us a Message</h2>
       <p className="mb-8 text-sm text-[#555555]">
         Fill out the form below and we&apos;ll get back to you as soon as possible.
       </p>
@@ -56,7 +56,7 @@ export default function ContactForm() {
             <label className="mb-2 block text-sm font-bold text-[#555555]">Reason for Contact</label>
             <select
               name="reason"
-              className="w-full cursor-pointer appearance-none rounded-xl border border-[#E5E7EB] bg-white px-4 py-3.5 text-[#222222] focus:border-[#E23744] focus:outline-none"
+              className="w-full cursor-pointer appearance-none rounded-xl border border-border bg-white px-4 py-3.5 text-foreground focus:border-primary focus:outline-none"
             >
               <option>General Inquiry</option>
               <option>Order Support</option>
@@ -76,7 +76,7 @@ export default function ContactForm() {
             required
             rows={5}
             placeholder="Write your message here..."
-            className="w-full resize-none rounded-xl border border-[#E5E7EB] bg-white px-4 py-3.5 text-[#222222] focus:border-[#E23744] focus:outline-none"
+            className="w-full resize-none rounded-xl border border-border bg-white px-4 py-3.5 text-foreground focus:border-primary focus:outline-none"
           />
         </div>
 
@@ -84,13 +84,13 @@ export default function ContactForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#E23744] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition hover:bg-[#C81E32] disabled:opacity-50"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition hover:bg-primary-hover disabled:opacity-50"
           >
             {isSubmitting ? "Sending…" : "Send Message"} <Send className="h-4 w-4" />
           </button>
           <button
             type="reset"
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#E8E8E8] bg-white px-6 py-2.5 text-sm font-semibold text-[#1C1C1C] transition hover:bg-[#FAFAFA]"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-white px-6 py-2.5 text-sm font-semibold text-foreground transition hover:bg-section"
           >
             Clear Form <RefreshCcw className="h-4 w-4 text-[#555555]" />
           </button>
@@ -121,7 +121,7 @@ function Field({
         name={name}
         required={required}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-[#E5E7EB] bg-white px-4 py-3.5 text-[#222222] placeholder:text-[#888888] focus:border-[#E23744] focus:outline-none"
+        className="w-full rounded-xl border border-border bg-white px-4 py-3.5 text-foreground placeholder:text-[#888888] focus:border-primary focus:outline-none"
       />
     </div>
   );

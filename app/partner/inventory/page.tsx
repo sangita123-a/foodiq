@@ -88,7 +88,7 @@ export default function PartnerInventoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex">
+    <div className="min-h-screen bg-section flex">
       <div className="hidden lg:block w-64 flex-shrink-0">
         <PartnerSidebar />
       </div>
@@ -97,8 +97,8 @@ export default function PartnerInventoryPage() {
         <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
           <div className="max-w-7xl mx-auto space-y-6">
             <div>
-              <h1 className="text-3xl font-black text-[#111827]">Inventory Management</h1>
-              <p className="text-[#6B7280]">Track ingredients, stock levels, and expiry dates.</p>
+              <h1 className="text-3xl font-black text-foreground">Inventory Management</h1>
+              <p className="text-gray-text">Track ingredients, stock levels, and expiry dates.</p>
             </div>
 
             {(alerts || []).length > 0 && (
@@ -115,9 +115,9 @@ export default function PartnerInventoryPage() {
             )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <form onSubmit={submit} className="lg:col-span-1 bg-white rounded-3xl border border-[#E5E7EB] p-6 space-y-3 h-fit">
-                <h2 className="font-black text-[#111827] flex items-center gap-2">
-                  <Package className="w-5 h-5 text-[#E23744]" />
+              <form onSubmit={submit} className="lg:col-span-1 bg-white rounded-3xl border border-border p-6 space-y-3 h-fit">
+                <h2 className="font-black text-foreground flex items-center gap-2">
+                  <Package className="w-5 h-5 text-primary" />
                   {editId ? "Edit Item" : "Add Item"}
                 </h2>
                 <input
@@ -125,7 +125,7 @@ export default function PartnerInventoryPage() {
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="Item name"
                   required
-                  className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+                  className="w-full border border-border rounded-xl px-4 py-2.5 text-sm"
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <input
@@ -134,12 +134,12 @@ export default function PartnerInventoryPage() {
                     value={form.quantity}
                     onChange={(e) => setForm({ ...form, quantity: Number(e.target.value) })}
                     placeholder="Quantity"
-                    className="border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+                    className="border border-border rounded-xl px-4 py-2.5 text-sm"
                   />
                   <select
                     value={form.unit}
                     onChange={(e) => setForm({ ...form, unit: e.target.value })}
-                    className="border border-[#E5E7EB] rounded-xl px-3 py-2.5 text-sm"
+                    className="border border-border rounded-xl px-3 py-2.5 text-sm"
                   >
                     {INVENTORY_UNITS.map((u) => (
                       <option key={u} value={u}>{u}</option>
@@ -152,12 +152,12 @@ export default function PartnerInventoryPage() {
                   value={form.purchase_price}
                   onChange={(e) => setForm({ ...form, purchase_price: Number(e.target.value) })}
                   placeholder="Purchase price (₹)"
-                  className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+                  className="w-full border border-border rounded-xl px-4 py-2.5 text-sm"
                 />
                 <select
                   value={form.category_id}
                   onChange={(e) => setForm({ ...form, category_id: e.target.value })}
-                  className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+                  className="w-full border border-border rounded-xl px-4 py-2.5 text-sm"
                 >
                   <option value="">No category</option>
                   {(categories || []).map((c) => (
@@ -169,7 +169,7 @@ export default function PartnerInventoryPage() {
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value)}
                     placeholder="New category"
-                    className="flex-1 border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm"
+                    className="flex-1 border border-border rounded-xl px-3 py-2 text-sm"
                   />
                   <button type="button" onClick={addCategory} className="px-3 py-2 bg-[#111827] text-white rounded-xl text-xs font-bold">
                     Add
@@ -179,30 +179,30 @@ export default function PartnerInventoryPage() {
                   type="date"
                   value={form.expiry_date}
                   onChange={(e) => setForm({ ...form, expiry_date: e.target.value })}
-                  className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+                  className="w-full border border-border rounded-xl px-4 py-2.5 text-sm"
                 />
                 <input
                   type="number"
                   value={form.reorder_level}
                   onChange={(e) => setForm({ ...form, reorder_level: Number(e.target.value) })}
                   placeholder="Reorder level"
-                  className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+                  className="w-full border border-border rounded-xl px-4 py-2.5 text-sm"
                 />
-                <button type="submit" disabled={busy} className="w-full bg-[#E23744] text-white font-black py-3 rounded-xl">
+                <button type="submit" disabled={busy} className="w-full bg-primary text-white font-black py-3 rounded-xl">
                   {busy ? "Saving…" : editId ? "Update Item" : "Add Item"}
                 </button>
                 {editId && (
-                  <button type="button" onClick={() => { setEditId(null); setForm(emptyForm); }} className="w-full text-sm text-[#6B7280]">
+                  <button type="button" onClick={() => { setEditId(null); setForm(emptyForm); }} className="w-full text-sm text-gray-text">
                     Cancel edit
                   </button>
                 )}
               </form>
 
-              <div className="lg:col-span-2 bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden">
-                {isLoading && <p className="p-6 text-sm text-[#6B7280]">Loading inventory…</p>}
+              <div className="lg:col-span-2 bg-white rounded-3xl border border-border overflow-hidden">
+                {isLoading && <p className="p-6 text-sm text-gray-text">Loading inventory…</p>}
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[640px] text-left">
-                    <thead className="bg-[#F8FAFC] border-b border-[#E5E7EB]">
+                    <thead className="bg-section border-b border-border">
                       <tr>
                         {["Item", "Qty", "Unit", "Price", "Status", "Actions"].map((h) => (
                           <th key={h} className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">{h}</th>
@@ -211,7 +211,7 @@ export default function PartnerInventoryPage() {
                     </thead>
                     <tbody>
                       {(items || []).map((item) => (
-                        <tr key={item.id} className="border-b border-[#E5E7EB] hover:bg-[#F8FAFC]">
+                        <tr key={item.id} className="border-b border-border hover:bg-section">
                           <td className="p-4">
                             <p className="font-bold text-sm">{item.name}</p>
                             <p className="text-xs text-[#9CA3AF]">{item.category_name || "—"}</p>
@@ -229,7 +229,7 @@ export default function PartnerInventoryPage() {
                             </span>
                           </td>
                           <td className="p-4 space-x-2">
-                            <button type="button" onClick={() => startEdit(item)} className="text-xs font-bold text-[#111827]">Edit</button>
+                            <button type="button" onClick={() => startEdit(item)} className="text-xs font-bold text-foreground">Edit</button>
                             <button
                               type="button"
                               onClick={() => deleteInventoryItem(item.id).then(refresh)}
@@ -244,7 +244,7 @@ export default function PartnerInventoryPage() {
                   </table>
                 </div>
                 {!isLoading && !items?.length && (
-                  <p className="p-8 text-center text-sm text-[#6B7280]">No inventory items yet. Add your first ingredient.</p>
+                  <p className="p-8 text-center text-sm text-gray-text">No inventory items yet. Add your first ingredient.</p>
                 )}
               </div>
             </div>

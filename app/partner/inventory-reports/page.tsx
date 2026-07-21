@@ -10,7 +10,7 @@ export default function PartnerInventoryReportsPage() {
   const { data, isLoading } = useSWR<InventoryReports>("/api/partner/inventory/reports", inventoryFetcher);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex">
+    <div className="min-h-screen bg-section flex">
       <div className="hidden lg:block w-64 flex-shrink-0">
         <PartnerSidebar />
       </div>
@@ -19,13 +19,13 @@ export default function PartnerInventoryReportsPage() {
         <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
           <div className="max-w-6xl mx-auto space-y-6">
             <div>
-              <h1 className="text-3xl font-black text-[#111827] flex items-center gap-2">
-                <BarChart3 className="w-8 h-8 text-[#E23744]" /> Inventory Reports
+              <h1 className="text-3xl font-black text-foreground flex items-center gap-2">
+                <BarChart3 className="w-8 h-8 text-primary" /> Inventory Reports
               </h1>
-              <p className="text-[#6B7280]">Consumption, wastage, food cost, and stock analytics.</p>
+              <p className="text-gray-text">Consumption, wastage, food cost, and stock analytics.</p>
             </div>
 
-            {isLoading && <p className="text-sm text-[#6B7280]">Loading reports…</p>}
+            {isLoading && <p className="text-sm text-gray-text">Loading reports…</p>}
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
@@ -34,9 +34,9 @@ export default function PartnerInventoryReportsPage() {
                 { label: "Inventory Turnover", value: Number(data?.inventory_turnover || 0).toFixed(2), icon: TrendingUp },
                 { label: "Low Stock Items", value: String(data?.low_stock?.length || 0), icon: TrendingDown },
               ].map((s) => (
-                <div key={s.label} className="bg-white rounded-2xl border border-[#E5E7EB] p-4">
+                <div key={s.label} className="bg-white rounded-2xl border border-border p-4">
                   <p className="text-xs font-bold uppercase text-[#9CA3AF]">{s.label}</p>
-                  <p className="text-2xl font-black text-[#111827]">{s.value}</p>
+                  <p className="text-2xl font-black text-foreground">{s.value}</p>
                 </div>
               ))}
             </div>
@@ -106,8 +106,8 @@ export default function PartnerInventoryReportsPage() {
 
 function ReportCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-3xl border border-[#E5E7EB] p-5">
-      <h2 className="font-black text-[#111827] mb-3 text-sm uppercase tracking-wide">{title}</h2>
+    <div className="bg-white rounded-3xl border border-border p-5">
+      <h2 className="font-black text-foreground mb-3 text-sm uppercase tracking-wide">{title}</h2>
       <div className="space-y-1">{children}</div>
     </div>
   );

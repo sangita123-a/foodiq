@@ -11,7 +11,7 @@ import { fetchWallet, transactionLabel, type WalletTransaction } from "@/service
 function TxnRow({ txn }: { txn: WalletTransaction }) {
   const isCredit = Number(txn.amount) > 0;
   return (
-    <div className="flex items-center justify-between border border-[#E5E7EB] rounded-xl px-4 py-3">
+    <div className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
       <div className="flex items-center gap-3">
         <div
           className={`w-9 h-9 rounded-full flex items-center justify-center ${
@@ -21,7 +21,7 @@ function TxnRow({ txn }: { txn: WalletTransaction }) {
           {isCredit ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
         </div>
         <div>
-          <p className="font-bold text-[#111827] text-sm">{transactionLabel(txn)}</p>
+          <p className="font-bold text-foreground text-sm">{transactionLabel(txn)}</p>
           <p className="text-xs text-[#9CA3AF]">
             {new Date(txn.created_at).toLocaleString("en-IN")}
             {txn.note ? ` · ${txn.note}` : ""}
@@ -44,13 +44,13 @@ export default function MyWalletView() {
 
   if (!hasToken) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] pt-[90px]">
+      <main className="min-h-screen bg-background pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 py-20 text-center max-w-lg">
-          <Wallet className="w-12 h-12 text-[#E23744] mx-auto mb-4" />
-          <h1 className="text-3xl font-black text-[#111827] mb-3">My Wallet</h1>
-          <p className="text-[#6B7280] mb-6">Sign in to view your Foodiq Wallet balance and transaction history.</p>
-          <Link href="/login" className="inline-block bg-[#E23744] text-white font-black px-8 py-3 rounded-xl">
+          <Wallet className="w-12 h-12 text-primary mx-auto mb-4" />
+          <h1 className="text-3xl font-black text-foreground mb-3">My Wallet</h1>
+          <p className="text-gray-text mb-6">Sign in to view your Foodiq Wallet balance and transaction history.</p>
+          <Link href="/login" className="inline-block bg-primary text-white font-black px-8 py-3 rounded-xl">
             Sign In
           </Link>
         </div>
@@ -60,20 +60,20 @@ export default function MyWalletView() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative pt-[90px]">
+    <main className="min-h-screen bg-background relative pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-10 max-w-3xl">
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
-            <Wallet className="w-7 h-7 text-[#E23744]" />
-            <h1 className="text-3xl md:text-4xl font-black text-[#111827]">My Wallet</h1>
+            <Wallet className="w-7 h-7 text-primary" />
+            <h1 className="text-3xl md:text-4xl font-black text-foreground">My Wallet</h1>
           </div>
-          <p className="text-[#6B7280]">Use your balance at checkout. Refunds and cashback are stored here.</p>
+          <p className="text-gray-text">Use your balance at checkout. Refunds and cashback are stored here.</p>
         </div>
 
         {isLoading ? (
-          <div className="h-48 bg-[#F8FAFC] animate-pulse rounded-3xl border border-[#E5E7EB] mb-8" />
+          <div className="h-48 bg-section animate-pulse rounded-3xl border border-border mb-8" />
         ) : (
           <>
             <div className="bg-gradient-to-br from-[#111827] to-[#1F2937] rounded-3xl p-8 text-white mb-6">
@@ -98,23 +98,23 @@ export default function MyWalletView() {
             <div className="flex gap-3 mb-8">
               <Link
                 href="/checkout"
-                className="flex-1 text-center bg-[#E23744] text-white font-black py-3 rounded-xl"
+                className="flex-1 text-center bg-primary text-white font-black py-3 rounded-xl"
               >
                 Use at Checkout
               </Link>
               <Link
                 href="/my-orders"
-                className="flex-1 text-center bg-white border border-[#E5E7EB] text-[#111827] font-black py-3 rounded-xl"
+                className="flex-1 text-center bg-white border border-border text-foreground font-black py-3 rounded-xl"
               >
                 My Orders
               </Link>
             </div>
 
             <section>
-              <h2 className="text-lg font-black text-[#111827] mb-4">Transaction History</h2>
+              <h2 className="text-lg font-black text-foreground mb-4">Transaction History</h2>
               <div className="space-y-3">
                 {(data?.transactions || []).length === 0 ? (
-                  <p className="text-sm text-[#9CA3AF] text-center py-10 bg-[#F8FAFC] rounded-2xl border border-[#E5E7EB]">
+                  <p className="text-sm text-[#9CA3AF] text-center py-10 bg-section rounded-2xl border border-border">
                     No transactions yet. Refunds and cashback will appear here.
                   </p>
                 ) : (

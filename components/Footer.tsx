@@ -6,7 +6,7 @@ import FooterContent from "./FooterContent";
 function FooterPlaceholder() {
   return (
     <footer
-      className="mt-12 w-full border-t border-[#E8E8E8] bg-[#F8F8F8] py-10 sm:mt-16 sm:py-14 lg:mt-20"
+      className="mt-12 w-full border-t border-border bg-footer py-10 sm:mt-16 sm:py-14 lg:mt-20"
       aria-hidden="true"
     >
       <div className="container mx-auto min-h-[320px] px-4 sm:px-6 lg:px-16" />

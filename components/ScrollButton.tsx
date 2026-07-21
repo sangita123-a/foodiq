@@ -20,13 +20,13 @@ export default function ScrollButton() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 1, duration: 1 }}
-      className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center w-14 h-14 rounded-full border border-[#EAEAEA] bg-white/90 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.12)] hover:bg-[#FAFAFA] transition-all group"
+      className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center w-14 h-14 rounded-full border border-border bg-white/90 backdrop-blur-md shadow-card hover:shadow-[0_8px_28px_rgba(0,0,0,0.12)] hover:bg-section transition-all group"
     >
       <motion.div
         animate={{ y: [0, 8, 0] }}
         transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
       >
-        <ArrowDown className="text-[#111827] w-6 h-6 group-hover:text-[var(--color-primary)] transition-colors" aria-hidden="true" />
+        <ArrowDown className="text-foreground w-6 h-6 group-hover:text-[var(--color-primary)] transition-colors" aria-hidden="true" />
       </motion.div>
     </motion.button>
   );

@@ -43,7 +43,7 @@ export default function FavDishCard({ dish, onRemove, onAdd, isAdding = false }:
           onClick={() => onRemove(dish.id)}
           className="absolute top-3 right-3 w-8 h-8 bg-black/60 hover:bg-red-500/20 backdrop-blur-md rounded-full flex items-center justify-center transition-colors group/heart"
         >
-          <Heart className="w-4 h-4 text-[#E23744] fill-[#E23744] group-hover/heart:scale-110 transition-transform" />
+          <Heart className="w-4 h-4 text-primary fill-primary group-hover/heart:scale-110 transition-transform" />
         </button>
 
         <div
@@ -65,12 +65,12 @@ export default function FavDishCard({ dish, onRemove, onAdd, isAdding = false }:
         </div>
 
         <div className="flex items-center justify-between mt-auto">
-          <span className="food-price text-[#111827]">₹{dish.price}</span>
+          <span className="food-price text-foreground">₹{dish.price}</span>
           <button
             type="button"
             onClick={() => onAdd?.(dish.id)}
             disabled={!onAdd || isAdding}
-            className="food-button min-h-0 bg-primary hover:bg-[#C81E34] text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 disabled:opacity-50"
+            className="food-button min-h-0 bg-primary hover:bg-primary-hover text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 disabled:opacity-50"
           >
             <Plus className="w-3.5 h-3.5" /> Add
           </button>

@@ -7,13 +7,13 @@
   --partner-surface: #ffffff;
   --partner-surface-subtle: #f8f9fa;
   --partner-surface-warm: #fffaf6;
-  --partner-primary: #E23744;
-  --partner-primary-hover: #e96f0b;
-  --partner-secondary: #E23744;
+  --partner-primary: #0F766E;
+  --partner-primary-hover: #0D9488;
+  --partner-secondary: #0F766E;
   --partner-ink: #1c1c1c;
   --partner-muted: #686b78;
   --partner-line: #ececec;
-  --partner-focus: rgba(226, 55, 68, 0.24);
+  --partner-focus: rgba(15, 118, 110, 0.24);
   --partner-shadow-sm: 0 1px 2px rgba(28, 28, 28, 0.04),
     0 4px 14px rgba(28, 28, 28, 0.035);
   --partner-shadow-md: 0 2px 5px rgba(28, 28, 28, 0.045),
@@ -83,7 +83,7 @@
 }
 
 [data-partner-surface] .shadow-\[0_0_15px_rgba\(252\,128\,25\,0\.3\)\] {
-  box-shadow: 0 6px 18px rgba(226, 55, 68, 0.18);
+  box-shadow: 0 6px 18px rgba(15, 118, 110, 0.18);
 }
 
 /* Consistent control feedback across every partner workflow. */
@@ -131,7 +131,7 @@
   border-color: var(--partner-primary);
 }
 
-[data-partner-surface] .hover\:bg-\[\#C81E34\]:hover {
+[data-partner-surface] .hover\:bg-primary-hover:hover {
   background-color: var(--partner-primary-hover);
 }
 
@@ -151,7 +151,7 @@
 [data-partner-surface]
   :where(.shadow-lg, .shadow-xl, .shadow-2xl):is(
     .border,
-    [class*="border-[#E5E7EB]"]
+    [class*="border-border"]
   ) {
   transition: border-color 180ms ease-out, box-shadow 180ms ease-out,
     transform 180ms ease-out;
@@ -160,9 +160,9 @@
 [data-partner-surface]
   :where(.shadow-lg, .shadow-xl, .shadow-2xl):is(
     .border,
-    [class*="border-[#E5E7EB]"]
+    [class*="border-border"]
   ):hover {
-  border-color: rgba(226, 55, 68, 0.2);
+  border-color: rgba(15, 118, 110, 0.2);
   box-shadow: var(--partner-shadow-md);
 }
 
@@ -203,7 +203,7 @@
   [data-partner-surface]
     :where(.shadow-lg, .shadow-xl, .shadow-2xl):is(
       .border,
-      [class*="border-[#E5E7EB]"]
+      [class*="border-border"]
     ) {
     transition-duration: 0.01ms;
   }

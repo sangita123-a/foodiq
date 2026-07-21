@@ -27,7 +27,7 @@ export default function RewardPointsCard({ totalPoints, level, pointsToNextLevel
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-[#F8FAFC] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-2xl relative overflow-hidden mb-12"
+      className="bg-section rounded-3xl p-6 md:p-8 border border-border shadow-2xl relative overflow-hidden mb-12"
     >
       {/* Background Decor */}
       <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none"></div>
@@ -38,7 +38,7 @@ export default function RewardPointsCard({ totalPoints, level, pointsToNextLevel
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <Coins className="w-5 h-5 text-yellow-500" />
-            <h3 className="text-[#6B7280] font-bold uppercase tracking-widest text-sm">Total Reward Points</h3>
+            <h3 className="text-gray-text font-bold uppercase tracking-widest text-sm">Total Reward Points</h3>
           </div>
           
           <div className="text-5xl md:text-6xl font-black text-white mb-6">
@@ -47,20 +47,20 @@ export default function RewardPointsCard({ totalPoints, level, pointsToNextLevel
 
           <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r border shadow-lg mb-6 ${getLevelColor()}`}>
             <Crown className="w-5 h-5" />
-            <span className="font-bold text-[#111827] tracking-wide">{level} Member</span>
+            <span className="font-bold text-foreground tracking-wide">{level} Member</span>
           </div>
           
           {/* Progress Bar */}
-          <div className="mb-2 flex justify-between text-xs font-bold text-[#6B7280]">
+          <div className="mb-2 flex justify-between text-xs font-bold text-gray-text">
             <span>Current: {level}</span>
             <span>{pointsToNextLevel} pts to next level</span>
           </div>
-          <div className="h-3 w-full bg-white rounded-full overflow-hidden border border-[#E5E7EB]">
+          <div className="h-3 w-full bg-white rounded-full overflow-hidden border border-border">
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${progressPercent}%` }}
               transition={{ duration: 1.5, ease: "easeOut" }}
-              className="h-full bg-gradient-to-r from-primary to-[#E23744] rounded-full"
+              className="h-full bg-gradient-to-r from-primary to-primary rounded-full"
             />
           </div>
         </div>
@@ -68,9 +68,9 @@ export default function RewardPointsCard({ totalPoints, level, pointsToNextLevel
         {/* Right Side: Savings & CTA */}
         <div className="flex-1 md:flex-none flex flex-col justify-between md:min-w-[250px] gap-6">
           
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
+          <div className="bg-white border border-border rounded-2xl p-5">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[#6B7280] text-sm font-bold">Total Savings</span>
+              <span className="text-gray-text text-sm font-bold">Total Savings</span>
               <TrendingUp className="w-4 h-4 text-green-400" />
             </div>
             <div className="text-2xl font-black text-green-400">₹{totalSavings.toLocaleString()}</div>

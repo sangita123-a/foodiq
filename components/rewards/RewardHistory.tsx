@@ -16,15 +16,15 @@ type Props = {
 
 export default function RewardHistory({ history }: Props) {
   return (
-    <div className="bg-[#F8FAFC] rounded-3xl p-6 md:p-8 border border-[#E5E7EB]">
-      <div className="flex items-center gap-3 mb-8 pb-6 border-b border-[#E5E7EB]">
+    <div className="bg-section rounded-3xl p-6 md:p-8 border border-border">
+      <div className="flex items-center gap-3 mb-8 pb-6 border-b border-border">
         <History className="w-6 h-6 text-primary" />
-        <h2 className="text-2xl font-bold text-[#111827]">Reward History</h2>
+        <h2 className="text-2xl font-bold text-foreground">Reward History</h2>
       </div>
 
       <div className="flex flex-col gap-4">
         {history.map((item) => (
-          <div key={item.id} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-[#E5E7EB] hover:border-[#E5E7EB] transition-colors">
+          <div key={item.id} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-border hover:border-border transition-colors">
             
             <div className="flex items-center gap-4">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${

@@ -19,13 +19,13 @@ export default function SimilarRestaurants({ currentRestaurantId }: SimilarResta
   if (!isLoading && similar.length === 0) return null;
 
   return (
-    <section className="container mx-auto px-4 md:px-8 py-16 border-t border-[#E5E7EB]">
+    <section className="container mx-auto px-4 md:px-8 py-16 border-t border-border">
       <h2 className="text-2xl md:text-3xl font-bold text-white mb-8">Similar Restaurants</h2>
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-[280px] bg-[#F8FAFC] rounded-2xl animate-pulse border border-[#E5E7EB]" />
+            <div key={i} className="h-[280px] bg-section rounded-2xl animate-pulse border border-border" />
           ))}
         </div>
       ) : (

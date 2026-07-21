@@ -8,7 +8,7 @@ type Point = { label: string; value: number };
 export function BiBarChart({
   data,
   height = 160,
-  color = "#E23744",
+  color = "#0F766E",
 }: {
   data: Point[];
   height?: number;
@@ -57,7 +57,7 @@ export function BiBarChart({
 export function BiLineChart({
   data,
   height = 160,
-  color = "#E23744",
+  color = "#0F766E",
 }: {
   data: Point[];
   height?: number;
@@ -104,7 +104,7 @@ export function BiLineChart({
         ))}
       </svg>
       {hover != null && points[hover] ? (
-        <p className="text-xs font-bold text-[#6B7280] text-center">
+        <p className="text-xs font-bold text-gray-text text-center">
           {points[hover].label}: {points[hover].value}
         </p>
       ) : null}
@@ -122,12 +122,12 @@ export function BiKpi({
   hint?: string;
 }) {
   return (
-    <div className="bg-white rounded-3xl border border-[#E5E7EB] p-5">
+    <div className="bg-white rounded-3xl border border-border p-5">
       <p className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">
         {label}
       </p>
-      <p className="text-2xl font-black text-[#111827] mt-1">{value}</p>
-      {hint ? <p className="text-xs text-[#6B7280] mt-1">{hint}</p> : null}
+      <p className="text-2xl font-black text-foreground mt-1">{value}</p>
+      {hint ? <p className="text-xs text-gray-text mt-1">{hint}</p> : null}
     </div>
   );
 }

@@ -171,7 +171,7 @@ export default function PartnerReviewsPage() {
   }, [reviews, search, ratingFilter, sortBy]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex selection:bg-[#E23744] selection:text-white">
+    <div className="min-h-screen bg-section flex selection:bg-primary selection:text-white">
       <div className="hidden lg:block w-64 flex-shrink-0">
         <PartnerSidebar />
       </div>
@@ -196,7 +196,7 @@ export default function PartnerReviewsPage() {
             />
 
             {loading ? (
-              <div className="h-40 bg-white rounded-3xl border border-[#E5E7EB] animate-pulse" />
+              <div className="h-40 bg-white rounded-3xl border border-border animate-pulse" />
             ) : filteredReviews.length > 0 ? (
               <ReviewsList
                 reviews={filteredReviews}

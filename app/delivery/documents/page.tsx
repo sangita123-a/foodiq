@@ -49,14 +49,14 @@ export default function DeliveryDocumentsPage() {
     <DeliveryShell title="Documents">
       <div className="max-w-3xl space-y-8">
         <div>
-          <h1 className="text-2xl font-black text-[#111827]">Profile & Documents</h1>
-          <p className="text-sm text-[#6B7280] mt-1">
+          <h1 className="text-2xl font-black text-foreground">Profile & Documents</h1>
+          <p className="text-sm text-gray-text mt-1">
             Upload your photo, license, vehicle RC, and insurance. Document uploads may require admin approval.
           </p>
         </div>
 
         {loading ? (
-          <div className="h-48 animate-pulse bg-[#F8FAFC] rounded-2xl" />
+          <div className="h-48 animate-pulse bg-section rounded-2xl" />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <MediaUploader

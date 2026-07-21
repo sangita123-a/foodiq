@@ -63,8 +63,8 @@ export default function AccountSettingsPanel() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-      <div className="rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm md:p-10">
-        <h2 className="mb-2 text-2xl font-bold text-[#222222]">Account Settings</h2>
+      <div className="rounded-[24px] border border-border bg-white p-6 shadow-sm md:p-10">
+        <h2 className="mb-2 text-2xl font-bold text-foreground">Account Settings</h2>
         <p className="mb-8 text-sm text-[#555555]">Edit your profile anytime. Changes are saved to your account.</p>
 
         <div className="mb-8 grid gap-6 md:grid-cols-2">
@@ -100,7 +100,7 @@ export default function AccountSettingsPanel() {
                 type="date"
                 name="dob"
                 defaultValue={dob}
-                className="w-full rounded-xl border border-[#E5E7EB] bg-white px-4 py-3.5 text-[#222222] focus:border-[#E23744] focus:outline-none"
+                className="w-full rounded-xl border border-border bg-white px-4 py-3.5 text-foreground focus:border-primary focus:outline-none"
               />
             </div>
           </div>
@@ -110,7 +110,7 @@ export default function AccountSettingsPanel() {
             <select
               name="gender"
               defaultValue={user.gender || ""}
-              className="w-full cursor-pointer rounded-xl border border-[#E5E7EB] bg-white px-4 py-3.5 text-[#222222] focus:border-[#E23744] focus:outline-none"
+              className="w-full cursor-pointer rounded-xl border border-border bg-white px-4 py-3.5 text-foreground focus:border-primary focus:outline-none"
             >
               <option value="">Prefer not to say</option>
               <option value="female">Female</option>
@@ -128,15 +128,15 @@ export default function AccountSettingsPanel() {
 
           <button
             type="submit"
-            className="rounded-xl bg-[#E23744] px-8 py-3 font-bold text-white shadow-md hover:bg-[#C81E34]"
+            className="rounded-xl bg-primary px-8 py-3 font-bold text-white shadow-md hover:bg-primary-hover"
           >
             Save Changes
           </button>
         </form>
       </div>
 
-      <div className="rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm md:p-8">
-        <h3 className="mb-6 text-xl font-bold text-[#222222]">Language & Notifications</h3>
+      <div className="rounded-[24px] border border-border bg-white p-6 shadow-sm md:p-8">
+        <h3 className="mb-6 text-xl font-bold text-foreground">Language & Notifications</h3>
         <div className="space-y-6">
           <LanguageRegionSettings />
           <NotificationSettings />
@@ -167,7 +167,7 @@ function Field({
         name={name}
         defaultValue={defaultValue}
         required={required}
-        className="w-full rounded-xl border border-[#E5E7EB] bg-white px-4 py-3.5 text-[#222222] focus:border-[#E23744] focus:outline-none"
+        className="w-full rounded-xl border border-border bg-white px-4 py-3.5 text-foreground focus:border-primary focus:outline-none"
       />
     </div>
   );

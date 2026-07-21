@@ -49,19 +49,19 @@ export default function DeliveryLoginForm() {
   };
 
   return (
-    <div className="w-full h-full min-h-[50vh] lg:min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6 lg:p-16 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-[#E23744]/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#E23744]/5 rounded-full blur-[100px] pointer-events-none" />
+    <div className="w-full h-full min-h-[50vh] lg:min-h-screen bg-section flex items-center justify-center p-6 lg:p-16 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md bg-[#FFFFFF]/80 backdrop-blur-xl border border-[#E5E7EB] rounded-[24px] p-8 lg:p-10 shadow-2xl relative z-10"
+        className="w-full max-w-md bg-background/80 backdrop-blur-xl border border-border rounded-[24px] p-8 lg:p-10 shadow-2xl relative z-10"
       >
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-black text-[#111827] mb-2">Rider Portal</h2>
-          <p className="text-[#6B7280]">Sign in to manage deliveries.</p>
+          <h2 className="text-3xl font-black text-foreground mb-2">Rider Portal</h2>
+          <p className="text-gray-text">Sign in to manage deliveries.</p>
         </div>
 
         {error && (
@@ -72,7 +72,7 @@ export default function DeliveryLoginForm() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Email</label>
+            <label className="block text-sm font-bold text-gray-text mb-2">Email</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Mail className="h-5 w-5 text-[#9CA3AF]" />
@@ -83,13 +83,13 @@ export default function DeliveryLoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="rider@foodiq.com"
                 required
-                className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-[#E23744] focus:ring-1 focus:ring-[#E23744] transition-colors"
+                className="w-full bg-section text-foreground border border-border rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-[#6B7280] mb-2">Password</label>
+            <label className="block text-sm font-bold text-gray-text mb-2">Password</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Lock className="h-5 w-5 text-[#9CA3AF]" />
@@ -100,11 +100,11 @@ export default function DeliveryLoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full bg-[#F8FAFC] text-[#111827] border border-[#E5E7EB] rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-[#E23744] focus:ring-1 focus:ring-[#E23744] transition-colors"
+                className="w-full bg-section text-foreground border border-border rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
               />
             </div>
             <div className="text-right mt-2">
-              <Link href="/delivery/forgot-password" className="text-xs font-bold text-[#E23744] hover:underline">
+              <Link href="/delivery/forgot-password" className="text-xs font-bold text-primary hover:underline">
                 Forgot password?
               </Link>
             </div>
@@ -113,16 +113,16 @@ export default function DeliveryLoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#E23744] hover:bg-[#C81E34] text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-60"
+            className="w-full bg-primary hover:bg-primary-hover text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-60"
           >
             {loading ? "Signing in..." : "Sign In"}
             <ArrowRight className="w-5 h-5" />
           </button>
         </form>
 
-        <p className="text-center text-sm text-[#6B7280] mt-8">
+        <p className="text-center text-sm text-gray-text mt-8">
           New rider?{" "}
-          <Link href="/delivery/register" className="text-[#E23744] font-bold hover:underline">
+          <Link href="/delivery/register" className="text-primary font-bold hover:underline">
             Register here
           </Link>
         </p>

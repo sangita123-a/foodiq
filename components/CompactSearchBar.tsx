@@ -20,7 +20,7 @@ export default function CompactSearchBar() {
   return (
     <form onSubmit={handleSearch} className="w-full max-w-[850px] h-[65px] bg-white border border-[var(--color-border)] rounded-[20px] flex items-center shadow-xl overflow-hidden relative mx-auto">
       {/* Left Section: Location */}
-      <div className="flex items-center h-full px-4 border-r border-[var(--color-border)] w-[200px] shrink-0 text-[#111827]">
+      <div className="flex items-center h-full px-4 border-r border-[var(--color-border)] w-[200px] shrink-0 text-foreground">
         <MapPin className="text-[var(--color-primary)] w-4 h-4 mr-2.5 shrink-0" aria-hidden="true" />
         <div className="flex flex-col flex-grow truncate justify-center">
           <span className="text-[11px] text-[var(--color-gray-text)] font-medium leading-tight">Location</span>
@@ -30,7 +30,7 @@ export default function CompactSearchBar() {
       </div>
 
       {/* Center Section: Search Input */}
-      <div className="flex items-center h-full flex-grow px-5 text-[#111827] group shrink-0">
+      <div className="flex items-center h-full flex-grow px-5 text-foreground group shrink-0">
         <Search className="text-[var(--color-gray-text)] group-focus-within:text-[var(--color-primary)] w-4 h-4 mr-3 shrink-0 transition-colors" aria-hidden="true" />
         <label htmlFor="compact-search-input" className="sr-only">
           Search restaurants or dishes
@@ -42,7 +42,7 @@ export default function CompactSearchBar() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search restaurants or dishes..."
           aria-label="Search restaurants or dishes"
-          className="w-full h-full bg-transparent outline-none text-[#111827] placeholder-[var(--color-gray-text)] text-base font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E23744]"
+          className="w-full h-full bg-transparent outline-none text-foreground placeholder-[var(--color-gray-text)] text-base font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         />
       </div>
 

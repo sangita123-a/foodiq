@@ -13,7 +13,7 @@ export default function FeaturedRestaurant() {
 
   if (isLoading) {
     return (
-      <section className="bg-[#FAFAFA] w-full py-[100px] overflow-hidden">
+      <section className="bg-section w-full py-[100px] overflow-hidden">
         <div className="w-[90%] max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-12 xl:gap-16 items-center">
             <div className="w-full lg:w-[55%] aspect-[4/3] bg-[#ECECEC] animate-pulse rounded-[20px]"></div>
@@ -32,7 +32,7 @@ export default function FeaturedRestaurant() {
   if (!restaurant) return null;
 
   return (
-    <section className="bg-[#FAFAFA] w-full py-12 sm:py-16 md:py-20 lg:py-[100px] overflow-hidden border-y border-[#EAEAEA]">
+    <section className="bg-section w-full py-12 sm:py-16 md:py-20 lg:py-[100px] overflow-hidden border-y border-border">
       <div className="w-[94%] sm:w-[90%] max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-12 xl:gap-16 items-center">
           
@@ -42,7 +42,7 @@ export default function FeaturedRestaurant() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="w-full lg:w-[55%] relative group rounded-[20px] overflow-hidden border border-[#ECECEC] shadow-[0_20px_50px_rgba(28,28,28,0.12)]"
+            className="w-full lg:w-[55%] relative group rounded-[20px] overflow-hidden border border-border shadow-[0_20px_50px_rgba(28,28,28,0.12)]"
           >
             <div className="aspect-[4/3] w-full relative">
               <SafeImage
@@ -73,51 +73,51 @@ export default function FeaturedRestaurant() {
             </div>
 
             {/* Main Heading */}
-            <h2 className="text-4xl md:text-5xl font-bold text-[#1C1C1C] mb-6 tracking-[-0.045em] leading-tight">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6 tracking-[-0.045em] leading-tight">
               {restaurant.name}
             </h2>
 
             {/* Stats Row */}
-            <div className="flex flex-wrap gap-3 text-sm font-medium text-[#686B78] mb-8">
-              <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-[#E5E7EB]">
+            <div className="flex flex-wrap gap-3 text-sm font-medium text-muted mb-8">
+              <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-border">
                 <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                 <span>{restaurant.rating} Rating</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-[#E5E7EB]">
+              <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-border">
                 <Clock className="w-4 h-4 text-primary" />
                 <span>30 min Delivery</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-[#E5E7EB]">
-                <Utensils className="w-4 h-4 text-[#6B7280]" />
+              <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-border">
+                <Utensils className="w-4 h-4 text-gray-text" />
                 <span className="line-clamp-1 max-w-[120px]">{restaurant.description || "Multi Cuisine"}</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-[#E5E7EB]">
+              <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-border">
                 <IndianRupee className="w-4 h-4 text-green-400" />
                 <span>{getPriceForTwo(restaurant.price_range).replace("₹", "")}</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-[#E5E7EB]">
+              <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-border">
                 <MapPin className="w-4 h-4 text-blue-400" />
                 <span className="line-clamp-1 max-w-[100px]">{restaurant.address || "Hyderabad"}</span>
               </div>
             </div>
 
             {/* Description */}
-            <p className="text-[#686B78] text-base md:text-lg leading-relaxed mb-10">
+            <p className="text-muted text-base md:text-lg leading-relaxed mb-10">
               {restaurant.description || "Experience authentic Dum Biryani prepared with premium ingredients, rich spices, and traditional cooking methods. Loved by thousands of food enthusiasts across the city."}
             </p>
 
             {/* Buttons */}
             <div className="flex flex-wrap gap-4 mb-10">
-              <Link href={`/restaurant/${restaurant.id}`} className="bg-[#E23744] hover:bg-[var(--color-primary-hover)] text-white px-8 py-2.5 rounded-xl text-sm font-semibold shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_6px_18px_rgba(0,0,0,0.1)] hover:-translate-y-0.5">
+              <Link href={`/restaurant/${restaurant.id}`} className="bg-primary hover:bg-[var(--color-primary-hover)] text-white px-8 py-2.5 rounded-xl text-sm font-semibold shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_6px_18px_rgba(0,0,0,0.1)] hover:-translate-y-0.5">
                 Explore Menu
               </Link>
-              <Link href={`/restaurant/${restaurant.id}`} className="bg-white border border-[#E8E8E8] text-[#1C1C1C] hover:bg-[#FAFAFA] hover:border-[#D4D4D4] px-8 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5">
+              <Link href={`/restaurant/${restaurant.id}`} className="bg-white border border-border text-foreground hover:bg-section hover:border-border px-8 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5">
                 View Restaurant
               </Link>
             </div>
 
             {/* Extra Info */}
-            <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm text-[#6B7280]">
+            <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm text-gray-text">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-[#2ECC71]" />
                 <span>Free Delivery</span>

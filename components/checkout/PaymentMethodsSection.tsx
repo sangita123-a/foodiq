@@ -68,12 +68,12 @@ type Props = {
 
 export default function PaymentMethodsSection({ selectedMethod, onSelect }: Props) {
   return (
-    <div className="bg-[#F8FAFC] rounded-2xl p-6 border border-[#E5E7EB] mb-6">
-      <h3 className="text-xl font-bold text-[#111827] mb-2 flex items-center gap-2">
+    <div className="bg-section rounded-2xl p-6 border border-border mb-6">
+      <h3 className="text-xl font-bold text-foreground mb-2 flex items-center gap-2">
         <CreditCard className="w-5 h-5 text-primary" />
         Payment Method
       </h3>
-      <p className="text-sm text-[#6B7280] mb-6">
+      <p className="text-sm text-gray-text mb-6">
         Pay securely with Razorpay (UPI, cards, net banking, wallets) or choose Cash on Delivery.
       </p>
 
@@ -90,13 +90,13 @@ export default function PaymentMethodsSection({ selectedMethod, onSelect }: Prop
               className={`p-4 rounded-xl border flex items-start gap-3 text-left transition-all duration-300 ${
                 isSelected
                   ? "border-primary bg-primary/5 text-primary shadow-[0_0_15px_rgba(226, 55, 68,0.15)]"
-                  : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#E23744]/40 hover:text-[#111827]"
+                  : "border-border bg-white text-gray-text hover:border-primary/40 hover:text-foreground"
               }`}
             >
               <span className="mt-0.5">{option.icon}</span>
               <span>
-                <span className="font-bold text-sm block text-[#111827]">{option.label}</span>
-                <span className="text-xs text-[#6B7280] mt-1 block">{option.hint}</span>
+                <span className="font-bold text-sm block text-foreground">{option.label}</span>
+                <span className="text-xs text-gray-text mt-1 block">{option.hint}</span>
               </span>
             </button>
           );

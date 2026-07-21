@@ -98,31 +98,31 @@ export default function DeliveryDashboardPage() {
       )}
 
       {isLoading && !data && (
-        <p className="text-[#6B7280] text-sm mb-6">Loading dashboard...</p>
+        <p className="text-gray-text text-sm mb-6">Loading dashboard...</p>
       )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="bg-white border border-[#E5E7EB] rounded-2xl p-5"
+            className="bg-white border border-border rounded-2xl p-5"
           >
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF]">
                 {stat.label}
               </p>
-              <stat.icon className="w-4 h-4 text-[#E23744]" />
+              <stat.icon className="w-4 h-4 text-primary" />
             </div>
-            <p className="text-2xl font-black text-[#111827]">{stat.value}</p>
+            <p className="text-2xl font-black text-foreground">{stat.value}</p>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <section className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
+        <section className="bg-white border border-border rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-black text-[#111827]">Active Deliveries</h2>
-            <Link href="/delivery/orders" className="text-sm font-bold text-[#E23744]">
+            <h2 className="text-lg font-black text-foreground">Active Deliveries</h2>
+            <Link href="/delivery/orders" className="text-sm font-bold text-primary">
               View all
             </Link>
           </div>
@@ -131,17 +131,17 @@ export default function DeliveryDashboardPage() {
               <Link
                 key={order.id}
                 href={`/delivery/orders/${order.id}`}
-                className="block border border-[#E5E7EB] rounded-xl p-4 hover:bg-[#F8FAFC] transition-colors"
+                className="block border border-border rounded-xl p-4 hover:bg-section transition-colors"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-bold text-[#111827]">{order.restaurant.name}</p>
-                    <p className="text-xs text-[#6B7280] mt-1 flex items-center gap-1">
+                    <p className="font-bold text-foreground">{order.restaurant.name}</p>
+                    <p className="text-xs text-gray-text mt-1 flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
                       {order.customer.address || "Customer address"}
                     </p>
                   </div>
-                  <span className="text-xs font-bold px-2 py-1 rounded-lg bg-[#E23744]/10 text-[#E23744]">
+                  <span className="text-xs font-bold px-2 py-1 rounded-lg bg-primary/10 text-primary">
                     {STATUS_LABELS[order.assignment_status || ""] ||
                       order.assignment_status}
                   </span>
@@ -149,16 +149,16 @@ export default function DeliveryDashboardPage() {
               </Link>
             ))}
             {!data?.assigned_orders?.length && (
-              <p className="text-sm text-[#6B7280] py-6 text-center">
+              <p className="text-sm text-gray-text py-6 text-center">
                 No active deliveries right now
               </p>
             )}
           </div>
         </section>
 
-        <section className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
+        <section className="bg-white border border-border rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-black text-[#111827]">New Orders Nearby</h2>
+            <h2 className="text-lg font-black text-foreground">New Orders Nearby</h2>
             <span className="text-xs font-bold text-[#9CA3AF]">
               {data?.available_orders?.length || 0} orders
             </span>
@@ -167,12 +167,12 @@ export default function DeliveryDashboardPage() {
             {(data?.available_orders || []).slice(0, 5).map((order) => (
               <div
                 key={order.id}
-                className="border border-[#E5E7EB] rounded-xl p-4"
+                className="border border-border rounded-xl p-4"
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
-                    <p className="font-bold text-[#111827]">{order.restaurant.name}</p>
-                    <p className="text-xs text-[#6B7280] mt-1">
+                    <p className="font-bold text-foreground">{order.restaurant.name}</p>
+                    <p className="text-xs text-gray-text mt-1">
                       Fee {formatCurrency(order.delivery_fee)} · Order{" "}
                       {formatCurrency(order.total_amount)}
                     </p>
@@ -181,7 +181,7 @@ export default function DeliveryDashboardPage() {
                     <OrderExpiryCountdown expiresAt={order.expires_at} onExpired={refresh} />
                     <Link
                       href={`/delivery/orders/${order.id}`}
-                      className="text-xs font-bold text-[#E23744]"
+                      className="text-xs font-bold text-primary"
                     >
                       Details
                     </Link>
@@ -191,14 +191,14 @@ export default function DeliveryDashboardPage() {
                   <button
                     type="button"
                     onClick={() => handleAccept(order.id)}
-                    className="flex-1 bg-[#E23744] hover:bg-[#C81E34] text-white text-sm font-bold py-2 rounded-lg"
+                    className="flex-1 bg-primary hover:bg-primary-hover text-white text-sm font-bold py-2 rounded-lg"
                   >
                     Accept
                   </button>
                   <button
                     type="button"
                     onClick={() => handleReject(order.id)}
-                    className="flex-1 bg-[#F8FAFC] hover:bg-[#F3F4F6] text-[#6B7280] text-sm font-bold py-2 rounded-lg border border-[#E5E7EB]"
+                    className="flex-1 bg-section hover:bg-[#F3F4F6] text-gray-text text-sm font-bold py-2 rounded-lg border border-border"
                   >
                     Reject
                   </button>
@@ -206,7 +206,7 @@ export default function DeliveryDashboardPage() {
               </div>
             ))}
             {!data?.available_orders?.length && (
-              <p className="text-sm text-[#6B7280] py-6 text-center">
+              <p className="text-sm text-gray-text py-6 text-center">
                 No nearby orders available. Go online to receive requests.
               </p>
             )}

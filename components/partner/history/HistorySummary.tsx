@@ -55,7 +55,7 @@ export default function HistorySummary({ orders }: HistorySummaryProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: idx * 0.1 }}
           whileHover={{ y: -5 }}
-          className="bg-[#FFFFFF] rounded-2xl p-5 border border-[#E5E7EB] shadow-lg group hover:border-[#E5E7EB] transition-all cursor-pointer relative overflow-hidden"
+          className="bg-background rounded-2xl p-5 border border-border shadow-lg group hover:border-border transition-all cursor-pointer relative overflow-hidden"
         >
           {/* subtle background glow on hover */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFC] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -65,10 +65,10 @@ export default function HistorySummary({ orders }: HistorySummaryProps) {
               <stat.icon className={`w-5 h-5 ${stat.color}`} />
             </div>
 
-            <h3 className="text-3xl font-black text-[#111827] mb-1">
+            <h3 className="text-3xl font-black text-foreground mb-1">
               <Counter from={0} to={stat.value} prefix={stat.prefix} />
             </h3>
-            <p className="text-[#6B7280] text-xs font-bold uppercase tracking-wider">{stat.title}</p>
+            <p className="text-gray-text text-xs font-bold uppercase tracking-wider">{stat.title}</p>
           </div>
         </motion.div>
       ))}

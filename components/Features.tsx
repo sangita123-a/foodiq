@@ -27,10 +27,10 @@ const features = [
 
 export default function Features() {
   return (
-    <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto border-t border-[#ECECEC] mt-8">
+    <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto border-t border-border mt-8">
       <div className="mb-12 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-3 tracking-[-0.04em]">Why Choose Foodiq</h2>
-        <p className="text-[#686B78] text-base md:text-lg">The best food delivery experience in town.</p>
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3 tracking-[-0.04em]">Why Choose Foodiq</h2>
+        <p className="text-muted text-base md:text-lg">The best food delivery experience in town.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -39,13 +39,13 @@ export default function Features() {
           return (
             <div 
               key={index} 
-              className="bg-white border border-[#E8E8E8] rounded-[18px] p-7 shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:border-[#D4D4D4] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] transition-all duration-300 group hover:-translate-y-1"
+              className="bg-white border border-border rounded-[18px] p-7 shadow-card hover:border-border hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] transition-all duration-300 group hover:-translate-y-1"
             >
-              <div className="w-14 h-14 bg-[#FAFAFA] rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#F5F5F5] transition-colors duration-300" aria-hidden="true">
-                <Icon className="w-7 h-7 text-[#E23744] transition-colors duration-300" />
+              <div className="w-14 h-14 bg-section rounded-xl flex items-center justify-center mb-6 group-hover:bg-section transition-colors duration-300" aria-hidden="true">
+                <Icon className="w-7 h-7 text-primary transition-colors duration-300" />
               </div>
-              <h3 className="text-lg font-bold text-[#1C1C1C] mb-3">{feature.title}</h3>
-              <p className="text-[#686B78] text-sm leading-relaxed">{feature.description}</p>
+              <h3 className="text-lg font-bold text-foreground mb-3">{feature.title}</h3>
+              <p className="text-muted text-sm leading-relaxed">{feature.description}</p>
             </div>
           );
         })}

@@ -76,7 +76,7 @@ export const STATIC_OFFER_STYLES = [
     title: "Buy 1 Get 1",
     subtitle: "On selected desserts",
     code: "BOGO",
-    color: "from-[#E23744] to-[#C81E34]",
+    color: "from-primary to-primary-hover",
     image: "/images/catalog/cuisines/desserts.webp",
   },
   {
@@ -84,7 +84,7 @@ export const STATIC_OFFER_STYLES = [
     title: "Buy 1 Get 1 Free Pizza",
     subtitle: "50% OFF · Valid Today",
     code: "PIZZABOGO",
-    color: "from-red-500 to-[#E23744]",
+    color: "from-red-500 to-primary",
     image: "/images/catalog/dishes/pizza/cheese-burst-pizza.webp",
   },
   {

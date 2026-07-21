@@ -65,7 +65,7 @@ export default function KPICards({ data }: KPICardsProps) {
     { title: "New Customers", value: data.newCustomers, icon: Users, color: "text-pink-400", bg: "bg-pink-400/10", border: "border-pink-400/20", trend: data.newCustomersGrowth, prefix: "" },
     
     { title: "Average Rating", value: data.averageRating, icon: Star, color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20", trend: data.averageRatingGrowth, prefix: "", isDecimal: true },
-    { title: "Best Selling Dish", value: 0, icon: Flame, color: "text-[#E23744]", bg: "bg-[#E23744]/10", border: "border-[#E23744]/20", trend: 12, prefix: "", isString: true, stringVal: data.bestSellingDish },
+    { title: "Best Selling Dish", value: 0, icon: Flame, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20", trend: 12, prefix: "", isString: true, stringVal: data.bestSellingDish },
     { title: "Avg Delivery Time", value: data.avgDeliveryTime, icon: Clock, color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20", trend: data.avgDeliveryTimeGrowth, prefix: "", suffix: "m", inverseGood: true },
     { title: "Avg Order Value", value: data.averageOrderValue, icon: Tag, color: "text-indigo-400", bg: "bg-indigo-400/10", border: "border-indigo-400/20", trend: data.aovGrowth, prefix: "₹" }
   ];
@@ -83,7 +83,7 @@ export default function KPICards({ data }: KPICardsProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: idx * 0.05 }}
             whileHover={{ y: -5 }}
-            className="bg-[#FFFFFF] rounded-2xl p-5 border border-[#E5E7EB] shadow-lg group hover:border-[#E5E7EB] transition-all cursor-default relative overflow-hidden"
+            className="bg-background rounded-2xl p-5 border border-border shadow-lg group hover:border-border transition-all cursor-default relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFC] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             
@@ -94,14 +94,14 @@ export default function KPICards({ data }: KPICardsProps) {
                   <stat.icon className={`w-5 h-5 ${stat.color} ${stat.title === 'Average Rating' ? 'fill-yellow-400' : ''}`} />
                 </div>
                 
-                <div className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md bg-[#F8FAFC] border border-[#E5E7EB] ${isUp ? 'text-green-400' : 'text-red-400'}`}>
+                <div className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md bg-section border border-border ${isUp ? 'text-green-400' : 'text-red-400'}`}>
                   {isUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                   {trendDisplay}
                 </div>
               </div>
 
               <div>
-                <h3 className={`font-black text-[#111827] mb-1 ${stat.isString ? 'text-lg line-clamp-1' : 'text-3xl'}`}>
+                <h3 className={`font-black text-foreground mb-1 ${stat.isString ? 'text-lg line-clamp-1' : 'text-3xl'}`}>
                   <Counter 
                     from={0} 
                     to={stat.value} 
@@ -113,7 +113,7 @@ export default function KPICards({ data }: KPICardsProps) {
                   />
                 </h3>
                 <div className="flex items-center justify-between">
-                  <p className="text-[#6B7280] text-xs font-bold uppercase tracking-wider">{stat.title}</p>
+                  <p className="text-gray-text text-xs font-bold uppercase tracking-wider">{stat.title}</p>
                   <Sparkline isUp={isUp} />
                 </div>
               </div>

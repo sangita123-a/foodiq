@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 const AdminShellInner = dynamic(() => import("./AdminShellInner"), {
   ssr: false,
   loading: () => (
-    <div className="min-h-screen bg-[#F8FAFC] animate-pulse" aria-hidden />
+    <div className="min-h-screen bg-section animate-pulse" aria-hidden />
   ),
 });
 

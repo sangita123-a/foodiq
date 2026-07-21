@@ -118,13 +118,13 @@ export default function NotificationsPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] relative pt-[90px]">
+      <main className="min-h-screen bg-background relative pt-[90px]">
         <Navbar />
         <div className="container mx-auto px-4 md:px-8 py-12 max-w-4xl">
-          <div className="w-48 h-10 bg-[#F8FAFC] animate-pulse rounded-lg mb-8" />
+          <div className="w-48 h-10 bg-section animate-pulse rounded-lg mb-8" />
           <div className="flex flex-col gap-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 bg-[#F8FAFC] animate-pulse rounded-2xl border border-[#E5E7EB]" />
+              <div key={i} className="h-24 bg-section animate-pulse rounded-2xl border border-border" />
             ))}
           </div>
         </div>
@@ -134,9 +134,9 @@ export default function NotificationsPage() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] flex flex-col items-center justify-center gap-4 pt-[90px]">
+      <main className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 pt-[90px]">
         <Navbar />
-        <div className="text-[#111827] text-xl">Failed to load notifications</div>
+        <div className="text-foreground text-xl">Failed to load notifications</div>
         <button type="button" onClick={() => mutate()} className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg">
           Retry
         </button>
@@ -145,7 +145,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-background relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-4xl">
@@ -164,20 +164,20 @@ export default function NotificationsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search notifications…"
-              className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2.5 text-sm"
+              className="w-full border border-border rounded-xl pl-9 pr-3 py-2.5 text-sm"
             />
           </div>
           <input
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
-            className="border border-[#E5E7EB] rounded-xl px-3 py-2.5 text-sm"
+            className="border border-border rounded-xl px-3 py-2.5 text-sm"
           />
           <input
             type="date"
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
-            className="border border-[#E5E7EB] rounded-xl px-3 py-2.5 text-sm"
+            className="border border-border rounded-xl px-3 py-2.5 text-sm"
           />
         </div>
 
@@ -190,7 +190,7 @@ export default function NotificationsPage() {
               r.ok ? "success" : "error"
             );
           }}
-          className="mb-8 text-sm font-bold text-[#E23744] hover:underline"
+          className="mb-8 text-sm font-bold text-primary hover:underline"
         >
           Enable browser push notifications
         </button>

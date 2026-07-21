@@ -10,12 +10,12 @@ import NotificationSettings from "@/components/settings/sections/NotificationSet
  */
 export default function NotificationPreferencesPage() {
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-background relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-3xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#111827]">Notification Preferences</h1>
-          <p className="text-[#6B7280] mt-2">
+          <h1 className="text-3xl font-bold text-foreground">Notification Preferences</h1>
+          <p className="text-gray-text mt-2">
             Manage email, SMS, push, and marketing preferences for your Foodiq account.
           </p>
         </div>
@@ -24,7 +24,7 @@ export default function NotificationPreferencesPage() {
           <button
             type="submit"
             form="settings-form"
-            className="bg-primary hover:bg-[#C81E34] text-white px-8 py-3 rounded-xl font-bold transition-colors"
+            className="bg-primary hover:bg-primary-hover text-white px-8 py-3 rounded-xl font-bold transition-colors"
           >
             Save Changes
           </button>

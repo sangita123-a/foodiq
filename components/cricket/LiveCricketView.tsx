@@ -67,12 +67,12 @@ export default function LiveCricketView() {
       <div className="flex items-center justify-between mb-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-gray-100 text-[#1A1A1A] font-bold text-sm border border-[#ECECEC] transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-gray-100 text-foreground font-bold text-sm border border-border transition-all"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Home</span>
         </Link>
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#E23744] text-white text-xs font-black uppercase tracking-wider shadow-sm animate-pulse">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary text-white text-xs font-black uppercase tracking-wider shadow-sm animate-pulse">
           <span className="w-2 h-2 rounded-full bg-white animate-ping" />
           <span>🔴 ICC MATCH LIVE BROADCAST</span>
         </div>
@@ -137,14 +137,14 @@ export default function LiveCricketView() {
           </div>
 
           {/* Interactive Navigation Tabs */}
-          <div className="bg-white rounded-2xl p-4 border border-[#ECECEC] shadow-sm">
+          <div className="bg-white rounded-2xl p-4 border border-border shadow-sm">
             <div className="flex items-center gap-2 border-b border-gray-100 pb-3 mb-4">
               <button
                 type="button"
                 onClick={() => setActiveTab("stream")}
                 className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
                   activeTab === "stream"
-                    ? "bg-[#E23744] text-white shadow-sm"
+                    ? "bg-primary text-white shadow-sm"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
@@ -155,7 +155,7 @@ export default function LiveCricketView() {
                 onClick={() => setActiveTab("commentary")}
                 className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
                   activeTab === "commentary"
-                    ? "bg-[#E23744] text-white shadow-sm"
+                    ? "bg-primary text-white shadow-sm"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
@@ -165,12 +165,12 @@ export default function LiveCricketView() {
 
             {activeTab === "stream" ? (
               <div className="space-y-3">
-                <div className="p-3 bg-[#FFF5F6] rounded-xl border border-[#E23744]/20 flex items-center justify-between">
+                <div className="p-3 bg-primary-soft rounded-xl border border-primary/20 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Award className="w-5 h-5 text-[#E23744]" />
+                    <Award className="w-5 h-5 text-primary" />
                     <div>
-                      <div className="text-xs font-black text-[#1A1A1A]">Match Day Special Offer</div>
-                      <div className="text-[11px] text-[#666666]">Apply coupon <span className="font-bold text-[#E23744]">MATCHCOMBO</span> for extra ₹100 flat discount!</div>
+                      <div className="text-xs font-black text-foreground">Match Day Special Offer</div>
+                      <div className="text-[11px] text-gray-text">Apply coupon <span className="font-bold text-primary">MATCHCOMBO</span> for extra ₹100 flat discount!</div>
                     </div>
                   </div>
                 </div>
@@ -196,12 +196,12 @@ export default function LiveCricketView() {
 
         {/* Match Day Combo Order Sidebar */}
         <div className="space-y-4">
-          <div className="bg-white rounded-3xl p-6 border border-[#ECECEC] shadow-md">
+          <div className="bg-white rounded-3xl p-6 border border-border shadow-md">
             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
-              <Flame className="w-5 h-5 text-[#E23744]" />
-              <h3 className="text-lg font-black text-[#1A1A1A]">Match Day Food Combos</h3>
+              <Flame className="w-5 h-5 text-primary" />
+              <h3 className="text-lg font-black text-foreground">Match Day Food Combos</h3>
             </div>
-            <p className="text-xs text-[#666666] mb-4">
+            <p className="text-xs text-gray-text mb-4">
               Get express 20-30 min delivery directly to your doorstep while you enjoy the live cricket action!
             </p>
 
@@ -209,7 +209,7 @@ export default function LiveCricketView() {
               {combos.map((c) => (
                 <div
                   key={c.id}
-                  className="group relative bg-[#F8F8F8] hover:bg-white rounded-2xl p-3 border border-gray-200 hover:border-[#E23744] hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+                  className="group relative bg-footer hover:bg-white rounded-2xl p-3 border border-gray-200 hover:border-primary hover:shadow-md transition-all duration-300 flex flex-col justify-between"
                 >
                   <div className="flex gap-3 mb-3">
                     <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 relative">
@@ -221,13 +221,13 @@ export default function LiveCricketView() {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="inline-block bg-[#E23744] text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase mb-1">
+                      <div className="inline-block bg-primary text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase mb-1">
                         {c.discount}
                       </div>
-                      <h4 className="text-xs font-black text-[#1A1A1A] truncate">{c.name}</h4>
-                      <p className="text-[10px] text-[#666666] line-clamp-1">{c.desc}</p>
+                      <h4 className="text-xs font-black text-foreground truncate">{c.name}</h4>
+                      <p className="text-[10px] text-gray-text line-clamp-1">{c.desc}</p>
                       <div className="flex items-baseline gap-1.5 mt-1">
-                        <span className="text-sm font-black text-[#1A1A1A]">₹{c.price}</span>
+                        <span className="text-sm font-black text-foreground">₹{c.price}</span>
                         <span className="text-[10px] text-gray-400 line-through font-medium">₹{c.origPrice}</span>
                       </div>
                     </div>
@@ -236,7 +236,7 @@ export default function LiveCricketView() {
                   <button
                     type="button"
                     onClick={() => handleOrderCombo(c)}
-                    className="w-full py-2 rounded-xl bg-[#E23744] hover:bg-[#C81E34] text-white text-xs font-black transition-all shadow-sm flex items-center justify-center gap-1.5 active:scale-98"
+                    className="w-full py-2 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-black transition-all shadow-sm flex items-center justify-center gap-1.5 active:scale-98"
                   >
                     <ShoppingBag className="w-3.5 h-3.5" />
                     <span>Order Now</span>

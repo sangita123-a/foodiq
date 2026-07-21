@@ -50,7 +50,7 @@ export default function RestaurantCard({
             className="w-full h-full object-cover"
           />
           <div className="absolute bottom-3 left-4 z-20 flex items-center gap-2">
-            <div className="flex items-center gap-1 text-[#1C1C1C] text-xs font-bold px-2 py-1 rounded-lg bg-[#FAFAFA] border border-[#ECECEC]">
+            <div className="flex items-center gap-1 text-foreground text-xs font-bold px-2 py-1 rounded-lg bg-section border border-border">
               <span>{rating}</span>
               <Star className="w-3 h-3 fill-[#F4B400] text-[#F4B400]" />
             </div>
@@ -62,7 +62,7 @@ export default function RestaurantCard({
         </div>
 
         <div className="food-card-body flex flex-col flex-grow">
-          <h3 className="food-card-title text-[#1C1C1C] mb-1 group-hover:text-[#1C1C1C] transition-colors">
+          <h3 className="food-card-title text-foreground mb-1 group-hover:text-foreground transition-colors">
             {name}
           </h3>
           <p className="food-card-description mb-3 line-clamp-1">{cuisine}</p>

@@ -35,17 +35,17 @@ export default function Reviews() {
   return (
     <section className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
       <div className="mb-12 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-3 tracking-[-0.04em]">What Our Customers Say</h2>
-        <p className="text-[#686B78] text-base md:text-lg">Don't just take our word for it.</p>
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3 tracking-[-0.04em]">What Our Customers Say</h2>
+        <p className="text-muted text-base md:text-lg">Don't just take our word for it.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {reviews.map((review) => (
           <div 
             key={review.id}
-            className="bg-white border border-[#EAEAEA] rounded-[18px] p-7 relative shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:border-[#D4D4D4] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] transition-all duration-300 group"
+            className="bg-white border border-border rounded-[18px] p-7 relative shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:border-border hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] transition-all duration-300 group"
           >
-            <Quote className="absolute top-6 right-8 w-12 h-12 text-[#E23744]/5 group-hover:text-primary/10 transition-colors duration-300" aria-hidden="true" />
+            <Quote className="absolute top-6 right-8 w-12 h-12 text-primary/5 group-hover:text-primary/10 transition-colors duration-300" aria-hidden="true" />
             
             <div className="flex gap-1 mb-6" role="img" aria-label={`${review.rating} out of 5 stars`}>
               {[...Array(5)].map((_, i) => (
@@ -57,10 +57,10 @@ export default function Reviews() {
               ))}
             </div>
 
-            <p className="text-[#686B78] text-sm mb-8 leading-relaxed italic">"{review.review}"</p>
+            <p className="text-muted text-sm mb-8 leading-relaxed italic">"{review.review}"</p>
 
             <div className="flex items-center gap-4 mt-auto">
-              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-[#E5E7EB]">
+              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-border">
                 <SafeImage
                   src={review.image}
                   fallback={AVATAR_FALLBACK}
@@ -70,8 +70,8 @@ export default function Reviews() {
                 />
               </div>
               <div>
-                <h3 className="text-[#1C1C1C] font-bold">{review.name}</h3>
-                <p className="text-[#686B78] text-sm">{review.role}</p>
+                <h3 className="text-foreground font-bold">{review.name}</h3>
+                <p className="text-muted text-sm">{review.role}</p>
               </div>
             </div>
           </div>

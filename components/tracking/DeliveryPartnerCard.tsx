@@ -21,12 +21,12 @@ export default function DeliveryPartnerCard({ partner }: Props) {
   if (!partner) return null;
 
   return (
-    <div className="bg-[#F8FAFC] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] mb-8">
+    <div className="bg-section rounded-3xl p-6 md:p-8 border border-border mb-8">
       <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
         
         {/* Driver Info */}
         <div className="flex items-center gap-5 text-center sm:text-left">
-          <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-[#E5E7EB] relative">
+          <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-border relative">
             <SafeImage 
               src={partner.image} 
               fallback={PARTNER_AVATAR_FALLBACK}
@@ -52,7 +52,7 @@ export default function DeliveryPartnerCard({ partner }: Props) {
         <div className="flex items-center gap-4 w-full sm:w-auto mt-2 sm:mt-0">
           <button
             type="button"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#F8FAFC] hover:bg-[#F8FAFC] text-white px-6 py-3.5 rounded-xl font-bold transition-colors"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-section hover:bg-section text-white px-6 py-3.5 rounded-xl font-bold transition-colors"
           >
             <MessageSquare className="w-4 h-4" />
             Chat

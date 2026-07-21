@@ -29,7 +29,7 @@ export default function FoodRecommendation() {
   return (
     <div className="mb-20">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-[#111827]">Recommended For You</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-foreground">Recommended For You</h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -37,7 +37,7 @@ export default function FoodRecommendation() {
           ? [1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="h-56 bg-[#F8FAFC] rounded-2xl animate-pulse border border-[#E5E7EB]"
+                className="h-56 bg-section rounded-2xl animate-pulse border border-border"
               />
             ))
           : items.map((food, idx) => (
@@ -47,7 +47,7 @@ export default function FoodRecommendation() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1, duration: 0.5 }}
             whileHover={{ y: -5 }}
-            className="bg-white rounded-2xl overflow-hidden border border-[#E5E7EB] hover:border-[var(--color-primary)] transition-all group"
+            className="bg-white rounded-2xl overflow-hidden border border-border hover:border-[var(--color-primary)] transition-all group"
           >
             <div className="w-full h-40 overflow-hidden relative">
               <SafeImage
@@ -58,14 +58,14 @@ export default function FoodRecommendation() {
               />
             </div>
             <div className="p-4">
-              <h3 className="text-lg font-bold text-[#111827] mb-1 truncate group-hover:text-[var(--color-primary)] transition-colors">
+              <h3 className="text-lg font-bold text-foreground mb-1 truncate group-hover:text-[var(--color-primary)] transition-colors">
                 {food.name}
               </h3>
               <p className="text-[var(--color-gray-text)] text-xs mb-3 truncate">{food.restaurant}</p>
 
               <div className="flex items-center justify-between mt-auto">
-                <span className="text-[#111827] font-bold">{food.price}</span>
-                <button className="w-8 h-8 rounded-full bg-[#F8FAFC] flex items-center justify-center text-[#111827] hover:bg-[var(--color-primary)] hover:text-[#111827] transition-colors">
+                <span className="text-foreground font-bold">{food.price}</span>
+                <button className="w-8 h-8 rounded-full bg-section flex items-center justify-center text-foreground hover:bg-[var(--color-primary)] hover:text-foreground transition-colors">
                   <Plus className="w-4 h-4" />
                 </button>
               </div>

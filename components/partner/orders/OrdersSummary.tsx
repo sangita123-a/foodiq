@@ -34,7 +34,7 @@ export default function OrdersSummary({ orders }: OrdersSummaryProps) {
 
   const stats = [
     { title: "New Orders", value: newOrders, icon: Bell, color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20", trend: "+2", isUp: true },
-    { title: "Preparing", value: preparing, icon: ChefHat, color: "text-[#E23744]", bg: "bg-[#E23744]/10", border: "border-[#E23744]/20", trend: "-1", isUp: false },
+    { title: "Preparing", value: preparing, icon: ChefHat, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20", trend: "-1", isUp: false },
     { title: "Ready for Pickup", value: ready, icon: PackageCheck, color: "text-purple-400", bg: "bg-purple-400/10", border: "border-purple-400/20", trend: "+5", isUp: true },
     { title: "Picked Up", value: pickedUp, icon: Bike, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20", trend: "+12", isUp: true },
     { title: "Completed Today", value: completed, icon: CheckCircle2, color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20", trend: "+24%", isUp: true }
@@ -49,7 +49,7 @@ export default function OrdersSummary({ orders }: OrdersSummaryProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: idx * 0.1 }}
           whileHover={{ y: -5 }}
-          className="bg-[#FFFFFF] rounded-2xl p-5 border border-[#E5E7EB] shadow-lg group hover:border-[#E5E7EB] transition-all cursor-pointer relative overflow-hidden"
+          className="bg-background rounded-2xl p-5 border border-border shadow-lg group hover:border-border transition-all cursor-pointer relative overflow-hidden"
         >
           {/* subtle background glow on hover */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFC] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -60,16 +60,16 @@ export default function OrdersSummary({ orders }: OrdersSummaryProps) {
                 <stat.icon className={`w-5 h-5 ${stat.color}`} />
               </div>
               
-              <div className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md bg-[#F8FAFC] border border-[#E5E7EB] ${stat.isUp ? 'text-green-400' : 'text-red-400'}`}>
+              <div className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md bg-section border border-border ${stat.isUp ? 'text-green-400' : 'text-red-400'}`}>
                 {stat.isUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                 {stat.trend}
               </div>
             </div>
 
-            <h3 className="text-3xl font-black text-[#111827] mb-1">
+            <h3 className="text-3xl font-black text-foreground mb-1">
               <Counter from={0} to={stat.value} />
             </h3>
-            <p className="text-[#6B7280] text-xs font-bold uppercase tracking-wider">{stat.title}</p>
+            <p className="text-gray-text text-xs font-bold uppercase tracking-wider">{stat.title}</p>
           </div>
         </motion.div>
       ))}

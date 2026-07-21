@@ -25,10 +25,10 @@ const posts = [
 
 export default function BlogPage() {
   return (
-    <main className="min-h-screen bg-[#FFFFFF] pt-[90px]">
+    <main className="min-h-screen bg-background pt-[90px]">
       <Navbar />
       <div className="container mx-auto max-w-3xl px-4 py-12 md:px-8">
-        <h1 className="mb-2 text-3xl font-black text-[#222222] md:text-4xl">
+        <h1 className="mb-2 text-3xl font-black text-foreground md:text-4xl">
           Foodiq Blog
         </h1>
         <p className="mb-10 text-[#555555]">
@@ -38,12 +38,12 @@ export default function BlogPage() {
           {posts.map((post) => (
             <li
               key={post.title}
-              className="rounded-2xl border border-[#E5E7EB] p-6 shadow-sm"
+              className="rounded-2xl border border-border p-6 shadow-sm"
             >
               <p className="mb-1 text-xs font-bold uppercase tracking-wider text-[#737373]">
                 {post.date}
               </p>
-              <h2 className="mb-2 text-xl font-bold text-[#222222]">
+              <h2 className="mb-2 text-xl font-bold text-foreground">
                 {post.title}
               </h2>
               <p className="text-[#555555]">{post.excerpt}</p>
@@ -52,7 +52,7 @@ export default function BlogPage() {
         </ul>
         <p className="mt-10 text-sm text-[#555555]">
           Press inquiries? Visit our{" "}
-          <Link href="/press" className="text-[#E23744] hover:underline">
+          <Link href="/press" className="text-primary hover:underline">
             Press page
           </Link>
           .

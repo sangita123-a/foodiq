@@ -98,20 +98,20 @@ export default function AdminUsersPage() {
     <AdminShell title="User Management">
       <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-[#111827]">Customers</h1>
-          <p className="text-[#6B7280]">Search, suspend, and review customer accounts.</p>
+          <h1 className="text-3xl font-black text-foreground">Customers</h1>
+          <p className="text-gray-text">Search, suspend, and review customer accounts.</p>
         </div>
         <div className="flex gap-3">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name, email, phone…"
-            className="bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#E23744]"
+            className="bg-white border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
           />
           <select
             value={suspended}
             onChange={(e) => setSuspended(e.target.value)}
-            className="bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm"
+            className="bg-white border border-border rounded-xl px-4 py-2.5 text-sm"
           >
             <option value="">All accounts</option>
             <option value="false">Active</option>
@@ -120,12 +120,12 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {isLoading && <p className="text-sm text-[#6B7280] mb-4">Loading…</p>}
+      {isLoading && <p className="text-sm text-gray-text mb-4">Loading…</p>}
 
-      <div className="bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden">
+      <div className="bg-white rounded-3xl border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[800px] text-left">
-            <thead className="bg-[#F8FAFC] border-b border-[#E5E7EB]">
+            <thead className="bg-section border-b border-border">
               <tr>
                 <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">Customer</th>
                 <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">Orders</th>
@@ -136,10 +136,10 @@ export default function AdminUsersPage() {
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id} className="border-b border-[#E5E7EB]">
+                <tr key={u.id} className="border-b border-border">
                   <td className="p-4">
-                    <p className="font-bold text-[#111827]">{u.full_name}</p>
-                    <p className="text-xs text-[#6B7280]">{u.email}</p>
+                    <p className="font-bold text-foreground">{u.full_name}</p>
+                    <p className="text-xs text-gray-text">{u.email}</p>
                     <p className="text-xs text-[#9CA3AF]">{u.phone_number || "—"}</p>
                   </td>
                   <td className="p-4 font-bold">{u.order_count || 0}</td>
@@ -151,10 +151,10 @@ export default function AdminUsersPage() {
                     <p className="text-[10px] text-[#9CA3AF] mt-1">{formatDate(u.created_at)}</p>
                   </td>
                   <td className="p-4 text-right space-x-2">
-                    <button type="button" onClick={() => viewOrders(u)} className="text-xs font-bold text-[#111827]">Orders</button>
-                    <button type="button" onClick={() => viewWallet(u)} className="text-xs font-bold text-[#111827]">Wallet</button>
-                    <button type="button" onClick={() => viewReferrals(u)} className="text-xs font-bold text-[#111827]">Referrals</button>
-                    <button type="button" onClick={() => toggleSuspend(u)} className="text-xs font-bold text-[#E23744]">
+                    <button type="button" onClick={() => viewOrders(u)} className="text-xs font-bold text-foreground">Orders</button>
+                    <button type="button" onClick={() => viewWallet(u)} className="text-xs font-bold text-foreground">Wallet</button>
+                    <button type="button" onClick={() => viewReferrals(u)} className="text-xs font-bold text-foreground">Referrals</button>
+                    <button type="button" onClick={() => toggleSuspend(u)} className="text-xs font-bold text-primary">
                       {u.is_suspended ? "Activate" : "Suspend"}
                     </button>
                     <button type="button" onClick={() => remove(u.id)} className="text-xs font-bold text-red-500">Delete</button>
@@ -170,25 +170,25 @@ export default function AdminUsersPage() {
       {ordersUser && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setOrdersUser(null)}>
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-black text-[#111827] mb-1">Orders — {ordersUser.full_name}</h3>
-            <p className="text-sm text-[#6B7280] mb-4">{ordersUser.email}</p>
+            <h3 className="text-xl font-black text-foreground mb-1">Orders — {ordersUser.full_name}</h3>
+            <p className="text-sm text-gray-text mb-4">{ordersUser.email}</p>
             <div className="space-y-2">
               {orders.map((o) => (
-                <div key={o.id} className="border border-[#E5E7EB] rounded-xl p-3 flex justify-between">
+                <div key={o.id} className="border border-border rounded-xl p-3 flex justify-between">
                   <div>
-                    <p className="font-mono text-xs text-[#E23744]">#{String(o.id).slice(0, 8)}</p>
+                    <p className="font-mono text-xs text-primary">#{String(o.id).slice(0, 8)}</p>
                     <p className="text-sm font-bold">{o.restaurant_name}</p>
-                    <p className="text-xs text-[#6B7280]">{formatDate(o.created_at)}</p>
+                    <p className="text-xs text-gray-text">{formatDate(o.created_at)}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-black">{formatCurrency(o.total_amount)}</p>
-                    <p className="text-xs text-[#6B7280]">{o.status}</p>
+                    <p className="text-xs text-gray-text">{o.status}</p>
                   </div>
                 </div>
               ))}
-              {!orders.length && <p className="text-sm text-[#6B7280]">No orders.</p>}
+              {!orders.length && <p className="text-sm text-gray-text">No orders.</p>}
             </div>
-            <button type="button" onClick={() => setOrdersUser(null)} className="mt-4 w-full py-3 rounded-xl bg-[#F8FAFC] border border-[#E5E7EB] font-bold">
+            <button type="button" onClick={() => setOrdersUser(null)} className="mt-4 w-full py-3 rounded-xl bg-section border border-border font-bold">
               Close
             </button>
           </div>
@@ -198,26 +198,26 @@ export default function AdminUsersPage() {
       {walletUser && wallet && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setWalletUser(null)}>
           <div className="bg-white rounded-3xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-black text-[#111827] mb-1">Wallet — {walletUser.full_name}</h3>
+            <h3 className="text-xl font-black text-foreground mb-1">Wallet — {walletUser.full_name}</h3>
             <div className="grid grid-cols-2 gap-3 mt-4">
-              <div className="bg-[#F8FAFC] rounded-xl p-4 border border-[#E5E7EB]">
+              <div className="bg-section rounded-xl p-4 border border-border">
                 <p className="text-xs text-[#9CA3AF] font-bold uppercase">Reward Points</p>
                 <p className="text-2xl font-black">{wallet.reward_points}</p>
               </div>
-              <div className="bg-[#F8FAFC] rounded-xl p-4 border border-[#E5E7EB]">
+              <div className="bg-section rounded-xl p-4 border border-border">
                 <p className="text-xs text-[#9CA3AF] font-bold uppercase">Referrals</p>
                 <p className="text-2xl font-black">{wallet.referral_count}</p>
               </div>
-              <div className="bg-[#F8FAFC] rounded-xl p-4 border border-[#E5E7EB]">
+              <div className="bg-section rounded-xl p-4 border border-border">
                 <p className="text-xs text-[#9CA3AF] font-bold uppercase">Total Spent</p>
                 <p className="text-xl font-black">{formatCurrency(wallet.total_spent)}</p>
               </div>
-              <div className="bg-[#F8FAFC] rounded-xl p-4 border border-[#E5E7EB]">
+              <div className="bg-section rounded-xl p-4 border border-border">
                 <p className="text-xs text-[#9CA3AF] font-bold uppercase">Orders</p>
                 <p className="text-2xl font-black">{wallet.order_count}</p>
               </div>
             </div>
-            <button type="button" onClick={() => setWalletUser(null)} className="mt-4 w-full py-3 rounded-xl bg-[#F8FAFC] border border-[#E5E7EB] font-bold">
+            <button type="button" onClick={() => setWalletUser(null)} className="mt-4 w-full py-3 rounded-xl bg-section border border-border font-bold">
               Close
             </button>
           </div>
@@ -227,24 +227,24 @@ export default function AdminUsersPage() {
       {referralUser && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setReferralUser(null)}>
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-black text-[#111827] mb-1">Referral History — {referralUser.full_name}</h3>
+            <h3 className="text-xl font-black text-foreground mb-1">Referral History — {referralUser.full_name}</h3>
             <div className="space-y-2 mt-4">
               {referrals.map((r) => (
-                <div key={r.id} className="border border-[#E5E7EB] rounded-xl p-3 flex justify-between">
+                <div key={r.id} className="border border-border rounded-xl p-3 flex justify-between">
                   <div>
                     <p className="text-sm font-bold">{r.referee_name || r.referee_email || "User"}</p>
-                    <p className="text-xs text-[#6B7280]">Code: {r.code}</p>
+                    <p className="text-xs text-gray-text">Code: {r.code}</p>
                     <p className="text-xs text-[#9CA3AF]">{formatDate(r.created_at)}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-black text-[#E23744]">+{r.points_awarded || 0} pts</p>
-                    <p className="text-xs text-[#6B7280]">{r.status}</p>
+                    <p className="font-black text-primary">+{r.points_awarded || 0} pts</p>
+                    <p className="text-xs text-gray-text">{r.status}</p>
                   </div>
                 </div>
               ))}
-              {!referrals.length && <p className="text-sm text-[#6B7280]">No referrals yet.</p>}
+              {!referrals.length && <p className="text-sm text-gray-text">No referrals yet.</p>}
             </div>
-            <button type="button" onClick={() => setReferralUser(null)} className="mt-4 w-full py-3 rounded-xl bg-[#F8FAFC] border border-[#E5E7EB] font-bold">
+            <button type="button" onClick={() => setReferralUser(null)} className="mt-4 w-full py-3 rounded-xl bg-section border border-border font-bold">
               Close
             </button>
           </div>

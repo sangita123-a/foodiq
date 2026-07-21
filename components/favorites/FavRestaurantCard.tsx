@@ -46,17 +46,17 @@ export default function FavRestaurantCard({ restaurant, onRemove }: Props) {
         <div className="absolute top-4 w-full px-4 flex justify-between items-start">
           <span className={`text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg backdrop-blur-md ${
             restaurant.isOpen 
-              ? "bg-green-500/80 text-[#111827]" 
-              : "bg-red-500/80 text-[#111827]"
+              ? "bg-green-500/80 text-foreground" 
+              : "bg-red-500/80 text-foreground"
           }`}>
             {restaurant.isOpen ? "Open Now" : "Closed"}
           </span>
           
           <button 
             onClick={() => onRemove(restaurant.id)}
-            className="w-10 h-10 bg-[#F8FAFC] hover:bg-red-500/20 backdrop-blur-md rounded-full flex items-center justify-center transition-colors group/heart"
+            className="w-10 h-10 bg-section hover:bg-red-500/20 backdrop-blur-md rounded-full flex items-center justify-center transition-colors group/heart"
           >
-            <Heart className="w-5 h-5 text-[#E23744] fill-[#E23744] group-hover/heart:scale-110 transition-transform" />
+            <Heart className="w-5 h-5 text-primary fill-primary group-hover/heart:scale-110 transition-transform" />
           </button>
         </div>
       </div>
@@ -71,18 +71,18 @@ export default function FavRestaurantCard({ restaurant, onRemove }: Props) {
 
         <p className="food-card-description mb-3 line-clamp-1">{restaurant.cuisine}</p>
 
-        <div className="flex items-center gap-2 text-xs font-semibold text-[#6B7280] mb-4">
-          <span className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-lg border border-[#E5E7EB]">
+        <div className="flex items-center gap-2 text-xs font-semibold text-gray-text mb-4">
+          <span className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-lg border border-border">
             <Clock className="w-3.5 h-3.5 text-primary" /> {restaurant.eta}
           </span>
-          <span className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-lg border border-[#E5E7EB]">
+          <span className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-lg border border-border">
             ₹{restaurant.priceForTwo} for two
           </span>
         </div>
 
         <Link 
           href={`/restaurant/${restaurant.id}`}
-          className="food-button mt-auto w-full bg-[#F8FAFC] hover:bg-primary text-white px-3 text-sm font-semibold flex items-center justify-center gap-2 border border-[#E5E7EB] group-hover:border-primary/50"
+          className="food-button mt-auto w-full bg-section hover:bg-primary text-white px-3 text-sm font-semibold flex items-center justify-center gap-2 border border-border group-hover:border-primary/50"
         >
           View Menu
           <ArrowRight className="w-4 h-4" />

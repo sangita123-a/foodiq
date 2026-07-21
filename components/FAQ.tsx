@@ -74,7 +74,7 @@ export default function FAQ() {
   }, [query]);
 
   return (
-    <section className="w-full border-t border-[#EAEAEA] bg-[#FAFAFA] py-16 md:py-24">
+    <section className="w-full border-t border-border bg-section py-16 md:py-24">
       <div className="mx-auto w-[calc(100%-32px)] max-w-5xl md:w-[calc(100%-64px)]">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -83,13 +83,13 @@ export default function FAQ() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-8 text-center"
         >
-          <span className="mb-3 inline-flex rounded-full border border-[#ECECEC] bg-[#FAFAFA] px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#696969]">
+          <span className="mb-3 inline-flex rounded-full border border-border bg-section px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-gray-text">
             Help Center
           </span>
-          <h2 className="mb-3 text-3xl font-bold tracking-[-0.045em] text-[#1C1C1C] md:text-5xl">
+          <h2 className="mb-3 text-3xl font-bold tracking-[-0.045em] text-foreground md:text-5xl">
             Frequently Asked Questions
           </h2>
-          <p className="mx-auto max-w-2xl text-sm leading-6 text-[#686B78] md:text-base">
+          <p className="mx-auto max-w-2xl text-sm leading-6 text-muted md:text-base">
             Everything you need to know before placing your order.
           </p>
         </motion.div>
@@ -108,7 +108,7 @@ export default function FAQ() {
             }}
             placeholder="Search questions, payments, refunds..."
             aria-label="Search frequently asked questions"
-            className="h-13 w-full rounded-[14px] border border-[#EAEAEA] bg-white py-3 pl-12 pr-4 text-sm text-[#1C1C1C] shadow-[0_4px_20px_rgba(0,0,0,0.08)] outline-none transition-all duration-300 placeholder:text-[#9C9C9C] focus:border-[#D4D4D4] focus:ring-4 focus:ring-[rgba(0,0,0,0.04)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E23744]"
+            className="h-13 w-full rounded-[14px] border border-border bg-white py-3 pl-12 pr-4 text-sm text-foreground shadow-card outline-none transition-all duration-300 placeholder:text-muted focus:border-border-hover focus:ring-4 focus:ring-[rgba(0,0,0,0.04)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           />
         </div>
 
@@ -126,8 +126,8 @@ export default function FAQ() {
                 transition={{ duration: 0.35, delay: Math.min(index * 0.025, 0.25) }}
                 className={`overflow-hidden rounded-2xl border bg-white transition-all duration-300 ${
                   isOpen
-                    ? "border-[#EAEAEA] shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
-                    : "border-[#EAEAEA] shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-[#D4D4D4] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
+                    ? "border-border shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
+                    : "border-border shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-border hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
                 }`}
               >
                 <button
@@ -135,11 +135,11 @@ export default function FAQ() {
                   onClick={() => toggleAccordion(faq.id)}
                   aria-expanded={isOpen}
                   aria-controls={answerId}
-                  className="flex w-full items-center justify-between gap-4 p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E23744] sm:p-5"
+                  className="flex w-full items-center justify-between gap-4 p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:p-5"
                 >
                   <span
                     className={`text-sm font-semibold leading-6 transition-colors duration-300 sm:text-base ${
-                      isOpen ? "text-[#1C1C1C]" : "text-[#1C1C1C]"
+                      isOpen ? "text-foreground" : "text-foreground"
                     }`}
                   >
                     {faq.question}
@@ -149,8 +149,8 @@ export default function FAQ() {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors duration-300 ${
                       isOpen
-                        ? "border-[#ECECEC] bg-[#FAFAFA] text-[#1C1C1C]"
-                        : "border-[#ECECEC] bg-[#FAFAFA] text-[#696969]"
+                        ? "border-border bg-section text-foreground"
+                        : "border-border bg-section text-gray-text"
                     }`}
                     aria-hidden="true"
                   >
@@ -182,7 +182,7 @@ export default function FAQ() {
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                     >
-                      <div className="mx-4 border-t border-[#E5E7EB] pb-5 pt-4 text-sm leading-6 text-[#6B7280] sm:mx-5">
+                      <div className="mx-4 border-t border-border pb-5 pt-4 text-sm leading-6 text-gray-text sm:mx-5">
                         {faq.answer}
                       </div>
                     </motion.div>
@@ -197,16 +197,16 @@ export default function FAQ() {
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F8FAFC] px-6 py-14 text-center"
+            className="rounded-2xl border border-dashed border-border bg-section px-6 py-14 text-center"
           >
             <Search className="mx-auto mb-3 h-8 w-8 text-[#9CA3AF]" />
-            <p className="font-medium text-[#6B7280]">No matching questions found.</p>
+            <p className="font-medium text-gray-text">No matching questions found.</p>
           </motion.div>
         )}
 
-        <div className="mt-10 rounded-[20px] border border-[#EAEAEA] bg-[#FAFAFA] p-6 text-center shadow-[0_4px_20px_rgba(0,0,0,0.08)] sm:p-8">
-          <h3 className="text-xl font-bold text-[#1C1C1C]">Still need help?</h3>
-          <p className="mt-1 text-sm text-[#686B78]">
+        <div className="mt-10 rounded-[20px] border border-border bg-section p-6 text-center shadow-card sm:p-8">
+          <h3 className="text-xl font-bold text-foreground">Still need help?</h3>
+          <p className="mt-1 text-sm text-muted">
             Our support team is ready to help.
           </p>
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
@@ -219,7 +219,7 @@ export default function FAQ() {
             </a>
             <a
               href="mailto:support@foodiq.com"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#EAEAEA] bg-white px-5 text-sm font-bold text-[#1C1C1C] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#D4D4D4] hover:bg-[#FAFAFA]"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-white px-5 text-sm font-bold text-foreground transition-all duration-300 hover:-translate-y-0.5 hover:border-border hover:bg-section"
             >
               <Mail className="h-4 w-4" />
               Email Us

@@ -9,27 +9,27 @@ export default function RecentReviews() {
   ];
 
   return (
-    <div className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-xl h-full">
+    <div className="bg-background rounded-3xl p-6 md:p-8 border border-border shadow-xl h-full">
       
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-[#111827] flex items-center gap-2">
+        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
           Recent Reviews
         </h2>
-        <button className="text-sm font-bold text-[#6B7280] hover:text-[#111827] transition-colors">
+        <button className="text-sm font-bold text-gray-text hover:text-foreground transition-colors">
           View All
         </button>
       </div>
 
       <div className="space-y-4">
         {reviews.map((review, idx) => (
-          <div key={idx} className="bg-[#F8FAFC] p-5 rounded-2xl border border-[#E5E7EB]">
+          <div key={idx} className="bg-section p-5 rounded-2xl border border-border">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full overflow-hidden border border-[#E5E7EB] bg-[#FFFFFF] flex items-center justify-center">
-                  <User className="w-5 h-5 text-[#6B7280]" aria-label={review.name} />
+                <div className="w-10 h-10 rounded-full overflow-hidden border border-border bg-background flex items-center justify-center">
+                  <User className="w-5 h-5 text-gray-text" aria-label={review.name} />
                 </div>
                 <div>
-                  <h4 className="text-[#111827] font-bold text-sm">{review.name}</h4>
+                  <h4 className="text-foreground font-bold text-sm">{review.name}</h4>
                   <p className="text-[#9CA3AF] text-xs">{review.date}</p>
                 </div>
               </div>
@@ -39,11 +39,11 @@ export default function RecentReviews() {
               </div>
             </div>
             
-            <p className="text-[#6B7280] text-sm leading-relaxed mb-4">
+            <p className="text-gray-text text-sm leading-relaxed mb-4">
               "{review.text}"
             </p>
 
-            <button className="flex items-center gap-2 text-sm text-[#E23744] font-bold hover:text-[#C81E34] transition-colors">
+            <button className="flex items-center gap-2 text-sm text-primary font-bold hover:text-[var(--color-primary-hover)] transition-colors">
               <MessageSquareReply className="w-4 h-4" /> Reply to {review.name.split(' ')[0]}
             </button>
           </div>

@@ -10,7 +10,7 @@ export default function QuickHelpCards() {
     { icon: AlertTriangle, title: "Order Problems", desc: "Missing items, wrong orders, or poor quality.", color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/20" },
     { icon: MessageSquare, title: "Live Chat", desc: "Chat instantly with our support team.", color: "text-primary", bg: "bg-primary/10 border-primary/20" },
     { icon: PhoneCall, title: "Call Support", desc: "Speak directly to a customer care executive.", color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20" },
-    { icon: Mail, title: "Email Support", desc: "Write to us for detailed queries or feedback.", color: "text-[#E23744]", bg: "bg-[#E23744]/10 border-[#E23744]/20" },
+    { icon: Mail, title: "Email Support", desc: "Write to us for detailed queries or feedback.", color: "text-primary", bg: "bg-primary/10 border-primary/20" },
   ];
 
   return (
@@ -19,13 +19,13 @@ export default function QuickHelpCards() {
         <motion.div 
           key={idx}
           whileHover={{ y: -8 }}
-          className="bg-[#F8FAFC] rounded-3xl p-6 border border-[#E5E7EB] hover:border-[#E5E7EB] transition-all duration-300 shadow-lg cursor-pointer group"
+          className="bg-section rounded-3xl p-6 border border-border hover:border-border transition-all duration-300 shadow-lg cursor-pointer group"
         >
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border transition-colors ${card.bg} group-hover:bg-[#F8FAFC] group-hover:border-[#E5E7EB]`}>
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border transition-colors ${card.bg} group-hover:bg-section group-hover:border-border`}>
             <card.icon className={`w-7 h-7 ${card.color}`} />
           </div>
-          <h3 className="text-xl font-bold text-[#1C1C1C] mb-2 group-hover:text-[#E23744] transition-colors">{card.title}</h3>
-          <p className="text-[#6B7280] text-sm leading-relaxed">{card.desc}</p>
+          <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">{card.title}</h3>
+          <p className="text-gray-text text-sm leading-relaxed">{card.desc}</p>
         </motion.div>
       ))}
     </div>

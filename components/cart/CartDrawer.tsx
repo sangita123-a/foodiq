@@ -98,7 +98,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
             )}
 
             {/* Header */}
-            <div className="flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 border-b border-[#ECECEC] shrink-0">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 border-b border-border shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0">
                   <ShoppingBag className="w-5 h-5" />
@@ -124,7 +124,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
             <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-3 sm:space-y-4">
               {items.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center py-12">
-                  <div className="w-20 h-20 rounded-full bg-[#F8FAFC] flex items-center justify-center text-[#94A3B8] mb-4">
+                  <div className="w-20 h-20 rounded-full bg-section flex items-center justify-center text-[#94A3B8] mb-4">
                     <ShoppingBag className="w-10 h-10" />
                   </div>
                   <h3 className="text-lg font-bold text-[#0F172A] mb-1">Your cart is empty</h3>
@@ -145,7 +145,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                   return (
                     <div
                       key={item.cart_item_id}
-                      className="flex items-center justify-between p-3 sm:p-3.5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] gap-2 sm:gap-3"
+                      className="flex items-center justify-between p-3 sm:p-3.5 rounded-2xl bg-section border border-[#E2E8F0] gap-2 sm:gap-3"
                     >
                       <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-white shrink-0">
                         <SafeImage
@@ -204,7 +204,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
 
             {/* Coupon Code & Totals Footer */}
             {items.length > 0 && (
-              <div className="p-4 sm:p-6 border-t border-[#ECECEC] bg-white space-y-4 shrink-0 safe-bottom">
+              <div className="p-4 sm:p-6 border-t border-border bg-white space-y-4 shrink-0 safe-bottom">
                 <div className="flex items-center gap-2">
                   <div className="relative flex-1 min-w-0">
                     <Tag className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
@@ -213,7 +213,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                       placeholder="Coupon Code"
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] uppercase font-bold focus:outline-none focus:border-primary"
+                      className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl bg-section border border-[#E2E8F0] uppercase font-bold focus:outline-none focus:border-primary"
                     />
                   </div>
                   <button
@@ -245,7 +245,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                       <span>-₹{discount}</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-base font-black text-[#0F172A] pt-2 border-t border-[#ECECEC]">
+                  <div className="flex justify-between text-base font-black text-[#0F172A] pt-2 border-t border-border">
                     <span>Total Amount</span>
                     <span className="text-primary">₹{grandTotal}</span>
                   </div>

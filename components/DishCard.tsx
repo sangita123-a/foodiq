@@ -42,8 +42,8 @@ export default function DishCard({
   const formattedRating = typeof rating === "number" ? rating.toFixed(1) : rating;
 
   return (
-    <div className="food-card relative group flex flex-col h-full rounded-[18px] border border-[#E5E7EB] bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      <Link href={`/food/${id}`} className="food-card-image relative block h-44 w-full overflow-hidden bg-[#F8FAFC]">
+    <div className="food-card relative group flex flex-col h-full rounded-[18px] border border-border bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+      <Link href={`/food/${id}`} className="food-card-image relative block h-44 w-full overflow-hidden bg-section">
         <SafeImage
           src={imageUrl}
           fallback={FOOD_FALLBACK}
@@ -89,14 +89,14 @@ export default function DishCard({
 
       {/* Card Content */}
       <div className="food-card-body flex-1 flex flex-col p-4">
-        <Link href={`/food/${id}`} className="food-card-title text-[#111827] font-bold text-base mb-1 line-clamp-1 hover:text-primary transition-colors">
+        <Link href={`/food/${id}`} className="food-card-title text-foreground font-bold text-base mb-1 line-clamp-1 hover:text-primary transition-colors">
           {name}
         </Link>
-        <p className="text-[#6B7280] text-xs mb-2 line-clamp-1">by {restaurantName}</p>
+        <p className="text-gray-text text-xs mb-2 line-clamp-1">by {restaurantName}</p>
         {description && <p className="food-card-description text-xs text-[#9CA3AF] mb-3 line-clamp-2">{description}</p>}
 
         <div className="flex items-center justify-between mt-auto pt-2 border-t border-[#F3F4F6]">
-          <span className="food-price text-[#111827] font-bold text-base">₹{price}</span>
+          <span className="food-price text-foreground font-bold text-base">₹{price}</span>
 
           {/* Add to Cart / Quantity Controls */}
           {onUpdateQuantity && (
@@ -122,7 +122,7 @@ export default function DishCard({
                 >
                   <Minus className="w-3.5 h-3.5" />
                 </button>
-                <span className="text-[#111827] font-bold text-xs min-w-[18px] text-center">{quantity}</span>
+                <span className="text-foreground font-bold text-xs min-w-[18px] text-center">{quantity}</span>
                 <button
                   type="button"
                   onClick={() => onUpdateQuantity(id, 1)}

@@ -46,7 +46,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[#E23744]/15 selection:text-[#1C1C1C] pt-[90px]">
+      <main className="min-h-screen bg-background relative selection:bg-primary/15 selection:text-foreground pt-[90px]">
         <Navbar />
         <EmptyCart />
         <SuggestedItems />
@@ -56,20 +56,20 @@ export default function CartPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[#E23744]/15 selection:text-[#1C1C1C] pt-[90px]">
+    <main className="min-h-screen bg-background relative selection:bg-primary/15 selection:text-foreground pt-[90px]">
       <Navbar />
       <div className="container mx-auto px-4 md:px-8 py-12">
-        <div className="mb-10 border-b border-[#E5E7EB] pb-8 flex items-center justify-between">
+        <div className="mb-10 border-b border-border pb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl md:text-5xl font-black text-[#111827] mb-3">Your Shopping Cart</h1>
-            <p className="text-[#6B7280] text-lg">
+            <h1 className="text-3xl md:text-5xl font-black text-foreground mb-3">Your Shopping Cart</h1>
+            <p className="text-gray-text text-lg">
               Review your items and proceed to checkout · {items.length} {items.length === 1 ? "item" : "items"}
             </p>
           </div>
           <button
             type="button"
             onClick={handleClearCart}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[#696969] bg-white border border-[#EAEAEA] hover:border-[#D4D4D4] hover:text-[#E23744] font-bold text-sm transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-gray-text bg-white border border-border hover:border-border hover:text-primary font-bold text-sm transition-colors"
           >
             <Trash2 className="w-4 h-4" />
             <span>Clear Cart</span>

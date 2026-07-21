@@ -13,17 +13,17 @@ export default function HistoryHeader() {
       className="mb-8"
     >
       <div className="flex items-center gap-2 text-sm text-[#9CA3AF] font-bold uppercase tracking-wider mb-4">
-        <Link href="/partner/dashboard" className="hover:text-[#E23744] transition-colors">Dashboard</Link>
+        <Link href="/partner/dashboard" className="hover:text-primary transition-colors">Dashboard</Link>
         <ChevronRight className="w-4 h-4" />
-        <span className="hover:text-[#111827] transition-colors cursor-default">Orders</span>
+        <span className="hover:text-foreground transition-colors cursor-default">Orders</span>
         <ChevronRight className="w-4 h-4" />
-        <span className="text-[#111827]">Order History</span>
+        <span className="text-foreground">Order History</span>
       </div>
       
-      <h1 className="text-3xl md:text-4xl font-black text-[#111827] mb-2 flex items-center gap-3">
+      <h1 className="text-3xl md:text-4xl font-black text-foreground mb-2 flex items-center gap-3">
         📋 Order History
       </h1>
-      <p className="text-[#6B7280]">
+      <p className="text-gray-text">
         View, search, and manage all completed, cancelled, and past customer orders.
       </p>
     </motion.div>

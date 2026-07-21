@@ -33,21 +33,21 @@ export default function FoodiqLiveHub() {
   };
 
   return (
-    <section className="py-6 bg-[#FFFFFF]">
+    <section className="py-6 bg-background">
       <div className="container mx-auto max-w-[1440px] px-4 md:px-8">
         
         {/* Section Header */}
-        <div className="flex items-center justify-between mb-5 pb-3 border-b border-[#EAEAEA]">
+        <div className="flex items-center justify-between mb-5 pb-3 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAFAFA] text-[#696969] text-xs font-black uppercase tracking-wider border border-[#ECECEC]">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-section text-gray-text text-xs font-black uppercase tracking-wider border border-border">
               <span aria-hidden="true">🔥</span>
               <span>Live Action & Deals</span>
             </div>
-            <h2 className="text-xl md:text-2xl font-black text-[#1A1A1A] tracking-tight flex items-center gap-2">
+            <h2 className="text-xl md:text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
               🔥 FOODIQ LIVE HUB
             </h2>
           </div>
-          <span className="text-xs font-bold text-[#666666] hidden sm:inline-block">
+          <span className="text-xs font-bold text-gray-text hidden sm:inline-block">
             Updated Real-Time
           </span>
         </div>
@@ -56,7 +56,7 @@ export default function FoodiqLiveHub() {
         <div className="flex overflow-x-auto snap-x scrollbar-none gap-4 md:gap-5 md:grid md:grid-cols-4 pb-2">
           
           {/* CARD 1: 🏏 LIVE CRICKET */}
-          <div className="min-w-[280px] sm:min-w-[300px] md:min-w-0 flex-1 group relative rounded-[18px] p-4 flex flex-col justify-between h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300 border border-[#EAEAEA] bg-[#1A1A1A]">
+          <div className="min-w-[280px] sm:min-w-[300px] md:min-w-0 flex-1 group relative rounded-[18px] p-4 flex flex-col justify-between h-[210px] md:h-[220px] overflow-hidden shadow-card hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300 border border-border bg-[#1A1A1A]">
             {/* Background Cricket Image with Gradient Overlay */}
             <div className="absolute inset-0 z-0">
               <SafeImage
@@ -116,7 +116,7 @@ export default function FoodiqLiveHub() {
                     "/restaurant/rest-pizza?deal=MATCHCOMBO"
                   )
                 }
-                className="inline-flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl bg-[#C81E32] hover:bg-[#C81E32] text-white text-[11px] font-black transition-all shadow-md active:scale-95"
+                className="inline-flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl bg-[#C81E32] hover:bg-primary-hover text-white text-[11px] font-black transition-all shadow-md active:scale-95"
               >
                 <span>Order Match Combo</span>
               </button>
@@ -124,7 +124,7 @@ export default function FoodiqLiveHub() {
           </div>
 
           {/* CARD 2: 🍕 PIZZA COMBO */}
-          <div className="min-w-[280px] sm:min-w-[300px] md:min-w-0 flex-1 group relative bg-white rounded-[18px] border border-[#EAEAEA] p-4 flex flex-col justify-between h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300">
+          <div className="min-w-[280px] sm:min-w-[300px] md:min-w-0 flex-1 group relative bg-white rounded-[18px] border border-border p-4 flex flex-col justify-between h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300">
             {/* Background Image Banner Right */}
             <div className="absolute top-0 right-0 w-36 h-full opacity-35 group-hover:opacity-50 transition-opacity duration-300 overflow-hidden rounded-r-[18px]">
               <SafeImage
@@ -142,16 +142,16 @@ export default function FoodiqLiveHub() {
                   <span>40% OFF</span>
                 </div>
 
-                <h3 className="text-base font-black text-[#1C1C1C] line-clamp-1 group-hover:text-[#696969] transition-colors">
+                <h3 className="text-base font-black text-foreground line-clamp-1 group-hover:text-gray-text transition-colors">
                   🍕 Cheese Burst Pizza
                 </h3>
-                <p className="text-[#666666] text-xs font-medium line-clamp-1 mb-2">
+                <p className="text-gray-text text-xs font-medium line-clamp-1 mb-2">
                   Loaded mozzarella crust + Pepsi
                 </p>
 
                 <div className="flex items-baseline gap-1.5 mb-2">
-                  <span className="text-base font-black text-[#1A1A1A]">₹299</span>
-                  <span className="text-xs text-[#6B7280] line-through font-medium">₹499</span>
+                  <span className="text-base font-black text-foreground">₹299</span>
+                  <span className="text-xs text-gray-text line-through font-medium">₹499</span>
                 </div>
               </div>
 
@@ -169,13 +169,13 @@ export default function FoodiqLiveHub() {
                       "/cuisine/pizza"
                     )
                   }
-                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-[#C81E32] hover:bg-[#C81E32] text-white text-[11px] font-extrabold transition-all shadow-sm active:scale-95"
+                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-[#C81E32] hover:bg-primary-hover text-white text-[11px] font-extrabold transition-all shadow-sm active:scale-95"
                 >
                   <span>Order Now</span>
                 </button>
                 <Link
                   href="/cuisine/pizza"
-                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-white hover:bg-[#FAFAFA] text-[#1C1C1C] text-[11px] font-bold transition-all border border-[#EAEAEA] active:scale-95"
+                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-white hover:bg-section text-foreground text-[11px] font-bold transition-all border border-border active:scale-95"
                 >
                   <span>View Menu</span>
                 </Link>
@@ -184,7 +184,7 @@ export default function FoodiqLiveHub() {
           </div>
 
           {/* CARD 3: 🍰 DESSERT FEST */}
-          <div className="min-w-[280px] sm:min-w-[300px] md:min-w-0 flex-1 group relative bg-white rounded-[18px] border border-[#EAEAEA] p-4 flex flex-col justify-between h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300">
+          <div className="min-w-[280px] sm:min-w-[300px] md:min-w-0 flex-1 group relative bg-white rounded-[18px] border border-border p-4 flex flex-col justify-between h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300">
             {/* Background Image Banner Right */}
             <div className="absolute top-0 right-0 w-36 h-full opacity-35 group-hover:opacity-50 transition-opacity duration-300 overflow-hidden rounded-r-[18px]">
               <SafeImage
@@ -202,16 +202,16 @@ export default function FoodiqLiveHub() {
                   <span>BUY 1 GET 1</span>
                 </div>
 
-                <h3 className="text-base font-black text-[#1C1C1C] line-clamp-1 group-hover:text-[#696969] transition-colors">
+                <h3 className="text-base font-black text-foreground line-clamp-1 group-hover:text-gray-text transition-colors">
                   🍰 Brownie & Ice Cream
                 </h3>
-                <p className="text-[#666666] text-xs font-medium line-clamp-1 mb-2">
+                <p className="text-gray-text text-xs font-medium line-clamp-1 mb-2">
                   Warm fudge brownie + ice cream
                 </p>
 
                 <div className="flex items-baseline gap-1.5 mb-2">
-                  <span className="text-base font-black text-[#1A1A1A]">₹189</span>
-                  <span className="text-xs text-[#6B7280] line-through font-medium">₹378</span>
+                  <span className="text-base font-black text-foreground">₹189</span>
+                  <span className="text-xs text-gray-text line-through font-medium">₹378</span>
                 </div>
               </div>
 
@@ -229,13 +229,13 @@ export default function FoodiqLiveHub() {
                       "/cuisine/desserts"
                     )
                   }
-                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-[#C81E32] hover:bg-[#C81E32] text-white text-[11px] font-extrabold transition-all shadow-sm active:scale-95"
+                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-[#C81E32] hover:bg-primary-hover text-white text-[11px] font-extrabold transition-all shadow-sm active:scale-95"
                 >
                   <span>Order Now</span>
                 </button>
                 <Link
                   href="/cuisine/desserts"
-                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-white hover:bg-[#FAFAFA] text-[#1C1C1C] text-[11px] font-bold transition-all border border-[#EAEAEA] active:scale-95"
+                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-white hover:bg-section text-foreground text-[11px] font-bold transition-all border border-border active:scale-95"
                 >
                   <span>View Menu</span>
                 </Link>
@@ -244,7 +244,7 @@ export default function FoodiqLiveHub() {
           </div>
 
           {/* CARD 4: 🥤 COLD DRINKS */}
-          <div className="min-w-[280px] sm:min-w-[300px] md:min-w-0 flex-1 group relative bg-white rounded-[18px] border border-[#EAEAEA] p-4 flex flex-col justify-between h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300">
+          <div className="min-w-[280px] sm:min-w-[300px] md:min-w-0 flex-1 group relative bg-white rounded-[18px] border border-border p-4 flex flex-col justify-between h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300">
             {/* Background Image Banner Right */}
             <div className="absolute top-0 right-0 w-36 h-full opacity-35 group-hover:opacity-50 transition-opacity duration-300 overflow-hidden rounded-r-[18px]">
               <SafeImage
@@ -262,16 +262,16 @@ export default function FoodiqLiveHub() {
                   <span>SUMMER COMBO</span>
                 </div>
 
-                <h3 className="text-base font-black text-[#1C1C1C] line-clamp-1 group-hover:text-[#696969] transition-colors">
+                <h3 className="text-base font-black text-foreground line-clamp-1 group-hover:text-gray-text transition-colors">
                   🥤 Coke, Pepsi & Mojito
                 </h3>
-                <p className="text-[#666666] text-xs font-medium line-clamp-1 mb-2">
+                <p className="text-gray-text text-xs font-medium line-clamp-1 mb-2">
                   Chilled carbonated trio pack
                 </p>
 
                 <div className="flex items-baseline gap-1.5 mb-2">
-                  <span className="text-base font-black text-[#1A1A1A]">₹139</span>
-                  <span className="text-xs text-[#6B7280] line-through font-medium">₹199</span>
+                  <span className="text-base font-black text-foreground">₹139</span>
+                  <span className="text-xs text-gray-text line-through font-medium">₹199</span>
                 </div>
               </div>
 
@@ -289,13 +289,13 @@ export default function FoodiqLiveHub() {
                       "/cuisine/beverages"
                     )
                   }
-                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-[#C81E32] hover:bg-[#C81E32] text-white text-[11px] font-extrabold transition-all shadow-sm active:scale-95"
+                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-[#C81E32] hover:bg-primary-hover text-white text-[11px] font-extrabold transition-all shadow-sm active:scale-95"
                 >
                   <span>Order Now</span>
                 </button>
                 <Link
                   href="/cuisine/beverages"
-                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-white hover:bg-[#FAFAFA] text-[#1C1C1C] text-[11px] font-bold transition-all border border-[#EAEAEA] active:scale-95"
+                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-white hover:bg-section text-foreground text-[11px] font-bold transition-all border border-border active:scale-95"
                 >
                   <span>View Menu</span>
                 </Link>

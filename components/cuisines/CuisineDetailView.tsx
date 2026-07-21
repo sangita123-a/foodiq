@@ -360,21 +360,21 @@ export default function CuisineDetailView({ slug }: Props) {
   }, [items, restaurantQuery]);
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[#E23744] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-background relative selection:bg-primary selection:text-white pt-[90px]">
       <Navbar />
       <FloatingCart />
 
       <div className="container mx-auto px-4 md:px-8 py-8 max-w-[1600px]">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-[#666666] hover:text-[#1A1A1A] mb-6 transition-colors text-sm font-bold"
+          className="inline-flex items-center gap-2 text-gray-text hover:text-foreground mb-6 transition-colors text-sm font-bold"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
         </Link>
 
         {/* Large Banner */}
-        <div className="relative rounded-3xl overflow-hidden mb-10 border border-[#ECECEC] bg-[#1A1A1A]">
+        <div className="relative rounded-3xl overflow-hidden mb-10 border border-border bg-[#1A1A1A]">
           <div className="absolute inset-0">
             <SafeImage
               src={cuisine.image_url}
@@ -386,7 +386,7 @@ export default function CuisineDetailView({ slug }: Props) {
             />
           </div>
           <div className="relative z-10 bg-gradient-to-r from-black/80 via-black/50 to-transparent p-8 md:p-12">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E23744] text-white text-xs font-black uppercase tracking-wider mb-3 shadow-md">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-white text-xs font-black uppercase tracking-wider mb-3 shadow-md">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Explore Category</span>
             </div>
@@ -394,7 +394,7 @@ export default function CuisineDetailView({ slug }: Props) {
             <p className="text-gray-200 text-sm md:text-lg max-w-2xl mb-4 font-medium">{cuisine.description}</p>
             <div className="flex flex-wrap gap-4 text-xs font-bold">
               <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/20 px-4 py-2 rounded-xl text-white">
-                <UtensilsCrossed className="w-4 h-4 text-[#E23744]" />
+                <UtensilsCrossed className="w-4 h-4 text-primary" />
                 {cuisine.restaurant_count || 12} Restaurants
               </span>
               <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/20 px-4 py-2 rounded-xl text-white">
@@ -409,10 +409,10 @@ export default function CuisineDetailView({ slug }: Props) {
           <section className="mb-12" aria-labelledby="cuisine-restaurants-heading">
             <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
-                <h2 id="cuisine-restaurants-heading" className="text-2xl font-black text-[#1A1A1A]">
+                <h2 id="cuisine-restaurants-heading" className="text-2xl font-black text-foreground">
                   Popular {cuisine.name} Spots
                 </h2>
-                <p className="mt-1 text-xs md:text-sm text-[#666666] font-medium">
+                <p className="mt-1 text-xs md:text-sm text-gray-text font-medium">
                   Top nearby restaurants serving authentic {cuisine.name.toLowerCase()}.
                 </p>
               </div>
@@ -424,7 +424,7 @@ export default function CuisineDetailView({ slug }: Props) {
                   value={restaurantQuery}
                   onChange={(event) => setRestaurantQuery(event.target.value)}
                   placeholder="Search restaurants..."
-                  className="h-11 w-full rounded-xl border border-[#ECECEC] bg-[#F8F8F8] pl-10 pr-4 text-sm text-[#1A1A1A] outline-none transition-colors placeholder:text-gray-500 focus:border-[#E23744]"
+                  className="h-11 w-full rounded-xl border border-border bg-footer pl-10 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-gray-500 focus:border-primary"
                 />
               </label>
             </div>
@@ -433,13 +433,13 @@ export default function CuisineDetailView({ slug }: Props) {
               {restaurants.map((restaurant) => (
                 <article
                   key={restaurant.id}
-                  className="group relative flex min-w-0 gap-3 rounded-2xl border border-[#ECECEC] bg-white p-3 transition-all duration-300 hover:-translate-y-1 hover:border-[#E23744]/50 hover:shadow-md"
+                  className="group relative flex min-w-0 gap-3 rounded-2xl border border-border bg-white p-3 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-md"
                 >
                   <Link
                     href={`/restaurant/${restaurant.id}`}
                     className="flex min-w-0 flex-1 gap-3"
                   >
-                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-[#F8F8F8] relative">
+                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-footer relative">
                       <SafeImage
                         src={restaurant.image}
                         fallback={RESTAURANT_FALLBACK}
@@ -448,20 +448,20 @@ export default function CuisineDetailView({ slug }: Props) {
                       />
                     </div>
                     <div className="min-w-0 py-1">
-                      <h3 className="line-clamp-1 pr-7 text-sm font-black text-[#1A1A1A]">
+                      <h3 className="line-clamp-1 pr-7 text-sm font-black text-foreground">
                         {restaurant.name}
                       </h3>
-                      <div className="mt-2 flex items-center gap-3 text-xs text-[#666666] font-semibold">
+                      <div className="mt-2 flex items-center gap-3 text-xs text-gray-text font-semibold">
                         <span className="inline-flex items-center gap-1 bg-[#16A34A] text-white px-1.5 py-0.5 rounded text-[10px] font-black">
                           <Star className="h-3 w-3 fill-current" />
                           {restaurant.rating.toFixed(1)}
                         </span>
                         <span className="inline-flex items-center gap-1">
-                          <Clock className="h-3.5 w-3.5 text-[#E23744]" />
+                          <Clock className="h-3.5 w-3.5 text-primary" />
                           {restaurant.deliveryTime}
                         </span>
                       </div>
-                      <p className="mt-2 text-xs text-[#666666]">
+                      <p className="mt-2 text-xs text-gray-text">
                         {restaurant.dishCount} dishes · From ₹{restaurant.minPrice}
                       </p>
                     </div>
@@ -469,7 +469,7 @@ export default function CuisineDetailView({ slug }: Props) {
                   <button
                     type="button"
                     onClick={() => toggleRestaurant(restaurant.id)}
-                    className="absolute right-3 top-3 rounded-full p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-[#E23744]"
+                    className="absolute right-3 top-3 rounded-full p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-primary"
                     aria-label={
                       restaurantIds.has(restaurant.id)
                         ? "Remove restaurant from favorites"
@@ -479,7 +479,7 @@ export default function CuisineDetailView({ slug }: Props) {
                     <Heart
                       className={`h-4 w-4 ${
                         restaurantIds.has(restaurant.id)
-                          ? "fill-[#E23744] text-[#E23744]"
+                          ? "fill-primary text-primary"
                           : ""
                       }`}
                     />
@@ -495,10 +495,10 @@ export default function CuisineDetailView({ slug }: Props) {
           <section className="mb-10" aria-labelledby="cuisine-gallery-heading">
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
-                <h2 id="cuisine-gallery-heading" className="text-2xl font-black text-[#1A1A1A]">
+                <h2 id="cuisine-gallery-heading" className="text-2xl font-black text-foreground">
                   {cuisine.name} Food Highlights
                 </h2>
-                <p className="mt-1 text-xs md:text-sm text-[#666666]">
+                <p className="mt-1 text-xs md:text-sm text-gray-text">
                   Top choices in this category available for instant order.
                 </p>
               </div>
@@ -508,7 +508,7 @@ export default function CuisineDetailView({ slug }: Props) {
                 <Link
                   key={item.menu_item_id}
                   href={`/food/${item.menu_item_id}`}
-                  className="group relative aspect-square overflow-hidden rounded-2xl border border-[#ECECEC] bg-[#F8F8F8]"
+                  className="group relative aspect-square overflow-hidden rounded-2xl border border-border bg-footer"
                   aria-label={`View ${item.name}`}
                 >
                   <SafeImage
@@ -529,17 +529,17 @@ export default function CuisineDetailView({ slug }: Props) {
         {/* Search, Filters, Sorting & Dishes Section */}
         <section className="mb-8" aria-labelledby="popular-dishes-heading">
           <div className="mb-5">
-            <h2 id="popular-dishes-heading" className="text-2xl font-black text-[#1A1A1A]">
+            <h2 id="popular-dishes-heading" className="text-2xl font-black text-foreground">
               Explore All {cuisine.name} Dishes ({filteredItems.length})
             </h2>
-            <p className="mt-1 text-xs md:text-sm text-[#666666]">
+            <p className="mt-1 text-xs md:text-sm text-gray-text">
               Search and filter delicious {cuisine.name.toLowerCase()} items delivered in 25-30 minutes.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[#ECECEC] bg-[#F8F8F8] p-3 md:p-4 mb-6">
-            <div className="mb-3 flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-[#1A1A1A]">
-              <SlidersHorizontal className="h-4 w-4 text-[#E23744]" />
+          <div className="rounded-2xl border border-border bg-footer p-3 md:p-4 mb-6">
+            <div className="mb-3 flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-foreground">
+              <SlidersHorizontal className="h-4 w-4 text-primary" />
               Filters & Search
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
@@ -551,7 +551,7 @@ export default function CuisineDetailView({ slug }: Props) {
                   placeholder={`Search ${cuisine.name.toLowerCase()} dishes...`}
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  className="h-11 w-full rounded-xl border border-[#ECECEC] bg-white pl-10 pr-4 text-sm text-[#1A1A1A] outline-none transition-colors placeholder:text-gray-400 focus:border-[#E23744]"
+                  className="h-11 w-full rounded-xl border border-border bg-white pl-10 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-gray-400 focus:border-primary"
                 />
               </label>
 
@@ -559,7 +559,7 @@ export default function CuisineDetailView({ slug }: Props) {
                 value={diet}
                 onChange={(event) => setDiet(event.target.value)}
                 aria-label="Diet preference"
-                className="h-11 rounded-xl border border-[#ECECEC] bg-white px-3 text-sm text-[#1A1A1A] outline-none focus:border-[#E23744] font-medium"
+                className="h-11 rounded-xl border border-border bg-white px-3 text-sm text-foreground outline-none focus:border-primary font-medium"
               >
                 <option value="all">All Food</option>
                 <option value="veg">Vegetarian</option>
@@ -569,7 +569,7 @@ export default function CuisineDetailView({ slug }: Props) {
                 value={rating}
                 onChange={(event) => setRating(event.target.value)}
                 aria-label="Minimum rating"
-                className="h-11 rounded-xl border border-[#ECECEC] bg-white px-3 text-sm text-[#1A1A1A] outline-none focus:border-[#E23744] font-medium"
+                className="h-11 rounded-xl border border-border bg-white px-3 text-sm text-foreground outline-none focus:border-primary font-medium"
               >
                 <option value="all">Any Rating</option>
                 <option value="4">4.0+ Rating</option>
@@ -579,7 +579,7 @@ export default function CuisineDetailView({ slug }: Props) {
                 value={delivery}
                 onChange={(event) => setDelivery(event.target.value)}
                 aria-label="Maximum delivery time"
-                className="h-11 rounded-xl border border-[#ECECEC] bg-white px-3 text-sm text-[#1A1A1A] outline-none focus:border-[#E23744] font-medium"
+                className="h-11 rounded-xl border border-border bg-white px-3 text-sm text-foreground outline-none focus:border-primary font-medium"
               >
                 <option value="all">Any Time</option>
                 <option value="30">Under 30 min</option>
@@ -589,7 +589,7 @@ export default function CuisineDetailView({ slug }: Props) {
                 value={price}
                 onChange={(event) => setPrice(event.target.value)}
                 aria-label="Price range"
-                className="h-11 rounded-xl border border-[#ECECEC] bg-white px-3 text-sm text-[#1A1A1A] outline-none focus:border-[#E23744] font-medium"
+                className="h-11 rounded-xl border border-border bg-white px-3 text-sm text-foreground outline-none focus:border-primary font-medium"
               >
                 <option value="all">Any Price</option>
                 <option value="under-200">Under ₹200</option>
@@ -600,7 +600,7 @@ export default function CuisineDetailView({ slug }: Props) {
                 value={sort}
                 onChange={(event) => setSort(event.target.value)}
                 aria-label="Sort dishes"
-                className="h-11 rounded-xl border border-[#ECECEC] bg-white px-3 text-sm text-[#1A1A1A] outline-none focus:border-[#E23744] font-bold"
+                className="h-11 rounded-xl border border-border bg-white px-3 text-sm text-foreground outline-none focus:border-primary font-bold"
               >
                 <option value="popular">Recommended</option>
                 <option value="rating">Top Rated</option>
@@ -615,7 +615,7 @@ export default function CuisineDetailView({ slug }: Props) {
           <div className="mb-8 flex justify-end">
             <Link
               href="/checkout"
-              className="inline-flex items-center gap-2 bg-[#E23744] hover:bg-[#C81E34] text-white px-6 py-3 rounded-xl font-black transition-colors shadow-md"
+              className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-xl font-black transition-colors shadow-md"
             >
               <ShoppingCart className="w-5 h-5" />
               Proceed to Checkout
@@ -624,8 +624,8 @@ export default function CuisineDetailView({ slug }: Props) {
         )}
 
         {filteredItems.length === 0 ? (
-          <div className="text-center py-20 bg-[#F8F8F8] rounded-2xl border border-[#ECECEC]">
-            <p className="text-[#666666] font-bold">
+          <div className="text-center py-20 bg-footer rounded-2xl border border-border">
+            <p className="text-gray-text font-bold">
               No dishes match the selected search and filters.
             </p>
           </div>

@@ -69,7 +69,7 @@ export default function AllCuisinesExplorer() {
                   setPage(1);
                 }}
                 placeholder="Search cuisines..."
-                className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-black/30 pl-10 pr-4 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-[#E23744]/70"
+                className="h-11 w-full rounded-xl border border-border bg-black/30 pl-10 pr-4 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-primary/70"
               />
             </label>
 
@@ -84,8 +84,8 @@ export default function AllCuisinesExplorer() {
                   }}
                   className={`h-10 shrink-0 rounded-xl border px-3.5 text-xs font-semibold transition-colors duration-300 ${
                     group === item.label
-                      ? "border-[#E23744] bg-[#E23744] text-white"
-                      : "border-[#E5E7EB] bg-white/[0.04] text-[#6B7280] hover:border-[#E5E7EB] hover:bg-white/[0.08]"
+                      ? "border-primary bg-primary text-white"
+                      : "border-border bg-white/[0.04] text-gray-text hover:border-border hover:bg-white/[0.08]"
                   }`}
                 >
                   {item.label}
@@ -102,7 +102,7 @@ export default function AllCuisinesExplorer() {
                   setSort(event.target.value);
                   setPage(1);
                 }}
-                className="h-11 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-black/30 pl-10 pr-8 text-sm text-gray-200 outline-none transition-colors focus:border-[#E23744]/70 lg:w-48"
+                className="h-11 w-full appearance-none rounded-xl border border-border bg-black/30 pl-10 pr-8 text-sm text-gray-200 outline-none transition-colors focus:border-primary/70 lg:w-48"
               >
                 <option value="recommended">Recommended</option>
                 <option value="restaurants">Most restaurants</option>
@@ -114,7 +114,7 @@ export default function AllCuisinesExplorer() {
         </div>
 
         <div className="mb-5 flex items-center justify-between gap-4">
-          <p className="text-sm text-[#6B7280]">
+          <p className="text-sm text-gray-text">
             {isLoading
               ? "Loading cuisines..."
               : `${filteredCuisines.length} cuisine${filteredCuisines.length === 1 ? "" : "s"} found`}
@@ -132,8 +132,8 @@ export default function AllCuisinesExplorer() {
           </div>
         ) : visibleCuisines.length === 0 ? (
           <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] px-6 py-16 text-center">
-            <h2 className="text-xl font-bold text-[#111827]">No cuisines found</h2>
-            <p className="mt-2 text-sm text-[#6B7280]">
+            <h2 className="text-xl font-bold text-foreground">No cuisines found</h2>
+            <p className="mt-2 text-sm text-gray-text">
               Try another search or choose a different category.
             </p>
           </div>
@@ -159,19 +159,19 @@ export default function AllCuisinesExplorer() {
               type="button"
               onClick={() => setPage((current) => Math.max(1, current - 1))}
               disabled={page === 1}
-              className="inline-flex h-10 items-center gap-1 rounded-xl border border-[#E5E7EB] bg-white/[0.04] px-3 text-sm text-[#6B7280] transition-colors hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-10 items-center gap-1 rounded-xl border border-border bg-white/[0.04] px-3 text-sm text-gray-text transition-colors hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
             >
               <ChevronLeft className="h-4 w-4" />
               Previous
             </button>
-            <span className="px-3 text-sm text-[#6B7280]">
+            <span className="px-3 text-sm text-gray-text">
               {page} / {pageCount}
             </span>
             <button
               type="button"
               onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
               disabled={page === pageCount}
-              className="inline-flex h-10 items-center gap-1 rounded-xl border border-[#E5E7EB] bg-white/[0.04] px-3 text-sm text-[#6B7280] transition-colors hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-10 items-center gap-1 rounded-xl border border-border bg-white/[0.04] px-3 text-sm text-gray-text transition-colors hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
             >
               Next
               <ChevronRight className="h-4 w-4" />

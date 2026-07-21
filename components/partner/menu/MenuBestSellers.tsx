@@ -20,13 +20,13 @@ export default function MenuBestSellers({ bestSellers = [] }: MenuBestSellersPro
 
   return (
     <div className="mb-10">
-      <h2 className="text-xl font-bold text-[#111827] flex items-center gap-2 mb-6">
-        All-Time Best Sellers <TrendingUp className="w-5 h-5 text-[#E23744]" />
+      <h2 className="text-xl font-bold text-foreground flex items-center gap-2 mb-6">
+        All-Time Best Sellers <TrendingUp className="w-5 h-5 text-primary" />
       </h2>
 
       <div className="flex gap-6 overflow-x-auto custom-scrollbar pb-4 -mx-4 px-4 md:mx-0 md:px-0">
         {bestSellers.length === 0 && (
-          <p className="text-[#6B7280] text-sm py-4">No best sellers yet.</p>
+          <p className="text-gray-text text-sm py-4">No best sellers yet.</p>
         )}
         {bestSellers.map((item, idx) => (
           <motion.div
@@ -34,7 +34,7 @@ export default function MenuBestSellers({ bestSellers = [] }: MenuBestSellersPro
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: idx * 0.1 }}
-            className="min-w-[280px] bg-[#FFFFFF] rounded-2xl border border-[#E5E7EB] overflow-hidden group hover:border-[#E5E7EB] transition-colors cursor-pointer"
+            className="min-w-[280px] bg-background rounded-2xl border border-border overflow-hidden group hover:border-border transition-colors cursor-pointer"
           >
             <div className="h-32 w-full overflow-hidden relative">
               <SafeImage
@@ -51,7 +51,7 @@ export default function MenuBestSellers({ bestSellers = [] }: MenuBestSellersPro
             <div className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-[#9CA3AF] text-xs font-bold uppercase mb-1">Orders</p>
-                <p className="text-[#6B7280] font-bold">{item.orders}</p>
+                <p className="text-gray-text font-bold">{item.orders}</p>
               </div>
               <div className="text-right">
                 <p className="text-[#9CA3AF] text-xs font-bold uppercase mb-1">Revenue</p>

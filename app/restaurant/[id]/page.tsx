@@ -257,10 +257,10 @@ export default function RestaurantPage() {
     return (
       <main className="min-h-screen bg-white pt-[90px]">
         <Navbar />
-        <div className="w-full h-[300px] md:h-[400px] bg-[#F8F8F8] animate-pulse relative"></div>
+        <div className="w-full h-[300px] md:h-[400px] bg-footer animate-pulse relative"></div>
         <div className="container mx-auto px-4 md:px-8 mt-4">
-          <div className="w-1/2 h-10 bg-[#F8F8F8] animate-pulse rounded mb-2"></div>
-          <div className="w-1/3 h-6 bg-[#F8F8F8] animate-pulse rounded"></div>
+          <div className="w-1/2 h-10 bg-footer animate-pulse rounded mb-2"></div>
+          <div className="w-1/3 h-6 bg-footer animate-pulse rounded"></div>
         </div>
       </main>
     );
@@ -270,8 +270,8 @@ export default function RestaurantPage() {
     return (
       <main className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 pt-[90px]">
         <Navbar />
-        <div className="text-[#1A1A1A] text-xl font-bold">Restaurant Details Unavailable</div>
-        <Link href="/order-online" className="text-[#E23744] font-bold hover:underline">
+        <div className="text-foreground text-xl font-bold">Restaurant Details Unavailable</div>
+        <Link href="/order-online" className="text-primary font-bold hover:underline">
           Explore Popular Restaurants
         </Link>
       </main>
@@ -279,7 +279,7 @@ export default function RestaurantPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white relative selection:bg-[#E23744] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-white relative selection:bg-primary selection:text-white pt-[90px]">
       <CatalogViewTracker
         type="restaurant"
         ready={Boolean(mappedRestaurant.id)}
@@ -323,15 +323,15 @@ export default function RestaurantPage() {
       <div className="container mx-auto max-w-[1440px] px-4 py-10 md:px-8">
         <div className="flex-1 w-full">
           {Object.keys(filteredMenu).length === 0 ? (
-            <div className="py-16 text-center bg-[#F8F8F8] rounded-2xl border border-[#ECECEC]">
-              <ShoppingBag className="w-12 h-12 text-[#E23744] mx-auto mb-3 opacity-60" />
-              <h3 className="text-xl font-bold text-[#1A1A1A] mb-1">No Menu Available</h3>
-              <p className="text-[#666666] text-sm mb-6">
+            <div className="py-16 text-center bg-footer rounded-2xl border border-border">
+              <ShoppingBag className="w-12 h-12 text-primary mx-auto mb-3 opacity-60" />
+              <h3 className="text-xl font-bold text-foreground mb-1">No Menu Available</h3>
+              <p className="text-gray-text text-sm mb-6">
                 This restaurant currently has no active menu items.
               </p>
               <Link
                 href="/order-online"
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#E23744] text-white font-bold text-sm hover:bg-[#C81E34] transition-all"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-hover transition-all"
               >
                 <span>Browse Other Restaurants</span>
                 <ArrowRight className="w-4 h-4" />
@@ -347,9 +347,9 @@ export default function RestaurantPage() {
                 }}
                 className="mb-10 pt-6"
               >
-                <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold tracking-tight text-[#1A1A1A]">
+                <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold tracking-tight text-foreground">
                   {category}
-                  <span className="bg-[#FFF5F6] text-[#E23744] text-xs px-3 py-1 rounded-full font-bold border border-[#E23744]/20">
+                  <span className="bg-primary-soft text-primary text-xs px-3 py-1 rounded-full font-bold border border-primary/20">
                     {items.length} items
                   </span>
                 </h2>

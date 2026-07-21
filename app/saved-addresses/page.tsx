@@ -137,14 +137,14 @@ function SavedAddressesContent() {
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-6xl">
         <div className="flex justify-between items-center mb-10">
           <div>
-            <div className="w-48 h-8 bg-[#F8FAFC] animate-pulse rounded-lg mb-2" />
-            <div className="w-64 h-5 bg-[#F8FAFC] animate-pulse rounded-lg" />
+            <div className="w-48 h-8 bg-section animate-pulse rounded-lg mb-2" />
+            <div className="w-64 h-5 bg-section animate-pulse rounded-lg" />
           </div>
-          <div className="w-32 h-10 bg-[#F8FAFC] animate-pulse rounded-lg" />
+          <div className="w-32 h-10 bg-section animate-pulse rounded-lg" />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-56 bg-[#F8FAFC] animate-pulse rounded-2xl border border-[#E5E7EB]" />
+            <div key={i} className="h-56 bg-section animate-pulse rounded-2xl border border-border" />
           ))}
         </div>
       </div>
@@ -154,7 +154,7 @@ function SavedAddressesContent() {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-20 flex flex-col items-center gap-4">
-        <div className="text-[#111827] text-xl">Failed to load addresses</div>
+        <div className="text-foreground text-xl">Failed to load addresses</div>
         <button type="button" onClick={() => mutate()} className="px-6 py-2 bg-primary text-white rounded-lg">
           Retry
         </button>
@@ -202,9 +202,9 @@ function SavedAddressesContent() {
 
 export default function SavedAddressesPage() {
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-background relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
       <Navbar />
-      <Suspense fallback={<div className="text-[#111827] text-center py-20">Loading addresses...</div>}>
+      <Suspense fallback={<div className="text-foreground text-center py-20">Loading addresses...</div>}>
         <SavedAddressesContent />
       </Suspense>
       <Footer />

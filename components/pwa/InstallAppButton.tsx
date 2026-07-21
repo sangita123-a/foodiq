@@ -14,7 +14,7 @@ export default function InstallAppButton() {
       onClick={() => {
         void installApp();
       }}
-      className="hidden md:inline-flex h-9 items-center gap-2 rounded-xl border border-[#E23744]/20 bg-[#E23744]/10 px-3.5 text-sm font-semibold text-[#E23744] transition-all hover:-translate-y-0.5 hover:bg-[#E23744]/15"
+      className="hidden md:inline-flex h-9 items-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-3.5 text-sm font-semibold text-primary transition-all hover:-translate-y-0.5 hover:bg-primary/15"
       aria-label="Install Foodiq app"
     >
       <Download className="h-4 w-4" />

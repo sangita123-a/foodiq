@@ -50,7 +50,7 @@ export default function PrivacySettings() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="bg-[#F8FAFC] rounded-3xl p-6 md:p-10 border border-[#E5E7EB] shadow-2xl"
+      className="bg-section rounded-3xl p-6 md:p-10 border border-border shadow-2xl"
     >
       <h2 className="text-2xl font-bold text-white mb-8">Privacy Settings</h2>
 
@@ -61,13 +61,13 @@ export default function PrivacySettings() {
           savePrivacy({ hide_profile: hideProfile, data_sharing: dataSharing });
         }}
       >
-        <div className="mb-10 pb-8 border-b border-[#E5E7EB] flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="mb-10 pb-8 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <EyeOff className="w-5 h-5 text-primary" />
-              <h3 className="text-lg font-bold text-[#111827]">Hide Profile from Search</h3>
+              <h3 className="text-lg font-bold text-foreground">Hide Profile from Search</h3>
             </div>
-            <p className="text-[#6B7280] text-sm max-w-md">
+            <p className="text-gray-text text-sm max-w-md">
               If enabled, your profile will not appear in public searches or friend recommendations.
             </p>
           </div>
@@ -78,7 +78,7 @@ export default function PrivacySettings() {
               setHideProfile(next);
               savePrivacy({ hide_profile: next });
             }}
-            className={`w-14 h-8 rounded-full p-1 transition-colors relative flex-shrink-0 ${hideProfile ? "bg-primary" : "bg-white border border-[#E5E7EB]"}`}
+            className={`w-14 h-8 rounded-full p-1 transition-colors relative flex-shrink-0 ${hideProfile ? "bg-primary" : "bg-white border border-border"}`}
           >
             <motion.div
               layout
@@ -89,12 +89,12 @@ export default function PrivacySettings() {
           </button>
         </div>
 
-        <div className="mb-10 pb-8 border-b border-[#E5E7EB]">
+        <div className="mb-10 pb-8 border-b border-border">
           <div className="flex items-center gap-3 mb-2">
             <Database className="w-5 h-5 text-blue-400" />
-            <h3 className="text-lg font-bold text-[#111827]">Manage Data Sharing</h3>
+            <h3 className="text-lg font-bold text-foreground">Manage Data Sharing</h3>
           </div>
-          <p className="text-[#6B7280] text-sm max-w-md mb-6">
+          <p className="text-gray-text text-sm max-w-md mb-6">
             Control how your data is shared with our restaurant partners for targeted offers and analytics.
           </p>
           <button
@@ -104,7 +104,7 @@ export default function PrivacySettings() {
               setDataSharing(next);
               savePrivacy({ data_sharing: next });
             }}
-            className="bg-[#F8FAFC] hover:bg-[#F8FAFC] text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors"
+            className="bg-section hover:bg-section text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors"
           >
             {dataSharing ? "Disable Data Sharing" : "Enable Data Sharing"}
           </button>
@@ -113,15 +113,15 @@ export default function PrivacySettings() {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <Download className="w-5 h-5 text-green-400" />
-            <h3 className="text-lg font-bold text-[#111827]">Download My Data</h3>
+            <h3 className="text-lg font-bold text-foreground">Download My Data</h3>
           </div>
-          <p className="text-[#6B7280] text-sm max-w-md mb-6">
+          <p className="text-gray-text text-sm max-w-md mb-6">
             Request a copy of your personal data in JSON or CSV format. It may take up to 24 hours to process.
           </p>
           <button
             type="button"
             onClick={downloadData}
-            className="bg-[#F8FAFC] hover:bg-[#F8FAFC] text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors flex items-center gap-2"
+            className="bg-section hover:bg-section text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors flex items-center gap-2"
           >
             <Download className="w-4 h-4" /> Request Archive
           </button>
