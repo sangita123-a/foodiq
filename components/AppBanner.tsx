@@ -1,7 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import { Apple, Play } from "lucide-react";
+import SafeImage from "@/components/ui/SafeImage";
+import { FOOD_FALLBACK } from "@/lib/images";
+import { APP_PREVIEW_IMAGE_SIZES } from "@/lib/performance/assets";
+
+const APP_STORE_URL = "https://apps.apple.com/app/foodiq/id6470000000";
+const GOOGLE_PLAY_URL =
+  "https://play.google.com/store/apps/details?id=com.foodiq.app";
 
 export default function AppBanner() {
   return (
@@ -9,8 +15,7 @@ export default function AppBanner() {
       <div className="bg-[linear-gradient(120deg,#F8F9FA_0%,#FFFFFF_68%)] border border-[#ECECEC] rounded-[20px] overflow-hidden relative shadow-[0_18px_55px_rgba(28,28,28,0.08)]">
         {/* Abstract Background Shapes */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/20 rounded-full blur-3xl opacity-50"></div>
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#E23744]/10/30 rounded-full blur-3xl opacity-50"></div>
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#FAFAFA] rounded-full blur-3xl opacity-80"></div>
         </div>
 
         <div className="flex flex-col md:flex-row items-center relative z-10">
@@ -23,23 +28,31 @@ export default function AppBanner() {
             </p>
             
             <div className="flex flex-wrap justify-center md:justify-start gap-4">
-              {/* App Store Button */}
-              <button className="flex items-center gap-3 bg-white text-[#1C1C1C] border border-[#ECECEC] px-6 py-3.5 rounded-xl shadow-sm hover:border-[#E23744]/30 hover:-translate-y-0.5 transition-all duration-300">
-                <Apple className="w-8 h-8" />
+              <a
+                href={APP_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 bg-white text-[#1C1C1C] border border-[#EAEAEA] px-6 py-3.5 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:border-[#D4D4D4] hover:-translate-y-0.5 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E23744]"
+              >
+                <Apple className="w-8 h-8" aria-hidden="true" />
                 <div className="text-left flex flex-col justify-center">
                   <span className="text-[10px] leading-none mb-1 font-medium">Download on the</span>
                   <span className="text-lg leading-none font-bold">App Store</span>
                 </div>
-              </button>
-              
-              {/* Google Play Button */}
-              <button className="flex items-center gap-3 bg-white text-[#1C1C1C] border border-[#ECECEC] px-6 py-3.5 rounded-xl shadow-sm hover:border-[#E23744]/30 hover:-translate-y-0.5 transition-all duration-300">
-                <Play className="w-7 h-7 fill-[#111827]" />
+              </a>
+
+              <a
+                href={GOOGLE_PLAY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 bg-white text-[#1C1C1C] border border-[#EAEAEA] px-6 py-3.5 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:border-[#D4D4D4] hover:-translate-y-0.5 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E23744]"
+              >
+                <Play className="w-7 h-7" fill="#111827" stroke="#111827" aria-hidden="true" />
                 <div className="text-left flex flex-col justify-center">
                   <span className="text-[10px] leading-none mb-1 text-[#6B7280]">GET IT ON</span>
                   <span className="text-lg leading-none font-bold">Google Play</span>
                 </div>
-              </button>
+              </a>
             </div>
           </div>
           
@@ -49,20 +62,21 @@ export default function AppBanner() {
               {/* Notch */}
               <div className="w-32 h-6 bg-[#E5E7EB] absolute top-0 rounded-b-xl z-20"></div>
               
-              <div className="w-full h-full relative">
-                <Image 
+              <div className="relative w-full h-full">
+                <SafeImage
                   src="/images/catalog/food/burger.webp"
-                  alt="App Preview"
+                  fallback={FOOD_FALLBACK}
+                  alt="Foodiq mobile app preview showing food delivery"
                   fill
-                  sizes="256px"
+                  sizes={APP_PREVIEW_IMAGE_SIZES}
                   className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/75 via-[#111827]/30/40 to-transparent flex flex-col justify-end p-6">
-                  <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-primary/30">
+                  <div className="w-12 h-12 bg-[#E23744] rounded-xl flex items-center justify-center mb-4 shadow-[0_4px_12px_rgba(0,0,0,0.12)]">
                     <span className="text-white font-bold text-xl">Fq</span>
                   </div>
                   <h3 className="text-white font-bold text-lg leading-tight mb-1">Your favorite food,</h3>
-                  <h3 className="text-white font-bold text-lg leading-tight text-primary">delivered fast.</h3>
+                  <h3 className="text-white font-bold text-lg leading-tight text-[#E23744]">delivered fast.</h3>
                 </div>
               </div>
             </div>

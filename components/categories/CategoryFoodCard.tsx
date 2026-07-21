@@ -24,7 +24,7 @@ export default function CategoryFoodCard({
   onToggleFavorite,
 }: Props) {
   return (
-    <div className="group relative flex flex-col justify-between overflow-hidden rounded-[20px] border border-[#ECECEC] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_32px_rgba(226,55,68,0.18)]">
+    <div className="group relative flex flex-col justify-between overflow-hidden rounded-[20px] border border-[#ECECEC] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]">
       <div className="relative h-[160px] w-full overflow-hidden bg-[#F8F8F8]">
         <SafeImage
           src={dish.image}
@@ -68,7 +68,7 @@ export default function CategoryFoodCard({
           <span className="mb-0.5 block text-[11px] font-bold uppercase tracking-wider text-[#666666]">
             {dish.restaurantName}
           </span>
-          <h4 className="line-clamp-1 text-base font-black text-[#1A1A1A] transition-colors group-hover:text-[#E23744]">
+          <h4 className="line-clamp-1 text-base font-black text-[#1C1C1C] transition-colors group-hover:text-[#696969]">
             {dish.name}
           </h4>
           <div className="mt-2 flex items-center gap-1 text-[11px] font-medium text-[#666666]">
@@ -89,7 +89,7 @@ export default function CategoryFoodCard({
                 <button
                   type="button"
                   onClick={() => onUpdateQuantity(dish.id, -1)}
-                  className="flex h-6 w-6 items-center justify-center rounded-lg transition-all hover:bg-white/20 active:scale-90"
+                  className="touch-target flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-white/20 active:scale-90"
                 >
                   <Minus className="h-3.5 w-3.5" />
                 </button>
@@ -97,7 +97,7 @@ export default function CategoryFoodCard({
                 <button
                   type="button"
                   onClick={() => onUpdateQuantity(dish.id, 1)}
-                  className="flex h-6 w-6 items-center justify-center rounded-lg transition-all hover:bg-white/20 active:scale-90"
+                  className="touch-target flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-white/20 active:scale-90"
                 >
                   <Plus className="h-3.5 w-3.5" />
                 </button>

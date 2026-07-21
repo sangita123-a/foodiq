@@ -23,7 +23,7 @@ export default function FaqAccordion({ faqs }: Props) {
 
   return (
     <div className="bg-[#F8FAFC] rounded-3xl p-6 md:p-8 border border-[#E5E7EB]">
-      <h2 className="text-2xl font-bold text-white mb-8">Frequently Asked Questions</h2>
+      <h2 className="text-2xl font-bold text-[#1C1C1C] mb-8">Frequently Asked Questions</h2>
       
       <div className="space-y-4">
         {faqs.map((faq) => (
@@ -35,7 +35,7 @@ export default function FaqAccordion({ faqs }: Props) {
               onClick={() => toggle(faq.id)}
               className="w-full flex items-center justify-between p-5 md:p-6 text-left transition-colors hover:bg-[#F8FAFC]"
             >
-              <span className={`font-bold pr-4 transition-colors ${openId === faq.id ? "text-primary" : "text-white"}`}>
+              <span className={`font-bold pr-4 transition-colors ${openId === faq.id ? "text-[#E23744]" : "text-[#1C1C1C]"}`}>
                 {faq.question}
               </span>
               <motion.div 

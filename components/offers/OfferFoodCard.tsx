@@ -1,9 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Star, Plus, Minus, Clock, Eye } from "lucide-react";
+import SafeImage from "@/components/ui/SafeImage";
 import { FOOD_FALLBACK, getFoodImage } from "@/lib/images";
+import { CARD_IMAGE_SIZES } from "@/lib/performance/assets";
 
 export type OfferFoodItem = {
   menu_item_id: string;
@@ -31,12 +32,13 @@ export default function OfferFoodCard({ item, quantity, isUpdating, onUpdateQuan
   return (
     <div className="food-card group flex flex-col">
       <Link href={foodHref} className="food-card-image block">
-        <Image
+        <SafeImage
           src={getFoodImage(item.image_url)}
+          fallback={FOOD_FALLBACK}
           alt={item.name}
           fill
+          sizes={CARD_IMAGE_SIZES}
           className="object-cover"
-          sizes="(max-width: 768px) 100vw, 320px"
         />
       </Link>
 

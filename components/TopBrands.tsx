@@ -57,18 +57,18 @@ const brands = [
 
 export default function TopBrands() {
   return (
-    <section className="py-20 bg-[#F8F9FA] overflow-hidden relative border-y border-[#ECECEC] mt-8">
+    <section className="py-20 bg-[#FAFAFA] overflow-hidden relative border-y border-[#EAEAEA] mt-8">
       <div className="mb-14 px-4 md:px-8 max-w-7xl mx-auto flex items-end justify-between">
         <div>
           <h2 className="text-3xl md:text-5xl font-bold text-[#1C1C1C] mb-3 tracking-[-0.045em]">Top Food Brands</h2>
           <p className="text-[#686B78] text-base md:text-lg">Order from India's Most Loved Restaurants</p>
         </div>
-        <div className="hidden md:flex gap-3">
-          <button className="w-12 h-12 rounded-full border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:bg-white hover:text-[#111827] transition-all">
-            <ChevronLeft className="w-6 h-6" />
+        <div className="hidden md:flex gap-3" aria-hidden="true">
+          <button type="button" tabIndex={-1} className="w-12 h-12 rounded-full border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:bg-white hover:text-[#111827] transition-all">
+            <ChevronLeft className="w-6 h-6" aria-hidden="true" />
           </button>
-          <button className="w-12 h-12 rounded-full border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:bg-white hover:text-[#111827] transition-all">
-            <ChevronRight className="w-6 h-6" />
+          <button type="button" tabIndex={-1} className="w-12 h-12 rounded-full border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:bg-white hover:text-[#111827] transition-all">
+            <ChevronRight className="w-6 h-6" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -91,20 +91,22 @@ export default function TopBrands() {
                   src={brand.foodImage}
                   fallback={RESTAURANT_FALLBACK}
                   alt={brand.name}
+                  fill
                   sizes="160px"
-                  className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-in-out"
+                  className="object-cover transform group-hover:scale-110 transition-transform duration-700 ease-in-out"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/75/40 to-transparent"></div>
               </div>
               
               {/* Brand Logo Overlapping */}
-              <div className="absolute top-[135px] md:top-[150px] w-14 h-14 bg-white rounded-full flex items-center justify-center p-2 shadow-xl border-4 border-white z-10 group-hover:-translate-y-1 transition-transform duration-300">
+              <div className="absolute top-[135px] md:top-[150px] w-14 h-14 bg-white rounded-full flex items-center justify-center p-2 shadow-xl border-4 border-white z-10 group-hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden">
                 <SafeImage 
                   src={brand.logo}
                   fallback={RESTAURANT_FALLBACK}
                   alt={`${brand.name} logo`}
+                  fill
                   sizes="56px"
-                  className="w-full h-full object-contain"
+                  className="object-contain p-1"
                 />
               </div>
 

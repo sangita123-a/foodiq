@@ -52,8 +52,8 @@ export default function TrendingDishesPage() {
   return (
     <div className="container mx-auto px-4 md:px-8 py-12 max-w-7xl">
       <div className="border-b border-[#E5E7EB] pb-6 mb-8">
-        <h1 className="text-3xl md:text-5xl font-black text-[#111827] mb-2">Trending Dishes</h1>
-        <p className="text-[#6B7280] text-base md:text-lg">
+        <h1 className="text-3xl md:text-5xl font-black text-[#1C1C1C] mb-2">Trending Dishes</h1>
+        <p className="text-[#696969] text-base md:text-lg">
           Top ordered dishes right now across Foodiq · {dishes.length} items available
         </p>
       </div>
@@ -74,7 +74,7 @@ export default function TrendingDishesPage() {
             return (
               <div
                 key={dish.id}
-                className="group relative bg-white rounded-[18px] border border-[#ECECEC] overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_32px_rgba(226,55,68,0.12)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300 flex flex-col h-[320px] sm:h-[340px]"
+                className="group relative bg-white rounded-[18px] border border-[#EAEAEA] overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300 flex flex-col h-[320px] sm:h-[340px]"
               >
                 <Link href={`/food/${dish.id}`} className="relative block h-[165px] sm:h-[175px] w-full overflow-hidden bg-[#F8F8F8] shrink-0">
                   <SafeImage
@@ -85,7 +85,7 @@ export default function TrendingDishesPage() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                  <div className="absolute top-2.5 left-2.5 bg-[#1A1A1A] text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-sm">
+                  <div className="absolute top-2.5 left-2.5 border border-[#E23744]/20 bg-[#FFF5F6] text-[#E23744] text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm">
                     #{index + 1}
                   </div>
 
@@ -149,7 +149,7 @@ export default function TrendingDishesPage() {
                         <span>ADD</span>
                       </button>
                     ) : (
-                      <div className="flex items-center gap-1 bg-[#FFF5F6] border border-[#E23744] rounded-xl px-1.5 py-0.5">
+                      <div className="flex items-center gap-1 bg-[#FAFAFA] border border-[#EAEAEA] rounded-xl px-1.5 py-0.5">
                         <button
                           type="button"
                           onClick={() => updateQuantity(dish.id, -1)}
@@ -191,7 +191,7 @@ export default function TrendingDishesPage() {
                         })
                       }
                       disabled={isUpdating}
-                      className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-xl bg-[#1A1A1A] text-white hover:bg-[#E23744] text-[11px] font-bold transition-colors disabled:opacity-50"
+                      className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-xl bg-[#E23744] text-white hover:bg-[#C81E32] text-[11px] font-semibold transition-colors disabled:opacity-50"
                     >
                       <span>Order</span>
                     </button>

@@ -11,6 +11,13 @@ import {
 } from "@/services/helpCenterApi";
 import { getSocket } from "@/lib/socket";
 import { useAuthToken } from "@/hooks/useAuthToken";
+import SafeImage from "@/components/ui/SafeImage";
+import { FOOD_FALLBACK } from "@/lib/images";
+import {
+  ATTACHMENT_PREVIEW_SIZES,
+  CHAT_ATTACHMENT_SIZES,
+  THUMBNAIL_IMAGE_SIZES,
+} from "@/lib/performance/assets";
 
 export default function LiveSupportChat() {
   const hasToken = useAuthToken();
@@ -175,8 +182,15 @@ export default function LiveSupportChat() {
               }`}
             >
               {m.attachment_url && m.attachment_type === "image" ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={m.attachment_url} alt="attachment" className="max-w-full rounded-lg mb-1" />
+                <SafeImage
+                  src={m.attachment_url}
+                  fallback={FOOD_FALLBACK}
+                  alt="Chat attachment image"
+                  width={320}
+                  height={240}
+                  sizes={CHAT_ATTACHMENT_SIZES}
+                  className="mb-1 max-w-full rounded-lg object-contain"
+                />
               ) : null}
               <p>{m.message}</p>
             </div>

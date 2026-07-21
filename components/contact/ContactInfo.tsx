@@ -2,6 +2,7 @@
 
 import { MapPin, Phone, Mail, Clock, Globe } from "lucide-react";
 import { useSiteSettings } from "@/contexts/SiteSettingsContext";
+import { useContactInfo } from "@/hooks/useContactInfo";
 
 function telHref(phone: string) {
   return `tel:${phone.replace(/\s/g, "")}`;
@@ -13,36 +14,37 @@ function mapsHref(address: string) {
 
 export default function ContactInfo() {
   const { settings } = useSiteSettings();
+  const { contact } = useContactInfo();
 
   const infoCards = [
     {
       icon: MapPin,
       title: "Office Address",
-      value: settings.office_address,
-      href: mapsHref(settings.office_address),
+      value: contact.office_address,
+      href: mapsHref(contact.office_address),
     },
     {
       icon: Phone,
       title: "Phone",
-      value: settings.support_phone,
-      href: telHref(settings.support_phone),
+      value: contact.phone_number,
+      href: telHref(contact.phone_number),
     },
     {
       icon: Mail,
       title: "Email",
-      value: settings.support_email,
-      href: `mailto:${settings.support_email}`,
+      value: contact.email,
+      href: `mailto:${contact.email}`,
     },
     {
       icon: Clock,
       title: "Business Hours",
-      value: settings.business_hours,
+      value: contact.business_hours,
     },
     {
       icon: Globe,
       title: "Website",
-      value: settings.website_url?.replace(/^https?:\/\//, ""),
-      href: settings.website_url?.startsWith("http") ? settings.website_url : `https://${settings.website_url}`,
+      value: contact.website?.replace(/^https?:\/\//, ""),
+      href: contact.website?.startsWith("http") ? contact.website : `https://${contact.website}`,
     },
   ];
 
@@ -86,16 +88,16 @@ export default function ContactInfo() {
           ))}
         </div>
 
-        {settings.whatsapp_number && (
+        {contact.whatsapp_number && (
           <div className="mt-8 rounded-xl border border-[#E5E7EB] bg-[#F0FDF4] p-4">
             <p className="text-xs font-bold uppercase tracking-widest text-[#555555]">WhatsApp</p>
             <a
-              href={`https://wa.me/${settings.whatsapp_number.replace(/\D/g, "")}`}
+              href={`https://wa.me/${contact.whatsapp_number.replace(/\D/g, "")}`}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-1 inline-block font-bold text-[#222222] hover:text-[#E23744]"
             >
-              {settings.whatsapp_number}
+              {contact.whatsapp_number}
             </a>
           </div>
         )}

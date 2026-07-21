@@ -5,6 +5,7 @@ import { mutate } from "swr";
 import AdminShell from "@/components/admin/AdminShell";
 import { useAdminList } from "@/hooks/useAdminData";
 import { adminPut } from "@/services/adminApi";
+import { CONTACT_INFO_SWR_KEY } from "@/lib/contactInfo";
 import MediaUploader from "@/components/media/MediaUploader";
 import type { MediaAsset } from "@/services/mediaApi";
 
@@ -59,6 +60,8 @@ export default function AdminSettingsPage() {
     try {
       await adminPut("/api/admin/settings", form as unknown as Record<string, unknown>);
       mutate("/api/admin/settings");
+      mutate(CONTACT_INFO_SWR_KEY);
+      mutate("site-settings");
       setSaved(true);
     } finally {
       setSaving(false);

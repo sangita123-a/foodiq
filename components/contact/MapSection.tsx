@@ -1,12 +1,14 @@
 "use client";
 
 import { useSiteSettings } from "@/contexts/SiteSettingsContext";
+import { useContactInfo } from "@/hooks/useContactInfo";
 
 export default function MapSection() {
   const { settings } = useSiteSettings();
+  const { contact } = useContactInfo();
   const embedUrl =
     settings.google_maps_embed_url ||
-    `https://maps.google.com/maps?q=${encodeURIComponent(settings.office_address)}&output=embed`;
+    `https://maps.google.com/maps?q=${encodeURIComponent(contact.office_address)}&output=embed`;
 
   return (
     <div className="container mx-auto px-4 py-20 md:px-8">

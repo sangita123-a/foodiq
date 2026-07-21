@@ -84,13 +84,13 @@ export default function ContactForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#E23744] px-6 py-4 font-black text-white shadow-md transition hover:bg-[#C81E34] disabled:opacity-50"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#E23744] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition hover:bg-[#C81E32] disabled:opacity-50"
           >
             {isSubmitting ? "Sending…" : "Send Message"} <Send className="h-4 w-4" />
           </button>
           <button
             type="reset"
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-6 py-4 font-bold text-[#222222] transition hover:bg-[#F8F9FA]"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#E8E8E8] bg-white px-6 py-2.5 text-sm font-semibold text-[#1C1C1C] transition hover:bg-[#FAFAFA]"
           >
             Clear Form <RefreshCcw className="h-4 w-4 text-[#555555]" />
           </button>

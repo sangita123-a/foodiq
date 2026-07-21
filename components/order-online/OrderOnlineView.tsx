@@ -208,7 +208,7 @@ export default function OrderOnlineView() {
       <Navbar />
       <FloatingCart />
 
-      <div className="border-b border-[#ECECEC] bg-[#F8F9FA] py-8">
+      <div className="border-b border-[#E8E8E8] bg-[#FAFAFA] py-8">
         <div className="container mx-auto max-w-[1600px] px-4 md:px-8">
           <CompactSearchBar />
         </div>
@@ -232,7 +232,7 @@ export default function OrderOnlineView() {
             {totalQuantity > 0 && (
               <Link
                 href="/checkout"
-                className="rounded-xl bg-[#E23744] px-5 py-2.5 text-xs font-black text-white shadow-[0_6px_16px_rgba(226,55,68,0.25)] transition hover:bg-[#C81E34]"
+                className="food-button food-button-primary px-5 py-2.5 text-xs font-black"
               >
                 Cart ₹{cartTotal} · Checkout →
               </Link>
@@ -244,10 +244,10 @@ export default function OrderOnlineView() {
           <button
             type="button"
             onClick={() => setView("restaurants")}
-            className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition ${
+            className={`inline-flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-semibold transition ${
               view === "restaurants"
-                ? "bg-[#E23744] text-white shadow-md"
-                : "border border-[#ECECEC] bg-white text-[#555555] hover:text-[#222222]"
+                ? "filter-tab-active border"
+                : "filter-tab"
             }`}
           >
             <Store className="h-4 w-4" /> Restaurants
@@ -255,10 +255,10 @@ export default function OrderOnlineView() {
           <button
             type="button"
             onClick={() => setView("menu")}
-            className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition ${
+            className={`inline-flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-semibold transition ${
               view === "menu"
-                ? "bg-[#E23744] text-white shadow-md"
-                : "border border-[#ECECEC] bg-white text-[#555555] hover:text-[#222222]"
+                ? "filter-tab-active border"
+                : "filter-tab"
             }`}
           >
             <UtensilsCrossed className="h-4 w-4" /> Browse Menu
@@ -314,7 +314,7 @@ export default function OrderOnlineView() {
                         type="button"
                         onClick={() => loadPage(page + 1, true)}
                         disabled={isLoadingMore}
-                        className="rounded-xl bg-[#E23744] px-7 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                        className="food-button food-button-primary px-7 py-3 text-sm disabled:opacity-60"
                       >
                         {isLoadingMore ? "Loading…" : "View More"}
                       </button>
@@ -342,10 +342,8 @@ export default function OrderOnlineView() {
                     key={cat || "all"}
                     type="button"
                     onClick={() => setMenuCategory(cat)}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-bold capitalize ${
-                      menuCategory === cat
-                        ? "bg-[#E23744] text-white"
-                        : "border border-[#ECECEC] bg-white text-[#555555]"
+                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize ${
+                      menuCategory === cat ? "filter-tab-active border" : "filter-tab"
                     }`}
                   >
                     {cat || "All"}
@@ -382,7 +380,7 @@ export default function OrderOnlineView() {
                   return (
                     <div
                       key={String(item.id)}
-                      className="group overflow-hidden rounded-[20px] border border-[#ECECEC] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(226,55,68,0.15)]"
+                      className="group overflow-hidden rounded-[20px] border border-[#ECECEC] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
                     >
                       <div className="relative h-40 overflow-hidden bg-[#F8F8F8]">
                         <SafeImage
@@ -408,29 +406,29 @@ export default function OrderOnlineView() {
                         </div>
                       </div>
                       <div className="p-4">
-                        <h3 className="line-clamp-1 font-black text-[#222222] group-hover:text-[#E23744]">
+                        <h3 className="line-clamp-1 font-black text-[#1C1C1C] group-hover:text-[#696969]">
                           {item.name}
                         </h3>
                         <p className="mt-1 line-clamp-1 text-xs text-[#555555]">
                           {item.restaurant_name || "Restaurant"}
                         </p>
                         <div className="mt-3 flex items-center justify-between">
-                          <span className="text-lg font-black text-[#E23744]">₹{item.price}</span>
+                          <span className="text-lg font-black text-[var(--color-price)]">₹{item.price}</span>
                           <Link
                             href={`/food/${item.id}`}
-                            className="text-xs font-bold text-[#555555] hover:text-[#E23744]"
+                            className="text-xs font-bold text-[#696969] hover:text-[#1C1C1C]"
                           >
                             View Details
                           </Link>
                         </div>
                         <div className="mt-3">
                           {qty > 0 ? (
-                            <div className="flex items-center justify-between rounded-xl bg-[#E23744] p-1 text-white">
+                            <div className="flex items-center justify-between rounded-xl border border-[#ECECEC] bg-white p-1 text-[#1C1C1C]">
                               <button
                                 type="button"
                                 disabled={updatingId === String(item.id)}
                                 onClick={() => updateQuantity(String(item.id), -1)}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/20"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[#FAFAFA]"
                               >
                                 <Minus className="h-4 w-4" />
                               </button>
@@ -439,7 +437,7 @@ export default function OrderOnlineView() {
                                 type="button"
                                 disabled={updatingId === String(item.id)}
                                 onClick={() => handleAddToCart(item)}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/20"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-primary)] hover:bg-[var(--color-primary-soft)]"
                               >
                                 <Plus className="h-4 w-4" />
                               </button>
@@ -449,7 +447,7 @@ export default function OrderOnlineView() {
                               type="button"
                               disabled={updatingId === String(item.id)}
                               onClick={() => handleAddToCart(item)}
-                              className="inline-flex w-full items-center justify-center gap-1 rounded-xl bg-[#E23744] py-2.5 text-xs font-black text-white hover:bg-[#C81E34]"
+                              className="food-button-add inline-flex w-full items-center justify-center gap-1 py-2.5 text-xs font-black"
                             >
                               <ShoppingCart className="h-3.5 w-3.5" /> Add to Cart
                             </button>

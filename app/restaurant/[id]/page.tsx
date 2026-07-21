@@ -271,7 +271,7 @@ export default function RestaurantPage() {
       <main className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 pt-[90px]">
         <Navbar />
         <div className="text-[#1A1A1A] text-xl font-bold">Restaurant Details Unavailable</div>
-        <Link href="/popular-restaurants" className="text-[#E23744] font-bold hover:underline">
+        <Link href="/order-online" className="text-[#E23744] font-bold hover:underline">
           Explore Popular Restaurants
         </Link>
       </main>
@@ -330,7 +330,7 @@ export default function RestaurantPage() {
                 This restaurant currently has no active menu items.
               </p>
               <Link
-                href="/popular-restaurants"
+                href="/order-online"
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#E23744] text-white font-bold text-sm hover:bg-[#C81E34] transition-all"
               >
                 <span>Browse Other Restaurants</span>

@@ -43,15 +43,16 @@ export default function Reviews() {
         {reviews.map((review) => (
           <div 
             key={review.id}
-            className="bg-white border border-[#ECECEC] rounded-[18px] p-7 relative shadow-[0_6px_22px_rgba(28,28,28,0.05)] hover:-translate-y-1 hover:border-[#E23744]/30 hover:shadow-[0_18px_42px_rgba(28,28,28,0.09)] transition-all duration-300 group"
+            className="bg-white border border-[#EAEAEA] rounded-[18px] p-7 relative shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:border-[#D4D4D4] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] transition-all duration-300 group"
           >
-            <Quote className="absolute top-6 right-8 w-12 h-12 text-[#E23744]/5 group-hover:text-primary/10 transition-colors duration-300" />
+            <Quote className="absolute top-6 right-8 w-12 h-12 text-[#E23744]/5 group-hover:text-primary/10 transition-colors duration-300" aria-hidden="true" />
             
-            <div className="flex gap-1 mb-6">
+            <div className="flex gap-1 mb-6" role="img" aria-label={`${review.rating} out of 5 stars`}>
               {[...Array(5)].map((_, i) => (
                 <Star 
                   key={i} 
-                  className={`w-5 h-5 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-[#9CA3AF]'}`} 
+                  className={`w-5 h-5 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-[#9CA3AF]'}`}
+                  aria-hidden="true"
                 />
               ))}
             </div>
@@ -69,7 +70,7 @@ export default function Reviews() {
                 />
               </div>
               <div>
-                <h4 className="text-[#1C1C1C] font-bold">{review.name}</h4>
+                <h3 className="text-[#1C1C1C] font-bold">{review.name}</h3>
                 <p className="text-[#686B78] text-sm">{review.role}</p>
               </div>
             </div>

@@ -12,16 +12,13 @@ export default function Newsletter() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="bg-gradient-to-r from-[#F8FAFC] to-[#F8FAFC] rounded-[40px] p-10 md:p-16 border border-[#E5E7EB] relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-10"
+          className="bg-white rounded-[40px] p-10 md:p-16 border border-[#E8E8E8] relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-10 shadow-[0_4px_20px_rgba(0,0,0,0.08)]"
         >
-          {/* Subtle red glow on the left */}
-          <div className="absolute top-1/2 left-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none -translate-x-1/2 -translate-y-1/2"></div>
-
           <div className="flex-1 relative z-10 text-center md:text-left">
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-black text-[#1C1C1C] mb-4">
               Stay Updated with Foodiq
             </h2>
-            <p className="text-[#6B7280]">
+            <p className="text-[#696969]">
               Subscribe to our newsletter for exclusive offers, new restaurant additions, and the latest food trends.
             </p>
           </div>
@@ -32,16 +29,16 @@ export default function Newsletter() {
                 type="email" 
                 placeholder="Enter your email address" 
                 required
-                className="flex-1 bg-white text-[#111827] border border-[#E5E7EB] rounded-xl px-6 py-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors min-w-[250px]"
+                className="flex-1 bg-white text-[#1C1C1C] border border-[#E8E8E8] rounded-xl px-6 py-3.5 focus:outline-none focus:border-[#D4D4D4] transition-colors min-w-[250px]"
               />
               <button 
                 type="submit"
-                className="bg-primary hover:bg-[#C81E34] text-white font-black px-8 py-4 rounded-xl transition-colors shadow-[0_0_20px_rgba(226, 55, 68,0.3)] whitespace-nowrap"
+                className="bg-[#E23744] hover:bg-[#C81E32] text-white font-semibold px-8 py-3.5 rounded-xl transition-colors shadow-[0_4px_12px_rgba(0,0,0,0.08)] whitespace-nowrap"
               >
                 Subscribe
               </button>
             </form>
-            <p className="text-[#9CA3AF] text-xs mt-3 text-center md:text-left">
+            <p className="text-[#9C9C9C] text-xs mt-3 text-center md:text-left">
               By subscribing, you agree to our Privacy Policy. No spam, ever.
             </p>
           </div>

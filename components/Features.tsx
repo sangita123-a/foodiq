@@ -39,10 +39,10 @@ export default function Features() {
           return (
             <div 
               key={index} 
-              className="bg-white border border-[#ECECEC] rounded-[18px] p-7 shadow-[0_6px_22px_rgba(28,28,28,0.05)] hover:border-primary/30 hover:shadow-[0_18px_42px_rgba(28,28,28,0.09)] transition-all duration-300 group hover:-translate-y-1"
+              className="bg-white border border-[#E8E8E8] rounded-[18px] p-7 shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:border-[#D4D4D4] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] transition-all duration-300 group hover:-translate-y-1"
             >
-              <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary transition-colors duration-300">
-                <Icon className="w-7 h-7 text-primary group-hover:text-[#111827] transition-colors duration-300" />
+              <div className="w-14 h-14 bg-[#FAFAFA] rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#F5F5F5] transition-colors duration-300" aria-hidden="true">
+                <Icon className="w-7 h-7 text-[#E23744] transition-colors duration-300" />
               </div>
               <h3 className="text-lg font-bold text-[#1C1C1C] mb-3">{feature.title}</h3>
               <p className="text-[#686B78] text-sm leading-relaxed">{feature.description}</p>

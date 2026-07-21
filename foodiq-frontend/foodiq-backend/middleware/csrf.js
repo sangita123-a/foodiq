@@ -13,10 +13,32 @@ const enabled = () =>
       (process.env.NODE_ENV === 'production' ? 'true' : 'false')
   ).toLowerCase() === 'true';
 
+/** Public credential endpoints — no session yet; must not require CSRF cookie. */
+const isAuthCredentialPath = (path) => {
+  const p = String(path || '').split('?')[0];
+  return (
+    p === '/api/auth/login' ||
+    p === '/api/auth/register' ||
+    p === '/api/auth/refresh' ||
+    p === '/api/auth/forgot-password' ||
+    p === '/api/auth/reset-password' ||
+    p === '/api/auth/logout' ||
+    p.startsWith('/api/delivery/register')
+  );
+};
+
 const issueToken = () => crypto.randomBytes(24).toString('hex');
 
 const csrfProtection = (req, res, next) => {
   if (!enabled()) return next();
+
+  const path = req.originalUrl || req.url || '';
+
+  // Webhooks & public signed callbacks
+  if (path.startsWith('/api/payments/webhook')) return next();
+
+  // Login/register/refresh must work before any CSRF cookie exists (SPA + API proxy).
+  if (isAuthCredentialPath(path)) return next();
 
   // Always allow safe methods
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
@@ -31,10 +53,6 @@ const csrfProtection = (req, res, next) => {
     }
     return next();
   }
-
-  // Webhooks & public signed callbacks
-  const path = req.originalUrl || '';
-  if (path.startsWith('/api/payments/webhook')) return next();
 
   // Bearer JWT auth — not cookie session → CSRF not applicable
   const auth = req.headers.authorization || '';

@@ -62,6 +62,7 @@ export default function LiveCricketView() {
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
+      <h1 className="sr-only">Live Cricket and Match Day Food on Foodiq</h1>
       {/* Back Button & Title */}
       <div className="flex items-center justify-between mb-6">
         <Link

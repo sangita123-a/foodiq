@@ -113,7 +113,7 @@ const buildGetRestaurantsQuery = (filters) => {
           ? 'newest'
           : sort;
 
-  switch (normalizedSort) {
+    switch (normalizedSort) {
     case 'popular':
       query += ' ORDER BY r.rating DESC, review_count DESC';
       break;
@@ -124,7 +124,8 @@ const buildGetRestaurantsQuery = (filters) => {
       query += ' ORDER BY r.estimated_delivery_time ASC';
       break;
     case 'price':
-      query += ' ORDER BY r.price_range ASC';
+    case 'price_low':
+      query += ' ORDER BY r.price_range ASC, r.rating DESC';
       break;
     case 'newest':
       query += ' ORDER BY r.created_at DESC';
@@ -144,6 +145,33 @@ const buildGetRestaurantsQuery = (filters) => {
 };
 
 const getRestaurants = async (filters) => {
+  const collectionSlug = filters.collection || filters.collection_slug;
+  if (collectionSlug) {
+    const { getCollectionBySlug } = require('./collectionModel');
+    const collection = await getCollectionBySlug(String(collectionSlug));
+    if (!collection) {
+      const limitVal = parseInt(filters.limit, 10) || 12;
+      return {
+        restaurants: [],
+        pagination: { total: 0, page: 1, limit: limitVal, totalPages: 0 },
+      };
+    }
+    const limitVal = Math.min(parseInt(filters.limit, 10) || 12, 40);
+    const all = collection.restaurants || [];
+    const pageVal = parseInt(filters.page, 10) || 1;
+    const offset = (pageVal - 1) * limitVal;
+    const restaurants = all.slice(offset, offset + limitVal);
+    return {
+      restaurants,
+      pagination: {
+        total: all.length,
+        page: pageVal,
+        limit: limitVal,
+        totalPages: Math.max(1, Math.ceil(all.length / limitVal)),
+      },
+    };
+  }
+
   const { query, values, limit, page } = buildGetRestaurantsQuery(filters);
   const countQuery = `SELECT COUNT(*) FROM (${query.split('ORDER BY')[0]}) filtered`;
   const countValues = values.slice(0, values.length - 2); // Remove limit and offset

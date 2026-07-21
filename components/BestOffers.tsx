@@ -1,11 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FIVE_BEST_OFFERS, PromotionalOffer } from "@/lib/data/20offersData";
 import { setActiveOffer } from "@/lib/offers";
 import { useToast } from "@/contexts/ToastContext";
+import SafeImage from "@/components/ui/SafeImage";
+import { FOOD_FALLBACK } from "@/lib/images";
+import { OFFER_BANNER_IMAGE_SIZES } from "@/lib/performance/assets";
 import { Tag, Clock, ArrowRight } from "lucide-react";
 
 export default function BestOffers() {
@@ -31,7 +33,7 @@ export default function BestOffers() {
         </div>
         <Link
           href="/offers"
-          className="inline-flex items-center gap-1.5 text-[#E23744] hover:text-[#C81E34] font-bold text-sm transition-colors"
+          className="inline-flex items-center gap-1.5 text-[#696969] hover:text-[var(--color-primary)] font-bold text-sm transition-colors"
         >
           <span>View All</span>
           <ArrowRight className="w-4 h-4" />
@@ -40,17 +42,18 @@ export default function BestOffers() {
 
       <div className="food-grid">
         {FIVE_BEST_OFFERS.map((offer) => (
-          <div
+          <article
             key={offer.id}
-            className="food-card relative group cursor-pointer bg-gradient-to-br from-[#FFF5F6] via-white to-white p-5 flex flex-col justify-between border border-[#ECECEC] rounded-[18px] hover:shadow-[0_12px_32px_rgba(226,55,68,0.12)] hover:-translate-y-1 transition-all duration-300 min-h-[200px]"
+            className="food-card relative group bg-white p-5 flex flex-col justify-between border border-[#EAEAEA] rounded-[18px] shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 min-h-[200px]"
           >
             {/* Image Banner Background */}
             <div className="absolute top-0 right-0 w-36 sm:w-44 h-full opacity-40 group-hover:opacity-60 transition-opacity duration-300 group-hover:scale-105 transform origin-right overflow-hidden rounded-r-[18px]">
-              <Image
+              <SafeImage
                 src={offer.image}
+                fallback={FOOD_FALLBACK}
                 alt={offer.title}
                 fill
-                sizes="(max-width: 640px) 144px, 176px"
+                sizes={OFFER_BANNER_IMAGE_SIZES}
                 className="object-cover object-left [mask-image:linear-gradient(to_right,transparent,black)]"
               />
             </div>
@@ -58,17 +61,17 @@ export default function BestOffers() {
             <div className="relative z-10 w-3/4 flex flex-col h-full justify-between">
               <div>
                 {/* Restaurant Name */}
-                <div className="flex items-center gap-1 text-[11px] font-bold text-[#E23744] uppercase tracking-wider mb-1">
-                  <Tag className="w-3 h-3" />
+                <div className="flex items-center gap-1 text-[11px] font-bold text-[#696969]">
+                  <Tag className="w-3 h-3 text-[#696969]" />
                   <span className="truncate">{offer.restaurantName}</span>
                 </div>
 
                 {/* Offer Title & Discount */}
-                <h3 className="text-lg sm:text-xl font-black text-[#1A1A1A] mb-1 leading-tight group-hover:text-[#E23744] transition-colors">
+                <h3 className="text-lg sm:text-xl font-black text-[#1C1C1C] mb-1 leading-tight group-hover:text-[#1C1C1C] transition-colors">
                   {offer.title}
                 </h3>
 
-                <span className="inline-block bg-[#E23744] text-white text-[11px] font-black px-2 py-0.5 rounded-md mb-2 uppercase tracking-wide">
+                <span className="offer-badge mb-2">
                   {offer.discountBadge}
                 </span>
 
@@ -86,7 +89,7 @@ export default function BestOffers() {
                   </div>
 
                   <div className="inline-flex items-center text-[10px] text-[#666666] font-bold gap-1 bg-[#F8F8F8] px-2 py-1 rounded-lg border border-[#ECECEC]">
-                    <Clock className="w-3 h-3 text-[#E23744]" />
+                    <Clock className="w-3 h-3 text-[#696969]" />
                     <span>{offer.expiryDate}</span>
                   </div>
                 </div>
@@ -95,14 +98,14 @@ export default function BestOffers() {
                 <button
                   type="button"
                   onClick={() => handleOrderNow(offer)}
-                  className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#E23744] hover:bg-[#C81E34] text-white text-xs font-extrabold transition-all shadow-sm active:scale-98"
+                  className="food-button food-button-primary w-full py-2 text-xs"
                 >
                   <span>Order Now</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
-          </div>
+          </article>
         ))}
       </div>
     </section>

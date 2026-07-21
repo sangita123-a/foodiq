@@ -104,7 +104,7 @@ export default function FavoritesPanel() {
           <div className="text-center py-12 text-[#6B7280]">
             <Heart className="w-10 h-10 mx-auto mb-3 opacity-40" />
             <p>No favorite dishes yet.</p>
-            <Link href="/restaurants" className="text-primary text-sm font-bold mt-2 inline-block">
+            <Link href="/order-online" className="text-primary text-sm font-bold mt-2 inline-block">
               Explore menu →
             </Link>
           </div>

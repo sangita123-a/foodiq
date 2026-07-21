@@ -20,14 +20,14 @@ export default function QuickContactCards() {
             <motion.div 
               key={idx}
               whileHover={{ y: -8 }}
-              className="bg-[#F8FAFC] rounded-3xl p-8 border border-[#E5E7EB] hover:border-[#E5E7EB] transition-all duration-300 shadow-xl cursor-pointer text-center group relative overflow-hidden"
+              className="bg-white rounded-3xl p-8 border border-[#E8E8E8] hover:border-[#D4D4D4] transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.08)] cursor-pointer text-center group relative overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-t from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-white border border-[#E5E7EB] flex items-center justify-center mb-6 group-hover:border-primary/50 transition-colors">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#FAFAFA]/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-[#FAFAFA] border border-[#E8E8E8] flex items-center justify-center mb-6 group-hover:border-[#D4D4D4] transition-colors">
                 <card.icon className={`w-8 h-8 ${card.color}`} />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">{card.title}</h3>
-              <p className="text-[#6B7280] text-sm leading-relaxed">{card.desc}</p>
+              <h3 className="text-xl font-bold text-[#1C1C1C] mb-2">{card.title}</h3>
+              <p className="text-[#696969] text-sm leading-relaxed">{card.desc}</p>
             </motion.div>
           ))}
         </div>

@@ -53,7 +53,7 @@ export default function WishlistPage() {
         ) : items.length === 0 ? (
           <p className="text-[#6B7280]">
             Your wishlist is empty.{" "}
-            <Link href="/restaurants" className="text-[#E23744] font-bold">
+            <Link href="/order-online" className="text-[#E23744] font-bold">
               Browse restaurants
             </Link>
           </p>

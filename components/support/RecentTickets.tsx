@@ -38,7 +38,7 @@ export default function RecentTickets({ tickets }: Props) {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-1">
                 <span className="text-xs font-mono font-bold text-[#9CA3AF] bg-[#F8FAFC] px-2 py-0.5 rounded">#{ticket.id}</span>
-                <h4 className="text-white font-bold truncate">{ticket.subject}</h4>
+                <h4 className="text-[#1C1C1C] font-bold truncate">{ticket.subject}</h4>
               </div>
               <p className="text-[#9CA3AF] text-xs font-bold">{ticket.date}</p>
             </div>

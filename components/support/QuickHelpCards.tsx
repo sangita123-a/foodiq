@@ -24,7 +24,7 @@ export default function QuickHelpCards() {
           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border transition-colors ${card.bg} group-hover:bg-[#F8FAFC] group-hover:border-[#E5E7EB]`}>
             <card.icon className={`w-7 h-7 ${card.color}`} />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2 group-hover:text-primary transition-colors">{card.title}</h3>
+          <h3 className="text-xl font-bold text-[#1C1C1C] mb-2 group-hover:text-[#E23744] transition-colors">{card.title}</h3>
           <p className="text-[#6B7280] text-sm leading-relaxed">{card.desc}</p>
         </motion.div>
       ))}

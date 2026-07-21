@@ -29,7 +29,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   app_name: "Foodiq",
   company_name: "Foodiq",
   support_email: "support@foodiq.com",
-  support_phone: "+91 1800 123 4567",
+  support_phone: "+91 1800 000 000",
   whatsapp_number: "+91 9876543210",
   office_address: "123 Culinary Avenue, Tech Park, Hyderabad, India 500081",
   business_hours: "Mon - Sun: 24/7 Support",

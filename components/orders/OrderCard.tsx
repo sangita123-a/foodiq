@@ -48,7 +48,7 @@ export default function OrderCard({ order }: Props) {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group mb-6 rounded-2xl border border-[#ECECEC] bg-white p-6 shadow-[0_8px_24px_rgba(28,28,28,0.07)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#E23744]/35 hover:shadow-[0_14px_34px_rgba(28,28,28,0.10)] md:p-8"
+      className="group mb-6 rounded-2xl border border-[#EAEAEA] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#D4D4D4] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] md:p-8"
     >
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-6">
@@ -79,7 +79,7 @@ export default function OrderCard({ order }: Props) {
 
       </div>
 
-      <div className="mb-6 flex items-center gap-2 border-b border-[#ECECEC] pb-6 text-sm text-[#686B78]">
+      <div className="mb-6 flex items-center gap-2 border-b border-[#EAEAEA] pb-6 text-sm text-[#686B78]">
         <MapPin className="w-4 h-4" />
         <span className="line-clamp-1">{order.address}</span>
       </div>
@@ -125,7 +125,7 @@ export default function OrderCard({ order }: Props) {
 
           <Link
             href={`/my-orders/${order.id}`}
-              className="flex items-center gap-2 rounded-xl border border-[#ECECEC] bg-[#F8F9FA] px-5 py-2.5 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#E23744]/30 hover:bg-white"
+              className="flex items-center gap-2 rounded-xl border border-[#EAEAEA] bg-white px-5 py-2.5 text-sm font-bold text-[#1C1C1C] transition-all hover:border-[#D4D4D4] hover:bg-[#FAFAFA]"
           >
             <Download className="w-4 h-4" /> Invoice
           </Link>
@@ -141,8 +141,8 @@ export default function OrderCard({ order }: Props) {
 
           {(order.status === "Delivered" || order.status === "Cancelled") && (
             <Link
-              href="/restaurants"
-              className="bg-[#E23744] hover:bg-[#C81E34] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors shadow-[0_0_15px_rgba(226, 55, 68,0.3)]"
+              href="/order-online"
+              className="bg-[#E23744] hover:bg-[#C81E32] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
             >
               <RefreshCw className="w-4 h-4" /> Reorder
             </Link>
@@ -159,7 +159,7 @@ export default function OrderCard({ order }: Props) {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="mt-6 flex flex-col gap-8 border-t border-[#ECECEC] pt-6 md:flex-row">
+            <div className="mt-6 flex flex-col gap-8 border-t border-[#EAEAEA] pt-6 md:flex-row">
               
               {/* Items List */}
               <div className="flex-1">
@@ -180,8 +180,8 @@ export default function OrderCard({ order }: Props) {
               </div>
 
               {/* Cost Breakdown */}
-              <div className="flex-1 rounded-2xl border border-[#ECECEC] bg-[#F8F9FA] p-6">
-                <div className="mb-4 flex flex-col gap-3 border-b border-[#ECECEC] pb-4 text-sm text-[#686B78]">
+              <div className="flex-1 rounded-2xl border border-[#EAEAEA] bg-[#F8F9FA] p-6">
+                <div className="mb-4 flex flex-col gap-3 border-b border-[#EAEAEA] pb-4 text-sm text-[#686B78]">
                   <div className="flex justify-between items-center">
                     <span>Subtotal</span>
                     <span className="text-[#1C1C1C]">₹{order.subtotal}</span>

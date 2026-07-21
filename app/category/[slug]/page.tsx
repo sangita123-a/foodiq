@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import CategoryDetailView from "@/components/categories/CategoryDetailView";
+import InternalSeoLinks from "@/components/seo/InternalSeoLinks";
 import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { buildEntityMetadata } from "@/lib/seo/entity-metadata";
+import {
+  getContextualInternalLinks,
+  getInternalLinksNavLabel,
+} from "@/lib/seo/internal-links";
 import { categoryKeywords } from "@/lib/seo/keywords";
 import { absoluteUrl, SITE_NAME } from "@/lib/seo/site";
 import {
@@ -28,14 +33,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description =
     category?.description ??
     `Explore ${name} dishes and order online on ${SITE_NAME}.`;
+  const trimmedDescription = description.slice(0, 160);
 
   return buildEntityMetadata({
     entityName: name,
     title: `${name} Collection`,
-    description: description.slice(0, 160),
+    description: trimmedDescription,
     path: `/category/${slug}`,
     image: category?.image,
     keywords: categoryKeywords(name, slug),
+    socialTitle: `${name} Food Category | Foodiq`,
+    socialDescription: trimmedDescription,
   });
 }
 
@@ -51,6 +59,7 @@ export default async function CategoryPage({ params }: PageProps) {
           data={[
             breadcrumbJsonLd([
               { name: "Home", path: "/" },
+              { name: "Food Categories", path: "/popular-cuisines" },
               { name: name, path: `/category/${slug}` },
             ]),
             {
@@ -64,6 +73,10 @@ export default async function CategoryPage({ params }: PageProps) {
           ]}
         />
       ) : null}
+      <InternalSeoLinks
+        links={getContextualInternalLinks("categoryDetail")}
+        label={getInternalLinksNavLabel("categoryDetail")}
+      />
       <CategoryDetailView slug={slug} />
     </>
   );

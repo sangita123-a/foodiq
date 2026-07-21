@@ -31,7 +31,7 @@ export default function RefundPolicyPage() {
           </h2>
           <p>
             Contact our support team via the{" "}
-            <Link href="/help" className="text-[#E23744] hover:underline">
+            <Link href="/help-support" className="text-[#E23744] hover:underline">
               Help Center
             </Link>{" "}
             or{" "}

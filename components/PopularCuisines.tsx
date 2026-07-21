@@ -89,7 +89,7 @@ export default function PopularCuisines() {
   );
 
   return (
-    <section className="relative w-full overflow-hidden border-y border-[#E5E7EB] bg-[radial-gradient(circle_at_50%_0%,rgba(226, 55, 68,0.08),transparent_34%),linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_50%,#FFFFFF_100%)]">
+    <section className="relative w-full overflow-hidden border-y border-[#E8E8E8] bg-[#FAFAFA]">
       <div className="food-section">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -99,17 +99,17 @@ export default function PopularCuisines() {
           className="mb-7 flex items-end justify-between gap-4"
         >
           <div className="min-w-0">
-            <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#111827] sm:text-2xl md:text-[28px]">
+            <h2 className="text-[22px] font-bold tracking-[-0.03em] text-[#1C1C1C] sm:text-2xl md:text-[28px]">
               <span aria-hidden="true">🍽️ </span>
               Popular Cuisines Around You
             </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6B7280]">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#696969]">
               Discover delicious cuisines loved by food lovers near your location.
             </p>
           </div>
           <Link
             href="/popular-cuisines"
-            className="group/view-all inline-flex shrink-0 items-center gap-1 rounded-full border border-[#E5E7EB] bg-white px-3.5 py-2 text-xs font-semibold text-[#111827] shadow-sm transition-[color,border-color,background-color] duration-300 hover:border-[#E23744]/50 hover:bg-[#FFF7ED] hover:text-[#E23744] sm:px-4 sm:text-sm"
+            className="group/view-all inline-flex shrink-0 items-center gap-1 rounded-full border border-[#E8E8E8] bg-white px-3.5 py-2 text-xs font-semibold text-[#1C1C1C] shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-[color,border-color,background-color] duration-300 hover:border-[#D4D4D4] hover:bg-[#FAFAFA] hover:text-[#E23744] sm:px-4 sm:text-sm"
           >
             View All
             <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/view-all:translate-x-0.5" />

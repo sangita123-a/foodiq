@@ -79,6 +79,7 @@ export function trackApiFailure(payload: {
   if (!isMonitoringEnabled()) return;
 
   const pathOnly = (payload.url || "").split("?")[0].slice(0, 180);
+  if (pathOnly.includes("/api/monitoring/")) return;
   trackEvent(AnalyticsEvents.apiError, {
     api_path: pathOnly,
     method: payload.method,

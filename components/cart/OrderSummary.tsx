@@ -124,7 +124,7 @@ export default function OrderSummary({
 
       <Link
         href="/checkout"
-        className="w-full bg-[#E23744] hover:bg-[#C81E34] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(226, 55, 68,0.4)] hover:-translate-y-1 transition-all duration-300"
+        className="w-full bg-[#E23744] hover:bg-[#C81E32] text-white py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:-translate-y-0.5"
       >
         Proceed to Checkout
         <ArrowRight className="w-5 h-5" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import api from "@/services/api";
 import {
@@ -29,22 +29,63 @@ async function fetchSiteSettings(): Promise<SiteSettings> {
   }
 }
 
-export function SiteSettingsProvider({ children }: { children: React.ReactNode }) {
+function readBootstrapSettings(): SiteSettings | undefined {
+  if (typeof document === "undefined") return undefined;
+  const node = document.getElementById("foodiq-site-settings");
+  if (!node?.textContent) return undefined;
+  try {
+    return mergeSiteSettings(JSON.parse(node.textContent));
+  } catch {
+    return undefined;
+  }
+}
+
+export function SiteSettingsProvider({
+  children,
+  initialSettings,
+}: {
+  children: React.ReactNode;
+  initialSettings?: SiteSettings;
+}) {
+  const [bootstrapSettings] = useState(() =>
+    mergeSiteSettings(initialSettings ?? readBootstrapSettings())
+  );
+
   const { data, isLoading } = useSWR("site-settings", fetchSiteSettings, {
+    fallbackData: bootstrapSettings,
     revalidateOnFocus: false,
+    revalidateOnMount: false,
     dedupingInterval: 60000,
   });
 
-  const settings = useMemo(() => mergeSiteSettings(data), [data]);
+  const settings = useMemo(
+    () => mergeSiteSettings(data ?? bootstrapSettings),
+    [data, bootstrapSettings]
+  );
+
+  const value = useMemo(
+    () => ({ settings, isLoading }),
+    [settings, isLoading]
+  );
 
   useEffect(() => {
-    const color = settings.theme_color || "#E23744";
+    const color = settings.theme_color || DEFAULT_SITE_SETTINGS.theme_color;
+    const isDefault =
+      color.toLowerCase() === DEFAULT_SITE_SETTINGS.theme_color.toLowerCase();
+
+    if (isDefault) {
+      // Let app/globals.css own primary + hover tokens when using the default theme.
+      document.documentElement.style.removeProperty("--color-primary");
+      document.documentElement.style.removeProperty("--color-primary-hover");
+      return;
+    }
+
     document.documentElement.style.setProperty("--color-primary", color);
     document.documentElement.style.setProperty("--color-primary-hover", color);
   }, [settings.theme_color]);
 
   return (
-    <SiteSettingsContext.Provider value={{ settings, isLoading }}>
+    <SiteSettingsContext.Provider value={value}>
       {children}
     </SiteSettingsContext.Provider>
   );

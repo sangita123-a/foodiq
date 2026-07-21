@@ -7,6 +7,7 @@ import {
   DEFAULT_RESTAURANT_IMAGE,
   resolveBackendUrl,
 } from "@/lib/images";
+import { CARD_IMAGE_QUALITY, CARD_IMAGE_SIZES } from "@/lib/performance/assets";
 
 type SafeImageProps = Omit<ImageProps, "src" | "alt" | "onError" | "decoding"> & {
   src?: string | null;
@@ -16,7 +17,7 @@ type SafeImageProps = Omit<ImageProps, "src" | "alt" | "onError" | "decoding"> &
   decorative?: boolean;
 };
 
-const DEFAULT_DIMENSIONS = { width: 640, height: 480 } as const;
+const DEFAULT_DIMENSIONS = { width: 384, height: 288 } as const;
 
 function resolveSrc(src: string | null | undefined, fallback: string) {
   const value = typeof src === "string" ? src.trim() : "";
@@ -49,6 +50,10 @@ function withObjectCover(className?: string) {
   return `${base} ${className}`;
 }
 
+function shouldSkipOptimization(src: string) {
+  return src.startsWith("data:") || src.startsWith("blob:");
+}
+
 export default function SafeImage({
   src,
   fallback,
@@ -58,9 +63,10 @@ export default function SafeImage({
   fill,
   width,
   height,
-  sizes = "(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw",
+  sizes = CARD_IMAGE_SIZES,
   priority,
   loading = "lazy",
+  quality = CARD_IMAGE_QUALITY,
   ...props
 }: SafeImageProps) {
   const resolved = resolveSrc(src, fallback);
@@ -81,9 +87,7 @@ export default function SafeImage({
   const mergedClassName = withObjectCover(className);
 
   const unoptimized =
-    activeSrc.startsWith("data:") ||
-    activeSrc.startsWith("blob:") ||
-    props.unoptimized === true;
+    shouldSkipOptimization(activeSrc) || props.unoptimized === true;
 
   const handleError = useCallback(() => {
     setActiveSrc((current) => {
@@ -100,6 +104,7 @@ export default function SafeImage({
     alt: resolvedAlt,
     sizes,
     priority,
+    quality,
     loading: priority ? undefined : loading,
     decoding: "async" as const,
     unoptimized,

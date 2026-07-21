@@ -5,6 +5,7 @@ import { Star, Clock } from "lucide-react";
 import Link from "next/link";
 import SafeImage from "@/components/ui/SafeImage";
 import { getRestaurantImage, RESTAURANT_FALLBACK } from "@/lib/images";
+import { CARD_IMAGE_SIZES } from "@/lib/performance/assets";
 
 interface RestaurantCardProps {
   id: string | number;
@@ -34,7 +35,7 @@ export default function RestaurantCard({
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay }}
-      whileHover={{ y: -5 }}
+      whileHover={{ y: -4 }}
       className="food-card group flex flex-col h-full min-h-0"
     >
       <Link href={`/restaurant/${id}`} className="flex flex-col flex-grow">
@@ -44,12 +45,14 @@ export default function RestaurantCard({
             src={imageUrl}
             fallback={RESTAURANT_FALLBACK}
             alt={name}
+            fill
+            sizes={CARD_IMAGE_SIZES}
             className="w-full h-full object-cover"
           />
           <div className="absolute bottom-3 left-4 z-20 flex items-center gap-2">
-            <div className="flex items-center gap-1 bg-green-600 px-2 py-1 rounded text-white text-xs font-bold">
+            <div className="flex items-center gap-1 text-[#1C1C1C] text-xs font-bold px-2 py-1 rounded-lg bg-[#FAFAFA] border border-[#ECECEC]">
               <span>{rating}</span>
-              <Star className="w-3 h-3 fill-white" />
+              <Star className="w-3 h-3 fill-[#F4B400] text-[#F4B400]" />
             </div>
             <div className="flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-white text-xs font-medium">
               <Clock className="w-3 h-3" />
@@ -59,7 +62,7 @@ export default function RestaurantCard({
         </div>
 
         <div className="food-card-body flex flex-col flex-grow">
-          <h3 className="food-card-title text-[#111827] mb-1 group-hover:text-[var(--color-primary)] transition-colors">
+          <h3 className="food-card-title text-[#1C1C1C] mb-1 group-hover:text-[#1C1C1C] transition-colors">
             {name}
           </h3>
           <p className="food-card-description mb-3 line-clamp-1">{cuisine}</p>
@@ -68,7 +71,7 @@ export default function RestaurantCard({
             <div className="h-px w-full bg-[#E5E7EB] mb-4" />
             <div className="flex items-center justify-between">
               <span className="text-[var(--color-gray-text)] text-sm">{priceForTwo}</span>
-              <span className="food-button min-h-0 px-3 py-2 bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-semibold rounded-lg group-hover:bg-[var(--color-primary)] group-hover:text-white text-xs">
+              <span className="food-button food-button-secondary min-h-0 px-3 py-2 text-xs">
                 View Menu
               </span>
             </div>

@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { buildPrivatePageMetadata } from "@/lib/seo/entity-metadata";
+import { publicMetadata } from "@/lib/seo/pages";
 
-export const metadata: Metadata = buildPrivatePageMetadata({
-  title: "Wishlist",
-  path: "/wishlist",
-});
+export const metadata: Metadata = publicMetadata("wishlist");
 
 export default function WishlistSeoLayout({
   children,

@@ -9,6 +9,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SafeImage from "@/components/ui/SafeImage";
 import { FOOD_FALLBACK, getFoodImage } from "@/lib/images";
+import { THUMBNAIL_IMAGE_SIZES } from "@/lib/performance/assets";
 import { useCartActions } from "@/hooks/useCartActions";
 import { useFavoriteActions } from "@/hooks/useFavoriteActions";
 import { useToast } from "@/contexts/ToastContext";
@@ -425,8 +426,16 @@ export default function FoodDetailView({ id }: { id: string }) {
                   {review.image_urls && review.image_urls.length > 0 && (
                     <div className="mt-3 flex gap-2 flex-wrap">
                       {review.image_urls.slice(0, 3).map((img, i) => (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img key={i} src={img} alt="" className="w-14 h-14 rounded-lg object-cover border border-[#E5E7EB]" />
+                        <SafeImage
+                          key={i}
+                          src={img}
+                          fallback={FOOD_FALLBACK}
+                          alt={`Review photo ${i + 1}`}
+                          width={56}
+                          height={56}
+                          sizes={THUMBNAIL_IMAGE_SIZES}
+                          className="w-14 h-14 rounded-lg object-cover border border-[#E5E7EB]"
+                        />
                       ))}
                     </div>
                   )}

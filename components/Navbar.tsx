@@ -2,16 +2,24 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { useRouter, usePathname } from "next/navigation";
 import { ShoppingCart, Search, Menu } from "lucide-react";
 import api from "@/services/api";
-import NotificationBell from "@/components/notifications/NotificationBell";
 import InstallAppButton from "@/components/pwa/InstallAppButton";
-import MobileDrawer from "@/components/ui/MobileDrawer";
 import { clearClientAuth } from "@/lib/authSession";
 import { useCartActions } from "@/hooks/useCartActions";
 import { usePrefersReducedMotion } from "@/hooks/useMediaQuery";
+
+const NotificationBell = dynamic(
+  () => import("@/components/notifications/NotificationBell"),
+  { ssr: false, loading: () => null }
+);
+
+const MobileDrawer = dynamic(() => import("@/components/ui/MobileDrawer"), {
+  ssr: false,
+  loading: () => null,
+});
 
 const NAV_LINKS = [
   { href: "/", label: "Home", isActive: (path: string) => path === "/" },
@@ -52,27 +60,25 @@ export default function Navbar() {
 
   const { totalQuantity: cartCount } = useCartActions();
 
-  const navMotion = reducedMotion
-    ? { initial: { opacity: 1 }, animate: { opacity: 1 }, transition: { duration: 0 } }
-    : { initial: { opacity: 0, y: -20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.4 } };
-
   return (
     <>
-      <motion.nav
-        {...navMotion}
-        className="sticky top-0 left-0 w-full h-[64px] md:h-[72px] lg:h-[80px] z-50 flex items-center justify-between px-3 sm:px-6 lg:px-16 bg-white/90 backdrop-blur-xl border-b border-[#ECECEC]/90 shadow-[0_8px_30px_rgba(28,28,28,0.06)] supports-[backdrop-filter]:bg-white/80 safe-top"
+      <nav
+        aria-label="Main navigation"
+        className={`sticky top-0 left-0 w-full h-[64px] md:h-[72px] lg:h-[80px] z-50 flex items-center justify-between px-3 sm:px-6 lg:px-16 bg-white/95 backdrop-blur-xl border-b border-[#ECECEC] shadow-[0_2px_12px_rgba(0,0,0,0.04)] supports-[backdrop-filter]:bg-white/90 safe-top ${
+          reducedMotion ? "" : "nav-enter-motion"
+        }`}
       >
         <div className="flex items-center gap-2 md:gap-3 min-w-0">
           <button
             type="button"
-            className="md:hidden touch-target flex items-center justify-center text-[#1C1C1C] p-2 rounded-xl border border-[#ECECEC] bg-white hover:bg-[#F8F9FA] transition-colors shrink-0"
+            className="md:hidden touch-target flex items-center justify-center text-[#1C1C1C] p-2 rounded-xl border border-[#ECECEC] bg-white hover:bg-[#FAFAFA] transition-colors shrink-0"
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
           >
             <Menu className="w-5 h-5" />
           </button>
 
-          <Link href="/" className="flex items-center text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-[-0.045em] transition-opacity hover:opacity-80 truncate">
+          <Link href="/" className="touch-target flex items-center text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-[-0.045em] transition-opacity hover:opacity-80 truncate py-1">
             <span className="text-[#1C1C1C]">Food</span>
             <span className="text-[var(--color-primary)]">iq</span>
           </Link>
@@ -86,8 +92,9 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
+                aria-current={active ? "page" : undefined}
                 className={`font-medium text-sm relative py-2 transition-colors ${
-                  active ? "text-[var(--color-primary)]" : "text-[#686B78] hover:text-[#1C1C1C]"
+                  active ? "text-[var(--color-primary)]" : "text-[#696969] hover:text-[#1C1C1C]"
                 }`}
               >
                 {link.label}
@@ -107,8 +114,9 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`font-medium text-xs relative py-1.5 transition-colors ${
-                  active ? "text-[var(--color-primary)]" : "text-[#686B78] hover:text-[#1C1C1C]"
+                aria-current={active ? "page" : undefined}
+                className={`font-medium text-sm relative py-2.5 px-1 touch-target inline-flex items-center transition-colors ${
+                  active ? "text-[var(--color-primary)]" : "text-[#696969] hover:text-[#1C1C1C]"
                 }`}
               >
                 {link.label}
@@ -121,7 +129,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center space-x-2 lg:space-x-3 shrink-0">
           <Link
             href="/search"
-            className="touch-target h-10 w-10 rounded-xl border border-[#ECECEC] bg-white hover:border-[#E23744]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] flex items-center justify-center transition-all"
+            className="touch-target h-10 w-10 rounded-xl border border-[#EAEAEA] bg-white hover:border-[#D4D4D4] hover:bg-[#FAFAFA] text-[#1C1C1C] flex items-center justify-center transition-all"
             aria-label="Search"
           >
             <Search className="w-4 h-4" />
@@ -131,7 +139,7 @@ export default function Navbar() {
             <>
               <Link
                 href="/cart"
-                className="relative touch-target h-10 w-10 rounded-xl border border-[#ECECEC] bg-white hover:border-[#E23744]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] flex items-center justify-center transition-all"
+                className="relative touch-target h-10 w-10 rounded-xl border border-[#EAEAEA] bg-white hover:border-[#D4D4D4] hover:bg-[#FAFAFA] text-[#1C1C1C] flex items-center justify-center transition-all"
                 aria-label={`Cart with ${cartCount} items`}
               >
                 <ShoppingCart className="w-4 h-4" />
@@ -149,12 +157,12 @@ export default function Navbar() {
 
           <Link
             href="/order-online"
-            className="hidden lg:inline-flex h-9 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm shadow-[0_6px_16px_rgba(226,55,68,0.2)] transition-all items-center"
+            className="hidden lg:inline-flex h-9 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all items-center"
           >
             Order Online
           </Link>
 
-          <div className="hidden lg:block h-6 w-px bg-[#ECECEC] mx-1" />
+          <div className="hidden lg:block h-6 w-px bg-[#EAEAEA] mx-1" />
 
           {user ? (
             <div className="flex items-center space-x-2 lg:space-x-3">
@@ -165,8 +173,9 @@ export default function Navbar() {
                 {user.full_name}
               </Link>
               <button
+                type="button"
                 onClick={handleLogout}
-                className="h-10 px-4 lg:px-5 rounded-xl border border-[#ECECEC] hover:border-[#E23744]/30 hover:bg-[#F8F9FA] text-[#1C1C1C] font-medium text-sm transition-all"
+                className="h-10 px-4 lg:px-5 rounded-xl border border-[#EAEAEA] hover:border-[#D4D4D4] hover:bg-[#FAFAFA] text-[#1C1C1C] font-medium text-sm transition-all"
               >
                 Logout
               </button>
@@ -174,7 +183,7 @@ export default function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="h-9 px-3.5 lg:px-5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm transition-all inline-flex items-center"
+              className="h-10 px-3.5 lg:px-5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm transition-all inline-flex items-center"
             >
               Login
             </Link>
@@ -182,10 +191,10 @@ export default function Navbar() {
         </div>
 
         {/* Mobile quick actions */}
-        <div className="flex md:hidden items-center gap-1.5 shrink-0">
+        <div className="flex md:hidden items-center gap-2 shrink-0">
           <Link
             href="/search"
-            className="touch-target flex h-10 w-10 items-center justify-center rounded-xl border border-[#ECECEC] bg-white text-[#1C1C1C]"
+            className="touch-target flex h-11 w-11 items-center justify-center rounded-xl border border-[#EAEAEA] bg-white text-[#1C1C1C]"
             aria-label="Search"
           >
             <Search className="w-4 h-4" />
@@ -193,7 +202,7 @@ export default function Navbar() {
           {isLoggedIn && (
             <Link
               href="/cart"
-              className="relative touch-target flex h-10 w-10 items-center justify-center rounded-xl border border-[#ECECEC] bg-white text-[#1C1C1C]"
+              className="relative touch-target flex h-11 w-11 items-center justify-center rounded-xl border border-[#ECECEC] bg-white text-[#1C1C1C]"
               aria-label={`Cart with ${cartCount} items`}
             >
               <ShoppingCart className="w-4 h-4" />
@@ -205,66 +214,69 @@ export default function Navbar() {
             </Link>
           )}
         </div>
-      </motion.nav>
+      </nav>
 
       {/* Mobile slide drawer */}
-      <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)} title="Menu" side="left" width="w-[min(300px,88vw)]">
-        <div className="flex flex-col p-3 gap-0.5">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMobileOpen(false)}
-              className={`touch-target flex items-center px-4 py-3 rounded-xl font-medium text-sm ${
-                link.isActive(pathname) ? "bg-[#E23744]/10 text-[var(--color-primary)]" : "text-[#686B78] hover:bg-[#F8F9FA] hover:text-[#1C1C1C]"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-
-          {isLoggedIn && (
-            <>
-              <Link href="/my-orders" onClick={() => setMobileOpen(false)} className="touch-target flex items-center px-4 py-3 rounded-xl text-[#686B78] hover:bg-[#F8F9FA] font-medium text-sm">
-                My Orders
-              </Link>
-              <Link href="/favorites" onClick={() => setMobileOpen(false)} className="touch-target flex items-center px-4 py-3 rounded-xl text-[#686B78] hover:bg-[#F8F9FA] font-medium text-sm">
-                Favorites
-              </Link>
-              <Link href="/profile" onClick={() => setMobileOpen(false)} className="touch-target flex items-center px-4 py-3 rounded-xl text-[#686B78] hover:bg-[#F8F9FA] font-medium text-sm">
-                Profile
-              </Link>
-            </>
-          )}
-
-          <div className="border-t border-[#ECECEC] mt-3 pt-3 space-y-2">
-            <Link
-              href="/order-online"
-              onClick={() => setMobileOpen(false)}
-              className="touch-target flex items-center justify-center px-4 py-3 rounded-xl bg-primary text-white font-semibold text-sm"
-            >
-              Order Online
-            </Link>
-            {user ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="w-full touch-target px-4 py-3 rounded-xl bg-[#F8F9FA] text-[#1C1C1C] font-medium text-sm"
-              >
-                Logout
-              </button>
-            ) : (
+      {mobileOpen ? (
+        <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)} title="Menu" side="left" width="w-[min(300px,88vw)]">
+          <div className="flex flex-col p-3 gap-0.5">
+            {NAV_LINKS.map((link) => (
               <Link
-                href="/login"
+                key={link.href}
+                href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="block touch-target px-4 py-3 rounded-xl bg-primary text-white font-medium text-sm text-center"
+                aria-current={link.isActive(pathname) ? "page" : undefined}
+                className={`touch-target flex items-center px-4 py-3 rounded-xl font-medium text-sm ${
+                  link.isActive(pathname) ? "bg-[#E23744]/10 text-[var(--color-primary)]" : "text-[#696969] hover:bg-[#FAFAFA] hover:text-[#1C1C1C]"
+                }`}
               >
-                Login
+                {link.label}
               </Link>
+            ))}
+
+            {isLoggedIn && (
+              <>
+                <Link href="/my-orders" onClick={() => setMobileOpen(false)} className="touch-target flex items-center px-4 py-3 rounded-xl text-[#696969] hover:bg-[#FAFAFA] font-medium text-sm">
+                  My Orders
+                </Link>
+                <Link href="/favorites" onClick={() => setMobileOpen(false)} className="touch-target flex items-center px-4 py-3 rounded-xl text-[#696969] hover:bg-[#FAFAFA] font-medium text-sm">
+                  Favorites
+                </Link>
+                <Link href="/profile" onClick={() => setMobileOpen(false)} className="touch-target flex items-center px-4 py-3 rounded-xl text-[#696969] hover:bg-[#FAFAFA] font-medium text-sm">
+                  Profile
+                </Link>
+              </>
             )}
+
+            <div className="border-t border-[#EAEAEA] mt-3 pt-3 space-y-2">
+              <Link
+                href="/order-online"
+                onClick={() => setMobileOpen(false)}
+                className="touch-target flex items-center justify-center px-4 py-3 rounded-xl bg-primary text-white font-semibold text-sm"
+              >
+                Order Online
+              </Link>
+              {user ? (
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full touch-target px-4 py-3 rounded-xl bg-[#FAFAFA] text-[#1C1C1C] font-medium text-sm"
+                >
+                  Logout
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="block touch-target px-4 py-3 rounded-xl bg-primary text-white font-medium text-sm text-center"
+                >
+                  Login
+                </Link>
+              )}
+            </div>
           </div>
-        </div>
-      </MobileDrawer>
+        </MobileDrawer>
+      ) : null}
     </>
   );
 }

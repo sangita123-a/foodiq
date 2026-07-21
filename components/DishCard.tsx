@@ -1,3 +1,4 @@
+/** @architecture UNUSED — not imported by any route. Safe to ignore. */
 "use client";
 
 import Link from "next/link";
@@ -47,8 +48,9 @@ export default function DishCard({
           src={imageUrl}
           fallback={FOOD_FALLBACK}
           alt={name}
+          fill
           sizes="(max-width: 768px) 100vw, 300px"
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
@@ -76,10 +78,12 @@ export default function DishCard({
             e.preventDefault();
             onToggleFavorite(id);
           }}
-          className="absolute right-3 top-3 z-10 rounded-full bg-black/60 p-2 text-white backdrop-blur-md transition-colors hover:text-primary"
+          className="touch-target-expand absolute right-2 top-2 z-10 text-white transition-colors hover:text-primary"
           aria-label={isFavorite ? `Remove ${name} from favorites` : `Add ${name} to favorites`}
         >
-          <Heart className={`h-4 w-4 ${isFavorite ? "fill-primary text-primary" : ""}`} />
+          <span className="flex items-center justify-center rounded-full bg-black/60 p-2 backdrop-blur-md">
+            <Heart className={`h-4 w-4 ${isFavorite ? "fill-primary text-primary" : ""}`} />
+          </span>
         </button>
       )}
 
@@ -101,7 +105,7 @@ export default function DishCard({
                 type="button"
                 onClick={() => onUpdateQuantity(id, 1)}
                 disabled={isUpdating}
-                className="bg-primary/10 hover:bg-primary text-primary hover:text-white px-3 py-1.5 rounded-full font-bold text-xs flex items-center gap-1 transition-colors disabled:opacity-50"
+                className="touch-target bg-primary/10 hover:bg-primary text-primary hover:text-white px-3 py-2 rounded-full font-bold text-xs flex items-center gap-1 transition-colors disabled:opacity-50"
                 aria-label={`Add ${name} to cart`}
               >
                 <Plus className="w-4 h-4" />
@@ -113,7 +117,7 @@ export default function DishCard({
                   type="button"
                   onClick={() => onUpdateQuantity(id, -1)}
                   disabled={isUpdating}
-                  className="p-1 text-primary hover:bg-primary hover:text-white rounded-full transition-colors disabled:opacity-50"
+                  className="touch-target p-1.5 text-primary hover:bg-primary hover:text-white rounded-full transition-colors disabled:opacity-50"
                   aria-label="Decrease quantity"
                 >
                   <Minus className="w-3.5 h-3.5" />
@@ -123,7 +127,7 @@ export default function DishCard({
                   type="button"
                   onClick={() => onUpdateQuantity(id, 1)}
                   disabled={isUpdating}
-                  className="p-1 text-primary hover:bg-primary hover:text-white rounded-full transition-colors disabled:opacity-50"
+                  className="touch-target p-1.5 text-primary hover:bg-primary hover:text-white rounded-full transition-colors disabled:opacity-50"
                   aria-label="Increase quantity"
                 >
                   <Plus className="w-3.5 h-3.5" />

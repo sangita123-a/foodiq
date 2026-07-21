@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import InternalSeoLinks from "@/components/seo/InternalSeoLinks";
 import JsonLd from "@/components/seo/JsonLd";
 import { CONTACT_FAQS } from "@/lib/seo/faq";
+import {
+  getContextualInternalLinks,
+  getInternalLinksNavLabel,
+} from "@/lib/seo/internal-links";
 import {
   breadcrumbJsonLd,
   faqJsonLd,
@@ -23,6 +28,10 @@ export default function ContactSeoLayout({ children }: { children: ReactNode }) 
           localBusinessJsonLd(),
           faqJsonLd(CONTACT_FAQS),
         ]}
+      />
+      <InternalSeoLinks
+        links={getContextualInternalLinks("contact")}
+        label={getInternalLinksNavLabel("contact")}
       />
       {children}
     </>

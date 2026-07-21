@@ -1,3 +1,4 @@
+/** @architecture UNUSED — not imported by any route. Safe to ignore. */
 "use client";
 
 import dynamic from "next/dynamic";

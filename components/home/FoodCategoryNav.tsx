@@ -3,6 +3,7 @@
 import Link from "next/link";
 import SafeImage from "@/components/ui/SafeImage";
 import { FOOD_FALLBACK } from "@/lib/images";
+import { CATEGORY_NAV_IMAGE_SIZES } from "@/lib/performance/assets";
 
 const FOOD_CATEGORIES = [
   { slug: "pizza", label: "Pizza", image: "/images/catalog/dishes/pizza/cheese-burst-pizza.webp" },
@@ -25,8 +26,9 @@ export default function FoodCategoryNav() {
   return (
     <section className="bg-white py-6 sm:py-8" id="food-category-nav">
       <div className="mx-auto max-w-[1440px] px-4 md:px-8">
-        <h2 className="text-xl sm:text-2xl font-black tracking-tight text-[#1A1A1A] md:text-3xl">
-          🍽 Order Our Best Food Options
+        <h2 className="text-xl sm:text-2xl font-black tracking-tight text-[#1C1C1C] md:text-3xl">
+          <span aria-hidden="true">🍽 </span>
+          Order Our Best Food Options
         </h2>
         <p className="mt-1 text-xs font-medium text-[#666666] md:text-sm">
           Choose your favourite food category
@@ -37,7 +39,7 @@ export default function FoodCategoryNav() {
             <Link
               key={item.slug}
               href={`/category/${item.slug}`}
-              className="flex w-[72px] sm:w-[88px] md:w-[96px] flex-col items-center gap-2"
+              className="flex w-[72px] sm:w-[88px] md:w-[96px] flex-col items-center gap-2 touch-target"
             >
               <div className="h-[72px] w-[72px] sm:h-[88px] sm:w-[88px] md:h-[96px] md:w-[96px] overflow-hidden rounded-full ring-2 ring-[#ECECEC] ring-offset-2">
                 <SafeImage
@@ -46,10 +48,11 @@ export default function FoodCategoryNav() {
                   decorative
                   width={96}
                   height={96}
+                  sizes={CATEGORY_NAV_IMAGE_SIZES}
                   className="h-full w-full object-cover"
                 />
               </div>
-              <span className="w-full text-center text-[10px] sm:text-xs font-black text-[#1A1A1A] line-clamp-2 leading-tight">
+              <span className="w-full text-center text-xs sm:text-xs font-black text-[#1C1C1C] line-clamp-2 leading-tight">
                 {item.label}
               </span>
             </Link>

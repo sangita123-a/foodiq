@@ -8,15 +8,7 @@ import { useToast } from "@/contexts/ToastContext";
 
 import { persistAuthUser } from "@/lib/authUser";
 import { markAuthenticated } from "@/lib/authSession";
-
-function getAuthErrorMessage(err: any, fallback: string) {
-  if (err?.response?.data?.message) return err.response.data.message;
-  if (typeof err?.response?.data?.error === 'string') return err.response.data.error;
-  if (err?.message === 'Network Error') {
-    return 'Cannot reach the server. Please check your backend connection.';
-  }
-  return fallback;
-}
+import { getAuthErrorMessage } from "@/lib/authErrors";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -72,62 +64,62 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4 pt-24 pb-12">
-      <div className="max-w-md w-full bg-[#F8FAFC] border border-[#E5E7EB] p-8 rounded-2xl backdrop-blur-md">
-        <h2 className="text-3xl font-bold text-[#111827] text-center mb-6">Create Account</h2>
-        {error && <div className="bg-red-500/20 border border-red-500 text-red-100 p-3 rounded-lg mb-6 text-sm">{error}</div>}
+      <div className="max-w-md w-full bg-white border border-[#EAEAEA] p-8 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+        <h2 className="text-3xl font-bold text-[#1C1C1C] text-center mb-6">Create Account</h2>
+        {error && <div className="bg-[#FFF8E6] border border-[#F4B400]/40 text-[#1C1C1C] p-3 rounded-lg mb-6 text-sm">{error}</div>}
         <form onSubmit={handleRegister} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-[#6B7280] mb-2">Full Name</label>
+            <label className="block text-sm font-medium text-[#696969] mb-2">Full Name</label>
             <input 
               type="text" 
               name="full_name"
               required
               value={formData.full_name}
               onChange={handleChange}
-              className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[var(--color-primary)] transition-colors"
+              className="w-full bg-white border border-[#EAEAEA] rounded-xl px-4 py-3 text-[#1C1C1C] focus:outline-none focus:border-[#D4D4D4] transition-colors"
               placeholder="John Doe"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#6B7280] mb-2">Email Address</label>
+            <label className="block text-sm font-medium text-[#696969] mb-2">Email Address</label>
             <input 
               type="email" 
               name="email"
               required
               value={formData.email}
               onChange={handleChange}
-              className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[var(--color-primary)] transition-colors"
+              className="w-full bg-white border border-[#EAEAEA] rounded-xl px-4 py-3 text-[#1C1C1C] focus:outline-none focus:border-[#D4D4D4] transition-colors"
               placeholder="john@example.com"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#6B7280] mb-2">Phone Number</label>
+            <label className="block text-sm font-medium text-[#696969] mb-2">Phone Number</label>
             <input 
               type="tel" 
               name="phone"
               required
               value={formData.phone}
               onChange={handleChange}
-              className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[var(--color-primary)] transition-colors"
+              className="w-full bg-white border border-[#EAEAEA] rounded-xl px-4 py-3 text-[#1C1C1C] focus:outline-none focus:border-[#D4D4D4] transition-colors"
               placeholder="+1 234 567 8900"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#6B7280] mb-2">Password</label>
+            <label className="block text-sm font-medium text-[#696969] mb-2">Password</label>
             <input 
               type="password" 
               name="password"
               required
               value={formData.password}
               onChange={handleChange}
-              className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#111827] focus:outline-none focus:border-[var(--color-primary)] transition-colors"
+              className="w-full bg-white border border-[#EAEAEA] rounded-xl px-4 py-3 text-[#1C1C1C] focus:outline-none focus:border-[#D4D4D4] transition-colors"
               placeholder="Create a password"
             />
           </div>
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-medium py-3 rounded-xl transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100"
+            className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold py-2.5 rounded-xl text-sm transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 disabled:hover:scale-100"
           >
             {loading ? "Creating account..." : "Register"}
           </button>

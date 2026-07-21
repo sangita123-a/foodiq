@@ -1,3 +1,4 @@
+/** @architecture UNUSED — not added to app/page.tsx. Safe to ignore. */
 "use client";
 
 import Link from "next/link";
@@ -52,7 +53,7 @@ export default function PersonalizedHomeRails() {
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-10">
       {campaigns[0] ? (
-        <div className="rounded-2xl bg-gradient-to-r from-[#E23744]/15 to-[#E23744]/5 border border-[#E5E7EB] p-5 sm:p-6">
+        <div className="rounded-2xl bg-[#FAFAFA] border border-[#EAEAEA] p-5 sm:p-6">
           <p className="text-xs font-bold uppercase tracking-wide text-[#E23744]">
             Seasonal
           </p>
@@ -79,7 +80,7 @@ export default function PersonalizedHomeRails() {
               Recommended for you
             </h2>
             <Link
-              href="/restaurants"
+              href="/order-online"
               className="text-sm font-bold text-[#E23744]"
             >
               See all

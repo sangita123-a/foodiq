@@ -2,20 +2,18 @@
 
 import type { ReactNode } from "react";
 import { SWRConfig } from "swr";
-import dynamic from "next/dynamic";
 import { fetcher } from "@/services/api";
 import { ToastProvider, useToast } from "@/contexts/ToastContext";
 import ErrorBoundary from "@/components/monitoring/ErrorBoundary";
 import AnalyticsProvider from "@/components/analytics/AnalyticsProvider";
 import PwaProvider from "@/components/pwa/PwaProvider";
-import AuthBootstrap from "@/components/AuthBootstrap";
 import { FeatureFlagProvider } from "@/lib/featureFlags";
 import { SiteSettingsProvider } from "@/contexts/SiteSettingsContext";
-
-const PushNotificationProvider = dynamic(
-  () => import("@/components/notifications/PushNotificationProvider"),
-  { ssr: false }
-);
+import type { SiteSettings } from "@/lib/siteSettings";
+import {
+  DeferredAuthBootstrap,
+  DeferredPushNotificationProvider,
+} from "@/components/performance/DeferredBootstraps";
 
 function SWRGlobalConfig({ children }: { children: ReactNode }) {
   const { showToast } = useToast();
@@ -45,17 +43,23 @@ function SWRGlobalConfig({ children }: { children: ReactNode }) {
   );
 }
 
-export function Providers({ children }: { children: ReactNode }) {
+export function Providers({
+  children,
+  initialSiteSettings,
+}: {
+  children: ReactNode;
+  initialSiteSettings?: SiteSettings;
+}) {
   return (
     <ToastProvider>
       <ErrorBoundary>
         <AnalyticsProvider>
           <PwaProvider>
-            <AuthBootstrap />
+            <DeferredAuthBootstrap />
             <SWRGlobalConfig>
               <FeatureFlagProvider>
-                <SiteSettingsProvider>
-                  <PushNotificationProvider>{children}</PushNotificationProvider>
+                <SiteSettingsProvider initialSettings={initialSiteSettings}>
+                  <DeferredPushNotificationProvider>{children}</DeferredPushNotificationProvider>
                 </SiteSettingsProvider>
               </FeatureFlagProvider>
             </SWRGlobalConfig>

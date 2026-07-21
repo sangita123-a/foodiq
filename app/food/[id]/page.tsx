@@ -44,13 +44,16 @@ export async function generateMetadata({
   if (isCollectionDishId(id)) {
     const dish = getCollectionDishById(id);
     if (dish) {
+      const description = dish.description.slice(0, 160);
       return buildEntityMetadata({
         entityName: dish.name,
         title: dish.name,
-        description: dish.description.slice(0, 160),
+        description,
         path: `/food/${dish.id}`,
         image: dish.image,
         keywords: foodItemKeywords(dish.name, dish.restaurantName, dish.collection),
+        socialTitle: `Order ${dish.name} on Foodiq`,
+        socialDescription: description,
       });
     }
   }
@@ -58,13 +61,16 @@ export async function generateMetadata({
   if (isCategoryDishId(id)) {
     const dish = getCategoryDishById(id);
     if (dish) {
+      const description = dish.description.slice(0, 160);
       return buildEntityMetadata({
         entityName: dish.name,
         title: dish.name,
-        description: dish.description.slice(0, 160),
+        description,
         path: `/food/${dish.id}`,
         image: dish.image,
         keywords: foodItemKeywords(dish.name, dish.restaurantName, dish.category),
+        socialTitle: `Order ${dish.name} on Foodiq`,
+        socialDescription: description,
       });
     }
   }
@@ -77,20 +83,26 @@ export async function generateMetadata({
       title: "Dish",
       description: "View dish details and order online on Foodiq.",
       path: `/food/${id}`,
+      socialTitle: "Dish Details | Foodiq",
+      socialDescription:
+        "View dish details, pricing, and restaurant info before ordering on Foodiq.",
     });
   }
 
   const description =
     item.description?.trim() ||
     `Order ${item.name}${item.restaurant_name ? ` from ${item.restaurant_name}` : ""} on Foodiq.`;
+  const trimmedDescription = description.slice(0, 160);
 
   return buildEntityMetadata({
     entityName: item.name,
     title: item.name,
-    description: description.slice(0, 160),
+    description: trimmedDescription,
     path: `/food/${item.id}`,
     image: item.image_url,
     keywords: foodItemKeywords(item.name, item.restaurant_name),
+    socialTitle: `Order ${item.name} on Foodiq`,
+    socialDescription: trimmedDescription,
   });
 }
 

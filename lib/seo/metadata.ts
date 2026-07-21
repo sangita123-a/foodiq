@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { resolveSocialPreviewImageUrl } from "./social-image-url";
 import {
   DEFAULT_OG_IMAGE,
   DEFAULT_TWITTER_IMAGE,
+  getFacebookAppId,
   SITE_DESCRIPTION,
   SITE_KEYWORDS,
   SITE_LOCALE,
@@ -14,6 +16,7 @@ import {
   absoluteUrl,
   getSiteUrl,
 } from "./site";
+import { normalizePath } from "./urls";
 
 export type PageSeoInput = {
   title: string;
@@ -24,10 +27,18 @@ export type PageSeoInput = {
   keywords?: string[];
   noIndex?: boolean;
   type?: "website" | "article";
+  /** When set, overrides `path` for rel=canonical (page may live at a different URL). */
+  canonicalPath?: string;
   /** Override default Open Graph title (e.g. home social share). */
   socialTitle?: string;
   /** Override default Open Graph / Twitter description. */
   socialDescription?: string;
+  /**
+   * - `api`: dynamic /api/social-image URL (static landing pages)
+   * - `file`: rely on route opengraph-image.tsx (entity routes)
+   * - `static`: use provided image path or default PNG fallback
+   */
+  socialImageMode?: "api" | "file" | "static";
 };
 
 function resolveImage(image?: string | null): string {
@@ -64,8 +75,62 @@ function buildLanguageAlternates(path: string) {
   };
 }
 
+function buildSocialOtherTags(imageAlt: string, ogImage: string): Record<string, string> {
+  const tags: Record<string, string> = {
+    "og:image:alt": imageAlt,
+    "og:image:width": "1200",
+    "og:image:height": "630",
+    "og:image:type": "image/png",
+    "og:image:secure_url": ogImage,
+    "twitter:image:alt": imageAlt,
+    "twitter:card": "summary_large_image",
+    "content-language": SITE_LOCALE,
+  };
+
+  const facebookAppId = getFacebookAppId();
+  if (facebookAppId) {
+    tags["fb:app_id"] = facebookAppId;
+  }
+
+  return tags;
+}
+
+function resolveSocialImages({
+  socialImageMode,
+  ogTitle,
+  ogDescription,
+  image,
+  twitterImage,
+  imageAlt,
+}: {
+  socialImageMode: "api" | "file" | "static";
+  ogTitle: string;
+  ogDescription: string;
+  image?: string | null;
+  twitterImage?: string | null;
+  imageAlt: string;
+}): { ogImage: string; twitterImageUrl: string; includeImages: boolean } {
+  if (socialImageMode === "file") {
+    return { ogImage: "", twitterImageUrl: "", includeImages: false };
+  }
+
+  if (socialImageMode === "static") {
+    const ogImage = resolveImage(image);
+    const twitterImageUrl = resolveTwitterImage(twitterImage, image);
+    return { ogImage, twitterImageUrl, includeImages: true };
+  }
+
+  const ogImage = resolveSocialPreviewImageUrl(ogTitle, ogDescription, image);
+  const twitterImageUrl = twitterImage
+    ? resolveSocialPreviewImageUrl(ogTitle, ogDescription, twitterImage)
+    : ogImage;
+
+  return { ogImage, twitterImageUrl, includeImages: true };
+}
+
 /**
- * Open Graph tags power WhatsApp, LinkedIn, Telegram, and Facebook previews.
+ * Open Graph tags power Facebook, LinkedIn, WhatsApp, and Telegram previews.
+ * Twitter Card tags power X (Twitter) previews.
  */
 export function buildPageMetadata({
   title,
@@ -78,15 +143,25 @@ export function buildPageMetadata({
   type = "website",
   socialTitle,
   socialDescription,
+  socialImageMode = "api",
+  canonicalPath,
 }: PageSeoInput): Metadata {
-  const url = absoluteUrl(path);
+  const normalizedPath = normalizePath(path);
+  const normalizedCanonical = normalizePath(canonicalPath ?? path);
+  const url = absoluteUrl(normalizedCanonical);
   const ogTitle = socialTitle || (title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`);
   const ogDescription = socialDescription || description;
-  const ogImage = resolveImage(image);
-  const twitterImageUrl = resolveTwitterImage(twitterImage, image);
   const imageAlt = `${ogTitle} — ${SITE_OG_IMAGE_ALT}`;
+  const { ogImage, twitterImageUrl, includeImages } = resolveSocialImages({
+    socialImageMode,
+    ogTitle,
+    ogDescription,
+    image,
+    twitterImage,
+    imageAlt,
+  });
 
-  return {
+  const metadata: Metadata = {
     title: title.includes(SITE_NAME) ? { absolute: title } : title,
     description,
     keywords,
@@ -97,7 +172,7 @@ export function buildPageMetadata({
     category: "food",
     alternates: {
       canonical: url,
-      languages: buildLanguageAlternates(path),
+      languages: buildLanguageAlternates(normalizedCanonical),
     },
     robots: noIndex
       ? {
@@ -124,12 +199,31 @@ export function buildPageMetadata({
       title: ogTitle,
       description: ogDescription,
       siteName: SITE_NAME,
-      images: buildOpenGraphImages(ogImage, imageAlt),
     },
     twitter: {
       card: "summary_large_image",
       title: ogTitle,
       description: ogDescription,
+      creator: SITE_TWITTER_HANDLE,
+      site: SITE_TWITTER_HANDLE,
+    },
+    other: includeImages
+      ? buildSocialOtherTags(imageAlt, ogImage)
+      : {
+          "twitter:card": "summary_large_image",
+          "content-language": SITE_LOCALE,
+        },
+    metadataBase: new URL(getSiteUrl()),
+    referrer: "origin-when-cross-origin",
+  };
+
+  if (includeImages) {
+    metadata.openGraph = {
+      ...metadata.openGraph,
+      images: buildOpenGraphImages(ogImage, imageAlt),
+    };
+    metadata.twitter = {
+      ...metadata.twitter,
       images: [
         {
           url: twitterImageUrl,
@@ -138,17 +232,10 @@ export function buildPageMetadata({
           alt: imageAlt,
         },
       ],
-      creator: SITE_TWITTER_HANDLE,
-      site: SITE_TWITTER_HANDLE,
-    },
-    other: {
-      "og:image:alt": imageAlt,
-      "twitter:image:alt": imageAlt,
-      "content-language": SITE_LOCALE,
-    },
-    metadataBase: new URL(getSiteUrl()),
-    referrer: "origin-when-cross-origin",
-  };
+    };
+  }
+
+  return metadata;
 }
 
 /** Default site-wide social metadata for the home page and fallbacks. */
@@ -159,8 +246,7 @@ export function buildDefaultSocialMetadata(): Metadata {
     path: "/",
     socialTitle: SITE_OG_TITLE,
     socialDescription: SITE_OG_DESCRIPTION,
-    image: DEFAULT_OG_IMAGE,
-    twitterImage: DEFAULT_TWITTER_IMAGE,
+    socialImageMode: "file",
   });
 }
 
@@ -207,8 +293,6 @@ export function buildRootIcons(): NonNullable<Metadata["icons"]> {
 export function buildRootLayoutMetadata(): Metadata {
   const siteUrl = getSiteUrl();
   const canonicalUrl = absoluteUrl("/");
-  const ogImage = absoluteUrl(DEFAULT_OG_IMAGE);
-  const twitterImage = absoluteUrl(DEFAULT_TWITTER_IMAGE);
   const imageAlt = `${SITE_OG_TITLE} — ${SITE_OG_IMAGE_ALT}`;
 
   return {
@@ -251,27 +335,20 @@ export function buildRootLayoutMetadata(): Metadata {
       title: SITE_OG_TITLE,
       description: SITE_OG_DESCRIPTION,
       siteName: SITE_NAME,
-      images: buildOpenGraphImages(ogImage, imageAlt),
     },
     twitter: {
       card: "summary_large_image",
       title: SITE_OG_TITLE,
       description: SITE_OG_DESCRIPTION,
-      site: "@foodiq",
-      creator: "@foodiq",
-      images: [
-        {
-          url: twitterImage,
-          width: 1200,
-          height: 630,
-          alt: imageAlt,
-        },
-      ],
+      site: SITE_TWITTER_HANDLE,
+      creator: SITE_TWITTER_HANDLE,
     },
     other: {
       "og:image:alt": imageAlt,
       "twitter:image:alt": imageAlt,
+      "twitter:card": "summary_large_image",
       "content-language": SITE_LOCALE,
+      ...(getFacebookAppId() ? { "fb:app_id": getFacebookAppId()! } : {}),
     },
     icons: buildRootIcons(),
     manifest: "/manifest.webmanifest",

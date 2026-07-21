@@ -1,6 +1,7 @@
 /**
  * Site-wide SEO configuration. Prefer NEXT_PUBLIC_SITE_URL in production.
  */
+import { normalizePath } from "./urls";
 export const SITE_NAME = "Foodiq";
 export const SITE_TAGLINE = "Online Food Delivery Platform";
 export const SITE_CITY = "Hyderabad";
@@ -55,8 +56,16 @@ export function getApiBaseUrl(): string {
 
 export function absoluteUrl(path = "/"): string {
   const base = getSiteUrl();
-  if (!path || path === "/") return base;
-  return `${base}${path.startsWith("/") ? path : `/${path}`}`;
+  const trimmed = path.trim();
+  const hashIndex = trimmed.indexOf("#");
+  const withoutHash = hashIndex >= 0 ? trimmed.slice(0, hashIndex) : trimmed;
+  const hash = hashIndex >= 0 ? trimmed.slice(hashIndex) : "";
+  const queryIndex = withoutHash.indexOf("?");
+  const pathname = queryIndex >= 0 ? withoutHash.slice(0, queryIndex) : withoutHash;
+  const query = queryIndex >= 0 ? withoutHash.slice(queryIndex) : "";
+  const normalized = normalizePath(pathname || "/");
+  if (normalized === "/") return `${base}${query}${hash}`;
+  return `${base}${normalized}${query}${hash}`;
 }
 
 export const DEFAULT_OG_IMAGE = "/opengraph-image.png";
@@ -70,15 +79,26 @@ export const ORGANIZATION_SAME_AS = [
 
 export const SITE_SUPPORT_EMAIL = "support@foodiq.com";
 export const SITE_SUPPORT_PHONE = "+91-40-4010-0100";
+export const SITE_STREET_ADDRESS =
+  "123 Culinary Avenue, Tech Park, Hyderabad, India 500081";
+export const SITE_ADDRESS_REGION = "Telangana";
+export const SITE_ADDRESS_COUNTRY = "IN";
+export const SITE_POSTAL_CODE = "500081";
+export const SITE_GEO_LATITUDE = 17.385;
+export const SITE_GEO_LONGITUDE = 78.4867;
 export const SITE_LOCALE = "en-IN";
 /** Open Graph locale format (BCP 47 with underscore). */
 export const SITE_OG_LOCALE = "en_IN";
 export const SITE_TWITTER_HANDLE = "@foodiq";
 
+/** Optional Facebook App ID for richer Facebook preview analytics. */
+export function getFacebookAppId(): string | undefined {
+  return process.env.NEXT_PUBLIC_FACEBOOK_APP_ID?.trim() || undefined;
+}
+
 /** Primary routes prefetched for faster navigation (no UI change). */
 export const PREFETCH_ROUTES = [
   "/order-online",
-  "/restaurants",
   "/offers",
   "/collections",
   "/search",

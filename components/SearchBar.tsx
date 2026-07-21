@@ -2,11 +2,12 @@
 
 import { MapPin, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { fetchSearchSuggest } from "@/services/featuresApi";
 import { useFeatureFlag } from "@/lib/featureFlags";
 import {
   HERO_CITIES,
+  getDefaultCity,
   getStoredCity,
   setStoredCity,
   type HeroCity,
@@ -14,15 +15,17 @@ import {
 import {
   mapApiSuggestion,
   normalizeSearchQuery,
+  preloadHeroSearchCatalog,
   resolveHeroSearchTarget,
   searchHeroCatalog,
+  searchHeroCatalogAsync,
   type HeroSearchResult,
 } from "@/lib/heroSearch";
 
 export default function SearchBar() {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [city, setCity] = useState<HeroCity>(() => getStoredCity());
+  const [city, setCity] = useState<HeroCity>(getDefaultCity);
   const [cityOpen, setCityOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<HeroSearchResult[]>([]);
   const [open, setOpen] = useState(false);
@@ -39,14 +42,11 @@ export default function SearchBar() {
       if (detail && HERO_CITIES.includes(detail)) setCity(detail);
     };
     window.addEventListener("foodiq:city-updated", onCity);
-    return () => window.removeEventListener("foodiq:city-updated", onCity);
-  }, []);
 
-  const localResults = useMemo(() => {
-    const q = normalizeSearchQuery(query);
-    if (q.length < 1) return [];
-    return searchHeroCatalog(query, city);
-  }, [query, city]);
+    return () => {
+      window.removeEventListener("foodiq:city-updated", onCity);
+    };
+  }, []);
 
   useEffect(() => {
     const q = normalizeSearchQuery(query);
@@ -57,35 +57,66 @@ export default function SearchBar() {
       return;
     }
 
-    setSuggestions(localResults);
-    setNoResults(localResults.length === 0);
-    setOpen(true);
+    let cancelled = false;
+    let apiTimer: ReturnType<typeof setTimeout> | undefined;
 
-    if (!smartSearch || q.length < 2) return;
+    const runLocalSearch = async () => {
+      const syncResults = searchHeroCatalog(query, city);
+      if (syncResults.length > 0) {
+        if (!cancelled) {
+          setSuggestions(syncResults);
+          setNoResults(syncResults.length === 0);
+          setOpen(true);
+        }
+        return syncResults;
+      }
 
-    const t = setTimeout(() => {
-      startTransition(() => {
-        void fetchSearchSuggest(query.trim(), 8).then((rows) => {
-          const mapped = rows
-            .map((row) => mapApiSuggestion(row, city))
-            .filter((row): row is HeroSearchResult => row !== null);
+      const asyncResults = await searchHeroCatalogAsync(query, city);
+      if (!cancelled) {
+        setSuggestions(asyncResults);
+        setNoResults(asyncResults.length === 0);
+        setOpen(true);
+      }
+      return asyncResults;
+    };
 
-          if (mapped.length > 0) {
-            const merged = new Map<string, HeroSearchResult>();
-            [...localResults, ...mapped].forEach((item) => {
-              merged.set(`${item.type}:${item.id}`, item);
+    const debounceId = setTimeout(() => {
+      void runLocalSearch();
+
+      if (smartSearch && q.length >= 2) {
+        apiTimer = setTimeout(() => {
+          startTransition(() => {
+            void runLocalSearch().then((localResults) => {
+              void fetchSearchSuggest(query.trim(), 8).then(async (rows) => {
+                const mapped = (
+                  await Promise.all(rows.map((row) => mapApiSuggestion(row, city)))
+                ).filter((row): row is HeroSearchResult => row !== null);
+
+                if (mapped.length > 0) {
+                  const merged = new Map<string, HeroSearchResult>();
+                  [...localResults, ...mapped].forEach((item) => {
+                    merged.set(`${item.type}:${item.id}`, item);
+                  });
+                  const next = Array.from(merged.values()).slice(0, 10);
+                  if (!cancelled) {
+                    setSuggestions(next);
+                    setNoResults(next.length === 0);
+                    setOpen(true);
+                  }
+                }
+              });
             });
-            const next = Array.from(merged.values()).slice(0, 10);
-            setSuggestions(next);
-            setNoResults(next.length === 0);
-            setOpen(true);
-          }
-        });
-      });
-    }, 180);
+          });
+        }, 180);
+      }
+    }, 120);
 
-    return () => clearTimeout(t);
-  }, [query, city, smartSearch, localResults]);
+    return () => {
+      cancelled = true;
+      clearTimeout(debounceId);
+      if (apiTimer) clearTimeout(apiTimer);
+    };
+  }, [query, city, smartSearch]);
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -112,14 +143,24 @@ export default function SearchBar() {
     const trimmed = query.trim().replace(/\s+/g, " ");
     if (!trimmed) {
       setOpen(false);
-      router.push(`/restaurants?city=${encodeURIComponent(city)}`);
+      router.push(`/order-online?city=${encodeURIComponent(city)}`);
       return;
     }
 
-    const results = suggestions.length ? suggestions : searchHeroCatalog(trimmed, city);
+    const results =
+      suggestions.length > 0
+        ? suggestions
+        : searchHeroCatalog(trimmed, city);
     if (results.length === 0) {
-      setNoResults(true);
-      setOpen(true);
+      void searchHeroCatalogAsync(trimmed, city).then((asyncResults) => {
+        if (asyncResults.length === 0) {
+          setNoResults(true);
+          setOpen(true);
+          return;
+        }
+        setOpen(false);
+        router.push(resolveHeroSearchTarget(trimmed, city, asyncResults));
+      });
       return;
     }
 
@@ -138,17 +179,18 @@ export default function SearchBar() {
     <div ref={wrapRef} className="relative w-full max-w-[900px]">
       <form
         onSubmit={handleSearch}
-        className="w-full h-[52px] sm:h-[60px] md:h-[66px] bg-white/95 backdrop-blur-md border border-[#ECECEC] rounded-[14px] sm:rounded-[18px] flex items-center shadow-[0_18px_50px_rgba(28,28,28,0.14)] overflow-hidden relative transition-shadow focus-within:border-[#E23744]/40 focus-within:shadow-[0_20px_55px_rgba(226,55,68,0.16)]"
+        className="w-full h-[52px] sm:h-[60px] md:h-[66px] bg-white/95 backdrop-blur-md border border-[#EAEAEA] rounded-[14px] sm:rounded-[18px] flex items-center shadow-[0_4px_20px_rgba(0,0,0,0.08)] overflow-hidden relative transition-shadow focus-within:border-[#D4D4D4] focus-within:shadow-[0_8px_28px_rgba(0,0,0,0.1)]"
       >
         <div ref={cityRef} className="relative hidden sm:block h-full shrink-0">
           <button
             type="button"
             onClick={() => setCityOpen((v) => !v)}
-            className="flex items-center h-full px-4 border-r border-[#ECECEC] w-[210px] text-[#1C1C1C] cursor-pointer hover:bg-[#F8F9FA] rounded-l-[18px] transition-colors text-left"
+            className="flex items-center h-full px-4 border-r border-[#ECECEC] w-[210px] text-[#1C1C1C] cursor-pointer hover:bg-[#F8F9FA] rounded-l-[18px] transition-colors text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E23744]"
             aria-expanded={cityOpen}
             aria-haspopup="listbox"
+            aria-label={`Select delivery city, currently ${city}`}
           >
-            <MapPin className="text-[var(--color-primary)] w-4 h-4 mr-2.5 shrink-0" />
+            <MapPin className="text-[var(--color-primary)] w-4 h-4 mr-2.5 shrink-0" aria-hidden="true" />
             <div className="flex flex-col flex-grow truncate justify-center min-w-0">
               <span className="text-[11px] text-[var(--color-gray-text)] font-medium leading-tight">
                 Location
@@ -184,7 +226,7 @@ export default function SearchBar() {
                     aria-selected={city === c}
                     onClick={() => selectCity(c)}
                     className={`w-full text-left px-4 py-2.5 text-sm font-semibold hover:bg-[#F8F9FA] ${
-                      city === c ? "text-[var(--color-primary)] bg-[#FFF5F6]" : "text-[#111827]"
+                      city === c ? "text-[var(--color-primary)] bg-[#FAFAFA]" : "text-[#1C1C1C]"
                     }`}
                   >
                     {c}
@@ -196,25 +238,33 @@ export default function SearchBar() {
         </div>
 
         <div className="flex min-w-0 items-center h-full flex-grow px-4 sm:px-5 text-[#1C1C1C] group">
-          <Search className="text-[var(--color-gray-text)] group-focus-within:text-[var(--color-primary)] w-4 h-4 mr-3 shrink-0 transition-colors" />
+          <Search className="text-[var(--color-gray-text)] group-focus-within:text-[var(--color-primary)] w-4 h-4 mr-3 shrink-0 transition-colors" aria-hidden="true" />
+          <label htmlFor="hero-search-input" className="sr-only">
+            Search restaurants or dishes
+          </label>
           <input
+            id="hero-search-input"
             type="search"
+            role="combobox"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => {
+              preloadHeroSearchCatalog();
               if (normalizeSearchQuery(query).length > 0) setOpen(true);
             }}
             placeholder="Search restaurants or dishes..."
-            className="w-full min-w-0 h-full bg-transparent outline-none text-[#1C1C1C] placeholder:text-[#686B78] text-sm sm:text-[16px] font-medium"
+            className="w-full min-w-0 h-full bg-transparent outline-none text-[#1C1C1C] placeholder:text-[#686B78] text-base sm:text-[16px] font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E23744]"
             autoComplete="off"
             aria-autocomplete="list"
-            aria-controls="hero-search-suggestions"
+            {...(showDropdown
+              ? { "aria-controls": "hero-search-suggestions", "aria-expanded": true }
+              : { "aria-expanded": false })}
           />
         </div>
 
         <button
           type="submit"
-          className="h-[40px] sm:h-[46px] md:h-[52px] w-[68px] sm:w-[86px] md:w-[158px] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-xs sm:text-sm rounded-xl transition-all active:translate-y-0 shadow-[0_7px_18px_rgba(226,55,68,0.28)] shrink-0 mr-1 touch-target"
+          className="h-[40px] sm:h-[46px] md:h-[52px] w-[68px] sm:w-[86px] md:w-[158px] bg-[#E23744] hover:bg-[#C81E32] text-white font-semibold text-xs sm:text-sm rounded-xl transition-all active:translate-y-0 shadow-[0_4px_12px_rgba(0,0,0,0.08)] shrink-0 mr-1 touch-target"
         >
           <span className="hidden sm:inline">Search</span>
           <span className="sm:hidden">Go</span>
@@ -235,7 +285,7 @@ export default function SearchBar() {
                   role="option"
                   aria-selected={false}
                   onClick={() => goSuggestion(s)}
-                  className="w-full text-left px-4 py-3 hover:bg-[#F8F9FA] flex items-center justify-between gap-3"
+                  className="touch-target w-full text-left px-4 py-3 hover:bg-[#F8F9FA] flex items-center justify-between gap-3"
                 >
                   <span className="font-semibold text-sm text-[#111827] truncate">{s.name}</span>
                   <span className="text-[10px] font-bold uppercase text-[#9CA3AF] shrink-0">

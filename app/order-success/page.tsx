@@ -22,7 +22,7 @@ function OrderSuccessContent() {
     return (
       <div className="container mx-auto px-4 py-20 text-center text-[#111827]">
         <p className="text-xl mb-4">No order found.</p>
-        <a href="/restaurants" className="text-[var(--color-primary)] hover:underline">
+        <a href="/order-online" className="text-[var(--color-primary)] hover:underline">
           Continue Shopping
         </a>
       </div>

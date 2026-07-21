@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
@@ -23,6 +22,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { RESTAURANT_FALLBACK, FOOD_FALLBACK } from "@/lib/images";
+import { HERO_BACKGROUND_SIZES } from "@/lib/performance/assets";
 import { useCartActions } from "@/hooks/useCartActions";
 import { useFavoriteActions } from "@/hooks/useFavoriteActions";
 
@@ -380,7 +380,9 @@ export default function CuisineDetailView({ slug }: Props) {
               src={cuisine.image_url}
               fallback={RESTAURANT_FALLBACK}
               alt={cuisine.name}
-              className="w-full h-full object-cover opacity-50"
+              fill
+              sizes={HERO_BACKGROUND_SIZES}
+              className="object-cover opacity-50"
             />
           </div>
           <div className="relative z-10 bg-gradient-to-r from-black/80 via-black/50 to-transparent p-8 md:p-12">

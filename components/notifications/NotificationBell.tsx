@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import api from "@/services/api";
 import { useAuthToken } from "@/hooks/useAuthToken";
 import { cleanNotificationMessage, mapTypeToCategory } from "@/lib/notificationTypes";
-import { enablePushNotifications } from "@/components/notifications/PushNotificationProvider";
+import { enablePushNotifications } from "@/lib/pushNotifications";
 
 type Notif = {
   id: string;

@@ -3,32 +3,23 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import DeferredRoutePrefetch from "@/components/performance/DeferredRoutePrefetch";
+import InternalSeoLinks from "@/components/seo/InternalSeoLinks";
 import JsonLd from "@/components/seo/JsonLd";
 import {
   faqJsonLd,
   foodDeliveryServiceJsonLd,
   localBusinessJsonLd,
   organizationJsonLd,
+  siteNavigationJsonLd,
   websiteJsonLd,
 } from "@/lib/seo/jsonld";
 import { HOME_FAQS } from "@/lib/seo/faq";
-import { buildOpenGraphImages, buildRootIcons } from "@/lib/seo/metadata";
-import {
-  absoluteUrl,
-  DEFAULT_OG_IMAGE,
-  DEFAULT_TWITTER_IMAGE,
-  getSiteUrl,
-  PREFETCH_ROUTES,
-  SITE_KEYWORDS,
-  SITE_LOCALE,
-  SITE_NAME,
-  SITE_OG_DESCRIPTION,
-  SITE_OG_IMAGE_ALT,
-  SITE_OG_LOCALE,
-  SITE_OG_TITLE,
-  SITE_TWITTER_HANDLE,
-  getApiBaseUrl,
-} from "@/lib/seo/site";
+import { SEO_HUB_LINKS } from "@/lib/seo/internal-links";
+import { buildRootLayoutMetadata } from "@/lib/seo/metadata";
+import { getApiBaseUrl, SITE_NAME } from "@/lib/seo/site";
+import { HERO_POSTER_WEBP } from "@/lib/performance/assets";
+import { fetchSiteSettingsServer } from "@/lib/siteSettings.server";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -40,12 +31,6 @@ const poppins = Poppins({
 });
 
 const apiBase = getApiBaseUrl();
-const siteUrl = getSiteUrl();
-const metadataBase = new URL(siteUrl);
-const canonicalUrl = absoluteUrl("/");
-const ogImage = absoluteUrl(DEFAULT_OG_IMAGE);
-const twitterImage = absoluteUrl(DEFAULT_TWITTER_IMAGE);
-const imageAlt = `${SITE_OG_TITLE} — ${SITE_OG_IMAGE_ALT}`;
 
 function buildSiteVerification(): Metadata["verification"] | undefined {
   const google = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
@@ -60,70 +45,8 @@ function buildSiteVerification(): Metadata["verification"] | undefined {
 }
 
 export const metadata: Metadata = {
-  metadataBase,
-  title: {
-    default: SITE_OG_TITLE,
-    template: `%s | ${SITE_NAME}`,
-  },
-  description: SITE_OG_DESCRIPTION,
-  keywords: [...SITE_KEYWORDS],
-  authors: [{ name: SITE_NAME, url: canonicalUrl }],
-  creator: SITE_NAME,
-  publisher: SITE_NAME,
-  applicationName: SITE_NAME,
-  category: "food",
-  alternates: {
-    canonical: canonicalUrl,
-    languages: {
-      [SITE_LOCALE]: canonicalUrl,
-      en: canonicalUrl,
-      "x-default": canonicalUrl,
-    },
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
-    },
-  },
-  openGraph: {
-    type: "website",
-    locale: SITE_OG_LOCALE,
-    alternateLocale: ["en"],
-    url: canonicalUrl,
-    title: SITE_OG_TITLE,
-    description: SITE_OG_DESCRIPTION,
-    siteName: SITE_NAME,
-    images: buildOpenGraphImages(ogImage, imageAlt),
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: SITE_OG_TITLE,
-    description: SITE_OG_DESCRIPTION,
-    site: SITE_TWITTER_HANDLE,
-    creator: SITE_TWITTER_HANDLE,
-    images: [
-      {
-        url: twitterImage,
-        width: 1200,
-        height: 630,
-        alt: imageAlt,
-      },
-    ],
-  },
-  icons: buildRootIcons(),
-  manifest: "/manifest.webmanifest",
-  referrer: "origin-when-cross-origin",
-  other: {
-    "og:image:alt": imageAlt,
-    "twitter:image:alt": imageAlt,
-    "content-language": SITE_LOCALE,
-  },
+  ...buildRootLayoutMetadata(),
+  verification: buildSiteVerification(),
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -156,7 +79,6 @@ export const metadata: Metadata = {
     email: false,
     address: false,
   },
-  verification: buildSiteVerification(),
 };
 
 export const viewport: Viewport = {
@@ -170,33 +92,38 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialSiteSettings = await fetchSiteSettingsServer();
+
   return (
     <html
       lang="en"
       className={`${poppins.variable} h-full antialiased`}
     >
       <head>
+        <link
+          rel="preload"
+          as="image"
+          href={HERO_POSTER_WEBP}
+          type="image/webp"
+          fetchPriority="high"
+        />
         {apiBase ? (
           <>
             <link rel="preconnect" href={apiBase} crossOrigin="anonymous" />
             <link rel="dns-prefetch" href={apiBase} />
           </>
         ) : null}
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-        <link rel="preload" as="image" href={DEFAULT_OG_IMAGE} type="image/png" />
-        {PREFETCH_ROUTES.map((route) => (
-          <link key={route} rel="prefetch" href={route} />
-        ))}
-        <link rel="preload" as="image" href="/default-restaurant.webp" type="image/webp" />
-        <link rel="preload" as="image" href="/default-food.webp" type="image/webp" />
       </head>
       <body className="min-h-full flex flex-col bg-white text-[#1C1C1C]">
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+        <DeferredRoutePrefetch />
         <GoogleAnalytics />
         <JsonLd
           data={[
@@ -204,10 +131,22 @@ export default function RootLayout({
             websiteJsonLd(),
             localBusinessJsonLd(),
             foodDeliveryServiceJsonLd(),
+            siteNavigationJsonLd(),
             faqJsonLd(HOME_FAQS),
           ]}
         />
-        <Providers>{children}</Providers>
+        <InternalSeoLinks
+          links={SEO_HUB_LINKS}
+          label="Foodiq primary navigation"
+        />
+        <script
+          id="foodiq-site-settings"
+          type="application/json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(initialSiteSettings).replace(/</g, "\\u003c"),
+          }}
+        />
+        <Providers initialSiteSettings={initialSiteSettings}>{children}</Providers>
       </body>
     </html>
   );

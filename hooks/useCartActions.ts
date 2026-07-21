@@ -5,13 +5,22 @@ import useSWR, { mutate as globalMutate } from "swr";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
 import { useAuthToken } from "@/hooks/useAuthToken";
-import { getLocalCart, updateLocalCartQuantity, LocalCartItem } from "@/lib/cart";
+import { getLocalCart, updateLocalCartQuantity, LocalCartItem, type LocalCart } from "@/lib/cart";
+
+const EMPTY_CART: LocalCart = {
+  items: [],
+  totalQuantity: 0,
+  subtotal: 0,
+  deliveryFee: 35,
+  tax: 18,
+  total: 53,
+};
 
 export function useCartActions() {
   const { showToast } = useToast();
   const authenticated = useAuthToken();
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [localCart, setLocalCart] = useState(getLocalCart());
+  const [localCart, setLocalCart] = useState<LocalCart>(EMPTY_CART);
 
   // Listen for local cart updates across tabs/components
   useEffect(() => {

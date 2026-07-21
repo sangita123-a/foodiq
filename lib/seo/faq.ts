@@ -49,7 +49,7 @@ export const HOME_FAQS: FaqEntry[] = [
     id: "h2",
     question: "How do I order food on Foodiq?",
     answer:
-      "Browse restaurants, pick dishes, add them to your cart, and checkout. Track your order in real time until delivery.",
+      "Browse restaurants on our order-online page, explore food categories and trending dishes, apply offers at checkout, and track your order in real time until delivery.",
   },
   {
     id: "h3",
@@ -73,7 +73,7 @@ export const HOME_FAQS: FaqEntry[] = [
     id: "h6",
     question: "How do I contact customer support?",
     answer:
-      "Visit Help & Support or email support@foodiq.com for assistance with your order or account.",
+      "Visit our contact page or Help & Support for assistance with orders, offers, and your account. Email support@foodiq.com for non-urgent issues.",
   },
 ];
 
@@ -82,7 +82,7 @@ export const CONTACT_FAQS: FaqEntry[] = [
     id: "c1",
     question: "How long does delivery usually take?",
     answer:
-      "Our average delivery time is 30-45 minutes depending on the restaurant's preparation time and your distance.",
+      "Our average delivery time is 30-45 minutes depending on the restaurant's preparation time and your distance. Browse restaurants or trending dishes to start a new order.",
   },
   {
     id: "c2",

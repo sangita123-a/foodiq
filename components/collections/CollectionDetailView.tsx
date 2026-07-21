@@ -87,7 +87,7 @@ export default function CollectionDetailView({ slug }: Props) {
           Back to Home
         </Link>
 
-        <div className="relative mb-10 overflow-hidden rounded-3xl border border-[#ECECEC] bg-[#1A1A1A]">
+        <div className="relative mb-10 overflow-hidden rounded-3xl border border-[#E8E8E8] bg-white">
           <div className="absolute inset-0">
             <SafeImage
               src={collection.bannerImage}
@@ -95,16 +95,16 @@ export default function CollectionDetailView({ slug }: Props) {
               alt={collection.title}
               fill
               sizes="100vw"
-              className="object-cover opacity-50"
+              className="object-cover opacity-40"
             />
           </div>
-          <div className="relative z-10 bg-gradient-to-r from-black/85 via-black/50 to-transparent p-8 md:p-12">
+          <div className="relative z-10 bg-gradient-to-r from-white/95 via-white/80 to-transparent p-8 md:p-12">
             <span className="mb-3 inline-block text-3xl">{collection.emoji}</span>
-            <h1 className="mb-3 text-3xl font-black text-white md:text-5xl">{collection.title}</h1>
-            <p className="mb-4 max-w-2xl text-sm font-medium text-gray-200 md:text-lg">
+            <h1 className="mb-3 text-3xl font-black text-[#1C1C1C] md:text-5xl">{collection.title}</h1>
+            <p className="mb-4 max-w-2xl text-sm font-medium text-[#696969] md:text-lg">
               {collection.description}
             </p>
-            <span className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/15 px-4 py-2 text-xs font-bold text-white backdrop-blur-md">
+            <span className="inline-flex items-center gap-2 rounded-xl border border-[#E8E8E8] bg-white px-4 py-2 text-xs font-bold text-[#1C1C1C] shadow-sm">
               {collection.itemCount} · {items.length} spots listed
             </span>
           </div>
@@ -130,10 +130,10 @@ export default function CollectionDetailView({ slug }: Props) {
                   key={value}
                   type="button"
                   onClick={() => setDiet(value)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-bold capitalize transition-colors ${
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition-colors ${
                     diet === value
-                      ? "bg-[#E23744] text-white"
-                      : "text-[#666666] hover:text-[#1A1A1A]"
+                      ? "border border-[#E23744] bg-[#FFF5F6] text-[#E23744]"
+                      : "text-[#696969] hover:text-[#1C1C1C]"
                   }`}
                 >
                   {value === "nonveg" ? "Non-Veg" : value}

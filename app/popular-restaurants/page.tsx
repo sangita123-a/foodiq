@@ -1,15 +1,6 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import FloatingCart from "@/components/FloatingCart";
-import FoodCategoryNav from "@/components/home/FoodCategoryNav";
+import { redirect } from "next/navigation";
+import { CANONICAL_PATHS } from "@/lib/seo/urls";
 
-export default function PopularRestaurantsPage() {
-  return (
-    <main className="relative min-h-screen bg-white pt-[90px] selection:bg-[#E23744]/20 selection:text-[#1A1A1A]">
-      <Navbar />
-      <FloatingCart />
-      <FoodCategoryNav />
-      <Footer />
-    </main>
-  );
+export default function PopularRestaurantsRedirectPage() {
+  redirect(CANONICAL_PATHS.orderOnline);
 }

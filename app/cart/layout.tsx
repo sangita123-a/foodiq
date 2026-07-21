@@ -1,11 +1,8 @@
 ﻿import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { buildPrivatePageMetadata } from "@/lib/seo/entity-metadata";
+import { publicMetadata } from "@/lib/seo/pages";
 
-export const metadata: Metadata = buildPrivatePageMetadata({
-  title: "Cart",
-  path: "/cart",
-});
+export const metadata: Metadata = publicMetadata("cart");
 
 export default function PrivateSeoLayout({ children }: { children: ReactNode }) {
   return children;

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import JsonLd from "@/components/seo/JsonLd";
-import { faqJsonLd } from "@/lib/seo/jsonld";
+import { faqJsonLd, publicPageBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { HELP_SUPPORT_FAQS } from "@/lib/seo/faq";
 import { publicMetadata } from "@/lib/seo/pages";
 
@@ -14,7 +14,12 @@ export default function HelpSupportSeoLayout({
 }) {
   return (
     <>
-      <JsonLd data={faqJsonLd(HELP_SUPPORT_FAQS)} />
+      <JsonLd
+        data={[
+          publicPageBreadcrumbJsonLd("Help & Support", "/help-support"),
+          faqJsonLd(HELP_SUPPORT_FAQS),
+        ]}
+      />
       {children}
     </>
   );

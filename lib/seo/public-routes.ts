@@ -3,6 +3,7 @@ import path from "path";
 import { CATEGORY_SLUGS } from "@/lib/data/categoryData";
 import { COLLECTION_SLUGS } from "@/lib/data/collectionsData";
 import { CUISINE_SLUGS } from "@/lib/cuisines";
+import { DUPLICATE_CUISINE_CATEGORY_SLUGS, isRedirectOnlyRoute } from "@/lib/seo/urls";
 
 /** Routes that must never appear in sitemap or search indexes. */
 export const PRIVATE_ROUTE_PREFIXES = [
@@ -30,10 +31,14 @@ export const PRIVATE_ROUTE_PREFIXES = [
   "/my-rewards",
   "/my-wallet",
   "/help-and-support",
+  "/help-center",
+  "/restaurants",
+  "/support",
   "/rewards",
   "/login",
   "/register",
   "/forgot-password",
+  "/offline",
   "/api",
 ] as const;
 
@@ -66,7 +71,7 @@ function walkStaticRoutes(dir: string, urlPrefix = ""): string[] {
     if (urlPrefix.includes("[")) continue;
 
     const route = urlPrefix || "/";
-    if (!isPrivateRoute(route)) {
+    if (!isPrivateRoute(route) && !isRedirectOnlyRoute(route)) {
       routes.push(route);
     }
   }
@@ -84,6 +89,9 @@ export function getKnownDynamicRoutePatterns(): string[] {
   const patterns: string[] = [];
 
   for (const slug of CUISINE_SLUGS) {
+    if ((DUPLICATE_CUISINE_CATEGORY_SLUGS as readonly string[]).includes(slug)) {
+      continue;
+    }
     patterns.push(`/cuisine/${slug}`);
   }
   for (const slug of CATEGORY_SLUGS) {
@@ -104,8 +112,6 @@ export type SitemapPriority = {
 
 const PRIORITY_OVERRIDES: Record<string, Omit<SitemapPriority, "path">> = {
   "/": { changeFrequency: "daily", priority: 1 },
-  "/restaurants": { changeFrequency: "daily", priority: 0.9 },
-  "/popular-restaurants": { changeFrequency: "daily", priority: 0.85 },
   "/popular-cuisines": { changeFrequency: "weekly", priority: 0.8 },
   "/trending-dishes": { changeFrequency: "daily", priority: 0.8 },
   "/offers": { changeFrequency: "daily", priority: 0.8 },
@@ -117,7 +123,11 @@ const PRIORITY_OVERRIDES: Record<string, Omit<SitemapPriority, "path">> = {
   "/help-support": { changeFrequency: "monthly", priority: 0.5 },
   "/privacy-policy": { changeFrequency: "yearly", priority: 0.3 },
   "/terms-of-service": { changeFrequency: "yearly", priority: 0.3 },
+  "/refund-policy": { changeFrequency: "yearly", priority: 0.3 },
   "/live-cricket": { changeFrequency: "daily", priority: 0.4 },
+  "/blog": { changeFrequency: "weekly", priority: 0.55 },
+  "/careers": { changeFrequency: "monthly", priority: 0.45 },
+  "/press": { changeFrequency: "monthly", priority: 0.45 },
 };
 
 export function getStaticSitemapEntries(): SitemapPriority[] {

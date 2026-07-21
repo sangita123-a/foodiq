@@ -76,7 +76,7 @@ const registerUser = async (req, res) => {
     if (userExists) {
       return res.status(400).json({
         success: false,
-        message: 'User already exists with this email',
+        message: 'Email already exists',
         error: {},
       });
     }
@@ -93,10 +93,14 @@ const registerUser = async (req, res) => {
 
     if (user) {
       const { pool } = require('../config/db');
-      await pool.query(
-        'INSERT INTO user_settings (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING',
-        [user.id]
-      );
+      try {
+        await pool.query(
+          'INSERT INTO user_settings (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING',
+          [user.id]
+        );
+      } catch (settingsErr) {
+        log.warn('user_settings on signup skipped', { error: settingsErr.message });
+      }
       try {
         const loyaltyEngine = require('../services/loyaltyEngine');
         const loyaltyModel = require('../models/loyaltyModel');
@@ -114,10 +118,14 @@ const registerUser = async (req, res) => {
           [user.id]
         );
       }
-      await pool.query(
-        'INSERT INTO notifications (user_id, title, message) VALUES ($1, $2, $3)',
-        [user.id, 'Welcome to Foodiq!', 'Thanks for joining. Explore restaurants and place your first order.']
-      );
+      try {
+        await pool.query(
+          'INSERT INTO notifications (user_id, title, message) VALUES ($1, $2, $3)',
+          [user.id, 'Welcome to Foodiq!', 'Thanks for joining. Explore restaurants and place your first order.']
+        );
+      } catch (notifErr) {
+        log.warn('welcome notification skipped', { error: notifErr.message });
+      }
 
       // Referral invite code (optional)
       try {
@@ -190,7 +198,7 @@ const registerUser = async (req, res) => {
     if (error?.code === '23505') {
       return res.status(400).json({
         success: false,
-        message: 'User already exists with this email',
+        message: 'Email already exists',
         error: {},
       });
     }
@@ -227,7 +235,7 @@ const loginUser = async (req, res) => {
       }).catch(() => {});
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password.',
+        message: 'User not found',
         error: {},
       });
     }
@@ -236,7 +244,7 @@ const loginUser = async (req, res) => {
       bump('auth_failed');
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password.',
+        message: 'Wrong password',
         error: {},
       });
     }
@@ -264,7 +272,7 @@ const loginUser = async (req, res) => {
       }
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password.',
+        message: 'Wrong password',
         error: {},
       });
     }

@@ -53,6 +53,9 @@ export async function generateMetadata({
       title: "Restaurant",
       description: "View restaurant menu and order online on Foodiq.",
       path: `/restaurant/${id}`,
+      socialTitle: "Restaurant Details | Foodiq",
+      socialDescription:
+        "Browse restaurant menus, ratings, and delivery options on Foodiq.",
     });
   }
 
@@ -67,6 +70,8 @@ export async function generateMetadata({
     path: `/restaurant/${restaurant.id}`,
     image: restaurant.image_url,
     keywords: restaurantKeywords(restaurant.name),
+    socialTitle: `Order from ${restaurant.name} | Foodiq`,
+    socialDescription: description.slice(0, 160),
   });
 }
 
@@ -88,7 +93,7 @@ export default async function RestaurantLayout({
     schemas.push(
       breadcrumbJsonLd([
         { name: "Home", path: "/" },
-        { name: "Restaurants", path: "/restaurants" },
+        { name: "Restaurants", path: "/order-online" },
         { name: restaurant.name, path: `/restaurant/${restaurant.id}` },
       ]),
       restaurantJsonLd(restaurant),

@@ -2193,6 +2193,13 @@ async function ensureSchema() {
       `);
     }
 
+    try {
+      const { seedCollectionRestaurants } = require('./seedCollections');
+      await seedCollectionRestaurants(pool);
+    } catch (seedErr) {
+      console.warn('[COLLECTIONS] Seed skipped:', seedErr.message);
+    }
+
     console.log('[SCHEMA] CPI Task 3 new features foundation ensured');
 
     // ========== CPI Task 4 — Analytics query indexes ==========

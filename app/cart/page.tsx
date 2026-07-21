@@ -46,7 +46,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+      <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[#E23744]/15 selection:text-[#1C1C1C] pt-[90px]">
         <Navbar />
         <EmptyCart />
         <SuggestedItems />
@@ -56,7 +56,7 @@ export default function CartPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[#E23744]/15 selection:text-[#1C1C1C] pt-[90px]">
       <Navbar />
       <div className="container mx-auto px-4 md:px-8 py-12">
         <div className="mb-10 border-b border-[#E5E7EB] pb-8 flex items-center justify-between">
@@ -69,7 +69,7 @@ export default function CartPage() {
           <button
             type="button"
             onClick={handleClearCart}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 font-bold text-sm transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[#696969] bg-white border border-[#EAEAEA] hover:border-[#D4D4D4] hover:text-[#E23744] font-bold text-sm transition-colors"
           >
             <Trash2 className="w-4 h-4" />
             <span>Clear Cart</span>

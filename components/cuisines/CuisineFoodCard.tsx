@@ -1,10 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Star, Plus, Minus, Clock, Heart, Share2, Eye } from "lucide-react";
-import { getFoodImage } from "@/lib/images";
+import SafeImage from "@/components/ui/SafeImage";
+import { FOOD_FALLBACK, getFoodImage } from "@/lib/images";
+import { CARD_IMAGE_SIZES } from "@/lib/performance/assets";
 import { shareContent } from "@/lib/share";
 import { useToast } from "@/contexts/ToastContext";
 
@@ -61,12 +62,13 @@ export default function CuisineFoodCard({
   return (
     <div className="food-card group flex flex-col">
       <Link href={foodHref} className="food-card-image block">
-        <Image
+        <SafeImage
           src={getFoodImage(item.image_url)}
+          fallback={FOOD_FALLBACK}
           alt={item.name}
           fill
+          sizes={CARD_IMAGE_SIZES}
           className="object-cover"
-          sizes="(max-width: 768px) 100vw, 320px"
         />
         <div
           className={`absolute top-3 left-3 w-5 h-5 flex items-center justify-center border-2 rounded-sm bg-black/50 ${

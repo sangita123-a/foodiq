@@ -42,5 +42,11 @@ export function getClarityId(): string | undefined {
 export function isMonitoringEnabled(): boolean {
   if (process.env.NODE_ENV !== "production") return false;
   if (process.env.NEXT_PUBLIC_MONITORING_ENABLED === "false") return false;
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1" || host.endsWith(".local")) {
+      return false;
+    }
+  }
   return true;
 }

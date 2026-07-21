@@ -44,7 +44,6 @@ function isRestaurantPage(url) {
   return (
     url.pathname === "/" ||
     url.pathname.startsWith("/restaurant/") ||
-    url.pathname.startsWith("/restaurants") ||
     url.pathname.startsWith("/order-online")
   );
 }

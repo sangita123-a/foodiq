@@ -153,7 +153,7 @@ export default function AdminDashboardPage() {
             {(stats?.weekly || []).map((d) => (
               <div key={d.day} className="flex-1 flex flex-col items-center gap-2">
                 <div
-                  className="w-full max-w-[36px] bg-[#E23744]/25 border border-[#E23744]/40 rounded-t-lg"
+                  className="w-full max-w-[36px] bg-[#EAEAEA] border border-[#D4D4D4] rounded-t-lg"
                   style={{ height: `${Math.max(8, Math.round((d.revenue / weeklyMax) * 100))}%` }}
                   title={formatCurrency(d.revenue)}
                 />

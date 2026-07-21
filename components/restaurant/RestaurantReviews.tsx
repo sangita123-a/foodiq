@@ -6,7 +6,8 @@ import { motion } from "framer-motion";
 import useSWR from "swr";
 import { formatDistanceToNow } from "date-fns";
 import SafeImage from "@/components/ui/SafeImage";
-import { AVATAR_FALLBACK } from "@/lib/images";
+import { AVATAR_FALLBACK, FOOD_FALLBACK } from "@/lib/images";
+import { THUMBNAIL_IMAGE_SIZES } from "@/lib/performance/assets";
 import RatingDistribution from "@/components/reviews/RatingDistribution";
 
 type Review = {
@@ -117,8 +118,16 @@ export default function RestaurantReviews({ restaurantId }: RestaurantReviewsPro
                 {review.images && review.images.length > 0 && (
                   <div className="flex gap-2 mb-3 flex-wrap">
                     {review.images.slice(0, 3).map((img, i) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img key={i} src={img} alt="" className="w-16 h-16 rounded-lg object-cover border border-[#E5E7EB]" />
+                      <SafeImage
+                        key={i}
+                        src={img}
+                        fallback={FOOD_FALLBACK}
+                        alt={`Review photo ${i + 1}`}
+                        width={64}
+                        height={64}
+                        sizes={THUMBNAIL_IMAGE_SIZES}
+                        className="w-16 h-16 rounded-lg object-cover border border-[#E5E7EB]"
+                      />
                     ))}
                   </div>
                 )}

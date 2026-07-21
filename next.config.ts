@@ -1,63 +1,18 @@
 import type { NextConfig } from "next";
+import { buildProductionSecurityHeaders, getSecurityHeadersOptions } from "./lib/security/headers";
+import { buildLegacyRedirects } from "./lib/seo/legacy-redirects";
 
-const isProd = process.env.NODE_ENV === "production";
-const apiOrigin = (() => {
-  try {
-    const raw = process.env.NEXT_PUBLIC_API_URL || "";
-    if (!raw) return "";
-    return new URL(raw).origin;
-  } catch {
-    return "";
-  }
-})();
-
-/** Production CSP — allows app assets, analytics, maps, Firebase, Razorpay. */
-const contentSecurityPolicy = [
-  "default-src 'self'",
-  "base-uri 'self'",
-  "object-src 'none'",
-  "frame-ancestors 'none'",
-  "form-action 'self'",
-  "img-src 'self' data: blob: https:",
-  "font-src 'self' data: https://fonts.gstatic.com",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  // Next.js + analytics need limited inline/eval in browser bundles
-  `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://checkout.razorpay.com https://www.gstatic.com`,
-  [
-    "connect-src 'self'",
-    "https://www.google-analytics.com",
-    "https://region1.google-analytics.com",
-    "https://www.googletagmanager.com",
-    "https://www.clarity.ms",
-    "https://*.clarity.ms",
-    "https://api.razorpay.com",
-    "https://lumberjack.razorpay.com",
-    "https://fcm.googleapis.com",
-    "https://firebaseinstallations.googleapis.com",
-    "https://*.googleapis.com",
-    "https://*.firebaseio.com",
-    "https://*.openstreetmap.org",
-    "wss:",
-    "ws:",
-    apiOrigin,
-    !isProd ? "http://localhost:4000 http://127.0.0.1:4000 ws://localhost:4000" : "",
-  ]
-    .filter(Boolean)
-    .join(" "),
-  "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://www.openstreetmap.org https://www.googletagmanager.com",
-  "worker-src 'self' blob:",
-  "manifest-src 'self'",
-  isProd ? "upgrade-insecure-requests" : "",
-]
-  .filter(Boolean)
-  .join("; ");
+const securityHeaders = buildProductionSecurityHeaders(getSecurityHeadersOptions());
 
 const nextConfig: NextConfig = {
+  // Allow automated/browser testing via 127.0.0.1 in local dev (Next.js 16 default blocks cross-origin HMR)
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   // Enables Docker/CI artifact packaging without changing app behavior
   output: "standalone",
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
+  trailingSlash: false,
   compiler: {
     removeConsole:
       process.env.NODE_ENV === "production"
@@ -70,6 +25,9 @@ const nextConfig: NextConfig = {
     : {}),
   images: {
     formats: ["image/avif", "image/webp"],
+    // Next.js 16: quality 72 is used by SafeImage; local backend images need private IP in dev
+    qualities: [72, 75, 100],
+    ...(process.env.NODE_ENV === "development" ? { dangerouslyAllowLocalIP: true } : {}),
     minimumCacheTTL: 60 * 60 * 24 * 30,
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
@@ -119,7 +77,14 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    optimizePackageImports: ["lucide-react", "framer-motion", "date-fns"],
+    optimizePackageImports: [
+      "lucide-react",
+      "framer-motion",
+      "date-fns",
+      "swr",
+      "firebase/app",
+      "firebase/messaging",
+    ],
   },
   async headers() {
     return [
@@ -161,6 +126,51 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/fonts/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/hero-video.mp4",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/default-:name.webp",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/opengraph-image.png",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=604800, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      {
+        source: "/twitter-image.png",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=604800, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      {
+        source: "/splash/:path*",
         headers: [
           {
             key: "Cache-Control",
@@ -224,53 +234,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/(.*)",
-        headers: [
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-Frame-Options", value: "DENY" },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(self), payment=(self)",
-          },
-          {
-            key: "Content-Security-Policy",
-            value: contentSecurityPolicy,
-          },
-          ...(isProd
-            ? [
-                {
-                  key: "Strict-Transport-Security",
-                  value: "max-age=63072000; includeSubDomains; preload",
-                },
-              ]
-            : []),
-        ],
+        headers: securityHeaders,
       },
     ];
   },
   async redirects() {
-    return [
-      { source: "/terms", destination: "/terms-of-service", permanent: true },
-      { source: "/privacy", destination: "/privacy-policy", permanent: true },
-      { source: "/help", destination: "/help-center", permanent: true },
-      { source: "/faq", destination: "/help-center", permanent: true },
-      { source: "/partner", destination: "/partner/login", permanent: false },
-      {
-        source: "/restaurant/login",
-        destination: "/partner/login",
-        permanent: true,
-      },
-      {
-        source: "/restaurant/register",
-        destination: "/partner/login",
-        permanent: false,
-      },
-      {
-        source: "/categories",
-        destination: "/popular-cuisines",
-        permanent: true,
-      },
-    ];
+    return buildLegacyRedirects();
   },
   async rewrites() {
     const backend = (

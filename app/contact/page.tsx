@@ -12,7 +12,7 @@ import Newsletter from "@/components/contact/Newsletter";
 
 export default function ContactPage() {
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[var(--color-primary)] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[#E23744]/15 selection:text-[#1C1C1C] pt-[90px]">
       <Navbar />
 
       <ContactHero />

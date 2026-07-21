@@ -97,7 +97,7 @@ export default function MyOrdersList() {
         <div className="text-center py-16 text-[#6B7280]">
           <Package className="w-12 h-12 mx-auto mb-4 opacity-40" />
           <p className="font-bold text-white mb-2">No orders yet</p>
-          <Link href="/restaurants" className="text-primary text-sm font-bold">
+          <Link href="/order-online" className="text-primary text-sm font-bold">
             Browse restaurants →
           </Link>
         </div>

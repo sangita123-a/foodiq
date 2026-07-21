@@ -230,6 +230,7 @@ app.use('/api/messaging', require('./routes/messagingRoutes'));
 app.use('/api/media', require('./routes/mediaRoutes'));
 app.use('/api/monitoring', require('./routes/monitoringRoutes'));
 app.use('/api/features', require('./routes/featureRoutes'));
+app.use('/api/collections', require('./routes/collectionRoutes'));
 app.use('/api/analytics', require('./routes/analyticsBiRoutes'));
 
 // ─── Static: catalog images ───────────────────────────────────────────────

@@ -31,9 +31,7 @@ function getGridColumns(width: number): number {
 }
 
 function useTrendingGridColumns(): number {
-  const [columns, setColumns] = useState(() =>
-    typeof window !== "undefined" ? getGridColumns(window.innerWidth) : 2
-  );
+  const [columns, setColumns] = useState(2);
 
   useEffect(() => {
     const update = () => setColumns(getGridColumns(window.innerWidth));
@@ -82,16 +80,12 @@ function DishCard({
   onAdd,
   onUpdateQty,
 }: DishCardProps) {
-  return (
-    <motion.article
-      layout
-      initial={animateIn ? { opacity: 0, y: -20 } : false}
-      animate={{ opacity: 1, y: 0 }}
-      exit={animateIn ? { opacity: 0, y: -20 } : undefined}
-      transition={{ duration: 0.35, delay: revealDelay, ease: "easeOut" }}
-      className="group flex shrink-0 flex-col overflow-hidden rounded-2xl border border-[#ECECEC] bg-white shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(226,55,68,0.14)]"
-      style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
-    >
+  const cardClassName =
+    "group flex shrink-0 flex-col overflow-hidden rounded-2xl border border-[#ECECEC] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]";
+  const cardStyle = { width: CARD_WIDTH, height: CARD_HEIGHT };
+
+  const cardBody = (
+    <>
       <div
         className="relative w-full shrink-0 overflow-hidden rounded-t-2xl bg-[#F8F8F8]"
         style={{ height: IMAGE_HEIGHT }}
@@ -114,39 +108,45 @@ function DishCard({
             e.stopPropagation();
             onFavoriteToggle(dish);
           }}
-          className="absolute right-1.5 top-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-[#666666] shadow-sm transition-colors hover:text-[#E23744]"
-          aria-label={isFavorite ? "Remove favorite" : "Add favorite"}
+          className="touch-target-expand absolute right-0 top-0 z-10 text-[#666666] transition-colors hover:text-[#E23744]"
+          aria-label={isFavorite ? `Remove ${dish.name} from favorites` : `Add ${dish.name} to favorites`}
           aria-pressed={isFavorite}
         >
-          <Heart className={`h-3 w-3 ${isFavorite ? "fill-[#E23744] text-[#E23744]" : ""}`} />
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/90 shadow-sm">
+            <Heart
+              className="h-3 w-3"
+              fill={isFavorite ? "#E23744" : "none"}
+              stroke={isFavorite ? "#E23744" : "currentColor"}
+            />
+          </span>
         </button>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col p-[10px]">
         <Link
           href={`/food/${dish.id}`}
-          className="line-clamp-1 text-[13px] font-extrabold leading-tight text-[#1A1A1A] transition-colors hover:text-[#E23744]"
+          className="line-clamp-1 text-[13px] font-extrabold leading-tight text-[#1C1C1C] transition-colors hover:text-[#1C1C1C]"
         >
           {dish.name}
         </Link>
 
-        <div className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-[#666666]">
-          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-          <span className="text-[#1A1A1A]">{dish.rating}</span>
+        <div className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-[#696969]">
+          <Star className="h-3 w-3 food-rating-star" fill="#F4B400" stroke="#F4B400" aria-hidden />
+          <span className="text-[#1C1C1C]">{dish.rating}</span>
           <span className="text-[#CCCCCC]">·</span>
           <Clock className="h-2.5 w-2.5" />
           <span>{deliveryTime}</span>
         </div>
 
-        <p className="mt-0.5 line-clamp-1 text-[10px] font-medium text-[#888888]">
+        <p className="mt-0.5 line-clamp-1 text-[10px] font-medium text-[#757575]">
           {dish.restaurantName}
         </p>
 
         <div className="mt-auto flex items-center justify-between gap-1 pt-1.5">
           <div className="min-w-0">
-            <span className="text-sm font-black text-[#E23744]">₹{dish.price}</span>
+            <span className="text-sm font-black text-[var(--color-price)]">₹{dish.price}</span>
             {dish.originalPrice && dish.originalPrice > dish.price && (
-              <span className="ml-0.5 text-[9px] text-[#AAAAAA] line-through">
+              <span className="ml-0.5 text-[9px] text-[var(--color-price-old)] line-through">
                 ₹{dish.originalPrice}
               </span>
             )}
@@ -157,31 +157,34 @@ function DishCard({
               type="button"
               onClick={() => onAdd(dish)}
               disabled={isUpdating}
-              className="inline-flex h-[34px] shrink-0 items-center justify-center gap-0.5 rounded-lg bg-[#E23744] px-2.5 text-[10px] font-extrabold text-white transition-all hover:bg-[#C81E34] disabled:opacity-50"
+              aria-label={`Add ${dish.name} to cart`}
+              className="food-button-add touch-target-expand inline-flex h-[34px] shrink-0 items-center justify-center gap-0.5 px-2.5 disabled:opacity-50"
             >
               <Plus className="h-3 w-3" />
               <span>Add</span>
             </button>
           ) : (
-            <div className="flex h-[34px] shrink-0 items-center gap-0.5 rounded-lg border border-[#E23744] bg-[#FFF5F6] px-1">
+            <div className="flex h-[34px] shrink-0 items-center gap-0.5 rounded-lg border border-[#ECECEC] bg-white px-1">
               <button
                 type="button"
                 onClick={() => onUpdateQty(dish.id, -1)}
                 disabled={isUpdating}
-                className="flex h-6 w-6 items-center justify-center rounded-md text-[#E23744] transition-colors hover:bg-[#E23744] hover:text-white disabled:opacity-50"
+                aria-label={`Decrease quantity of ${dish.name}`}
+                className="touch-target-expand flex h-6 w-6 items-center justify-center rounded-md border border-[#ECECEC] text-[#696969] transition-colors hover:bg-[#FAFAFA] disabled:opacity-50"
               >
-                <Minus className="h-3 w-3" />
+                <Minus className="h-3 w-3" aria-hidden="true" />
               </button>
-              <span className="min-w-[12px] text-center text-[10px] font-black text-[#E23744]">
+              <span className="min-w-[12px] text-center text-[10px] font-black text-[#1C1C1C]" aria-live="polite">
                 {qty}
               </span>
               <button
                 type="button"
                 onClick={() => onUpdateQty(dish.id, 1)}
                 disabled={isUpdating}
-                className="flex h-6 w-6 items-center justify-center rounded-md text-[#E23744] transition-colors hover:bg-[#E23744] hover:text-white disabled:opacity-50"
+                aria-label={`Increase quantity of ${dish.name}`}
+                className="touch-target-expand flex h-6 w-6 items-center justify-center rounded-md border border-[var(--color-primary)] text-[var(--color-primary)] transition-colors hover:bg-[var(--color-primary-soft)] disabled:opacity-50"
               >
-                <Plus className="h-3 w-3" />
+                <Plus className="h-3 w-3" aria-hidden="true" />
               </button>
             </div>
           )}
@@ -189,12 +192,33 @@ function DishCard({
 
         <Link
           href={`/food/${dish.id}`}
-          className="mt-1 inline-flex items-center justify-center gap-0.5 text-[9px] font-bold text-[#888888] transition-colors hover:text-[#E23744]"
+          className="mt-1 inline-flex items-center justify-center gap-0.5 text-[9px] font-bold text-[#696969] transition-colors hover:text-[#1C1C1C]"
         >
-          <Eye className="h-2.5 w-2.5" />
+          <Eye className="h-2.5 w-2.5" aria-hidden="true" />
           <span>View Details</span>
         </Link>
       </div>
+    </>
+  );
+
+  if (!animateIn) {
+    return (
+      <article className={cardClassName} style={cardStyle}>
+        {cardBody}
+      </article>
+    );
+  }
+
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.35, delay: revealDelay, ease: "easeOut" }}
+      className={cardClassName}
+      style={cardStyle}
+    >
+      {cardBody}
     </motion.article>
   );
 }
@@ -317,21 +341,21 @@ export default function TrendingDishes() {
       <div className="container mx-auto max-w-7xl px-4 md:px-8">
         <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-red-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-red-600">
-              <Flame className="h-4 w-4 fill-red-500 text-red-500" />
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#ECECEC] bg-[#FAFAFA] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#696969]">
+              <Flame className="h-4 w-4 text-[var(--color-primary)]" fill="var(--color-primary)" stroke="var(--color-primary)" aria-hidden />
               <span>60 Trending Delicacies</span>
             </div>
-            <h2 className="mb-2 text-3xl font-extrabold tracking-tight text-[#0F172A] md:text-4xl">
+            <h2 className="mb-2 text-3xl font-extrabold tracking-tight text-[#1C1C1C] md:text-4xl">
               Trending Dishes Right Now
             </h2>
-            <p className="text-base text-[#64748B] md:text-lg">
+            <p className="text-base text-[#696969] md:text-lg">
               Most ordered dishes across Foodiq with instant delivery.
             </p>
           </div>
 
           <Link
             href="/trending-dishes"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#0F172A] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#E23744]"
+            className="food-button food-button-primary inline-flex items-center gap-2 px-5 py-2 text-sm"
           >
             <ShoppingBag className="h-4 w-4" />
             <span>View All 60 Dishes</span>
@@ -346,10 +370,9 @@ export default function TrendingDishes() {
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200 md:text-sm ${
-                  isActive
-                    ? "scale-105 bg-[#0F172A] text-white shadow-md"
-                    : "border border-[#E2E8F0] bg-[#F8FAFC] text-[#475569] hover:bg-[#F1F5F9]"
+                aria-pressed={isActive}
+                className={`filter-tab md:text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] ${
+                  isActive ? "filter-tab-active" : ""
                 }`}
               >
                 {cat}
@@ -359,7 +382,7 @@ export default function TrendingDishes() {
         </div>
 
         <div className={GRID_CLASS}>
-          <AnimatePresence mode="popLayout">
+          <AnimatePresence mode="sync">
             {isLoading && visibleDishes.length === 0
               ? Array.from({ length: initialVisible }).map((_, i) => (
                   <div
@@ -378,7 +401,7 @@ export default function TrendingDishes() {
           </AnimatePresence>
         </div>
 
-        {hasMore && !isLoading && (
+        {hasMore && visibleDishes.length > 0 && (
           <div className="flex justify-center">
             <button
               type="button"
@@ -390,7 +413,7 @@ export default function TrendingDishes() {
                   setShowAll(true);
                 }
               }}
-              className="mt-10 px-8 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg"
+              className="food-button food-button-primary mt-10 px-8 py-2.5 text-sm"
             >
               {showAll ? "View Less" : "View More"}
             </button>

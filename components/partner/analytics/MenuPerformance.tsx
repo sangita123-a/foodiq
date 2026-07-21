@@ -42,6 +42,9 @@ function MenuCard({ item, title, icon: Icon, colorClass, gradientClass, delay }:
 }
 
 export default function MenuPerformance({ data }: MenuPerformanceProps) {
+  const topSeller = data.topSelling[0] ?? data.highestRevenue;
+  const needsAttention = data.leastOrdered[0] ?? data.fastestPrep;
+
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-6">
@@ -52,7 +55,7 @@ export default function MenuPerformance({ data }: MenuPerformanceProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MenuCard
-          item={data.topSelling[0]}
+          item={topSeller}
           title="Top Seller"
           icon={TrendingUp}
           colorClass="text-green-400"
@@ -76,7 +79,7 @@ export default function MenuPerformance({ data }: MenuPerformanceProps) {
           delay={0.2}
         />
         <MenuCard
-          item={data.leastOrdered[0]}
+          item={needsAttention}
           title="Needs Attention"
           icon={TrendingDown}
           colorClass="text-red-400"

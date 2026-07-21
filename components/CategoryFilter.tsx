@@ -1,3 +1,4 @@
+/** @architecture UNUSED — not imported by any route. Safe to ignore. */
 "use client";
 
 import { motion } from "framer-motion";
@@ -27,7 +28,7 @@ export default function CategoryFilter() {
       params.set("category", slug);
     }
     params.delete("page");
-    router.push(`/restaurants?${params.toString()}`, { scroll: false });
+    router.push(`/order-online?${params.toString()}`, { scroll: false });
   };
 
   return (
@@ -35,14 +36,17 @@ export default function CategoryFilter() {
       {categories.map((cat, idx) => {
         const isActive = currentCategory === cat.slug;
         return (
-          <motion.div
+          <motion.button
             key={cat.slug}
+            type="button"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1, duration: 0.5 }}
             whileHover={{ scale: 1.05, y: -5 }}
             onClick={() => handleCategoryClick(cat.slug)}
-            className="flex flex-col items-center gap-3 cursor-pointer group"
+            aria-pressed={isActive}
+            aria-label={`Filter by ${cat.name}`}
+            className="flex flex-col items-center gap-3 cursor-pointer group bg-transparent border-0 p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#E23744]"
           >
             <div
               className={`w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 transition-colors shadow-lg relative ${
@@ -62,7 +66,7 @@ export default function CategoryFilter() {
                 alt={cat.name}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
-              <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-2xl drop-shadow-md">
+              <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-2xl drop-shadow-md" aria-hidden="true">
                 {cat.emoji}
               </span>
             </div>
@@ -73,7 +77,7 @@ export default function CategoryFilter() {
             >
               {cat.name}
             </span>
-          </motion.div>
+          </motion.button>
         );
       })}
     </div>

@@ -3,17 +3,23 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import SafeImage from "@/components/ui/SafeImage";
+import { RESTAURANT_FALLBACK } from "@/lib/images";
+import { HERO_BACKGROUND_SIZES } from "@/lib/performance/assets";
 
 export default function AboutHero() {
   return (
     <div className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden">
-      
-      {/* Premium Food Background with Dark Overlay */}
-      <div 
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/images/catalog/cuisines/indian.webp')" }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/80 to-white"></div>
+      <div className="absolute inset-0 z-0">
+        <SafeImage
+          src="/images/catalog/cuisines/indian.webp"
+          fallback={RESTAURANT_FALLBACK}
+          decorative
+          fill
+          sizes={HERO_BACKGROUND_SIZES}
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/80 to-white" />
       </div>
 
       <div className="container mx-auto px-4 md:px-8 relative z-10 text-center">
@@ -42,7 +48,7 @@ export default function AboutHero() {
         >
           <Link 
             href="/"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#E23744] px-8 py-4 font-bold text-white shadow-[0_12px_30px_rgba(226, 55, 68,0.22)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#E23744] hover:shadow-[0_16px_34px_rgba(239,79,95,0.22)]"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#E23744] px-8 py-4 font-bold text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#C81E32] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
           >
             Explore Restaurants <ArrowRight className="w-5 h-5" />
           </Link>

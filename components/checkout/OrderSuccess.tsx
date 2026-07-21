@@ -80,7 +80,7 @@ export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false 
       initial={{ scale: 0.9, y: 50 }}
       animate={{ scale: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
-      className="bg-[#F8FAFC] rounded-3xl p-8 md:p-12 max-w-lg w-full border border-[#E5E7EB] shadow-[0_20px_60px_rgba(226, 55, 68,0.2)] text-center relative overflow-hidden"
+      className="bg-white rounded-3xl p-8 md:p-12 max-w-lg w-full border border-[#EAEAEA] shadow-[0_8px_28px_rgba(0,0,0,0.08)] text-center relative overflow-hidden"
     >
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-green-500/20 rounded-full blur-[80px] pointer-events-none" />
 
@@ -192,7 +192,7 @@ export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false 
       </Link>
 
       <Link
-        href="/restaurants"
+        href="/order-online"
         className="w-full mt-4 bg-white border border-[#E5E7EB] hover:bg-[#F8FAFC] text-[#111827] py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all relative z-10"
       >
         <ShoppingBag className="w-5 h-5" />

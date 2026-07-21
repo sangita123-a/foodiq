@@ -13,7 +13,7 @@ export default function FeaturedRestaurant() {
 
   if (isLoading) {
     return (
-      <section className="bg-[#F8F9FA] w-full py-[100px] overflow-hidden">
+      <section className="bg-[#FAFAFA] w-full py-[100px] overflow-hidden">
         <div className="w-[90%] max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-12 xl:gap-16 items-center">
             <div className="w-full lg:w-[55%] aspect-[4/3] bg-[#ECECEC] animate-pulse rounded-[20px]"></div>
@@ -32,7 +32,7 @@ export default function FeaturedRestaurant() {
   if (!restaurant) return null;
 
   return (
-    <section className="bg-[#F8F9FA] w-full py-12 sm:py-16 md:py-20 lg:py-[100px] overflow-hidden border-y border-[#ECECEC]">
+    <section className="bg-[#FAFAFA] w-full py-12 sm:py-16 md:py-20 lg:py-[100px] overflow-hidden border-y border-[#EAEAEA]">
       <div className="w-[94%] sm:w-[90%] max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-12 xl:gap-16 items-center">
           
@@ -49,6 +49,7 @@ export default function FeaturedRestaurant() {
                 src={getRestaurantImage(restaurant.image_url)}
                 fallback={RESTAURANT_FALLBACK}
                 alt={restaurant.name}
+                fill
                 sizes="(max-width: 1024px) 100vw, 55vw"
                 className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-in-out"
               />
@@ -107,10 +108,10 @@ export default function FeaturedRestaurant() {
 
             {/* Buttons */}
             <div className="flex flex-wrap gap-4 mb-10">
-              <Link href={`/restaurant/${restaurant.id}`} className="bg-[#E23744] hover:bg-[var(--color-primary-hover)] text-white px-8 py-3.5 rounded-xl font-semibold shadow-[0_8px_20px_rgba(226, 55, 68,0.22)] transition-all duration-300 hover:shadow-[0_12px_26px_rgba(226, 55, 68,0.3)] hover:-translate-y-1">
+              <Link href={`/restaurant/${restaurant.id}`} className="bg-[#E23744] hover:bg-[var(--color-primary-hover)] text-white px-8 py-2.5 rounded-xl text-sm font-semibold shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_6px_18px_rgba(0,0,0,0.1)] hover:-translate-y-0.5">
                 Explore Menu
               </Link>
-              <Link href={`/restaurant/${restaurant.id}`} className="bg-white border border-[#E23744] text-[#E23744] hover:bg-[#E23744] hover:text-white px-8 py-3.5 rounded-xl font-semibold transition-all duration-300 hover:-translate-y-1">
+              <Link href={`/restaurant/${restaurant.id}`} className="bg-white border border-[#E8E8E8] text-[#1C1C1C] hover:bg-[#FAFAFA] hover:border-[#D4D4D4] px-8 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5">
                 View Restaurant
               </Link>
             </div>
@@ -118,19 +119,19 @@ export default function FeaturedRestaurant() {
             {/* Extra Info */}
             <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm text-[#6B7280]">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
+                <CheckCircle2 className="w-5 h-5 text-[#2ECC71]" />
                 <span>Free Delivery</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
+                <CheckCircle2 className="w-5 h-5 text-[#2ECC71]" />
                 <span>Pure Hygiene</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
+                <CheckCircle2 className="w-5 h-5 text-[#2ECC71]" />
                 <span>1000+ Reviews</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
+                <CheckCircle2 className="w-5 h-5 text-[#2ECC71]" />
                 <span>Open Now</span>
               </div>
             </div>

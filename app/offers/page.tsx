@@ -2,8 +2,10 @@
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import Link from "next/link";
+import { FOOD_FALLBACK } from "@/lib/images";
+import { OFFER_PAGE_BANNER_SIZES } from "@/lib/performance/assets";
 import { Tag, Clock, ArrowRight, Sparkles } from "lucide-react";
 import { FIVE_BEST_OFFERS, PromotionalOffer } from "@/lib/data/20offersData";
 import { setActiveOffer } from "@/lib/offers";
@@ -25,7 +27,7 @@ export default function OffersPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[#E23744] selection:text-white pt-[90px]">
+    <main className="min-h-screen bg-[#FFFFFF] relative selection:bg-[#E23744]/15 selection:text-[#1C1C1C] pt-[90px]">
       <Navbar />
 
       <div className="container mx-auto max-w-[1440px] px-4 md:px-8 py-10">
@@ -48,15 +50,16 @@ export default function OffersPage() {
           {FIVE_BEST_OFFERS.map((offer) => (
             <div
               key={offer.id}
-              className="food-card relative group cursor-pointer bg-gradient-to-br from-[#FFF5F6] via-white to-white p-6 flex flex-col justify-between border border-[#ECECEC] rounded-[18px] hover:shadow-[0_12px_32px_rgba(226,55,68,0.12)] hover:-translate-y-1 transition-all duration-300 min-h-[220px]"
+              className="food-card relative group cursor-pointer bg-white p-6 flex flex-col justify-between border border-[#EAEAEA] rounded-[18px] shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 min-h-[220px]"
             >
               {/* Image Banner Background */}
               <div className="absolute top-0 right-0 w-40 sm:w-48 h-full opacity-40 group-hover:opacity-60 transition-opacity duration-300 group-hover:scale-105 transform origin-right overflow-hidden rounded-r-[18px]">
-                <Image
+                <SafeImage
                   src={offer.image}
+                  fallback={FOOD_FALLBACK}
                   alt={offer.title}
                   fill
-                  sizes="(max-width: 640px) 160px, 192px"
+                  sizes={OFFER_PAGE_BANNER_SIZES}
                   className="object-cover object-left [mask-image:linear-gradient(to_right,transparent,black)]"
                 />
               </div>
@@ -68,7 +71,7 @@ export default function OffersPage() {
                     <span className="truncate">{offer.restaurantName}</span>
                   </div>
 
-                  <h3 className="text-xl font-black text-[#1A1A1A] mb-1 leading-tight group-hover:text-[#E23744] transition-colors">
+                  <h3 className="text-xl font-black text-[#1C1C1C] mb-1 leading-tight group-hover:text-[#1C1C1C] transition-colors">
                     {offer.title}
                   </h3>
 
@@ -97,7 +100,7 @@ export default function OffersPage() {
                   <button
                     type="button"
                     onClick={() => handleOrderNow(offer)}
-                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#E23744] hover:bg-[#C81E34] text-white text-sm font-extrabold transition-all shadow-sm active:scale-98"
+                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#E23744] hover:bg-[#C81E32] text-white text-sm font-semibold transition-all shadow-sm active:scale-98"
                   >
                     <span>Order Now</span>
                     <ArrowRight className="w-4 h-4" />

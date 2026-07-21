@@ -1,6 +1,3 @@
-import { CATEGORIES } from "@/lib/data/categoryData";
-import { FEATURED_COLLECTIONS } from "@/lib/data/collectionsData";
-import { POPULAR_RESTAURANTS_30, TRENDING_DISHES_60 } from "@/lib/data/30restaurantsData";
 import { type HeroCity, getRestaurantCity, restaurantMatchesCity } from "@/lib/heroLocation";
 
 export type HeroSearchResult = {
@@ -11,6 +8,28 @@ export type HeroSearchResult = {
   href: string;
 };
 
+type CatalogData = {
+  restaurants: Array<{
+    id: string;
+    name: string;
+    category: string;
+    cuisine: string;
+    location: string;
+  }>;
+  dishes: Array<{
+    id: string;
+    name: string;
+    category: string;
+    restaurantId: string;
+    restaurantName: string;
+  }>;
+  categories: Array<{ id: string; name: string; description: string }>;
+  collections: Array<{ slug: string; title: string; description: string }>;
+};
+
+let catalog: CatalogData | null = null;
+let catalogPromise: Promise<CatalogData> | null = null;
+
 export function normalizeSearchQuery(raw: string): string {
   return raw.trim().replace(/\s+/g, " ").toLowerCase();
 }
@@ -19,7 +38,36 @@ function matchesQuery(text: string, query: string): boolean {
   return normalizeSearchQuery(text).includes(query);
 }
 
-export function searchHeroCatalog(query: string, city: HeroCity): HeroSearchResult[] {
+function ensureCatalog(): Promise<CatalogData> {
+  if (catalog) return Promise.resolve(catalog);
+  if (!catalogPromise) {
+    catalogPromise = Promise.all([
+      import("@/lib/data/30restaurantsData"),
+      import("@/lib/data/categoryData"),
+      import("@/lib/data/collectionsData"),
+    ]).then(([restaurantsModule, categoryModule, collectionsModule]) => {
+      catalog = {
+        restaurants: restaurantsModule.POPULAR_RESTAURANTS_30,
+        dishes: restaurantsModule.TRENDING_DISHES_60,
+        categories: categoryModule.CATEGORIES,
+        collections: collectionsModule.FEATURED_COLLECTIONS,
+      };
+      return catalog;
+    });
+  }
+  return catalogPromise;
+}
+
+/** Warm the search catalog chunk during idle time or on first interaction. */
+export function preloadHeroSearchCatalog(): void {
+  void ensureCatalog();
+}
+
+function searchWithCatalog(
+  query: string,
+  city: HeroCity,
+  data: CatalogData
+): HeroSearchResult[] {
   const q = normalizeSearchQuery(query);
   if (q.length < 1) return [];
 
@@ -33,7 +81,7 @@ export function searchHeroCatalog(query: string, city: HeroCity): HeroSearchResu
     results.push(item);
   };
 
-  for (const restaurant of POPULAR_RESTAURANTS_30) {
+  for (const restaurant of data.restaurants) {
     if (!restaurantMatchesCity(restaurant.id, city)) continue;
     if (
       matchesQuery(restaurant.name, q) ||
@@ -51,7 +99,7 @@ export function searchHeroCatalog(query: string, city: HeroCity): HeroSearchResu
     }
   }
 
-  for (const dish of TRENDING_DISHES_60) {
+  for (const dish of data.dishes) {
     if (!restaurantMatchesCity(dish.restaurantId, city)) continue;
     if (
       matchesQuery(dish.name, q) ||
@@ -68,7 +116,7 @@ export function searchHeroCatalog(query: string, city: HeroCity): HeroSearchResu
     }
   }
 
-  for (const category of CATEGORIES) {
+  for (const category of data.categories) {
     if (matchesQuery(category.name, q) || matchesQuery(category.description, q)) {
       push({
         type: "category",
@@ -80,7 +128,7 @@ export function searchHeroCatalog(query: string, city: HeroCity): HeroSearchResu
     }
   }
 
-  for (const collection of FEATURED_COLLECTIONS) {
+  for (const collection of data.collections) {
     if (matchesQuery(collection.title, q) || matchesQuery(collection.description, q)) {
       push({
         type: "collection",
@@ -95,15 +143,30 @@ export function searchHeroCatalog(query: string, city: HeroCity): HeroSearchResu
   return results.slice(0, 10);
 }
 
-export function mapApiSuggestion(
+/** Sync search when catalog is already loaded; otherwise returns []. */
+export function searchHeroCatalog(query: string, city: HeroCity): HeroSearchResult[] {
+  if (!catalog) return [];
+  return searchWithCatalog(query, city, catalog);
+}
+
+export async function searchHeroCatalogAsync(
+  query: string,
+  city: HeroCity
+): Promise<HeroSearchResult[]> {
+  const data = await ensureCatalog();
+  return searchWithCatalog(query, city, data);
+}
+
+export async function mapApiSuggestion(
   row: { type: string; id: string; name: string; subtitle?: string },
   city: HeroCity
-): HeroSearchResult | null {
+): Promise<HeroSearchResult | null> {
   if (row.type === "restaurant" && !restaurantMatchesCity(row.id, city)) {
     return null;
   }
   if (row.type === "menu_item" || row.type === "dish") {
-    const dish = TRENDING_DISHES_60.find((d) => d.id === row.id);
+    const data = await ensureCatalog();
+    const dish = data.dishes.find((entry) => entry.id === row.id);
     if (dish && !restaurantMatchesCity(dish.restaurantId, city)) return null;
     return {
       type: "dish",
@@ -157,7 +220,7 @@ export function resolveHeroSearchTarget(
   results: HeroSearchResult[]
 ): string {
   const q = normalizeSearchQuery(query);
-  if (!q) return `/restaurants?city=${encodeURIComponent(city)}`;
+  if (!q) return `/order-online?city=${encodeURIComponent(city)}`;
 
   if (results.length === 1) return results[0].href;
 

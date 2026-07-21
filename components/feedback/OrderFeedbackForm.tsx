@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
+import SafeImage from "@/components/ui/SafeImage";
+import { FOOD_FALLBACK } from "@/lib/images";
+import { ATTACHMENT_PREVIEW_SIZES } from "@/lib/performance/assets";
 
 type Props = {
   orderId: string;
@@ -238,7 +241,15 @@ export default function OrderFeedbackForm({
               {images.map((img, i) => (
                 <div key={i} className="relative">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img} alt="" className="w-20 h-20 rounded-xl object-cover border border-[#E5E7EB]" />
+                  <SafeImage
+                    src={img}
+                    fallback={FOOD_FALLBACK}
+                    alt="Uploaded order feedback photo"
+                    width={80}
+                    height={80}
+                    sizes={ATTACHMENT_PREVIEW_SIZES}
+                    className="w-20 h-20 rounded-xl object-cover border border-[#E5E7EB]"
+                  />
                   <button
                     type="button"
                     onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}

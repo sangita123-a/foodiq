@@ -5,7 +5,7 @@ import AllCuisinesExplorer from "@/components/cuisines/AllCuisinesExplorer";
 
 export default function PopularCuisinesPage() {
   return (
-    <main className="relative min-h-screen bg-[radial-gradient(circle_at_50%_0%,rgba(226, 55, 68,0.09),transparent_28%),#FFFFFF] pt-[90px] selection:bg-[var(--color-primary)] selection:text-white">
+    <main className="relative min-h-screen bg-[#FFFFFF] pt-[90px] selection:bg-[#E23744]/15 selection:text-[#1C1C1C]">
       <Navbar />
       <FloatingCart />
       <header className="mx-auto w-[calc(100%_-_32px)] max-w-[1600px] pb-8 pt-12 md:w-[calc(100%_-_48px)] md:pb-10 md:pt-16">

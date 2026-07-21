@@ -9,11 +9,19 @@ type State = { hasError: boolean };
 export default class ErrorBoundary extends Component<Props, State> {
   state: State = { hasError: false };
 
-  static getDerivedStateFromError() {
+  static getDerivedStateFromError(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    const name = error instanceof Error ? error.name : "";
+    if (/hydrat/i.test(message) || /hydrat/i.test(name)) {
+      return { hasError: false };
+    }
     return { hasError: true };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
+    if (/hydrat/i.test(error.message) || /hydrat/i.test(error.name)) {
+      return;
+    }
     reportClientError({
       message: error.message,
       stack: error.stack,

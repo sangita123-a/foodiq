@@ -23,6 +23,9 @@ import {
   type TicketMessage,
 } from "@/services/ticketApi";
 import { Headphones, MessageSquare, Plus, X, ImagePlus, Send } from "lucide-react";
+import SafeImage from "@/components/ui/SafeImage";
+import { FOOD_FALLBACK } from "@/lib/images";
+import { ATTACHMENT_PREVIEW_SIZES, THUMBNAIL_IMAGE_SIZES } from "@/lib/performance/assets";
 
 function MessageBubble({ msg }: { msg: TicketMessage }) {
   const isCustomer = msg.sender_role === "customer";
@@ -42,7 +45,15 @@ function MessageBubble({ msg }: { msg: TicketMessage }) {
           <div className="mt-2 flex flex-wrap gap-2">
             {attachments.map((url, i) => (
               <a key={i} href={url} target="_blank" rel="noreferrer">
-                <img src={url} alt="" className="h-20 w-20 rounded-lg object-cover border border-white/30" />
+                <SafeImage
+                  src={url}
+                  fallback={FOOD_FALLBACK}
+                  alt="Support ticket attachment preview"
+                  width={80}
+                  height={80}
+                  sizes={ATTACHMENT_PREVIEW_SIZES}
+                  className="h-20 w-20 rounded-lg object-cover border border-white/30"
+                />
               </a>
             ))}
           </div>
@@ -348,7 +359,15 @@ export default function HelpSupportView() {
                 <div className="flex flex-wrap gap-2 mt-2">
                   {createImages.map((url, i) => (
                     <div key={i} className="relative">
-                      <img src={url} alt="" className="h-16 w-16 rounded-lg object-cover" />
+                      <SafeImage
+                        src={url}
+                        fallback={FOOD_FALLBACK}
+                        alt="Ticket attachment preview"
+                        width={64}
+                        height={64}
+                        sizes={THUMBNAIL_IMAGE_SIZES}
+                        className="h-16 w-16 rounded-lg object-cover"
+                      />
                       <button
                         type="button"
                         onClick={() => setCreateImages((p) => p.filter((_, j) => j !== i))}
@@ -448,7 +467,16 @@ export default function HelpSupportView() {
                     {replyImages.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-2">
                         {replyImages.map((url, i) => (
-                          <img key={i} src={url} alt="" className="h-14 w-14 rounded-lg object-cover" />
+                          <SafeImage
+                            key={i}
+                            src={url}
+                            fallback={FOOD_FALLBACK}
+                            alt={`Ticket attachment ${i + 1}`}
+                            width={56}
+                            height={56}
+                            sizes={THUMBNAIL_IMAGE_SIZES}
+                            className="h-14 w-14 rounded-lg object-cover"
+                          />
                         ))}
                       </div>
                     )}

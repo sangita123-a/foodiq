@@ -15,7 +15,7 @@ import {
   cleanNotificationMessage,
   mapTypeToCategory,
 } from "@/lib/notificationTypes";
-import { enablePushNotifications } from "@/components/notifications/PushNotificationProvider";
+import { enablePushNotifications } from "@/lib/pushNotifications";
 import { Search } from "lucide-react";
 
 export default function NotificationsPage() {

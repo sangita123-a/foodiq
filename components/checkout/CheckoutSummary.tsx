@@ -87,14 +87,14 @@ export default function CheckoutSummary({
 
       <div className="flex justify-between items-center mb-8">
         <span className="text-lg font-bold text-[#1C1C1C]">Grand Total</span>
-        <span className="text-2xl font-black text-[#E23744]">₹{grandTotal}</span>
+        <span className="text-2xl font-black text-[#1C1C1C]">₹{grandTotal}</span>
       </div>
 
       <button
         type="button"
         onClick={onPlaceOrder}
         disabled={isSubmitting || items.length === 0}
-        className="hidden lg:flex w-full items-center justify-center gap-2 rounded-xl bg-[#E23744] py-4 min-h-[52px] font-bold text-white shadow-[0_8px_20px_rgba(226,55,68,0.18)] transition-all duration-300 hover:bg-[#E23744] hover:shadow-[0_12px_26px_rgba(239,79,95,0.22)] disabled:opacity-50 touch-target text-sm sm:text-base"
+        className="hidden lg:flex w-full items-center justify-center gap-2 rounded-xl bg-[#E23744] py-3.5 min-h-[48px] font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:bg-[#C81E32] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] disabled:opacity-50 touch-target text-sm"
       >
         {buttonLabel}
         {!isSubmitting && <ArrowRight className="w-5 h-5" />}

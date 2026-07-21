@@ -1,18 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import { useAuthToken } from "@/hooks/useAuthToken";
-import { registerPushDevice } from "@/lib/firebaseMessaging";
-
-const RealtimeBridge = dynamic(() => import("./RealtimeBridge"), {
-  ssr: false,
-});
-
-/** Explicit user-initiated push permission + device registration. */
-export async function enablePushNotifications() {
-  return registerPushDevice();
-}
+import RealtimeBridge from "./RealtimeBridge";
 
 /**
  * Defers Socket.IO + FCM until after idle so customer pages stay light.

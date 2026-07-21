@@ -33,6 +33,7 @@ import {
   ClipboardList,
   Headphones,
   Package,
+  Phone,
 } from "lucide-react";
 import { clearClientAuth } from "@/lib/authSession";
 import {
@@ -80,6 +81,7 @@ const menuItems: MenuItem[] = [
   { name: "Media Library", icon: Images, href: "/admin/media", permission: "media" },
   { name: "Security", icon: Shield, href: "/admin/security", permission: "security" },
   { name: "Admin Staff", icon: UserCog, href: "/admin/staff", permission: "staff" },
+  { name: "Contact Settings", icon: Phone, href: "/admin/contact-settings", permission: "settings" },
   { name: "Settings", icon: Settings, href: "/admin/settings", permission: "settings" },
 ];
 

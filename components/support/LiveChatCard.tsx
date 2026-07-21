@@ -16,7 +16,7 @@ export default function LiveChatCard() {
           </div>
         </div>
 
-        <h3 className="text-2xl font-bold text-white mb-2 relative z-10">Live Chat Support</h3>
+        <h3 className="text-2xl font-bold text-[#1C1C1C] mb-2 relative z-10">Live Chat Support</h3>
         <p className="text-[#6B7280] text-sm mb-6 relative z-10 leading-relaxed">
           Get instant help from our support agents for urgent issues regarding active orders.
         </p>
@@ -25,7 +25,7 @@ export default function LiveChatCard() {
           <Zap className="w-5 h-5 text-yellow-500" />
           <div>
             <p className="text-[#9CA3AF] text-xs font-bold uppercase tracking-widest mb-0.5">Avg Response Time</p>
-            <p className="text-white font-black">Under 2 Minutes</p>
+            <p className="text-[#1C1C1C] font-black">Under 2 Minutes</p>
           </div>
         </div>
       </div>

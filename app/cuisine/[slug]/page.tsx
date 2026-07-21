@@ -10,6 +10,10 @@ import {
 import { buildEntityMetadata } from "@/lib/seo/entity-metadata";
 import { cuisineKeywords } from "@/lib/seo/keywords";
 import { absoluteUrl, SITE_NAME } from "@/lib/seo/site";
+import {
+  getCuisineCanonicalPath,
+  isDuplicateCuisineSlug,
+} from "@/lib/seo/urls";
 
 export function generateStaticParams() {
   return CUISINE_SLUGS.map((slug) => ({ slug }));
@@ -51,6 +55,8 @@ export async function generateMetadata({
     title: `${name} Cuisine`,
     description: description.slice(0, 160),
     path: `/cuisine/${slug}`,
+    canonicalPath: getCuisineCanonicalPath(slug),
+    noIndex: isDuplicateCuisineSlug(slug),
     image: cuisine?.image_url,
     keywords: cuisineKeywords(name, slug),
   });
@@ -78,7 +84,7 @@ export default async function CuisinePage({ params }: PageProps) {
             description:
               cuisine?.description ||
               `Browse ${name} food on ${SITE_NAME}.`,
-            url: absoluteUrl(`/cuisine/${slug}`),
+            url: absoluteUrl(getCuisineCanonicalPath(slug)),
           },
         ]}
       />

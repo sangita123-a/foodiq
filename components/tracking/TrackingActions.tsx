@@ -47,7 +47,7 @@ export default function TrackingActions({ orderId, currentStageId }: Props) {
 
         <button
           type="button"
-          onClick={() => router.push("/restaurants")}
+          onClick={() => router.push("/order-online")}
           className="w-full bg-white hover:bg-[#F8FAFC] text-[#111827] py-4 rounded-xl font-bold flex items-center justify-between px-6 transition-colors border border-[#E5E7EB]"
         >
           <div className="flex items-center gap-3">

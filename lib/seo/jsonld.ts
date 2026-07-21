@@ -1,14 +1,27 @@
 import {
   absoluteUrl,
   getApiBaseUrl,
+  getSiteUrl,
   ORGANIZATION_SAME_AS,
+  SITE_ADDRESS_COUNTRY,
+  SITE_ADDRESS_REGION,
   SITE_CITY,
   SITE_DESCRIPTION,
+  SITE_GEO_LATITUDE,
+  SITE_GEO_LONGITUDE,
   SITE_NAME,
+  SITE_POSTAL_CODE,
+  SITE_STREET_ADDRESS,
   SITE_SUPPORT_EMAIL,
   SITE_SUPPORT_PHONE,
 } from "./site";
 import type { FaqEntry } from "./faq";
+import { SEO_HUB_LINKS } from "./internal-links";
+import {
+  assertValidJsonLdSchemas,
+  validateJsonLdSchemas,
+  type SchemaValidationResult,
+} from "./jsonld-validate";
 
 type JsonLd = Record<string, unknown>;
 
@@ -22,6 +35,28 @@ function logoImageObject() {
     url: absoluteUrl("/icons/icon-512.png"),
     width: 512,
     height: 512,
+  };
+}
+
+function postalAddress(streetAddress?: string | null) {
+  return {
+    "@type": "PostalAddress",
+    streetAddress: streetAddress || SITE_STREET_ADDRESS,
+    addressLocality: SITE_CITY,
+    addressRegion: SITE_ADDRESS_REGION,
+    postalCode: SITE_POSTAL_CODE,
+    addressCountry: SITE_ADDRESS_COUNTRY,
+  };
+}
+
+export function searchActionJsonLd(): JsonLd {
+  return {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: `${absoluteUrl("/search")}?q={search_term_string}`,
+    },
+    "query-input": "required name=search_term_string",
   };
 }
 
@@ -51,12 +86,16 @@ function buildAggregateRating(
 }
 
 function foodOffer(path: string, price?: number | string | null): JsonLd {
+  const parsedPrice = price != null ? Number(price) : NaN;
   return compact({
     "@type": "Offer",
-    price: price != null ? Number(price) : undefined,
+    price: Number.isFinite(parsedPrice) && parsedPrice >= 0 ? parsedPrice : 0,
     priceCurrency: "INR",
     availability: "https://schema.org/InStock",
     url: absoluteUrl(path),
+    seller: {
+      "@id": `${getSiteUrl()}/#organization`,
+    },
   });
 }
 
@@ -71,6 +110,8 @@ export function organizationJsonLd(): JsonLd {
     image: absoluteUrl("/icons/og-default.png"),
     description: SITE_DESCRIPTION,
     email: SITE_SUPPORT_EMAIL,
+    telephone: SITE_SUPPORT_PHONE,
+    address: postalAddress(),
     sameAs: [...ORGANIZATION_SAME_AS],
     areaServed: {
       "@type": "City",
@@ -103,14 +144,7 @@ export function websiteJsonLd(): JsonLd {
     publisher: {
       "@id": `${absoluteUrl("/")}#organization`,
     },
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${absoluteUrl("/search")}?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
+    potentialAction: searchActionJsonLd(),
   });
 }
 
@@ -128,16 +162,11 @@ export function localBusinessJsonLd(): JsonLd {
     email: SITE_SUPPORT_EMAIL,
     priceRange: "₹₹",
     servesCuisine: "Indian",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: SITE_CITY,
-      addressRegion: "Telangana",
-      addressCountry: "IN",
-    },
+    address: postalAddress(),
     geo: {
       "@type": "GeoCoordinates",
-      latitude: 17.385,
-      longitude: 78.4867,
+      latitude: SITE_GEO_LATITUDE,
+      longitude: SITE_GEO_LONGITUDE,
     },
     areaServed: {
       "@type": "City",
@@ -217,6 +246,30 @@ export function breadcrumbJsonLd(
   });
 }
 
+/** Site-wide primary navigation hubs for crawlers (mirrors sr-only internal links). */
+export function siteNavigationJsonLd(): JsonLd {
+  return compact({
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: `${SITE_NAME} site navigation`,
+    numberOfItems: SEO_HUB_LINKS.length,
+    itemListElement: SEO_HUB_LINKS.map((link, index) => ({
+      "@type": "SiteNavigationElement",
+      position: index + 1,
+      name: link.anchor,
+      url: absoluteUrl(link.href),
+    })),
+  });
+}
+
+/** Home → page breadcrumb for static public landing routes. */
+export function publicPageBreadcrumbJsonLd(pageName: string, path: string): JsonLd {
+  return breadcrumbJsonLd([
+    { name: "Home", path: "/" },
+    { name: pageName, path },
+  ]);
+}
+
 export function restaurantListJsonLd(
   restaurants: Array<{ id: string; name: string; image_url?: string | null }>
 ): JsonLd {
@@ -224,7 +277,7 @@ export function restaurantListJsonLd(
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: `Restaurants on ${SITE_NAME}`,
-    url: absoluteUrl("/restaurants"),
+    url: absoluteUrl("/order-online"),
     numberOfItems: restaurants.length,
     itemListElement: restaurants.slice(0, 50).map((restaurant, index) => ({
       "@type": "ListItem",
@@ -269,20 +322,7 @@ export function restaurantJsonLd(restaurant: {
       restaurant.price_range != null
         ? "₹".repeat(Math.min(Math.max(Number(restaurant.price_range), 1), 4))
         : "₹₹",
-    address: restaurant.address
-      ? {
-          "@type": "PostalAddress",
-          streetAddress: restaurant.address,
-          addressLocality: SITE_CITY,
-          addressRegion: "Telangana",
-          addressCountry: "IN",
-        }
-      : {
-          "@type": "PostalAddress",
-          addressLocality: SITE_CITY,
-          addressRegion: "Telangana",
-          addressCountry: "IN",
-        },
+    address: postalAddress(restaurant.address),
     aggregateRating,
     servesCuisine: "Multi-cuisine",
     hasMenu: absoluteUrl(path),
@@ -340,6 +380,7 @@ export function foodItemJsonLd(item: {
   const path = `/food/${item.id}`;
   const image = item.image || item.image_url || absoluteUrl("/icons/og-default.png");
   const aggregateRating = buildAggregateRating(item.rating, item.review_count);
+  const resolvedImage = image.startsWith("http") ? image : absoluteUrl(image);
 
   return compact({
     "@context": "https://schema.org",
@@ -347,7 +388,7 @@ export function foodItemJsonLd(item: {
     "@id": absoluteUrl(path),
     name: item.name,
     description: item.description || `Order ${item.name} on ${SITE_NAME}.`,
-    image,
+    image: resolvedImage,
     url: absoluteUrl(path),
     offers: foodOffer(path, item.price),
     aggregateRating,
@@ -391,15 +432,18 @@ export function productJsonLd(item: {
   const path = `/food/${item.id}`;
   const image = item.image || item.image_url || absoluteUrl("/icons/og-default.png");
   const aggregateRating = buildAggregateRating(item.rating, item.review_count);
+  const resolvedImage = image.startsWith("http") ? image : absoluteUrl(image);
 
   return compact({
     "@context": "https://schema.org",
     "@type": "Product",
     "@id": `${absoluteUrl(path)}#product`,
     name: item.name,
+    sku: item.id,
+    category: "Food & Beverage",
     description:
       item.description || `Order ${item.name} online on ${SITE_NAME}.`,
-    image,
+    image: resolvedImage,
     url: absoluteUrl(path),
     brand: item.restaurant_name
       ? { "@type": "Brand", name: item.restaurant_name }
@@ -408,6 +452,55 @@ export function productJsonLd(item: {
     aggregateRating,
   });
 }
+
+/** Validates all required Schema.org JSON-LD builders used across the site. */
+export function validateSampleJsonLdSchemas(): SchemaValidationResult[] {
+  const website = websiteJsonLd();
+  const nestedSearchAction =
+    typeof website.potentialAction === "object" && website.potentialAction !== null
+      ? (website.potentialAction as JsonLd)
+      : {};
+
+  return validateJsonLdSchemas({
+    organization: organizationJsonLd(),
+    website,
+    localBusiness: localBusinessJsonLd(),
+    restaurant: restaurantJsonLd({
+      id: "rest-pizza",
+      name: "Pizza Italia Oven",
+      description: "Wood-fired pizzas and Italian favorites.",
+      image_url: absoluteUrl("/default-restaurant.webp"),
+      address: "Jubilee Hills, Hyderabad",
+      phone: SITE_SUPPORT_PHONE,
+      rating: 4.9,
+      review_count: 1280,
+      price_range: 2,
+    }),
+    breadcrumb: breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Restaurants", path: "/order-online" },
+      { name: "Pizza Italia Oven", path: "/restaurant/rest-pizza" },
+    ]),
+    searchAction: nestedSearchAction,
+    product: productJsonLd({
+      id: "dish_pizza_1",
+      name: "Margherita Pizza",
+      description: "Classic cheese pizza with fresh basil.",
+      price: 299,
+      image: absoluteUrl("/default-food.webp"),
+      restaurant_name: "Pizza Italia Oven",
+      rating: 4.8,
+      review_count: 420,
+    }),
+  });
+}
+
+export function ensureValidSampleJsonLdSchemas(): void {
+  assertValidJsonLdSchemas(validateSampleJsonLdSchemas());
+}
+
+export { assertValidJsonLdSchemas, validateJsonLdSchemas };
+export type { SchemaValidationResult };
 
 /** Lightweight server fetch for SEO metadata (never throws). */
 export async function fetchApiJson<T = unknown>(

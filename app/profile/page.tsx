@@ -61,7 +61,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <main className="relative min-h-screen bg-[#FFFFFF] pt-[72px] sm:pt-[80px] md:pt-[90px] selection:bg-[#E23744]/20 overflow-x-hidden">
+    <main className="relative min-h-screen bg-[#FFFFFF] pt-[72px] sm:pt-[80px] md:pt-[90px] selection:bg-[#E23744]/15 selection:text-[#1C1C1C] overflow-x-hidden">
       <Navbar />
 
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 md:px-8 md:py-12">
@@ -72,10 +72,10 @@ export default function ProfilePage() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`touch-target whitespace-nowrap rounded-xl px-4 py-2.5 text-xs font-bold transition-colors ${
+              className={`touch-target whitespace-nowrap rounded-xl px-4 py-2 text-xs font-semibold transition-colors ${
                 activeTab === tab.id
-                  ? "bg-[#E23744] text-white shadow-md"
-                  : "border border-[#ECECEC] bg-white text-[#686B78]"
+                  ? "border border-[#E23744] bg-[#FFF5F6] text-[#E23744] shadow-sm"
+                  : "border border-[#E8E8E8] bg-white text-[#696969]"
               }`}
             >
               {tab.label}

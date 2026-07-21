@@ -32,20 +32,20 @@ export default function DeliveryTimeSection({
       <div className="flex gap-4 mb-6">
         <button 
           onClick={() => onModeChange("Now")}
-          className={`flex-1 py-3 rounded-xl font-bold transition-colors ${
+          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
             mode === "Now" 
-            ? 'bg-primary text-white shadow-[0_8px_18px_rgba(226, 55, 68,0.18)]' 
-            : 'border border-[#ECECEC] bg-[#F8F9FA] text-[#686B78] hover:bg-white'
+            ? 'border border-[#E23744] bg-[#FFF5F6] text-[#E23744] shadow-sm' 
+            : 'border border-[#E8E8E8] bg-white text-[#696969] hover:bg-[#FAFAFA]'
           }`}
         >
           Deliver Now
         </button>
         <button 
           onClick={() => onModeChange("Schedule")}
-          className={`flex-1 py-3 rounded-xl font-bold transition-colors ${
+          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
             mode === "Schedule" 
-            ? 'bg-primary text-white shadow-[0_8px_18px_rgba(226, 55, 68,0.18)]' 
-            : 'border border-[#ECECEC] bg-[#F8F9FA] text-[#686B78] hover:bg-white'
+            ? 'border border-[#E23744] bg-[#FFF5F6] text-[#E23744] shadow-sm' 
+            : 'border border-[#E8E8E8] bg-white text-[#696969] hover:bg-[#FAFAFA]'
           }`}
         >
           Schedule

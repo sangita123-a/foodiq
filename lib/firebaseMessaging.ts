@@ -1,13 +1,5 @@
 "use client";
 
-import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
-import {
-  getMessaging,
-  getToken,
-  isSupported,
-  onMessage,
-  type Messaging,
-} from "firebase/messaging";
 import api from "@/services/api";
 
 type FirebaseWebConfig = {
@@ -18,9 +10,38 @@ type FirebaseWebConfig = {
   appId?: string | null;
 };
 
+type FirebaseApp = import("firebase/app").FirebaseApp;
+type Messaging = import("firebase/messaging").Messaging;
+
 let app: FirebaseApp | null = null;
 let messaging: Messaging | null = null;
 let cachedVapid: string | null = null;
+let messagingModule: typeof import("firebase/messaging") | null = null;
+let appModule: typeof import("firebase/app") | null = null;
+
+async function loadAppModule() {
+  if (typeof window === "undefined") return null;
+  if (!appModule) {
+    try {
+      appModule = await import("firebase/app");
+    } catch {
+      return null;
+    }
+  }
+  return appModule;
+}
+
+async function loadMessagingModule() {
+  if (typeof window === "undefined") return null;
+  if (!messagingModule) {
+    try {
+      messagingModule = await import("firebase/messaging");
+    } catch {
+      return null;
+    }
+  }
+  return messagingModule;
+}
 
 async function loadConfig() {
   const fromEnv: FirebaseWebConfig = {
@@ -51,12 +72,14 @@ async function loadConfig() {
   }
 }
 
-function initApp(cfg: FirebaseWebConfig) {
-  if (!cfg.apiKey || !cfg.projectId || !cfg.appId) return null;
-  if (getApps().length) {
-    app = getApps()[0]!;
+async function initApp(cfg: FirebaseWebConfig) {
+  const firebaseApp = await loadAppModule();
+  if (!firebaseApp || !cfg.apiKey || !cfg.projectId || !cfg.appId) return null;
+
+  if (firebaseApp.getApps().length) {
+    app = firebaseApp.getApps()[0]!;
   } else {
-    app = initializeApp({
+    app = firebaseApp.initializeApp({
       apiKey: cfg.apiKey,
       authDomain: cfg.authDomain || undefined,
       projectId: cfg.projectId,
@@ -69,17 +92,21 @@ function initApp(cfg: FirebaseWebConfig) {
 
 export async function getFirebaseMessaging(): Promise<Messaging | null> {
   if (typeof window === "undefined") return null;
-  const supported = await isSupported().catch(() => false);
+
+  const fcm = await loadMessagingModule();
+  if (!fcm) return null;
+
+  const supported = await fcm.isSupported().catch(() => false);
   if (!supported) return null;
 
   const cfg = await loadConfig();
   if (cfg.mock && !cfg.firebase?.apiKey) return null;
 
-  const firebaseApp = initApp(cfg.firebase || {});
+  const firebaseApp = await initApp(cfg.firebase || {});
   if (!firebaseApp) return null;
 
   if (!messaging) {
-    messaging = getMessaging(firebaseApp);
+    messaging = fcm.getMessaging(firebaseApp);
   }
   return messaging;
 }
@@ -106,7 +133,6 @@ export async function registerPushDevice(): Promise<{
 
   const msg = await getFirebaseMessaging();
   if (!msg) {
-    // Dev / mock: register a synthetic token so backend flow can be tested
     if (process.env.NEXT_PUBLIC_FCM_MOCK_TOKEN === "true") {
       const mockToken = `mock_web_${Date.now()}`;
       await api.post("/api/notifications/device-token", {
@@ -118,6 +144,9 @@ export async function registerPushDevice(): Promise<{
     }
     return { ok: false, reason: "firebase_not_configured" };
   }
+
+  const fcm = await loadMessagingModule();
+  if (!fcm) return { ok: false, reason: "firebase_not_configured" };
 
   try {
     let registration = await navigator.serviceWorker.getRegistration("/");
@@ -131,7 +160,7 @@ export async function registerPushDevice(): Promise<{
     const vapidKey =
       cachedVapid || process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || undefined;
 
-    const token = await getToken(msg, {
+    const token = await fcm.getToken(msg, {
       vapidKey,
       serviceWorkerRegistration: registration,
     });
@@ -172,7 +201,10 @@ export async function listenForegroundMessages(
   const msg = await getFirebaseMessaging();
   if (!msg) return () => {};
 
-  return onMessage(msg, (payload) => {
+  const fcm = await loadMessagingModule();
+  if (!fcm) return () => {};
+
+  return fcm.onMessage(msg, (payload) => {
     onPayload({
       title: payload.notification?.title,
       body: payload.notification?.body,

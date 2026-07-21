@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import SafeImage from "@/components/ui/SafeImage";
 import { RESTAURANT_FALLBACK } from "@/lib/images";
+import { STORY_IMAGE_SIZES } from "@/lib/performance/assets";
 
 export default function OurStory() {
   return (
@@ -18,12 +19,14 @@ export default function OurStory() {
             transition={{ duration: 0.8 }}
             className="w-full lg:w-1/2 relative rounded-3xl overflow-hidden group shadow-2xl"
           >
-            <div className="aspect-[4/3] w-full overflow-hidden rounded-3xl">
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl">
               <SafeImage 
                 src="/images/catalog/restaurants/indian.webp" 
                 fallback={RESTAURANT_FALLBACK}
-                alt="Our Story" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                alt="Foodiq team serving Indian cuisine"
+                fill
+                sizes={STORY_IMAGE_SIZES}
+                className="object-cover group-hover:scale-105 transition-transform duration-700"
               />
             </div>
             {/* Dark gradient overlay for premium feel */}

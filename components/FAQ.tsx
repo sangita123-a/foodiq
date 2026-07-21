@@ -74,7 +74,7 @@ export default function FAQ() {
   }, [query]);
 
   return (
-    <section className="w-full border-t border-[#ECECEC] bg-[radial-gradient(circle_at_top,rgba(226, 55, 68,0.07),transparent_34%),#FFFFFF] py-16 md:py-24">
+    <section className="w-full border-t border-[#EAEAEA] bg-[#FAFAFA] py-16 md:py-24">
       <div className="mx-auto w-[calc(100%-32px)] max-w-5xl md:w-[calc(100%-64px)]">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -83,7 +83,7 @@ export default function FAQ() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-8 text-center"
         >
-          <span className="mb-3 inline-flex rounded-full border border-[#E23744]/20 bg-[#E23744]/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#E23744]">
+          <span className="mb-3 inline-flex rounded-full border border-[#ECECEC] bg-[#FAFAFA] px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#696969]">
             Help Center
           </span>
           <h2 className="mb-3 text-3xl font-bold tracking-[-0.045em] text-[#1C1C1C] md:text-5xl">
@@ -108,7 +108,7 @@ export default function FAQ() {
             }}
             placeholder="Search questions, payments, refunds..."
             aria-label="Search frequently asked questions"
-            className="h-13 w-full rounded-[14px] border border-[#ECECEC] bg-white py-3 pl-12 pr-4 text-sm text-[#1C1C1C] shadow-[0_10px_32px_rgba(28,28,28,0.07)] outline-none transition-all duration-300 placeholder:text-[#686B78] focus:border-[#E23744]/60 focus:ring-4 focus:ring-[#E23744]/10"
+            className="h-13 w-full rounded-[14px] border border-[#EAEAEA] bg-white py-3 pl-12 pr-4 text-sm text-[#1C1C1C] shadow-[0_4px_20px_rgba(0,0,0,0.08)] outline-none transition-all duration-300 placeholder:text-[#9C9C9C] focus:border-[#D4D4D4] focus:ring-4 focus:ring-[rgba(0,0,0,0.04)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E23744]"
           />
         </div>
 
@@ -126,8 +126,8 @@ export default function FAQ() {
                 transition={{ duration: 0.35, delay: Math.min(index * 0.025, 0.25) }}
                 className={`overflow-hidden rounded-2xl border bg-white transition-all duration-300 ${
                   isOpen
-                    ? "border-[#E23744]/35 shadow-[0_14px_36px_rgba(226, 55, 68,0.1)]"
-                    : "border-[#E5E7EB] shadow-[0_8px_24px_rgba(15,23,42,0.06)] hover:-translate-y-0.5 hover:border-[#E23744]/25 hover:shadow-[0_14px_32px_rgba(15,23,42,0.1)]"
+                    ? "border-[#EAEAEA] shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
+                    : "border-[#EAEAEA] shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-[#D4D4D4] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
                 }`}
               >
                 <button
@@ -135,11 +135,11 @@ export default function FAQ() {
                   onClick={() => toggleAccordion(faq.id)}
                   aria-expanded={isOpen}
                   aria-controls={answerId}
-                  className="flex w-full items-center justify-between gap-4 p-4 text-left outline-none sm:p-5"
+                  className="flex w-full items-center justify-between gap-4 p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E23744] sm:p-5"
                 >
                   <span
                     className={`text-sm font-semibold leading-6 transition-colors duration-300 sm:text-base ${
-                      isOpen ? "text-[#E23744]" : "text-[#111827]"
+                      isOpen ? "text-[#1C1C1C]" : "text-[#1C1C1C]"
                     }`}
                   >
                     {faq.question}
@@ -149,8 +149,8 @@ export default function FAQ() {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors duration-300 ${
                       isOpen
-                        ? "border-[#E23744] bg-[#E23744] text-white"
-                        : "border-[#E5E7EB] bg-[#F8FAFC] text-[#6B7280]"
+                        ? "border-[#ECECEC] bg-[#FAFAFA] text-[#1C1C1C]"
+                        : "border-[#ECECEC] bg-[#FAFAFA] text-[#696969]"
                     }`}
                     aria-hidden="true"
                   >
@@ -204,7 +204,7 @@ export default function FAQ() {
           </motion.div>
         )}
 
-        <div className="mt-10 rounded-[20px] border border-[#ECECEC] bg-[#F8F9FA] p-6 text-center shadow-[0_18px_48px_rgba(28,28,28,0.07)] sm:p-8">
+        <div className="mt-10 rounded-[20px] border border-[#EAEAEA] bg-[#FAFAFA] p-6 text-center shadow-[0_4px_20px_rgba(0,0,0,0.08)] sm:p-8">
           <h3 className="text-xl font-bold text-[#1C1C1C]">Still need help?</h3>
           <p className="mt-1 text-sm text-[#686B78]">
             Our support team is ready to help.
@@ -212,14 +212,14 @@ export default function FAQ() {
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
             <a
               href="/help-support"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#E23744] px-5 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#C81E34] hover:shadow-[0_8px_24px_rgba(226, 55, 68,0.3)]"
+              className="food-button food-button-primary inline-flex min-h-11 items-center justify-center gap-2 px-5 py-2.5 text-sm"
             >
               <MessageCircle className="h-4 w-4" />
               Contact Support
             </a>
             <a
               href="mailto:support@foodiq.com"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-5 text-sm font-bold text-[#111827] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#E23744]/30 hover:bg-[#FFF7ED]"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#EAEAEA] bg-white px-5 text-sm font-bold text-[#1C1C1C] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#D4D4D4] hover:bg-[#FAFAFA]"
             >
               <Mail className="h-4 w-4" />
               Email Us

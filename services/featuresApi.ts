@@ -32,12 +32,12 @@ export async function fetchSearchSuggest(q: string, limit = 8) {
 }
 
 export async function fetchCollections() {
-  const res = await api.get("/api/features/collections");
+  const res = await api.get("/api/collections");
   return res.data.data as Array<Record<string, unknown>>;
 }
 
 export async function fetchCollection(slug: string) {
-  const res = await api.get(`/api/features/collections/${slug}`);
+  const res = await api.get(`/api/collections/${slug}`);
   return res.data.data;
 }
 
