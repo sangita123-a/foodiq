@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useSiteSettings } from "@/contexts/SiteSettingsContext";
 import SafeImage from "@/components/ui/SafeImage";
 import { RESTAURANT_FALLBACK } from "@/lib/images";
+import { CONTACT_HERO_IMAGE } from "@/lib/data/sectionImages";
 import { HERO_BACKGROUND_SIZES } from "@/lib/performance/assets";
 
 export default function ContactHero() {
@@ -14,7 +15,7 @@ export default function ContactHero() {
     <div className="relative flex h-[50vh] min-h-[400px] items-center justify-center overflow-hidden">
       <div className="absolute inset-0 z-0">
         <SafeImage
-          src="/images/catalog/restaurants/indian.webp"
+          src={CONTACT_HERO_IMAGE}
           fallback={RESTAURANT_FALLBACK}
           decorative
           fill

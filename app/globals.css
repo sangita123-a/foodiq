@@ -537,6 +537,40 @@ textarea:focus-visible {
   color: var(--color-gray-text);
 }
 
+.collections-page-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  align-items: stretch;
+}
+
+@media (min-width: 640px) {
+  .collections-page-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (min-width: 768px) {
+  .collections-page-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .collections-page-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .collections-page-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
 /* Modern form inputs */
 .food-input {
   width: 100%;

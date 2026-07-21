@@ -2,7 +2,8 @@
 
 import SafeImage from "@/components/ui/SafeImage";
 import { Star, Quote } from "lucide-react";
-import { AVATAR_FALLBACK } from "@/lib/images";
+import { getAvatarImage } from "@/lib/images";
+import { TESTIMONIAL_AVATARS } from "@/lib/data/sectionImages";
 
 const reviews = [
   {
@@ -11,7 +12,7 @@ const reviews = [
     role: "Food Blogger",
     review: "Foodiq is my go-to app for ordering food. The delivery is incredibly fast, and the restaurant selection is premium. Highly recommended!",
     rating: 5,
-    image: AVATAR_FALLBACK,
+    image: TESTIMONIAL_AVATARS[5],
   },
   {
     id: 2,
@@ -19,7 +20,7 @@ const reviews = [
     role: "Regular Customer",
     review: "I love the user interface and how easy it is to find what I'm craving. The exclusive discounts are a cherry on top. Great experience always.",
     rating: 5,
-    image: AVATAR_FALLBACK,
+    image: TESTIMONIAL_AVATARS[6],
   },
   {
     id: 3,
@@ -27,7 +28,7 @@ const reviews = [
     role: "Food Enthusiast",
     review: "The food always arrives hot and fresh. Customer support is very responsive. It's definitely better than other delivery apps I've used.",
     rating: 4,
-    image: AVATAR_FALLBACK,
+    image: TESTIMONIAL_AVATARS[7],
   }
 ];
 
@@ -63,7 +64,7 @@ export default function Reviews() {
               <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-border">
                 <SafeImage
                   src={review.image}
-                  fallback={AVATAR_FALLBACK}
+                  fallback={getAvatarImage(null)}
                   alt={review.name}
                   fill
                   sizes="48px"

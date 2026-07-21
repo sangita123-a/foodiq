@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Clock, Eye, Flame, Heart, Minus, Plus, ShoppingBag, Star } from "lucide-react";
 import useSWR from "swr";
 import SafeImage from "@/components/ui/SafeImage";
-import { FOOD_FALLBACK, getFoodImage } from "@/lib/images";
+import { FOOD_FALLBACK, getUniqueTrendingImage, getRestaurantCoverImage } from "@/lib/images";
 import {
   Dish60,
   POPULAR_RESTAURANTS_30,
@@ -254,7 +254,7 @@ export default function TrendingDishes() {
           rating: String(d.rating || d.restaurant_rating || fallbackObj.rating),
           price: d.discount_price ? Number(d.discount_price) : Number(d.price || fallbackObj.price),
           originalPrice: d.price ? Number(d.price) : fallbackObj.originalPrice,
-          image: getFoodImage((d.image_url || d.image) as string) || fallbackObj.image,
+          image: getUniqueTrendingImage(fallbackObj.image, (d.image_url || d.image) as string),
           description: (d.description as string) || fallbackObj.description,
           isVeg: Boolean(d.is_vegetarian ?? d.is_veg ?? fallbackObj.isVeg),
           isBestseller: Boolean(d.is_bestseller ?? fallbackObj.isBestseller),

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Star, Quote, Calendar, Utensils, Store } from "lucide-react";
 import SafeImage from "@/components/ui/SafeImage";
-import { AVATAR_FALLBACK } from "@/lib/images";
+import { getAvatarImage } from "@/lib/images";
+import { TESTIMONIAL_AVATARS } from "@/lib/data/sectionImages";
 
 type Testimonial = {
   id: string;
@@ -23,7 +24,7 @@ const testimonialsData: Testimonial[] = [
     id: "t1",
     name: "Priya Sharma",
     city: "Hyderabad",
-    image: AVATAR_FALLBACK,
+    image: TESTIMONIAL_AVATARS[0],
     rating: 5,
     review: "The delivery was super fast and the food was still hot. Foodiq has become my favorite food ordering platform. Highly recommended!",
     restaurant: "Paradise Biryani",
@@ -34,7 +35,7 @@ const testimonialsData: Testimonial[] = [
     id: "t2",
     name: "Rahul Verma",
     city: "Mumbai",
-    image: AVATAR_FALLBACK,
+    image: TESTIMONIAL_AVATARS[1],
     rating: 5,
     review: "Absolutely seamless experience. The tracking is incredibly accurate and the food packaging was premium and tamper-proof.",
     restaurant: "Domino's Pizza",
@@ -45,7 +46,7 @@ const testimonialsData: Testimonial[] = [
     id: "t3",
     name: "Ananya Gupta",
     city: "Delhi",
-    image: AVATAR_FALLBACK,
+    image: TESTIMONIAL_AVATARS[2],
     rating: 5,
     review: "I love the exclusive discounts! I saved so much on my favorite sushi place today. Customer support is also super responsive.",
     restaurant: "Tokyo Sushi",
@@ -56,7 +57,7 @@ const testimonialsData: Testimonial[] = [
     id: "t4",
     name: "Arjun Reddy",
     city: "Bangalore",
-    image: AVATAR_FALLBACK,
+    image: TESTIMONIAL_AVATARS[3],
     rating: 5,
     review: "Best late-night delivery app out there. Finding great food at 2 AM is so easy now. Five stars all the way!",
     restaurant: "Midnight Bites",
@@ -67,7 +68,7 @@ const testimonialsData: Testimonial[] = [
     id: "t5",
     name: "Sneha Patil",
     city: "Pune",
-    image: AVATAR_FALLBACK,
+    image: TESTIMONIAL_AVATARS[4],
     rating: 5,
     review: "The user interface is gorgeous. It feels like a premium app every time I open it. The curated collections are brilliant.",
     restaurant: "Green Leaf Cafe",
@@ -82,7 +83,6 @@ export default function LovedByFoodLovers() {
   const [isPaused, setIsPaused] = useState(false);
   const [cardsToShow, setCardsToShow] = useState(3);
 
-  // Responsive cards to show
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -94,12 +94,11 @@ export default function LovedByFoodLovers() {
       }
     };
 
-    handleResize(); // Initial check
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Auto-slide every 4 seconds
   useEffect(() => {
     if (isHovered || isPaused) return;
 
@@ -113,9 +112,7 @@ export default function LovedByFoodLovers() {
   return (
     <section className="bg-section w-full py-14 sm:py-20 md:py-[100px] overflow-hidden border-t border-border mt-6 sm:mt-8">
       <div className="w-[90%] max-w-7xl mx-auto">
-        
-        {/* Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
@@ -133,7 +130,6 @@ export default function LovedByFoodLovers() {
           </p>
         </motion.div>
 
-        {/* Carousel Container */}
         <div
           className="relative overflow-hidden"
           onMouseEnter={() => setIsHovered(true)}
@@ -157,16 +153,14 @@ export default function LovedByFoodLovers() {
             aria-live="polite"
           >
             {testimonialsData.map((testimonial) => (
-              <div 
+              <div
                 key={testimonial.id}
                 className="flex-shrink-0"
                 style={{ width: `calc(${100 / cardsToShow}% - ${(6 * (cardsToShow - 1)) / cardsToShow}rem)` }}
               >
                 <div className="bg-white rounded-[20px] p-8 h-full border border-border shadow-card relative group hover:-translate-y-1 hover:border-border hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] transition-all duration-300">
-                  {/* Background Quote Icon */}
                   <Quote className="absolute top-6 right-6 w-16 h-16 text-primary/10 group-hover:text-primary/20 transition-colors duration-300 pointer-events-none" aria-hidden="true" />
 
-                  {/* Header: Rating & Profile */}
                   <div className="flex justify-between items-start mb-6 relative z-10">
                     <div
                       className="flex gap-1 bg-section px-3 py-1.5 rounded-full border border-border"
@@ -174,44 +168,41 @@ export default function LovedByFoodLovers() {
                       aria-label={`${testimonial.rating} out of 5 stars`}
                     >
                       {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          className={`w-3.5 h-3.5 ${i < testimonial.rating ? 'text-yellow-400 fill-yellow-400' : 'text-[#9CA3AF]'}`}
+                        <Star
+                          key={i}
+                          className={`w-3.5 h-3.5 ${i < testimonial.rating ? "text-yellow-400 fill-yellow-400" : "text-[#9CA3AF]"}`}
                           aria-hidden="true"
                         />
                       ))}
                     </div>
                   </div>
 
-                  {/* Review Text */}
                   <p className="text-muted text-sm leading-relaxed mb-8 italic relative z-10">
-                    "{testimonial.review}"
+                    &ldquo;{testimonial.review}&rdquo;
                   </p>
 
-                  {/* Order Details */}
-                  <div className="bg-[#F8F9FA] rounded-xl p-4 mb-8 border border-border">
+                  <div className="bg-section rounded-xl p-4 mb-8 border border-border">
                     <div className="flex items-center gap-2 text-sm text-gray-text mb-2">
                       <Store className="w-4 h-4 text-primary" />
-                      <span className="font-semibold text-[#374151]">Ordered From:</span> 
+                      <span className="font-semibold text-foreground">Ordered From:</span>
                       <span className="text-foreground truncate">{testimonial.restaurant}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-text mb-2">
                       <Utensils className="w-4 h-4 text-primary" />
-                      <span className="font-semibold text-[#374151]">Dish:</span> 
+                      <span className="font-semibold text-foreground">Dish:</span>
                       <span className="text-foreground truncate">{testimonial.dish}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-[#9CA3AF]">
+                    <div className="flex items-center gap-2 text-xs text-muted">
                       <Calendar className="w-3.5 h-3.5" />
                       <span>{testimonial.date}</span>
                     </div>
                   </div>
 
-                  {/* Customer Info */}
                   <div className="flex items-center gap-4 mt-auto">
                     <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-border">
-                      <SafeImage 
-                        src={testimonial.image} 
-                        fallback={AVATAR_FALLBACK}
+                      <SafeImage
+                        src={testimonial.image}
+                        fallback={getAvatarImage(null)}
                         alt={testimonial.name}
                         className="w-full h-full object-cover"
                       />
@@ -227,7 +218,6 @@ export default function LovedByFoodLovers() {
           </div>
         </div>
 
-        {/* Carousel Indicators */}
         <div className="flex justify-center items-center gap-1 sm:gap-2 mt-8 sm:mt-10" role="tablist" aria-label="Testimonial slides">
           {[...Array(testimonialsData.length - cardsToShow + 1)].map((_, idx) => (
             <button
@@ -242,15 +232,12 @@ export default function LovedByFoodLovers() {
               <span
                 aria-hidden="true"
                 className={`block h-2 rounded-full transition-all duration-300 ${
-                  currentIndex === idx
-                    ? "w-8 bg-primary"
-                    : "w-2 bg-[#D1D5DB] hover:bg-[#9CA3AF]"
+                  currentIndex === idx ? "w-8 bg-primary" : "w-2 bg-border hover:bg-muted"
                 }`}
               />
             </button>
           ))}
         </div>
-
       </div>
     </section>
   );

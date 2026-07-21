@@ -1,3 +1,5 @@
+import { OFFER_BANNER_IMAGES } from "@/lib/data/sectionImages";
+
 export interface PromotionalOffer {
   id: string;
   restaurantId: string;
@@ -28,7 +30,7 @@ export const FIVE_BEST_OFFERS: PromotionalOffer[] = [
     expiryDate: "Valid Today",
     minOrder: 299,
     maxDiscount: 200,
-    image: "/images/catalog/dishes/pizza/cheese-burst-pizza.webp",
+    image: OFFER_BANNER_IMAGES.pizza,
   },
   {
     id: "card-2-burger",
@@ -43,7 +45,7 @@ export const FIVE_BEST_OFFERS: PromotionalOffer[] = [
     expiryDate: "Valid Today",
     minOrder: 249,
     maxDiscount: 150,
-    image: "/images/catalog/dishes/burger/crispy-chicken-burger.webp",
+    image: OFFER_BANNER_IMAGES.burger,
   },
   {
     id: "card-3-biryani",
@@ -58,7 +60,7 @@ export const FIVE_BEST_OFFERS: PromotionalOffer[] = [
     expiryDate: "Valid Today",
     minOrder: 499,
     maxDiscount: 150,
-    image: "/images/catalog/dishes/biryani/hyderabadi-chicken-biryani.webp",
+    image: OFFER_BANNER_IMAGES.biryani,
   },
   {
     id: "card-4-drinks",
@@ -73,7 +75,7 @@ export const FIVE_BEST_OFFERS: PromotionalOffer[] = [
     expiryDate: "Valid Today",
     minOrder: 149,
     maxDiscount: 100,
-    image: "/images/catalog/dishes/beverages/coca-cola.webp",
+    image: OFFER_BANNER_IMAGES.drinks,
   },
   {
     id: "card-5-desserts",
@@ -88,7 +90,7 @@ export const FIVE_BEST_OFFERS: PromotionalOffer[] = [
     expiryDate: "Valid Today",
     minOrder: 199,
     maxDiscount: 120,
-    image: "/images/catalog/dishes/desserts/chocolate-ice-cream.webp",
+    image: OFFER_BANNER_IMAGES.desserts,
   },
 ];
 

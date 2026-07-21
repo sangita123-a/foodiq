@@ -92,18 +92,9 @@ export function getAvatarImage(url?: string | null): string {
   return resolveBackendUrl(url) ?? AVATAR_FALLBACK;
 }
 
-export const BRAND_FOOD_IMAGES: Record<string, string> = {
-  Subway: "/images/catalog/food/fast-food.webp",
-  "Behrouz Biryani": "/images/catalog/food/biryani.webp",
-  "Biryani By Kilo": "/images/catalog/food/biryani.webp",
-  "Wow! Momo": "/images/catalog/food/chinese.webp",
-  "Haldiram's": "/images/catalog/food/indian.webp",
-  "Barbeque Nation": "/images/catalog/food/north-indian.webp",
-  Faasos: "/images/catalog/food/street-food.webp",
-  "Domino's Pizza": "/images/catalog/food/pizza.webp",
-  KFC: "/images/catalog/food/fast-food.webp",
-  "Burger King": "/images/catalog/food/burger.webp",
-};
+import { BRAND_FOOD_IMAGES_UNIQUE, RESTAURANT_COVER_BY_ID } from "@/lib/data/sectionImages";
+
+export const BRAND_FOOD_IMAGES: Record<string, string> = BRAND_FOOD_IMAGES_UNIQUE;
 
 export const BRAND_LOGOS: Record<string, string> = {
   Subway: "/images/catalog/logos/subway.webp",
@@ -123,8 +114,40 @@ export const BRAND_LOGOS: Record<string, string> = {
   "Baskin Robbins": "/images/catalog/logos/desserts.webp",
 };
 
+const GENERIC_IMAGES = new Set([
+  DEFAULT_RESTAURANT_IMAGE,
+  DEFAULT_FOOD_IMAGE,
+  "/default-restaurant.webp",
+  "/default-food.webp",
+]);
+
+export function isGenericFoodImage(url?: string | null): boolean {
+  if (!url) return true;
+  const normalized = url.trim().toLowerCase();
+  return GENERIC_IMAGES.has(normalized) || normalized.endsWith("/default-restaurant.webp") || normalized.endsWith("/default-food.webp");
+}
+
+export function getRestaurantCoverImage(restaurantId?: string | null, url?: string | null): string {
+  const custom = resolveBackendUrl(url);
+  if (custom && !isGenericFoodImage(custom)) return custom;
+  const id = restaurantId?.trim();
+  if (id && RESTAURANT_COVER_BY_ID[id]) {
+    return resolveBackendUrl(RESTAURANT_COVER_BY_ID[id]) ?? RESTAURANT_COVER_BY_ID[id];
+  }
+  return DEFAULT_RESTAURANT_IMAGE;
+}
+
 export function getRestaurantImage(url?: string | null): string {
-  return resolveBackendUrl(url) ?? DEFAULT_RESTAURANT_IMAGE;
+  const resolved = resolveBackendUrl(url);
+  if (resolved && !isGenericFoodImage(resolved)) return resolved;
+  return DEFAULT_RESTAURANT_IMAGE;
+}
+
+export function getUniqueTrendingImage(staticImage: string, apiImage?: string | null): string {
+  if (staticImage?.trim()) return resolveBackendUrl(staticImage) ?? staticImage;
+  const resolved = resolveBackendUrl(apiImage);
+  if (resolved && !isGenericFoodImage(resolved)) return resolved;
+  return DEFAULT_FOOD_IMAGE;
 }
 
 export function getFoodImage(url?: string | null): string {
@@ -168,7 +191,7 @@ export function mapRestaurantCard(r: {
   return {
     id: r.id,
     name: r.name,
-    image: getRestaurantImage(r.image_url),
+    image: getRestaurantCoverImage(String(r.id), r.image_url),
     rating: String(r.rating ?? "4.5"),
     time: `${r.estimated_delivery_time || 30} min`,
     cuisine: r.category_name || r.description || "Various Cuisines",

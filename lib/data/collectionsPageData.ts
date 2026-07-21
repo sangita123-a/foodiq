@@ -1,0 +1,281 @@
+export type CollectionsPageRestaurant = {
+  id: string;
+  name: string;
+  image: string;
+  rating: string;
+  time: string;
+  cuisine: string;
+  priceForTwo: string;
+};
+
+export type CollectionsPageSection = {
+  id: string;
+  title: string;
+  description: string;
+  fallback?: string;
+  restaurants: CollectionsPageRestaurant[];
+};
+
+export const COLLECTIONS_PAGE_SECTIONS: CollectionsPageSection[] = [
+  {
+    id: "top-rated",
+    title: "Top Rated Restaurants",
+    description: "The absolute best rated spots in the city.",
+    restaurants: [
+      {
+        id: "rest-biryani",
+        name: "Paradise Biryani",
+        image: "/images/catalog/dishes/biryani/hyderabadi-chicken-biryani.webp",
+        rating: "4.9",
+        time: "28 min",
+        cuisine: "Biryani, Hyderabadi",
+        priceForTwo: "₹600 for two",
+      },
+      {
+        id: "rest-bbq",
+        name: "Barbeque Nation",
+        image: "/images/catalog/restaurants/rest-bbq.jpg",
+        rating: "4.8",
+        time: "32 min",
+        cuisine: "BBQ, North Indian",
+        priceForTwo: "₹800 for two",
+      },
+      {
+        id: "rest-burger",
+        name: "Burger Craft House",
+        image: "/images/catalog/restaurants/rest-burger.jpg",
+        rating: "4.7",
+        time: "22 min",
+        cuisine: "Burgers, Fast Food",
+        priceForTwo: "₹350 for two",
+      },
+      {
+        id: "rest-pizza",
+        name: "Pizza Italia Oven",
+        image: "/images/catalog/restaurants/rest-pizza.jpg",
+        rating: "4.9",
+        time: "25 min",
+        cuisine: "Italian, Pizza",
+        priceForTwo: "₹500 for two",
+      },
+      {
+        id: "rest-biryani",
+        name: "Royal Hyderabadi Biryani",
+        image: "/images/catalog/dishes/dish-by-2.jpg",
+        rating: "4.8",
+        time: "30 min",
+        cuisine: "Biryani, Mughlai",
+        priceForTwo: "₹550 for two",
+      },
+    ],
+  },
+  {
+    id: "quick-bites",
+    title: "Quick Bites",
+    description: "Meals that arrive fast when you're hungry now.",
+    restaurants: [
+      {
+        id: "rest-momos",
+        name: "Wow Momo",
+        image: "/images/catalog/restaurants/rest-momos.jpg",
+        rating: "4.6",
+        time: "18 min",
+        cuisine: "Momos, Fast Food",
+        priceForTwo: "₹200 for two",
+      },
+      {
+        id: "rest-sandwich",
+        name: "Subway",
+        image: "/images/catalog/dishes/dish-sw-1.jpg",
+        rating: "4.5",
+        time: "20 min",
+        cuisine: "Sandwiches, Healthy",
+        priceForTwo: "₹280 for two",
+      },
+      {
+        id: "rest-fast-food",
+        name: "McDonald's",
+        image: "/images/catalog/dishes/dish-bg-1.jpg",
+        rating: "4.4",
+        time: "15 min",
+        cuisine: "Burgers, Fast Food",
+        priceForTwo: "₹300 for two",
+      },
+      {
+        id: "rest-fast-food",
+        name: "KFC",
+        image: "/images/catalog/dishes/dish-bk-1.jpg",
+        rating: "4.5",
+        time: "18 min",
+        cuisine: "Chicken, Fast Food",
+        priceForTwo: "₹400 for two",
+      },
+      {
+        id: "rest-burger",
+        name: "Burger King",
+        image: "/images/catalog/dishes/burger/smash-burger.webp",
+        rating: "4.3",
+        time: "16 min",
+        cuisine: "Burgers, Fast Food",
+        priceForTwo: "₹350 for two",
+      },
+    ],
+  },
+  {
+    id: "biryani",
+    title: "Best Biryani Near You",
+    description: "Authentic, rich, and aromatic biryanis.",
+    fallback: "/cuisine/biryani",
+    restaurants: [
+      {
+        id: "rest-biryani",
+        name: "Paradise",
+        image: "/images/catalog/dishes/dish-by-1.jpg",
+        rating: "4.9",
+        time: "30 min",
+        cuisine: "Hyderabadi Biryani",
+        priceForTwo: "₹600 for two",
+      },
+      {
+        id: "rest-biryani",
+        name: "Mehfil",
+        image: "/images/catalog/dishes/biryani/kolkata-biryani.webp",
+        rating: "4.7",
+        time: "28 min",
+        cuisine: "Mughlai Biryani",
+        priceForTwo: "₹550 for two",
+      },
+      {
+        id: "rest-biryani",
+        name: "Shah Ghouse",
+        image: "/images/catalog/dishes/biryani/mutton-biryani.webp",
+        rating: "4.8",
+        time: "32 min",
+        cuisine: "Dum Biryani",
+        priceForTwo: "₹580 for two",
+      },
+      {
+        id: "rest-biryani",
+        name: "Bawarchi",
+        image: "/images/catalog/dishes/biryani/paneer-biryani.webp",
+        rating: "4.6",
+        time: "26 min",
+        cuisine: "Andhra Biryani",
+        priceForTwo: "₹450 for two",
+      },
+      {
+        id: "rest-biryani",
+        name: "Pista House",
+        image: "/images/catalog/cuisines/biryani.webp",
+        rating: "4.8",
+        time: "29 min",
+        cuisine: "Irani Biryani",
+        priceForTwo: "₹520 for two",
+      },
+    ],
+  },
+  {
+    id: "veg",
+    title: "Pure Veg Specials",
+    description: "Exquisite vegetarian delicacies for everyone.",
+    restaurants: [
+      {
+        id: "rest-south-indian",
+        name: "Saravana Bhavan",
+        image: "/images/catalog/restaurants/rest-south-indian.jpg",
+        rating: "4.8",
+        time: "22 min",
+        cuisine: "South Indian, Pure Veg",
+        priceForTwo: "₹250 for two",
+      },
+      {
+        id: "rest-south-indian",
+        name: "A2B",
+        image: "/images/catalog/dishes/dish-si-1.jpg",
+        rating: "4.7",
+        time: "20 min",
+        cuisine: "South Indian, Sweets",
+        priceForTwo: "₹280 for two",
+      },
+      {
+        id: "rest-south-indian",
+        name: "Chutneys",
+        image: "/images/catalog/dishes/dish-si-2.jpg",
+        rating: "4.6",
+        time: "24 min",
+        cuisine: "Andhra, Pure Veg",
+        priceForTwo: "₹320 for two",
+      },
+      {
+        id: "rest-coffee",
+        name: "Minerva Coffee Shop",
+        image: "/images/catalog/restaurants/rest-coffee.jpg",
+        rating: "4.5",
+        time: "18 min",
+        cuisine: "South Indian, Coffee",
+        priceForTwo: "₹300 for two",
+      },
+      {
+        id: "rest-north-indian",
+        name: "Santosh Dhaba",
+        image: "/images/catalog/restaurants/rest-north-indian.jpg",
+        rating: "4.4",
+        time: "25 min",
+        cuisine: "North Indian, Pure Veg",
+        priceForTwo: "₹350 for two",
+      },
+    ],
+  },
+  {
+    id: "budget",
+    title: "Budget Meals",
+    description: "Delicious food that doesn't break the bank.",
+    restaurants: [
+      {
+        id: "rest-snacks",
+        name: "Meals under ₹199",
+        image: "/images/catalog/dishes/street-food/vada-pav.webp",
+        rating: "4.5",
+        time: "15 min",
+        cuisine: "Street Food, Snacks",
+        priceForTwo: "₹199 for two",
+      },
+      {
+        id: "rest-thali",
+        name: "Combo Meals",
+        image: "/images/catalog/restaurants/rest-thali.jpg",
+        rating: "4.6",
+        time: "22 min",
+        cuisine: "Thali, Combos",
+        priceForTwo: "₹249 for two",
+      },
+      {
+        id: "rest-street-food",
+        name: "Student Meals",
+        image: "/images/catalog/dishes/street-food/pav-bhaji.webp",
+        rating: "4.4",
+        time: "18 min",
+        cuisine: "Street Food, Quick Bites",
+        priceForTwo: "₹179 for two",
+      },
+      {
+        id: "rest-thali",
+        name: "Mini Thali",
+        image: "/images/catalog/dishes/dish-th-2.jpg",
+        rating: "4.5",
+        time: "20 min",
+        cuisine: "Indian Thali",
+        priceForTwo: "₹229 for two",
+      },
+      {
+        id: "rest-fast-food",
+        name: "Pocket Friendly Deals",
+        image: "/images/catalog/dishes/dish-ff-1.jpg",
+        rating: "4.3",
+        time: "16 min",
+        cuisine: "Fast Food, Value Meals",
+        priceForTwo: "₹199 for two",
+      },
+    ],
+  },
+];

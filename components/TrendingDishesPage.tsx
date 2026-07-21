@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Eye, Heart, Minus, Plus, Star } from "lucide-react";
 import useSWR from "swr";
 import SafeImage from "@/components/ui/SafeImage";
-import { FOOD_FALLBACK, getFoodImage } from "@/lib/images";
+import { FOOD_FALLBACK, getUniqueTrendingImage } from "@/lib/images";
 import { TRENDING_DISHES_60, Dish60 } from "@/lib/data/30restaurantsData";
 import { useCartActions } from "@/hooks/useCartActions";
 import { useFavoriteActions } from "@/hooks/useFavoriteActions";
@@ -37,7 +37,7 @@ export default function TrendingDishesPage() {
           rating: String(item.rating || item.restaurant_rating || fallbackObj.rating),
           price: item.discount_price ? Number(item.discount_price) : Number(item.price || fallbackObj.price),
           originalPrice: item.price ? Number(item.price) : fallbackObj.originalPrice,
-          image: getFoodImage(item.image_url || item.image) || fallbackObj.image,
+          image: getUniqueTrendingImage(fallbackObj.image, item.image_url || item.image),
           description: item.description || fallbackObj.description,
           isVeg: Boolean(item.is_vegetarian ?? item.is_veg ?? fallbackObj.isVeg),
           isBestseller: Boolean(item.is_bestseller ?? fallbackObj.isBestseller),

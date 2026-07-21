@@ -5,7 +5,7 @@ import { Star, Clock, Utensils, IndianRupee, MapPin, CheckCircle2 } from "lucide
 import useSWR from "swr";
 import Link from "next/link";
 import SafeImage from "@/components/ui/SafeImage";
-import { getPriceForTwo, getRestaurantImage, RESTAURANT_FALLBACK } from "@/lib/images";
+import { getPriceForTwo, getRestaurantCoverImage, RESTAURANT_FALLBACK } from "@/lib/images";
 
 export default function FeaturedRestaurant() {
   const { data, isLoading } = useSWR('/api/restaurants?sort=popular&limit=1');
@@ -46,7 +46,7 @@ export default function FeaturedRestaurant() {
           >
             <div className="aspect-[4/3] w-full relative">
               <SafeImage
-                src={getRestaurantImage(restaurant.image_url)}
+                src={getRestaurantCoverImage(String(restaurant.id), restaurant.image_url)}
                 fallback={RESTAURANT_FALLBACK}
                 alt={restaurant.name}
                 fill

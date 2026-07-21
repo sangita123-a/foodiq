@@ -3,23 +3,24 @@
 import Link from "next/link";
 import SafeImage from "@/components/ui/SafeImage";
 import { FOOD_FALLBACK } from "@/lib/images";
+import { CATEGORY_NAV_IMAGES } from "@/lib/data/sectionImages";
 import { CATEGORY_NAV_IMAGE_SIZES } from "@/lib/performance/assets";
 
 const FOOD_CATEGORIES = [
-  { slug: "pizza", label: "Pizza", image: "/images/catalog/dishes/pizza/cheese-burst-pizza.webp" },
-  { slug: "burger", label: "Burger", image: "/images/catalog/dishes/burger/cheese-burger.webp" },
-  { slug: "chicken", label: "Chicken", image: "/images/catalog/dishes/indian/tandoori-chicken.webp" },
-  { slug: "biryani", label: "Biryani", image: "/images/catalog/dishes/biryani/hyderabadi-biryani.webp" },
-  { slug: "momos", label: "Momos", image: "/images/catalog/dishes/chinese/veg-momos.webp" },
-  { slug: "drinks", label: "Drinks", image: "/images/catalog/dishes/beverages/coca-cola.webp" },
-  { slug: "dessert", label: "Dessert", image: "/images/catalog/dishes/desserts/brownie-sundae.webp" },
-  { slug: "coffee", label: "Coffee", image: "/images/catalog/dishes/beverages/classic-cappuccino.webp" },
-  { slug: "fries", label: "Fries", image: "/images/catalog/dishes/burger/french-fries.webp" },
-  { slug: "wraps", label: "Wraps", image: "/images/catalog/dishes/fast-food/chicken-wrap.webp" },
-  { slug: "noodles", label: "Noodles", image: "/images/catalog/dishes/chinese/hakka-noodles.webp" },
-  { slug: "sandwich", label: "Sandwich", image: "/images/catalog/dishes/fast-food/club-sandwich.webp" },
-  { slug: "donuts", label: "Donuts", image: "/images/catalog/dishes/desserts/glazed-donuts.webp" },
-  { slug: "icecream", label: "Ice Cream", image: "/images/catalog/dishes/desserts/butterscotch-ice-cream.webp" },
+  { slug: "pizza", label: "Pizza", image: CATEGORY_NAV_IMAGES.pizza },
+  { slug: "burger", label: "Burger", image: CATEGORY_NAV_IMAGES.burger },
+  { slug: "chicken", label: "Chicken", image: CATEGORY_NAV_IMAGES.chicken },
+  { slug: "biryani", label: "Biryani", image: CATEGORY_NAV_IMAGES.biryani },
+  { slug: "momos", label: "Momos", image: CATEGORY_NAV_IMAGES.momos },
+  { slug: "drinks", label: "Drinks", image: CATEGORY_NAV_IMAGES.drinks },
+  { slug: "dessert", label: "Dessert", image: CATEGORY_NAV_IMAGES.dessert },
+  { slug: "coffee", label: "Coffee", image: CATEGORY_NAV_IMAGES.coffee },
+  { slug: "fries", label: "Fries", image: CATEGORY_NAV_IMAGES.fries },
+  { slug: "wraps", label: "Wraps", image: CATEGORY_NAV_IMAGES.wraps },
+  { slug: "noodles", label: "Noodles", image: CATEGORY_NAV_IMAGES.noodles },
+  { slug: "sandwich", label: "Sandwich", image: CATEGORY_NAV_IMAGES.sandwich },
+  { slug: "donuts", label: "Donuts", image: CATEGORY_NAV_IMAGES.donuts },
+  { slug: "cakes", label: "Cakes", image: CATEGORY_NAV_IMAGES.cakes },
 ] as const;
 
 export default function FoodCategoryNav() {
@@ -41,7 +42,7 @@ export default function FoodCategoryNav() {
               href={`/category/${item.slug}`}
               className="flex w-[72px] sm:w-[88px] md:w-[96px] flex-col items-center gap-2 touch-target"
             >
-              <div className="h-[72px] w-[72px] sm:h-[88px] sm:w-[88px] md:h-[96px] md:w-[96px] overflow-hidden rounded-full ring-2 ring-[#ECECEC] ring-offset-2">
+              <div className="h-[72px] w-[72px] sm:h-[88px] sm:w-[88px] md:h-[96px] md:w-[96px] overflow-hidden rounded-full ring-2 ring-border ring-offset-2">
                 <SafeImage
                   src={item.image}
                   fallback={FOOD_FALLBACK}

@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Tv, Tag, Sparkles } from "lucide-react";
+import { Tv, Sparkles, ChefHat, Truck } from "lucide-react";
 import SafeImage from "@/components/ui/SafeImage";
 import { FOOD_FALLBACK } from "@/lib/images";
+import { LIVE_HUB_IMAGES } from "@/lib/data/sectionImages";
 import { useCartActions } from "@/hooks/useCartActions";
 import { useToast } from "@/contexts/ToastContext";
 
@@ -60,8 +61,8 @@ export default function FoodiqLiveHub() {
             {/* Background Cricket Image with Gradient Overlay */}
             <div className="absolute inset-0 z-0">
               <SafeImage
-                src="/images/catalog/cricket-stadium.png"
-                fallback="/images/catalog/cuisines/indian.webp"
+                src={LIVE_HUB_IMAGES.cricket}
+                fallback="/images/catalog/restaurants/rest-street-food.jpg"
                 alt="Live Cricket Match"
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
@@ -123,58 +124,56 @@ export default function FoodiqLiveHub() {
             </div>
           </div>
 
-          {/* CARD 2: 🍕 PIZZA COMBO */}
+          {/* CARD 2: Live Cooking */}
           <div className="min-w-[280px] sm:min-w-[300px] md:min-w-0 flex-1 group relative bg-white rounded-[18px] border border-border p-4 flex flex-col justify-between h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300">
-            {/* Background Image Banner Right */}
             <div className="absolute top-0 right-0 w-36 h-full opacity-35 group-hover:opacity-50 transition-opacity duration-300 overflow-hidden rounded-r-[18px]">
               <SafeImage
-                src="/images/catalog/dishes/pizza/cheese-burst-pizza.webp"
+                src={LIVE_HUB_IMAGES.liveCooking}
                 fallback={FOOD_FALLBACK}
-                alt="Cheese Burst Pizza"
+                alt="Live cooking in restaurant kitchen"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 [mask-image:linear-gradient(to_right,transparent,black_70%)]"
               />
             </div>
 
             <div className="relative z-10 flex flex-col justify-between h-full w-[72%]">
               <div>
-                <div className="inline-flex items-center gap-1 bg-[#C81E32] text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-sm uppercase tracking-wide mb-1.5">
-                  <Tag className="w-3 h-3" />
-                  <span>40% OFF</span>
+                <div className="inline-flex items-center gap-1 bg-primary text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-sm uppercase tracking-wide mb-1.5">
+                  <ChefHat className="w-3 h-3" />
+                  <span>LIVE COOKING</span>
                 </div>
 
                 <h3 className="text-base font-black text-foreground line-clamp-1 group-hover:text-gray-text transition-colors">
-                  🍕 Cheese Burst Pizza
+                  Chef&apos;s Tandoor Special
                 </h3>
                 <p className="text-gray-text text-xs font-medium line-clamp-1 mb-2">
-                  Loaded mozzarella crust + Pepsi
+                  Fresh from the kitchen, straight to your door
                 </p>
 
                 <div className="flex items-baseline gap-1.5 mb-2">
-                  <span className="text-base font-black text-foreground">₹299</span>
+                  <span className="text-base font-black text-foreground">₹349</span>
                   <span className="text-xs text-gray-text line-through font-medium">₹499</span>
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() =>
                     handleAddToCartAndNavigate(
-                      "pizza_combo_40",
-                      "Cheese Burst Pizza (40% OFF)",
-                      299,
-                      "/images/catalog/dishes/pizza/cheese-burst-pizza.webp",
-                      "rest-pizza",
-                      "/cuisine/pizza"
+                      "live_cooking_tandoor_1",
+                      "Chef's Tandoor Special",
+                      349,
+                      LIVE_HUB_IMAGES.liveCookingDish,
+                      "rest-tandoori",
+                      "/restaurant/rest-tandoori"
                     )
                   }
-                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-[#C81E32] hover:bg-primary-hover text-white text-[11px] font-extrabold transition-all shadow-sm active:scale-95"
+                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-[11px] font-extrabold transition-all shadow-sm active:scale-95"
                 >
                   <span>Order Now</span>
                 </button>
                 <Link
-                  href="/cuisine/pizza"
+                  href="/restaurant/rest-tandoori"
                   className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-white hover:bg-section text-foreground text-[11px] font-bold transition-all border border-border active:scale-95"
                 >
                   <span>View Menu</span>
@@ -183,14 +182,13 @@ export default function FoodiqLiveHub() {
             </div>
           </div>
 
-          {/* CARD 3: 🍰 DESSERT FEST */}
+          {/* CARD 3: Chef Kitchen */}
           <div className="min-w-[280px] sm:min-w-[300px] md:min-w-0 flex-1 group relative bg-white rounded-[18px] border border-border p-4 flex flex-col justify-between h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300">
-            {/* Background Image Banner Right */}
             <div className="absolute top-0 right-0 w-36 h-full opacity-35 group-hover:opacity-50 transition-opacity duration-300 overflow-hidden rounded-r-[18px]">
               <SafeImage
-                src="/images/catalog/dishes/desserts/brownie-sundae.webp"
+                src={LIVE_HUB_IMAGES.chefKitchen}
                 fallback={FOOD_FALLBACK}
-                alt="Brownie & Ice Cream"
+                alt="Chef preparing food in restaurant kitchen"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 [mask-image:linear-gradient(to_right,transparent,black_70%)]"
               />
             </div>
@@ -199,42 +197,41 @@ export default function FoodiqLiveHub() {
               <div>
                 <div className="inline-flex items-center gap-1 bg-[#16A34A] text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-sm uppercase tracking-wide mb-1.5">
                   <Sparkles className="w-3 h-3" />
-                  <span>BUY 1 GET 1</span>
+                  <span>CHEF SPECIAL</span>
                 </div>
 
                 <h3 className="text-base font-black text-foreground line-clamp-1 group-hover:text-gray-text transition-colors">
-                  🍰 Brownie & Ice Cream
+                  Smokey BBQ Platter
                 </h3>
                 <p className="text-gray-text text-xs font-medium line-clamp-1 mb-2">
-                  Warm fudge brownie + ice cream
+                  Premium grilled meats &amp; sides
                 </p>
 
                 <div className="flex items-baseline gap-1.5 mb-2">
-                  <span className="text-base font-black text-foreground">₹189</span>
-                  <span className="text-xs text-gray-text line-through font-medium">₹378</span>
+                  <span className="text-base font-black text-foreground">₹449</span>
+                  <span className="text-xs text-gray-text line-through font-medium">₹599</span>
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() =>
                     handleAddToCartAndNavigate(
-                      "dessert_bogo_1",
-                      "Brownie & Ice Cream BOGO",
-                      189,
-                      "/images/catalog/dishes/desserts/brownie-sundae.webp",
-                      "rest-icecream",
-                      "/cuisine/desserts"
+                      "chef_bbq_platter_1",
+                      "Smokey BBQ Platter",
+                      449,
+                      LIVE_HUB_IMAGES.chefDish,
+                      "rest-bbq",
+                      "/restaurant/rest-bbq"
                     )
                   }
-                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-[#C81E32] hover:bg-primary-hover text-white text-[11px] font-extrabold transition-all shadow-sm active:scale-95"
+                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-[11px] font-extrabold transition-all shadow-sm active:scale-95"
                 >
                   <span>Order Now</span>
                 </button>
                 <Link
-                  href="/cuisine/desserts"
+                  href="/restaurant/rest-bbq"
                   className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-white hover:bg-section text-foreground text-[11px] font-bold transition-all border border-border active:scale-95"
                 >
                   <span>View Menu</span>
@@ -243,58 +240,56 @@ export default function FoodiqLiveHub() {
             </div>
           </div>
 
-          {/* CARD 4: 🥤 COLD DRINKS */}
+          {/* CARD 4: Fresh Delivery */}
           <div className="min-w-[280px] sm:min-w-[300px] md:min-w-0 flex-1 group relative bg-white rounded-[18px] border border-border p-4 flex flex-col justify-between h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300">
-            {/* Background Image Banner Right */}
             <div className="absolute top-0 right-0 w-36 h-full opacity-35 group-hover:opacity-50 transition-opacity duration-300 overflow-hidden rounded-r-[18px]">
               <SafeImage
-                src="/images/catalog/dishes/beverages/coca-cola.webp"
+                src={LIVE_HUB_IMAGES.freshDelivery}
                 fallback={FOOD_FALLBACK}
-                alt="Cold Drinks"
+                alt="Fresh ingredients and healthy delivery"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 [mask-image:linear-gradient(to_right,transparent,black_70%)]"
               />
             </div>
 
             <div className="relative z-10 flex flex-col justify-between h-full w-[72%]">
               <div>
-                <div className="inline-flex items-center gap-1 bg-[#C81E32] text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-sm uppercase tracking-wide mb-1.5">
-                  <Tag className="w-3 h-3" />
-                  <span>SUMMER COMBO</span>
+                <div className="inline-flex items-center gap-1 bg-primary text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-sm uppercase tracking-wide mb-1.5">
+                  <Truck className="w-3 h-3" />
+                  <span>FRESH DELIVERY</span>
                 </div>
 
                 <h3 className="text-base font-black text-foreground line-clamp-1 group-hover:text-gray-text transition-colors">
-                  🥤 Coke, Pepsi & Mojito
+                  Green Bowl &amp; Juice Combo
                 </h3>
                 <p className="text-gray-text text-xs font-medium line-clamp-1 mb-2">
-                  Chilled carbonated trio pack
+                  Fresh ingredients delivered fast
                 </p>
 
                 <div className="flex items-baseline gap-1.5 mb-2">
-                  <span className="text-base font-black text-foreground">₹139</span>
-                  <span className="text-xs text-gray-text line-through font-medium">₹199</span>
+                  <span className="text-base font-black text-foreground">₹199</span>
+                  <span className="text-xs text-gray-text line-through font-medium">₹279</span>
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() =>
                     handleAddToCartAndNavigate(
-                      "cold_drinks_combo_1",
-                      "Coke, Pepsi & Mojito Trio",
-                      139,
-                      "/images/catalog/dishes/beverages/coca-cola.webp",
-                      "rest-cold-drinks",
-                      "/cuisine/beverages"
+                      "fresh_delivery_combo_1",
+                      "Green Bowl & Juice Combo",
+                      199,
+                      LIVE_HUB_IMAGES.freshDish,
+                      "rest-healthy",
+                      "/restaurant/rest-healthy"
                     )
                   }
-                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-[#C81E32] hover:bg-primary-hover text-white text-[11px] font-extrabold transition-all shadow-sm active:scale-95"
+                  className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-[11px] font-extrabold transition-all shadow-sm active:scale-95"
                 >
                   <span>Order Now</span>
                 </button>
                 <Link
-                  href="/cuisine/beverages"
+                  href="/restaurant/rest-healthy"
                   className="w-full inline-flex items-center justify-center py-1.5 rounded-xl bg-white hover:bg-section text-foreground text-[11px] font-bold transition-all border border-border active:scale-95"
                 >
                   <span>View Menu</span>

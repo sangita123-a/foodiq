@@ -1,5 +1,7 @@
-/** LCP hero poster — WebP for fast first paint; PNG kept as OG fallback. */
-export const HERO_POSTER_WEBP = "/icons/hero-poster.webp";
+import { HERO_POSTER_IMAGE } from "@/lib/data/sectionImages";
+
+/** LCP hero poster — premium restaurant ambience. */
+export const HERO_POSTER_WEBP = HERO_POSTER_IMAGE;
 export const HERO_POSTER_PNG = "/icons/og-default.png";
 export const HERO_VIDEO = "/hero-video.mp4";
 
