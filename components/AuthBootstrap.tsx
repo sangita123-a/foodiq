@@ -16,7 +16,7 @@ export default function AuthBootstrap() {
     (async () => {
       try {
         const res = await api.post("/api/auth/refresh", {});
-        const token = res.data?.data?.token as string | undefined;
+        const token = (res.data?.token || res.data?.data?.token) as string | undefined;
         if (!cancelled && token) markAuthenticated(token);
         else if (!cancelled) clearClientAuth();
       } catch {

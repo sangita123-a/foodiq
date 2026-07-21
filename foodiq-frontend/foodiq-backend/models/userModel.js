@@ -21,6 +21,19 @@ const findUserByEmail = async (email) => {
   return rows[0];
 };
 
+const findUserByPhone = async (phone) => {
+  const normalized = String(phone || '').trim();
+  if (!normalized) return null;
+  const query = `
+    SELECT id, email, phone_number
+    FROM users
+    WHERE TRIM(phone_number) = $1 AND COALESCE(is_deleted, false) = false
+    LIMIT 1
+  `;
+  const { rows } = await pool.query(query, [normalized]);
+  return rows[0] || null;
+};
+
 const findUserById = async (id) => {
   const query = `SELECT id, full_name, email, phone_number, role, admin_role, COALESCE(token_version, 1)::int AS token_version, created_at, updated_at FROM users WHERE id = $1 AND COALESCE(is_deleted, false) = false`;
   const { rows } = await pool.query(query, [id]);
@@ -52,6 +65,7 @@ const updateUserPassword = async (id, passwordHash) => {
 module.exports = {
   createUser,
   findUserByEmail,
+  findUserByPhone,
   findUserById,
   updateUserProfile,
   updateUserPassword,

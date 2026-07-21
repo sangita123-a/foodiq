@@ -24,6 +24,7 @@ function assert(label, condition, detail = "") {
 }
 
 const email = `authtest_${Date.now()}@example.com`;
+const phone = `+919${String(Date.now()).slice(-9)}`;
 const password = "TestPass1";
 let token = "";
 
@@ -34,7 +35,7 @@ console.log(`\nAuth tests → ${BASE}\n`);
   const r = await req("POST", "/api/auth/register", {
     full_name: "Bad Email",
     email: "not-an-email",
-    phone: "+91 9876543210",
+    phone,
     password,
   });
   assert("Invalid email rejected", r.status === 400 && r.data.message?.includes("Invalid email"), r.data.message);
@@ -45,7 +46,7 @@ console.log(`\nAuth tests → ${BASE}\n`);
   const r = await req("POST", "/api/auth/register", {
     full_name: "Weak Pass",
     email: `weak_${Date.now()}@example.com`,
-    phone: "+91 9876543210",
+    phone,
     password: "short",
   });
   assert("Weak password rejected", r.status === 400 && /password/i.test(r.data.message || ""), r.data.message);
@@ -56,7 +57,7 @@ console.log(`\nAuth tests → ${BASE}\n`);
   const r = await req("POST", "/api/auth/register", {
     full_name: "Auth Test User",
     email,
-    phone: "+91 9876543210",
+    phone,
     password,
   });
   token = r.data?.data?.token || "";
@@ -68,7 +69,7 @@ console.log(`\nAuth tests → ${BASE}\n`);
   const r = await req("POST", "/api/auth/register", {
     full_name: "Duplicate",
     email,
-    phone: "+91 9876543210",
+    phone,
     password,
   });
   assert("Duplicate email rejected", r.status === 400 && /already exists/i.test(r.data.message || ""), r.data.message);

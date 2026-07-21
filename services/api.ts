@@ -123,10 +123,19 @@ api.interceptors.request.use(
   async (config) => {
     if (typeof window !== 'undefined') {
       const method = (config.method || 'get').toUpperCase();
+      const url = String(config.url || '');
+      const isAuthCredentialCall =
+        url.includes('/api/auth/login') ||
+        url.includes('/api/auth/register') ||
+        url.includes('/api/delivery/register');
       const token = getAccessToken();
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
-      } else if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && !readCookie(CSRF_COOKIE)) {
+      } else if (
+        ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) &&
+        !readCookie(CSRF_COOKIE) &&
+        !isAuthCredentialCall
+      ) {
         await ensureCsrfCookie();
       }
       const csrf = readCookie(CSRF_COOKIE);

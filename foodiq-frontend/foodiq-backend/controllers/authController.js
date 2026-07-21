@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const {
   createUser,
   findUserByEmail,
+  findUserByPhone,
   findUserById,
   updateUserProfile: updateUserProfileModel,
   updateUserPassword,
@@ -29,17 +30,52 @@ const { log } = require('../utils/logger');
 
 const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS || 12);
 
+const buildAuthUserPayload = (user, token, refresh_token = null) => ({
+  id: user.id,
+  full_name: user.full_name,
+  email: user.email,
+  phone_number: user.phone_number,
+  role: user.role,
+  admin_role: user.admin_role || (user.role === 'admin' ? 'admin' : null),
+  token,
+  refresh_token,
+});
+
+const sendAuthSuccess = (res, status, message, user, token, refresh_token = null) => {
+  const payload = buildAuthUserPayload(user, token, refresh_token);
+  return res.status(status).json({
+    success: true,
+    message,
+    user: {
+      id: payload.id,
+      full_name: payload.full_name,
+      email: payload.email,
+      phone_number: payload.phone_number,
+      role: payload.role,
+      admin_role: payload.admin_role,
+    },
+    token,
+    data: payload,
+  });
+};
+
 // @desc    Register new user
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
   try {
+    log.info('[auth] register request received', {
+      email: req.body?.email ? String(req.body.email).trim().toLowerCase() : null,
+      hasPhone: Boolean(req.body?.phone || req.body?.phone_number),
+    });
+
     const full_name = String(req.body.full_name || '').trim();
     const email = normalizeEmail(req.body.email);
     const password = req.body.password;
     const phone = String(req.body.phone || req.body.phone_number || '').trim();
 
     if (!full_name || !email || !password || !phone) {
+      log.warn('[auth] register validation failed: missing fields');
       return res.status(400).json({
         success: false,
         message: 'Please include all fields (full_name, email, password, phone)',
@@ -48,6 +84,7 @@ const registerUser = async (req, res) => {
     }
 
     if (!isValidEmail(email)) {
+      log.warn('[auth] register validation failed: invalid email', { email });
       return res.status(400).json({
         success: false,
         message: 'Invalid email format',
@@ -56,6 +93,7 @@ const registerUser = async (req, res) => {
     }
 
     if (!isValidPassword(password)) {
+      log.warn('[auth] register validation failed: weak password');
       return res.status(400).json({
         success: false,
         message: getPasswordPolicyMessage(),
@@ -64,6 +102,7 @@ const registerUser = async (req, res) => {
     }
 
     if (!isValidPhone(phone)) {
+      log.warn('[auth] register validation failed: invalid phone', { phone });
       return res.status(400).json({
         success: false,
         message: 'Invalid phone number format',
@@ -74,6 +113,7 @@ const registerUser = async (req, res) => {
     const userExists = await findUserByEmail(email);
 
     if (userExists) {
+      log.warn('[auth] register rejected: duplicate email', { email });
       return res.status(400).json({
         success: false,
         message: 'Email already exists',
@@ -81,8 +121,19 @@ const registerUser = async (req, res) => {
       });
     }
 
+    const phoneExists = await findUserByPhone(phone);
+    if (phoneExists) {
+      log.warn('[auth] register rejected: duplicate phone', { phone });
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number already exists',
+        error: {},
+      });
+    }
+
     const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
     const password_hash = await bcrypt.hash(password, salt);
+    log.info('[auth] password hashed for registration');
 
     const user = await createUser({
       full_name,
@@ -92,6 +143,7 @@ const registerUser = async (req, res) => {
     });
 
     if (user) {
+      log.info('[auth] user created in database', { userId: user.id, email: user.email });
       const { pool } = require('../config/db');
       try {
         await pool.query(
@@ -154,6 +206,7 @@ const registerUser = async (req, res) => {
       }
 
       const token = generateToken(user.id, { tv: user.token_version ?? 1 });
+      log.info('[auth] access JWT generated', { userId: user.id });
 
       let refresh_token = null;
       try {
@@ -171,23 +224,19 @@ const registerUser = async (req, res) => {
         req,
       }).catch(() => {});
 
-      // Secure httpOnly cookies (also returns Bearer token for SPA)
       setAuthCookies(res, { accessToken: token, refreshToken: refresh_token });
 
-      res.status(201).json({
-        success: true,
-        message: 'User registered successfully',
-        data: {
-          id: user.id,
-          full_name: user.full_name,
-          email: user.email,
-          phone_number: user.phone_number,
-          role: user.role,
-          token,
-          refresh_token,
-        },
-      });
+      log.info('[auth] register success response sent', { userId: user.id });
+      return sendAuthSuccess(
+        res,
+        201,
+        'Registration successful',
+        user,
+        token,
+        refresh_token
+      );
     } else {
+      log.error('[auth] register failed: createUser returned empty row');
       res.status(400).json({
         success: false,
         message: 'Invalid user data',
@@ -196,12 +245,18 @@ const registerUser = async (req, res) => {
     }
   } catch (error) {
     if (error?.code === '23505') {
+      const message =
+        String(error.detail || '').includes('phone') || String(error.constraint || '').includes('phone')
+          ? 'Phone number already exists'
+          : 'Email already exists';
+      log.warn('[auth] register duplicate key', { message });
       return res.status(400).json({
         success: false,
-        message: 'Email already exists',
+        message,
         error: {},
       });
     }
+    log.error('[auth] register server error', { error: error.message });
     return fail(res, 500, 'Server Error during registration', error);
   }
 };
@@ -211,10 +266,15 @@ const registerUser = async (req, res) => {
 // @access  Public
 const loginUser = async (req, res) => {
   try {
+    log.info('[auth] login request received', {
+      email: req.body?.email ? String(req.body.email).trim().toLowerCase() : null,
+    });
+
     const email = normalizeEmail(req.body.email);
     const password = req.body.password;
 
     if (!email || !password) {
+      log.warn('[auth] login validation failed: missing credentials');
       return res.status(400).json({
         success: false,
         message: 'Please include email and password',
@@ -222,9 +282,19 @@ const loginUser = async (req, res) => {
       });
     }
 
+    if (!isValidEmail(email)) {
+      log.warn('[auth] login validation failed: invalid email', { email });
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email format',
+        error: {},
+      });
+    }
+
     const user = await findUserByEmail(email);
 
     if (!user) {
+      log.warn('[auth] login failed: user not found', { email });
       bump('auth_failed');
       writeAudit({
         action: 'failed_login',
@@ -241,6 +311,7 @@ const loginUser = async (req, res) => {
     }
 
     if (!user.password_hash || !user.password_hash.startsWith('$2')) {
+      log.warn('[auth] login failed: missing bcrypt hash', { userId: user.id });
       bump('auth_failed');
       return res.status(401).json({
         success: false,
@@ -250,6 +321,7 @@ const loginUser = async (req, res) => {
     }
 
     const passwordMatched = await bcrypt.compare(password, user.password_hash);
+    log.info('[auth] password compare completed', { userId: user.id, matched: passwordMatched });
 
     if (!passwordMatched) {
       bump('auth_failed');
@@ -278,6 +350,7 @@ const loginUser = async (req, res) => {
     }
 
     const token = generateToken(user.id, { tv: user.token_version ?? 1 });
+    log.info('[auth] access JWT generated', { userId: user.id });
     let refresh_token = null;
     try {
       refresh_token = await generateRefreshToken(user.id, clientMeta(req));
@@ -305,21 +378,10 @@ const loginUser = async (req, res) => {
 
     setAuthCookies(res, { accessToken: token, refreshToken: refresh_token });
 
-    res.json({
-      success: true,
-      message: 'Login successful',
-      data: {
-        id: user.id,
-        full_name: user.full_name,
-        email: user.email,
-        phone_number: user.phone_number,
-        role: user.role,
-        admin_role: user.admin_role || (user.role === 'admin' ? 'admin' : null),
-        token,
-        refresh_token,
-      },
-    });
+    log.info('[auth] login success response sent', { userId: user.id });
+    return sendAuthSuccess(res, 200, 'Login successful', user, token, refresh_token);
   } catch (error) {
+    log.error('[auth] login server error', { error: error.message });
     return fail(res, 500, 'Server Error during login', error);
   }
 };

@@ -1,6 +1,5 @@
 /**
- * Persist only non-sensitive user profile fields in localStorage.
- * JWT stays in the js-cookie used for Bearer auth (never duplicate tokens in localStorage).
+ * Persist user profile (+ token reference) in localStorage for client session restore.
  */
 export type PublicUser = {
   id?: string;
