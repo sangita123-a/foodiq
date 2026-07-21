@@ -1,6 +1,6 @@
 # Foodiq Google Search Readiness Report
 
-Generated: 2026-07-21T11:20:52.719Z
+Generated: 2026-07-21T13:46:21.476Z
 
 ## Final Verdict
 
@@ -88,7 +88,7 @@ Generated: 2026-07-21T11:20:52.719Z
 | Duplicate metadata titles | ✅ Pass | 0 duplicates |
 | Duplicate canonical paths | ✅ Pass | 0 duplicates |
 | Legacy internal links | ✅ Pass | 0 remaining |
-| Empty alt attributes (UI) | ✅ Pass | 0 files |
+| Empty alt attributes (UI) | ⚠️ Review | 1 files |
 | Global 404 page | ✅ Present | `app/not-found.tsx` |
 | Configured redirects | ✅ | 15 rules |
 
@@ -172,7 +172,9 @@ No legacy internal links detected in `app/` or `components/`.
 
 ## Empty Alt Text Scan
 
-No UI files with empty alt attributes (excluding OG image generator).
+| File | Empty alt count |
+|------|-----------------|
+| `app\blog\page.tsx` | 1 |
 
 ## Infrastructure Checklist
 

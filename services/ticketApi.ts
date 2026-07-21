@@ -166,12 +166,12 @@ export function statusColor(status: string) {
   if (s === "open") return "bg-amber-50 text-amber-700";
   if (s === "in progress") return "bg-blue-50 text-blue-700";
   if (s === "resolved") return "bg-emerald-50 text-emerald-700";
-  return "bg-[#F3F4F6] text-[#6B7280]";
+  return "bg-[#F3F4F6] text-gray-text";
 }
 
 export function priorityColor(priority?: string) {
   const p = String(priority || "Medium").toLowerCase();
   if (p === "high") return "text-red-600";
   if (p === "low") return "text-[#9CA3AF]";
-  return "text-[#111827]";
+  return "text-foreground";
 }

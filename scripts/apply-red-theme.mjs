@@ -8,11 +8,11 @@ const EXTENSIONS = ['.ts', '.tsx', '.css', '.js', '.jsx', '.json'];
 // Map of exact replacements for orange & former theme colors
 const REPLACEMENTS = [
   // Primary Orange to Primary Red
-  { from: /#FC8019/gi, to: '#E23744' },
-  { from: /#E76F0B/gi, to: '#C81E34' },
-  { from: /#E9700A/gi, to: '#C81E34' },
-  { from: /#E66F0D/gi, to: '#C81E34' },
-  { from: /#EF4F5F/gi, to: '#E23744' },
+  { from: /#FC8019/gi, to: '#0F766E' },
+  { from: /#E76F0B/gi, to: 'var(--color-primary-hover)' },
+  { from: /#E9700A/gi, to: 'var(--color-primary-hover)' },
+  { from: /#E66F0D/gi, to: 'var(--color-primary-hover)' },
+  { from: /#EF4F5F/gi, to: '#0F766E' },
   
   // RGBA strings
   { from: /rgba\(252,\s*128,\s*25/gi, to: 'rgba(226, 55, 68' },
@@ -23,21 +23,21 @@ const REPLACEMENTS = [
   // Tailwind orange classes
   { from: /\btext-orange-400\b/g, to: 'text-[#E23744]' },
   { from: /\btext-orange-500\b/g, to: 'text-[#E23744]' },
-  { from: /\btext-orange-600\b/g, to: 'text-[#C81E34]' },
+  { from: /\btext-orange-600\b/g, to: 'text-[var(--color-primary-hover)]' },
   { from: /\bbg-orange-400\b/g, to: 'bg-[#E23744]' },
   { from: /\bbg-orange-500\b/g, to: 'bg-[#E23744]' },
-  { from: /\bbg-orange-600\b/g, to: 'bg-[#C81E34]' },
+  { from: /\bbg-orange-600\b/g, to: 'bg-[var(--color-primary-hover)]' },
   { from: /\bbg-orange-200\b/g, to: 'bg-[#E23744]/10' },
   { from: /\bborder-orange-400\b/g, to: 'border-[#E23744]' },
   { from: /\bborder-orange-500\b/g, to: 'border-[#E23744]' },
-  { from: /\bhover:bg-orange-600\b/g, to: 'hover:bg-[#C81E34]' },
-  { from: /\bhover:text-orange-600\b/g, to: 'hover:text-[#C81E34]' },
-  { from: /\bfrom-orange-500\b/g, to: 'from-[#E23744]' },
-  { from: /\bto-orange-500\b/g, to: 'to-[#E23744]' },
-  { from: /\bfrom-orange-600\b/g, to: 'from-[#C81E34]' },
-  { from: /\bto-orange-600\b/g, to: 'to-[#C81E34]' },
-  { from: /\bfrom-amber-500\b/g, to: 'from-[#E23744]' },
-  { from: /\bto-amber-500\b/g, to: 'to-[#E23744]' },
+  { from: /\bhover:bg-orange-600\b/g, to: 'hover:bg-primary-hover' },
+  { from: /\bhover:text-orange-600\b/g, to: 'hover:text-[var(--color-primary-hover)]' },
+  { from: /\bfrom-orange-500\b/g, to: 'from-primary' },
+  { from: /\bto-orange-500\b/g, to: 'to-primary' },
+  { from: /\bfrom-orange-600\b/g, to: 'from-[var(--color-primary-hover)]' },
+  { from: /\bto-orange-600\b/g, to: 'to-primary-hover' },
+  { from: /\bfrom-amber-500\b/g, to: 'from-primary' },
+  { from: /\bto-amber-500\b/g, to: 'to-primary' },
   { from: /shadow-orange-500/g, to: 'shadow-[#E23744]' },
 
   // Warm beige / cream backgrounds to pure modern gray/white or soft red tint

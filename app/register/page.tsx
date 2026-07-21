@@ -89,6 +89,13 @@ export default function RegisterPage() {
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-lg mb-6 text-sm">
             {error}
+            {error.toLowerCase().includes("email already exists") && (
+              <p className="mt-2">
+                <Link href="/login" className="text-primary font-medium hover:underline">
+                  Log in with this email instead
+                </Link>
+              </p>
+            )}
           </div>
         )}
         <form onSubmit={handleRegister} className="space-y-5" noValidate>
