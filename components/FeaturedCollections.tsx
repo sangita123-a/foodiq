@@ -6,13 +6,10 @@ import SafeImage from "@/components/ui/SafeImage";
 import { RESTAURANT_FALLBACK } from "@/lib/images";
 import { FEATURED_COLLECTIONS } from "@/lib/data/collectionsData";
 
-const CARD_WIDTH = 280;
-const CARD_HEIGHT = 200;
-
 export default function FeaturedCollections() {
   return (
     <section className="w-full overflow-hidden bg-white py-10 md:py-12" id="featured-collections">
-      <div className="container mx-auto max-w-[1440px] px-4 md:px-8">
+      <div className="container mx-auto max-w-[1440px] px-3 md:px-8">
         <div className="mb-8">
           <h2 className="text-2xl font-black tracking-tight text-foreground md:text-3xl">
             ✨ Featured Collections
@@ -22,13 +19,12 @@ export default function FeaturedCollections() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 justify-items-center gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 md:justify-items-center">
           {FEATURED_COLLECTIONS.map((collection) => (
             <Link
               key={collection.slug}
               href={`/collections/${collection.slug}`}
-              className="group/card relative block shrink-0 cursor-pointer overflow-hidden rounded-[20px] border border-border bg-white shadow-card transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
-              style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
+              className="group/card relative block w-full cursor-pointer overflow-hidden rounded-2xl border border-border bg-white shadow-card transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] aspect-[7/5] md:aspect-auto md:w-[280px] md:h-[200px] md:justify-self-center"
             >
               <SafeImage
                 src={collection.coverImage}

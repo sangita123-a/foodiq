@@ -15,13 +15,12 @@ import {
 import { useCartActions } from "@/hooks/useCartActions";
 import { useFavoriteActions } from "@/hooks/useFavoriteActions";
 
-const CARD_WIDTH = 170;
 const CARD_HEIGHT = 240;
 const IMAGE_HEIGHT = 110;
 const SECTION_ID = "trending-dishes-section";
 
 const GRID_CLASS =
-  "grid grid-cols-2 justify-items-center gap-[14px] md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7";
+  "flex gap-3 overflow-x-auto scroll-row pb-2 -mx-1 px-1 md:grid md:grid-cols-4 md:overflow-visible md:pb-0 md:mx-0 md:px-0 lg:grid-cols-6 xl:grid-cols-7 md:gap-[14px] md:justify-items-center";
 
 function getGridColumns(width: number): number {
   if (width >= 1280) return 7;
@@ -81,8 +80,8 @@ function DishCard({
   onUpdateQty,
 }: DishCardProps) {
   const cardClassName =
-    "group flex shrink-0 flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]";
-  const cardStyle = { width: CARD_WIDTH, height: CARD_HEIGHT };
+    "group flex shrink-0 flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] w-[150px] md:w-[170px]";
+  const cardStyle = { height: CARD_HEIGHT };
 
   const cardBody = (
     <>
@@ -96,7 +95,7 @@ function DishCard({
             fallback={FOOD_FALLBACK}
             alt={dish.name}
             fill
-            sizes="170px"
+            sizes="(max-width: 767px) 150px, 170px"
             className="block object-cover object-center transition-transform duration-300 ease-out group-hover:scale-[1.05]"
           />
         </Link>
@@ -142,9 +141,9 @@ function DishCard({
           {dish.restaurantName}
         </p>
 
-        <div className="mt-auto flex items-center justify-between gap-1 pt-1.5">
+          <div className="mt-auto flex items-center justify-between gap-1 pt-1.5">
           <div className="min-w-0">
-            <span className="text-sm font-black text-[var(--color-price)]">₹{dish.price}</span>
+            <span className="text-xs md:text-sm font-black text-[var(--color-price)]">₹{dish.price}</span>
             {dish.originalPrice && dish.originalPrice > dish.price && (
               <span className="ml-0.5 text-[9px] text-[var(--color-price-old)] line-through">
                 ₹{dish.originalPrice}
@@ -158,7 +157,7 @@ function DishCard({
               onClick={() => onAdd(dish)}
               disabled={isUpdating}
               aria-label={`Add ${dish.name} to cart`}
-              className="food-button-add touch-target-expand inline-flex h-[34px] shrink-0 items-center justify-center gap-0.5 px-2.5 disabled:opacity-50"
+              className="food-button-add touch-target-expand inline-flex h-[34px] w-full md:w-auto shrink-0 items-center justify-center gap-0.5 px-2.5 disabled:opacity-50"
             >
               <Plus className="h-3 w-3" />
               <span>Add</span>
@@ -344,7 +343,7 @@ export default function TrendingDishes() {
 
   return (
     <section className="bg-white py-12" id={SECTION_ID}>
-      <div className="container mx-auto max-w-7xl px-4 md:px-8">
+      <div className="container mx-auto max-w-7xl px-3 md:px-8">
         <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-border bg-section px-3 py-1 text-xs font-bold uppercase tracking-wider text-gray-text">
@@ -393,8 +392,8 @@ export default function TrendingDishes() {
               ? Array.from({ length: initialVisible }).map((_, i) => (
                   <div
                     key={i}
-                    className="animate-pulse rounded-2xl bg-footer"
-                    style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
+                    className="animate-pulse rounded-2xl bg-footer w-[150px] md:w-[170px]"
+                    style={{ height: CARD_HEIGHT }}
                   />
                 ))
               : visibleDishes.map((dish, index) =>

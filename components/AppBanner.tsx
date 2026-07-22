@@ -11,7 +11,7 @@ const GOOGLE_PLAY_URL =
 
 export default function AppBanner() {
   return (
-    <section className="py-16 px-4 md:px-8 max-w-7xl mx-auto my-12">
+    <section className="py-12 px-3 md:px-8 max-w-7xl mx-auto my-8 md:my-12 md:py-16">
       <div className="bg-[linear-gradient(120deg,#F8F9FA_0%,#FFFFFF_68%)] border border-border rounded-[20px] overflow-hidden relative shadow-[0_18px_55px_rgba(28,28,28,0.08)]">
         {/* Abstract Background Shapes */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">

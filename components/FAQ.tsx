@@ -74,8 +74,8 @@ export default function FAQ() {
   }, [query]);
 
   return (
-    <section className="w-full border-t border-border bg-section py-16 md:py-24">
-      <div className="mx-auto w-[calc(100%-32px)] max-w-5xl md:w-[calc(100%-64px)]">
+    <section className="w-full border-t border-border bg-section py-12 md:py-24">
+      <div className="mx-auto w-[calc(100%-24px)] max-w-5xl md:w-[calc(100%-64px)]">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -112,7 +112,7 @@ export default function FAQ() {
           />
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 w-full">
           {filteredFaqs.map((faq, index) => {
             const isOpen = openId === faq.id;
             const answerId = `${faq.id}-answer`;

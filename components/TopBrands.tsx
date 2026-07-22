@@ -55,13 +55,78 @@ const brands = [
   },
 ];
 
+function BrandCard({
+  brand,
+  compact = false,
+}: {
+  brand: (typeof brands)[number];
+  compact?: boolean;
+}) {
+  if (compact) {
+    return (
+      <div className="w-[130px] shrink-0 bg-white rounded-2xl flex flex-col items-center p-3 border border-border shadow-[0_4px_16px_rgba(28,28,28,0.05)]">
+        <div className="w-20 h-20 rounded-full relative overflow-hidden shadow-[0_6px_18px_rgba(15,23,42,0.12)] border-2 border-[#F8FAFC] mb-3">
+          <SafeImage 
+            src={brand.foodImage}
+            fallback={RESTAURANT_FALLBACK}
+            alt={brand.name}
+            fill
+            sizes="80px"
+            className="object-cover"
+          />
+        </div>
+        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-1.5 shadow-md border-2 border-white -mt-7 mb-2 relative overflow-hidden">
+          <SafeImage 
+            src={brand.logo}
+            fallback={RESTAURANT_FALLBACK}
+            alt={`${brand.name} logo`}
+            fill
+            sizes="48px"
+            className="object-contain p-0.5"
+          />
+        </div>
+        <h3 className="text-foreground font-bold text-center text-xs leading-tight line-clamp-2">{brand.name}</h3>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-[200px] md:w-[220px] bg-white rounded-[20px] flex flex-col items-center p-5 cursor-pointer border border-border shadow-[0_6px_22px_rgba(28,28,28,0.05)] hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(28,28,28,0.1)] transition-all duration-300 ease-out flex-shrink-0 group relative overflow-hidden">
+      <div className="w-36 h-36 md:w-40 md:h-40 rounded-full mb-8 relative overflow-hidden shadow-[0_10px_30px_rgba(15,23,42,0.14)] border-4 border-[#F8FAFC] group-hover:border-primary/30 transition-colors duration-300">
+        <SafeImage 
+          src={brand.foodImage}
+          fallback={RESTAURANT_FALLBACK}
+          alt={brand.name}
+          fill
+          sizes="160px"
+          className="object-cover transform group-hover:scale-110 transition-transform duration-700 ease-in-out"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/75/40 to-transparent"></div>
+      </div>
+      
+      <div className="absolute top-[135px] md:top-[150px] w-14 h-14 bg-white rounded-full flex items-center justify-center p-2 shadow-xl border-4 border-white z-10 group-hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden">
+        <SafeImage 
+          src={brand.logo}
+          fallback={RESTAURANT_FALLBACK}
+          alt={`${brand.name} logo`}
+          fill
+          sizes="56px"
+          className="object-contain p-1"
+        />
+      </div>
+
+      <h3 className="text-foreground font-bold text-center text-lg mt-2 group-hover:text-primary transition-colors">{brand.name}</h3>
+    </div>
+  );
+}
+
 export default function TopBrands() {
   return (
     <section className="py-20 bg-section overflow-hidden relative border-y border-border mt-8">
-      <div className="mb-14 px-4 md:px-8 max-w-7xl mx-auto flex items-end justify-between">
+      <div className="mb-8 md:mb-14 px-3 md:px-8 max-w-7xl mx-auto flex items-end justify-between">
         <div>
           <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-3 tracking-[-0.045em]">Top Food Brands</h2>
-          <p className="text-muted text-base md:text-lg">Order from India's Most Loved Restaurants</p>
+          <p className="text-muted text-base md:text-lg">Order from India&apos;s Most Loved Restaurants</p>
         </div>
         <div className="hidden md:flex gap-3" aria-hidden="true">
           <button type="button" tabIndex={-1} className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-gray-text hover:bg-white hover:text-foreground transition-all">
@@ -73,46 +138,21 @@ export default function TopBrands() {
         </div>
       </div>
 
-      <div className="relative w-full pause-marquee">
-        {/* Left and Right Fade Masks for premium look */}
+      {/* Mobile: horizontal scroll */}
+      <div className="scroll-row md:hidden px-3 pb-2">
+        {brands.map((brand) => (
+          <BrandCard key={brand.name} brand={brand} compact />
+        ))}
+      </div>
+
+      {/* Desktop/Tablet: marquee */}
+      <div className="relative w-full pause-marquee hidden md:block">
         <div className="absolute top-0 left-0 w-12 md:w-40 h-full bg-gradient-to-r from-[#F8F9FA] to-transparent z-10 pointer-events-none"></div>
         <div className="absolute top-0 right-0 w-12 md:w-40 h-full bg-gradient-to-l from-[#F8F9FA] to-transparent z-10 pointer-events-none"></div>
 
         <div className="animate-marquee gap-8 px-4 py-4">
-          {/* Duplicate the array internally for infinite seamless scrolling */}
           {[...brands, ...brands].map((brand, index) => (
-            <div 
-              key={index} 
-              className="w-[200px] md:w-[220px] bg-white rounded-[20px] flex flex-col items-center p-5 cursor-pointer border border-border shadow-[0_6px_22px_rgba(28,28,28,0.05)] hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(28,28,28,0.1)] transition-all duration-300 ease-out flex-shrink-0 group relative overflow-hidden"
-            >
-              {/* Premium Circular Food Image */}
-              <div className="w-36 h-36 md:w-40 md:h-40 rounded-full mb-8 relative overflow-hidden shadow-[0_10px_30px_rgba(15,23,42,0.14)] border-4 border-[#F8FAFC] group-hover:border-primary/30 transition-colors duration-300">
-                <SafeImage 
-                  src={brand.foodImage}
-                  fallback={RESTAURANT_FALLBACK}
-                  alt={brand.name}
-                  fill
-                  sizes="160px"
-                  className="object-cover transform group-hover:scale-110 transition-transform duration-700 ease-in-out"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/75/40 to-transparent"></div>
-              </div>
-              
-              {/* Brand Logo Overlapping */}
-              <div className="absolute top-[135px] md:top-[150px] w-14 h-14 bg-white rounded-full flex items-center justify-center p-2 shadow-xl border-4 border-white z-10 group-hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden">
-                <SafeImage 
-                  src={brand.logo}
-                  fallback={RESTAURANT_FALLBACK}
-                  alt={`${brand.name} logo`}
-                  fill
-                  sizes="56px"
-                  className="object-contain p-1"
-                />
-              </div>
-
-              {/* Brand Name */}
-              <h3 className="text-foreground font-bold text-center text-lg mt-2 group-hover:text-primary transition-colors">{brand.name}</h3>
-            </div>
+            <BrandCard key={index} brand={brand} />
           ))}
         </div>
       </div>

@@ -229,6 +229,12 @@ textarea:focus-visible {
     font-size: 16px;
   }
 
+  .app-container,
+  .food-section {
+    width: min(100% - 24px, 1280px);
+    padding-inline: 0;
+  }
+
   .food-section {
     padding-block: clamp(28px, 7vw, 56px);
   }
@@ -247,7 +253,50 @@ textarea:focus-visible {
   }
 
   .food-card-body {
-    padding: 14px;
+    padding: 12px;
+  }
+
+  .food-grid-restaurants {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .food-grid-restaurants .food-card-image {
+    height: 120px;
+  }
+
+  .food-grid-restaurants .food-card-body {
+    padding: 10px;
+  }
+
+  .food-grid-restaurants .food-card-title {
+    font-size: 0.875rem;
+  }
+
+  .food-grid-restaurants .food-card-description {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .food-grid-restaurants .food-rating,
+  .food-grid-restaurants .food-card-body .text-xs {
+    font-size: 0.625rem;
+  }
+
+  .food-grid-restaurants .food-button.food-button-secondary {
+    width: 100%;
+    justify-content: center;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.6875rem;
+  }
+
+  .mobile-section-pad {
+    padding-inline: 12px;
+  }
+
+  .mobile-full-bleed {
+    margin-inline: -12px;
+    padding-inline: 12px;
   }
 
   .table-responsive-cards thead {

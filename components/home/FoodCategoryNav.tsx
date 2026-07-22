@@ -25,8 +25,8 @@ const FOOD_CATEGORIES = [
 
 export default function FoodCategoryNav() {
   return (
-    <section className="bg-white py-6 sm:py-8" id="food-category-nav">
-      <div className="mx-auto max-w-[1440px] px-4 md:px-8">
+    <section className="bg-white py-5 sm:py-8" id="food-category-nav">
+      <div className="mx-auto max-w-[1440px] px-3 md:px-8">
         <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground md:text-3xl">
           <span aria-hidden="true">🍽 </span>
           Order Our Best Food Options
@@ -35,14 +35,14 @@ export default function FoodCategoryNav() {
           Choose your favourite food category
         </p>
 
-        <div className="scroll-row mt-5 sm:mt-6 flex flex-nowrap overflow-x-auto">
+        <div className="scroll-row mt-4 sm:mt-6 flex flex-nowrap overflow-x-auto -mx-1 px-1">
           {FOOD_CATEGORIES.map((item) => (
             <Link
               key={item.slug}
               href={`/category/${item.slug}`}
-              className="flex w-[72px] sm:w-[88px] md:w-[96px] flex-col items-center gap-2 touch-target"
+              className="flex w-[64px] sm:w-[88px] md:w-[96px] flex-col items-center gap-1.5 touch-target"
             >
-              <div className="h-[72px] w-[72px] sm:h-[88px] sm:w-[88px] md:h-[96px] md:w-[96px] overflow-hidden rounded-full ring-2 ring-border ring-offset-2">
+              <div className="h-14 w-14 sm:h-[88px] sm:w-[88px] md:h-[96px] md:w-[96px] overflow-hidden rounded-full ring-2 ring-border ring-offset-2">
                 <SafeImage
                   src={item.image}
                   fallback={FOOD_FALLBACK}
@@ -53,7 +53,7 @@ export default function FoodCategoryNav() {
                   className="h-full w-full object-cover"
                 />
               </div>
-              <span className="w-full text-center text-xs sm:text-xs font-black text-foreground line-clamp-2 leading-tight">
+              <span className="w-full text-center text-[11px] sm:text-xs font-black text-foreground line-clamp-2 leading-tight">
                 {item.label}
               </span>
             </Link>

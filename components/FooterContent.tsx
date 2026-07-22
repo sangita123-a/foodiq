@@ -130,7 +130,7 @@ function FooterLinkSection({
   id: string;
 }) {
   return (
-    <nav aria-labelledby={id}>
+    <nav aria-labelledby={id} className="flex flex-col items-center sm:items-start">
       <h3 id={id} className={sectionTitleClass}>
         {title}
       </h3>
@@ -243,10 +243,10 @@ export default function FooterContent() {
         className="mt-12 w-full border-t border-border bg-footer py-10 text-foreground sm:mt-16 sm:py-14 lg:mt-20"
         role="contentinfo"
       >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-16">
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-6 lg:gap-10">
-            <div className="col-span-2 sm:col-span-3 lg:col-span-2">
-              <div className="flex items-center text-2xl font-bold tracking-tight sm:text-3xl">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-16">
+          <div className="grid grid-cols-1 gap-8 text-center max-sm:grid-cols-1 sm:grid-cols-3 sm:text-left lg:grid-cols-6 lg:gap-10">
+            <div className="col-span-1 sm:col-span-3 lg:col-span-2 flex flex-col items-center sm:items-start">
+              <div className="flex items-center justify-center text-2xl font-bold tracking-tight sm:text-3xl sm:justify-start">
                 {settings.logo_url ? (
                   <SafeImage
                     src={settings.logo_url}
@@ -259,7 +259,7 @@ export default function FooterContent() {
                 ) : null}
                 <span className="text-foreground">Foodiq</span>
               </div>
-              <p className="mt-3 max-w-sm text-xs text-gray-text sm:text-sm">
+              <p className="mt-3 max-w-sm text-xs text-gray-text sm:text-sm mx-auto sm:mx-0">
                 {settings.footer_content ||
                   "Discover amazing restaurants and delicious food delivered straight to your doorstep."}
               </p>
@@ -271,7 +271,7 @@ export default function FooterContent() {
                 <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted">
                   Follow Us
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                   {socialLinks.map(({ label, href, Icon }) => (
                     <a
                       key={label}
@@ -287,7 +287,7 @@ export default function FooterContent() {
                 </div>
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-3">
+              <div className="mt-6 flex flex-wrap gap-3 justify-center sm:justify-start">
                 <a
                   href={appStoreUrl}
                   target="_blank"

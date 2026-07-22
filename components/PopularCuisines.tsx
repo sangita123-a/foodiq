@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import useSWR from "swr";
+import SafeImage from "@/components/ui/SafeImage";
 import CuisineCard, { CuisineCardData } from "@/components/cuisines/CuisineCard";
 import { resolveBackendUrl } from "@/lib/images";
 
@@ -116,7 +117,42 @@ export default function PopularCuisines() {
           </Link>
         </motion.div>
 
-        <div className="grid grid-cols-2 justify-center gap-3 sm:gap-4 md:grid-cols-[repeat(4,minmax(0,190px))] lg:grid-cols-[repeat(5,minmax(0,190px))] 2xl:grid-cols-[repeat(6,minmax(0,190px))]">
+        {/* Mobile: horizontal scroll */}
+        <div className="scroll-row md:hidden -mx-1 px-1 pb-1">
+          {cuisineCategories.map((category) => {
+            const cuisine = cuisineBySlug.get(category.slug);
+            const image =
+              resolveBackendUrl(cuisine?.image_url) ||
+              resolveBackendUrl(cuisine?.preview_images?.find(Boolean)) ||
+              resolveBackendUrl(category.image) ||
+              category.image;
+
+            return (
+              <Link
+                key={category.slug}
+                href={`/cuisine/${category.slug}`}
+                className="flex w-[72px] shrink-0 flex-col items-center gap-1.5 touch-target"
+                aria-label={`Explore ${category.name} cuisine`}
+              >
+                <div className="h-[60px] w-[60px] overflow-hidden rounded-full bg-section ring-2 ring-border">
+                  <SafeImage
+                    src={image}
+                    fallback={resolveBackendUrl(category.image) || category.image}
+                    alt={category.name}
+                    width={60}
+                    height={60}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <span className="w-full text-center text-[11px] font-bold leading-tight text-foreground line-clamp-2">
+                  {category.name}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="hidden md:grid md:grid-cols-[repeat(4,minmax(0,190px))] lg:grid-cols-[repeat(5,minmax(0,190px))] 2xl:grid-cols-[repeat(6,minmax(0,190px))] justify-center gap-3 sm:gap-4">
           {cuisineCategories.map((category, index) => {
             const cuisine = cuisineBySlug.get(category.slug);
 

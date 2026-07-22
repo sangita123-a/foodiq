@@ -52,10 +52,10 @@ export default function HeroContent() {
   return (
     <div className="relative z-10 flex w-full max-w-5xl flex-col items-center justify-center text-center">
       <h1 className="m-0 flex flex-col items-center justify-center p-0 text-center font-extrabold leading-tight tracking-tight text-white drop-shadow-md">
-        <span className="block text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold">
+        <span className="block text-[30px] sm:text-5xl md:text-6xl lg:text-7xl font-extrabold">
           Find the Best
         </span>
-        <span className="relative my-1 block h-[1.25em] w-full max-w-[500px] overflow-hidden text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-primary">
+        <span className="relative my-1 block h-[1.25em] w-full max-w-[500px] overflow-hidden text-[30px] sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-primary">
           <span
             key={index}
             className={`absolute inset-0 flex items-center justify-center text-center ${
@@ -65,7 +65,7 @@ export default function HeroContent() {
             {words[index]}
           </span>
         </span>
-        <span className="block text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold">
+        <span className="block text-[30px] sm:text-5xl md:text-6xl lg:text-7xl font-extrabold">
           Near You
         </span>
       </h1>
@@ -74,7 +74,7 @@ export default function HeroContent() {
         Discover amazing restaurants and delicious food delivered straight to your doorstep.
       </p>
 
-      <div className="mt-8 sm:mt-10 md:mt-12 w-full max-w-4xl flex justify-center px-2">
+      <div className="mt-6 sm:mt-10 md:mt-12 w-full max-w-4xl flex justify-center">
         <SearchBar />
       </div>
 

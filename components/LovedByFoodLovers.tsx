@@ -110,8 +110,8 @@ export default function LovedByFoodLovers() {
   }, [isHovered, isPaused, cardsToShow]);
 
   return (
-    <section className="bg-section w-full py-14 sm:py-20 md:py-[100px] overflow-hidden border-t border-border mt-6 sm:mt-8">
-      <div className="w-[90%] max-w-7xl mx-auto">
+    <section className="bg-section w-full py-10 sm:py-20 md:py-[100px] overflow-hidden border-t border-border mt-6 sm:mt-8">
+      <div className="w-[calc(100%-24px)] md:w-[90%] max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -131,7 +131,7 @@ export default function LovedByFoodLovers() {
         </motion.div>
 
         <div
-          className="relative overflow-hidden"
+          className="relative overflow-hidden px-0"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           aria-roledescription="carousel"
@@ -158,8 +158,8 @@ export default function LovedByFoodLovers() {
                 className="flex-shrink-0"
                 style={{ width: `calc(${100 / cardsToShow}% - ${(6 * (cardsToShow - 1)) / cardsToShow}rem)` }}
               >
-                <div className="bg-white rounded-[20px] p-8 h-full border border-border shadow-card relative group hover:-translate-y-1 hover:border-border hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] transition-all duration-300">
-                  <Quote className="absolute top-6 right-6 w-16 h-16 text-primary/10 group-hover:text-primary/20 transition-colors duration-300 pointer-events-none" aria-hidden="true" />
+                <div className="bg-white rounded-2xl p-5 sm:p-8 h-full border border-border shadow-card relative group hover:-translate-y-1 hover:border-border hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] transition-all duration-300 overflow-hidden">
+                  <Quote className="absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 sm:w-16 sm:h-16 text-primary/10 group-hover:text-primary/20 transition-colors duration-300 pointer-events-none" aria-hidden="true" />
 
                   <div className="flex justify-between items-start mb-6 relative z-10">
                     <div

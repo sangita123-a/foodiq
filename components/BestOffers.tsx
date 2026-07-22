@@ -40,11 +40,11 @@ export default function BestOffers() {
         </Link>
       </div>
 
-      <div className="food-grid">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {FIVE_BEST_OFFERS.map((offer) => (
           <article
             key={offer.id}
-            className="food-card relative group bg-white p-5 flex flex-col justify-between border border-border rounded-[18px] shadow-card hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 min-h-[200px]"
+            className="food-card relative group bg-white p-5 flex flex-col justify-between border border-border rounded-2xl md:rounded-[18px] shadow-card hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 min-h-[200px] overflow-hidden"
           >
             {/* Image Banner Background */}
             <div className="absolute top-0 right-0 w-36 sm:w-44 h-full opacity-40 group-hover:opacity-60 transition-opacity duration-300 group-hover:scale-105 transform origin-right overflow-hidden rounded-r-[18px]">
