@@ -32,9 +32,9 @@ export default function FeaturedRestaurant() {
   if (!restaurant) return null;
 
   return (
-    <section className="bg-section w-full py-12 sm:py-16 md:py-20 lg:py-[100px] overflow-hidden border-y border-border">
-      <div className="w-[94%] sm:w-[90%] max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row gap-12 xl:gap-16 items-center">
+    <section className="bg-section w-full py-10 sm:py-16 md:py-20 lg:py-[100px] overflow-hidden border-y border-border">
+      <div className="w-[calc(100%-24px)] sm:w-[90%] max-w-7xl mx-auto">
+        <div className="flex flex-col lg:flex-row gap-8 sm:gap-12 xl:gap-16 items-center">
           
           {/* Left Side - Image (55%) */}
           <motion.div 
@@ -73,12 +73,12 @@ export default function FeaturedRestaurant() {
             </div>
 
             {/* Main Heading */}
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6 tracking-[-0.045em] leading-tight">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4 sm:mb-6 tracking-[-0.045em] leading-tight">
               {restaurant.name}
             </h2>
 
             {/* Stats Row */}
-            <div className="flex flex-wrap gap-3 text-sm font-medium text-muted mb-8">
+            <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm font-medium text-muted mb-6 sm:mb-8">
               <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-border">
                 <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                 <span>{restaurant.rating} Rating</span>
@@ -107,11 +107,11 @@ export default function FeaturedRestaurant() {
             </p>
 
             {/* Buttons */}
-            <div className="flex flex-wrap gap-4 mb-10">
-              <Link href={`/restaurant/${restaurant.id}`} className="bg-primary hover:bg-[var(--color-primary-hover)] text-white px-8 py-2.5 rounded-xl text-sm font-semibold shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_6px_18px_rgba(0,0,0,0.1)] hover:-translate-y-0.5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4 mb-8 sm:mb-10">
+              <Link href={`/restaurant/${restaurant.id}`} className="w-full sm:w-auto text-center bg-primary hover:bg-[var(--color-primary-hover)] text-white px-8 py-2.5 rounded-xl text-sm font-semibold shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_6px_18px_rgba(0,0,0,0.1)] hover:-translate-y-0.5">
                 Explore Menu
               </Link>
-              <Link href={`/restaurant/${restaurant.id}`} className="bg-white border border-border text-foreground hover:bg-section hover:border-border px-8 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5">
+              <Link href={`/restaurant/${restaurant.id}`} className="w-full sm:w-auto text-center bg-white border border-border text-foreground hover:bg-section hover:border-border px-8 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5">
                 View Restaurant
               </Link>
             </div>

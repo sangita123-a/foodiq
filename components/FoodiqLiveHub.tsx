@@ -34,17 +34,17 @@ export default function FoodiqLiveHub() {
   };
 
   return (
-    <section className="py-6 bg-background">
-      <div className="container mx-auto max-w-[1440px] px-4 md:px-8">
+    <section className="py-5 sm:py-6 bg-background overflow-hidden">
+      <div className="container mx-auto max-w-[1440px] px-3 md:px-8">
         
         {/* Section Header */}
-        <div className="flex items-center justify-between mb-5 pb-3 border-b border-border">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-section text-gray-text text-xs font-black uppercase tracking-wider border border-border">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-5 pb-3 border-b border-border">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 min-w-0">
+            <div className="inline-flex w-fit items-center gap-1.5 px-3 py-1 rounded-full bg-section text-gray-text text-[10px] sm:text-xs font-black uppercase tracking-wider border border-border">
               <span aria-hidden="true">🔥</span>
               <span>Live Action & Deals</span>
             </div>
-            <h2 className="text-xl md:text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
               🔥 FOODIQ LIVE HUB
             </h2>
           </div>
@@ -54,10 +54,10 @@ export default function FoodiqLiveHub() {
         </div>
 
         {/* 1 ROW ONLY (4 Equal Cards in Horizontal Line) */}
-        <div className="flex overflow-x-auto snap-x scrollbar-none gap-4 md:gap-5 md:grid md:grid-cols-4 pb-2">
+        <div className="scroll-row md:grid md:grid-cols-4 md:gap-5 md:overflow-visible pb-2">
           
           {/* CARD 1: 🏏 LIVE CRICKET */}
-          <div className="min-w-[280px] sm:min-w-[300px] md:min-w-0 flex-1 group relative rounded-[18px] p-4 flex flex-col justify-between h-[210px] md:h-[220px] overflow-hidden shadow-card hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300 border border-border bg-[#1A1A1A]">
+          <div className="min-w-[260px] sm:min-w-[280px] md:min-w-0 flex-1 group relative rounded-2xl p-4 flex flex-col justify-between h-[200px] sm:h-[210px] md:h-[220px] overflow-hidden shadow-card hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300 border border-border bg-[#1A1A1A]">
             {/* Background Cricket Image with Gradient Overlay */}
             <div className="absolute inset-0 z-0">
               <SafeImage
@@ -125,7 +125,7 @@ export default function FoodiqLiveHub() {
           </div>
 
           {/* CARD 2: Live Cooking */}
-          <div className="min-w-[280px] sm:min-w-[300px] md:min-w-0 flex-1 group relative bg-white rounded-[18px] border border-border p-4 flex flex-col justify-between h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300">
+          <div className="min-w-[260px] sm:min-w-[280px] md:min-w-0 flex-1 group relative bg-white rounded-2xl border border-border p-4 flex flex-col justify-between h-[200px] sm:h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300">
             <div className="absolute top-0 right-0 w-36 h-full opacity-35 group-hover:opacity-50 transition-opacity duration-300 overflow-hidden rounded-r-[18px]">
               <SafeImage
                 src={LIVE_HUB_IMAGES.liveCooking}
@@ -183,7 +183,7 @@ export default function FoodiqLiveHub() {
           </div>
 
           {/* CARD 3: Chef Kitchen */}
-          <div className="min-w-[280px] sm:min-w-[300px] md:min-w-0 flex-1 group relative bg-white rounded-[18px] border border-border p-4 flex flex-col justify-between h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300">
+          <div className="min-w-[260px] sm:min-w-[280px] md:min-w-0 flex-1 group relative bg-white rounded-2xl border border-border p-4 flex flex-col justify-between h-[200px] sm:h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300">
             <div className="absolute top-0 right-0 w-36 h-full opacity-35 group-hover:opacity-50 transition-opacity duration-300 overflow-hidden rounded-r-[18px]">
               <SafeImage
                 src={LIVE_HUB_IMAGES.chefKitchen}
@@ -241,7 +241,7 @@ export default function FoodiqLiveHub() {
           </div>
 
           {/* CARD 4: Fresh Delivery */}
-          <div className="min-w-[280px] sm:min-w-[300px] md:min-w-0 flex-1 group relative bg-white rounded-[18px] border border-border p-4 flex flex-col justify-between h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300">
+          <div className="min-w-[260px] sm:min-w-[280px] md:min-w-0 flex-1 group relative bg-white rounded-2xl border border-border p-4 flex flex-col justify-between h-[200px] sm:h-[210px] md:h-[220px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300">
             <div className="absolute top-0 right-0 w-36 h-full opacity-35 group-hover:opacity-50 transition-opacity duration-300 overflow-hidden rounded-r-[18px]">
               <SafeImage
                 src={LIVE_HUB_IMAGES.freshDelivery}

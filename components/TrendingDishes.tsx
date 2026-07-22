@@ -342,25 +342,25 @@ export default function TrendingDishes() {
   );
 
   return (
-    <section className="bg-white py-12" id={SECTION_ID}>
+    <section className="bg-white py-8 md:py-12 overflow-hidden" id={SECTION_ID}>
       <div className="container mx-auto max-w-7xl px-3 md:px-8">
-        <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-          <div>
+        <div className="mb-6 md:mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+          <div className="min-w-0">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-border bg-section px-3 py-1 text-xs font-bold uppercase tracking-wider text-gray-text">
               <Flame className="h-4 w-4 text-[var(--color-primary)]" fill="var(--color-primary)" stroke="var(--color-primary)" aria-hidden />
               <span>60 Trending Delicacies</span>
             </div>
-            <h2 className="mb-2 text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
+            <h2 className="mb-2 text-2xl md:text-4xl font-extrabold tracking-tight text-foreground">
               Trending Dishes Right Now
             </h2>
-            <p className="text-base text-gray-text md:text-lg">
+            <p className="text-sm md:text-lg text-gray-text">
               Most ordered dishes across Foodiq with instant delivery.
             </p>
           </div>
 
           <Link
             href="/trending-dishes"
-            className="food-button food-button-primary inline-flex items-center gap-2 px-5 py-2 text-sm"
+            className="food-button food-button-primary inline-flex w-full md:w-auto items-center justify-center gap-2 px-5 py-2 text-sm"
           >
             <ShoppingBag className="h-4 w-4" />
             <span>View All 60 Dishes</span>
@@ -418,7 +418,7 @@ export default function TrendingDishes() {
                   setShowAll(true);
                 }
               }}
-              className="food-button food-button-primary mt-10 px-8 py-2.5 text-sm"
+              className="food-button food-button-primary mt-8 md:mt-10 w-full max-w-xs md:w-auto px-8 py-2.5 text-sm"
             >
               {showAll ? "View Less" : "View More"}
             </button>

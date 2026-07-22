@@ -131,7 +131,7 @@ export default function LovedByFoodLovers() {
         </motion.div>
 
         <div
-          className="relative overflow-hidden px-0"
+          className="relative overflow-hidden mobile-no-overflow"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           aria-roledescription="carousel"

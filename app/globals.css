@@ -299,6 +299,15 @@ textarea:focus-visible {
     padding-inline: 12px;
   }
 
+  .mobile-no-overflow {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  .mobile-section-title {
+    font-size: clamp(1.25rem, 5vw, 1.75rem);
+  }
+
   .table-responsive-cards thead {
     display: none;
   }

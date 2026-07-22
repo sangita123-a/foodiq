@@ -25,8 +25,8 @@ export default function BestOffers() {
   };
 
   return (
-    <section className="food-section">
-      <div className="food-section-heading">
+    <section className="food-section overflow-hidden">
+      <div className="food-section-heading flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2 tracking-tight">Today&apos;s Best Offers</h2>
           <p>Save big with our exclusive deals across top restaurants.</p>
@@ -40,7 +40,7 @@ export default function BestOffers() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 max-md:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {FIVE_BEST_OFFERS.map((offer) => (
           <article
             key={offer.id}
