@@ -28,28 +28,46 @@ const server = http.createServer(app);
 
 const isProduction = process.env.NODE_ENV === 'production';
 
+/** Canonical production frontends — kept in code so auth works even if Render env is stale. */
+const PRODUCTION_FRONTEND_ORIGINS = [
+  'https://foodiq-ecru.vercel.app',
+  'https://foodiq-sangita123-as-projects.vercel.app',
+];
+
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   ...(process.env.CORS_ORIGINS || '')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),
+  ...(isProduction ? PRODUCTION_FRONTEND_ORIGINS : []),
   ...(isProduction
     ? []
     : ['http://localhost:3000', 'http://127.0.0.1:3000']),
-].filter(Boolean);
+]
+  .map((o) => String(o || '').trim().replace(/\/$/, ''))
+  .filter(Boolean);
 
 const corsStrict =
   String(process.env.CORS_STRICT || (isProduction ? 'true' : 'false')).toLowerCase() ===
   'true';
-// Production: only allow *.vercel.app when explicitly enabled
+// Allow *.vercel.app in production by default (Vercel preview + production domains).
 const allowVercelPreviews =
-  String(process.env.CORS_ALLOW_VERCEL || 'false').toLowerCase() === 'true';
+  String(process.env.CORS_ALLOW_VERCEL || (isProduction ? 'true' : 'false')).toLowerCase() ===
+  'true';
 
 const isOriginAllowed = (origin) => {
   if (!origin) return true;
-  if (allowedOrigins.includes(origin)) return true;
-  if (allowVercelPreviews && /\.vercel\.app$/i.test(origin)) return true;
+  const normalized = String(origin).trim().replace(/\/$/, '');
+  if (allowedOrigins.includes(normalized)) return true;
+  if (allowVercelPreviews) {
+    try {
+      const { hostname } = new URL(normalized);
+      if (hostname === 'vercel.app' || hostname.endsWith('.vercel.app')) return true;
+    } catch {
+      if (/\.vercel\.app$/i.test(normalized)) return true;
+    }
+  }
   return false;
 };
 
@@ -85,7 +103,8 @@ app.use(
         return callback(null, true);
       }
       if (corsStrict) {
-        return callback(new Error('Not allowed by CORS'));
+        // Do not throw — Error becomes a 500 via errorHandler and breaks Vercel /backend-api proxy.
+        return callback(null, false);
       }
       // Dev / local tooling: allow unknown origins unless CORS_STRICT
       return callback(null, true);

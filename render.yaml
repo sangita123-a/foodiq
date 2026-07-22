@@ -45,9 +45,9 @@ services:
       - key: RAZORPAY_MOCK
         value: "true"
       - key: FRONTEND_URL
-        value: https://foodiq-sangita123-as-projects.vercel.app
+        value: https://foodiq-ecru.vercel.app
       - key: CORS_ORIGINS
-        value: https://foodiq-sangita123-as-projects.vercel.app
+        value: https://foodiq-ecru.vercel.app,https://foodiq-sangita123-as-projects.vercel.app
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET
