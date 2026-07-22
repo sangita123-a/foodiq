@@ -77,15 +77,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 pt-24">
-      <div className="max-w-md w-full bg-background border border-border p-8 rounded-2xl shadow-card">
-        <h2 className="text-3xl font-bold text-foreground text-center mb-6">Welcome Back</h2>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 pt-20 max-md:pt-20 max-md:px-3 md:pt-24">
+      <div className="max-w-md w-full bg-background border border-border p-5 sm:p-8 rounded-xl sm:rounded-2xl shadow-card max-md:p-5 max-md:rounded-xl">
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground text-center mb-4 sm:mb-6 max-md:text-xl max-md:mb-4">Welcome Back</h2>
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-lg mb-6 text-sm">
             {error}
           </div>
         )}
-        <form onSubmit={handleLogin} className="space-y-5" noValidate>
+        <form onSubmit={handleLogin} className="space-y-4 sm:space-y-5 max-md:space-y-4" noValidate>
           <div>
             <label htmlFor="login-email" className="food-label">Email Address</label>
             <input
@@ -132,7 +132,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="food-button food-button-primary w-full py-2.5 text-sm disabled:opacity-70 inline-flex items-center justify-center gap-2"
+            className="food-button food-button-primary w-full py-2 text-sm disabled:opacity-70 inline-flex items-center justify-center gap-2 max-md:py-2 max-md:text-xs"
           >
             {loading ? (
               <>

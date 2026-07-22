@@ -12,7 +12,7 @@ export default function ContactHero() {
   const company = settings.company_name || settings.app_name || "Foodiq";
 
   return (
-    <div className="relative flex h-[50vh] min-h-[400px] items-center justify-center overflow-hidden">
+    <div className="relative flex h-[36vh] min-h-[220px] items-center justify-center overflow-hidden max-md:h-[36vh] max-md:min-h-[220px] md:h-[50vh] md:min-h-[400px]">
       <div className="absolute inset-0 z-0">
         <SafeImage
           src={CONTACT_HERO_IMAGE}
@@ -30,7 +30,7 @@ export default function ContactHero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mb-6 text-5xl font-black text-foreground md:text-6xl lg:text-7xl"
+          className="mb-4 text-2xl font-black text-foreground max-md:mb-3 max-md:text-2xl md:mb-6 md:text-5xl lg:text-7xl"
         >
           Contact <span className="text-primary">{company}</span>
         </motion.h1>
@@ -39,7 +39,7 @@ export default function ContactHero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mx-auto max-w-3xl text-lg leading-relaxed text-gray-text md:text-xl"
+          className="mx-auto max-w-3xl text-sm leading-relaxed text-gray-text max-md:text-sm md:text-lg lg:text-xl"
         >
           We&apos;re here to help. Reach out anytime for support, feedback, partnerships, or business inquiries.
         </motion.p>

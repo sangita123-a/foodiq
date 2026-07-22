@@ -477,16 +477,16 @@ export default function CheckoutPage() {
         </div>
 
         {/* Mobile sticky checkout bar */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-white/95 backdrop-blur-md px-4 py-3 safe-bottom shadow-[0_-8px_24px_rgba(0,0,0,0.08)]">
-          <div className="flex items-center justify-between gap-4 mb-2">
-            <span className="text-sm font-bold text-muted">Total</span>
-            <span className="text-xl font-black text-foreground">₹{totals.grandTotal}</span>
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-white/95 backdrop-blur-md px-3 py-2.5 safe-bottom shadow-[0_-8px_24px_rgba(0,0,0,0.08)] max-md:px-3 max-md:py-2.5">
+          <div className="flex items-center justify-between gap-3 mb-1.5 max-md:mb-1.5">
+            <span className="text-xs font-bold text-muted max-md:text-xs">Total</span>
+            <span className="text-lg font-black text-foreground max-md:text-lg">₹{totals.grandTotal}</span>
           </div>
           <button
             type="button"
             onClick={handlePlaceOrder}
             disabled={isSubmitting || cartItems.length === 0}
-            className="w-full touch-target min-h-[48px] rounded-xl bg-primary font-semibold text-white text-sm shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:bg-primary-hover disabled:opacity-50"
+            className="w-full touch-target min-h-[44px] rounded-lg bg-primary font-semibold text-white text-xs shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:bg-primary-hover disabled:opacity-50 max-md:min-h-[44px] max-md:text-xs md:rounded-xl md:min-h-[48px] md:text-sm"
           >
             {buttonLabel}
           </button>

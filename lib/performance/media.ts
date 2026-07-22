@@ -24,11 +24,10 @@ export function hasSaveDataEnabled(): boolean {
   return getConnection()?.saveData === true;
 }
 
-/** Hero background video competes with LCP on mobile and save-data connections. */
+/** Hero background video — skip only on save-data or reduced-motion. */
 export function shouldLoadHeroVideo(): boolean {
   if (typeof window === "undefined") return false;
   if (prefersReducedMotionMedia()) return false;
-  if (isMobileViewport()) return false;
   if (hasSaveDataEnabled()) return false;
   return true;
 }

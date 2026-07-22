@@ -83,9 +83,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 pt-24 pb-12">
-      <div className="max-w-md w-full bg-background border border-border p-8 rounded-2xl shadow-card">
-        <h2 className="text-3xl font-bold text-foreground text-center mb-6">Create Account</h2>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 pt-20 pb-10 max-md:pt-20 max-md:px-3 max-md:pb-10 md:pt-24 md:pb-12">
+      <div className="max-w-md w-full bg-background border border-border p-5 sm:p-8 rounded-xl sm:rounded-2xl shadow-card max-md:p-5 max-md:rounded-xl">
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground text-center mb-4 sm:mb-6 max-md:text-xl max-md:mb-4">Create Account</h2>
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-lg mb-6 text-sm">
             {error}

@@ -25,10 +25,10 @@ export default function CartItemCard({ item, onUpdateQuantity, onRemove, isUpdat
   const itemTotal = item.price * item.quantity;
 
   return (
-    <div className="bg-section rounded-[22px] p-4 md:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-6 shadow-md border border-border hover:border-border transition-colors">
+    <div className="bg-section rounded-[22px] p-3 sm:p-4 md:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 md:gap-6 shadow-md border border-border hover:border-border transition-colors max-md:p-3 max-md:rounded-xl max-md:gap-3">
       
       {/* Item Image */}
-      <div className="w-full sm:w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 relative">
+      <div className="w-full sm:w-24 h-20 sm:h-24 rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0 relative max-md:h-20">
         <SafeImage 
           src={item.image} 
           fallback={FOOD_FALLBACK}
@@ -44,7 +44,7 @@ export default function CartItemCard({ item, onUpdateQuantity, onRemove, isUpdat
           <div className={`w-3 h-3 flex items-center justify-center border rounded-sm ${item.isVeg ? 'border-green-600' : 'border-red-600'}`}>
             <div className={`w-1.5 h-1.5 rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'}`}></div>
           </div>
-          <h3 className="text-lg md:text-xl font-bold text-white line-clamp-1">{item.name}</h3>
+          <h3 className="text-base sm:text-lg md:text-xl font-bold text-white line-clamp-1 max-md:text-sm">{item.name}</h3>
         </div>
         <p className="text-[#A1A1A1] text-sm mb-3">From {item.restaurant}</p>
         <div className="text-white font-bold text-lg">
@@ -56,7 +56,7 @@ export default function CartItemCard({ item, onUpdateQuantity, onRemove, isUpdat
       <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-4 mt-2 sm:mt-0">
         
         {/* Quantity Selector */}
-        <div className="flex items-center bg-background border border-border rounded-lg overflow-hidden h-10 w-28">
+        <div className="flex items-center bg-background border border-border rounded-lg overflow-hidden h-9 w-24 max-md:h-9 max-md:w-24 sm:h-10 sm:w-28">
           <button 
             type="button"
             onClick={() => onUpdateQuantity(item.id, -1)}

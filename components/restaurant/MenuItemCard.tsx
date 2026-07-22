@@ -75,7 +75,7 @@ export default function MenuItemCard({
     <article className="food-card group flex h-full flex-col rounded-[14px]">
       
       {/* Item Info */}
-      <div className="order-2 flex flex-1 flex-col justify-between p-3">
+      <div className="order-2 flex flex-1 flex-col justify-between p-2.5 sm:p-3 max-md:p-2.5">
         <div>
           {/* Veg/Non-Veg Badge & Tags */}
           <div className="mb-2 flex min-h-5 items-center gap-2">
@@ -97,7 +97,7 @@ export default function MenuItemCard({
           </div>
 
           <div className="flex justify-between items-start gap-2">
-            <Link href={`/food/${item.id}`} className="mb-1 line-clamp-1 text-[15px] font-semibold leading-5 text-foreground transition-colors group-hover:text-primary">
+            <Link href={`/food/${item.id}`} className="mb-1 line-clamp-1 text-sm font-semibold leading-5 text-foreground transition-colors group-hover:text-primary max-md:text-[13px] sm:text-[15px]">
               {item.name}
             </Link>
             <button 
@@ -142,7 +142,7 @@ export default function MenuItemCard({
       </div>
 
       {/* Item Image & Controls */}
-      <div className="relative order-1 h-[132px] w-full flex-shrink-0 overflow-hidden bg-[#F8F9FA]">
+      <div className="relative order-1 h-[112px] w-full flex-shrink-0 overflow-hidden bg-[#F8F9FA] max-md:h-[112px] sm:h-[132px]">
         <div className="h-full w-full overflow-hidden bg-[#F8F9FA]">
           <Link href={`/food/${item.id}`} className="block h-full w-full">
             <SafeImage 
@@ -155,7 +155,7 @@ export default function MenuItemCard({
         </div>
         
         {/* Add/Quantity Button */}
-        <div className="absolute bottom-3 right-3 flex h-9 w-28 items-center justify-between overflow-hidden rounded-lg border border-border bg-white/95 font-bold text-foreground shadow-[0_8px_22px_rgba(28,28,28,0.12)] backdrop-blur-sm">
+        <div className="absolute bottom-2 right-2 flex h-8 w-24 items-center justify-between overflow-hidden rounded-lg border border-border bg-white/95 font-bold text-foreground shadow-[0_8px_22px_rgba(28,28,28,0.12)] backdrop-blur-sm max-md:bottom-2 max-md:right-2 max-md:h-8 max-md:w-[88px] sm:bottom-3 sm:right-3 sm:h-9 sm:w-28">
           {quantity > 0 ? (
             <>
               <button 
@@ -165,7 +165,7 @@ export default function MenuItemCard({
               >
                 <Minus className="w-4 h-4" />
               </button>
-              <span className="w-1/3 text-center text-sm">{quantity}</span>
+              <span className="w-1/3 text-center text-xs sm:text-sm max-md:text-xs">{quantity}</span>
               <button 
                 onClick={() => onUpdateQuantity(item.id, 1)}
                 disabled={isUpdating}
@@ -178,7 +178,7 @@ export default function MenuItemCard({
             <button 
               onClick={() => onUpdateQuantity(item.id, 1)}
               disabled={isUpdating}
-              className="h-full w-full text-center text-sm font-bold tracking-wider text-primary transition-colors hover:bg-section disabled:opacity-50"
+              className="h-full w-full text-center text-xs font-bold tracking-wider text-primary transition-colors hover:bg-section disabled:opacity-50 sm:text-sm max-md:text-xs"
             >
               ADD
             </button>

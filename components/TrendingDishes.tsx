@@ -78,11 +78,11 @@ function DishCard({
   onUpdateQty,
 }: DishCardProps) {
   const cardClassName =
-    "group flex h-auto w-[148px] shrink-0 flex-col overflow-hidden rounded-lg border border-border bg-white shadow-[0_1px_6px_rgba(0,0,0,0.05)] transition-all duration-300 max-md:w-[148px] md:h-[240px] md:w-[170px] md:rounded-2xl md:shadow-[0_2px_12px_rgba(0,0,0,0.06)] md:hover:-translate-y-1 md:hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]";
+    "group flex h-auto w-[140px] shrink-0 flex-col overflow-hidden rounded-lg border border-border bg-white shadow-[0_1px_6px_rgba(0,0,0,0.05)] transition-all duration-300 max-md:w-[140px] md:h-[240px] md:w-[170px] md:rounded-2xl md:shadow-[0_2px_12px_rgba(0,0,0,0.06)] md:hover:-translate-y-1 md:hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]";
 
   const cardBody = (
     <>
-      <div className="relative h-[100px] w-full shrink-0 overflow-hidden rounded-t-lg bg-footer max-md:h-[100px] md:h-[110px] md:rounded-t-2xl">
+      <div className="relative h-[92px] w-full shrink-0 overflow-hidden rounded-t-lg bg-footer max-md:h-[92px] md:h-[110px] md:rounded-t-2xl">
         <Link href={`/food/${dish.id}`} className="relative block h-full w-full">
           <SafeImage
             src={dish.image}
@@ -151,7 +151,7 @@ function DishCard({
               onClick={() => onAdd(dish)}
               disabled={isUpdating}
               aria-label={`Add ${dish.name} to cart`}
-              className="food-button-add touch-target-expand inline-flex h-[26px] shrink-0 items-center justify-center gap-0.5 rounded-md border border-[var(--color-primary)] bg-white px-2 text-[10px] font-bold text-[var(--color-primary)] disabled:opacity-50 max-md:min-w-[52px] md:h-[34px] md:w-auto md:rounded-lg md:border-0 md:bg-[var(--color-primary)] md:px-2.5 md:font-normal md:text-white md:text-xs"
+              className="food-button food-button-add touch-target-expand inline-flex h-[24px] shrink-0 items-center justify-center gap-0.5 rounded-md border border-[var(--color-primary)] bg-white px-1.5 text-[9px] font-bold text-[var(--color-primary)] disabled:opacity-50 max-md:min-w-[48px] md:h-[34px] md:w-auto md:rounded-lg md:border-0 md:bg-[var(--color-primary)] md:px-2.5 md:font-normal md:text-white md:text-xs"
             >
               <Plus className="h-3 w-3" />
               <span>Add</span>
@@ -353,7 +353,7 @@ export default function TrendingDishes() {
 
           <Link
             href="/trending-dishes"
-            className="food-button food-button-primary inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-[11px] max-md:py-1.5 max-md:text-[11px] md:w-auto md:gap-2 md:px-5 md:py-2 md:text-sm"
+            className="food-button food-button-primary inline-flex w-full items-center justify-center gap-1 px-2.5 py-1 text-[10px] max-md:py-1 max-md:text-[10px] md:w-auto md:gap-2 md:px-5 md:py-2 md:text-sm"
           >
             <ShoppingBag className="h-3.5 w-3.5 md:h-4 md:w-4" />
             <span>View All 60 Dishes</span>
@@ -410,7 +410,7 @@ export default function TrendingDishes() {
                   setShowAll(true);
                 }
               }}
-              className="food-button food-button-primary mt-4 w-full max-w-xs px-5 py-2 text-xs max-md:mt-4 max-md:py-2 max-md:text-xs md:mt-10 md:w-auto md:px-8 md:py-2.5 md:text-sm"
+              className="food-button food-button-primary mt-3 w-full max-w-xs px-4 py-1.5 text-[10px] max-md:mt-3 max-md:py-1.5 max-md:text-[10px] md:mt-10 md:w-auto md:px-8 md:py-2.5 md:text-sm"
             >
               {showAll ? "View Less" : "View More"}
             </button>

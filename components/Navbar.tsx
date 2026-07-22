@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter, usePathname } from "next/navigation";
-import { ShoppingCart, Search, Menu, User } from "lucide-react";
+import { ShoppingCart, Search, Menu } from "lucide-react";
 import api from "@/services/api";
 import InstallAppButton from "@/components/pwa/InstallAppButton";
 import { clearClientAuth } from "@/lib/authSession";
@@ -64,11 +64,11 @@ export default function Navbar() {
     <>
       <nav
         aria-label="Main navigation"
-        className={`sticky top-0 left-0 w-full h-14 md:h-[72px] lg:h-[80px] z-50 flex items-center justify-between px-3 sm:px-6 lg:px-16 bg-white/95 backdrop-blur-xl border-b border-border shadow-nav supports-[backdrop-filter]:bg-white/90 safe-top ${
+        className={`sticky top-0 left-0 w-full z-50 flex items-center justify-between bg-white/95 backdrop-blur-xl border-b border-border shadow-nav supports-[backdrop-filter]:bg-white/90 safe-top max-md:h-14 max-md:px-3 md:h-[72px] md:px-6 lg:h-[80px] lg:px-16 ${
           reducedMotion ? "" : "nav-enter-motion"
         }`}
       >
-        <Link href="/" className="touch-target flex items-center text-lg max-sm:text-lg sm:text-2xl lg:text-3xl font-extrabold tracking-[-0.045em] text-foreground transition-opacity hover:opacity-80 truncate py-1 min-w-0 shrink">
+        <Link href="/" className="touch-target flex items-center font-extrabold tracking-[-0.045em] text-foreground transition-opacity hover:opacity-80 truncate py-1 min-w-0 shrink max-md:text-base md:text-2xl lg:text-3xl">
           Foodiq
         </Link>
 
@@ -178,38 +178,29 @@ export default function Navbar() {
           )}
         </div>
 
-        <div className="flex md:hidden items-center gap-0.5 max-sm:gap-0.5 shrink-0">
+        <div className="flex md:hidden items-center gap-1 shrink-0">
           <Link
             href="/search"
-            className="touch-target flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-foreground"
+            className="touch-target flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-white text-foreground"
             aria-label="Search"
           >
             <Search className="w-4 h-4" />
           </Link>
           <Link
             href="/cart"
-            className="relative touch-target flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-foreground"
+            className="relative touch-target flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-white text-foreground"
             aria-label={`Cart with ${cartCount} items`}
           >
             <ShoppingCart className="w-4 h-4" />
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[var(--color-primary)] text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+              <span className="absolute -top-1 -right-1 bg-[var(--color-primary)] text-white text-[9px] font-bold min-w-[16px] h-4 flex items-center justify-center rounded-full px-0.5">
                 {cartCount > 99 ? "99+" : cartCount}
               </span>
             )}
           </Link>
-          {isLoggedIn ? (
-            <Link
-              href="/profile"
-              className="touch-target flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-foreground"
-              aria-label="Profile"
-            >
-              <User className="w-4 h-4" />
-            </Link>
-          ) : null}
           <button
             type="button"
-            className="md:hidden touch-target flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-foreground"
+            className="touch-target flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-white text-foreground"
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
           >
