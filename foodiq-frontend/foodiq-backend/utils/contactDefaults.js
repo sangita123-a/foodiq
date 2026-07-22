@@ -1,10 +1,10 @@
 const DEFAULT_CONTACT_INFO = {
   office_address: '123 Culinary Avenue, Tech Park, Hyderabad, India 500081',
-  phone_number: '+91 1800 123 4567',
-  email: 'support@foodiq.com',
+  phone_number: '+91 6371115043',
+  email: 'ssangitasahoo48@gmail.com',
   business_hours: 'Mon - Sun: 24/7 Support',
   website: 'https://foodiq.com',
-  whatsapp_number: '+91 9876543210',
+  whatsapp_number: '+91 6371115043',
 };
 
 function mergeContactDefaults(partial) {

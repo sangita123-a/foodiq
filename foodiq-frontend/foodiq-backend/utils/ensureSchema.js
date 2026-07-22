@@ -467,8 +467,8 @@ async function ensureSchema() {
         tax_percent NUMERIC(5,2) DEFAULT 5,
         commission_percent NUMERIC(5,2) DEFAULT 15,
         app_name VARCHAR(100) DEFAULT 'Foodiq',
-        support_email VARCHAR(255) DEFAULT 'support@foodiq.com',
-        support_phone VARCHAR(30) DEFAULT '+91 1800 000 000',
+        support_email VARCHAR(255) DEFAULT 'ssangitasahoo48@gmail.com',
+        support_phone VARCHAR(30) DEFAULT '+91 6371115043',
         payment_cod_enabled BOOLEAN DEFAULT TRUE,
         payment_upi_enabled BOOLEAN DEFAULT TRUE,
         payment_card_enabled BOOLEAN DEFAULT TRUE,
@@ -503,6 +503,15 @@ async function ensureSchema() {
     for (const [col, typ] of siteSettingColumns) {
       await q(`ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS ${col} ${typ}`);
     }
+
+    await q(`
+      UPDATE admin_settings SET
+        support_phone = '+91 6371115043',
+        support_email = 'ssangitasahoo48@gmail.com',
+        whatsapp_number = '+91 6371115043',
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = 1
+    `);
 
     await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS address_line VARCHAR(255)`);
     await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS city VARCHAR(100)`);

@@ -9,11 +9,11 @@ export type ContactInfo = {
 
 export const DEFAULT_CONTACT_INFO: ContactInfo = {
   office_address: "123 Culinary Avenue, Tech Park, Hyderabad, India 500081",
-  phone_number: "+91 1800 000 000",
-  email: "support@foodiq.com",
+  phone_number: "+91 6371115043",
+  email: "ssangitasahoo48@gmail.com",
   business_hours: "Mon - Sun: 24/7 Support",
   website: "https://foodiq.com",
-  whatsapp_number: "+91 9876543210",
+  whatsapp_number: "+91 6371115043",
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
