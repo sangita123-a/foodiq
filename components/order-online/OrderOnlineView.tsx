@@ -204,20 +204,20 @@ export default function OrderOnlineView() {
   const cartTotal = subtotal + deliveryFee + taxAmount;
 
   return (
-    <main className="relative min-h-screen bg-white pt-[72px] sm:pt-[80px] md:pt-[90px] selection:bg-primary/20 overflow-x-hidden">
+    <main className="relative min-h-screen bg-white pt-14 sm:pt-[72px] md:pt-[90px] selection:bg-primary/20 overflow-x-hidden">
       <Navbar />
       <FloatingCart />
 
-      <div className="border-b border-border bg-section py-8">
-        <div className="container mx-auto max-w-[1600px] px-4 md:px-8">
+      <div className="border-b border-border bg-section py-5 md:py-8">
+        <div className="container mx-auto max-w-[1600px] px-3 md:px-8">
           <CompactSearchBar />
         </div>
       </div>
 
-      <div className="container mx-auto max-w-[1600px] px-4 py-10 md:px-8">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-foreground md:text-4xl">
+      <div className="container mx-auto max-w-[1600px] px-3 py-6 md:px-8 md:py-10">
+        <div className="mb-6 md:mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-2xl md:text-4xl font-black tracking-tight text-foreground">
               Order Online
             </h1>
             <p className="mt-1 text-sm font-medium text-[#555555] md:text-base">
@@ -240,11 +240,11 @@ export default function OrderOnlineView() {
           </div>
         </div>
 
-        <div className="mb-8 flex gap-2">
+        <div className="mb-6 md:mb-8 flex gap-2 overflow-x-auto pb-1">
           <button
             type="button"
             onClick={() => setView("restaurants")}
-            className={`inline-flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-semibold transition ${
+            className={`inline-flex shrink-0 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
               view === "restaurants"
                 ? "filter-tab-active border"
                 : "filter-tab"
@@ -255,7 +255,7 @@ export default function OrderOnlineView() {
           <button
             type="button"
             onClick={() => setView("menu")}
-            className={`inline-flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-semibold transition ${
+            className={`inline-flex shrink-0 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
               view === "menu"
                 ? "filter-tab-active border"
                 : "filter-tab"
