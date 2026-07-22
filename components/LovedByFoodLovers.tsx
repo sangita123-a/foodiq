@@ -110,7 +110,7 @@ export default function LovedByFoodLovers() {
   }, [isHovered, isPaused, cardsToShow]);
 
   return (
-    <section className="mt-4 w-full overflow-hidden border-t border-border bg-section py-6 max-md:py-6 sm:mt-8 md:py-20 lg:py-[100px]">
+    <section className="mt-2 w-full overflow-hidden border-t border-border bg-section py-4 max-md:py-4 sm:mt-8 md:py-20 lg:py-[100px]">
       <div className="mx-auto w-[calc(100%-24px)] max-w-7xl md:w-[90%]">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

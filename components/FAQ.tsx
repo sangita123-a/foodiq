@@ -74,7 +74,7 @@ export default function FAQ() {
   }, [query]);
 
   return (
-    <section className="w-full border-t border-border bg-section py-6 max-md:py-5 md:py-24">
+    <section className="w-full border-t border-border bg-section py-4 max-md:py-4 md:py-24">
       <div className="mx-auto w-[calc(100%-24px)] max-w-5xl md:w-[calc(100%-64px)]">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

@@ -8,7 +8,7 @@ import { FEATURED_COLLECTIONS } from "@/lib/data/collectionsData";
 
 export default function FeaturedCollections() {
   return (
-    <section className="w-full overflow-hidden bg-white py-5 max-md:py-5 md:py-12" id="featured-collections">
+    <section className="w-full overflow-hidden bg-white py-4 max-md:py-4 md:py-12" id="featured-collections">
       <div className="container mx-auto max-w-[1440px] px-3 md:px-8">
         <div className="mb-3 max-md:mb-3 md:mb-8">
           <h2 className="text-base font-black tracking-tight text-foreground max-md:text-base md:text-3xl">

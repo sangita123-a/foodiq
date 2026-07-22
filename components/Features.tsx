@@ -27,7 +27,7 @@ const features = [
 
 export default function Features() {
   return (
-    <section className="mx-auto mt-4 max-w-7xl border-t border-border px-3 py-6 max-md:py-6 md:mt-8 md:px-8 md:py-20">
+    <section className="mx-auto mt-2 max-w-7xl border-t border-border px-3 py-4 max-md:py-4 md:mt-8 md:px-8 md:py-20">
       <div className="mb-4 text-center max-md:mb-4 md:mb-12">
         <h2 className="mb-1 text-lg font-bold tracking-[-0.04em] text-foreground max-md:text-lg md:mb-3 md:text-4xl">Why Choose Foodiq</h2>
         <p className="text-xs text-muted max-md:line-clamp-1 md:text-lg">The best food delivery experience in town.</p>

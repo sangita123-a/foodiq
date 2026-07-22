@@ -335,7 +335,7 @@ export default function TrendingDishes() {
   );
 
   return (
-    <section className="overflow-hidden bg-white py-5 max-md:py-5 md:py-12" id={SECTION_ID}>
+    <section className="overflow-hidden bg-white py-4 max-md:py-4 md:py-12" id={SECTION_ID}>
       <div className="container mx-auto max-w-7xl px-3 md:px-8">
         <div className="mb-3 flex flex-col justify-between gap-2 max-md:mb-3 md:mb-8 md:flex-row md:items-end md:gap-4">
           <div className="min-w-0">

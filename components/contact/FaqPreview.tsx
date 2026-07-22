@@ -20,33 +20,33 @@ export default function FaqPreview() {
   };
 
   return (
-    <div className="py-20 bg-white">
-      <div className="container mx-auto px-4 md:px-8 max-w-4xl">
+    <div className="bg-white py-4 max-md:py-4 md:py-20">
+      <div className="container mx-auto max-w-4xl px-3 max-md:px-3 md:px-8">
         
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-black text-foreground mb-4">Frequently Asked Questions</h2>
-          <p className="text-gray-text">Find quick answers to common questions below.</p>
+        <div className="mb-4 text-center max-md:mb-4 md:mb-12">
+          <h2 className="mb-1 text-base font-black text-foreground max-md:text-base md:mb-4 md:text-4xl">Frequently Asked Questions</h2>
+          <p className="text-[11px] text-gray-text max-md:text-[11px] md:text-base">Find quick answers to common questions below.</p>
         </div>
 
-        <div className="space-y-4 mb-10">
+        <div className="mb-4 space-y-2 max-md:mb-4 max-md:space-y-2 md:mb-10 md:space-y-4">
           {faqs.map((faq) => (
             <div 
               key={faq.id} 
-              className="border border-border rounded-2xl overflow-hidden bg-white shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
+              className="overflow-hidden rounded-lg border border-border bg-white shadow-[0_4px_20px_rgba(0,0,0,0.06)] max-md:rounded-lg md:rounded-2xl"
             >
               <button 
                 onClick={() => toggle(faq.id)}
-                className="w-full flex items-center justify-between p-5 md:p-6 text-left transition-colors hover:bg-section"
+                className="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-section max-md:p-3 md:p-6"
               >
-                <span className={`font-bold pr-4 transition-colors ${openId === faq.id ? "text-primary" : "text-foreground"}`}>
+                <span className={`pr-3 text-xs font-bold transition-colors max-md:text-xs md:pr-4 md:text-base ${openId === faq.id ? "text-primary" : "text-foreground"}`}>
                   {faq.question}
                 </span>
                 <motion.div 
                   animate={{ rotate: openId === faq.id ? 180 : 0 }}
                   transition={{ duration: 0.2 }}
-                  className="flex-shrink-0"
+                  className="shrink-0"
                 >
-                  <ChevronDown className={`w-5 h-5 ${openId === faq.id ? "text-primary" : "text-gray-text"}`} />
+                  <ChevronDown className={`h-4 w-4 max-md:h-4 max-md:w-4 md:h-5 md:w-5 ${openId === faq.id ? "text-primary" : "text-gray-text"}`} />
                 </motion.div>
               </button>
               
@@ -58,7 +58,7 @@ export default function FaqPreview() {
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                   >
-                    <div className="px-5 md:px-6 pb-6 pt-2 text-gray-text leading-relaxed border-t border-border">
+                    <div className="border-t border-border px-3 pb-3 pt-1.5 text-[11px] leading-relaxed text-gray-text max-md:px-3 max-md:pb-3 max-md:pt-1.5 max-md:text-[11px] md:px-6 md:pb-6 md:pt-2 md:text-base">
                       {faq.answer}
                     </div>
                   </motion.div>
@@ -71,9 +71,9 @@ export default function FaqPreview() {
         <div className="text-center">
           <Link 
             href="/help-support"
-            className="inline-flex items-center gap-2 bg-white hover:bg-section text-foreground border border-border px-8 py-3.5 rounded-xl font-semibold transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-section max-md:gap-1.5 max-md:px-4 max-md:py-2 max-md:text-xs md:gap-2 md:rounded-xl md:px-8 md:py-3.5 md:text-base"
           >
-            View All FAQs <ArrowRight className="w-5 h-5 text-gray-text" />
+            View All FAQs <ArrowRight className="h-4 w-4 text-gray-text max-md:h-4 max-md:w-4 md:h-5 md:w-5" />
           </Link>
         </div>
 

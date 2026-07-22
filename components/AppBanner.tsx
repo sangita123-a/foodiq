@@ -11,32 +11,32 @@ const GOOGLE_PLAY_URL =
 
 export default function AppBanner() {
   return (
-    <section className="mx-auto my-4 max-w-7xl px-3 py-4 max-md:my-4 max-md:px-3 max-md:py-4 md:my-12 md:px-8 md:py-16">
-      <div className="relative overflow-hidden rounded-xl border border-border bg-[linear-gradient(120deg,#F8F9FA_0%,#FFFFFF_68%)] shadow-[0_18px_55px_rgba(28,28,28,0.08)] max-md:rounded-xl md:rounded-[20px]">
+    <section className="mx-auto my-2 max-w-7xl px-3 py-2 max-md:my-2 max-md:px-3 max-md:py-2 md:my-12 md:px-8 md:py-16">
+      <div className="relative overflow-hidden rounded-lg border border-border bg-[linear-gradient(120deg,#F8F9FA_0%,#FFFFFF_68%)] shadow-[0_18px_55px_rgba(28,28,28,0.08)] max-md:rounded-lg md:rounded-[20px]">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-section opacity-80 blur-3xl"></div>
         </div>
 
         <div className="relative z-10 flex flex-col items-center md:flex-row">
-          <div className="w-full flex-1 p-4 text-center max-md:p-4 sm:p-10 md:p-16 md:text-left">
-            <h2 className="mb-2 text-lg font-extrabold leading-tight tracking-[-0.045em] text-foreground max-md:mb-2 max-md:text-lg md:mb-6 md:text-5xl">
+          <div className="w-full flex-1 p-3 text-center max-md:p-3 sm:p-10 md:p-16 md:text-left">
+            <h2 className="mb-1 text-sm font-extrabold leading-tight tracking-[-0.045em] text-foreground max-md:mb-1 max-md:text-sm md:mb-6 md:text-5xl">
               Get the Foodiq App
             </h2>
-            <p className="mx-auto mb-4 max-w-xl text-xs leading-relaxed text-muted max-md:mb-4 max-md:line-clamp-2 max-md:text-xs md:mx-0 md:mb-10 md:text-lg">
+            <p className="mx-auto mb-2.5 max-w-xl text-[10px] leading-snug text-muted max-md:mb-2.5 max-md:line-clamp-1 max-md:text-[10px] md:mx-0 md:mb-10 md:line-clamp-none md:text-lg">
               Order faster, track deliveries, and get exclusive app-only offers.
             </p>
 
-            <div className="flex flex-wrap justify-center gap-2 max-md:gap-2 md:justify-start md:gap-4">
+            <div className="flex flex-wrap justify-center gap-1.5 max-md:gap-1.5 md:justify-start md:gap-4">
               <a
                 href={APP_STORE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-foreground shadow-card transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary max-md:gap-2 max-md:rounded-lg max-md:px-3 max-md:py-2 md:gap-3 md:rounded-xl md:px-6 md:py-3.5 md:hover:-translate-y-0.5 md:hover:border-border"
+                className="flex items-center gap-1.5 rounded-md border border-border bg-white px-2.5 py-1.5 text-foreground shadow-card transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary max-md:gap-1.5 max-md:rounded-md max-md:px-2.5 max-md:py-1.5 md:gap-3 md:rounded-xl md:px-6 md:py-3.5 md:hover:-translate-y-0.5 md:hover:border-border"
               >
-                <Apple className="h-5 w-5 max-md:h-5 max-md:w-5 md:h-8 md:w-8" aria-hidden="true" />
+                <Apple className="h-4 w-4 max-md:h-4 max-md:w-4 md:h-8 md:w-8" aria-hidden="true" />
                 <div className="flex flex-col justify-center text-left">
-                  <span className="mb-0.5 text-[8px] font-medium leading-none max-md:text-[8px] md:mb-1 md:text-[10px]">Download on the</span>
-                  <span className="text-xs font-bold leading-none max-md:text-xs md:text-lg">App Store</span>
+                  <span className="mb-0 text-[7px] font-medium leading-none max-md:text-[7px] md:mb-1 md:text-[10px]">Download on the</span>
+                  <span className="text-[10px] font-bold leading-none max-md:text-[10px] md:text-lg">App Store</span>
                 </div>
               </a>
 
@@ -44,12 +44,12 @@ export default function AppBanner() {
                 href={GOOGLE_PLAY_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-foreground shadow-card transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary max-md:gap-2 max-md:rounded-lg max-md:px-3 max-md:py-2 md:gap-3 md:rounded-xl md:px-6 md:py-3.5 md:hover:-translate-y-0.5 md:hover:border-border"
+                className="flex items-center gap-1.5 rounded-md border border-border bg-white px-2.5 py-1.5 text-foreground shadow-card transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary max-md:gap-1.5 max-md:rounded-md max-md:px-2.5 max-md:py-1.5 md:gap-3 md:rounded-xl md:px-6 md:py-3.5 md:hover:-translate-y-0.5 md:hover:border-border"
               >
-                <Play className="h-5 w-5 max-md:h-5 max-md:w-5 md:h-7 md:w-7" fill="#111827" stroke="#111827" aria-hidden="true" />
+                <Play className="h-4 w-4 max-md:h-4 max-md:w-4 md:h-7 md:w-7" fill="#111827" stroke="#111827" aria-hidden="true" />
                 <div className="flex flex-col justify-center text-left">
-                  <span className="mb-0.5 text-[8px] leading-none text-gray-text max-md:text-[8px] md:mb-1 md:text-[10px]">GET IT ON</span>
-                  <span className="text-xs font-bold leading-none max-md:text-xs md:text-lg">Google Play</span>
+                  <span className="mb-0 text-[7px] leading-none text-gray-text max-md:text-[7px] md:mb-1 md:text-[10px]">GET IT ON</span>
+                  <span className="text-[10px] font-bold leading-none max-md:text-[10px] md:text-lg">Google Play</span>
                 </div>
               </a>
             </div>

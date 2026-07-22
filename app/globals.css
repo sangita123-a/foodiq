@@ -245,7 +245,11 @@ textarea:focus-visible {
   }
 
   .food-section {
-    padding-block: 14px;
+    padding-block: 10px;
+  }
+
+  .home-section-wrap > section {
+    scroll-margin-top: 56px;
   }
 
   .food-section-heading {

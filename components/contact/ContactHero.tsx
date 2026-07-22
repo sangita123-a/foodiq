@@ -12,7 +12,7 @@ export default function ContactHero() {
   const company = settings.company_name || settings.app_name || "Foodiq";
 
   return (
-    <div className="relative flex h-[36vh] min-h-[220px] items-center justify-center overflow-hidden max-md:h-[36vh] max-md:min-h-[220px] md:h-[50vh] md:min-h-[400px]">
+    <div className="relative flex h-[22vh] min-h-[140px] items-center justify-center overflow-hidden max-md:h-[22vh] max-md:min-h-[140px] md:h-[50vh] md:min-h-[400px]">
       <div className="absolute inset-0 z-0">
         <SafeImage
           src={CONTACT_HERO_IMAGE}
@@ -25,12 +25,12 @@ export default function ContactHero() {
         <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/85 to-white" />
       </div>
 
-      <div className="container relative z-10 mx-auto mt-10 px-4 text-center md:px-8">
+      <div className="container relative z-10 mx-auto mt-2 px-3 text-center max-md:mt-2 max-md:px-3 md:mt-10 md:px-8">
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mb-4 text-2xl font-black text-foreground max-md:mb-3 max-md:text-2xl md:mb-6 md:text-5xl lg:text-7xl"
+          className="mb-1 text-lg font-black text-foreground max-md:mb-1 max-md:text-lg md:mb-6 md:text-5xl lg:text-7xl"
         >
           Contact <span className="text-primary">{company}</span>
         </motion.h1>
@@ -39,7 +39,7 @@ export default function ContactHero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mx-auto max-w-3xl text-sm leading-relaxed text-gray-text max-md:text-sm md:text-lg lg:text-xl"
+          className="mx-auto max-w-3xl text-[11px] leading-snug text-gray-text max-md:line-clamp-2 max-md:text-[11px] md:text-lg lg:text-xl"
         >
           We&apos;re here to help. Reach out anytime for support, feedback, partnerships, or business inquiries.
         </motion.p>
