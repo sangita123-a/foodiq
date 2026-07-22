@@ -245,7 +245,7 @@ textarea:focus-visible {
   }
 
   .food-section {
-    padding-block: 16px;
+    padding-block: 14px;
   }
 
   .food-section-heading {
@@ -280,7 +280,7 @@ textarea:focus-visible {
   }
 
   .food-card {
-    border-radius: 12px;
+    border-radius: 10px;
   }
 
   .food-card:hover {
@@ -301,7 +301,7 @@ textarea:focus-visible {
   }
 
   .food-grid-restaurants .food-card-image {
-    height: 115px;
+    height: 105px;
   }
 
   .food-grid-restaurants .food-card-body {

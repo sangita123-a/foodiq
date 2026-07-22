@@ -179,7 +179,7 @@ export default function SearchBar() {
     <div ref={wrapRef} className="relative w-full max-w-[900px]">
       <form
         onSubmit={handleSearch}
-        className="flex h-12 w-full items-center overflow-hidden rounded-xl border border-border bg-white/95 shadow-card backdrop-blur-md transition-shadow focus-within:border-[#D4D4D4] focus-within:shadow-[0_8px_28px_rgba(0,0,0,0.1)] max-md:h-12 max-md:rounded-xl md:h-[66px] md:rounded-[18px]"
+        className="flex w-full items-center overflow-hidden rounded-xl border border-border bg-white/95 shadow-card backdrop-blur-md transition-shadow focus-within:border-[#D4D4D4] focus-within:shadow-[0_8px_28px_rgba(0,0,0,0.1)] max-md:h-[46px] max-md:rounded-xl md:h-[66px] md:rounded-[18px]"
       >
         <div ref={cityRef} className="relative hidden sm:block h-full shrink-0">
           <button

@@ -74,29 +74,29 @@ export default function FAQ() {
   }, [query]);
 
   return (
-    <section className="w-full border-t border-border bg-section py-12 md:py-24">
+    <section className="w-full border-t border-border bg-section py-6 max-md:py-5 md:py-24">
       <div className="mx-auto w-[calc(100%-24px)] max-w-5xl md:w-[calc(100%-64px)]">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-8 text-center"
+          className="mb-4 text-center max-md:mb-3 md:mb-8"
         >
-          <span className="mb-3 inline-flex rounded-full border border-border bg-section px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-gray-text">
+          <span className="mb-2 inline-flex rounded-full border border-border bg-section px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.16em] text-gray-text max-md:mb-2 md:mb-3 md:px-3 md:py-1 md:text-xs">
             Help Center
           </span>
-          <h2 className="mb-3 text-3xl font-bold tracking-[-0.045em] text-foreground md:text-5xl">
+          <h2 className="mb-2 text-lg font-bold tracking-[-0.045em] text-foreground max-md:mb-1 max-md:text-lg md:mb-3 md:text-5xl">
             Frequently Asked Questions
           </h2>
-          <p className="mx-auto max-w-2xl text-sm leading-6 text-muted md:text-base">
+          <p className="mx-auto max-w-2xl text-[11px] leading-5 text-muted max-md:line-clamp-2 md:text-base md:leading-6">
             Everything you need to know before placing your order.
           </p>
         </motion.div>
 
-        <div className="relative mx-auto mb-8 max-w-2xl">
+        <div className="relative mx-auto mb-4 max-w-2xl max-md:mb-3 md:mb-8">
           <Search
-            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]"
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF] md:left-4 md:h-5 md:w-5"
             aria-hidden="true"
           />
           <input
@@ -108,11 +108,11 @@ export default function FAQ() {
             }}
             placeholder="Search questions, payments, refunds..."
             aria-label="Search frequently asked questions"
-            className="h-13 w-full rounded-[14px] border border-border bg-white py-3 pl-12 pr-4 text-sm text-foreground shadow-card outline-none transition-all duration-300 placeholder:text-muted focus:border-border-hover focus:ring-4 focus:ring-[rgba(0,0,0,0.04)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="h-10 w-full rounded-lg border border-border bg-white py-2 pl-9 pr-3 text-xs text-foreground shadow-card outline-none transition-all duration-300 placeholder:text-muted focus:border-border-hover focus:ring-4 focus:ring-[rgba(0,0,0,0.04)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:h-13 md:rounded-[14px] md:py-3 md:pl-12 md:pr-4 md:text-sm"
           />
         </div>
 
-        <div className="space-y-3 w-full">
+        <div className="w-full space-y-2 max-md:space-y-2 md:space-y-3">
           {filteredFaqs.map((faq, index) => {
             const isOpen = openId === faq.id;
             const answerId = `${faq.id}-answer`;
@@ -124,10 +124,10 @@ export default function FAQ() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.35, delay: Math.min(index * 0.025, 0.25) }}
-                className={`overflow-hidden rounded-2xl border bg-white transition-all duration-300 ${
+                className={`overflow-hidden rounded-lg border bg-white transition-all duration-300 max-md:rounded-lg md:rounded-2xl ${
                   isOpen
                     ? "border-border shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
-                    : "border-border shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-border hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
+                    : "border-border shadow-[0_4px_20px_rgba(0,0,0,0.06)] md:hover:-translate-y-0.5 md:hover:border-border md:hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
                 }`}
               >
                 <button
@@ -135,10 +135,10 @@ export default function FAQ() {
                   onClick={() => toggleAccordion(faq.id)}
                   aria-expanded={isOpen}
                   aria-controls={answerId}
-                  className="flex w-full items-center justify-between gap-4 p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:p-5"
+                  className="flex w-full items-center justify-between gap-2 p-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary max-md:p-3 sm:p-5"
                 >
                   <span
-                    className={`text-sm font-semibold leading-6 transition-colors duration-300 sm:text-base ${
+                    className={`text-xs font-semibold leading-5 transition-colors duration-300 sm:text-base sm:leading-6 ${
                       isOpen ? "text-foreground" : "text-foreground"
                     }`}
                   >
@@ -147,7 +147,7 @@ export default function FAQ() {
                   <motion.span
                     animate={{ rotate: isOpen ? 180 : 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors duration-300 ${
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-colors duration-300 max-md:h-7 max-md:w-7 md:h-9 md:w-9 ${
                       isOpen
                         ? "border-border bg-section text-foreground"
                         : "border-border bg-section text-gray-text"
@@ -182,7 +182,7 @@ export default function FAQ() {
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                     >
-                      <div className="mx-4 border-t border-border pb-5 pt-4 text-sm leading-6 text-gray-text sm:mx-5">
+                      <div className="mx-3 border-t border-border pb-3 pt-2.5 text-[11px] leading-5 text-gray-text max-md:mx-3 max-md:pb-3 max-md:pt-2 sm:mx-5 sm:pb-5 sm:pt-4 sm:text-sm sm:leading-6">
                         {faq.answer}
                       </div>
                     </motion.div>
@@ -204,24 +204,24 @@ export default function FAQ() {
           </motion.div>
         )}
 
-        <div className="mt-10 rounded-[20px] border border-border bg-section p-6 text-center shadow-card sm:p-8">
-          <h3 className="text-xl font-bold text-foreground">Still need help?</h3>
-          <p className="mt-1 text-sm text-muted">
+        <div className="mt-6 rounded-xl border border-border bg-section p-4 text-center shadow-card max-md:mt-5 max-md:p-4 sm:p-8 md:mt-10 md:rounded-[20px]">
+          <h3 className="text-base font-bold text-foreground max-md:text-sm md:text-xl">Still need help?</h3>
+          <p className="mt-0.5 text-[11px] text-muted max-md:text-[11px] md:mt-1 md:text-sm">
             Our support team is ready to help.
           </p>
-          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+          <div className="mt-4 flex flex-col justify-center gap-2 max-md:mt-3 max-md:gap-2 sm:flex-row sm:gap-3 md:mt-6">
             <a
               href="/help-support"
-              className="food-button food-button-primary inline-flex min-h-11 items-center justify-center gap-2 px-5 py-2.5 text-sm"
+              className="food-button food-button-primary inline-flex min-h-9 items-center justify-center gap-1.5 px-4 py-2 text-xs max-md:min-h-9 md:min-h-11 md:gap-2 md:px-5 md:py-2.5 md:text-sm"
             >
-              <MessageCircle className="h-4 w-4" />
+              <MessageCircle className="h-3.5 w-3.5 md:h-4 md:w-4" />
               Contact Support
             </a>
             <a
               href="mailto:support@foodiq.com"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-white px-5 text-sm font-bold text-foreground transition-all duration-300 hover:-translate-y-0.5 hover:border-border hover:bg-section"
+              className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-border bg-white px-4 text-xs font-bold text-foreground transition-all duration-300 max-md:min-h-9 md:min-h-11 md:rounded-xl md:px-5 md:text-sm md:hover:-translate-y-0.5 md:hover:border-border md:hover:bg-section"
             >
-              <Mail className="h-4 w-4" />
+              <Mail className="h-3.5 w-3.5 md:h-4 md:w-4" />
               Email Us
             </a>
           </div>

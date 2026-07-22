@@ -78,11 +78,11 @@ function DishCard({
   onUpdateQty,
 }: DishCardProps) {
   const cardClassName =
-    "group flex h-auto w-[156px] shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-white shadow-[0_1px_8px_rgba(0,0,0,0.06)] transition-all duration-300 max-md:w-[156px] md:h-[240px] md:w-[170px] md:rounded-2xl md:shadow-[0_2px_12px_rgba(0,0,0,0.06)] md:hover:-translate-y-1 md:hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]";
+    "group flex h-auto w-[148px] shrink-0 flex-col overflow-hidden rounded-lg border border-border bg-white shadow-[0_1px_6px_rgba(0,0,0,0.05)] transition-all duration-300 max-md:w-[148px] md:h-[240px] md:w-[170px] md:rounded-2xl md:shadow-[0_2px_12px_rgba(0,0,0,0.06)] md:hover:-translate-y-1 md:hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]";
 
   const cardBody = (
     <>
-      <div className="relative h-[110px] w-full shrink-0 overflow-hidden rounded-t-xl bg-footer max-md:h-[110px] md:h-[110px] md:rounded-t-2xl">
+      <div className="relative h-[100px] w-full shrink-0 overflow-hidden rounded-t-lg bg-footer max-md:h-[100px] md:h-[110px] md:rounded-t-2xl">
         <Link href={`/food/${dish.id}`} className="relative block h-full w-full">
           <SafeImage
             src={dish.image}

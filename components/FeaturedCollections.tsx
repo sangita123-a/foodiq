@@ -19,12 +19,12 @@ export default function FeaturedCollections() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-2 max-md:grid-cols-1 max-md:gap-2 md:grid-cols-2 md:gap-4 lg:grid-cols-3 md:justify-items-center">
+        <div className="grid grid-cols-2 gap-2 max-md:grid-cols-2 max-md:gap-2 md:grid-cols-2 md:gap-4 lg:grid-cols-3 md:justify-items-center">
           {FEATURED_COLLECTIONS.map((collection) => (
             <Link
               key={collection.slug}
               href={`/collections/${collection.slug}`}
-              className="group/card relative block h-[108px] w-full cursor-pointer overflow-hidden rounded-lg border border-border bg-white shadow-card transition-all duration-300 max-md:h-[108px] md:aspect-auto md:h-[200px] md:w-[280px] md:rounded-2xl md:justify-self-center md:hover:-translate-y-1.5 md:hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
+              className="group/card relative block h-[92px] w-full cursor-pointer overflow-hidden rounded-lg border border-border bg-white shadow-card transition-all duration-300 max-md:h-[92px] md:aspect-auto md:h-[200px] md:w-[280px] md:rounded-2xl md:justify-self-center md:hover:-translate-y-1.5 md:hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
             >
               <SafeImage
                 src={collection.coverImage}

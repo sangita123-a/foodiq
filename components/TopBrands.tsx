@@ -122,11 +122,11 @@ function BrandCard({
 
 export default function TopBrands() {
   return (
-    <section className="relative mt-6 overflow-hidden border-y border-border bg-section py-6 md:mt-8 md:py-20">
-      <div className="mx-auto mb-5 flex max-w-7xl items-end justify-between px-3 md:mb-14 md:px-8">
+    <section className="relative mt-6 overflow-hidden border-y border-border bg-section max-md:mt-4 max-md:py-5 md:mt-8 md:py-20">
+      <div className="mx-auto mb-8 flex max-w-7xl items-end justify-between px-3 max-md:mb-4 md:mb-14 md:px-8">
         <div>
-          <h2 className="mb-1 text-xl font-bold tracking-[-0.045em] text-foreground md:mb-3 md:text-5xl">Top Food Brands</h2>
-          <p className="text-xs text-muted md:text-lg">Order from India&apos;s Most Loved Restaurants</p>
+          <h2 className="mb-3 text-3xl font-bold tracking-[-0.045em] text-foreground max-md:mb-1 max-md:text-lg md:text-5xl">Top Food Brands</h2>
+          <p className="text-base text-muted max-md:text-[11px] md:text-lg">Order from India&apos;s Most Loved Restaurants</p>
         </div>
         <div className="hidden md:flex gap-3" aria-hidden="true">
           <button type="button" tabIndex={-1} className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-gray-text hover:bg-white hover:text-foreground transition-all">

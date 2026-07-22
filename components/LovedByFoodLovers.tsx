@@ -130,25 +130,63 @@ export default function LovedByFoodLovers() {
           </p>
         </motion.div>
 
+        <div className="md:hidden">
+          <div className="grid grid-cols-2 gap-2">
+            {testimonialsData.slice(0, 4).map((testimonial) => (
+              <div
+                key={testimonial.id}
+                className="relative overflow-hidden rounded-lg border border-border bg-white p-2 shadow-card"
+              >
+                <div className="mb-1.5 flex gap-0.5" role="img" aria-label={`${testimonial.rating} out of 5 stars`}>
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-2.5 w-2.5 ${i < testimonial.rating ? "fill-yellow-400 text-yellow-400" : "text-[#9CA3AF]"}`}
+                      aria-hidden="true"
+                    />
+                  ))}
+                </div>
+                <p className="mb-2 line-clamp-3 text-[10px] italic leading-snug text-muted">
+                  &ldquo;{testimonial.review}&rdquo;
+                </p>
+                <div className="flex items-center gap-1.5">
+                  <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full border border-border">
+                    <SafeImage
+                      src={testimonial.image}
+                      fallback={getAvatarImage(null)}
+                      alt={testimonial.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="truncate text-[10px] font-bold text-foreground">{testimonial.name}</h3>
+                    <p className="truncate text-[9px] text-muted">{testimonial.city}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div
-          className="relative overflow-hidden mobile-no-overflow"
+          className="relative hidden overflow-hidden mobile-no-overflow md:block"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           aria-roledescription="carousel"
           aria-label="Customer testimonials"
         >
-          <div className="mb-2 flex justify-end max-md:mb-2 md:mb-4">
+          <div className="mb-2 flex justify-end md:mb-4">
             <button
               type="button"
               onClick={() => setIsPaused((value) => !value)}
               aria-pressed={isPaused}
-              className="touch-target rounded-lg border border-border bg-white px-3 py-1.5 text-[10px] font-semibold text-foreground transition-colors hover:border-border hover:bg-section focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary max-md:py-1.5 max-md:text-[10px] md:px-4 md:py-2.5 md:text-xs"
+              className="touch-target rounded-lg border border-border bg-white px-4 py-2.5 text-xs font-semibold text-foreground transition-colors hover:border-border hover:bg-section focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               {isPaused ? "Play testimonials" : "Pause testimonials"}
             </button>
           </div>
           <div
-            className="flex transition-transform duration-700 ease-in-out gap-4 md:gap-6 max-md:gap-0"
+            className="flex gap-6 transition-transform duration-700 ease-in-out"
             style={{ transform: `translateX(-${currentIndex * (100 / cardsToShow)}%)` }}
             aria-live="polite"
           >
@@ -218,7 +256,7 @@ export default function LovedByFoodLovers() {
           </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-center gap-1 sm:mt-10 md:gap-2" role="tablist" aria-label="Testimonial slides">
+        <div className="mt-4 hidden items-center justify-center gap-2 md:flex sm:mt-10" role="tablist" aria-label="Testimonial slides">
           {[...Array(testimonialsData.length - cardsToShow + 1)].map((_, idx) => (
             <button
               key={idx}

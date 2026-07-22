@@ -51,9 +51,9 @@ export default function HeroContent() {
 
   return (
     <div className="relative z-10 flex w-full max-w-5xl flex-col items-center justify-center px-1 text-center max-md:px-0">
-      <h1 className="m-0 flex max-w-full flex-col items-center justify-center p-0 text-center text-[30px] font-extrabold leading-[1.15] tracking-tight text-white drop-shadow-md max-md:text-[30px] md:text-6xl lg:text-7xl">
+      <h1 className="m-0 flex max-w-full flex-col items-center justify-center p-0 text-center font-extrabold leading-[1.12] tracking-tight text-white drop-shadow-md max-md:text-[28px] md:text-6xl lg:text-7xl">
         <span className="block max-md:line-clamp-1">Find the Best</span>
-        <span className="relative my-0.5 block h-[1.15em] w-full max-w-[500px] overflow-hidden text-primary max-md:my-0 md:my-1">
+        <span className="relative block h-[1.12em] w-full max-w-[500px] overflow-hidden text-primary max-md:my-0 md:my-1">
           <span
             key={index}
             className={`absolute inset-0 flex items-center justify-center text-center ${
@@ -66,11 +66,11 @@ export default function HeroContent() {
         <span className="block max-md:line-clamp-1">Near You</span>
       </h1>
 
-      <p className="mt-3 max-w-2xl text-center text-xs font-medium leading-snug text-white/95 drop-shadow max-md:line-clamp-2 max-md:px-1 md:mt-6 md:text-lg lg:text-xl">
+      <p className="mt-2 max-w-2xl text-center text-[11px] font-medium leading-snug text-white/95 drop-shadow max-md:line-clamp-2 max-md:px-1 md:mt-6 md:text-lg lg:text-xl">
         Discover amazing restaurants and delicious food delivered straight to your doorstep.
       </p>
 
-      <div className="mt-4 flex w-full max-w-4xl justify-center max-md:mt-3 md:mt-12">
+      <div className="mt-3 flex w-full max-w-4xl justify-center max-md:mt-2 md:mt-12">
         <SearchBar />
       </div>
 

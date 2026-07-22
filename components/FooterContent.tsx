@@ -240,7 +240,7 @@ export default function FooterContent() {
   return (
     <>
       <footer
-        className="mt-6 w-full border-t border-border bg-footer py-6 text-foreground max-md:py-6 sm:mt-16 sm:py-14 lg:mt-20"
+        className="mt-4 w-full border-t border-border bg-footer py-4 text-foreground max-md:py-4 sm:mt-16 sm:py-14 lg:mt-20"
         role="contentinfo"
       >
         <div className="container mx-auto px-3 max-md:px-3 sm:px-6 lg:px-16">

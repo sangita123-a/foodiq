@@ -5,17 +5,16 @@ import { Star, Clock, Utensils, IndianRupee, CheckCircle2 } from "lucide-react";
 import useSWR from "swr";
 import Link from "next/link";
 import SafeImage from "@/components/ui/SafeImage";
-import RestaurantCard from "@/components/RestaurantCard";
-import { getPriceForTwo, getRestaurantCoverImage, mapRestaurantCard, RESTAURANT_FALLBACK } from "@/lib/images";
+import { getPriceForTwo, getRestaurantCoverImage, RESTAURANT_FALLBACK } from "@/lib/images";
 
 export default function FeaturedRestaurant() {
-  const { data, isLoading } = useSWR("/api/restaurants?sort=popular&limit=4");
+  const { data, isLoading } = useSWR("/api/restaurants?sort=popular&limit=1");
   const restaurants = Array.isArray(data) ? data : [];
   const restaurant = restaurants[0];
 
   if (isLoading) {
     return (
-      <section className="w-full overflow-hidden bg-section py-[100px] max-md:py-5">
+      <section className="w-full overflow-hidden bg-section py-[100px] max-md:py-4">
         <div className="mx-auto w-[90%] max-w-7xl max-md:w-[calc(100%-24px)]">
           <div className="hidden flex-col items-center gap-12 lg:flex-row xl:gap-16 md:flex">
             <div className="aspect-[4/3] w-full animate-pulse rounded-[20px] bg-[#ECECEC] lg:w-[55%]" />
@@ -25,10 +24,8 @@ export default function FeaturedRestaurant() {
               <div className="mt-4 h-24 w-full animate-pulse rounded bg-[#E5E7EB]" />
             </div>
           </div>
-          <div className="food-grid food-grid-restaurants md:hidden">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-[188px] animate-pulse rounded-xl bg-[#ECECEC]" />
-            ))}
+          <div className="md:hidden">
+            <div className="h-[220px] animate-pulse rounded-xl bg-[#ECECEC]" />
           </div>
         </div>
       </section>
@@ -38,18 +35,65 @@ export default function FeaturedRestaurant() {
   if (!restaurant) return null;
 
   return (
-    <section className="w-full overflow-hidden border-y border-border bg-section py-6 md:py-20 lg:py-[100px] max-md:py-5">
+    <section className="w-full overflow-hidden border-y border-border bg-section py-6 md:py-20 lg:py-[100px] max-md:py-4">
       <div className="mx-auto w-[calc(100%-24px)] max-w-7xl md:w-[90%]">
-        {/* Mobile: compact 2×2 restaurant grid */}
+        {/* Mobile: compact single featured spotlight */}
         <div className="md:hidden">
-          <div className="mb-3">
-            <h2 className="text-base font-bold text-foreground">Featured Restaurants</h2>
-            <p className="mt-0.5 text-[11px] text-gray-text line-clamp-1">Top picks loved by foodies near you</p>
+          <div className="mb-2.5">
+            <div className="mb-1 inline-flex items-center gap-1 rounded-full border border-yellow-500/20 bg-yellow-500/10 px-2 py-0.5 text-[9px] font-bold tracking-wider text-yellow-500">
+              <Star className="h-2.5 w-2.5 fill-yellow-500" />
+              FEATURED
+            </div>
+            <h2 className="text-sm font-bold leading-tight text-foreground">{restaurant.name}</h2>
+            <p className="mt-0.5 line-clamp-1 text-[10px] text-muted">
+              {restaurant.description || "Top pick loved by foodies near you"}
+            </p>
           </div>
-          <div className="food-grid food-grid-restaurants">
-            {restaurants.slice(0, 4).map((item, idx: number) => (
-              <RestaurantCard key={String(item.id)} {...mapRestaurantCard(item)} delay={Math.min(idx * 0.05, 0.2)} />
-            ))}
+
+          <div className="overflow-hidden rounded-xl border border-border bg-white shadow-card">
+            <div className="relative h-[120px] w-full">
+              <SafeImage
+                src={getRestaurantCoverImage(String(restaurant.id), restaurant.image_url)}
+                fallback={RESTAURANT_FALLBACK}
+                alt={restaurant.name}
+                fill
+                sizes="100vw"
+                className="object-cover"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            </div>
+
+            <div className="p-2.5">
+              <div className="mb-2 flex flex-wrap gap-1.5 text-[9px] font-medium text-muted">
+                <div className="flex items-center gap-0.5 rounded-md border border-border bg-section px-1.5 py-0.5">
+                  <Star className="h-2.5 w-2.5 fill-yellow-500 text-yellow-500" />
+                  <span>{restaurant.rating}</span>
+                </div>
+                <div className="flex items-center gap-0.5 rounded-md border border-border bg-section px-1.5 py-0.5">
+                  <Clock className="h-2.5 w-2.5 text-primary" />
+                  <span>30 min</span>
+                </div>
+                <div className="flex items-center gap-0.5 rounded-md border border-border bg-section px-1.5 py-0.5">
+                  <IndianRupee className="h-2.5 w-2.5 text-green-400" />
+                  <span>{getPriceForTwo(restaurant.price_range).replace("₹", "")}</span>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Link
+                  href={`/restaurant/${restaurant.id}`}
+                  className="flex-1 rounded-lg bg-primary py-2 text-center text-[11px] font-semibold text-white"
+                >
+                  Explore Menu
+                </Link>
+                <Link
+                  href={`/restaurant/${restaurant.id}`}
+                  className="flex-1 rounded-lg border border-border bg-white py-2 text-center text-[11px] font-semibold text-foreground"
+                >
+                  View Restaurant
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -46,7 +46,7 @@ export default function Reviews() {
         {reviews.map((review) => (
           <article
             key={review.id}
-            className="relative w-[260px] shrink-0 rounded-xl border border-border bg-white p-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
+            className="relative w-[240px] shrink-0 rounded-lg border border-border bg-white p-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
           >
             <Quote className="absolute right-3 top-3 h-8 w-8 text-primary/5" aria-hidden="true" />
             <div className="mb-2 flex gap-0.5" role="img" aria-label={`${review.rating} out of 5 stars`}>
