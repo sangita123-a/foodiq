@@ -292,7 +292,7 @@ export default function OrderOnlineView() {
                   {[1, 2, 3, 4, 5, 6].map((i) => (
                     <div
                       key={i}
-                      className="h-[252px] animate-pulse rounded-2xl border border-border bg-[#F8F9FA]"
+                      className="h-[188px] max-md:h-[188px] animate-pulse rounded-xl border border-border bg-[#F8F9FA] md:h-[252px] md:rounded-2xl"
                     />
                   ))}
                 </div>

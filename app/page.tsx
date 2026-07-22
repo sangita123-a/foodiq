@@ -75,7 +75,7 @@ export default function Home() {
       <Hero />
       <ClientFloatingCart />
 
-      <div className="relative z-10 bg-white pt-4 sm:pt-6 cvw-defer-section overflow-x-hidden max-md:overflow-x-hidden home-section-wrap">
+      <div className="relative z-10 bg-white pt-2 sm:pt-6 cvw-defer-section overflow-x-hidden max-md:overflow-x-hidden home-section-wrap">
         <FoodiqLiveHubSection />
         <FoodCategoryNav />
         <TrendingDishes />

@@ -97,20 +97,20 @@ export default function PopularCuisines() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="mb-7 flex items-end justify-between gap-4"
+          className="mb-4 flex items-end justify-between gap-3 md:mb-7 md:gap-4"
         >
           <div className="min-w-0">
-            <h2 className="text-[22px] font-bold tracking-[-0.03em] text-foreground sm:text-2xl md:text-[28px]">
+            <h2 className="text-lg font-bold tracking-[-0.03em] text-foreground sm:text-2xl md:text-[28px]">
               <span aria-hidden="true">🍽️ </span>
               Popular Cuisines Around You
             </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-text">
+            <p className="mt-1 max-w-2xl text-xs leading-5 text-gray-text md:mt-2 md:text-sm md:leading-6">
               Discover delicious cuisines loved by food lovers near your location.
             </p>
           </div>
           <Link
             href="/popular-cuisines"
-            className="group/view-all inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-white px-3.5 py-2 text-xs font-semibold text-foreground shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-[color,border-color,background-color] duration-300 hover:border-border hover:bg-section hover:text-primary sm:px-4 sm:text-sm"
+            className="group/view-all inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-white px-2.5 py-1.5 text-[10px] font-semibold text-foreground shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-[color,border-color,background-color] duration-300 sm:px-4 sm:py-2 sm:text-sm md:hover:border-border md:hover:bg-section md:hover:text-primary"
           >
             View All
             <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/view-all:translate-x-0.5" />
@@ -118,7 +118,7 @@ export default function PopularCuisines() {
         </motion.div>
 
         {/* Mobile: horizontal scroll */}
-        <div className="scroll-row md:hidden -mx-1 px-1 pb-1">
+        <div className="scroll-row pb-1 md:hidden">
           {cuisineCategories.map((category) => {
             const cuisine = cuisineBySlug.get(category.slug);
             const image =
@@ -131,10 +131,10 @@ export default function PopularCuisines() {
               <Link
                 key={category.slug}
                 href={`/cuisine/${category.slug}`}
-                className="flex w-[72px] shrink-0 flex-col items-center gap-1.5 touch-target"
+                className="flex w-[64px] shrink-0 flex-col items-center gap-1 touch-target"
                 aria-label={`Explore ${category.name} cuisine`}
               >
-                <div className="h-[60px] w-[60px] overflow-hidden rounded-full bg-section ring-2 ring-border">
+                <div className="h-[52px] w-[52px] overflow-hidden rounded-full bg-section ring-2 ring-border">
                   <SafeImage
                     src={image}
                     fallback={resolveBackendUrl(category.image) || category.image}

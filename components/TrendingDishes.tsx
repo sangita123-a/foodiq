@@ -15,12 +15,10 @@ import {
 import { useCartActions } from "@/hooks/useCartActions";
 import { useFavoriteActions } from "@/hooks/useFavoriteActions";
 
-const CARD_HEIGHT = 240;
-const IMAGE_HEIGHT = 110;
 const SECTION_ID = "trending-dishes-section";
 
 const GRID_CLASS =
-  "flex gap-3 overflow-x-auto scroll-row pb-2 -mx-1 px-1 md:grid md:grid-cols-4 md:overflow-visible md:pb-0 md:mx-0 md:px-0 lg:grid-cols-6 xl:grid-cols-7 md:gap-[14px] md:justify-items-center";
+  "flex gap-2.5 overflow-x-auto scroll-row pb-1 md:grid md:grid-cols-4 md:overflow-visible md:pb-0 md:gap-[14px] md:justify-items-center lg:grid-cols-6 xl:grid-cols-7";
 
 function getGridColumns(width: number): number {
   if (width >= 1280) return 7;
@@ -80,15 +78,11 @@ function DishCard({
   onUpdateQty,
 }: DishCardProps) {
   const cardClassName =
-    "group flex shrink-0 flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] w-[150px] md:w-[170px]";
-  const cardStyle = { height: CARD_HEIGHT };
+    "group flex h-auto w-[128px] shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-white shadow-[0_1px_8px_rgba(0,0,0,0.06)] transition-all duration-300 md:h-[240px] md:w-[170px] md:rounded-2xl md:shadow-[0_2px_12px_rgba(0,0,0,0.06)] md:hover:-translate-y-1 md:hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]";
 
   const cardBody = (
     <>
-      <div
-        className="relative w-full shrink-0 overflow-hidden rounded-t-2xl bg-footer"
-        style={{ height: IMAGE_HEIGHT }}
-      >
+      <div className="relative h-[92px] w-full shrink-0 overflow-hidden rounded-t-xl bg-footer md:h-[110px] md:rounded-t-2xl">
         <Link href={`/food/${dish.id}`} className="relative block h-full w-full">
           <SafeImage
             src={dish.image}
@@ -121,15 +115,15 @@ function DishCard({
         </button>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col p-[10px]">
+      <div className="flex min-h-0 flex-1 flex-col p-2 md:p-[10px]">
         <Link
           href={`/food/${dish.id}`}
-          className="line-clamp-1 text-[13px] font-extrabold leading-tight text-foreground transition-colors hover:text-foreground"
+          className="line-clamp-1 text-[12px] font-extrabold leading-tight text-foreground transition-colors hover:text-foreground md:text-[13px]"
         >
           {dish.name}
         </Link>
 
-        <div className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-gray-text">
+        <div className="mt-0.5 flex items-center gap-1 text-[9px] font-semibold text-gray-text md:mt-1 md:text-[10px]">
           <Star className="h-3 w-3 food-rating-star" fill="#F4B400" stroke="#F4B400" aria-hidden />
           <span className="text-foreground">{dish.rating}</span>
           <span className="text-[#CCCCCC]">·</span>
@@ -137,13 +131,13 @@ function DishCard({
           <span>{deliveryTime}</span>
         </div>
 
-        <p className="mt-0.5 line-clamp-1 text-[10px] font-medium text-[#757575]">
+        <p className="mt-0.5 line-clamp-1 text-[9px] font-medium text-[#757575] md:text-[10px]">
           {dish.restaurantName}
         </p>
 
-          <div className="mt-auto flex items-center justify-between gap-1 pt-1.5">
+        <div className="mt-auto flex items-center justify-between gap-1 pt-1 md:pt-1.5">
           <div className="min-w-0">
-            <span className="text-xs md:text-sm font-black text-[var(--color-price)]">₹{dish.price}</span>
+            <span className="text-[11px] font-black text-[var(--color-price)] md:text-sm">₹{dish.price}</span>
             {dish.originalPrice && dish.originalPrice > dish.price && (
               <span className="ml-0.5 text-[9px] text-[var(--color-price-old)] line-through">
                 ₹{dish.originalPrice}
@@ -157,13 +151,13 @@ function DishCard({
               onClick={() => onAdd(dish)}
               disabled={isUpdating}
               aria-label={`Add ${dish.name} to cart`}
-              className="food-button-add touch-target-expand inline-flex h-[34px] w-full md:w-auto shrink-0 items-center justify-center gap-0.5 px-2.5 disabled:opacity-50"
+              className="food-button-add touch-target-expand inline-flex h-[28px] w-full shrink-0 items-center justify-center gap-0.5 px-2 text-[10px] disabled:opacity-50 md:h-[34px] md:w-auto md:px-2.5 md:text-xs"
             >
               <Plus className="h-3 w-3" />
               <span>Add</span>
             </button>
           ) : (
-            <div className="flex h-[34px] shrink-0 items-center gap-0.5 rounded-lg border border-border bg-white px-1">
+            <div className="flex h-[28px] shrink-0 items-center gap-0.5 rounded-lg border border-border bg-white px-0.5 md:h-[34px] md:px-1">
               <button
                 type="button"
                 onClick={() => onUpdateQty(dish.id, -1)}
@@ -191,7 +185,7 @@ function DishCard({
 
         <Link
           href={`/food/${dish.id}`}
-          className="mt-1 inline-flex items-center justify-center gap-0.5 text-[9px] font-bold text-gray-text transition-colors hover:text-foreground"
+          className="mt-1 hidden items-center justify-center gap-0.5 text-[9px] font-bold text-gray-text transition-colors hover:text-foreground md:inline-flex"
         >
           <Eye className="h-2.5 w-2.5" aria-hidden="true" />
           <span>View Details</span>
@@ -202,7 +196,7 @@ function DishCard({
 
   if (!animateIn) {
     return (
-      <article className={cardClassName} style={cardStyle}>
+      <article className={cardClassName}>
         {cardBody}
       </article>
     );
@@ -215,7 +209,6 @@ function DishCard({
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.35, delay: revealDelay, ease: "easeOut" }}
       className={cardClassName}
-      style={cardStyle}
     >
       {cardBody}
     </motion.article>
@@ -342,32 +335,32 @@ export default function TrendingDishes() {
   );
 
   return (
-    <section className="bg-white py-8 md:py-12 overflow-hidden" id={SECTION_ID}>
+    <section className="overflow-hidden bg-white py-6 md:py-12" id={SECTION_ID}>
       <div className="container mx-auto max-w-7xl px-3 md:px-8">
-        <div className="mb-6 md:mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div className="mb-4 flex flex-col justify-between gap-3 md:mb-8 md:flex-row md:items-end md:gap-4">
           <div className="min-w-0">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-border bg-section px-3 py-1 text-xs font-bold uppercase tracking-wider text-gray-text">
-              <Flame className="h-4 w-4 text-[var(--color-primary)]" fill="var(--color-primary)" stroke="var(--color-primary)" aria-hidden />
+            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-border bg-section px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-text md:mb-3 md:gap-2 md:px-3 md:py-1 md:text-xs">
+              <Flame className="h-3.5 w-3.5 text-[var(--color-primary)] md:h-4 md:w-4" fill="var(--color-primary)" stroke="var(--color-primary)" aria-hidden />
               <span>60 Trending Delicacies</span>
             </div>
-            <h2 className="mb-2 text-2xl md:text-4xl font-extrabold tracking-tight text-foreground">
+            <h2 className="mb-1 text-lg font-extrabold tracking-tight text-foreground md:mb-2 md:text-4xl">
               Trending Dishes Right Now
             </h2>
-            <p className="text-sm md:text-lg text-gray-text">
+            <p className="text-xs text-gray-text md:text-lg">
               Most ordered dishes across Foodiq with instant delivery.
             </p>
           </div>
 
           <Link
             href="/trending-dishes"
-            className="food-button food-button-primary inline-flex w-full md:w-auto items-center justify-center gap-2 px-5 py-2 text-sm"
+            className="food-button food-button-primary inline-flex w-full items-center justify-center gap-2 px-4 py-2 text-xs md:w-auto md:px-5 md:text-sm"
           >
             <ShoppingBag className="h-4 w-4" />
             <span>View All 60 Dishes</span>
           </Link>
         </div>
 
-        <div className="hide-scrollbar mb-8 flex items-center gap-2 overflow-x-auto pb-4 scroll-smooth">
+        <div className="hide-scrollbar mb-5 flex items-center gap-1.5 overflow-x-auto scroll-smooth pb-2 md:mb-8 md:gap-2 md:pb-4">
           {categories.slice(0, 16).map((cat) => {
             const isActive = selectedCategory === cat;
             return (
@@ -392,8 +385,7 @@ export default function TrendingDishes() {
               ? Array.from({ length: initialVisible }).map((_, i) => (
                   <div
                     key={i}
-                    className="animate-pulse rounded-2xl bg-footer w-[150px] md:w-[170px]"
-                    style={{ height: CARD_HEIGHT }}
+                    className="h-[196px] w-[128px] animate-pulse rounded-xl bg-footer md:h-[240px] md:w-[170px] md:rounded-2xl"
                   />
                 ))
               : visibleDishes.map((dish, index) =>

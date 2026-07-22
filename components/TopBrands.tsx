@@ -64,8 +64,8 @@ function BrandCard({
 }) {
   if (compact) {
     return (
-      <div className="w-[130px] shrink-0 bg-white rounded-2xl flex flex-col items-center p-3 border border-border shadow-[0_4px_16px_rgba(28,28,28,0.05)]">
-        <div className="w-20 h-20 rounded-full relative overflow-hidden shadow-[0_6px_18px_rgba(15,23,42,0.12)] border-2 border-[#F8FAFC] mb-3">
+      <div className="mb-2 flex w-[108px] shrink-0 flex-col items-center rounded-xl border border-border bg-white p-2.5 shadow-[0_2px_10px_rgba(28,28,28,0.05)] md:mb-3 md:w-[130px] md:rounded-2xl md:p-3">
+        <div className="relative mb-2 h-16 w-16 overflow-hidden rounded-full border-2 border-[#F8FAFC] shadow-[0_4px_14px_rgba(15,23,42,0.12)] md:mb-3 md:h-20 md:w-20 md:shadow-[0_6px_18px_rgba(15,23,42,0.12)]">
           <SafeImage 
             src={brand.foodImage}
             fallback={RESTAURANT_FALLBACK}
@@ -75,7 +75,7 @@ function BrandCard({
             className="object-cover"
           />
         </div>
-        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-1.5 shadow-md border-2 border-white -mt-7 mb-2 relative overflow-hidden">
+        <div className="relative -mt-6 mb-1.5 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white p-1 shadow-md md:-mt-7 md:mb-2 md:h-12 md:w-12 md:p-1.5">
           <SafeImage 
             src={brand.logo}
             fallback={RESTAURANT_FALLBACK}
@@ -85,7 +85,7 @@ function BrandCard({
             className="object-contain p-0.5"
           />
         </div>
-        <h3 className="text-foreground font-bold text-center text-xs leading-tight line-clamp-2">{brand.name}</h3>
+        <h3 className="line-clamp-2 text-center text-[10px] font-bold leading-tight text-foreground md:text-xs">{brand.name}</h3>
       </div>
     );
   }
@@ -122,11 +122,11 @@ function BrandCard({
 
 export default function TopBrands() {
   return (
-    <section className="py-10 md:py-20 bg-section overflow-hidden relative border-y border-border mt-6 md:mt-8">
-      <div className="mb-8 md:mb-14 px-3 md:px-8 max-w-7xl mx-auto flex items-end justify-between">
+    <section className="relative mt-4 overflow-hidden border-y border-border bg-section py-6 md:mt-8 md:py-20">
+      <div className="mx-auto mb-5 flex max-w-7xl items-end justify-between px-3 md:mb-14 md:px-8">
         <div>
-          <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-3 tracking-[-0.045em]">Top Food Brands</h2>
-          <p className="text-muted text-base md:text-lg">Order from India&apos;s Most Loved Restaurants</p>
+          <h2 className="mb-1 text-xl font-bold tracking-[-0.045em] text-foreground md:mb-3 md:text-5xl">Top Food Brands</h2>
+          <p className="text-xs text-muted md:text-lg">Order from India&apos;s Most Loved Restaurants</p>
         </div>
         <div className="hidden md:flex gap-3" aria-hidden="true">
           <button type="button" tabIndex={-1} className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-gray-text hover:bg-white hover:text-foreground transition-all">
@@ -139,7 +139,7 @@ export default function TopBrands() {
       </div>
 
       {/* Mobile: horizontal scroll */}
-      <div className="scroll-row md:hidden px-3 pb-2">
+      <div className="scroll-row px-3 pb-1 md:hidden">
         {brands.map((brand) => (
           <BrandCard key={brand.name} brand={brand} compact />
         ))}

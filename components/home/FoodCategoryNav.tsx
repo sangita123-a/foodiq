@@ -25,24 +25,24 @@ const FOOD_CATEGORIES = [
 
 export default function FoodCategoryNav() {
   return (
-    <section className="bg-white py-5 sm:py-8" id="food-category-nav">
+    <section className="bg-white py-4 sm:py-8 md:py-8" id="food-category-nav">
       <div className="mx-auto max-w-[1440px] px-3 md:px-8">
-        <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground md:text-3xl">
+        <h2 className="text-lg font-black tracking-tight text-foreground md:text-3xl sm:text-2xl">
           <span aria-hidden="true">🍽 </span>
           Order Our Best Food Options
         </h2>
-        <p className="mt-1 text-xs font-medium text-gray-text md:text-sm">
+        <p className="mt-0.5 text-[11px] font-medium text-gray-text md:mt-1 md:text-sm">
           Choose your favourite food category
         </p>
 
-        <div className="scroll-row mt-4 sm:mt-6 flex flex-nowrap overflow-x-auto -mx-1 px-1">
+        <div className="scroll-row mt-3 flex flex-nowrap overflow-x-auto sm:mt-6">
           {FOOD_CATEGORIES.map((item) => (
             <Link
               key={item.slug}
               href={`/category/${item.slug}`}
-              className="flex w-[64px] sm:w-[88px] md:w-[96px] flex-col items-center gap-1.5 touch-target"
+              className="flex w-[56px] flex-col items-center gap-1 touch-target sm:w-[88px] md:w-[96px] sm:gap-1.5"
             >
-              <div className="h-14 w-14 sm:h-[88px] sm:w-[88px] md:h-[96px] md:w-[96px] overflow-hidden rounded-full ring-2 ring-border ring-offset-2">
+              <div className="h-12 w-12 overflow-hidden rounded-full ring-2 ring-border ring-offset-1 sm:h-[88px] sm:w-[88px] sm:ring-offset-2 md:h-[96px] md:w-[96px]">
                 <SafeImage
                   src={item.image}
                   fallback={FOOD_FALLBACK}
@@ -53,7 +53,7 @@ export default function FoodCategoryNav() {
                   className="h-full w-full object-cover"
                 />
               </div>
-              <span className="w-full text-center text-[11px] sm:text-xs font-black text-foreground line-clamp-2 leading-tight">
+              <span className="w-full text-center text-[10px] font-black leading-tight text-foreground line-clamp-2 sm:text-xs">
                 {item.label}
               </span>
             </Link>
