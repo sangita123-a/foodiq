@@ -68,7 +68,7 @@ export default function Navbar() {
           reducedMotion ? "" : "nav-enter-motion"
         }`}
       >
-        <Link href="/" className="touch-target flex items-center text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-[-0.045em] text-foreground transition-opacity hover:opacity-80 truncate py-1 min-w-0">
+        <Link href="/" className="touch-target flex items-center text-lg max-sm:text-lg sm:text-2xl lg:text-3xl font-extrabold tracking-[-0.045em] text-foreground transition-opacity hover:opacity-80 truncate py-1 min-w-0 shrink">
           Foodiq
         </Link>
 
@@ -178,7 +178,7 @@ export default function Navbar() {
           )}
         </div>
 
-        <div className="flex md:hidden items-center gap-1 shrink-0">
+        <div className="flex md:hidden items-center gap-0.5 max-sm:gap-0.5 shrink-0">
           <Link
             href="/search"
             className="touch-target flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-foreground"

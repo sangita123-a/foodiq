@@ -8,7 +8,7 @@ import { usePrefersReducedMotion } from "@/hooks/useMediaQuery";
 const SearchBar = dynamic(() => import("@/components/SearchBar"), {
   loading: () => (
     <div
-      className="h-[52px] sm:h-[60px] md:h-[66px] w-full max-w-4xl rounded-[14px] sm:rounded-[18px] bg-white/15 animate-pulse"
+      className="h-12 sm:h-[60px] md:h-[66px] w-full max-w-4xl rounded-[14px] sm:rounded-[18px] bg-white/15 animate-pulse"
       aria-hidden
     />
   ),

@@ -304,6 +304,28 @@ textarea:focus-visible {
     max-width: 100%;
   }
 
+  .home-section-wrap {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .mobile-stack-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  @media (min-width: 768px) {
+    .mobile-stack-actions {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      width: auto;
+    }
+  }
+
   .mobile-section-title {
     font-size: clamp(1.25rem, 5vw, 1.75rem);
   }

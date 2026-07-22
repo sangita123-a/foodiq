@@ -122,7 +122,7 @@ function BrandCard({
 
 export default function TopBrands() {
   return (
-    <section className="py-20 bg-section overflow-hidden relative border-y border-border mt-8">
+    <section className="py-10 md:py-20 bg-section overflow-hidden relative border-y border-border mt-6 md:mt-8">
       <div className="mb-8 md:mb-14 px-3 md:px-8 max-w-7xl mx-auto flex items-end justify-between">
         <div>
           <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-3 tracking-[-0.045em]">Top Food Brands</h2>

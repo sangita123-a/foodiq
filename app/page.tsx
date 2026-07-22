@@ -65,7 +65,7 @@ export default function Home() {
     <main
       id="main-content"
       tabIndex={-1}
-      className="min-h-screen bg-white text-foreground relative selection:bg-primary/15 selection:text-foreground"
+      className="min-h-screen bg-white text-foreground relative selection:bg-primary/15 selection:text-foreground overflow-x-hidden max-md:overflow-x-hidden"
     >
       <InternalSeoLinks
         links={getContextualInternalLinks("home")}
@@ -75,7 +75,7 @@ export default function Home() {
       <Hero />
       <ClientFloatingCart />
 
-      <div className="relative z-10 bg-white pt-4 sm:pt-6 cvw-defer-section overflow-x-hidden max-md:overflow-x-hidden">
+      <div className="relative z-10 bg-white pt-4 sm:pt-6 cvw-defer-section overflow-x-hidden max-md:overflow-x-hidden home-section-wrap">
         <FoodiqLiveHubSection />
         <FoodCategoryNav />
         <TrendingDishes />
@@ -95,4 +95,4 @@ export default function Home() {
     </main>
   );
 }
-
+

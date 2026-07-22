@@ -19,8 +19,8 @@ export default function AppBanner() {
         </div>
 
         <div className="flex flex-col md:flex-row items-center relative z-10">
-          <div className="p-10 md:p-16 flex-1 text-center md:text-left">
-            <h2 className="text-4xl md:text-5xl font-extrabold tracking-[-0.045em] text-foreground mb-6 leading-tight">
+          <div className="p-6 sm:p-10 md:p-16 flex-1 text-center md:text-left w-full">
+            <h2 className="text-3xl md:text-5xl font-extrabold tracking-[-0.045em] text-foreground mb-4 md:mb-6 leading-tight">
               Get the Foodiq App
             </h2>
             <p className="text-muted text-lg leading-relaxed mb-10 max-w-xl mx-auto md:mx-0">

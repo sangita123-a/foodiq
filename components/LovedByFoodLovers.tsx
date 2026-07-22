@@ -117,15 +117,15 @@ export default function LovedByFoodLovers() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-14 text-center"
+          className="mb-8 md:mb-14 text-center px-1"
         >
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <span className="text-3xl md:text-4xl" aria-hidden="true">❤️</span>
-            <h2 className="text-3xl md:text-5xl font-bold text-foreground tracking-[-0.045em]">
+          <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3 mb-3 md:mb-4">
+            <span className="text-2xl md:text-4xl" aria-hidden="true">❤️</span>
+            <h2 className="text-2xl md:text-5xl font-bold text-foreground tracking-[-0.045em]">
               Loved by Food Lovers
             </h2>
           </div>
-          <p className="text-muted text-base md:text-lg">
+          <p className="text-sm md:text-lg text-muted">
             See why thousands of customers choose Foodiq every day.
           </p>
         </motion.div>
@@ -148,7 +148,7 @@ export default function LovedByFoodLovers() {
             </button>
           </div>
           <div
-            className="flex transition-transform duration-700 ease-in-out gap-6"
+            className="flex transition-transform duration-700 ease-in-out gap-4 md:gap-6 max-md:gap-0"
             style={{ transform: `translateX(-${currentIndex * (100 / cardsToShow)}%)` }}
             aria-live="polite"
           >
@@ -156,7 +156,7 @@ export default function LovedByFoodLovers() {
               <div
                 key={testimonial.id}
                 className="flex-shrink-0"
-                style={{ width: `calc(${100 / cardsToShow}% - ${(6 * (cardsToShow - 1)) / cardsToShow}rem)` }}
+                style={{ width: cardsToShow === 1 ? "100%" : `calc(${100 / cardsToShow}% - ${(6 * (cardsToShow - 1)) / cardsToShow}rem)` }}
               >
                 <div className="bg-white rounded-2xl p-5 sm:p-8 h-full border border-border shadow-card relative group hover:-translate-y-1 hover:border-border hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] transition-all duration-300 overflow-hidden">
                   <Quote className="absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 sm:w-16 sm:h-16 text-primary/10 group-hover:text-primary/20 transition-colors duration-300 pointer-events-none" aria-hidden="true" />
