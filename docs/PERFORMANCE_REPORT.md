@@ -1,6 +1,6 @@
 # Foodiq Core Web Vitals Performance Report
 
-**Generated:** 2026-07-21 · **App version:** 4.1.0  
+**Generated:** 2026-07-22 · **App version:** 4.1.0  
 **Scope:** Next.js frontend — no UI redesign
 
 ---
@@ -14,7 +14,7 @@
 | **INP** | < 200ms | 6/6 checks OK |
 
 Static guardrails: **13/13** optimization checks passing.  
-CI scripts: `perf:validate` PASS · `mobile:validate` PASS
+CI scripts: `perf:validate` PASS · `mobile:validate` FAIL
 
 ---
 
@@ -145,13 +145,12 @@ Mobile inputs use 16px to prevent iOS zoom: OK
 Mobile section spacing uses responsive clamp: OK
 LCP hero poster preloaded in document head: OK
 Homepage does not preload LCP from body: OK
-Navbar mobile menu uses touch-target: OK
+Navbar mobile menu uses touch-target: FAIL
 Navbar mobile actions are 44px: OK
 SearchBar input uses 16px on mobile: OK
 LovedByFoodLovers carousel controls use carousel-control: OK
 FoodCategoryNav avoids competing LCP priority images: OK
 TrendingDishes interactive controls meet touch target: OK
-Mobile SEO guardrails validation passed.
 ```
 
 ---
