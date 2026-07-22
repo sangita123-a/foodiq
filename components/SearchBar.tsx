@@ -179,7 +179,7 @@ export default function SearchBar() {
     <div ref={wrapRef} className="relative w-full max-w-[900px]">
       <form
         onSubmit={handleSearch}
-        className="flex w-full items-center overflow-hidden rounded-xl border border-border bg-white/95 shadow-card backdrop-blur-md transition-shadow focus-within:border-[#D4D4D4] focus-within:shadow-[0_8px_28px_rgba(0,0,0,0.1)] max-md:h-[44px] max-md:rounded-lg md:h-[66px] md:rounded-[18px]"
+        className="flex w-full items-center overflow-hidden rounded-xl border border-border bg-white/95 shadow-card backdrop-blur-md transition-shadow focus-within:border-[#D4D4D4] focus-within:shadow-[0_8px_28px_rgba(0,0,0,0.1)] max-md:h-[40px] max-md:rounded-[10px] md:h-[66px] md:rounded-[18px]"
       >
         <div ref={cityRef} className="relative hidden sm:block h-full shrink-0">
           <button
@@ -237,8 +237,8 @@ export default function SearchBar() {
           ) : null}
         </div>
 
-        <div className="flex min-w-0 items-center h-full flex-grow px-4 sm:px-5 text-foreground group">
-          <Search className="text-[var(--color-gray-text)] group-focus-within:text-[var(--color-primary)] w-4 h-4 mr-3 shrink-0 transition-colors" aria-hidden="true" />
+        <div className="flex min-w-0 items-center h-full flex-grow px-3 sm:px-5 text-foreground group max-md:px-2.5">
+          <Search className="text-[var(--color-gray-text)] group-focus-within:text-[var(--color-primary)] w-3.5 h-3.5 mr-2 shrink-0 transition-colors max-md:h-3.5 max-md:w-3.5 md:mr-3 md:h-4 md:w-4" aria-hidden="true" />
           <label htmlFor="hero-search-input" className="sr-only">
             Search restaurants or dishes
           </label>
@@ -253,7 +253,7 @@ export default function SearchBar() {
               if (normalizeSearchQuery(query).length > 0) setOpen(true);
             }}
             placeholder="Search restaurants or dishes..."
-            className="w-full min-w-0 h-full bg-transparent outline-none text-foreground placeholder:text-muted text-base sm:text-[16px] font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="w-full min-w-0 h-full bg-transparent outline-none text-foreground placeholder:text-muted font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary max-md:text-sm md:text-base sm:text-[16px]"
             autoComplete="off"
             aria-autocomplete="list"
             {...(showDropdown
@@ -264,7 +264,7 @@ export default function SearchBar() {
 
         <button
           type="submit"
-          className="mr-1 flex h-9 w-[52px] shrink-0 touch-target items-center justify-center rounded-lg bg-primary text-xs font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all active:translate-y-0 hover:bg-primary-hover max-md:h-9 max-md:w-[52px] md:h-[52px] md:w-[158px] md:rounded-xl md:text-sm"
+          className="mr-0.5 flex h-8 w-[44px] shrink-0 touch-target items-center justify-center rounded-[8px] bg-primary text-[10px] font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all active:translate-y-0 hover:bg-primary-hover max-md:h-8 max-md:w-[44px] max-md:rounded-[8px] md:mr-1 md:h-[52px] md:w-[158px] md:rounded-xl md:text-sm"
         >
           <span className="hidden md:inline">Search</span>
           <span className="md:hidden">Go</span>
@@ -275,7 +275,7 @@ export default function SearchBar() {
         <ul
           id="hero-search-suggestions"
           role="listbox"
-          className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 bg-white border border-border rounded-2xl shadow-lg overflow-hidden max-h-72 overflow-y-auto"
+          className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-white border border-border rounded-xl shadow-lg overflow-hidden max-h-60 overflow-y-auto max-md:rounded-xl max-md:max-h-52 md:top-[calc(100%+6px)] md:rounded-2xl md:max-h-72"
         >
           {suggestions.length > 0 ? (
             suggestions.map((s) => (
@@ -285,9 +285,9 @@ export default function SearchBar() {
                   role="option"
                   aria-selected={false}
                   onClick={() => goSuggestion(s)}
-                  className="touch-target w-full text-left px-4 py-3 hover:bg-section flex items-center justify-between gap-3"
+                  className="touch-target w-full text-left px-3 py-2 hover:bg-section flex items-center justify-between gap-2 max-md:px-3 max-md:py-2 md:px-4 md:py-3 md:gap-3"
                 >
-                  <span className="font-semibold text-sm text-foreground truncate">{s.name}</span>
+                  <span className="font-semibold text-xs text-foreground truncate max-md:text-xs md:text-sm">{s.name}</span>
                   <span className="text-[10px] font-bold uppercase text-[#9CA3AF] shrink-0">
                     {s.type}
                     {s.subtitle ? ` · ${s.subtitle}` : ""}

@@ -12,26 +12,24 @@ export default function QuickContactCards() {
   ];
 
   return (
-    <div className="py-20">
-      <div className="container mx-auto px-4 md:px-8">
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="py-6 max-md:py-6 md:py-20">
+      <div className="container mx-auto px-3 max-md:px-3 md:px-8">
+        <div className="grid grid-cols-2 gap-2 max-md:grid-cols-2 max-md:gap-2 sm:grid-cols-2 lg:grid-cols-4 md:gap-6">
           {cards.map((card, idx) => (
-            <motion.div 
+            <motion.div
               key={idx}
               whileHover={{ y: -8 }}
-              className="bg-white rounded-3xl p-8 border border-border hover:border-border transition-all duration-300 shadow-card cursor-pointer text-center group relative overflow-hidden"
+              className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-white p-3 text-center shadow-card transition-all duration-300 max-md:rounded-xl max-md:p-3 md:rounded-3xl md:p-8 md:hover:border-border"
             >
-              <div className="absolute inset-0 bg-gradient-to-t from-[#FAFAFA]/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-section border border-border flex items-center justify-center mb-6 group-hover:border-border transition-colors">
-                <card.icon className={`w-8 h-8 ${card.color}`} />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#FAFAFA]/80 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
+              <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-section transition-colors group-hover:border-border max-md:mb-2 max-md:h-10 max-md:w-10 md:mb-6 md:h-16 md:w-16 md:rounded-2xl">
+                <card.icon className={`h-5 w-5 ${card.color} max-md:h-5 max-md:w-5 md:h-8 md:w-8`} />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">{card.title}</h3>
-              <p className="text-gray-text text-sm leading-relaxed">{card.desc}</p>
+              <h3 className="mb-0.5 text-xs font-bold text-foreground max-md:text-xs md:mb-2 md:text-xl">{card.title}</h3>
+              <p className="line-clamp-2 text-[10px] leading-snug text-gray-text max-md:text-[10px] md:text-sm md:leading-relaxed">{card.desc}</p>
             </motion.div>
           ))}
         </div>
-
       </div>
     </div>
   );

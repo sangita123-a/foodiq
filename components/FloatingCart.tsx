@@ -22,7 +22,7 @@ export default function FloatingCart() {
           type="button"
           onClick={() => setDrawerOpen(true)}
           aria-label={`View cart, ${totalQuantity} ${totalQuantity === 1 ? "item" : "items"}, total ₹${subtotal}`}
-          className="w-full bg-[#0F172A] hover:bg-primary text-white p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-2xl flex items-center justify-between transition-all duration-300 group border border-white/10 backdrop-blur-xl max-md:p-3 max-md:rounded-xl"
+          className="w-full bg-[#0F172A] hover:bg-primary text-white p-2.5 sm:p-4 rounded-xl sm:rounded-2xl shadow-2xl flex items-center justify-between transition-all duration-300 group border border-white/10 backdrop-blur-xl max-md:p-2.5 max-md:rounded-xl"
         >
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary/20 flex items-center justify-center text-primary group-hover:bg-white group-hover:text-primary transition-colors max-md:h-8 max-md:w-8">
@@ -39,7 +39,7 @@ export default function FloatingCart() {
             </div>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-1.5 bg-primary px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black text-white group-hover:bg-white group-hover:text-primary transition-colors shadow-md max-md:px-3 max-md:py-1.5 max-md:text-[10px]">
+          <div className="flex items-center gap-1.5 bg-primary px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-xs font-black text-white group-hover:bg-white group-hover:text-primary transition-colors shadow-md max-md:px-2.5 max-md:py-1 max-md:text-[9px]">
             <span>View Cart</span>
             <ArrowRight className="w-4 h-4" />
           </div>

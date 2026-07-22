@@ -145,9 +145,9 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                   return (
                     <div
                       key={item.cart_item_id}
-                      className="flex items-center justify-between p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-section border border-[#E2E8F0] gap-2 sm:gap-3 max-md:p-2.5 max-md:rounded-xl"
+                      className="flex items-center justify-between p-2 sm:p-3.5 rounded-xl sm:rounded-2xl bg-section border border-[#E2E8F0] gap-1.5 sm:gap-3 max-md:p-2 max-md:rounded-lg max-md:gap-1.5"
                     >
-                      <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl overflow-hidden bg-white shrink-0 max-md:h-12 max-md:w-12">
+                      <div className="relative w-11 h-11 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl overflow-hidden bg-white shrink-0 max-md:h-11 max-md:w-11">
                         <SafeImage
                           src={getFoodImage(item.image)}
                           fallback={FOOD_FALLBACK}
@@ -164,23 +164,23 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                       </div>
 
                       <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                        <div className="flex items-center gap-1 sm:gap-1.5 bg-white border border-[#CBD5E1] rounded-lg px-1 sm:px-2 py-0.5 sm:py-1 max-md:rounded-lg">
+                        <div className="flex items-center gap-1 sm:gap-1.5 bg-white border border-[#CBD5E1] rounded-md px-0.5 sm:px-2 py-0.5 sm:py-1 max-md:rounded-md">
                           <button
                             type="button"
                             onClick={() => updateQuantity(item.menu_item_id, -1)}
                             disabled={isUpdating}
-                            className="touch-target w-7 h-7 sm:w-6 sm:h-6 rounded-md bg-[#F1F5F9] text-primary flex items-center justify-center font-bold hover:bg-primary hover:text-white transition-colors disabled:opacity-50 max-md:h-7 max-md:w-7"
+                            className="touch-target w-6 h-6 sm:w-6 sm:h-6 rounded-md bg-[#F1F5F9] text-primary flex items-center justify-center font-bold hover:bg-primary hover:text-white transition-colors disabled:opacity-50 max-md:h-6 max-md:w-6"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
-                          <span className="text-[10px] sm:text-xs font-black text-[#0F172A] min-w-[14px] text-center max-md:text-[10px]">
+                          <span className="text-[10px] sm:text-xs font-black text-[#0F172A] min-w-[12px] text-center max-md:text-[10px]">
                             {item.quantity}
                           </span>
                           <button
                             type="button"
                             onClick={() => updateQuantity(item.menu_item_id, 1)}
                             disabled={isUpdating}
-                            className="touch-target w-7 h-7 sm:w-6 sm:h-6 rounded-md bg-[#F1F5F9] text-primary flex items-center justify-center font-bold hover:bg-primary hover:text-white transition-colors disabled:opacity-50 max-md:h-7 max-md:w-7"
+                            className="touch-target w-6 h-6 sm:w-6 sm:h-6 rounded-md bg-[#F1F5F9] text-primary flex items-center justify-center font-bold hover:bg-primary hover:text-white transition-colors disabled:opacity-50 max-md:h-6 max-md:w-6"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
@@ -190,7 +190,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                           type="button"
                           onClick={() => updateQuantity(item.menu_item_id, -item.quantity)}
                           disabled={isUpdating}
-                          className="touch-target w-8 h-8 sm:w-8 sm:h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors disabled:opacity-50 max-md:h-8 max-md:w-8"
+                          className="touch-target w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors disabled:opacity-50 max-md:h-7 max-md:w-7"
                           aria-label="Remove item"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -254,7 +254,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                 <Link
                   href="/checkout"
                   onClick={onClose}
-                  className="block w-full py-3 bg-primary text-white text-center font-extrabold rounded-lg text-xs shadow-md hover:bg-primary-hover transition-colors touch-target max-md:py-3 max-md:text-xs md:rounded-xl md:py-4 md:text-sm"
+                  className="block w-full py-2.5 bg-primary text-white text-center font-extrabold rounded-lg text-[11px] shadow-md hover:bg-primary-hover transition-colors touch-target max-md:py-2.5 max-md:text-[11px] md:rounded-xl md:py-4 md:text-sm"
                 >
                   Proceed to Checkout
                 </Link>

@@ -151,7 +151,7 @@ function DishCard({
               onClick={() => onAdd(dish)}
               disabled={isUpdating}
               aria-label={`Add ${dish.name} to cart`}
-              className="food-button food-button-add touch-target-expand inline-flex h-[24px] shrink-0 items-center justify-center gap-0.5 rounded-md border border-[var(--color-primary)] bg-white px-1.5 text-[9px] font-bold text-[var(--color-primary)] disabled:opacity-50 max-md:min-w-[48px] md:h-[34px] md:w-auto md:rounded-lg md:border-0 md:bg-[var(--color-primary)] md:px-2.5 md:font-normal md:text-white md:text-xs"
+              className="food-button food-button-add touch-target-expand inline-flex h-[22px] shrink-0 items-center justify-center gap-0.5 rounded-md border border-[var(--color-primary)] bg-white px-1.5 text-[9px] font-bold text-[var(--color-primary)] disabled:opacity-50 max-md:min-w-[44px] md:h-[34px] md:w-auto md:rounded-lg md:border-0 md:bg-[var(--color-primary)] md:px-2.5 md:font-normal md:text-white md:text-xs"
             >
               <Plus className="h-3 w-3" />
               <span>Add</span>

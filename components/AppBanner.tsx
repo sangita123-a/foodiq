@@ -11,33 +11,32 @@ const GOOGLE_PLAY_URL =
 
 export default function AppBanner() {
   return (
-    <section className="py-12 px-3 md:px-8 max-w-7xl mx-auto my-8 md:my-12 md:py-16">
-      <div className="bg-[linear-gradient(120deg,#F8F9FA_0%,#FFFFFF_68%)] border border-border rounded-[20px] overflow-hidden relative shadow-[0_18px_55px_rgba(28,28,28,0.08)]">
-        {/* Abstract Background Shapes */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-section rounded-full blur-3xl opacity-80"></div>
+    <section className="mx-auto my-4 max-w-7xl px-3 py-4 max-md:my-4 max-md:px-3 max-md:py-4 md:my-12 md:px-8 md:py-16">
+      <div className="relative overflow-hidden rounded-xl border border-border bg-[linear-gradient(120deg,#F8F9FA_0%,#FFFFFF_68%)] shadow-[0_18px_55px_rgba(28,28,28,0.08)] max-md:rounded-xl md:rounded-[20px]">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-section opacity-80 blur-3xl"></div>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center relative z-10">
-          <div className="p-6 sm:p-10 md:p-16 flex-1 text-center md:text-left w-full">
-            <h2 className="text-3xl md:text-5xl font-extrabold tracking-[-0.045em] text-foreground mb-4 md:mb-6 leading-tight">
+        <div className="relative z-10 flex flex-col items-center md:flex-row">
+          <div className="w-full flex-1 p-4 text-center max-md:p-4 sm:p-10 md:p-16 md:text-left">
+            <h2 className="mb-2 text-lg font-extrabold leading-tight tracking-[-0.045em] text-foreground max-md:mb-2 max-md:text-lg md:mb-6 md:text-5xl">
               Get the Foodiq App
             </h2>
-            <p className="text-muted text-lg leading-relaxed mb-10 max-w-xl mx-auto md:mx-0">
-              Order your favorite meals even faster, track deliveries in real-time, and get exclusive app-only offers. Download now!
+            <p className="mx-auto mb-4 max-w-xl text-xs leading-relaxed text-muted max-md:mb-4 max-md:line-clamp-2 max-md:text-xs md:mx-0 md:mb-10 md:text-lg">
+              Order faster, track deliveries, and get exclusive app-only offers.
             </p>
-            
-            <div className="flex flex-wrap justify-center md:justify-start gap-4">
+
+            <div className="flex flex-wrap justify-center gap-2 max-md:gap-2 md:justify-start md:gap-4">
               <a
                 href={APP_STORE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 bg-white text-foreground border border-border px-6 py-3.5 rounded-xl shadow-card hover:border-border hover:-translate-y-0.5 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-foreground shadow-card transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary max-md:gap-2 max-md:rounded-lg max-md:px-3 max-md:py-2 md:gap-3 md:rounded-xl md:px-6 md:py-3.5 md:hover:-translate-y-0.5 md:hover:border-border"
               >
-                <Apple className="w-8 h-8" aria-hidden="true" />
-                <div className="text-left flex flex-col justify-center">
-                  <span className="text-[10px] leading-none mb-1 font-medium">Download on the</span>
-                  <span className="text-lg leading-none font-bold">App Store</span>
+                <Apple className="h-5 w-5 max-md:h-5 max-md:w-5 md:h-8 md:w-8" aria-hidden="true" />
+                <div className="flex flex-col justify-center text-left">
+                  <span className="mb-0.5 text-[8px] font-medium leading-none max-md:text-[8px] md:mb-1 md:text-[10px]">Download on the</span>
+                  <span className="text-xs font-bold leading-none max-md:text-xs md:text-lg">App Store</span>
                 </div>
               </a>
 
@@ -45,38 +44,36 @@ export default function AppBanner() {
                 href={GOOGLE_PLAY_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 bg-white text-foreground border border-border px-6 py-3.5 rounded-xl shadow-card hover:border-border hover:-translate-y-0.5 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-foreground shadow-card transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary max-md:gap-2 max-md:rounded-lg max-md:px-3 max-md:py-2 md:gap-3 md:rounded-xl md:px-6 md:py-3.5 md:hover:-translate-y-0.5 md:hover:border-border"
               >
-                <Play className="w-7 h-7" fill="#111827" stroke="#111827" aria-hidden="true" />
-                <div className="text-left flex flex-col justify-center">
-                  <span className="text-[10px] leading-none mb-1 text-gray-text">GET IT ON</span>
-                  <span className="text-lg leading-none font-bold">Google Play</span>
+                <Play className="h-5 w-5 max-md:h-5 max-md:w-5 md:h-7 md:w-7" fill="#111827" stroke="#111827" aria-hidden="true" />
+                <div className="flex flex-col justify-center text-left">
+                  <span className="mb-0.5 text-[8px] leading-none text-gray-text max-md:text-[8px] md:mb-1 md:text-[10px]">GET IT ON</span>
+                  <span className="text-xs font-bold leading-none max-md:text-xs md:text-lg">Google Play</span>
                 </div>
               </a>
             </div>
           </div>
-          
-          <div className="flex-1 w-full flex justify-center items-end pt-10 md:pt-16 px-10">
-            {/* Phone Mockup - purely CSS/div based representation since we might not have a phone image */}
-            <div className="relative w-64 h-80 bg-white rounded-t-[2.5rem] border-t-[8px] border-x-[8px] border-border flex flex-col items-center overflow-hidden shadow-2xl translate-y-2 group">
-              {/* Notch */}
-              <div className="w-32 h-6 bg-[#E5E7EB] absolute top-0 rounded-b-xl z-20"></div>
-              
-              <div className="relative w-full h-full">
+
+          {/* Phone mockup — desktop only */}
+          <div className="hidden w-full flex-1 items-end justify-center px-10 pt-16 md:flex">
+            <div className="group relative flex h-80 w-64 translate-y-2 flex-col items-center overflow-hidden rounded-t-[2.5rem] border-x-[8px] border-t-[8px] border-border bg-white shadow-2xl">
+              <div className="absolute top-0 z-20 h-6 w-32 rounded-b-xl bg-[#E5E7EB]"></div>
+              <div className="relative h-full w-full">
                 <SafeImage
                   src="/images/catalog/food/burger.webp"
                   fallback={FOOD_FALLBACK}
                   alt="Foodiq mobile app preview showing food delivery"
                   fill
                   sizes={APP_PREVIEW_IMAGE_SIZES}
-                  className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                  className="object-cover opacity-80 transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/75 via-[#111827]/30/40 to-transparent flex flex-col justify-end p-6">
-                  <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-4 shadow-[0_4px_12px_rgba(0,0,0,0.12)]">
-                    <span className="text-white font-bold text-xl">Fq</span>
+                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-[#111827]/75 via-[#111827]/30/40 to-transparent p-6">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-[0_4px_12px_rgba(0,0,0,0.12)]">
+                    <span className="text-xl font-bold text-white">Fq</span>
                   </div>
-                  <h3 className="text-white font-bold text-lg leading-tight mb-1">Your favorite food,</h3>
-                  <h3 className="text-white font-bold text-lg leading-tight text-primary">delivered fast.</h3>
+                  <h3 className="mb-1 text-lg font-bold leading-tight text-white">Your favorite food,</h3>
+                  <h3 className="text-lg font-bold leading-tight text-primary">delivered fast.</h3>
                 </div>
               </div>
             </div>

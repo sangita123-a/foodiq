@@ -72,7 +72,7 @@ export default function MenuItemCard({
   };
 
   return (
-    <article className="food-card group flex h-full flex-col rounded-[14px]">
+    <article className="food-card group flex h-full flex-col rounded-[14px] max-md:rounded-[10px]">
       
       {/* Item Info */}
       <div className="order-2 flex flex-1 flex-col justify-between p-2.5 sm:p-3 max-md:p-2.5">
@@ -155,7 +155,7 @@ export default function MenuItemCard({
         </div>
         
         {/* Add/Quantity Button */}
-        <div className="absolute bottom-2 right-2 flex h-8 w-24 items-center justify-between overflow-hidden rounded-lg border border-border bg-white/95 font-bold text-foreground shadow-[0_8px_22px_rgba(28,28,28,0.12)] backdrop-blur-sm max-md:bottom-2 max-md:right-2 max-md:h-8 max-md:w-[88px] sm:bottom-3 sm:right-3 sm:h-9 sm:w-28">
+        <div className="absolute bottom-2 right-2 flex h-7 w-[80px] items-center justify-between overflow-hidden rounded-md border border-border bg-white/95 font-bold text-foreground shadow-[0_8px_22px_rgba(28,28,28,0.12)] backdrop-blur-sm max-md:bottom-2 max-md:right-2 max-md:h-7 max-md:w-[80px] sm:bottom-3 sm:right-3 sm:h-9 sm:w-28 sm:rounded-lg">
           {quantity > 0 ? (
             <>
               <button 
@@ -178,7 +178,7 @@ export default function MenuItemCard({
             <button 
               onClick={() => onUpdateQuantity(item.id, 1)}
               disabled={isUpdating}
-              className="h-full w-full text-center text-xs font-bold tracking-wider text-primary transition-colors hover:bg-section disabled:opacity-50 sm:text-sm max-md:text-xs"
+              className="h-full w-full text-center text-[10px] font-bold tracking-wider text-primary transition-colors hover:bg-section disabled:opacity-50 sm:text-sm max-md:text-[10px]"
             >
               ADD
             </button>

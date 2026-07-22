@@ -19,7 +19,7 @@ export default function ContactPage() {
 
       <div className="container mx-auto px-3 py-8 max-md:px-3 max-md:py-8 md:px-8 md:py-20">
         
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col gap-4 max-md:gap-4 lg:flex-row md:gap-8">
           {/* Left: Contact Form (55%) */}
           <div className="w-full lg:w-[55%]">
             <ContactForm />

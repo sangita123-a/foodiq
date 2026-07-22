@@ -3,9 +3,8 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SafeImage from "@/components/ui/SafeImage";
-import Link from "next/link";
 import { FOOD_FALLBACK } from "@/lib/images";
-import { OFFER_PAGE_BANNER_SIZES } from "@/lib/performance/assets";
+import { OFFER_BANNER_IMAGE_SIZES } from "@/lib/performance/assets";
 import { Tag, Clock, ArrowRight, Sparkles } from "lucide-react";
 import { FIVE_BEST_OFFERS, PromotionalOffer } from "@/lib/data/20offersData";
 import { setActiveOffer } from "@/lib/offers";
@@ -27,72 +26,70 @@ export default function OffersPage() {
   };
 
   return (
-    <main className="min-h-screen bg-background relative selection:bg-primary/15 selection:text-foreground pt-[90px]">
+    <main className="min-h-screen bg-background relative selection:bg-primary/15 selection:text-foreground pt-14 max-md:pt-14 md:pt-[90px]">
       <Navbar />
 
-      <div className="container mx-auto max-w-[1440px] px-4 md:px-8 py-10">
+      <div className="container mx-auto max-w-[1440px] px-3 py-4 max-md:px-3 max-md:py-4 md:px-8 md:py-10">
         {/* Page Header */}
-        <div className="mb-10 text-center md:text-left border-b border-border pb-8">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-primary-soft text-primary text-xs font-black uppercase tracking-wider mb-3 border border-primary/20">
-            <Sparkles className="w-4 h-4" />
+        <div className="mb-4 border-b border-border pb-4 text-center max-md:mb-4 max-md:pb-4 md:mb-10 md:pb-8 md:text-left">
+          <div className="mb-2 inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary-soft px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-primary max-md:mb-2 md:mb-3 md:gap-1.5 md:px-3.5 md:py-1 md:text-xs">
+            <Sparkles className="h-3 w-3 md:h-4 md:w-4" />
             <span>Today&apos;s Featured Deals</span>
           </div>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground tracking-tight mb-3">
+          <h1 className="mb-1 text-lg font-black tracking-tight text-foreground max-md:text-lg md:mb-3 md:text-4xl lg:text-5xl">
             Today&apos;s Best Offers
           </h1>
-          <p className="text-gray-text text-base md:text-lg max-w-2xl font-medium">
+          <p className="mx-auto max-w-2xl text-[11px] font-medium text-gray-text max-md:line-clamp-2 md:text-base lg:text-lg">
             Save big on your favorite food with active coupons applied automatically at checkout.
           </p>
         </div>
 
-        {/* 5 Offers Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Offers Grid — compact 2-col on mobile */}
+        <div className="grid grid-cols-2 gap-2 max-md:grid-cols-2 max-md:gap-2 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
           {FIVE_BEST_OFFERS.map((offer) => (
-            <div
+            <article
               key={offer.id}
-              className="food-card relative group cursor-pointer bg-white p-6 flex flex-col justify-between border border-border rounded-[18px] shadow-card hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 min-h-[220px]"
+              className="food-card group relative flex min-h-0 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-border bg-white p-2 shadow-card transition-all duration-300 max-md:min-h-[140px] max-md:rounded-lg max-md:p-2 md:min-h-[220px] md:rounded-[18px] md:p-6 md:hover:-translate-y-1 md:hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
             >
-              {/* Image Banner Background */}
-              <div className="absolute top-0 right-0 w-40 sm:w-48 h-full opacity-40 group-hover:opacity-60 transition-opacity duration-300 group-hover:scale-105 transform origin-right overflow-hidden rounded-r-[18px]">
+              <div className="absolute top-0 right-0 h-full w-14 overflow-hidden rounded-r-lg opacity-35 transition-opacity duration-300 max-md:w-14 md:w-48 md:rounded-r-[18px] md:opacity-40 md:group-hover:scale-105 md:group-hover:opacity-60">
                 <SafeImage
                   src={offer.image}
                   fallback={FOOD_FALLBACK}
                   alt={offer.title}
                   fill
-                  sizes={OFFER_PAGE_BANNER_SIZES}
+                  sizes={OFFER_BANNER_IMAGE_SIZES}
                   className="object-cover object-left [mask-image:linear-gradient(to_right,transparent,black)]"
                 />
               </div>
 
-              <div className="relative z-10 w-3/4 flex flex-col h-full justify-between">
+              <div className="relative z-10 flex h-full w-full flex-col justify-between md:w-3/4">
                 <div>
-                  <div className="flex items-center gap-1 text-xs font-bold text-primary uppercase tracking-wider mb-1">
-                    <Tag className="w-3.5 h-3.5" />
+                  <div className="mb-0.5 flex items-center gap-0.5 truncate text-[9px] font-bold uppercase tracking-wider text-primary max-md:truncate md:mb-1 md:gap-1 md:text-xs">
+                    <Tag className="h-2 w-2 shrink-0 md:h-3.5 md:w-3.5" />
                     <span className="truncate">{offer.restaurantName}</span>
                   </div>
 
-                  <h3 className="text-xl font-black text-foreground mb-1 leading-tight group-hover:text-foreground transition-colors">
+                  <h3 className="mb-0.5 line-clamp-1 text-xs font-black leading-tight text-foreground max-md:text-xs md:mb-1 md:text-xl">
                     {offer.title}
                   </h3>
 
-                  <span className="inline-block bg-primary text-white text-xs font-black px-2.5 py-0.5 rounded-md mb-2 uppercase tracking-wide">
+                  <span className="offer-badge mb-1 inline-block text-[8px] font-black uppercase tracking-wide max-md:mb-1 md:mb-2 md:px-2.5 md:py-0.5 md:text-xs">
                     {offer.discountBadge}
                   </span>
 
-                  <p className="text-gray-text text-xs font-medium line-clamp-2 mb-4">
+                  <p className="mb-1 line-clamp-1 text-[9px] font-medium text-gray-text max-md:hidden md:mb-4 md:block md:line-clamp-2 md:text-xs">
                     {offer.description}
                   </p>
                 </div>
 
                 <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="inline-flex items-center bg-white border border-border rounded-lg px-3 py-1 shadow-sm">
-                      <span className="text-xs text-gray-text uppercase tracking-wider font-semibold mr-2">Code:</span>
-                      <span className="text-sm text-primary font-black tracking-wider">{offer.code}</span>
+                  <div className="mb-1.5 hidden flex-wrap items-center gap-2 md:mb-4 md:flex">
+                    <div className="inline-flex items-center rounded-lg border border-border bg-white px-3 py-1 shadow-sm">
+                      <span className="mr-2 text-xs font-semibold uppercase tracking-wider text-gray-text">Code:</span>
+                      <span className="text-sm font-black tracking-wider text-primary">{offer.code}</span>
                     </div>
-
-                    <div className="inline-flex items-center text-xs text-gray-text font-bold gap-1 bg-footer px-2.5 py-1 rounded-lg border border-border">
-                      <Clock className="w-3.5 h-3.5 text-primary" />
+                    <div className="inline-flex items-center gap-1 rounded-lg border border-border bg-footer px-2.5 py-1 text-xs font-bold text-gray-text">
+                      <Clock className="h-3.5 w-3.5 text-primary" />
                       <span>{offer.expiryDate}</span>
                     </div>
                   </div>
@@ -100,14 +97,14 @@ export default function OffersPage() {
                   <button
                     type="button"
                     onClick={() => handleOrderNow(offer)}
-                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-sm font-semibold transition-all shadow-sm active:scale-98"
+                    className="food-button food-button-primary inline-flex w-full items-center justify-center gap-1 py-1 text-[10px] max-md:h-7 max-md:py-0 md:gap-2 md:py-2.5 md:text-sm"
                   >
                     <span>Order Now</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="h-3 w-3 md:h-4 md:w-4" />
                   </button>
                 </div>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       </div>
