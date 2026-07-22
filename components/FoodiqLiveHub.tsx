@@ -54,7 +54,7 @@ export default function FoodiqLiveHub() {
         </div>
 
         {/* 1 ROW ONLY (4 Equal Cards in Horizontal Line) */}
-        <div className="scroll-row md:grid md:grid-cols-4 md:gap-5 md:overflow-visible pb-2">
+        <div className="flex scroll-row md:grid md:grid-cols-4 md:gap-5 md:overflow-visible pb-2">
           
           {/* CARD 1: 🏏 LIVE CRICKET */}
           <div className="min-w-[260px] sm:min-w-[280px] md:min-w-0 flex-1 group relative rounded-2xl p-4 flex flex-col justify-between h-[200px] sm:h-[210px] md:h-[220px] overflow-hidden shadow-card hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300 border border-border bg-[#1A1A1A]">

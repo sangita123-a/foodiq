@@ -64,28 +64,28 @@ function BrandCard({
 }) {
   if (compact) {
     return (
-      <div className="mb-2 flex w-[108px] shrink-0 flex-col items-center rounded-xl border border-border bg-white p-2.5 shadow-[0_2px_10px_rgba(28,28,28,0.05)] md:mb-3 md:w-[130px] md:rounded-2xl md:p-3">
-        <div className="relative mb-2 h-16 w-16 overflow-hidden rounded-full border-2 border-[#F8FAFC] shadow-[0_4px_14px_rgba(15,23,42,0.12)] md:mb-3 md:h-20 md:w-20 md:shadow-[0_6px_18px_rgba(15,23,42,0.12)]">
+      <div className="w-[108px] shrink-0 rounded-xl border border-border bg-white p-2.5 shadow-[0_2px_10px_rgba(28,28,28,0.05)] flex flex-col items-center">
+        <div className="relative mb-2 h-16 w-16 overflow-hidden rounded-full border-2 border-[#F8FAFC] shadow-[0_4px_14px_rgba(15,23,42,0.12)]">
           <SafeImage 
             src={brand.foodImage}
             fallback={RESTAURANT_FALLBACK}
             alt={brand.name}
             fill
-            sizes="80px"
+            sizes="64px"
             className="object-cover"
           />
         </div>
-        <div className="relative -mt-6 mb-1.5 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white p-1 shadow-md md:-mt-7 md:mb-2 md:h-12 md:w-12 md:p-1.5">
+        <div className="relative -mt-6 mb-1.5 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white p-1 shadow-md">
           <SafeImage 
             src={brand.logo}
             fallback={RESTAURANT_FALLBACK}
             alt={`${brand.name} logo`}
             fill
-            sizes="48px"
+            sizes="40px"
             className="object-contain p-0.5"
           />
         </div>
-        <h3 className="line-clamp-2 text-center text-[10px] font-bold leading-tight text-foreground md:text-xs">{brand.name}</h3>
+        <h3 className="line-clamp-2 text-center text-[10px] font-bold leading-tight text-foreground">{brand.name}</h3>
       </div>
     );
   }
@@ -122,7 +122,7 @@ function BrandCard({
 
 export default function TopBrands() {
   return (
-    <section className="relative mt-4 overflow-hidden border-y border-border bg-section py-6 md:mt-8 md:py-20">
+    <section className="relative mt-6 overflow-hidden border-y border-border bg-section py-6 md:mt-8 md:py-20">
       <div className="mx-auto mb-5 flex max-w-7xl items-end justify-between px-3 md:mb-14 md:px-8">
         <div>
           <h2 className="mb-1 text-xl font-bold tracking-[-0.045em] text-foreground md:mb-3 md:text-5xl">Top Food Brands</h2>
@@ -139,10 +139,12 @@ export default function TopBrands() {
       </div>
 
       {/* Mobile: horizontal scroll */}
-      <div className="scroll-row px-3 pb-1 md:hidden">
-        {brands.map((brand) => (
-          <BrandCard key={brand.name} brand={brand} compact />
-        ))}
+      <div className="md:hidden">
+        <div className="scroll-row px-3 pb-2">
+          {brands.map((brand) => (
+            <BrandCard key={brand.name} brand={brand} compact />
+          ))}
+        </div>
       </div>
 
       {/* Desktop/Tablet: marquee */}

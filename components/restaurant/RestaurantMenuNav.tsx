@@ -23,7 +23,7 @@ export default function RestaurantMenuNav({
         
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
           
-          <div className="scroll-row flex-1 order-2 md:order-1">
+          <div className="flex scroll-row flex-1 order-2 md:order-1">
             {categories.map((category) => {
               const isActive = activeCategory === category;
               return (

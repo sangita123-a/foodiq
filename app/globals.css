@@ -190,7 +190,6 @@ textarea:focus-visible {
 }
 
 .scroll-row {
-  display: flex;
   gap: clamp(12px, 3vw, 28px);
   overflow-x: auto;
   overscroll-behavior-x: contain;
@@ -199,6 +198,13 @@ textarea:focus-visible {
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding-bottom: 4px;
+}
+
+/* display:flex must not override Tailwind responsive hidden utilities (e.g. md:hidden) */
+@media (max-width: 767px) {
+  .scroll-row {
+    display: flex;
+  }
 }
 
 .scroll-row::-webkit-scrollbar {
