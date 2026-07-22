@@ -97,21 +97,21 @@ import { BRAND_FOOD_IMAGES_UNIQUE, RESTAURANT_COVER_BY_ID } from "@/lib/data/sec
 export const BRAND_FOOD_IMAGES: Record<string, string> = BRAND_FOOD_IMAGES_UNIQUE;
 
 export const BRAND_LOGOS: Record<string, string> = {
-  Subway: "/images/catalog/logos/subway.webp",
-  "Behrouz Biryani": "/images/catalog/logos/biryani.webp",
-  "Biryani By Kilo": "/images/catalog/logos/biryani.webp",
-  "Wow! Momo": "/images/catalog/logos/chinese.webp",
-  "Haldiram's": "/images/catalog/logos/indian.webp",
-  "Barbeque Nation": "/images/catalog/logos/north-indian.webp",
-  Faasos: "/images/catalog/logos/street-food.webp",
-  "Domino's Pizza": "/images/catalog/logos/pizza.webp",
-  KFC: "/images/catalog/logos/fast-food.webp",
-  "Burger King": "/images/catalog/logos/burger.webp",
-  "Pizza Hut": "/images/catalog/logos/pizza.webp",
-  "McDonald's": "/images/catalog/logos/burger.webp",
-  "Taco Bell": "/images/catalog/logos/fast-food.webp",
-  Starbucks: "/images/catalog/logos/healthy.webp",
-  "Baskin Robbins": "/images/catalog/logos/desserts.webp",
+  Subway: "/images/catalog/dishes/fast-food/veggie-sub.webp",
+  "Behrouz Biryani": "/images/catalog/dishes/biryani/hyderabadi-chicken-biryani.webp",
+  "Biryani By Kilo": "/images/catalog/dishes/biryani/mutton-biryani.webp",
+  "Wow! Momo": "/images/catalog/dishes/chinese/chicken-momos.webp",
+  "Haldiram's": "/images/catalog/dishes/desserts/gulab-jamun.webp",
+  "Barbeque Nation": "/images/catalog/dishes/indian/butter-chicken.webp",
+  Faasos: "/images/catalog/dishes/fast-food/chicken-wrap.webp",
+  "Domino's Pizza": "/images/catalog/dishes/pizza/pepperoni-pizza.webp",
+  KFC: "/images/catalog/dishes/fast-food/fried-chicken-bucket.webp",
+  "Burger King": "/images/catalog/dishes/burger/crispy-chicken-burger.webp",
+  "Pizza Hut": "/images/catalog/dishes/pizza/farmhouse-pizza.webp",
+  "McDonald's": "/images/catalog/dishes/burger/cheese-burger.webp",
+  "Taco Bell": "/images/catalog/dishes/mexican/loaded-nachos.webp",
+  Starbucks: "/images/catalog/dishes/beverages/classic-cappuccino.webp",
+  "Baskin Robbins": "/images/catalog/dishes/desserts/butterscotch-ice-cream.webp",
 };
 
 const GENERIC_IMAGES = new Set([

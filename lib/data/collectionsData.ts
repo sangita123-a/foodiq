@@ -129,7 +129,7 @@ function toCollectionItem(
     rating: restaurant.rating,
     deliveryTime: restaurant.time,
     isVeg: dish.isVeg,
-    image: restaurant.image,
+    image: dish.image,
     description: `${dish.name} · ${restaurant.cuisine}`,
   };
 }

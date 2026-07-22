@@ -95,7 +95,7 @@ export const COLLECTIONS_PAGE_SECTIONS: CollectionsPageSection[] = [
       {
         id: "rest-fast-food",
         name: "McDonald's",
-        image: "/images/catalog/dishes/dish-bg-1.jpg",
+        image: "/images/catalog/dishes/burger/cheese-burger.webp",
         rating: "4.4",
         time: "15 min",
         cuisine: "Burgers, Fast Food",
@@ -104,7 +104,7 @@ export const COLLECTIONS_PAGE_SECTIONS: CollectionsPageSection[] = [
       {
         id: "rest-fast-food",
         name: "KFC",
-        image: "/images/catalog/dishes/dish-bk-1.jpg",
+        image: "/images/catalog/dishes/fast-food/fried-chicken-bucket.webp",
         rating: "4.5",
         time: "18 min",
         cuisine: "Chicken, Fast Food",
@@ -166,7 +166,7 @@ export const COLLECTIONS_PAGE_SECTIONS: CollectionsPageSection[] = [
       {
         id: "rest-biryani",
         name: "Pista House",
-        image: "/images/catalog/cuisines/biryani.webp",
+        image: "/images/catalog/dishes/biryani/lucknowi-biryani.webp",
         rating: "4.8",
         time: "29 min",
         cuisine: "Irani Biryani",
@@ -191,7 +191,7 @@ export const COLLECTIONS_PAGE_SECTIONS: CollectionsPageSection[] = [
       {
         id: "rest-south-indian",
         name: "A2B",
-        image: "/images/catalog/dishes/dish-si-1.jpg",
+        image: "/images/catalog/dishes/south-indian/masala-dosa.webp",
         rating: "4.7",
         time: "20 min",
         cuisine: "South Indian, Sweets",

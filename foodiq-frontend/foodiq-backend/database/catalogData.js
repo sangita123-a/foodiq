@@ -156,9 +156,67 @@ const restaurantCuisineSlugs = [
   'italian', 'street-food', 'seafood', 'bakery', 'desserts', 'healthy', 'fast-food',
 ];
 
+const RESTAURANT_COVER_IMAGES = [
+  '/images/catalog/restaurants/rest-chinese.jpg',
+  '/images/catalog/restaurants/rest-north-indian.jpg',
+  '/images/catalog/restaurants/rest-south-indian.jpg',
+  '/images/catalog/restaurants/rest-pasta.jpg',
+  '/images/catalog/restaurants/rest-pizza.jpg',
+  '/images/catalog/restaurants/rest-burger.jpg',
+  '/images/catalog/restaurants/rest-healthy.jpg',
+  '/images/catalog/restaurants/rest-street-food.jpg',
+  '/images/catalog/restaurants/rest-seafood.jpg',
+  '/images/catalog/restaurants/rest-bakery.jpg',
+  '/images/catalog/restaurants/rest-desserts.jpg',
+  '/images/catalog/restaurants/rest-fast-food.jpg',
+  '/images/catalog/restaurants/rest-cold-drinks.jpg',
+  '/images/catalog/restaurants/rest-biryani.jpg',
+  '/images/catalog/restaurants/rest-shawarma.jpg',
+  '/images/catalog/restaurants/rest-tandoori.jpg',
+  '/images/catalog/restaurants/rest-thali.jpg',
+  '/images/catalog/restaurants/rest-bbq.jpg',
+  '/images/catalog/restaurants/rest-sandwich.jpg',
+  '/images/catalog/restaurants/rest-momos.jpg',
+  '/images/catalog/restaurants/rest-snacks.jpg',
+  '/images/catalog/restaurants/rest-coffee.jpg',
+  '/images/catalog/restaurants/rest-icecream.jpg',
+  '/images/catalog/restaurants/rest-salads.jpg',
+  '/images/catalog/restaurants/rest-juice.jpg',
+];
+
+const RESTAURANT_LOGO_IMAGES = [
+  '/images/catalog/dishes/chinese/hakka-noodles.webp',
+  '/images/catalog/dishes/indian/butter-chicken.webp',
+  '/images/catalog/dishes/south-indian/masala-dosa.webp',
+  '/images/catalog/dishes/italian/alfredo-pasta.webp',
+  '/images/catalog/dishes/pizza/classic-margherita.webp',
+  '/images/catalog/dishes/burger/cheese-burger.webp',
+  '/images/catalog/dishes/healthy/greek-salad.webp',
+  '/images/catalog/dishes/street-food/pani-puri.webp',
+  '/images/catalog/dishes/seafood/garlic-butter-prawns.webp',
+  '/images/catalog/dishes/bakery/butter-croissant.webp',
+  '/images/catalog/dishes/desserts/chocolate-cake.webp',
+  '/images/catalog/dishes/fast-food/classic-burger.webp',
+  '/images/catalog/dishes/beverages/coca-cola.webp',
+  '/images/catalog/dishes/biryani/hyderabadi-biryani.webp',
+  '/images/catalog/dishes/dish-sh-1.jpg',
+  '/images/catalog/dishes/north-indian/tandoori-chicken.webp',
+  '/images/catalog/dishes/dish-th-1.jpg',
+  '/images/catalog/dishes/dish-bb-1.jpg',
+  '/images/catalog/dishes/fast-food/club-sandwich.webp',
+  '/images/catalog/dishes/chinese/chicken-momos.webp',
+  '/images/catalog/dishes/dish-sn-1.jpg',
+  '/images/catalog/dishes/beverages/classic-cappuccino.webp',
+  '/images/catalog/dishes/desserts/butterscotch-ice-cream.webp',
+  '/images/catalog/dishes/healthy/chicken-caesar-salad.webp',
+  '/images/catalog/dishes/beverages/fresh-orange-juice.webp',
+];
+
 const restaurants = restaurantNames.map((name, index) => {
   const cuisineSlug = restaurantCuisineSlugs[index];
   const slug = slugify(name);
+  const coverImage = RESTAURANT_COVER_IMAGES[index % RESTAURANT_COVER_IMAGES.length];
+  const logoImage = RESTAURANT_LOGO_IMAGES[index % RESTAURANT_LOGO_IMAGES.length];
   return {
     slug,
     name,
@@ -170,9 +228,9 @@ const restaurants = restaurantNames.map((name, index) => {
     deliveryTime: 22 + (index % 5) * 4,
     distanceKm: Number((1.2 + (index % 7) * 0.55).toFixed(1)),
     offerText: index % 3 === 0 ? '50% OFF up to ₹100' : index % 3 === 1 ? 'Free delivery' : '20% OFF above ₹299',
-    image: `/images/catalog/restaurants/${cuisineSlug}.webp`,
-    logo: `/images/catalog/logos/${cuisineSlug}.webp`,
-    banner: `/images/catalog/cuisines/${cuisineSlug}.webp`,
+    image: coverImage,
+    logo: logoImage,
+    banner: coverImage,
   };
 });
 

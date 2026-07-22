@@ -15,7 +15,7 @@ export const LIVE_HUB_IMAGES = {
 export const CATEGORY_NAV_IMAGES = {
   pizza: "/images/catalog/dishes/pizza/classic-margherita.webp",
   burger: "/images/catalog/dishes/burger/cheese-burger.webp",
-  chicken: "/images/catalog/dishes/indian/tandoori-chicken.webp",
+  chicken: "/images/catalog/dishes/fast-food/fried-chicken-bucket.webp",
   biryani: "/images/catalog/dishes/biryani/hyderabadi-biryani.webp",
   momos: "/images/catalog/dishes/chinese/veg-momos.webp",
   drinks: "/images/catalog/dishes/beverages/fresh-orange-juice.webp",
@@ -38,14 +38,14 @@ export const OFFER_BANNER_IMAGES = {
 } as const;
 
 export const TESTIMONIAL_AVATARS = [
-  "/images/catalog/cuisines/healthy.webp",
-  "/images/catalog/cuisines/italian.webp",
-  "/images/catalog/cuisines/chinese.webp",
-  "/images/catalog/cuisines/street-food.webp",
-  "/images/catalog/cuisines/desserts.webp",
-  "/images/catalog/dishes/dish-pz-1.jpg",
-  "/images/catalog/dishes/dish-by-1.jpg",
-  "/images/catalog/dishes/dish-si-1.jpg",
+  "/images/catalog/dishes/pizza/classic-margherita.webp",
+  "/images/catalog/dishes/biryani/hyderabadi-biryani.webp",
+  "/images/catalog/dishes/chinese/hakka-noodles.webp",
+  "/images/catalog/dishes/burger/cheese-burger.webp",
+  "/images/catalog/dishes/desserts/chocolate-cake.webp",
+  "/images/catalog/dishes/beverages/classic-cappuccino.webp",
+  "/images/catalog/dishes/chinese/chicken-momos.webp",
+  "/images/catalog/dishes/fast-food/fried-chicken-bucket.webp",
 ] as const;
 
 export const BLOG_THUMBNAILS = [
@@ -61,14 +61,17 @@ export const BRAND_FOOD_IMAGES_UNIQUE: Record<string, string> = {
   "Behrouz Biryani": "/images/catalog/dishes/biryani/kolkata-biryani.webp",
   "Biryani By Kilo": "/images/catalog/dishes/biryani/mutton-biryani.webp",
   "Wow! Momo": "/images/catalog/dishes/chinese/chicken-momos.webp",
-  "Haldiram's": "/images/catalog/dishes/dish-si-1.jpg",
+  "Haldiram's": "/images/catalog/dishes/desserts/gulab-jamun.webp",
   "Barbeque Nation": "/images/catalog/dishes/indian/butter-chicken.webp",
   Faasos: "/images/catalog/dishes/fast-food/chicken-wrap.webp",
   "Domino's Pizza": "/images/catalog/dishes/pizza/pepperoni-pizza.webp",
-  KFC: "/images/catalog/dishes/dish-bk-1.jpg",
-  "Burger King": "/images/catalog/dishes/fast-food/classic-burger.webp",
-  "McDonald's": "/images/catalog/dishes/dish-bg-1.jpg",
+  KFC: "/images/catalog/dishes/fast-food/fried-chicken-bucket.webp",
+  "Burger King": "/images/catalog/dishes/burger/crispy-chicken-burger.webp",
+  "McDonald's": "/images/catalog/dishes/burger/cheese-burger.webp",
   "Pizza Hut": "/images/catalog/dishes/pizza/farmhouse-pizza.webp",
+  "Taco Bell": "/images/catalog/dishes/mexican/loaded-nachos.webp",
+  Starbucks: "/images/catalog/dishes/beverages/classic-cappuccino.webp",
+  "Baskin Robbins": "/images/catalog/dishes/desserts/butterscotch-ice-cream.webp",
 };
 
 export const RESTAURANT_COVER_BY_ID: Record<string, string> = {

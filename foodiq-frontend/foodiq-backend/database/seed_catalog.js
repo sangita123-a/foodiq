@@ -238,11 +238,9 @@ async function syncCatalog() {
       SET image_url = '/images/catalog/cuisines/indian.webp'
       WHERE image_url IS NULL OR BTRIM(image_url) = '';
       UPDATE restaurants
-      SET image_url = COALESCE(NULLIF(image_url, ''), '/images/catalog/restaurants/indian.webp'),
-          logo_url = COALESCE(NULLIF(logo_url, ''), '/images/catalog/logos/indian.webp'),
-          banner_url = COALESCE(NULLIF(banner_url, ''), '/images/catalog/cuisines/indian.webp');
-      UPDATE menu_items
-      SET image_url = '/images/catalog/food/indian.webp'
+      SET image_url = COALESCE(NULLIF(image_url, ''), '/images/catalog/restaurants/rest-north-indian.jpg'),
+          logo_url = COALESCE(NULLIF(logo_url, ''), '/images/catalog/dishes/indian/butter-chicken.webp'),
+          banner_url = COALESCE(NULLIF(banner_url, ''), '/images/catalog/restaurants/rest-north-indian.jpg')
       WHERE image_url IS NULL OR BTRIM(image_url) = '';
     `);
 
