@@ -179,7 +179,7 @@ export default function SearchBar() {
     <div ref={wrapRef} className="relative w-full max-w-[900px]">
       <form
         onSubmit={handleSearch}
-        className="w-full h-12 sm:h-[60px] md:h-[66px] bg-white/95 backdrop-blur-md border border-border rounded-[14px] sm:rounded-[18px] flex items-center shadow-card overflow-hidden relative transition-shadow focus-within:border-[#D4D4D4] focus-within:shadow-[0_8px_28px_rgba(0,0,0,0.1)]"
+        className="flex h-12 w-full items-center overflow-hidden rounded-xl border border-border bg-white/95 shadow-card backdrop-blur-md transition-shadow focus-within:border-[#D4D4D4] focus-within:shadow-[0_8px_28px_rgba(0,0,0,0.1)] max-md:h-12 max-md:rounded-xl md:h-[66px] md:rounded-[18px]"
       >
         <div ref={cityRef} className="relative hidden sm:block h-full shrink-0">
           <button
@@ -264,10 +264,10 @@ export default function SearchBar() {
 
         <button
           type="submit"
-          className="h-[40px] sm:h-[46px] md:h-[52px] w-[68px] sm:w-[86px] md:w-[158px] bg-primary hover:bg-primary-hover text-white font-semibold text-xs sm:text-sm rounded-xl transition-all active:translate-y-0 shadow-[0_4px_12px_rgba(0,0,0,0.08)] shrink-0 mr-1 touch-target"
+          className="mr-1 flex h-9 w-[52px] shrink-0 touch-target items-center justify-center rounded-lg bg-primary text-xs font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all active:translate-y-0 hover:bg-primary-hover max-md:h-9 max-md:w-[52px] md:h-[52px] md:w-[158px] md:rounded-xl md:text-sm"
         >
-          <span className="hidden sm:inline">Search</span>
-          <span className="sm:hidden">Go</span>
+          <span className="hidden md:inline">Search</span>
+          <span className="md:hidden">Go</span>
         </button>
       </form>
 

@@ -140,7 +140,7 @@ export default function TopBrands() {
 
       {/* Mobile: horizontal scroll */}
       <div className="md:hidden">
-        <div className="scroll-row px-3 pb-2">
+        <div className="scroll-row scroll-row-snap px-3 pb-1">
           {brands.map((brand) => (
             <BrandCard key={brand.name} brand={brand} compact />
           ))}

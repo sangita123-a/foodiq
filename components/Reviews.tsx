@@ -34,33 +34,67 @@ const reviews = [
 
 export default function Reviews() {
   return (
-    <section className="py-12 px-3 md:px-8 max-w-7xl mx-auto">
-      <div className="mb-12 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3 tracking-[-0.04em]">What Our Customers Say</h2>
-        <p className="text-muted text-base md:text-lg">Don't just take our word for it.</p>
+    <section className="mx-auto max-w-7xl px-3 py-6 max-md:py-6 md:px-8 md:py-12">
+      <div className="mb-4 text-center max-md:mb-4 md:mb-12">
+        <h2 className="mb-1 text-lg font-bold tracking-[-0.04em] text-foreground max-md:text-lg md:mb-3 md:text-4xl">What Our Customers Say</h2>
+        <p className="text-xs text-muted max-md:line-clamp-1 md:text-lg">Don&apos;t just take our word for it.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* Mobile: horizontal swipe */}
+      <div className="md:hidden">
+        <div className="scroll-row scroll-row-snap pb-1">
         {reviews.map((review) => (
-          <div 
+          <article
             key={review.id}
-            className="bg-white border border-border rounded-[18px] p-7 relative shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:border-border hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] transition-all duration-300 group"
+            className="relative w-[260px] shrink-0 rounded-xl border border-border bg-white p-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
           >
-            <Quote className="absolute top-6 right-8 w-12 h-12 text-primary/5 group-hover:text-primary/10 transition-colors duration-300" aria-hidden="true" />
-            
-            <div className="flex gap-1 mb-6" role="img" aria-label={`${review.rating} out of 5 stars`}>
+            <Quote className="absolute right-3 top-3 h-8 w-8 text-primary/5" aria-hidden="true" />
+            <div className="mb-2 flex gap-0.5" role="img" aria-label={`${review.rating} out of 5 stars`}>
               {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
-                  className={`w-5 h-5 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-[#9CA3AF]'}`}
+                <Star
+                  key={i}
+                  className={`h-3 w-3 ${i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-[#9CA3AF]"}`}
+                  aria-hidden="true"
+                />
+              ))}
+            </div>
+            <p className="mb-3 line-clamp-4 text-[11px] italic leading-relaxed text-muted">&ldquo;{review.review}&rdquo;</p>
+            <div className="flex items-center gap-2">
+              <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border border-border">
+                <SafeImage src={review.image} fallback={getAvatarImage(null)} alt={review.name} fill sizes="32px" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="truncate text-xs font-bold text-foreground">{review.name}</h3>
+                <p className="truncate text-[10px] text-muted">{review.role}</p>
+              </div>
+            </div>
+          </article>
+        ))}
+        </div>
+      </div>
+
+      {/* Tablet/Desktop: original grid */}
+      <div className="hidden grid-cols-1 gap-8 md:grid md:grid-cols-3">
+        {reviews.map((review) => (
+          <div
+            key={review.id}
+            className="group relative rounded-[18px] border border-border bg-white p-7 shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-border hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
+          >
+            <Quote className="absolute right-8 top-6 h-12 w-12 text-primary/5 transition-colors duration-300 group-hover:text-primary/10" aria-hidden="true" />
+
+            <div className="mb-6 flex gap-1" role="img" aria-label={`${review.rating} out of 5 stars`}>
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`h-5 w-5 ${i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-[#9CA3AF]"}`}
                   aria-hidden="true"
                 />
               ))}
             </div>
 
-            <p className="text-muted text-sm mb-8 leading-relaxed italic">"{review.review}"</p>
+            <p className="mb-8 text-sm italic leading-relaxed text-muted">&ldquo;{review.review}&rdquo;</p>
 
-            <div className="flex items-center gap-4 mt-auto">
+            <div className="mt-auto flex items-center gap-4">
               <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-border">
                 <SafeImage
                   src={review.image}
@@ -71,8 +105,8 @@ export default function Reviews() {
                 />
               </div>
               <div>
-                <h3 className="text-foreground font-bold">{review.name}</h3>
-                <p className="text-muted text-sm">{review.role}</p>
+                <h3 className="font-bold text-foreground">{review.name}</h3>
+                <p className="text-sm text-muted">{review.role}</p>
               </div>
             </div>
           </div>

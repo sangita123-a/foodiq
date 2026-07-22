@@ -8,7 +8,7 @@ import { usePrefersReducedMotion } from "@/hooks/useMediaQuery";
 const SearchBar = dynamic(() => import("@/components/SearchBar"), {
   loading: () => (
     <div
-      className="h-12 sm:h-[60px] md:h-[66px] w-full max-w-4xl rounded-[14px] sm:rounded-[18px] bg-white/15 animate-pulse"
+      className="h-12 w-full max-w-4xl animate-pulse rounded-xl bg-white/15 max-md:h-12 md:h-[66px] md:rounded-[18px]"
       aria-hidden
     />
   ),
@@ -50,12 +50,10 @@ export default function HeroContent() {
   };
 
   return (
-    <div className="relative z-10 flex w-full max-w-5xl flex-col items-center justify-center text-center">
-      <h1 className="m-0 flex flex-col items-center justify-center p-0 text-center font-extrabold leading-tight tracking-tight text-white drop-shadow-md">
-        <span className="block text-[30px] sm:text-5xl md:text-6xl lg:text-7xl font-extrabold">
-          Find the Best
-        </span>
-        <span className="relative my-1 block h-[1.25em] w-full max-w-[500px] overflow-hidden text-[30px] sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-primary">
+    <div className="relative z-10 flex w-full max-w-5xl flex-col items-center justify-center px-1 text-center max-md:px-0">
+      <h1 className="m-0 flex max-w-full flex-col items-center justify-center p-0 text-center text-[30px] font-extrabold leading-[1.15] tracking-tight text-white drop-shadow-md max-md:text-[30px] md:text-6xl lg:text-7xl">
+        <span className="block max-md:line-clamp-1">Find the Best</span>
+        <span className="relative my-0.5 block h-[1.15em] w-full max-w-[500px] overflow-hidden text-primary max-md:my-0 md:my-1">
           <span
             key={index}
             className={`absolute inset-0 flex items-center justify-center text-center ${
@@ -65,16 +63,14 @@ export default function HeroContent() {
             {words[index]}
           </span>
         </span>
-        <span className="block text-[30px] sm:text-5xl md:text-6xl lg:text-7xl font-extrabold">
-          Near You
-        </span>
+        <span className="block max-md:line-clamp-1">Near You</span>
       </h1>
 
-      <p className="mt-4 sm:mt-6 max-w-2xl text-center text-sm sm:text-base md:text-lg lg:text-xl font-medium text-white/95 leading-relaxed drop-shadow">
+      <p className="mt-3 max-w-2xl text-center text-xs font-medium leading-snug text-white/95 drop-shadow max-md:line-clamp-2 max-md:px-1 md:mt-6 md:text-lg lg:text-xl">
         Discover amazing restaurants and delicious food delivered straight to your doorstep.
       </p>
 
-      <div className="mt-6 sm:mt-10 md:mt-12 w-full max-w-4xl flex justify-center">
+      <div className="mt-4 flex w-full max-w-4xl justify-center max-md:mt-3 md:mt-12">
         <SearchBar />
       </div>
 
@@ -82,7 +78,7 @@ export default function HeroContent() {
         type="button"
         onClick={scrollToContent}
         aria-label="Scroll down to explore categories and dishes"
-        className={`mt-8 sm:mt-12 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/30 bg-white/20 text-white backdrop-blur-sm transition-all hover:bg-white hover:text-primary hover:shadow-lg ${
+        className={`mt-6 hidden h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/30 bg-white/20 text-white backdrop-blur-sm transition-all hover:bg-white hover:text-primary hover:shadow-lg md:mt-12 md:flex ${
           prefersReduced ? "" : "hero-scroll-bounce"
         }`}
       >

@@ -78,11 +78,11 @@ function DishCard({
   onUpdateQty,
 }: DishCardProps) {
   const cardClassName =
-    "group flex h-auto w-[128px] shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-white shadow-[0_1px_8px_rgba(0,0,0,0.06)] transition-all duration-300 md:h-[240px] md:w-[170px] md:rounded-2xl md:shadow-[0_2px_12px_rgba(0,0,0,0.06)] md:hover:-translate-y-1 md:hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]";
+    "group flex h-auto w-[156px] shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-white shadow-[0_1px_8px_rgba(0,0,0,0.06)] transition-all duration-300 max-md:w-[156px] md:h-[240px] md:w-[170px] md:rounded-2xl md:shadow-[0_2px_12px_rgba(0,0,0,0.06)] md:hover:-translate-y-1 md:hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]";
 
   const cardBody = (
     <>
-      <div className="relative h-[92px] w-full shrink-0 overflow-hidden rounded-t-xl bg-footer md:h-[110px] md:rounded-t-2xl">
+      <div className="relative h-[110px] w-full shrink-0 overflow-hidden rounded-t-xl bg-footer max-md:h-[110px] md:h-[110px] md:rounded-t-2xl">
         <Link href={`/food/${dish.id}`} className="relative block h-full w-full">
           <SafeImage
             src={dish.image}
@@ -151,7 +151,7 @@ function DishCard({
               onClick={() => onAdd(dish)}
               disabled={isUpdating}
               aria-label={`Add ${dish.name} to cart`}
-              className="food-button-add touch-target-expand inline-flex h-[28px] w-full shrink-0 items-center justify-center gap-0.5 px-2 text-[10px] disabled:opacity-50 md:h-[34px] md:w-auto md:px-2.5 md:text-xs"
+              className="food-button-add touch-target-expand inline-flex h-[26px] shrink-0 items-center justify-center gap-0.5 rounded-md border border-[var(--color-primary)] bg-white px-2 text-[10px] font-bold text-[var(--color-primary)] disabled:opacity-50 max-md:min-w-[52px] md:h-[34px] md:w-auto md:rounded-lg md:border-0 md:bg-[var(--color-primary)] md:px-2.5 md:font-normal md:text-white md:text-xs"
             >
               <Plus className="h-3 w-3" />
               <span>Add</span>
@@ -335,9 +335,9 @@ export default function TrendingDishes() {
   );
 
   return (
-    <section className="overflow-hidden bg-white py-6 md:py-12" id={SECTION_ID}>
+    <section className="overflow-hidden bg-white py-5 max-md:py-5 md:py-12" id={SECTION_ID}>
       <div className="container mx-auto max-w-7xl px-3 md:px-8">
-        <div className="mb-4 flex flex-col justify-between gap-3 md:mb-8 md:flex-row md:items-end md:gap-4">
+        <div className="mb-3 flex flex-col justify-between gap-2 max-md:mb-3 md:mb-8 md:flex-row md:items-end md:gap-4">
           <div className="min-w-0">
             <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-border bg-section px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-text md:mb-3 md:gap-2 md:px-3 md:py-1 md:text-xs">
               <Flame className="h-3.5 w-3.5 text-[var(--color-primary)] md:h-4 md:w-4" fill="var(--color-primary)" stroke="var(--color-primary)" aria-hidden />
@@ -353,9 +353,9 @@ export default function TrendingDishes() {
 
           <Link
             href="/trending-dishes"
-            className="food-button food-button-primary inline-flex w-full items-center justify-center gap-2 px-4 py-2 text-xs md:w-auto md:px-5 md:text-sm"
+            className="food-button food-button-primary inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5 text-[11px] max-md:py-1.5 max-md:text-[11px] md:w-auto md:gap-2 md:px-5 md:py-2 md:text-sm"
           >
-            <ShoppingBag className="h-4 w-4" />
+            <ShoppingBag className="h-3.5 w-3.5 md:h-4 md:w-4" />
             <span>View All 60 Dishes</span>
           </Link>
         </div>
@@ -385,7 +385,7 @@ export default function TrendingDishes() {
               ? Array.from({ length: initialVisible }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-[196px] w-[128px] animate-pulse rounded-xl bg-footer md:h-[240px] md:w-[170px] md:rounded-2xl"
+                    className="h-[210px] w-[156px] animate-pulse rounded-xl bg-footer max-md:h-[210px] max-md:w-[156px] md:h-[240px] md:w-[170px] md:rounded-2xl"
                   />
                 ))
               : visibleDishes.map((dish, index) =>
@@ -410,7 +410,7 @@ export default function TrendingDishes() {
                   setShowAll(true);
                 }
               }}
-              className="food-button food-button-primary mt-8 md:mt-10 w-full max-w-xs md:w-auto px-8 py-2.5 text-sm"
+              className="food-button food-button-primary mt-4 w-full max-w-xs px-5 py-2 text-xs max-md:mt-4 max-md:py-2 max-md:text-xs md:mt-10 md:w-auto md:px-8 md:py-2.5 md:text-sm"
             >
               {showAll ? "View Less" : "View More"}
             </button>

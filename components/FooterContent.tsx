@@ -21,7 +21,7 @@ const linkClass =
   "rounded-sm text-gray-text transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-footer";
 
 const sectionTitleClass =
-  "mb-4 text-sm font-bold uppercase tracking-wider text-foreground";
+  "mb-2 text-[10px] font-bold uppercase tracking-wider text-foreground max-md:mb-2 md:mb-4 md:text-sm";
 
 function telHref(phone: string) {
   return `tel:${phone.replace(/\s/g, "")}`;
@@ -130,11 +130,11 @@ function FooterLinkSection({
   id: string;
 }) {
   return (
-    <nav aria-labelledby={id} className="flex flex-col items-center sm:items-start">
+    <nav aria-labelledby={id} className="flex flex-col items-start max-md:items-start sm:items-start">
       <h3 id={id} className={sectionTitleClass}>
         {title}
       </h3>
-      <ul className="space-y-2.5 text-xs sm:text-sm">
+      <ul className="space-y-1.5 text-[11px] max-md:space-y-1.5 md:space-y-2.5 md:text-sm">
         {links.map((link) => (
           <li key={link.href}>
             <Link href={link.href} className={linkClass}>
@@ -240,13 +240,13 @@ export default function FooterContent() {
   return (
     <>
       <footer
-        className="mt-12 w-full border-t border-border bg-footer py-10 text-foreground sm:mt-16 sm:py-14 lg:mt-20"
+        className="mt-6 w-full border-t border-border bg-footer py-6 text-foreground max-md:py-6 sm:mt-16 sm:py-14 lg:mt-20"
         role="contentinfo"
       >
-        <div className="container mx-auto px-3 sm:px-6 lg:px-16">
-          <div className="grid grid-cols-1 gap-8 text-center max-sm:grid-cols-1 sm:grid-cols-3 sm:text-left lg:grid-cols-6 lg:gap-10">
-            <div className="col-span-1 sm:col-span-3 lg:col-span-2 flex flex-col items-center sm:items-start">
-              <div className="flex items-center justify-center text-2xl font-bold tracking-tight sm:text-3xl sm:justify-start">
+        <div className="container mx-auto px-3 max-md:px-3 sm:px-6 lg:px-16">
+          <div className="grid grid-cols-2 gap-4 text-left max-md:grid-cols-2 max-md:gap-4 max-md:text-left sm:grid-cols-3 sm:text-left lg:grid-cols-6 lg:gap-10">
+            <div className="col-span-2 flex flex-col items-start sm:col-span-3 lg:col-span-2">
+              <div className="flex items-center justify-start text-lg font-bold tracking-tight max-md:text-lg sm:text-3xl">
                 {settings.logo_url ? (
                   <SafeImage
                     src={settings.logo_url}
@@ -254,12 +254,12 @@ export default function FooterContent() {
                     alt={settings.company_name || "Foodiq"}
                     width={120}
                     height={40}
-                    className="mr-3 h-10 w-auto max-w-[120px] !object-contain"
+                    className="mr-2 h-8 w-auto max-w-[96px] !object-contain max-md:mr-2 max-md:h-8 md:mr-3 md:h-10 md:max-w-[120px]"
                   />
                 ) : null}
                 <span className="text-foreground">Foodiq</span>
               </div>
-              <p className="mt-3 max-w-sm text-xs text-gray-text sm:text-sm mx-auto sm:mx-0">
+              <p className="mt-2 max-w-sm text-[11px] text-gray-text max-md:line-clamp-2 sm:text-sm">
                 {settings.footer_content ||
                   "Discover amazing restaurants and delicious food delivered straight to your doorstep."}
               </p>
@@ -267,11 +267,11 @@ export default function FooterContent() {
                 {settings.business_hours}
               </p>
 
-              <div className="mt-6">
-                <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted">
+              <div className="mt-3 max-md:mt-3 md:mt-6">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-muted max-md:mb-2 md:mb-3 md:text-xs">
                   Follow Us
                 </p>
-                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                <div className="flex flex-wrap justify-start gap-1.5 max-md:gap-1.5 md:gap-2">
                   {socialLinks.map(({ label, href, Icon }) => (
                     <a
                       key={label}
@@ -279,15 +279,15 @@ export default function FooterContent() {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`Foodiq on ${label}`}
-                      className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-gray-text transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-footer"
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-white text-gray-text transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-footer max-md:h-8 max-md:w-8 md:h-10 md:w-10"
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     </a>
                   ))}
                 </div>
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-3 justify-center sm:justify-start">
+              <div className="mt-3 hidden flex-wrap gap-2 sm:mt-6 sm:flex">
                 <a
                   href={appStoreUrl}
                   target="_blank"
@@ -349,7 +349,7 @@ export default function FooterContent() {
             />
           </div>
 
-          <div className="mt-10 border-t border-border pt-8 lg:mt-12">
+          <div className="mt-6 border-t border-border pt-4 max-md:mt-4 max-md:pt-4 lg:mt-12 lg:pt-8">
             <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
               <div>
                 <h3 className={sectionTitleClass}>Newsletter</h3>
@@ -451,7 +451,7 @@ export default function FooterContent() {
             </div>
           </div>
 
-          <p className="mt-10 border-t border-border pt-6 text-center text-xs text-muted">
+          <p className="mt-4 border-t border-border pt-4 text-center text-[10px] text-muted max-md:mt-4 max-md:pt-4 md:mt-10 md:pt-6 md:text-xs">
             &copy; {year} Foodiq. All Rights Reserved.
           </p>
         </div>

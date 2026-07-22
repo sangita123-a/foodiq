@@ -26,28 +26,27 @@ export default function BestOffers() {
 
   return (
     <section className="food-section overflow-hidden">
-      <div className="food-section-heading flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="food-section-heading flex flex-col gap-2 max-md:gap-2 sm:flex-row sm:items-end sm:justify-between md:gap-3">
         <div>
-          <h2 className="mb-1 text-lg font-bold tracking-tight text-foreground md:mb-2 md:text-3xl">Today&apos;s Best Offers</h2>
-          <p className="text-xs md:text-base">Save big with our exclusive deals across top restaurants.</p>
+          <h2 className="mb-0.5 text-base font-bold tracking-tight text-foreground max-md:text-base md:mb-2 md:text-3xl">Today&apos;s Best Offers</h2>
+          <p className="text-[11px] max-md:line-clamp-1 md:text-base">Save big with our exclusive deals across top restaurants.</p>
         </div>
         <Link
           href="/offers"
-          className="inline-flex items-center gap-1.5 text-gray-text hover:text-[var(--color-primary)] font-bold text-sm transition-colors"
+          className="inline-flex items-center gap-1 text-[11px] font-bold text-gray-text transition-colors hover:text-[var(--color-primary)] max-md:hidden md:inline-flex md:gap-1.5 md:text-sm"
         >
           <span>View All</span>
-          <ArrowRight className="w-4 h-4" />
+          <ArrowRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 max-md:grid-cols-1 md:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5">
-        {FIVE_BEST_OFFERS.map((offer) => (
+      <div className="grid grid-cols-2 gap-2 max-md:grid-cols-2 max-md:gap-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+        {FIVE_BEST_OFFERS.map((offer, index) => (
           <article
             key={offer.id}
-            className="food-card group relative flex min-h-0 flex-col justify-between overflow-hidden rounded-xl border border-border bg-white p-3 shadow-card transition-all duration-300 md:min-h-[200px] md:rounded-[18px] md:p-5 md:hover:-translate-y-1 md:hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
+            className={`food-card group relative flex min-h-0 flex-col justify-between overflow-hidden rounded-lg border border-border bg-white p-2 shadow-card transition-all duration-300 max-md:min-h-[148px] max-md:rounded-lg max-md:p-2 md:min-h-[200px] md:rounded-[18px] md:p-5 md:hover:-translate-y-1 md:hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)] ${index >= 4 ? "max-md:hidden" : ""}`}
           >
-            {/* Image Banner Background */}
-            <div className="absolute top-0 right-0 h-full w-28 overflow-hidden rounded-r-xl opacity-40 transition-opacity duration-300 group-hover:opacity-60 sm:w-44 md:rounded-r-[18px] md:group-hover:scale-105">
+            <div className="absolute top-0 right-0 h-full w-16 overflow-hidden rounded-r-lg opacity-35 transition-opacity duration-300 max-md:w-16 md:w-44 md:rounded-r-[18px] md:opacity-40 md:group-hover:scale-105 md:group-hover:opacity-60">
               <SafeImage
                 src={offer.image}
                 fallback={FOOD_FALLBACK}
@@ -58,50 +57,45 @@ export default function BestOffers() {
               />
             </div>
 
-            <div className="relative z-10 flex h-full w-[72%] flex-col justify-between md:w-3/4">
+            <div className="relative z-10 flex h-full w-full flex-col justify-between md:w-3/4">
               <div>
-                {/* Restaurant Name */}
-                <div className="flex items-center gap-1 text-[10px] font-bold text-gray-text md:text-[11px]">
-                  <Tag className="h-2.5 w-2.5 text-gray-text md:h-3 md:w-3" />
+                <div className="mb-0.5 flex items-center gap-0.5 text-[9px] font-bold text-gray-text max-md:truncate md:gap-1 md:text-[11px]">
+                  <Tag className="h-2 w-2 shrink-0 md:h-3 md:w-3" />
                   <span className="truncate">{offer.restaurantName}</span>
                 </div>
 
-                {/* Offer Title & Discount */}
-                <h3 className="mb-0.5 text-base font-black leading-tight text-foreground transition-colors group-hover:text-foreground md:mb-1 md:text-xl sm:text-lg">
+                <h3 className="mb-0.5 line-clamp-1 text-xs font-black leading-tight text-foreground md:mb-1 md:text-xl">
                   {offer.title}
                 </h3>
 
-                <span className="offer-badge mb-1.5 md:mb-2">
+                <span className="offer-badge mb-1 text-[9px] max-md:mb-1 md:mb-2 md:text-xs">
                   {offer.discountBadge}
                 </span>
 
-                <p className="mb-2 line-clamp-1 text-[11px] font-medium text-gray-text md:mb-3 md:text-xs">
+                <p className="mb-1 line-clamp-1 text-[9px] font-medium text-gray-text max-md:hidden md:mb-3 md:block md:text-xs">
                   {offer.description}
                 </p>
               </div>
 
               <div>
-                {/* Code & Expiry */}
-                <div className="mb-2 flex flex-wrap items-center gap-1.5 md:mb-3 md:gap-2">
-                  <div className="inline-flex items-center rounded-md border border-border bg-white px-2 py-0.5 shadow-sm md:rounded-lg md:px-2.5 md:py-1">
-                    <span className="mr-1 text-[9px] font-semibold uppercase tracking-wider text-gray-text md:mr-1.5 md:text-[10px]">Code:</span>
-                    <span className="text-[10px] font-black tracking-wider text-primary md:text-xs">{offer.code}</span>
+                <div className="mb-1.5 hidden flex-wrap items-center gap-1 md:mb-3 md:flex md:gap-2">
+                  <div className="inline-flex items-center rounded border border-border bg-white px-1.5 py-0.5 shadow-sm md:rounded-lg md:px-2.5 md:py-1">
+                    <span className="mr-1 text-[8px] font-semibold uppercase tracking-wider text-gray-text md:mr-1.5 md:text-[10px]">Code:</span>
+                    <span className="text-[9px] font-black tracking-wider text-primary md:text-xs">{offer.code}</span>
                   </div>
-
-                  <div className="inline-flex items-center gap-0.5 rounded-md border border-border bg-footer px-1.5 py-0.5 text-[9px] font-bold text-gray-text md:gap-1 md:rounded-lg md:px-2 md:py-1 md:text-[10px]">
-                    <Clock className="h-2.5 w-2.5 text-gray-text md:h-3 md:w-3" />
+                  <div className="inline-flex items-center gap-0.5 rounded border border-border bg-footer px-1 py-0.5 text-[8px] font-bold text-gray-text md:gap-1 md:rounded-lg md:px-2 md:py-1 md:text-[10px]">
+                    <Clock className="h-2 w-2 md:h-3 md:w-3" />
                     <span className="truncate">{offer.expiryDate}</span>
                   </div>
                 </div>
 
-                {/* Action Button */}
                 <button
                   type="button"
                   onClick={() => handleOrderNow(offer)}
-                  className="food-button food-button-primary w-full py-1.5 text-[11px] md:py-2 md:text-xs"
+                  className="food-button food-button-primary w-full py-1 text-[10px] max-md:h-7 max-md:py-0 md:py-2 md:text-xs"
                 >
                   <span>Order Now</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="h-3 w-3 md:h-3.5 md:w-3.5" />
                 </button>
               </div>
             </div>

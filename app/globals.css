@@ -245,7 +245,7 @@ textarea:focus-visible {
   }
 
   .food-section {
-    padding-block: 20px;
+    padding-block: 16px;
   }
 
   .food-section-heading {
@@ -268,6 +268,15 @@ textarea:focus-visible {
   .scroll-row {
     gap: 10px;
     scroll-padding-inline: 12px;
+    scroll-snap-type: x proximity;
+  }
+
+  .scroll-row-snap {
+    scroll-snap-type: x mandatory;
+  }
+
+  .scroll-row-snap > * {
+    scroll-snap-align: start;
   }
 
   .food-card {
@@ -292,7 +301,7 @@ textarea:focus-visible {
   }
 
   .food-grid-restaurants .food-card-image {
-    height: 100px;
+    height: 115px;
   }
 
   .food-grid-restaurants .food-card-body {
