@@ -38,26 +38,38 @@ export function getBackendBase(): string {
 }
 
 /**
- * Converts a possibly-relative backend image path to an absolute URL.
- * e.g. "/images/catalog/restaurants/indian.webp"
- *   → "https://foodiq-2.onrender.com/images/catalog/restaurants/indian.webp"
- * Already-absolute URLs (https://...) are returned unchanged.
+ * Resolves an image path for the browser/Next.js Image.
+ * Static catalog assets under public/ are always same-origin so Vercel serves them
+ * directly (avoids slow /backend-api proxy timeouts in production).
+ * Uploads and other backend-only paths are prefixed with the API origin.
  */
 export function resolveBackendUrl(path: string | null | undefined): string | null {
   if (!path) return null;
   const p = path.trim();
   if (!p) return null;
-  // Already absolute
-  if (p.startsWith("http://") || p.startsWith("https://")) return p;
-  // Already routed through Next.js dev proxy
-  if (p.startsWith("/backend-api/")) return p;
-  // Backend catalog assets live on the API server
-  if (p.startsWith("/images/catalog/")) {
-    const base = getBackendBase();
-    return `${base}${p}`;
+  // Already absolute — normalize known backend catalog URLs to same-origin static paths
+  if (p.startsWith("http://") || p.startsWith("https://")) {
+    try {
+      const { pathname } = new URL(p);
+      if (pathname.startsWith("/images/") || pathname.startsWith("/default-")) {
+        return pathname;
+      }
+    } catch {
+      /* keep original absolute URL */
+    }
+    return p;
   }
-  if (p.startsWith("/images/")) return p;
-  // Relative path from backend — prefix with backend origin
+  // Already routed through Next.js dev proxy
+  if (p.startsWith("/backend-api/")) {
+    const stripped = p.replace(/^\/backend-api/, "");
+    if (stripped.startsWith("/images/") || stripped.startsWith("/default-")) {
+      return stripped;
+    }
+    return p;
+  }
+  // Bundled in Next.js public/ — same-origin on localhost and Vercel
+  if (p.startsWith("/images/") || p.startsWith("/default-")) return p;
+  // Backend-only relative paths (uploads, media, etc.)
   const base = getBackendBase();
   return `${base}${p.startsWith("/") ? "" : "/"}${p}`;
 }
