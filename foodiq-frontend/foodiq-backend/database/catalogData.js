@@ -156,33 +156,26 @@ const restaurantCuisineSlugs = [
   'italian', 'street-food', 'seafood', 'bakery', 'desserts', 'healthy', 'fast-food',
 ];
 
-const RESTAURANT_COVER_IMAGES = [
-  '/images/catalog/restaurants/rest-chinese.jpg',
-  '/images/catalog/restaurants/rest-north-indian.jpg',
-  '/images/catalog/restaurants/rest-south-indian.jpg',
-  '/images/catalog/restaurants/rest-pasta.jpg',
-  '/images/catalog/restaurants/rest-pizza.jpg',
-  '/images/catalog/restaurants/rest-burger.jpg',
-  '/images/catalog/restaurants/rest-healthy.jpg',
-  '/images/catalog/restaurants/rest-street-food.jpg',
-  '/images/catalog/restaurants/rest-seafood.jpg',
-  '/images/catalog/restaurants/rest-bakery.jpg',
-  '/images/catalog/restaurants/rest-desserts.jpg',
-  '/images/catalog/restaurants/rest-fast-food.jpg',
-  '/images/catalog/restaurants/rest-cold-drinks.jpg',
-  '/images/catalog/restaurants/rest-biryani.jpg',
-  '/images/catalog/restaurants/rest-shawarma.jpg',
-  '/images/catalog/restaurants/rest-tandoori.jpg',
-  '/images/catalog/restaurants/rest-thali.jpg',
-  '/images/catalog/restaurants/rest-bbq.jpg',
-  '/images/catalog/restaurants/rest-sandwich.jpg',
-  '/images/catalog/restaurants/rest-momos.jpg',
-  '/images/catalog/restaurants/rest-snacks.jpg',
-  '/images/catalog/restaurants/rest-coffee.jpg',
-  '/images/catalog/restaurants/rest-icecream.jpg',
-  '/images/catalog/restaurants/rest-salads.jpg',
-  '/images/catalog/restaurants/rest-juice.jpg',
-];
+const RESTAURANT_COVER_BY_CUISINE = {
+  chinese: '/images/catalog/restaurants/rest-chinese.jpg',
+  indian: '/images/catalog/restaurants/rest-north-indian.jpg',
+  'north-indian': '/images/catalog/restaurants/rest-north-indian.jpg',
+  'south-indian': '/images/catalog/restaurants/rest-south-indian.jpg',
+  italian: '/images/catalog/restaurants/rest-pasta.jpg',
+  pizza: '/images/catalog/restaurants/rest-pizza.jpg',
+  burger: '/images/catalog/restaurants/rest-burger.jpg',
+  healthy: '/images/catalog/restaurants/rest-healthy.jpg',
+  'street-food': '/images/catalog/restaurants/rest-street-food.jpg',
+  seafood: '/images/catalog/restaurants/rest-seafood.jpg',
+  bakery: '/images/catalog/restaurants/rest-bakery.jpg',
+  desserts: '/images/catalog/restaurants/rest-desserts.jpg',
+  'fast-food': '/images/catalog/restaurants/rest-fast-food.jpg',
+  beverages: '/images/catalog/restaurants/rest-coffee.jpg',
+  biryani: '/images/catalog/restaurants/rest-biryani.jpg',
+  mexican: '/images/catalog/restaurants/rest-shawarma.jpg',
+};
+
+const RESTAURANT_COVER_IMAGES = Object.values(RESTAURANT_COVER_BY_CUISINE);
 
 const RESTAURANT_LOGO_IMAGES = [
   '/images/catalog/dishes/chinese/hakka-noodles.webp',
@@ -215,7 +208,9 @@ const RESTAURANT_LOGO_IMAGES = [
 const restaurants = restaurantNames.map((name, index) => {
   const cuisineSlug = restaurantCuisineSlugs[index];
   const slug = slugify(name);
-  const coverImage = RESTAURANT_COVER_IMAGES[index % RESTAURANT_COVER_IMAGES.length];
+  const coverImage =
+    RESTAURANT_COVER_BY_CUISINE[cuisineSlug] ||
+    RESTAURANT_COVER_IMAGES[index % RESTAURANT_COVER_IMAGES.length];
   const logoImage = RESTAURANT_LOGO_IMAGES[index % RESTAURANT_LOGO_IMAGES.length];
   return {
     slug,

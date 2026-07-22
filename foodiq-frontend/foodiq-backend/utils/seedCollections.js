@@ -131,52 +131,61 @@ async function ensureOfferText(pool) {
 }
 
 async function ensureHighQualityImages(pool) {
-  const imageMap = [
-    { pattern: '%biryani%', image: '/images/catalog/restaurants/biryani.webp' },
-    { pattern: '%pizza%', image: '/images/catalog/restaurants/pizza.webp' },
-    { pattern: '%burger%', image: '/images/catalog/restaurants/burger.webp' },
-    { pattern: '%chinese%', image: '/images/catalog/restaurants/chinese.webp' },
-    { pattern: '%south%', image: '/images/catalog/restaurants/south-indian.webp' },
-    { pattern: '%dosa%', image: '/images/catalog/restaurants/south-indian.webp' },
-    { pattern: '%veg%', image: '/images/catalog/restaurants/south-indian.webp' },
+  await pool.query(`
+    UPDATE restaurants r
+    SET image_url = CASE rc.slug
+      WHEN 'chinese' THEN '/images/catalog/restaurants/rest-chinese.jpg'
+      WHEN 'indian' THEN '/images/catalog/restaurants/rest-north-indian.jpg'
+      WHEN 'north-indian' THEN '/images/catalog/restaurants/rest-north-indian.jpg'
+      WHEN 'south-indian' THEN '/images/catalog/restaurants/rest-south-indian.jpg'
+      WHEN 'italian' THEN '/images/catalog/restaurants/rest-pasta.jpg'
+      WHEN 'pizza' THEN '/images/catalog/restaurants/rest-pizza.jpg'
+      WHEN 'burger' THEN '/images/catalog/restaurants/rest-burger.jpg'
+      WHEN 'healthy' THEN '/images/catalog/restaurants/rest-healthy.jpg'
+      WHEN 'street-food' THEN '/images/catalog/restaurants/rest-street-food.jpg'
+      WHEN 'seafood' THEN '/images/catalog/restaurants/rest-seafood.jpg'
+      WHEN 'bakery' THEN '/images/catalog/restaurants/rest-bakery.jpg'
+      WHEN 'desserts' THEN '/images/catalog/restaurants/rest-desserts.jpg'
+      WHEN 'fast-food' THEN '/images/catalog/restaurants/rest-fast-food.jpg'
+      WHEN 'beverages' THEN '/images/catalog/restaurants/rest-coffee.jpg'
+      WHEN 'biryani' THEN '/images/catalog/restaurants/rest-biryani.jpg'
+      WHEN 'mexican' THEN '/images/catalog/restaurants/rest-shawarma.jpg'
+      ELSE r.image_url
+    END
+    FROM restaurant_categories rc
+    WHERE rc.id = r.category_id
+      AND r.is_active = TRUE
+      AND (
+        r.image_url IS NULL
+        OR TRIM(r.image_url) = ''
+        OR r.image_url = '/images/catalog/restaurants/north-indian.webp'
+        OR r.image_url = '/images/catalog/restaurants/indian.webp'
+        OR r.image_url NOT LIKE '/images/catalog/restaurants/rest-%'
+      )
+  `);
+
+  const nameOverrides = [
+    ['%brew%blend%', '/images/catalog/restaurants/rest-coffee.jpg'],
+    ['%punjab junction%', '/images/catalog/restaurants/rest-north-indian.jpg'],
+    ['%quick bite%', '/images/catalog/restaurants/rest-fast-food.jpg'],
+    ['%fresh fuel%', '/images/catalog/restaurants/rest-healthy.jpg'],
+    ['%stone oven%', '/images/catalog/restaurants/rest-pizza.jpg'],
+    ['%daily bakehouse%', '/images/catalog/restaurants/rest-bakery.jpg'],
+    ['%urban tandoor%', '/images/catalog/restaurants/rest-tandoori.jpg'],
+    ['%casa italiano%', '/images/catalog/restaurants/rest-pasta.jpg'],
+    ['%foodiq express%', '/images/catalog/restaurants/rest-fast-food.jpg'],
+    ['%tandoor%', '/images/catalog/restaurants/rest-tandoori.jpg'],
+    ['%wok%', '/images/catalog/restaurants/rest-chinese.jpg'],
+    ['%dosa%', '/images/catalog/restaurants/rest-south-indian.jpg'],
   ];
 
-  for (const { pattern, image } of imageMap) {
+  for (const [pattern, image] of nameOverrides) {
     await pool.query(
       `UPDATE restaurants SET image_url = $1
-       WHERE is_active = TRUE
-         AND (image_url IS NULL OR TRIM(image_url) = '' OR image_url NOT LIKE 'http%')
-         AND name ILIKE $2`,
+       WHERE is_active = TRUE AND name ILIKE $2`,
       [image, pattern]
     );
   }
-
-  await pool.query(
-    `UPDATE restaurants SET image_url = '/images/catalog/restaurants/north-indian.webp'
-     WHERE is_active = TRUE
-       AND (image_url IS NULL OR TRIM(image_url) = '' OR image_url NOT LIKE 'http%')`
-  );
-
-  await pool.query(
-    `UPDATE restaurants SET image_url = '/images/catalog/restaurants/biryani.webp'
-     WHERE is_active = TRUE AND name ILIKE '%biryani%'`
-  );
-  await pool.query(
-    `UPDATE restaurants SET image_url = '/images/catalog/restaurants/pizza.webp'
-     WHERE is_active = TRUE AND name ILIKE '%pizza%'`
-  );
-  await pool.query(
-    `UPDATE restaurants SET image_url = '/images/catalog/restaurants/burger.webp'
-     WHERE is_active = TRUE AND name ILIKE '%burger%'`
-  );
-  await pool.query(
-    `UPDATE restaurants SET image_url = '/images/catalog/restaurants/chinese.webp'
-     WHERE is_active = TRUE AND (name ILIKE '%chinese%' OR name ILIKE '%wok%' OR name ILIKE '%momo%')`
-  );
-  await pool.query(
-    `UPDATE restaurants SET image_url = '/images/catalog/restaurants/south-indian.webp'
-     WHERE is_active = TRUE AND (name ILIKE '%dosa%' OR name ILIKE '%south%' OR name ILIKE '%veg%')`
-  );
 }
 
 async function seedCollectionRestaurants(pool) {

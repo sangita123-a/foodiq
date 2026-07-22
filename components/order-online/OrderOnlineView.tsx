@@ -288,11 +288,11 @@ export default function OrderOnlineView() {
               </div>
 
               {isLoading ? (
-                <div className="food-grid">
+                <div className="food-grid food-grid-restaurants">
                   {[1, 2, 3, 4, 5, 6].map((i) => (
                     <div
                       key={i}
-                      className="h-[300px] animate-pulse rounded-2xl border border-border bg-[#F8F9FA]"
+                      className="h-[252px] animate-pulse rounded-2xl border border-border bg-[#F8F9FA]"
                     />
                   ))}
                 </div>
@@ -303,7 +303,7 @@ export default function OrderOnlineView() {
                 </div>
               ) : (
                 <>
-                  <div className="food-grid">
+                  <div className="food-grid food-grid-restaurants">
                     {restaurants.map((restaurant: any, idx: number) => (
                       <RestaurantCard key={`${restaurant.id}-${idx}`} {...restaurant} delay={Math.min(idx * 0.08, 0.4)} />
                     ))}

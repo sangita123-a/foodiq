@@ -105,6 +105,10 @@ export function getAvatarImage(url?: string | null): string {
 }
 
 import { BRAND_FOOD_IMAGES_UNIQUE, RESTAURANT_COVER_BY_ID } from "@/lib/data/sectionImages";
+import {
+  isBulkRestaurantFallback,
+  resolveRestaurantCoverPath,
+} from "@/lib/data/restaurantCoverImages";
 
 export const BRAND_FOOD_IMAGES: Record<string, string> = BRAND_FOOD_IMAGES_UNIQUE;
 
@@ -139,9 +143,28 @@ export function isGenericFoodImage(url?: string | null): boolean {
   return GENERIC_IMAGES.has(normalized) || normalized.endsWith("/default-restaurant.webp") || normalized.endsWith("/default-food.webp");
 }
 
-export function getRestaurantCoverImage(restaurantId?: string | null, url?: string | null): string {
+export function getRestaurantCoverImage(
+  restaurantId?: string | null,
+  url?: string | null,
+  options?: { name?: string | null; category?: string | null; categorySlug?: string | null }
+): string {
+  const mapped = resolveRestaurantCoverPath({
+    id: restaurantId,
+    name: options?.name,
+    category: options?.category,
+    categorySlug: options?.categorySlug,
+    imageUrl: url,
+    coverById: RESTAURANT_COVER_BY_ID,
+  });
+  if (mapped) {
+    return resolveBackendUrl(mapped) ?? mapped;
+  }
+
   const custom = resolveBackendUrl(url);
-  if (custom && !isGenericFoodImage(custom)) return custom;
+  if (custom && !isGenericFoodImage(custom) && !isBulkRestaurantFallback(url)) {
+    return custom;
+  }
+
   const id = restaurantId?.trim();
   if (id && RESTAURANT_COVER_BY_ID[id]) {
     return resolveBackendUrl(RESTAURANT_COVER_BY_ID[id]) ?? RESTAURANT_COVER_BY_ID[id];
@@ -209,7 +232,10 @@ export function mapRestaurantCard(r: {
   return {
     id: r.id,
     name: r.name,
-    image: getRestaurantCoverImage(String(r.id), r.image_url),
+    image: getRestaurantCoverImage(String(r.id), r.image_url, {
+      name: r.name,
+      category: r.category_name,
+    }),
     rating: String(r.rating ?? "4.5"),
     time: `${r.estimated_delivery_time || 30} min`,
     cuisine: r.category_name || r.description || "Various Cuisines",
