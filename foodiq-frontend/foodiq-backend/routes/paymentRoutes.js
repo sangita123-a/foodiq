@@ -11,6 +11,8 @@ const {
   handleRazorpayWebhook,
   downloadInvoice,
   getPaymentForOrder,
+  getPaymentDetail,
+  retryPayment,
 } = require('../controllers/paymentController');
 const { protect } = require('../middleware/authMiddleware');
 const { paymentLimiter } = require('../middleware/rateLimiters');
@@ -23,9 +25,12 @@ router.use(paymentLimiter);
 
 router.post('/create', createPayment);
 router.post('/verify', verifyPayment);
+router.get('/', getHistory);
 router.get('/history', getHistory);
+router.post('/retry', retryPayment);
 router.get('/by-order/:orderId', getPaymentForOrder);
 router.get('/:id/invoice', downloadInvoice);
+router.get('/:id', getPaymentDetail);
 
 router.post('/razorpay/order', createRazorpayCheckoutOrder);
 router.post('/razorpay/verify', verifyRazorpayPayment);

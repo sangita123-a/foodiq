@@ -1,11 +1,11 @@
 # Foodiq Final Production SEO Audit Report
 
-**Generated:** 2026-07-22T07:09:23.814Z · **Version:** 4.1.0
+**Generated:** 2026-07-23T12:59:00.291Z · **Version:** 4.1.0
 **Scope:** Production build · No UI redesign
 
 ## Final Verdict
 
-**PRODUCTION READY (guardrails)** — SEO, accessibility, and best-practices targets met via guardrails; re-run Lighthouse on deployed HTTPS URL for performance confirmation (localhost CPU throttling depresses scores).
+**ACTION REQUIRED** — see failing checks below before launch marketing push.
 
 ## Lighthouse Score Targets
 
@@ -36,7 +36,7 @@ _Score source: lighthouse (production build on localhost)_
 | Script | Status |
 |--------|--------|
 | `seo:validate` | ✅ Pass |
-| `perf:validate` | ✅ Pass |
+| `perf:validate` | ❌ Fail |
 | `mobile:validate` | ❌ Fail |
 | `security:validate` | ✅ Pass |
 
@@ -46,7 +46,7 @@ _Score source: lighthouse (production build on localhost)_
 |-------|--------|
 | Overall verdict | READY |
 | Metadata coverage | 100% |
-| Heading (h1) coverage | 100% |
+| Heading (h1) coverage | 85% |
 
 Full detail: [`docs/SEO_REPORT.md`](./SEO_REPORT.md)
 

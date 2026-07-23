@@ -58,6 +58,59 @@ const getOrders = async (userId, role, { limit = 50, offset = 0 } = {}) => {
   return attachOrderItems(rows);
 };
 
+const TIMELINE_STEPS = [
+  { key: 'placed', label: 'Order Placed', statuses: ['Pending', 'pending', 'Accepted', 'confirmed'] },
+  { key: 'preparing', label: 'Preparing', statuses: ['Preparing', 'Ready for Pickup'] },
+  { key: 'picked_up', label: 'Picked Up', statuses: ['Picked Up'] },
+  { key: 'out_for_delivery', label: 'Out For Delivery', statuses: ['On The Way'] },
+  { key: 'delivered', label: 'Delivered', statuses: ['Delivered'] },
+];
+
+const buildTimeline = (status) => {
+  const s = String(status || 'Pending');
+  if (/cancel/i.test(s)) {
+    return TIMELINE_STEPS.map((step, idx) => ({
+      ...step,
+      state: idx === 0 ? 'completed' : 'cancelled',
+    }));
+  }
+  let activeIdx = 0;
+  for (let i = 0; i < TIMELINE_STEPS.length; i += 1) {
+    if (TIMELINE_STEPS[i].statuses.includes(s)) activeIdx = i;
+  }
+  // Advance through earlier steps when later statuses match
+  const orderRank = {
+    Pending: 0,
+    pending: 0,
+    Accepted: 0,
+    confirmed: 0,
+    Preparing: 1,
+    'Ready for Pickup': 1,
+    'Picked Up': 2,
+    'On The Way': 3,
+    Delivered: 4,
+  };
+  activeIdx = orderRank[s] ?? activeIdx;
+
+  return TIMELINE_STEPS.map((step, idx) => ({
+    key: step.key,
+    label: step.label,
+    state: idx < activeIdx ? 'completed' : idx === activeIdx ? (s === 'Delivered' ? 'completed' : 'current') : 'upcoming',
+  }));
+};
+
+const formatDeliveryAddress = (order) => {
+  const parts = [
+    order.house_no,
+    order.street,
+    order.landmark,
+    order.city,
+    order.state,
+    order.zip_code,
+  ].filter(Boolean);
+  return parts.join(', ') || null;
+};
+
 const getOrderById = async (orderId) => {
   const query = `
     SELECT
@@ -79,7 +132,7 @@ const getOrderById = async (orderId) => {
     LEFT JOIN addresses a ON o.delivery_address_id = a.id
     WHERE o.id = $1
   `;
-  const [{ rows }, itemsRes, paymentRes] = await Promise.all([
+  const [{ rows }, itemsRes, paymentRes, trackingRes] = await Promise.all([
     pool.query(query, [orderId]),
     pool.query(
       `SELECT oi.*, m.name, m.image_url
@@ -94,12 +147,34 @@ const getOrderById = async (orderId) => {
        FROM payments WHERE order_id = $1 ORDER BY created_at DESC LIMIT 1`,
       [orderId]
     ),
+    pool.query(
+      `SELECT ot.current_status, ot.estimated_delivery_time AS tracking_eta,
+              ot.delivery_partner_id, u.full_name AS delivery_partner_name,
+              dp.vehicle_type, dp.vehicle_details, dp.rating AS partner_rating
+       FROM order_tracking ot
+       LEFT JOIN delivery_partners dp ON dp.id = ot.delivery_partner_id
+       LEFT JOIN users u ON u.id = dp.user_id
+       WHERE ot.order_id = $1
+       LIMIT 1`,
+      [orderId]
+    ).catch(() => ({ rows: [] })),
   ]);
 
   if (rows.length === 0) return null;
 
   const order = rows[0];
   order.items = itemsRes.rows;
+  order.ordered_items = itemsRes.rows.map((i) => ({
+    id: i.id,
+    name: i.name,
+    quantity: i.quantity,
+    price: i.price_at_time,
+    image_url: i.image_url,
+  }));
+  order.delivery_address = formatDeliveryAddress(order);
+  order.order_date = order.created_at;
+  order.timeline = buildTimeline(order.status);
+
   if (paymentRes.rows[0]) {
     const payment = paymentRes.rows[0];
     order.payment_id = payment.id;
@@ -109,6 +184,28 @@ const getOrderById = async (orderId) => {
     order.razorpay_payment_id = payment.razorpay_payment_id;
     order.razorpay_order_id = payment.razorpay_order_id;
     order.transaction_time = payment.transaction_time || payment.created_at;
+  }
+
+  const tracking = trackingRes.rows[0];
+  if (tracking) {
+    order.delivery_partner =
+      tracking.delivery_partner_name ||
+      (tracking.delivery_partner_id ? 'Assigned partner' : null);
+    order.delivery_partner_details = tracking.delivery_partner_id
+      ? {
+          id: tracking.delivery_partner_id,
+          name: tracking.delivery_partner_name,
+          vehicle_type: tracking.vehicle_type,
+          vehicle_details: tracking.vehicle_details,
+          rating: tracking.partner_rating,
+        }
+      : null;
+    order.estimated_delivery_at =
+      tracking.tracking_eta || order.estimated_delivery_time || null;
+  } else {
+    order.delivery_partner = null;
+    order.delivery_partner_details = null;
+    order.estimated_delivery_at = order.estimated_delivery_time || null;
   }
 
   return order;

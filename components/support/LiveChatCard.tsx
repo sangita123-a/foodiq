@@ -2,7 +2,11 @@
 
 import { MessageSquareText, Zap } from "lucide-react";
 
-export default function LiveChatCard() {
+type Props = {
+  onStart?: () => void;
+};
+
+export default function LiveChatCard({ onStart }: Props) {
   return (
     <div className="bg-section rounded-3xl p-6 md:p-8 border border-border relative overflow-hidden h-full flex flex-col justify-between">
       
@@ -30,7 +34,11 @@ export default function LiveChatCard() {
         </div>
       </div>
 
-      <button className="w-full bg-primary hover:bg-primary-hover text-white px-6 py-4 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(226, 55, 68,0.3)] hover:-translate-y-1 relative z-10 flex items-center justify-center gap-2">
+      <button
+        type="button"
+        onClick={onStart}
+        className="w-full bg-primary hover:bg-primary-hover text-white px-6 py-4 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(226, 55, 68,0.3)] hover:-translate-y-1 relative z-10 flex items-center justify-center gap-2"
+      >
         <MessageSquareText className="w-5 h-5" />
         Start Live Chat
       </button>

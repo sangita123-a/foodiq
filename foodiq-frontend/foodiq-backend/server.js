@@ -219,6 +219,7 @@ app.use('/api/live-deals', liveDealRoutes);
 app.use('/api/cuisines', cuisineRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/refunds', require('./routes/refundRoutes'));
 app.use('/api/payment-methods', paymentMethodRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/delivery-partners', deliveryPartnerRoutes);

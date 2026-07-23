@@ -8,33 +8,39 @@ export type FaqEntry = {
 export const HELP_SUPPORT_FAQS: FaqEntry[] = [
   {
     id: "f1",
-    question: "How do I track my order?",
+    question: "How to cancel an order?",
     answer:
-      "Once your order is confirmed, you can track it in real-time by going to the 'Live Order Tracking' page or clicking on the active order banner on your homepage. You will see the delivery partner's live location on the map.",
+      "You can cancel an order within 60 seconds of placing it from My Orders without any penalty. If the restaurant has already started preparing your food, cancellation may incur a small fee and refund timing depends on your payment method.",
   },
   {
     id: "f2",
-    question: "How can I cancel an order?",
+    question: "How to request a refund?",
     answer:
-      "You can cancel an order within 60 seconds of placing it directly from the 'My Orders' page without any penalty. If the restaurant has already started preparing your food, cancellation may incur a small fee.",
+      "Open Payment Issues on Help & Support to review refund status, or raise an Order Problem ticket for quality issues. Approved UPI/wallet refunds usually reflect in 2–4 hours; card refunds may take 5–7 business days.",
   },
   {
     id: "f3",
-    question: "How do refunds work?",
+    question: "How long does delivery take?",
     answer:
-      "If your order is cancelled, the refund is initiated immediately. For UPI and Wallets, it reflects within 2-4 hours. For Credit/Debit cards, it may take 5-7 business days depending on your bank.",
+      "Most Foodiq deliveries arrive within 30–45 minutes depending on distance, restaurant prep time, and traffic. Use Track an Order for a live ETA and delivery partner updates.",
   },
   {
     id: "f4",
-    question: "How do I apply coupons?",
+    question: "How to contact support?",
     answer:
-      "During checkout, you will see a 'Apply Coupon' section. You can either select an available coupon from the list or manually type in your promo code and click 'Apply'.",
+      "Use Live Chat for urgent help, Call Support for phone assistance, or Email Support for detailed queries. Logged-in users can also submit Order Problem tickets with photos.",
   },
   {
     id: "f5",
-    question: "How do I contact support?",
+    question: "Payment failed.",
     answer:
-      "You can reach us instantly via the 'Live Chat' option on this page, or you can call us at our toll-free number. For non-urgent issues, feel free to submit a support ticket below.",
+      "If a payment fails, the order is not confirmed and any temporary hold is released by your bank. Open Payment Issues to retry the payment or place the order again with another method.",
+  },
+  {
+    id: "f6",
+    question: "Track my order.",
+    answer:
+      "Click Track an Order on this page, enter your Order ID, and view restaurant details, items, payment method, delivery address, partner info, and an animated status timeline through Delivered.",
   },
 ];
 

@@ -1161,6 +1161,28 @@ async function ensureSchema() {
       )
     `);
     await q(`
+      CREATE TABLE IF NOT EXISTS email_support (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        ticket_number VARCHAR(20),
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        subject VARCHAR(255) NOT NULL,
+        message TEXT NOT NULL,
+        attachment_url TEXT,
+        status VARCHAR(40) NOT NULL DEFAULT 'Open',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      ALTER TABLE support_tickets
+        ADD COLUMN IF NOT EXISTS problem_type VARCHAR(80),
+        ADD COLUMN IF NOT EXISTS image_url TEXT,
+        ADD COLUMN IF NOT EXISTS expected_resolution_at TIMESTAMP WITH TIME ZONE,
+        ADD COLUMN IF NOT EXISTS attachment_urls JSONB DEFAULT '[]'::jsonb
+    `);
+    await q(`
       CREATE UNIQUE INDEX IF NOT EXISTS idx_reviews_user_order
         ON reviews(user_id, order_id) WHERE order_id IS NOT NULL
     `);

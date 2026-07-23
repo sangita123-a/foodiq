@@ -1,6 +1,6 @@
 # Foodiq Google Search Readiness Report
 
-Generated: 2026-07-22T07:09:13.116Z
+Generated: 2026-07-23T12:58:49.116Z
 
 ## Final Verdict
 
@@ -11,8 +11,8 @@ Generated: 2026-07-22T07:09:13.116Z
 | Check | Status | Details |
 |-------|--------|---------|
 | robots.txt | ✅ Pass | `app/robots.ts` — Allow `/`, 33 disallow rules, sitemap declared |
-| sitemap.xml | ✅ Pass | `app/sitemap.ts` — 468 static URLs (deduped), revalidate 3600s |
-| Metadata (title, description, robots) | ✅ Pass | 17/17 public routes with dedicated metadata |
+| sitemap.xml | ✅ Pass | `app/sitemap.ts` — 471 static URLs (deduped), revalidate 3600s |
+| Metadata (title, description, robots) | ✅ Pass | 20/20 public routes with dedicated metadata |
 | Schema.org JSON-LD | ✅ Pass | Organization, WebSite, LocalBusiness, Restaurant, BreadcrumbList, SearchAction, Product |
 | Canonical URLs | ✅ Pass | `alternates.canonical` via `buildPageMetadata()`, 15 legacy redirects |
 | Open Graph | ✅ Pass | og:title, og:description, og:url, og:image (1200×630), route `opengraph-image.tsx` |
@@ -33,9 +33,9 @@ Generated: 2026-07-22T07:09:13.116Z
 
 | Metric | Value |
 |--------|-------|
-| Static sitemap URLs | 468 |
-| After deduplication | 468 |
-| Static public routes covered | 17 |
+| Static sitemap URLs | 471 |
+| After deduplication | 471 |
+| Static public routes covered | 20 |
 | Dynamic entries | Restaurants + menu items from API at runtime |
 | Private routes excluded | ✅ cart, checkout, profile, admin, API |
 | Redirect-only routes excluded | ✅ /restaurants, /help-center, /support, etc. |
@@ -83,8 +83,8 @@ Generated: 2026-07-22T07:09:13.116Z
 
 | Category | Status | Score |
 |----------|--------|-------|
-| Dedicated page metadata (public routes) | ✅ Pass | 100% (17/17) |
-| Heading coverage (public routes with h1) | ✅ Pass | 100% (17/17) |
+| Dedicated page metadata (public routes) | ✅ Pass | 100% (20/20) |
+| Heading coverage (public routes with h1) | ⚠️ Issues | 85% (17/20) |
 | Duplicate metadata titles | ✅ Pass | 0 duplicates |
 | Duplicate canonical paths | ✅ Pass | 0 duplicates |
 | Legacy internal links | ✅ Pass | 0 remaining |
@@ -115,17 +115,26 @@ Generated: 2026-07-22T07:09:13.116Z
 | `/careers` | ✅ | layout | ✅ |
 | `/collections` | ✅ | layout | ✅ |
 | `/contact` | ✅ | layout | ✅ |
+| `/email-support` | ✅ | layout | ❌ |
 | `/help-support` | ✅ | layout | ✅ |
 | `/live-cricket` | ✅ | layout | ✅ |
 | `/offers` | ✅ | layout | ✅ |
 | `/order-online` | ✅ | layout | ✅ |
+| `/payment-support` | ✅ | layout | ❌ |
 | `/popular-cuisines` | ✅ | layout | ✅ |
 | `/press` | ✅ | layout | ✅ |
 | `/privacy-policy` | ✅ | layout | ✅ |
 | `/refund-policy` | ✅ | layout | ✅ |
+| `/report-problem` | ✅ | layout | ❌ |
 | `/search` | ✅ | layout | ✅ |
 | `/terms-of-service` | ✅ | layout | ✅ |
 | `/trending-dishes` | ✅ | layout | ✅ |
+
+### Missing h1
+
+- `/email-support` (`app\email-support\page.tsx`)
+- `/payment-support` (`app\payment-support\page.tsx`)
+- `/report-problem` (`app\report-problem\page.tsx`)
 
 ## Canonical & Redirect Map
 
@@ -191,8 +200,8 @@ No legacy internal links detected in `app/` or `components/`.
 
 ## Route Inventory
 
-- Total routes: **118**
-- Public routes: **17**
+- Total routes: **121**
+- Public routes: **20**
 - Private routes: **100**
 - SEO layout files: **47**
 

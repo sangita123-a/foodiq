@@ -1144,11 +1144,149 @@ const getPaymentForOrder = async (req, res) => {
   }
 };
 
+/** GET /api/payments/:id — payment details for the authenticated user */
+const getPaymentDetail = async (req, res) => {
+  try {
+    const payment = await getPaymentById(req.params.id, req.user.id);
+    if (!payment) return fail(res, 404, 'Payment not found');
+
+    let refund = null;
+    try {
+      const { rows } = await pool.query(
+        `SELECT * FROM refunds WHERE payment_id = $1 ORDER BY created_at DESC LIMIT 1`,
+        [payment.id]
+      );
+      refund = rows[0] || null;
+    } catch {
+      refund = null;
+    }
+
+    let refundRequest = null;
+    try {
+      const { rows } = await pool.query(
+        `SELECT * FROM refund_requests WHERE payment_id = $1 ORDER BY created_at DESC LIMIT 1`,
+        [payment.id]
+      );
+      refundRequest = rows[0] || null;
+    } catch {
+      refundRequest = null;
+    }
+
+    return ok(res, 'Payment retrieved', {
+      ...payment,
+      refund,
+      refund_request: refundRequest,
+      invoice_url: `/api/payments/${payment.id}/invoice`,
+    });
+  } catch (error) {
+    return fail(res, 500, 'Server Error retrieving payment', error.message);
+  }
+};
+
+/**
+ * POST /api/payments/retry — retry a failed / pending payment for an order.
+ * Body: { payment_id? , order_id? }
+ */
+const retryPayment = async (req, res) => {
+  try {
+    const paymentId = req.body.payment_id || req.body.paymentId;
+    const orderId = req.body.order_id || req.body.orderId;
+    let payment = null;
+
+    if (paymentId) {
+      payment = await getPaymentById(paymentId, req.user.id);
+    } else if (orderId) {
+      payment = await getPaymentByOrderId(orderId);
+      if (payment && payment.user_id !== req.user.id) payment = null;
+    }
+
+    if (!payment) return fail(res, 404, 'Payment not found');
+    if (!['failed', 'pending', 'created'].includes(String(payment.status).toLowerCase())) {
+      return fail(res, 400, 'Only failed or pending payments can be retried');
+    }
+
+    // Reset to pending so checkout / Razorpay flow can continue
+    const updated = await updatePaymentStatus(
+      payment.id,
+      req.user.id,
+      'pending',
+      null
+    );
+
+    try {
+      await createPaymentTransaction({
+        user_id: req.user.id,
+        razorpay_order_id: `retry_${payment.id}_${Date.now()}`,
+        amount: payment.amount,
+        currency: 'INR',
+        payment_method: payment.method || 'razorpay',
+        status: 'pending',
+        checkout_payload: {
+          retry: true,
+          payment_id: payment.id,
+          order_id: payment.order_id,
+          previous_status: payment.status,
+        },
+        receipt: `retry_${String(payment.id).slice(0, 8)}`,
+      });
+    } catch {
+      /* optional audit trail */
+    }
+
+    return ok(res, 'Payment retry initiated', {
+      payment: updated || payment,
+      retry: true,
+      next_step: 'checkout',
+      checkout_hint: payment.order_id
+        ? `/checkout?order_id=${payment.order_id}&retry_payment=${payment.id}`
+        : '/checkout',
+    });
+  } catch (error) {
+    return fail(res, 500, 'Server Error retrying payment', error);
+  }
+};
+
+/** GET /api/refunds/:id — refund status for the authenticated user */
+const getRefundById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    let row = null;
+
+    const fromRefunds = await pool.query(
+      `SELECT r.*, p.user_id, p.order_id AS payment_order_id, p.method AS payment_method
+       FROM refunds r
+       JOIN payments p ON p.id = r.payment_id
+       WHERE r.id = $1 AND p.user_id = $2`,
+      [id, req.user.id]
+    ).catch(() => ({ rows: [] }));
+
+    if (fromRefunds.rows[0]) {
+      row = { ...fromRefunds.rows[0], source: 'refunds' };
+    } else {
+      const fromRequests = await pool.query(
+        `SELECT * FROM refund_requests WHERE id = $1 AND user_id = $2`,
+        [id, req.user.id]
+      );
+      if (fromRequests.rows[0]) {
+        row = { ...fromRequests.rows[0], source: 'refund_requests' };
+      }
+    }
+
+    if (!row) return fail(res, 404, 'Refund not found');
+    return ok(res, 'Refund retrieved', row);
+  } catch (error) {
+    return fail(res, 500, 'Server Error retrieving refund', error);
+  }
+};
+
 module.exports = {
   createPayment,
   verifyPayment,
   getHistory,
   getPaymentForOrder,
+  getPaymentDetail,
+  retryPayment,
+  getRefundById,
   createRazorpayCheckoutOrder,
   verifyRazorpayPayment,
   markPaymentFailed,

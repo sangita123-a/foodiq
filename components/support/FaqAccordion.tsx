@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
+import { highlightParts } from "@/lib/support/searchContent";
 
 export type FaqType = {
   id: string;
@@ -12,20 +13,35 @@ export type FaqType = {
 
 type Props = {
   faqs: FaqType[];
+  highlightQuery?: string;
 };
 
-export default function FaqAccordion({ faqs }: Props) {
+export default function FaqAccordion({ faqs, highlightQuery = "" }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
 
   const toggle = (id: string) => {
     setOpenId(openId === id ? null : id);
   };
 
+  const renderHighlight = (text: string) =>
+    highlightParts(text, highlightQuery).map((part, i) =>
+      part.hit ? (
+        <mark key={i} className="rounded bg-primary/20 px-0.5 text-inherit">
+          {part.text}
+        </mark>
+      ) : (
+        <span key={i}>{part.text}</span>
+      )
+    );
+
   return (
     <div className="bg-section rounded-3xl p-6 md:p-8 border border-border">
       <h2 className="text-2xl font-bold text-foreground mb-8">Frequently Asked Questions</h2>
       
       <div className="space-y-4">
+        {faqs.length === 0 ? (
+          <p className="text-sm text-gray-text py-4">No FAQs match your search.</p>
+        ) : null}
         {faqs.map((faq) => (
           <div 
             key={faq.id} 
@@ -34,9 +50,10 @@ export default function FaqAccordion({ faqs }: Props) {
             <button 
               onClick={() => toggle(faq.id)}
               className="w-full flex items-center justify-between p-5 md:p-6 text-left transition-colors hover:bg-section"
+              aria-expanded={openId === faq.id}
             >
               <span className={`font-bold pr-4 transition-colors ${openId === faq.id ? "text-primary" : "text-foreground"}`}>
-                {faq.question}
+                {renderHighlight(faq.question)}
               </span>
               <motion.div 
                 animate={{ rotate: openId === faq.id ? 180 : 0 }}
@@ -56,7 +73,7 @@ export default function FaqAccordion({ faqs }: Props) {
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
                   <div className="px-5 md:px-6 pb-6 pt-2 text-gray-text leading-relaxed border-t border-border">
-                    {faq.answer}
+                    {renderHighlight(faq.answer)}
                   </div>
                 </motion.div>
               )}

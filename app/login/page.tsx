@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import api from "@/services/api";
@@ -12,8 +12,15 @@ import { getAuthErrorMessage } from "@/lib/authErrors";
 import { parseAuthApiResponse } from "@/lib/authResponse";
 import { validateLoginForm, type AuthFieldErrors } from "@/lib/authValidation";
 
-export default function LoginPage() {
+function safeRedirectPath(raw: string | null): string {
+  if (!raw) return "/profile";
+  if (!raw.startsWith("/") || raw.startsWith("//")) return "/profile";
+  return raw;
+}
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -60,7 +67,7 @@ export default function LoginPage() {
           /* optional session tracking */
         }
         showToast(parsed.message || "Login successful!", "success");
-        router.push("/profile");
+        router.push(safeRedirectPath(searchParams.get("redirect")));
         return;
       }
 
@@ -77,7 +84,6 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 pt-20 max-md:pt-20 max-md:px-3 md:pt-24">
       <div className="max-w-md w-full bg-background border border-border p-5 sm:p-8 rounded-xl sm:rounded-2xl shadow-card max-md:p-5 max-md:rounded-xl">
         <h2 className="text-2xl sm:text-3xl font-bold text-foreground text-center mb-4 sm:mb-6 max-md:text-xl max-md:mb-4">Welcome Back</h2>
         {error && (
@@ -151,6 +157,15 @@ export default function LoginPage() {
           </Link>
         </div>
       </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 pt-20 max-md:pt-20 max-md:px-3 md:pt-24">
+      <Suspense fallback={<div className="text-gray-text p-8">Loading…</div>}>
+        <LoginForm />
+      </Suspense>
     </div>
   );
 }
