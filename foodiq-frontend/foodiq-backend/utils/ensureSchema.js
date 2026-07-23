@@ -31,6 +31,10 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS tax_amount NUMERIC(10,2) DEFAULT 0
     `);
     await q(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS is_phone_verified BOOLEAN DEFAULT FALSE
+    `);
+    await q(`
       CREATE TABLE IF NOT EXISTS invoices (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         invoice_number VARCHAR(40) NOT NULL UNIQUE,

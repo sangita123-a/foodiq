@@ -21,6 +21,11 @@ const MobileDrawer = dynamic(() => import("@/components/ui/MobileDrawer"), {
   loading: () => null,
 });
 
+const AuthDrawer = dynamic(() => import("@/components/auth/AuthDrawer"), {
+  ssr: false,
+  loading: () => null,
+});
+
 const NAV_LINKS = [
   { href: "/", label: "Home", isActive: (path: string) => path === "/" },
   { href: "/collections", label: "Collections", isActive: (path: string) => path.startsWith("/collections") },
@@ -34,15 +39,28 @@ export default function Navbar() {
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
   const reducedMotion = usePrefersReducedMotion();
   const isLoggedIn = !!user;
 
-  useEffect(() => {
+  const refreshUser = () => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    setUser(storedUser ? JSON.parse(storedUser) : null);
+  };
+
+  useEffect(() => {
+    refreshUser();
   }, [pathname]);
+
+  useEffect(() => {
+    const onAuth = () => refreshUser();
+    window.addEventListener("foodiq:auth", onAuth);
+    window.addEventListener("storage", onAuth);
+    return () => {
+      window.removeEventListener("foodiq:auth", onAuth);
+      window.removeEventListener("storage", onAuth);
+    };
+  }, []);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -55,7 +73,12 @@ export default function Navbar() {
     clearClientAuth();
     setUser(null);
     setMobileOpen(false);
-    router.push("/login");
+    router.push("/");
+  };
+
+  const openSignIn = () => {
+    setMobileOpen(false);
+    setAuthOpen(true);
   };
 
   const { totalQuantity: cartCount } = useCartActions();
@@ -72,7 +95,6 @@ export default function Navbar() {
           Foodiq
         </Link>
 
-        {/* Desktop nav */}
         <div className="hidden lg:flex items-center space-x-7">
           {NAV_LINKS.map((link) => {
             const active = link.isActive(pathname);
@@ -94,7 +116,6 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* Tablet compact nav */}
         <div className="hidden md:flex lg:hidden items-center space-x-4">
           {NAV_LINKS.slice(0, 3).map((link) => {
             const active = link.isActive(pathname);
@@ -113,7 +134,6 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* Desktop / tablet actions */}
         <div className="hidden md:flex items-center space-x-2 lg:space-x-3 shrink-0">
           <Link
             href="/search"
@@ -169,12 +189,13 @@ export default function Navbar() {
               </button>
             </div>
           ) : (
-            <Link
-              href="/login"
+            <button
+              type="button"
+              onClick={openSignIn}
               className="h-10 px-3.5 lg:px-5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-semibold text-sm transition-all inline-flex items-center"
             >
-              Login
-            </Link>
+              Sign In
+            </button>
           )}
         </div>
 
@@ -209,7 +230,6 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile slide drawer */}
       {mobileOpen ? (
         <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)} title="Menu" side="left" width="w-[min(300px,88vw)]">
           <div className="flex flex-col p-3 gap-0.5">
@@ -258,18 +278,20 @@ export default function Navbar() {
                   Logout
                 </button>
               ) : (
-                <Link
-                  href="/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="block touch-target px-4 py-3 rounded-xl bg-primary text-white font-medium text-sm text-center"
+                <button
+                  type="button"
+                  onClick={openSignIn}
+                  className="w-full touch-target px-4 py-3 rounded-xl bg-primary text-white font-medium text-sm text-center"
                 >
-                  Login
-                </Link>
+                  Sign In
+                </button>
               )}
             </div>
           </div>
         </MobileDrawer>
       ) : null}
+
+      <AuthDrawer open={authOpen} onClose={() => setAuthOpen(false)} onAuthenticated={refreshUser} />
     </>
   );
 }

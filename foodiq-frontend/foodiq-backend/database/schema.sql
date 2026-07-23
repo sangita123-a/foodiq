@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(255) NOT NULL,
     phone_number VARCHAR(20),
+    is_phone_verified BOOLEAN DEFAULT FALSE,
     role VARCHAR(50) DEFAULT 'customer' CHECK (role IN ('customer', 'admin', 'restaurant_owner', 'delivery_partner')),
     profile_image_url VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,

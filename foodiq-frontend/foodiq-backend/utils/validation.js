@@ -29,14 +29,23 @@ const getPasswordStrengthScore = (password) => {
 };
 
 const isValidPhone = (phone) => {
+  const { isValidIndianMobile } = require('./phone');
+  // Prefer strict Indian mobile; keep legacy loose check as fallback for international admin/partner flows
+  if (isValidIndianMobile(phone)) return true;
   const phoneRegex = /^[0-9+\-\s()]{7,20}$/;
-  return phoneRegex.test(phone);
+  return phoneRegex.test(String(phone || ''));
+};
+
+const isValidIndianMobileOnly = (phone) => {
+  const { isValidIndianMobile } = require('./phone');
+  return isValidIndianMobile(phone);
 };
 
 module.exports = {
   isValidEmail,
   isValidPassword,
   isValidPhone,
+  isValidIndianMobileOnly,
   getPasswordPolicyMessage,
   getPasswordStrengthScore,
 };

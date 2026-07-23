@@ -53,3 +53,5 @@ foodiq-frontend/foodiq-backend/logs/
 
 # accidental nested duplicate tree
 foodiq-frontend/foodiq-backend/foodiq-frontend/
+
+.vercel

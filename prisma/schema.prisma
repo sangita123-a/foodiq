@@ -21,19 +21,22 @@ enum OrderStatus {
 }
 
 model User {
-  id             String          @id @default(uuid())
-  email          String          @unique
-  fullName       String          @map("full_name")
-  role           String          @default("customer")
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @default(now()) @updatedAt @map("updated_at")
-  orders         Order[]
-  payments       Payment[]
-  supportTickets SupportTicket[]
-  chatRooms      ChatRoom[]
-  invoices       Invoice[]
-  transactions   PaymentTransaction[]
-  refunds        Refund[]
+  id              String          @id @default(uuid())
+  email           String          @unique
+  fullName        String          @map("full_name")
+  mobile          String?         @map("phone_number")
+  passwordHash    String          @map("password_hash")
+  isPhoneVerified Boolean         @default(false) @map("is_phone_verified")
+  role            String          @default("customer")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @default(now()) @updatedAt @map("updated_at")
+  orders          Order[]
+  payments        Payment[]
+  supportTickets  SupportTicket[]
+  chatRooms       ChatRoom[]
+  invoices        Invoice[]
+  transactions    PaymentTransaction[]
+  refunds         Refund[]
 
   @@map("users")
 }

@@ -6,6 +6,7 @@ const {
   findUserById,
   updateUserProfile: updateUserProfileModel,
   updateUserPassword,
+  markPhoneVerified,
 } = require('../models/userModel');
 const generateToken = require('../utils/generateToken');
 const {
@@ -22,8 +23,10 @@ const {
   isValidEmail,
   isValidPassword,
   isValidPhone,
+  isValidIndianMobileOnly,
   getPasswordPolicyMessage,
 } = require('../utils/validation');
+const { toE164Indian, normalizeIndianMobile } = require('../utils/phone');
 const { setAuthCookies, clearAuthCookies } = require('../utils/authCookies');
 const { fail } = require('../utils/respond');
 const { log } = require('../utils/logger');
@@ -37,6 +40,7 @@ const buildAuthUserPayload = (user, token, refresh_token = null) => ({
   phone_number: user.phone_number,
   role: user.role,
   admin_role: user.admin_role || (user.role === 'admin' ? 'admin' : null),
+  is_phone_verified: Boolean(user.is_phone_verified),
   token,
   refresh_token,
 });
@@ -53,11 +57,27 @@ const sendAuthSuccess = (res, status, message, user, token, refresh_token = null
       phone_number: payload.phone_number,
       role: payload.role,
       admin_role: payload.admin_role,
+      is_phone_verified: payload.is_phone_verified,
     },
     token,
     data: payload,
   });
 };
+
+const issueSessionForUser = async (req, res, user, message, status = 200) => {
+  const token = generateToken(user.id, { tv: user.token_version ?? 1 });
+  let refresh_token = null;
+  try {
+    refresh_token = await generateRefreshToken(user.id, clientMeta(req));
+  } catch {
+    /* optional */
+  }
+  setAuthCookies(res, { accessToken: token, refreshToken: refresh_token });
+  return sendAuthSuccess(res, status, message, user, token, refresh_token);
+};
+
+const syntheticEmailFromPhone = (phone) =>
+  `u${normalizeIndianMobile(phone)}@phone.foodiq.local`;
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -70,20 +90,33 @@ const registerUser = async (req, res) => {
     });
 
     const full_name = String(req.body.full_name || '').trim();
-    const email = normalizeEmail(req.body.email);
+    const rawEmail = String(req.body.email || '').trim();
     const password = req.body.password;
-    const phone = String(req.body.phone || req.body.phone_number || '').trim();
+    const phone = String(req.body.phone || req.body.phone_number || req.body.mobile || '').trim();
 
-    if (!full_name || !email || !password || !phone) {
+    if (!full_name || !password || !phone) {
       log.warn('[auth] register validation failed: missing fields');
       return res.status(400).json({
         success: false,
-        message: 'Please include all fields (full_name, email, password, phone)',
+        message: 'Please include full_name, password, and phone',
         error: {},
       });
     }
 
-    if (!isValidEmail(email)) {
+    if (!isValidIndianMobileOnly(phone)) {
+      log.warn('[auth] register validation failed: invalid phone', { phone });
+      return res.status(400).json({
+        success: false,
+        message: 'Enter a valid 10-digit Indian mobile number',
+        error: {},
+      });
+    }
+
+    const email = rawEmail
+      ? normalizeEmail(rawEmail)
+      : syntheticEmailFromPhone(phone);
+
+    if (rawEmail && !isValidEmail(email)) {
       log.warn('[auth] register validation failed: invalid email', { email });
       return res.status(400).json({
         success: false,
@@ -101,24 +134,16 @@ const registerUser = async (req, res) => {
       });
     }
 
-    if (!isValidPhone(phone)) {
-      log.warn('[auth] register validation failed: invalid phone', { phone });
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid phone number format',
-        error: {},
-      });
-    }
-
-    const userExists = await findUserByEmail(email);
-
-    if (userExists) {
-      log.warn('[auth] register rejected: duplicate email', { email });
-      return res.status(400).json({
-        success: false,
-        message: 'Email already exists',
-        error: {},
-      });
+    if (rawEmail) {
+      const userExists = await findUserByEmail(email);
+      if (userExists) {
+        log.warn('[auth] register rejected: duplicate email', { email });
+        return res.status(400).json({
+          success: false,
+          message: 'Email already exists',
+          error: {},
+        });
+      }
     }
 
     const phoneExists = await findUserByPhone(phone);
@@ -140,6 +165,7 @@ const registerUser = async (req, res) => {
       email,
       password_hash,
       phone_number: phone,
+      is_phone_verified: Boolean(req.body.phone_verified),
     });
 
     if (user) {
@@ -266,35 +292,49 @@ const registerUser = async (req, res) => {
 // @access  Public
 const loginUser = async (req, res) => {
   try {
+    const email = normalizeEmail(req.body.email);
+    const mobile = String(req.body.mobile || req.body.phone || req.body.phone_number || '').trim();
+    const password = req.body.password;
+    const identifier = email || mobile;
+
     log.info('[auth] login request received', {
-      email: req.body?.email ? String(req.body.email).trim().toLowerCase() : null,
+      email: email || null,
+      mobile: mobile ? normalizeIndianMobile(mobile) : null,
     });
 
-    const email = normalizeEmail(req.body.email);
-    const password = req.body.password;
-
-    if (!email || !password) {
+    if (!identifier || !password) {
       log.warn('[auth] login validation failed: missing credentials');
       return res.status(400).json({
         success: false,
-        message: 'Please include email and password',
+        message: 'Please include mobile (or email) and password',
         error: {},
       });
     }
 
-    if (!isValidEmail(email)) {
-      log.warn('[auth] login validation failed: invalid email', { email });
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid email format',
-        error: {},
-      });
+    let user = null;
+    if (email) {
+      if (!isValidEmail(email)) {
+        log.warn('[auth] login validation failed: invalid email', { email });
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid email format',
+          error: {},
+        });
+      }
+      user = await findUserByEmail(email);
+    } else {
+      if (!isValidIndianMobileOnly(mobile)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Enter a valid 10-digit Indian mobile number',
+          error: {},
+        });
+      }
+      user = await findUserByPhone(mobile);
     }
-
-    const user = await findUserByEmail(email);
 
     if (!user) {
-      log.warn('[auth] login failed: user not found', { email });
+      log.warn('[auth] login failed: user not found', { identifier });
       bump('auth_failed');
       writeAudit({
         action: 'failed_login',
@@ -349,15 +389,6 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const token = generateToken(user.id, { tv: user.token_version ?? 1 });
-    log.info('[auth] access JWT generated', { userId: user.id });
-    let refresh_token = null;
-    try {
-      refresh_token = await generateRefreshToken(user.id, clientMeta(req));
-    } catch {
-      /* optional */
-    }
-
     writeAudit({
       userId: user.id,
       role: user.role,
@@ -376,10 +407,8 @@ const loginUser = async (req, res) => {
       }
     }
 
-    setAuthCookies(res, { accessToken: token, refreshToken: refresh_token });
-
     log.info('[auth] login success response sent', { userId: user.id });
-    return sendAuthSuccess(res, 200, 'Login successful', user, token, refresh_token);
+    return issueSessionForUser(req, res, user, 'Login successful');
   } catch (error) {
     log.error('[auth] login server error', { error: error.message });
     return fail(res, 500, 'Server Error during login', error);
@@ -461,33 +490,57 @@ const updateUserProfile = async (req, res) => {
 const forgotPassword = async (req, res) => {
   try {
     const email = normalizeEmail(req.body.email);
-    if (!email) {
-      return res.status(400).json({ success: false, message: 'Email is required', error: {} });
+    const mobile = String(req.body.mobile || req.body.phone || req.body.phone_number || '').trim();
+
+    if (!email && !mobile) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mobile number or email is required',
+        error: {},
+      });
     }
 
-    const user = await findUserByEmail(email);
+    let user = null;
+    if (mobile) {
+      if (!isValidIndianMobileOnly(mobile)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Enter a valid 10-digit Indian mobile number',
+          error: {},
+        });
+      }
+      user = await findUserByPhone(mobile);
+    } else {
+      user = await findUserByEmail(email);
+    }
+
+    const genericMessage = mobile
+      ? 'If an account exists for this mobile number, a password reset code has been sent.'
+      : 'If an account exists for this email, a password reset code has been sent.';
+
     if (!user) {
-      // Same response as success — avoid account enumeration
       return res.json({
         success: true,
-        message:
-          'If an account exists for this email, a password reset code has been sent.',
-        data: { email },
+        message: genericMessage,
+        data: email ? { email } : { mobile: toE164Indian(mobile) },
       });
     }
 
     const { issueOtp } = require('../services/otpService');
-    const channel = user.phone_number ? 'both' : 'email';
+    const destination = mobile ? toE164Indian(mobile) : email;
+    const channel = mobile ? 'sms' : user.phone_number ? 'both' : 'email';
     const otpResult = await issueOtp({
       userId: user.id,
-      destination: email,
+      destination,
       channel,
       purpose: 'password_reset',
       name: user.full_name,
     });
 
-    const payload = { email, expires_at: otpResult.expires_at };
-    // Never expose OTP codes outside non-production + explicit OTP_EXPOSE_CODE
+    const payload = email
+      ? { email, expires_at: otpResult.expires_at }
+      : { mobile: toE164Indian(mobile), expires_at: otpResult.expires_at };
+
     if (
       process.env.NODE_ENV !== 'production' &&
       otpResult.debug_code &&
@@ -498,8 +551,7 @@ const forgotPassword = async (req, res) => {
 
     res.json({
       success: true,
-      message:
-        'If an account exists for this email, a password reset code has been sent.',
+      message: genericMessage,
       data: payload,
     });
   } catch (error) {
@@ -520,13 +572,14 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   try {
     const email = normalizeEmail(req.body.email);
-    const resetCode = String(req.body.reset_code || req.body.code || '').trim();
+    const mobile = String(req.body.mobile || req.body.phone || req.body.phone_number || '').trim();
+    const resetCode = String(req.body.reset_code || req.body.code || req.body.otp || '').trim();
     const newPassword = req.body.new_password || req.body.password;
 
-    if (!email || !resetCode || !newPassword) {
+    if ((!email && !mobile) || !resetCode || !newPassword) {
       return res.status(400).json({
         success: false,
-        message: 'Email, reset code, and new password are required',
+        message: 'Mobile (or email), reset code, and new password are required',
         error: {},
       });
     }
@@ -539,7 +592,7 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    const user = await findUserByEmail(email);
+    const user = mobile ? await findUserByPhone(mobile) : await findUserByEmail(email);
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -549,15 +602,15 @@ const resetPassword = async (req, res) => {
     }
 
     const { verifyOtp } = require('../services/otpService');
-    // Legacy demo code FOODIQ only in non-production mock email mode
     const isMockEmail = String(process.env.EMAIL_PROVIDER || 'mock').toLowerCase() === 'mock';
+    const isMockSms = String(process.env.SMS_PROVIDER || 'mock').toLowerCase() === 'mock';
     const allowDemoReset =
       process.env.NODE_ENV !== 'production' &&
-      isMockEmail &&
+      ((email && isMockEmail) || (mobile && isMockSms)) &&
       resetCode.toUpperCase() === 'FOODIQ';
     if (!allowDemoReset) {
       await verifyOtp({
-        destination: email,
+        destination: mobile ? toE164Indian(mobile) : email,
         purpose: 'password_reset',
         code: resetCode,
       });
@@ -590,6 +643,162 @@ const resetPassword = async (req, res) => {
       error.status && error.status < 500
         ? error.message
         : 'Unable to reset password',
+      error
+    );
+  }
+};
+
+// @desc    Send OTP for phone sign-in / password reset
+// @route   POST /api/auth/send-otp
+// @access  Public
+const sendAuthOtp = async (req, res) => {
+  try {
+    const mobile = String(req.body.mobile || req.body.phone || req.body.phone_number || '').trim();
+    const purposeRaw = String(req.body.purpose || 'phone_login').trim().toLowerCase();
+    const purpose =
+      purposeRaw === 'password_reset' || purposeRaw === 'forgot_password'
+        ? 'password_reset'
+        : 'phone_login';
+
+    if (!isValidIndianMobileOnly(mobile)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Enter a valid 10-digit Indian mobile number',
+        error: {},
+      });
+    }
+
+    const destination = toE164Indian(mobile);
+    const user = await findUserByPhone(mobile);
+
+    if (purpose === 'password_reset' && !user) {
+      return res.json({
+        success: true,
+        message: 'If an account exists for this mobile number, a password reset code has been sent.',
+        data: { mobile: destination },
+      });
+    }
+
+    const { issueOtp } = require('../services/otpService');
+    const otpResult = await issueOtp({
+      userId: user?.id || null,
+      destination,
+      channel: 'sms',
+      purpose,
+      name: user?.full_name || null,
+    });
+
+    const data = {
+      mobile: destination,
+      otp_id: otpResult.otp_id,
+      expires_at: otpResult.expires_at,
+      purpose,
+      account_exists: Boolean(user),
+    };
+
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      otpResult.debug_code &&
+      String(process.env.OTP_EXPOSE_CODE || '').toLowerCase() === 'true'
+    ) {
+      data.debug_code = otpResult.debug_code;
+    }
+
+    return res.json({
+      success: true,
+      message: 'OTP sent successfully',
+      data,
+    });
+  } catch (error) {
+    return fail(
+      res,
+      error.status || 500,
+      error.status && error.status < 500 ? error.message : 'Failed to send OTP',
+      error
+    );
+  }
+};
+
+// @desc    Verify OTP and create JWT session (phone login)
+// @route   POST /api/auth/verify-otp
+// @access  Public
+const verifyAuthOtp = async (req, res) => {
+  try {
+    const mobile = String(req.body.mobile || req.body.phone || req.body.phone_number || '').trim();
+    const code = String(req.body.otp || req.body.code || '').trim();
+    const purposeRaw = String(req.body.purpose || 'phone_login').trim().toLowerCase();
+    const purpose =
+      purposeRaw === 'password_reset' || purposeRaw === 'forgot_password'
+        ? 'password_reset'
+        : 'phone_login';
+
+    if (!isValidIndianMobileOnly(mobile)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Enter a valid 10-digit Indian mobile number',
+        error: {},
+      });
+    }
+    if (!/^\d{4,8}$/.test(code)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Enter a valid OTP',
+        error: {},
+      });
+    }
+
+    const destination = toE164Indian(mobile);
+    const { verifyOtp } = require('../services/otpService');
+    await verifyOtp({ destination, purpose, code });
+
+    if (purpose === 'password_reset') {
+      return res.json({
+        success: true,
+        message: 'OTP verified. You can set a new password.',
+        data: { mobile: destination, verified: true, purpose },
+      });
+    }
+
+    let user = await findUserByPhone(mobile);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'No account found for this number. Please create an account.',
+        error: { needs_registration: true },
+        data: { needs_registration: true, mobile: destination },
+      });
+    }
+
+    try {
+      user = (await markPhoneVerified(user.id)) || user;
+    } catch {
+      /* column may be pending migration */
+    }
+
+    writeAudit({
+      userId: user.id,
+      role: user.role,
+      action: 'otp_login',
+      category: 'auth',
+      message: 'User signed in with OTP',
+      req,
+    }).catch(() => {});
+
+    if (user.role === 'customer') {
+      try {
+        const loyaltyEngine = require('../services/loyaltyEngine');
+        await loyaltyEngine.creditDailyLogin(user.id);
+      } catch {
+        /* ignore */
+      }
+    }
+
+    return issueSessionForUser(req, res, user, 'OTP verified. Signed in successfully.');
+  } catch (error) {
+    return fail(
+      res,
+      error.status || 500,
+      error.status && error.status < 500 ? error.message : 'OTP verification failed',
       error
     );
   }
@@ -692,4 +901,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   refreshAccessToken,
+  sendAuthOtp,
+  verifyAuthOtp,
 };
