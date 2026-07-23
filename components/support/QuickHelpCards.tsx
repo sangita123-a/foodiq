@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { PackageSearch, CreditCard, AlertTriangle, MessageSquare, PhoneCall, Mail } from "lucide-react";
 
@@ -14,6 +15,16 @@ export type QuickHelpAction =
 type Props = {
   onAction?: (action: QuickHelpAction) => void;
 };
+
+const ACTION_HREF: Partial<Record<QuickHelpAction, string>> = {
+  track: "/track-order",
+  payments: "/payment-support",
+  "order-problem": "/report-problem",
+  email: "/email-support",
+};
+
+const CARD_CLASS =
+  "bg-section rounded-3xl p-6 border border-border hover:border-border transition-all duration-300 shadow-lg cursor-pointer group text-left block h-full";
 
 export default function QuickHelpCards({ onAction }: Props) {
   const cards: Array<{
@@ -34,21 +45,53 @@ export default function QuickHelpCards({ onAction }: Props) {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-      {cards.map((card, idx) => (
-        <motion.button
-          type="button"
-          key={idx}
-          whileHover={{ y: -8 }}
-          onClick={() => onAction?.(card.action)}
-          className="bg-section rounded-3xl p-6 border border-border hover:border-border transition-all duration-300 shadow-lg cursor-pointer group text-left"
-        >
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border transition-colors ${card.bg} group-hover:bg-section group-hover:border-border`}>
-            <card.icon className={`w-7 h-7 ${card.color}`} />
-          </div>
-          <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">{card.title}</h3>
-          <p className="text-gray-text text-sm leading-relaxed">{card.desc}</p>
-        </motion.button>
-      ))}
+      {cards.map((card, idx) => {
+        const href = ACTION_HREF[card.action];
+        const body = (
+          <>
+            <div
+              className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border transition-colors ${card.bg} group-hover:bg-section group-hover:border-border`}
+            >
+              <card.icon className={`w-7 h-7 ${card.color}`} />
+            </div>
+            <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+              {card.title}
+            </h3>
+            <p className="text-gray-text text-sm leading-relaxed">{card.desc}</p>
+          </>
+        );
+
+        if (href) {
+          return (
+            <motion.div key={idx} whileHover={{ y: -8 }} className="h-full">
+              <Link
+                href={href}
+                className={CARD_CLASS}
+                onClick={(e) => {
+                  if (!onAction) return;
+                  e.preventDefault();
+                  onAction(card.action);
+                }}
+              >
+                {body}
+              </Link>
+            </motion.div>
+          );
+        }
+
+        return (
+          <motion.button
+            type="button"
+            key={idx}
+            whileHover={{ y: -8 }}
+            onClick={() => onAction?.(card.action)}
+            className={CARD_CLASS}
+            aria-label={card.title}
+          >
+            {body}
+          </motion.button>
+        );
+      })}
     </div>
   );
 }

@@ -51,7 +51,7 @@ export default function TrackOrderModal({ open, onClose, variant = "modal" }: Pr
       const orderId = values.orderId.trim();
       await trackOrder(orderId);
       onClose();
-      router.push(`/track-order/${encodeURIComponent(orderId)}`);
+      router.push(`/track-order?id=${encodeURIComponent(orderId)}`);
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string }; status?: number } })?.response?.data

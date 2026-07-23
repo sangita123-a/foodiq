@@ -137,10 +137,13 @@ export function middleware(request: NextRequest) {
         : pathname.startsWith("/partner")
           ? "/partner/login"
           : "/login";
-    return applySeoHeaders(
-      request,
-      NextResponse.redirect(new URL(loginPath, request.url))
-    );
+    const loginUrl = new URL(loginPath, request.url);
+    // Preserve destination so users return to Help & Support flows after login
+    if (loginPath === "/login") {
+      const redirectTarget = `${pathname}${request.nextUrl.search || ""}`;
+      loginUrl.searchParams.set("redirect", redirectTarget);
+    }
+    return applySeoHeaders(request, NextResponse.redirect(loginUrl));
   }
 
   // Check if it's an auth route (login/register)

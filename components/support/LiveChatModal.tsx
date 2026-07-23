@@ -38,6 +38,7 @@ export default function LiveChatModal({ open, onClose }: Props) {
   const [showEmoji, setShowEmoji] = useState(false);
   const [aiSession, setAiSession] = useState<string | undefined>();
   const [unread, setUnread] = useState(0);
+  const [startError, setStartError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -78,6 +79,7 @@ export default function LiveChatModal({ open, onClose }: Props) {
 
   const beginHuman = async () => {
     setStarting(true);
+    setStartError(null);
     try {
       const chat = await startLiveChat("Help & Support live chat");
       setChatId(chat.id);
@@ -107,6 +109,8 @@ export default function LiveChatModal({ open, onClose }: Props) {
           },
         ]);
       }
+    } catch {
+      setStartError("Could not start live chat. Please sign in and try again.");
     } finally {
       setStarting(false);
     }
@@ -217,6 +221,7 @@ export default function LiveChatModal({ open, onClose }: Props) {
     setMessages([]);
     setInput("");
     setShowEmoji(false);
+    setStartError(null);
     onClose();
   };
 
@@ -224,6 +229,11 @@ export default function LiveChatModal({ open, onClose }: Props) {
     <SupportModal open={open} onClose={handleClose} title="Live Chat" wide>
       {mode === "choose" ? (
         <div className="grid gap-4 sm:grid-cols-2">
+          {startError ? (
+            <p className="sm:col-span-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-500">
+              {startError}
+            </p>
+          ) : null}
           <button
             type="button"
             onClick={beginHuman}

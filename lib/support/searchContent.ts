@@ -126,7 +126,7 @@ export function searchSupportWithLiveData(
         title: `Order #${String(o.id).slice(0, 8).toUpperCase()}`,
         body: `${o.restaurant_name || "Restaurant"} · Status: ${o.status || "—"}`,
         category: "orders",
-        href: `/track-order/${encodeURIComponent(o.id)}`,
+        href: `/track-order?id=${encodeURIComponent(o.id)}`,
       });
     }
   }
