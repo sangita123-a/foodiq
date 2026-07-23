@@ -99,6 +99,26 @@ async function ensureSchema() {
       END $$;
     `);
     await q(`
+      DO $$
+      DECLARE
+        constraint_name text;
+      BEGIN
+        SELECT con.conname INTO constraint_name
+        FROM pg_constraint con
+        JOIN pg_class rel ON rel.oid = con.conrelid
+        WHERE rel.relname = 'orders' AND con.contype = 'c' AND pg_get_constraintdef(con.oid) ILIKE '%status%'
+        LIMIT 1;
+        IF constraint_name IS NOT NULL THEN
+          EXECUTE format('ALTER TABLE orders DROP CONSTRAINT %I', constraint_name);
+        END IF;
+        ALTER TABLE orders
+          ADD CONSTRAINT orders_status_check
+          CHECK (status IN ('Pending', 'Paid', 'Accepted', 'Preparing', 'Ready for Pickup', 'Picked Up', 'On The Way', 'Out for Delivery', 'Delivered', 'Cancelled', 'pending', 'paid', 'confirmed', 'cancelled'));
+      EXCEPTION WHEN duplicate_object THEN
+        NULL;
+      END $$;
+    `);
+    await q(`
       ALTER TABLE payments
         ADD COLUMN IF NOT EXISTS razorpay_order_id VARCHAR(100),
         ADD COLUMN IF NOT EXISTS razorpay_payment_id VARCHAR(100),

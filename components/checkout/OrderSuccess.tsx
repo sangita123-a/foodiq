@@ -93,18 +93,28 @@ export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false 
         <CheckCircle2 className="w-12 h-12 text-green-500" />
       </motion.div>
 
-      <h2 className="text-3xl font-black text-foreground mb-2 relative z-10">Order Placed!</h2>
+      <h2 className="text-3xl font-black text-foreground mb-2 relative z-10">Payment Successful</h2>
       <p className="text-gray-text mb-8 relative z-10">
-        Your food is being prepared and will be with you shortly.
+        Your order has been confirmed and food is being prepared.
       </p>
 
       <div className="bg-white rounded-2xl p-4 mb-6 border border-border relative z-10 text-left">
-        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-border">
-          <Package className="w-5 h-5 text-primary" />
-          <div>
-            <div className="text-xs text-[#9CA3AF]">Order ID</div>
-            <div className="font-bold text-foreground">{displayId}</div>
+        <div className="flex items-center justify-between mb-4 pb-4 border-b border-border">
+          <div className="flex items-center gap-3">
+            <Package className="w-5 h-5 text-primary" />
+            <div>
+              <div className="text-xs text-[#9CA3AF]">Order ID</div>
+              <div className="font-bold text-foreground">{displayId}</div>
+            </div>
           </div>
+          {(order?.razorpay_payment_id || order?.payment_id) && (
+            <div className="text-right">
+              <div className="text-xs text-[#9CA3AF]">Transaction ID</div>
+              <div className="font-mono text-xs font-bold text-foreground">
+                {order.razorpay_payment_id || order.payment_id}
+              </div>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-3 mb-4 pb-4 border-b border-border">
           <Clock className="w-5 h-5 text-blue-400" />

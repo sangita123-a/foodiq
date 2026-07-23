@@ -49,8 +49,17 @@ export type VerifyPaymentResponse = {
 };
 
 export async function createRazorpayOrder(payload: Record<string, unknown>) {
-  const res = await api.post("/api/payments/razorpay/order", payload);
-  return res.data.data as RazorpayOrderResponse;
+  try {
+    const res = await api.post("/api/payment/create-order", payload);
+    return res.data.data as RazorpayOrderResponse;
+  } catch (err: unknown) {
+    const status = (err as { response?: { status?: number } })?.response?.status;
+    if (status === 404) {
+      const res = await api.post("/api/payments/razorpay/order", payload);
+      return res.data.data as RazorpayOrderResponse;
+    }
+    throw err;
+  }
 }
 
 export async function verifyRazorpayPayment(payload: {
@@ -58,8 +67,17 @@ export async function verifyRazorpayPayment(payload: {
   razorpay_payment_id: string;
   razorpay_signature: string;
 }) {
-  const res = await api.post("/api/payments/razorpay/verify", payload);
-  return res.data.data as VerifyPaymentResponse;
+  try {
+    const res = await api.post("/api/payment/verify", payload);
+    return res.data.data as VerifyPaymentResponse;
+  } catch (err: unknown) {
+    const status = (err as { response?: { status?: number } })?.response?.status;
+    if (status === 404) {
+      const res = await api.post("/api/payments/razorpay/verify", payload);
+      return res.data.data as VerifyPaymentResponse;
+    }
+    throw err;
+  }
 }
 
 export async function markRazorpayFailed(razorpay_order_id: string, reason?: string) {
@@ -84,8 +102,23 @@ export async function placeCodOrder(payload: Record<string, unknown>) {
 }
 
 export async function fetchPaymentHistory() {
-  const res = await api.get("/api/payments/history");
-  return res.data.data as Array<Record<string, unknown>>;
+  try {
+    const res = await api.get("/api/payment/history");
+    return res.data.data as Array<Record<string, unknown>>;
+  } catch {
+    const res = await api.get("/api/payments/history");
+    return res.data.data as Array<Record<string, unknown>>;
+  }
+}
+
+export async function fetchPaymentDetails(paymentId: string) {
+  try {
+    const res = await api.get(`/api/payment/${paymentId}`);
+    return res.data.data;
+  } catch {
+    const res = await api.get(`/api/payments/${paymentId}`);
+    return res.data.data;
+  }
 }
 
 export async function fetchPaymentForOrder(orderId: string) {

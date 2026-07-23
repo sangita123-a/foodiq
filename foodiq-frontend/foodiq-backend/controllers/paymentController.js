@@ -323,6 +323,11 @@ const finalizeVerifiedPayment = async ({
       payment = checkoutResult.payment;
     }
 
+    await client.query(
+      `UPDATE orders SET status = 'Paid', updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+      [orderId]
+    );
+
     await updateTransaction(
       lockedTxn.id,
       {

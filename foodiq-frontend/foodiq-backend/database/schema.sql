@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS orders (
     restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
     delivery_address_id UUID REFERENCES addresses(id) ON DELETE SET NULL,
     coupon_id UUID REFERENCES coupons(id) ON DELETE SET NULL,
-    status VARCHAR(50) DEFAULT 'Pending' CHECK (status IN ('Pending', 'Accepted', 'Preparing', 'Ready for Pickup', 'Picked Up', 'On The Way', 'Delivered', 'Cancelled', 'pending', 'confirmed', 'cancelled')),
+    status VARCHAR(50) DEFAULT 'Pending' CHECK (status IN ('Pending', 'Paid', 'Accepted', 'Preparing', 'Ready for Pickup', 'Picked Up', 'On The Way', 'Out for Delivery', 'Delivered', 'Cancelled', 'pending', 'paid', 'confirmed', 'cancelled')),
     subtotal DECIMAL(10,2) NOT NULL,
     discount_amount DECIMAL(10,2) DEFAULT 0.0,
     delivery_fee DECIMAL(10,2) DEFAULT 0.0,

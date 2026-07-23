@@ -24,7 +24,13 @@ router.use(protect);
 router.use(paymentLimiter);
 
 router.post('/create', createPayment);
-router.post('/verify', verifyPayment);
+router.post('/create-order', createRazorpayCheckoutOrder);
+router.post('/verify', (req, res) => {
+  if (req.body && (req.body.razorpay_signature || req.body.razorpay_order_id)) {
+    return verifyRazorpayPayment(req, res);
+  }
+  return verifyPayment(req, res);
+});
 router.get('/', getHistory);
 router.get('/history', getHistory);
 router.post('/retry', retryPayment);
