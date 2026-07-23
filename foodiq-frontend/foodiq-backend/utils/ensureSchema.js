@@ -35,6 +35,68 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS is_phone_verified BOOLEAN DEFAULT FALSE
     `);
     await q(`
+      CREATE TABLE IF NOT EXISTS testimonials (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+        restaurant_id UUID REFERENCES restaurants(id) ON DELETE SET NULL,
+        restaurant_name VARCHAR(255),
+        dish_name VARCHAR(255),
+        city VARCHAR(120),
+        rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+        review_text TEXT NOT NULL,
+        user_name VARCHAR(255),
+        profile_image_url TEXT,
+        status VARCHAR(30) NOT NULL DEFAULT 'pending'
+          CHECK (status IN ('pending', 'approved', 'rejected', 'hidden')),
+        helpful_count INTEGER NOT NULL DEFAULT 0,
+        is_featured BOOLEAN NOT NULL DEFAULT FALSE,
+        order_date TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_testimonials_status ON testimonials(status)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_testimonials_featured ON testimonials(is_featured) WHERE status = 'approved'`);
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_testimonials_user_order
+      ON testimonials(user_id, order_id)
+      WHERE order_id IS NOT NULL
+    `);
+    await q(`
+      CREATE TABLE IF NOT EXISTS review_images (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        testimonial_id UUID NOT NULL REFERENCES testimonials(id) ON DELETE CASCADE,
+        image_url TEXT NOT NULL,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_review_images_testimonial ON review_images(testimonial_id)`);
+    await q(`
+      CREATE TABLE IF NOT EXISTS helpful_votes (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        testimonial_id UUID NOT NULL REFERENCES testimonials(id) ON DELETE CASCADE,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (testimonial_id, user_id)
+      )
+    `);
+    await q(`
+      CREATE TABLE IF NOT EXISTS reported_reviews (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        testimonial_id UUID NOT NULL REFERENCES testimonials(id) ON DELETE CASCADE,
+        reporter_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        reason TEXT NOT NULL,
+        status VARCHAR(30) NOT NULL DEFAULT 'open'
+          CHECK (status IN ('open', 'reviewed', 'dismissed', 'actioned')),
+        admin_notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_reported_reviews_status ON reported_reviews(status)`);
+    await q(`
       CREATE TABLE IF NOT EXISTS invoices (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         invoice_number VARCHAR(40) NOT NULL UNIQUE,

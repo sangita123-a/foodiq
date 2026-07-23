@@ -184,15 +184,67 @@ model ChatRoom {
   @@map("chat_rooms")
 }
 
-model Message {
-  id        String   @id @default(uuid())
-  roomId    String   @map("room_id")
-  senderId  String   @map("sender_id")
-  text      String
-  imageUrl  String?  @map("image_url")
-  createdAt DateTime @default(now()) @map("created_at")
+model Testimonial {
+  id              String   @id @default(uuid())
+  userId          String?  @map("user_id")
+  orderId         String?  @map("order_id")
+  restaurantId    String?  @map("restaurant_id")
+  restaurantName  String?  @map("restaurant_name")
+  dishName        String?  @map("dish_name")
+  city            String?
+  rating          Int
+  reviewText      String   @map("review_text")
+  userName        String?  @map("user_name")
+  profileImageUrl String?  @map("profile_image_url")
+  status          String   @default("pending")
+  helpfulCount    Int      @default(0) @map("helpful_count")
+  isFeatured      Boolean  @default(false) @map("is_featured")
+  orderDate       DateTime? @map("order_date")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
 
-  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  images   ReviewImage[]
+  votes    HelpfulVote[]
+  reports  ReportedReview[]
 
-  @@map("messages")
+  @@map("testimonials")
+}
+
+model ReviewImage {
+  id            String   @id @default(uuid())
+  testimonialId String   @map("testimonial_id")
+  imageUrl      String   @map("image_url")
+  sortOrder     Int      @default(0) @map("sort_order")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  testimonial Testimonial @relation(fields: [testimonialId], references: [id], onDelete: Cascade)
+
+  @@map("review_images")
+}
+
+model HelpfulVote {
+  id            String   @id @default(uuid())
+  testimonialId String   @map("testimonial_id")
+  userId        String   @map("user_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  testimonial Testimonial @relation(fields: [testimonialId], references: [id], onDelete: Cascade)
+
+  @@unique([testimonialId, userId])
+  @@map("helpful_votes")
+}
+
+model ReportedReview {
+  id            String   @id @default(uuid())
+  testimonialId String   @map("testimonial_id")
+  reporterId    String?  @map("reporter_id")
+  reason        String
+  status        String   @default("open")
+  adminNotes    String?  @map("admin_notes")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  testimonial Testimonial @relation(fields: [testimonialId], references: [id], onDelete: Cascade)
+
+  @@map("reported_reviews")
 }
