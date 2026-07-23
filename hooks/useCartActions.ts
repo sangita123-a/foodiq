@@ -11,9 +11,10 @@ const EMPTY_CART: LocalCart = {
   items: [],
   totalQuantity: 0,
   subtotal: 0,
-  deliveryFee: 35,
-  tax: 18,
-  total: 53,
+  deliveryFee: 0,
+  platformFee: 0,
+  tax: 0,
+  total: 0,
 };
 
 export function useCartActions() {

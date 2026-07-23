@@ -91,13 +91,17 @@ function ensureEnv() {
 }
 
 function clearNextCache() {
-  const nextDir = join(ROOT, ".next");
-  if (!existsSync(nextDir)) return;
-  try {
-    rmSync(nextDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 500 });
-    log("Cleared .next cache");
-  } catch (err) {
-    log(`Could not fully clear .next: ${err.message}`);
+  const cacheDir = join(ROOT, ".next", "cache");
+  const devDir = join(ROOT, ".next", "dev");
+  for (const d of [cacheDir, devDir]) {
+    if (existsSync(d)) {
+      try {
+        rmSync(d, { recursive: true, force: true, maxRetries: 3, retryDelay: 500 });
+        log(`Cleared ${d}`);
+      } catch (err) {
+        log(`Could not clear ${d}: ${err.message}`);
+      }
+    }
   }
 }
 
@@ -107,16 +111,27 @@ for (const p of [3000, 3001, 3002, 3003]) {
 }
 
 ensureEnv();
+clearNextCache();
 
 if (process.argv.includes("--clean")) {
-  clearNextCache();
+  const nextDir = join(ROOT, ".next");
+  if (existsSync(nextDir)) {
+    try {
+      rmSync(nextDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 500 });
+      log("Cleared full .next directory");
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
 killPort(PORT);
 
-log(`Starting Next.js on http://localhost:${PORT}`);
+log(`Starting Next.js (Webpack dev server) on http://localhost:${PORT}`);
 
-const child = spawn("npx", ["next", "dev", "--port", String(PORT)], {
+const devArgs = ["next", "dev", "--webpack", "--port", String(PORT)];
+
+const child = spawn("npx", devArgs, {
   cwd: ROOT,
   stdio: "inherit",
   shell: true,

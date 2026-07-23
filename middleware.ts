@@ -22,6 +22,7 @@ const protectedRoutes = [
   "/my-rewards",
   "/my-wallet",
   "/help-and-support",
+  "/help-support",
   "/track-order",
   "/payment-support",
   "/report-problem",

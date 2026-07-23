@@ -26,6 +26,29 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS scheduled_for TIMESTAMP WITH TIME ZONE
     `);
     await q(`
+      ALTER TABLE orders
+        ADD COLUMN IF NOT EXISTS platform_fee NUMERIC(10,2) DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS tax_amount NUMERIC(10,2) DEFAULT 0
+    `);
+    await q(`
+      CREATE TABLE IF NOT EXISTS invoices (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        invoice_number VARCHAR(40) NOT NULL UNIQUE,
+        order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        payment_id UUID NOT NULL UNIQUE REFERENCES payments(id) ON DELETE CASCADE,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        amount NUMERIC(10,2) NOT NULL,
+        tax_amount NUMERIC(10,2) DEFAULT 0,
+        currency VARCHAR(10) DEFAULT 'INR',
+        status VARCHAR(30) NOT NULL DEFAULT 'issued',
+        issued_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_invoices_user ON invoices(user_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_invoices_order ON invoices(order_id)`);
+    await q(`
       ALTER TABLE restaurant_categories
         ADD COLUMN IF NOT EXISTS slug VARCHAR(100),
         ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0

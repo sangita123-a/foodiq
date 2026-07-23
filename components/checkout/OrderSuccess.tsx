@@ -155,7 +155,7 @@ export default function OrderSuccess({ orderId, etaMinutes = 30, asPage = false 
         )}
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-xs text-[#9CA3AF]">Total Amount</div>
+            <div className="text-xs text-[#9CA3AF]">Amount Paid</div>
             <div className="font-black text-xl text-primary">
               {total > 0 ? `₹${total.toFixed(2)}` : "—"}
             </div>

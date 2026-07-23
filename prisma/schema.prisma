@@ -1,4 +1,6 @@
 // Prisma Schema for Foodiq
+// Runtime DB access uses raw SQL (pg). This schema mirrors production tables
+// for typing, migrations, and tooling compatibility.
 
 generator client {
   provider = "prisma-client-js"
@@ -19,45 +21,175 @@ enum OrderStatus {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  fullName  String    @map("full_name")
-  role      String    @default("customer")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
-  orders    Order[]
-  payments  Payment[]
+  id             String          @id @default(uuid())
+  email          String          @unique
+  fullName       String          @map("full_name")
+  role           String          @default("customer")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @default(now()) @updatedAt @map("updated_at")
+  orders         Order[]
+  payments       Payment[]
+  supportTickets SupportTicket[]
+  chatRooms      ChatRoom[]
+  invoices       Invoice[]
+  transactions   PaymentTransaction[]
+  refunds        Refund[]
 
   @@map("users")
 }
 
 model Order {
-  id        String      @id @default(uuid())
-  userId    String      @map("user_id")
-  status    OrderStatus @default(Pending)
-  subtotal  Float       @default(0.0)
-  total     Float       @map("total_amount")
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @default(now()) @updatedAt @map("updated_at")
+  id              String          @id @default(uuid())
+  userId          String          @map("user_id")
+  status          OrderStatus     @default(Pending)
+  subtotal        Float           @default(0.0)
+  discountAmount  Float           @default(0.0) @map("discount_amount")
+  deliveryFee     Float           @default(0.0) @map("delivery_fee")
+  platformFee     Float           @default(0.0) @map("platform_fee")
+  taxAmount       Float           @default(0.0) @map("tax_amount")
+  total           Float           @map("total_amount")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @default(now()) @updatedAt @map("updated_at")
 
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  payment Payment?
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payment        Payment?
+  supportTickets SupportTicket[]
+  invoices       Invoice[]
+  transactions   PaymentTransaction[]
+  refunds        Refund[]
 
   @@map("orders")
 }
 
 model Payment {
-  id            String   @id @default(uuid())
-  userId        String   @map("user_id")
-  orderId       String   @unique @map("order_id")
-  amount        Float
-  paymentMethod String   @map("method")
-  transactionId String?  @map("razorpay_payment_id")
-  status        String   @default("pending")
-  createdAt     DateTime @default(now()) @map("created_at")
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  orderId           String   @unique @map("order_id")
+  amount            Float
+  paymentMethod     String   @map("method")
+  transactionId     String?  @map("razorpay_payment_id")
+  razorpayOrderId   String?  @map("razorpay_order_id")
+  razorpaySignature String?  @map("razorpay_signature")
+  status            String   @default("pending")
+  currency          String   @default("INR")
+  transactionTime   DateTime? @map("transaction_time")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
 
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order        Order                @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  refunds      Refund[]
+  invoices     Invoice[]
+  transactions PaymentTransaction[]
 
   @@map("payments")
+}
+
+model PaymentTransaction {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  orderId           String?  @map("order_id")
+  paymentId         String?  @map("payment_id")
+  razorpayOrderId   String   @unique @map("razorpay_order_id")
+  razorpayPaymentId String?  @map("razorpay_payment_id")
+  razorpaySignature String?  @map("razorpay_signature")
+  amount            Float
+  currency          String   @default("INR")
+  paymentMethod     String?  @map("payment_method")
+  status            String   @default("created")
+  checkoutPayload   Json     @default("{}") @map("checkout_payload")
+  receipt           String?
+  failureReason     String?  @map("failure_reason")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order   Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  payment Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@map("payment_transactions")
+}
+
+model Invoice {
+  id            String   @id @default(uuid())
+  invoiceNumber String   @unique @map("invoice_number")
+  orderId       String   @map("order_id")
+  paymentId     String   @unique @map("payment_id")
+  userId        String   @map("user_id")
+  amount        Float
+  taxAmount     Float    @default(0) @map("tax_amount")
+  currency      String   @default("INR")
+  status        String   @default("issued")
+  issuedAt      DateTime @default(now()) @map("issued_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@map("invoices")
+}
+
+model Refund {
+  id               String   @id @default(uuid())
+  paymentId        String   @map("payment_id")
+  orderId          String   @map("order_id")
+  userId           String   @map("user_id")
+  amount           Float
+  reason           String?
+  status           String   @default("processed")
+  razorpayRefundId String?  @map("razorpay_refund_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refunds")
+}
+
+model SupportTicket {
+  id          String   @id @default(uuid())
+  ticketId    String   @unique @map("ticket_id")
+  userId      String   @map("user_id")
+  orderId     String?  @map("order_id")
+  category    String
+  subject     String
+  description String
+  imageUrl    String?  @map("image_url")
+  status      String   @default("open")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order Order? @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("support_tickets")
+}
+
+model ChatRoom {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  status    String    @default("active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  messages  Message[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("chat_rooms")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  roomId    String   @map("room_id")
+  senderId  String   @map("sender_id")
+  text      String
+  imageUrl  String?  @map("image_url")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
 }

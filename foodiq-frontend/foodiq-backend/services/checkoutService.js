@@ -229,11 +229,12 @@ const prepareCheckout = async (userId, body) => {
       deliveryCharge = 0;
     }
   }
+  const platformFee = subtotal > 0 ? 5 : 0;
   const taxResult = await require('./taxEngine')
     .calculateTax(subtotal, { countryCode: 'IN' })
     .catch(() => ({ tax: subtotal * 0.05, rate: 0.05, enabled: false }));
   const tax = taxResult.tax;
-  let totalAmount = subtotal + deliveryCharge + tax - discount;
+  let totalAmount = subtotal + deliveryCharge + platformFee + tax - discount;
 
   // V3 pricing engine (off by default — identical to V2 when disabled)
   let marketId = null;
@@ -280,6 +281,7 @@ const prepareCheckout = async (userId, body) => {
     subtotal,
     discount,
     deliveryCharge,
+    platformFee,
     tax,
     totalAmount,
     originalTotalAmount,
@@ -322,10 +324,10 @@ const commitCheckoutOrder = async (userId, prepared, paymentMeta = {}, client = 
   const orderQuery = `
     INSERT INTO orders (
       user_id, restaurant_id, delivery_address_id, coupon_id, offer_id, status,
-      subtotal, discount_amount, delivery_fee, total_amount, delivery_instructions,
+      subtotal, discount_amount, delivery_fee, platform_fee, tax_amount, total_amount, delivery_instructions,
       delivery_mode, scheduled_for, market_id, currency, wallet_amount_used
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
     RETURNING *
   `;
   const orderValues = [
@@ -338,6 +340,8 @@ const commitCheckoutOrder = async (userId, prepared, paymentMeta = {}, client = 
     prepared.subtotal,
     prepared.discount,
     prepared.deliveryCharge,
+    prepared.platformFee || 0,
+    prepared.tax || 0,
     prepared.originalTotalAmount ?? prepared.totalAmount,
     prepared.delivery_instructions,
     prepared.delivery_mode,
@@ -527,6 +531,7 @@ const formatCheckoutResponse = (order, paymentMethod, prepared) => ({
     subtotal: parseFloat(prepared.subtotal.toFixed(2)),
     discount: parseFloat(prepared.discount.toFixed(2)),
     delivery_charge: parseFloat(prepared.deliveryCharge.toFixed(2)),
+    platform_fee: parseFloat(Number(prepared.platformFee || 0).toFixed(2)),
     tax: parseFloat(prepared.tax.toFixed(2)),
     grand_total: parseFloat(prepared.totalAmount.toFixed(2)),
     estimated_delivery_minutes: 30,

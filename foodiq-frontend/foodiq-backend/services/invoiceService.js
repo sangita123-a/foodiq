@@ -121,6 +121,8 @@ const buildInvoicePdfBuffer = async ({ paymentId, userId = null }) => {
     row('Subtotal', `₹${Number(order.subtotal).toFixed(2)}`);
     row('Discount', `-₹${Number(order.discount_amount || 0).toFixed(2)}`);
     row('Delivery', `₹${Number(order.delivery_fee || 0).toFixed(2)}`);
+    row('Platform Fee', `₹${Number(order.platform_fee || 0).toFixed(2)}`);
+    row('GST', `₹${Number(order.tax_amount || 0).toFixed(2)}`);
     row('Total', `₹${Number(order.total_amount).toFixed(2)}`, true);
 
     y += 20;
@@ -154,7 +156,31 @@ const buildInvoicePdfForOrder = async (orderId, userId = null) => {
   return buildInvoicePdfBuffer({ paymentId: q.rows[0].id, userId });
 };
 
+/**
+ * Persist invoice metadata after a successful payment (idempotent).
+ */
+const recordInvoice = async ({ paymentId, orderId, userId, amount, taxAmount = 0 }) => {
+  if (!paymentId || !orderId || !userId) return null;
+  const existing = await pool.query('SELECT * FROM invoices WHERE payment_id = $1 LIMIT 1', [
+    paymentId,
+  ]);
+  if (existing.rows[0]) return existing.rows[0];
+
+  const short = String(orderId).replace(/-/g, '').slice(0, 8).toUpperCase();
+  const invoiceNumber = `INV-${short}-${Date.now().toString(36).toUpperCase()}`;
+  const inserted = await pool.query(
+    `INSERT INTO invoices (
+      invoice_number, order_id, payment_id, user_id, amount, tax_amount, status
+    ) VALUES ($1, $2, $3, $4, $5, $6, 'issued')
+    ON CONFLICT (payment_id) DO UPDATE SET updated_at = CURRENT_TIMESTAMP
+    RETURNING *`,
+    [invoiceNumber, orderId, paymentId, userId, Number(amount) || 0, Number(taxAmount) || 0]
+  );
+  return inserted.rows[0];
+};
+
 module.exports = {
   buildInvoicePdfBuffer,
   buildInvoicePdfForOrder,
+  recordInvoice,
 };

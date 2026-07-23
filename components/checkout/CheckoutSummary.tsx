@@ -7,6 +7,7 @@ type Props = {
   items: { name: string; quantity: number; price?: number }[];
   subtotal: number;
   deliveryCharge?: number;
+  platformFee?: number;
   tax?: number;
   discount: number;
   onPlaceOrder: () => void;
@@ -20,6 +21,7 @@ export default function CheckoutSummary({
   items,
   subtotal,
   deliveryCharge = 50,
+  platformFee = 5,
   tax,
   discount,
   onPlaceOrder,
@@ -28,7 +30,7 @@ export default function CheckoutSummary({
   estimatedDeliveryMinutes = 30,
 }: Props) {
   const taxes = tax !== undefined ? tax : Math.round(subtotal * 0.05);
-  const grandTotal = Math.max(0, subtotal + deliveryCharge + taxes - discount);
+  const grandTotal = Math.max(0, subtotal + deliveryCharge + platformFee + taxes - discount);
   const etaLow = Math.max(10, estimatedDeliveryMinutes - 5);
   const etaHigh = estimatedDeliveryMinutes + 5;
 
@@ -72,6 +74,10 @@ export default function CheckoutSummary({
         <div className="flex justify-between items-center">
           <span>Delivery Charge</span>
           <span className="font-medium text-foreground">₹{deliveryCharge}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span>Platform Fee</span>
+          <span className="font-medium text-foreground">₹{platformFee}</span>
         </div>
         <div className="flex justify-between items-center">
           <span>GST (5%)</span>

@@ -36,6 +36,7 @@ import {
 import { openRazorpayCheckout } from "@/lib/razorpay";
 import { useCartActions } from "@/hooks/useCartActions";
 import { clearLocalCart } from "@/lib/cart";
+import { calcBill } from "@/lib/pricing";
 
 type CartItem = {
   id?: string;
@@ -102,15 +103,17 @@ export default function CheckoutPage() {
   }));
 
   const subtotal = cartData?.totals?.subtotal ? Number(cartData.totals.subtotal) : actionSubtotal;
-  const deliveryCharge = cartItems.length > 0 ? 35 : 0;
-  const tax = Math.round(subtotal * 0.05);
-  const effectiveDelivery = freeDelivery ? 0 : deliveryCharge;
-  const preWalletTotal = Math.max(0, subtotal + effectiveDelivery + tax - discount);
+  const bill = calcBill({ subtotal, discount, freeDelivery });
+  const effectiveDelivery = bill.deliveryFee;
+  const platformFee = bill.platformFee;
+  const tax = bill.tax;
+  const preWalletTotal = Math.max(0, bill.grandTotal);
   const grandTotal = Math.max(0, preWalletTotal - walletAmount);
 
   const totals = {
     subtotal,
     deliveryCharge: effectiveDelivery,
+    platformFee,
     tax,
     discount,
     grandTotal,
@@ -465,7 +468,8 @@ export default function CheckoutPage() {
               restaurantName={restaurantName}
               items={mappedCartItems}
               subtotal={totals.subtotal}
-              deliveryCharge={freeDelivery ? 0 : totals.deliveryCharge}
+              deliveryCharge={totals.deliveryCharge}
+              platformFee={totals.platformFee}
               tax={totals.tax}
               discount={discount}
               onPlaceOrder={handlePlaceOrder}

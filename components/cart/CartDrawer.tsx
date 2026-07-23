@@ -26,10 +26,11 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
   const isMobile = useIsMobile(768);
   const reducedMotion = usePrefersReducedMotion();
 
-  const deliveryFee = items.length > 0 ? 35 : 0;
+  const deliveryFee = items.length > 0 ? (subtotal >= 500 ? 0 : 50) : 0;
+  const platformFee = items.length > 0 ? 5 : 0;
   const tax = Math.round(subtotal * 0.05);
   const discount = couponDiscount;
-  const grandTotal = Math.max(0, subtotal + deliveryFee + tax - discount);
+  const grandTotal = Math.max(0, subtotal + deliveryFee + platformFee + tax - discount);
 
   const applyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -234,6 +235,10 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                   <div className="flex justify-between">
                     <span>Delivery Fee</span>
                     <span className="font-bold text-[#0F172A]">₹{deliveryFee}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Platform Fee</span>
+                    <span className="font-bold text-[#0F172A]">₹{platformFee}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Taxes & Charges (5% GST)</span>

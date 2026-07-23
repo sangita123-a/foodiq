@@ -26,6 +26,7 @@ export type RazorpayOrderResponse = {
     subtotal: number;
     discount: number;
     delivery_charge: number;
+    platform_fee?: number;
     tax: number;
     grand_total: number;
   };

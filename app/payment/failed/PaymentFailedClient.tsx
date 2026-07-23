@@ -56,11 +56,11 @@ export default function PaymentFailedPage() {
               Retry Payment
             </button>
             <Link
-              href="/cart"
+              href="/checkout"
               className="inline-flex items-center justify-center gap-2 border border-border text-foreground font-bold px-6 py-3 rounded-xl hover:bg-section"
             >
               <ShoppingBag className="w-4 h-4" />
-              Back to Cart
+              Back to Checkout
             </Link>
           </div>
 

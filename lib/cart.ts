@@ -1,5 +1,7 @@
 "use client";
 
+import { calcBill, DELIVERY_FEE, PLATFORM_FEE, calcGst } from "@/lib/pricing";
+
 export type LocalCartItem = {
   cart_item_id: string;
   restaurant_id: string;
@@ -17,45 +19,59 @@ export type LocalCart = {
   totalQuantity: number;
   subtotal: number;
   deliveryFee: number;
+  platformFee: number;
   tax: number;
   total: number;
 };
 
 const CART_KEY = "foodiq_local_cart";
 
+function emptyCart(): LocalCart {
+  return {
+    items: [],
+    totalQuantity: 0,
+    subtotal: 0,
+    deliveryFee: 0,
+    platformFee: 0,
+    tax: 0,
+    total: 0,
+  };
+}
+
+function recompute(items: LocalCartItem[]): LocalCart {
+  const normalized = items.filter((item) => item.quantity > 0);
+  const totalQuantity = normalized.reduce((sum, i) => sum + i.quantity, 0);
+  const subtotal = normalized.reduce((sum, i) => sum + (i.subtotal || i.price * i.quantity), 0);
+  const bill = calcBill({ subtotal });
+  return {
+    items: normalized,
+    totalQuantity,
+    subtotal: bill.subtotal,
+    deliveryFee: bill.deliveryFee,
+    platformFee: bill.platformFee,
+    tax: bill.tax,
+    total: bill.grandTotal,
+  };
+}
+
 export function getLocalCart(): LocalCart {
   if (typeof window === "undefined") {
-    return { items: [], totalQuantity: 0, subtotal: 0, deliveryFee: 35, tax: 18, total: 53 };
+    return emptyCart();
   }
   try {
     const raw = localStorage.getItem(CART_KEY);
-    if (!raw) {
-      return { items: [], totalQuantity: 0, subtotal: 0, deliveryFee: 35, tax: 18, total: 53 };
-    }
+    if (!raw) return emptyCart();
     const parsed = JSON.parse(raw);
     const items: LocalCartItem[] = Array.isArray(parsed.items) ? parsed.items : [];
-    const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0);
-    const subtotal = items.reduce((sum, i) => sum + i.subtotal, 0);
-    const deliveryFee = items.length > 0 ? 35 : 0;
-    const tax = Math.round(subtotal * 0.05); // 5% GST
-    const total = subtotal + deliveryFee + tax;
-
-    return { items, totalQuantity, subtotal, deliveryFee, tax, total };
+    return recompute(items);
   } catch {
-    return { items: [], totalQuantity: 0, subtotal: 0, deliveryFee: 35, tax: 18, total: 53 };
+    return emptyCart();
   }
 }
 
 export function saveLocalCart(cartItems: LocalCartItem[]) {
   if (typeof window === "undefined") return;
-  const items = cartItems.filter((item) => item.quantity > 0);
-  const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0);
-  const subtotal = items.reduce((sum, i) => sum + (i.subtotal || i.price * i.quantity), 0);
-  const deliveryFee = items.length > 0 ? 35 : 0;
-  const tax = Math.round(subtotal * 0.05);
-  const total = subtotal + deliveryFee + tax;
-
-  const payload: LocalCart = { items, totalQuantity, subtotal, deliveryFee, tax, total };
+  const payload = recompute(cartItems);
   localStorage.setItem(CART_KEY, JSON.stringify(payload));
   window.dispatchEvent(new CustomEvent("foodiq:cart-updated", { detail: payload }));
 }
@@ -108,5 +124,8 @@ export function updateLocalCartQuantity(
 export function clearLocalCart() {
   if (typeof window === "undefined") return;
   localStorage.removeItem(CART_KEY);
-  window.dispatchEvent(new CustomEvent("foodiq:cart-updated", { detail: getLocalCart() }));
+  window.dispatchEvent(new CustomEvent("foodiq:cart-updated", { detail: emptyCart() }));
 }
+
+/** Legacy helpers for callers that still reference flat fee constants */
+export { DELIVERY_FEE, PLATFORM_FEE, calcGst };

@@ -10,27 +10,36 @@ import { Trash2 } from "lucide-react";
 import { getFoodImage } from "@/lib/images";
 import { useCartActions } from "@/hooks/useCartActions";
 import { clearLocalCart } from "@/lib/cart";
+import { calcBill } from "@/lib/pricing";
 import { useToast } from "@/contexts/ToastContext";
+import api from "@/services/api";
+import { useAuthToken } from "@/hooks/useAuthToken";
 
 export default function CartPage() {
   const { items, subtotal, updatingId, updateQuantity } = useCartActions();
   const { showToast } = useToast();
+  const hasToken = useAuthToken();
 
-  const handleClearCart = () => {
+  const handleClearCart = async () => {
     clearLocalCart();
+    if (hasToken) {
+      try {
+        await api.delete("/api/cart/clear");
+      } catch {
+        /* local clear already applied */
+      }
+    }
     showToast("Cart cleared", "success");
   };
 
-  const deliveryCharge = items.length > 0 ? 35 : 0;
-  const tax = Math.round(subtotal * 0.05);
-  const grandTotal = subtotal + deliveryCharge + tax;
-
+  const bill = calcBill({ subtotal });
   const totals = {
-    subtotal,
-    deliveryCharge,
-    tax,
+    subtotal: bill.subtotal,
+    deliveryCharge: bill.deliveryFee,
+    platformFee: bill.platformFee,
+    tax: bill.tax,
     discount: 0,
-    grandTotal,
+    grandTotal: bill.grandTotal,
   };
 
   const mappedCartItems = items.map((item) => ({

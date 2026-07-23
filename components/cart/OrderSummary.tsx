@@ -10,10 +10,12 @@ type OrderSummaryProps = {
   subtotal?: number;
   taxes?: number;
   delivery?: number;
+  platformFee?: number;
   discount?: number;
   totals?: {
     subtotal: number;
     deliveryCharge?: number;
+    platformFee?: number;
     tax?: number;
     discount?: number;
     grandTotal?: number;
@@ -24,6 +26,7 @@ export default function OrderSummary({
   subtotal: extSubtotal,
   taxes: extTaxes,
   delivery: extDelivery,
+  platformFee: extPlatformFee,
   discount: extDiscount,
   totals,
 }: OrderSummaryProps) {
@@ -32,11 +35,31 @@ export default function OrderSummary({
   const [couponError, setCouponError] = useState("");
 
   const subtotal = extSubtotal ?? totals?.subtotal ?? 0;
-  const deliveryFee = extDelivery !== undefined ? extDelivery : totals?.deliveryCharge !== undefined ? totals.deliveryCharge : 49;
-  const taxes = extTaxes !== undefined ? extTaxes : totals?.tax !== undefined ? totals.tax : Math.round(subtotal * 0.05);
+  const deliveryFee =
+    extDelivery !== undefined
+      ? extDelivery
+      : totals?.deliveryCharge !== undefined
+        ? totals.deliveryCharge
+        : subtotal > 0
+          ? 50
+          : 0;
+  const platformFee =
+    extPlatformFee !== undefined
+      ? extPlatformFee
+      : totals?.platformFee !== undefined
+        ? totals.platformFee
+        : subtotal > 0
+          ? 5
+          : 0;
+  const taxes =
+    extTaxes !== undefined
+      ? extTaxes
+      : totals?.tax !== undefined
+        ? totals.tax
+        : Math.round(subtotal * 0.05);
   const discount = (extDiscount || totals?.discount || 0) + localDiscount;
 
-  const grandTotal = subtotal + deliveryFee + taxes - discount;
+  const grandTotal = Math.max(0, subtotal + deliveryFee + platformFee + taxes - discount);
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -76,6 +99,10 @@ export default function OrderSummary({
         <div className="flex justify-between items-center">
           <span>Delivery Fee</span>
           <span className="text-white font-medium">₹{deliveryFee}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span>Platform Fee</span>
+          <span className="text-white font-medium">₹{platformFee}</span>
         </div>
         <div className="flex justify-between items-center">
           <span>Taxes (5% GST)</span>

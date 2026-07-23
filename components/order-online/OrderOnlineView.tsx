@@ -199,9 +199,10 @@ export default function OrderOnlineView() {
   };
 
   const deliveryFee =
-    subtotal >= Number(settings.free_delivery_min || 499) ? 0 : Number(settings.delivery_charge || 35);
+    subtotal >= Number(settings.free_delivery_min || 500) ? 0 : Number(settings.delivery_charge || 50);
+  const platformFee = subtotal > 0 ? 5 : 0;
   const taxAmount = Math.round(subtotal * (Number(settings.tax_percent || 5) / 100));
-  const cartTotal = subtotal + deliveryFee + taxAmount;
+  const cartTotal = subtotal + deliveryFee + platformFee + taxAmount;
 
   return (
     <main className="relative min-h-screen bg-white pt-14 sm:pt-[72px] md:pt-[90px] selection:bg-primary/20 overflow-x-hidden">

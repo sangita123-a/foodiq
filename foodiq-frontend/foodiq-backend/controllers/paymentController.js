@@ -912,7 +912,7 @@ const downloadInvoice = async (req, res) => {
 /** Attach PDF invoice to payment-success email (non-blocking). */
 const emailInvoiceAfterPayment = async ({ userId, paymentId, orderId, amount }) => {
   try {
-    const { buildInvoicePdfBuffer } = require('../services/invoiceService');
+    const { buildInvoicePdfBuffer, recordInvoice } = require('../services/invoiceService');
     const { sendEmail } = require('../services/emailService');
     const { templates } = require('../services/emailTemplates');
     const userQ = await pool.query(
@@ -921,6 +921,19 @@ const emailInvoiceAfterPayment = async ({ userId, paymentId, orderId, amount }) 
     );
     const email = userQ.rows[0]?.email;
     if (!email || !paymentId) return;
+
+    const orderTax = await pool.query(
+      'SELECT tax_amount FROM orders WHERE id = $1',
+      [orderId]
+    );
+
+    await recordInvoice({
+      paymentId,
+      orderId,
+      userId,
+      amount,
+      taxAmount: orderTax.rows[0]?.tax_amount || 0,
+    });
 
     const pdf = await buildInvoicePdfBuffer({ paymentId, userId });
     const tpl = templates.invoice({
