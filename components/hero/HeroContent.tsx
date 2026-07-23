@@ -70,7 +70,7 @@ export default function HeroContent() {
         Discover amazing restaurants and delicious food delivered straight to your doorstep.
       </p>
 
-      <div className="mt-2 flex w-full max-w-4xl justify-center max-md:mt-1.5 md:mt-12">
+      <div className="mt-2 flex w-full max-w-[1100px] justify-center max-md:mt-1.5 md:mt-12">
         <SearchBar />
       </div>
 

@@ -146,7 +146,7 @@ LCP hero poster preloaded in document head: OK
 Homepage does not preload LCP from body: OK
 Navbar mobile menu uses touch-target: FAIL
 Navbar mobile actions are 44px: FAIL
-SearchBar input uses 16px on mobile: OK
+SearchBar input uses 16px on mobile: FAIL
 LovedByFoodLovers carousel controls use carousel-control: OK
 FoodCategoryNav avoids competing LCP priority images: OK
 TrendingDishes interactive controls meet touch target: OK

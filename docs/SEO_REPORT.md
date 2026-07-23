@@ -1,6 +1,6 @@
 # Foodiq Google Search Readiness Report
 
-Generated: 2026-07-23T15:24:08.252Z
+Generated: 2026-07-23T17:12:43.976Z
 
 ## Final Verdict
 
@@ -88,7 +88,7 @@ Generated: 2026-07-23T15:24:08.252Z
 | Duplicate metadata titles | ✅ Pass | 0 duplicates |
 | Duplicate canonical paths | ✅ Pass | 0 duplicates |
 | Legacy internal links | ✅ Pass | 0 remaining |
-| Empty alt attributes (UI) | ⚠️ Review | 1 files |
+| Empty alt attributes (UI) | ⚠️ Review | 2 files |
 | Global 404 page | ✅ Present | `app/not-found.tsx` |
 | Configured redirects | ✅ | 15 rules |
 
@@ -183,6 +183,7 @@ No legacy internal links detected in `app/` or `components/`.
 
 | File | Empty alt count |
 |------|-----------------|
+| `components\LovedByFoodLovers.tsx` | 1 |
 | `app\blog\page.tsx` | 1 |
 
 ## Infrastructure Checklist

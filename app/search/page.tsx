@@ -12,10 +12,13 @@ import Link from "next/link";
 import { getFoodImage, mapRestaurantCard } from "@/lib/images";
 import { useCartActions } from "@/hooks/useCartActions";
 import { POPULAR_RESTAURANTS_30, TRENDING_DISHES_60 } from "@/lib/data/30restaurantsData";
+import { restaurantMatchesCity, resolveCityKey } from "@/lib/heroLocation";
 
 function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
+  const cityParam = searchParams.get("city") || "";
+  const cityKey = cityParam ? resolveCityKey(cityParam) : "";
   const { quantities, updatingId, updateQuantity } = useCartActions();
 
   const { data, isLoading } = useSWR(query ? `/api/search?q=${encodeURIComponent(query)}` : null);
@@ -31,26 +34,34 @@ function SearchContent() {
   const fallbackRestaurants = useMemo(() => {
     if (!query) return [];
     const q = query.toLowerCase();
-    return POPULAR_RESTAURANTS_30.filter(
-      (r) =>
+    return POPULAR_RESTAURANTS_30.filter((r) => {
+      const matchesQuery =
         r.name.toLowerCase().includes(q) ||
         r.category.toLowerCase().includes(q) ||
-        r.cuisine.toLowerCase().includes(q)
-    );
-  }, [query]);
+        r.cuisine.toLowerCase().includes(q);
+      if (!matchesQuery) return false;
+      if (!cityKey) return true;
+      return restaurantMatchesCity(r.id, cityKey);
+    });
+  }, [query, cityKey]);
 
   const fallbackDishes = useMemo(() => {
     if (!query) return [];
     const q = query.toLowerCase();
-    return TRENDING_DISHES_60.filter(
-      (d) =>
+    return TRENDING_DISHES_60.filter((d) => {
+      const matchesQuery =
         d.name.toLowerCase().includes(q) ||
         d.category.toLowerCase().includes(q) ||
-        d.restaurantName.toLowerCase().includes(q)
-    );
-  }, [query]);
+        d.restaurantName.toLowerCase().includes(q);
+      if (!matchesQuery) return false;
+      if (!cityKey) return true;
+      return restaurantMatchesCity(d.restaurantId, cityKey);
+    });
+  }, [query, cityKey]);
 
-  const apiRestaurants = results.filter((r: any) => r.type === "restaurant");
+  const apiRestaurants = results
+    .filter((r: any) => r.type === "restaurant")
+    .filter((r: any) => !cityKey || !r.id || restaurantMatchesCity(String(r.id), cityKey));
   const apiMenuItems = results.filter((r: any) => r.type === "menu_item");
   const cuisines = results.filter((r: any) => r.type === "cuisine");
 
@@ -103,7 +114,9 @@ function SearchContent() {
               ? "Enter a search term above."
               : isLoading && restaurants.length === 0
                 ? "Searching..."
-                : `Found ${restaurants.length} restaurants, ${menuItems.length} dishes, and ${cuisines.length} cuisines.`}
+                : `Found ${restaurants.length} restaurants, ${menuItems.length} dishes, and ${cuisines.length} cuisines${
+                    cityKey ? ` in ${cityKey}` : ""
+                  }.`}
           </p>
         </div>
 
