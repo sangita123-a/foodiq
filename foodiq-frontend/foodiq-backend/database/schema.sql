@@ -606,6 +606,16 @@ CREATE TABLE IF NOT EXISTS otp_codes (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Partial index: fast lookup for active OTPs (the hot query path in verifyOtp + issueOtp)
+CREATE INDEX IF NOT EXISTS idx_otp_codes_dest_purpose
+    ON otp_codes(destination, purpose, consumed_at)
+    WHERE consumed_at IS NULL;
+
+-- Index for expiry-based cleanup queries
+CREATE INDEX IF NOT EXISTS idx_otp_codes_expires
+    ON otp_codes(expires_at)
+    WHERE consumed_at IS NULL;
+
 -- Cloud media library
 CREATE TABLE IF NOT EXISTS media_assets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -15,6 +15,67 @@ async function ensureSchema() {
     }
   };
   try {
+    // ── OTP / SMS / Email tables (must exist before any auth request) ──────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS otp_codes (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        destination VARCHAR(255) NOT NULL,
+        channel VARCHAR(20) NOT NULL DEFAULT 'email',
+        purpose VARCHAR(60) NOT NULL DEFAULT 'verification',
+        code_hash VARCHAR(128) NOT NULL,
+        attempts INTEGER NOT NULL DEFAULT 0,
+        expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+        consumed_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_otp_codes_dest_purpose
+      ON otp_codes(destination, purpose, consumed_at)
+      WHERE consumed_at IS NULL
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_otp_codes_expires
+      ON otp_codes(expires_at)
+      WHERE consumed_at IS NULL
+    `);
+    await q(`
+      CREATE TABLE IF NOT EXISTS sms_logs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        to_phone VARCHAR(30) NOT NULL,
+        body TEXT NOT NULL,
+        template VARCHAR(80),
+        status VARCHAR(30) NOT NULL DEFAULT 'pending',
+        provider VARCHAR(40),
+        provider_message_id VARCHAR(255),
+        error TEXT,
+        attempts INTEGER NOT NULL DEFAULT 1,
+        meta JSONB DEFAULT '{}'::jsonb,
+        related_order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      CREATE TABLE IF NOT EXISTS email_logs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        to_email VARCHAR(255) NOT NULL,
+        subject VARCHAR(500) NOT NULL,
+        template VARCHAR(80),
+        status VARCHAR(30) NOT NULL DEFAULT 'pending',
+        provider VARCHAR(40),
+        provider_message_id VARCHAR(255),
+        error TEXT,
+        attempts INTEGER NOT NULL DEFAULT 1,
+        meta JSONB DEFAULT '{}'::jsonb,
+        related_order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    // ── Orders ────────────────────────────────────────────────────────────────
     await q(`
       ALTER TABLE orders
       ADD COLUMN IF NOT EXISTS delivery_instructions TEXT

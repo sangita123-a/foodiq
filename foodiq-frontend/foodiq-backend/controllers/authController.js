@@ -660,7 +660,10 @@ const sendAuthOtp = async (req, res) => {
         ? 'password_reset'
         : 'phone_login';
 
+    log.info('[auth] send-otp request received', { mobile: mobile ? mobile.slice(-4).padStart(mobile.length, '*') : null, purpose });
+
     if (!isValidIndianMobileOnly(mobile)) {
+      log.warn('[auth] send-otp rejected: invalid phone', { mobile });
       return res.status(400).json({
         success: false,
         message: 'Enter a valid 10-digit Indian mobile number',
@@ -670,8 +673,10 @@ const sendAuthOtp = async (req, res) => {
 
     const destination = toE164Indian(mobile);
     const user = await findUserByPhone(mobile);
+    log.info('[auth] send-otp user lookup', { destination, account_exists: Boolean(user), userId: user?.id || null });
 
     if (purpose === 'password_reset' && !user) {
+      log.info('[auth] send-otp password_reset: no account, returning generic response');
       return res.json({
         success: true,
         message: 'If an account exists for this mobile number, a password reset code has been sent.',
@@ -688,6 +693,13 @@ const sendAuthOtp = async (req, res) => {
       name: user?.full_name || null,
     });
 
+    log.info('[auth] send-otp OTP issued', {
+      otp_id: otpResult.otp_id,
+      destination,
+      sms_sent: otpResult.sms_sent,
+      has_sms_error: Boolean(otpResult.sms_error),
+    });
+
     const data = {
       mobile: destination,
       otp_id: otpResult.otp_id,
@@ -696,6 +708,7 @@ const sendAuthOtp = async (req, res) => {
       account_exists: Boolean(user),
     };
 
+    // Expose OTP in dev mode so testers can see it in the API response / toast
     if (
       process.env.NODE_ENV !== 'production' &&
       otpResult.debug_code &&
@@ -704,12 +717,26 @@ const sendAuthOtp = async (req, res) => {
       data.debug_code = otpResult.debug_code;
     }
 
+    // Surface SMS send failure as a non-fatal warning in the response
+    let message = 'OTP sent successfully';
+    if (otpResult.sms_error) {
+      log.warn('[auth] send-otp SMS dispatch failed, returning warning', {
+        destination,
+        sms_error: otpResult.sms_error,
+      });
+      message = process.env.NODE_ENV !== 'production'
+        ? `OTP generated but SMS failed: ${otpResult.sms_error}`
+        : 'OTP generated. If you do not receive an SMS, please try again.';
+      data.sms_failed = true;
+    }
+
     return res.json({
       success: true,
-      message: 'OTP sent successfully',
+      message,
       data,
     });
   } catch (error) {
+    log.error('[auth] send-otp error', { error: error.message, status: error.status });
     return fail(
       res,
       error.status || 500,

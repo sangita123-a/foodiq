@@ -23,6 +23,9 @@ const isAuthCredentialPath = (path) => {
     p === '/api/auth/forgot-password' ||
     p === '/api/auth/reset-password' ||
     p === '/api/auth/logout' ||
+    // OTP endpoints are unauthenticated public flows — no CSRF cookie exists yet
+    p === '/api/auth/send-otp' ||
+    p === '/api/auth/verify-otp' ||
     p.startsWith('/api/delivery/register')
   );
 };
