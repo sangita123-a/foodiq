@@ -20,7 +20,7 @@ const hashCode = (code) =>
 
 /**
  * Rate-limit OTP requests per destination + purpose.
- * Max OTP_RATE_MAX requests in OTP_RATE_WINDOW_MIN minutes.
+ * Max OTP_RATE_MAX requests in OTP_RATE_WINDOW_MIN minutes (default 5 per hour).
  */
 const assertRateLimit = async (destination, purpose) => {
   const { rows } = await pool.query(
@@ -51,14 +51,14 @@ const assertRateLimit = async (destination, purpose) => {
  * @param {string|null} opts.userId
  * @param {string} opts.destination  - E.164 phone (+91xxxxxxxxxx) or email
  * @param {'email'|'sms'|'both'} opts.channel
- * @param {string} opts.purpose      - phone_login | password_reset | verification
+ * @param {string} opts.purpose      - phone_login | email_login | password_reset | verification
  * @param {string|null} opts.name
- * @returns {{ otp_id, expires_at, channel, sms_sent, debug_code? }}
+ * @returns {{ otp_id, expires_at, channel, sms_sent, email_sent, debug_code? }}
  */
 const issueOtp = async ({
   userId = null,
   destination,
-  channel = 'email', // email | sms | both
+  channel = 'email',
   purpose = 'verification',
   name = null,
 }) => {
@@ -109,36 +109,68 @@ const issueOtp = async ({
   const otpId = rows[0].id;
   log.info('[otp] OTP saved to database', { otp_id: otpId, destination, purpose });
 
-  const channels = channel === 'both' ? ['email', 'sms'] : [channel];
+  const isEmailDest = destination.includes('@');
+  const resolvedChannel = channel === 'auto' ? (isEmailDest ? 'email' : 'sms') : channel;
+  const channels = resolvedChannel === 'both' ? ['email', 'sms'] : [resolvedChannel];
+
+  let emailSent = false;
+  let emailFailed = false;
+  let emailError = null;
   let smsSent = false;
   let smsFailed = false;
   let smsError = null;
 
   // ── Email channel ───────────────────────────────────────────────────────────
-  if (channels.includes('email') && destination.includes('@')) {
-    const tpl = purpose.includes('reset')
-      ? templates.passwordReset({ name, code })
-      : templates.otp({ code, purpose });
-    log.info('[otp] dispatching email', { to: destination, purpose });
-    await sendEmail({
-      to: destination,
-      subject: tpl.subject,
-      html: tpl.html,
-      text: tpl.text,
-      userId,
-      template: purpose,
-      meta: { otp_id: otpId },
-    }).catch((err) => {
-      log.warn('[otp] email dispatch failed', { destination, error: err.message });
-    });
+  if (channels.includes('email')) {
+    let emailTo = isEmailDest ? destination : null;
+    if (!emailTo && userId) {
+      const u = await pool.query('SELECT email FROM users WHERE id = $1', [userId]);
+      emailTo = u.rows[0]?.email || null;
+    }
+
+    if (emailTo) {
+      const tpl = purpose.includes('reset')
+        ? templates.passwordReset({ name, code })
+        : templates.otp({ code, purpose });
+      log.info('[otp] dispatching email', { to: emailTo, purpose, otp_id: otpId });
+
+      try {
+        const emailResult = await sendEmail({
+          to: emailTo,
+          subject: tpl.subject,
+          html: tpl.html,
+          text: tpl.text,
+          userId,
+          template: purpose,
+          meta: { otp_id: otpId },
+        });
+        emailSent = true;
+        log.info('[otp] Email dispatched successfully', {
+          to: emailTo,
+          provider_id: emailResult.id,
+          mock: emailResult.mock,
+        });
+      } catch (err) {
+        emailFailed = true;
+        emailError = err.message;
+        log.error('[otp] Email dispatch failed', {
+          to: emailTo,
+          purpose,
+          otp_id: otpId,
+          error: err.message,
+        });
+      }
+    } else {
+      log.warn('[otp] Email channel requested but no email address resolved', {
+        destination,
+        userId,
+      });
+    }
   }
 
   // ── SMS channel ─────────────────────────────────────────────────────────────
   if (channels.includes('sms')) {
-    const phone = destination.includes('@') ? null : destination;
-    let smsTo = phone;
-
-    // If channel=both and destination is email, look up phone from user record
+    let smsTo = !isEmailDest ? destination : null;
     if (!smsTo && userId) {
       const u = await pool.query('SELECT phone_number FROM users WHERE id = $1', [userId]);
       smsTo = u.rows[0]?.phone_number || null;
@@ -183,17 +215,15 @@ const issueOtp = async ({
   const response = {
     otp_id: otpId,
     expires_at: rows[0].expires_at,
-    channel,
+    channel: resolvedChannel,
+    email_sent: emailSent,
     sms_sent: smsSent,
   };
 
-  // Surface SMS failure as a non-fatal warning so the caller can inform the user
-  if (smsFailed) {
-    response.sms_error = smsError;
-    log.warn('[otp] returning with sms_failed flag', { otp_id: otpId, sms_error: smsError });
-  }
+  if (emailFailed) response.email_error = emailError;
+  if (smsFailed) response.sms_error = smsError;
 
-  // Expose OTP code only in non-production + OTP_EXPOSE_CODE=true
+  // Expose OTP code in non-production + OTP_EXPOSE_CODE=true
   if (
     process.env.NODE_ENV !== 'production' &&
     String(process.env.OTP_EXPOSE_CODE || '').toLowerCase() === 'true'

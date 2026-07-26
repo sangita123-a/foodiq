@@ -6,7 +6,7 @@ import MobileDrawer from "@/components/ui/MobileDrawer";
 import { useToast } from "@/contexts/ToastContext";
 import { markAuthenticated, authCookieOptions } from "@/lib/authSession";
 import { persistAuthUser } from "@/lib/authUser";
-import { validateIndianMobile, normalizeIndianMobile } from "@/lib/phone";
+import { validateIndianMobile, normalizeIndianMobile, toE164Indian } from "@/lib/phone";
 import { validateFullName, validatePassword, validateEmail } from "@/lib/authValidation";
 import {
   sendOtp,
@@ -124,7 +124,23 @@ export default function AuthDrawer({ open, onClose, onAuthenticated }: Props) {
   };
 
   const requestOtp = async (purpose: "phone_login" | "password_reset") => {
-    const err = validateIndianMobile(mobile);
+    const value = mobile.trim();
+    let err: string | null = null;
+    let payload: { destination?: string; mobile?: string; purpose?: "phone_login" | "password_reset" } = {};
+
+    if (value.includes("@")) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        err = "Enter a valid email address";
+      } else {
+        payload = { destination: value.toLowerCase(), purpose };
+      }
+    } else {
+      err = validateIndianMobile(value);
+      if (!err) {
+        payload = { mobile: normalizeIndianMobile(value), destination: toE164Indian(value), purpose };
+      }
+    }
+
     if (err) {
       setFieldError(err);
       return;
@@ -132,7 +148,7 @@ export default function AuthDrawer({ open, onClose, onAuthenticated }: Props) {
     setLoading(true);
     setFieldError(null);
     try {
-      const res = await sendOtp({ mobile: normalizeIndianMobile(mobile), purpose });
+      const res = await sendOtp(payload);
       if (!res.success) {
         setFieldError(res.message || "Failed to send OTP");
         return;
@@ -140,7 +156,7 @@ export default function AuthDrawer({ open, onClose, onAuthenticated }: Props) {
       if (res.data?.debug_code) {
         showToast(`Dev OTP: ${res.data.debug_code}`, "success");
       } else {
-        showToast("OTP sent to your mobile", "success");
+        showToast(res.message || "OTP sent successfully", "success");
       }
       setOtpPurpose(purpose);
       setOtp(["", "", "", "", "", ""]);
@@ -165,8 +181,11 @@ export default function AuthDrawer({ open, onClose, onAuthenticated }: Props) {
     setLoading(true);
     setFieldError(null);
     try {
+      const value = mobile.trim();
+      const isEmail = value.includes("@");
       const parsed = await verifyOtp({
-        mobile: normalizeIndianMobile(mobile),
+        destination: isEmail ? value.toLowerCase() : undefined,
+        mobile: !isEmail ? normalizeIndianMobile(value) : undefined,
         otp: otpCode,
         purpose: "phone_login",
       });
@@ -334,30 +353,31 @@ export default function AuthDrawer({ open, onClose, onAuthenticated }: Props) {
           <div className="space-y-5">
             <p className="text-sm text-gray-text">
               {view === "forgot-phone"
-                ? "Enter your registered mobile number to receive a reset code."
-                : "Enter your mobile number to continue. We’ll send a one-time password."}
+                ? "Enter your registered mobile number or email to receive a reset code."
+                : "Enter your mobile number or email to continue. We’ll send a one-time password."}
             </p>
             <label className="block">
               <span className="mb-2 block text-xs font-bold uppercase tracking-wide text-muted">
-                Mobile Number
+                Mobile Number or Email
               </span>
               <div className="flex overflow-hidden rounded-xl border border-border bg-white focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15">
-                <span className="flex items-center border-r border-border bg-section px-3 text-sm font-semibold text-foreground">
-                  +91
-                </span>
+                {!mobile.includes("@") && (
+                  <span className="flex items-center border-r border-border bg-section px-3 text-sm font-semibold text-foreground">
+                    +91
+                  </span>
+                )}
                 <input
-                  type="tel"
-                  inputMode="numeric"
-                  autoComplete="tel"
-                  maxLength={10}
+                  type="text"
+                  inputMode={mobile.includes("@") ? "email" : "numeric"}
+                  autoComplete="username"
                   value={mobile}
                   onChange={(e) => {
-                    setMobile(e.target.value.replace(/\D/g, "").slice(0, 10));
+                    setMobile(e.target.value);
                     setFieldError(null);
                   }}
-                  placeholder="9876543210"
+                  placeholder="9876543210 or user@example.com"
                   className="w-full bg-transparent px-3 py-3 text-foreground outline-none"
-                  aria-label="Mobile number"
+                  aria-label="Mobile number or email"
                 />
               </div>
             </label>

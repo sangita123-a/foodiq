@@ -2,8 +2,11 @@ import api from "@/services/api";
 import { parseAuthApiResponse, type AuthApiPayload } from "@/lib/authResponse";
 
 export async function sendOtp(payload: {
-  mobile: string;
-  purpose?: "phone_login" | "password_reset";
+  mobile?: string;
+  email?: string;
+  destination?: string;
+  channel?: "sms" | "email" | "both" | "auto";
+  purpose?: "phone_login" | "email_login" | "password_reset";
 }) {
   const res = await api.post("/api/auth/send-otp", payload);
   return res.data as {
@@ -11,18 +14,23 @@ export async function sendOtp(payload: {
     message?: string;
     data?: {
       mobile?: string;
+      email?: string;
+      destination?: string;
       expires_at?: string;
       debug_code?: string;
       account_exists?: boolean;
       purpose?: string;
+      delivery_warning?: boolean;
     };
   };
 }
 
 export async function verifyOtp(payload: {
-  mobile: string;
+  mobile?: string;
+  email?: string;
+  destination?: string;
   otp: string;
-  purpose?: "phone_login" | "password_reset";
+  purpose?: "phone_login" | "email_login" | "password_reset";
 }) {
   const res = await api.post("/api/auth/verify-otp", payload);
   return parseAuthApiResponse(res.data as AuthApiPayload);

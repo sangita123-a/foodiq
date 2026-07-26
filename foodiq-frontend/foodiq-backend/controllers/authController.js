@@ -648,39 +648,85 @@ const resetPassword = async (req, res) => {
   }
 };
 
-// @desc    Send OTP for phone sign-in / password reset
+// @desc    Send OTP for phone sign-in / email sign-in / password reset
 // @route   POST /api/auth/send-otp
 // @access  Public
 const sendAuthOtp = async (req, res) => {
   try {
-    const mobile = String(req.body.mobile || req.body.phone || req.body.phone_number || '').trim();
+    const rawDestination = String(
+      req.body.destination || req.body.email || req.body.mobile || req.body.phone || req.body.phone_number || ''
+    ).trim();
+
     const purposeRaw = String(req.body.purpose || 'phone_login').trim().toLowerCase();
     const purpose =
       purposeRaw === 'password_reset' || purposeRaw === 'forgot_password'
         ? 'password_reset'
+        : purposeRaw === 'email_login'
+        ? 'email_login'
         : 'phone_login';
 
-    log.info('[auth] send-otp request received', { mobile: mobile ? mobile.slice(-4).padStart(mobile.length, '*') : null, purpose });
+    log.info('[auth] send-otp request received', {
+      rawDestination: rawDestination ? (rawDestination.includes('@') ? rawDestination : rawDestination.slice(-4).padStart(rawDestination.length, '*')) : null,
+      purpose,
+      reqChannel: req.body.channel,
+    });
 
-    if (!isValidIndianMobileOnly(mobile)) {
-      log.warn('[auth] send-otp rejected: invalid phone', { mobile });
+    if (!rawDestination) {
+      log.warn('[auth] send-otp rejected: missing destination');
       return res.status(400).json({
         success: false,
-        message: 'Enter a valid 10-digit Indian mobile number',
+        message: 'Mobile number or email address is required',
         error: {},
       });
     }
 
-    const destination = toE164Indian(mobile);
-    const user = await findUserByPhone(mobile);
-    log.info('[auth] send-otp user lookup', { destination, account_exists: Boolean(user), userId: user?.id || null });
+    let destination = '';
+    let channel = req.body.channel || 'auto';
+    let user = null;
+
+    if (rawDestination.includes('@')) {
+      // Email destination
+      const email = rawDestination.toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        log.warn('[auth] send-otp rejected: invalid email format', { email });
+        return res.status(400).json({
+          success: false,
+          message: 'Enter a valid email address',
+          error: {},
+        });
+      }
+      destination = email;
+      channel = req.body.channel || 'email';
+      user = await findUserByEmail(email);
+    } else {
+      // Mobile phone destination
+      const mobile = normalizeMobileDigits(rawDestination);
+      if (!isValidIndianMobileOnly(mobile)) {
+        log.warn('[auth] send-otp rejected: invalid phone', { mobile: rawDestination });
+        return res.status(400).json({
+          success: false,
+          message: 'Enter a valid 10-digit Indian mobile number',
+          error: {},
+        });
+      }
+      destination = toE164Indian(mobile);
+      channel = req.body.channel || 'sms';
+      user = await findUserByPhone(mobile);
+    }
+
+    log.info('[auth] send-otp user lookup result', {
+      destination,
+      channel,
+      account_exists: Boolean(user),
+      userId: user?.id || null,
+    });
 
     if (purpose === 'password_reset' && !user) {
       log.info('[auth] send-otp password_reset: no account, returning generic response');
       return res.json({
         success: true,
-        message: 'If an account exists for this mobile number, a password reset code has been sent.',
-        data: { mobile: destination },
+        message: 'If an account exists, a password reset code has been sent.',
+        data: { destination },
       });
     }
 
@@ -688,7 +734,7 @@ const sendAuthOtp = async (req, res) => {
     const otpResult = await issueOtp({
       userId: user?.id || null,
       destination,
-      channel: 'sms',
+      channel,
       purpose,
       name: user?.full_name || null,
     });
@@ -696,19 +742,24 @@ const sendAuthOtp = async (req, res) => {
     log.info('[auth] send-otp OTP issued', {
       otp_id: otpResult.otp_id,
       destination,
+      channel: otpResult.channel,
       sms_sent: otpResult.sms_sent,
+      email_sent: otpResult.email_sent,
       has_sms_error: Boolean(otpResult.sms_error),
+      has_email_error: Boolean(otpResult.email_error),
     });
 
     const data = {
-      mobile: destination,
+      destination,
+      mobile: destination.startsWith('+') ? destination : undefined,
+      email: destination.includes('@') ? destination : undefined,
       otp_id: otpResult.otp_id,
       expires_at: otpResult.expires_at,
+      channel: otpResult.channel,
       purpose,
       account_exists: Boolean(user),
     };
 
-    // Expose OTP in dev mode so testers can see it in the API response / toast
     if (
       process.env.NODE_ENV !== 'production' &&
       otpResult.debug_code &&
@@ -717,17 +768,14 @@ const sendAuthOtp = async (req, res) => {
       data.debug_code = otpResult.debug_code;
     }
 
-    // Surface SMS send failure as a non-fatal warning in the response
     let message = 'OTP sent successfully';
-    if (otpResult.sms_error) {
-      log.warn('[auth] send-otp SMS dispatch failed, returning warning', {
-        destination,
-        sms_error: otpResult.sms_error,
-      });
+    if (otpResult.sms_error || otpResult.email_error) {
+      const errDetail = otpResult.sms_error || otpResult.email_error;
+      log.warn('[auth] send-otp delivery warning', { destination, error: errDetail });
       message = process.env.NODE_ENV !== 'production'
-        ? `OTP generated but SMS failed: ${otpResult.sms_error}`
-        : 'OTP generated. If you do not receive an SMS, please try again.';
-      data.sms_failed = true;
+        ? `OTP generated but delivery warning: ${errDetail}`
+        : 'OTP generated. If you do not receive it, please try again.';
+      data.delivery_warning = true;
     }
 
     return res.json({
@@ -746,35 +794,56 @@ const sendAuthOtp = async (req, res) => {
   }
 };
 
-// @desc    Verify OTP and create JWT session (phone login)
+// @desc    Verify OTP and create JWT session (phone/email login)
 // @route   POST /api/auth/verify-otp
 // @access  Public
 const verifyAuthOtp = async (req, res) => {
   try {
-    const mobile = String(req.body.mobile || req.body.phone || req.body.phone_number || '').trim();
+    const rawDestination = String(
+      req.body.destination || req.body.email || req.body.mobile || req.body.phone || req.body.phone_number || ''
+    ).trim();
     const code = String(req.body.otp || req.body.code || '').trim();
     const purposeRaw = String(req.body.purpose || 'phone_login').trim().toLowerCase();
     const purpose =
       purposeRaw === 'password_reset' || purposeRaw === 'forgot_password'
         ? 'password_reset'
+        : purposeRaw === 'email_login'
+        ? 'email_login'
         : 'phone_login';
 
-    if (!isValidIndianMobileOnly(mobile)) {
+    log.info('[auth] verify-otp request received', {
+      rawDestination: rawDestination ? (rawDestination.includes('@') ? rawDestination : rawDestination.slice(-4).padStart(rawDestination.length, '*')) : null,
+      purpose,
+    });
+
+    if (!rawDestination) {
       return res.status(400).json({
         success: false,
-        message: 'Enter a valid 10-digit Indian mobile number',
+        message: 'Mobile number or email address is required',
         error: {},
       });
     }
+
     if (!/^\d{4,8}$/.test(code)) {
       return res.status(400).json({
         success: false,
-        message: 'Enter a valid OTP',
+        message: 'Enter a valid OTP code',
         error: {},
       });
     }
 
-    const destination = toE164Indian(mobile);
+    let destination = '';
+    let user = null;
+
+    if (rawDestination.includes('@')) {
+      destination = rawDestination.toLowerCase();
+      user = await findUserByEmail(destination);
+    } else {
+      const mobile = normalizeMobileDigits(rawDestination);
+      destination = toE164Indian(mobile);
+      user = await findUserByPhone(mobile);
+    }
+
     const { verifyOtp } = require('../services/otpService');
     await verifyOtp({ destination, purpose, code });
 
@@ -782,24 +851,26 @@ const verifyAuthOtp = async (req, res) => {
       return res.json({
         success: true,
         message: 'OTP verified. You can set a new password.',
-        data: { mobile: destination, verified: true, purpose },
+        data: { destination, verified: true, purpose },
       });
     }
 
-    let user = await findUserByPhone(mobile);
     if (!user) {
+      log.warn('[auth] verify-otp: no account found for destination', { destination });
       return res.status(404).json({
         success: false,
-        message: 'No account found for this number. Please create an account.',
+        message: 'No account found. Please create an account.',
         error: { needs_registration: true },
-        data: { needs_registration: true, mobile: destination },
+        data: { needs_registration: true, destination },
       });
     }
 
-    try {
-      user = (await markPhoneVerified(user.id)) || user;
-    } catch {
-      /* column may be pending migration */
+    if (destination.startsWith('+')) {
+      try {
+        user = (await markPhoneVerified(user.id)) || user;
+      } catch {
+        /* column may be pending migration */
+      }
     }
 
     writeAudit({
@@ -820,8 +891,10 @@ const verifyAuthOtp = async (req, res) => {
       }
     }
 
+    log.info('[auth] verify-otp successful, issuing session', { userId: user.id, role: user.role });
     return issueSessionForUser(req, res, user, 'OTP verified. Signed in successfully.');
   } catch (error) {
+    log.error('[auth] verify-otp error', { error: error.message, status: error.status });
     return fail(
       res,
       error.status || 500,
