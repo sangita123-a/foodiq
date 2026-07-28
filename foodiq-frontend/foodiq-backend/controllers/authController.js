@@ -313,24 +313,17 @@ const loginUser = async (req, res) => {
 
     let user = null;
     if (email) {
-      if (!isValidEmail(email)) {
-        log.warn('[auth] login validation failed: invalid email', { email });
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid email format',
-          error: {},
-        });
+      if (isValidEmail(email)) {
+        user = await findUserByEmail(email);
       }
-      user = await findUserByEmail(email);
-    } else {
-      if (!isValidIndianMobileOnly(mobile)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Enter a valid 10-digit Indian mobile number',
-          error: {},
-        });
+      if (!user && (isValidIndianMobileOnly(email) || /^\d{10}$/.test(email))) {
+        user = await findUserByPhone(email);
       }
-      user = await findUserByPhone(mobile);
+    }
+    if (!user && mobile) {
+      if (isValidIndianMobileOnly(mobile)) {
+        user = await findUserByPhone(mobile);
+      }
     }
 
     if (!user) {
@@ -350,7 +343,10 @@ const loginUser = async (req, res) => {
       });
     }
 
-    if (!user.password_hash || !user.password_hash.startsWith('$2')) {
+    const passwordHash = user.password_hash || user.password;
+    log.info('[auth] user lookup successful', { userId: user.id, email: user.email, hasPasswordHash: Boolean(passwordHash) });
+
+    if (!passwordHash || (!passwordHash.startsWith('$2a$') && !passwordHash.startsWith('$2b$') && !passwordHash.startsWith('$2y$') && !passwordHash.startsWith('$2'))) {
       log.warn('[auth] login failed: missing bcrypt hash', { userId: user.id });
       bump('auth_failed');
       return res.status(401).json({
@@ -360,7 +356,7 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const passwordMatched = await bcrypt.compare(password, user.password_hash);
+    const passwordMatched = await bcrypt.compare(password, passwordHash);
     log.info('[auth] password compare completed', { userId: user.id, matched: passwordMatched });
 
     if (!passwordMatched) {

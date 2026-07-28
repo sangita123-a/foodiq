@@ -1,6 +1,6 @@
 # Foodiq Google Search Readiness Report
 
-Generated: 2026-07-28T15:23:59.217Z
+Generated: 2026-07-28T15:47:08.289Z
 
 ## Final Verdict
 

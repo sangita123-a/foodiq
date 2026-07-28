@@ -15,14 +15,26 @@ const createUser = async (userData) => {
     );
     return rows[0];
   } catch (err) {
-    if (!String(err.message || '').includes('is_phone_verified')) throw err;
-    const { rows } = await pool.query(
-      `INSERT INTO users (full_name, email, password_hash, phone_number)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id, full_name, email, phone_number, role, created_at, updated_at`,
-      [full_name, normalizedEmail, password_hash, phone]
-    );
-    return rows[0];
+    const msg = String(err.message || '');
+    if (msg.includes('password_hash')) {
+      const { rows } = await pool.query(
+        `INSERT INTO users (full_name, email, password, phone_number)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id, full_name, email, phone_number, role, created_at, updated_at`,
+        [full_name, normalizedEmail, password_hash, phone]
+      );
+      return rows[0];
+    }
+    if (msg.includes('is_phone_verified')) {
+      const { rows } = await pool.query(
+        `INSERT INTO users (full_name, email, password_hash, phone_number)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id, full_name, email, phone_number, role, created_at, updated_at`,
+        [full_name, normalizedEmail, password_hash, phone]
+      );
+      return rows[0];
+    }
+    throw err;
   }
 };
 
