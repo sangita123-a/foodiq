@@ -27,6 +27,7 @@ model User {
   mobile          String?         @map("phone_number")
   passwordHash    String          @map("password_hash")
   isPhoneVerified Boolean         @default(false) @map("is_phone_verified")
+  isDeleted       Boolean         @default(false) @map("is_deleted")
   role            String          @default("customer")
   createdAt       DateTime        @default(now()) @map("created_at")
   updatedAt       DateTime        @default(now()) @updatedAt @map("updated_at")

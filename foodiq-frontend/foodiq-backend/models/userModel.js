@@ -27,33 +27,68 @@ const createUser = async (userData) => {
 };
 
 const findUserByEmail = async (email) => {
-  const normalizedEmail = normalizeEmail(email);
-  const query = `SELECT * FROM users WHERE LOWER(TRIM(email)) = $1 AND COALESCE(is_deleted, false) = false`;
-  const { rows } = await pool.query(query, [normalizedEmail]);
-  return rows[0];
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  if (!normalizedEmail) return null;
+  try {
+    const query = `SELECT * FROM users WHERE LOWER(email) = LOWER($1) AND (is_deleted = false OR is_deleted IS NULL)`;
+    const { rows } = await pool.query(query, [normalizedEmail]);
+    return rows[0];
+  } catch (err) {
+    if (String(err.message || '').includes('is_deleted')) {
+      const fallbackQuery = `SELECT * FROM users WHERE LOWER(email) = LOWER($1)`;
+      const { rows } = await pool.query(fallbackQuery, [normalizedEmail]);
+      return rows[0];
+    }
+    throw err;
+  }
 };
 
 const findUserByPhone = async (phone) => {
   const variants = phoneMatchVariants(phone);
   if (!variants.length) return null;
-  const query = `
-    SELECT *
-    FROM users
-    WHERE COALESCE(is_deleted, false) = false
-      AND (
-        TRIM(phone_number) = ANY($1::text[])
-        OR regexp_replace(COALESCE(phone_number, ''), '\\D', '', 'g') = $2
-      )
-    LIMIT 1
-  `;
-  const { rows } = await pool.query(query, [variants, normalizeIndianMobile(phone)]);
-  return rows[0] || null;
+  const normalizedMobile = normalizeIndianMobile(phone);
+  try {
+    const query = `
+      SELECT *
+      FROM users
+      WHERE (is_deleted = false OR is_deleted IS NULL)
+        AND (
+          TRIM(phone_number) = ANY($1::text[])
+          OR regexp_replace(COALESCE(phone_number, ''), '\\D', '', 'g') = $2
+        )
+      LIMIT 1
+    `;
+    const { rows } = await pool.query(query, [variants, normalizedMobile]);
+    return rows[0] || null;
+  } catch (err) {
+    if (String(err.message || '').includes('is_deleted')) {
+      const fallbackQuery = `
+        SELECT *
+        FROM users
+        WHERE TRIM(phone_number) = ANY($1::text[])
+           OR regexp_replace(COALESCE(phone_number, ''), '\\D', '', 'g') = $2
+        LIMIT 1
+      `;
+      const { rows } = await pool.query(fallbackQuery, [variants, normalizedMobile]);
+      return rows[0] || null;
+    }
+    throw err;
+  }
 };
 
 const findUserById = async (id) => {
-  const query = `SELECT id, full_name, email, phone_number, role, admin_role, COALESCE(token_version, 1)::int AS token_version, COALESCE(is_phone_verified, false) AS is_phone_verified, created_at, updated_at FROM users WHERE id = $1 AND COALESCE(is_deleted, false) = false`;
-  const { rows } = await pool.query(query, [id]);
-  return rows[0];
+  try {
+    const query = `SELECT id, full_name, email, phone_number, role, admin_role, COALESCE(token_version, 1)::int AS token_version, COALESCE(is_phone_verified, false) AS is_phone_verified, created_at, updated_at FROM users WHERE id = $1 AND (is_deleted = false OR is_deleted IS NULL)`;
+    const { rows } = await pool.query(query, [id]);
+    return rows[0];
+  } catch (err) {
+    if (String(err.message || '').includes('is_deleted')) {
+      const fallbackQuery = `SELECT id, full_name, email, phone_number, role, admin_role, COALESCE(token_version, 1)::int AS token_version, COALESCE(is_phone_verified, false) AS is_phone_verified, created_at, updated_at FROM users WHERE id = $1`;
+      const { rows } = await pool.query(fallbackQuery, [id]);
+      return rows[0];
+    }
+    throw err;
+  }
 };
 
 const updateUserProfile = async (id, userData) => {
