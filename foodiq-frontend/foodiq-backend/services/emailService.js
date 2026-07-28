@@ -15,7 +15,7 @@ const { log } = require('../utils/logger');
 const getSmtpHost = () => process.env.SMTP_HOST || process.env.EMAIL_HOST;
 const getSmtpPort = () => Number(process.env.SMTP_PORT || process.env.EMAIL_PORT || 587);
 const getSmtpUser = () => process.env.SMTP_USER || process.env.EMAIL_USER;
-const getSmtpPass = () => process.env.SMTP_PASS || process.env.EMAIL_PASS;
+const getSmtpPass = () => process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.EMAIL_PASSWORD;
 const getSmtpSecure = () =>
   String(process.env.SMTP_SECURE || '').toLowerCase() === 'true' || getSmtpPort() === 465;
 const getFromAddress = () =>
@@ -29,11 +29,15 @@ const getFromAddress = () =>
  */
 const provider = () => {
   const configured = String(process.env.EMAIL_PROVIDER || '').toLowerCase().trim();
-  if (configured && configured !== 'auto') return configured;
 
-  if (getSmtpHost()) return 'smtp';
-  if (process.env.RESEND_API_KEY) return 'resend';
-  if (process.env.SENDGRID_API_KEY) return 'sendgrid';
+  // If SMTP or service keys exist and EMAIL_PROVIDER is auto, empty, or default mock, auto-upgrade
+  if (!configured || configured === 'auto' || configured === 'mock') {
+    if (getSmtpHost() || getSmtpUser()) return 'smtp';
+    if (process.env.RESEND_API_KEY) return 'resend';
+    if (process.env.SENDGRID_API_KEY) return 'sendgrid';
+  }
+
+  if (configured && configured !== 'auto') return configured;
 
   return 'mock';
 };

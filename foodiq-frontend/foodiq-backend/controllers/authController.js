@@ -533,9 +533,20 @@ const forgotPassword = async (req, res) => {
       name: user.full_name,
     });
 
+    if (otpResult.email_error) {
+      log.error('[authController] forgotPassword OTP email dispatch error:', {
+        email,
+        error: otpResult.email_error,
+      });
+    }
+
     const payload = email
       ? { email, expires_at: otpResult.expires_at }
       : { mobile: toE164Indian(mobile), expires_at: otpResult.expires_at };
+
+    if (otpResult.email_error && process.env.NODE_ENV !== 'production') {
+      payload.email_error = otpResult.email_error;
+    }
 
     if (
       process.env.NODE_ENV !== 'production' &&

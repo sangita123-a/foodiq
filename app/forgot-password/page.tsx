@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
         <p className="text-gray-text text-sm text-center mb-6">
           {step === "request"
             ? "Enter your email to receive reset instructions."
-            : "Enter reset code FOODIQ and your new password."}
+            : "Enter the 6-digit code sent to your email and your new password."}
         </p>
 
         {error && (
@@ -108,14 +108,14 @@ export default function ForgotPasswordPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-text mb-2">Reset Code</label>
+              <label className="block text-sm font-medium text-gray-text mb-2">Reset Code (OTP)</label>
               <input
                 type="text"
                 required
                 value={resetCode}
                 onChange={(e) => setResetCode(e.target.value)}
                 className="w-full bg-section border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-[var(--color-primary)]"
-                placeholder="FOODIQ"
+                placeholder="123456"
               />
             </div>
             <div>
