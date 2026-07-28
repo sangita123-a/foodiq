@@ -533,20 +533,26 @@ const forgotPassword = async (req, res) => {
       name: user.full_name,
     });
 
-    if (otpResult.email_error) {
+    if (otpResult.email_error && !otpResult.email_sent) {
       log.error('[authController] forgotPassword OTP email dispatch error:', {
         email,
         error: otpResult.email_error,
+      });
+
+      const isNotConfigured = String(otpResult.email_error).toLowerCase().includes('not configured');
+      return res.status(500).json({
+        success: false,
+        message: isNotConfigured ? 'Email service not configured' : `Email delivery failed: ${otpResult.email_error}`,
+        error: {
+          code: isNotConfigured ? 'EMAIL_SERVICE_NOT_CONFIGURED' : 'EMAIL_DISPATCH_FAILED',
+          detail: otpResult.email_error,
+        },
       });
     }
 
     const payload = email
       ? { email, expires_at: otpResult.expires_at }
       : { mobile: toE164Indian(mobile), expires_at: otpResult.expires_at };
-
-    if (otpResult.email_error && process.env.NODE_ENV !== 'production') {
-      payload.email_error = otpResult.email_error;
-    }
 
     if (
       process.env.NODE_ENV !== 'production' &&

@@ -226,7 +226,24 @@ const sendEmail = async (opts) => {
 
   try {
     if (mockMode) {
-      log.info('[email:mock] Email not sent — mock mode active', {
+      if (process.env.NODE_ENV === 'production' || process.env.ALLOW_MOCK_EMAIL !== 'true') {
+        const err = new Error('Email service not configured');
+        err.code = 'EMAIL_SERVICE_NOT_CONFIGURED';
+        log.error('[email] Delivery failed: Email service not configured (missing SMTP_HOST, EMAIL_USER, or EMAIL_PASSWORD)', {
+          to,
+          subject,
+          template,
+        });
+        await logEmail({
+          ...baseLog,
+          status: 'failed',
+          provider: 'none',
+          error: err.message,
+        });
+        throw err;
+      }
+
+      log.info('[email:mock] Email not sent — mock mode active (dev mode)', {
         to,
         subject,
         template,
@@ -248,7 +265,18 @@ const sendEmail = async (opts) => {
       result = await sendViaSendgrid({ to, subject, html, text, attachments });
     } else {
       const from = getFromAddress();
-      log.info('[email:smtp] sending mail via Nodemailer SMTP', { to, subject, from });
+      const host = getSmtpHost();
+      const port = getSmtpPort();
+      const user = getSmtpUser();
+      log.info('[email:smtp] Attempting SMTP email delivery...', {
+        to,
+        subject,
+        from,
+        host,
+        port,
+        user: user ? `${user.slice(0, 3)}***` : null,
+      });
+
       const info = await getSmtpTransport().sendMail({
         from,
         to,
@@ -261,7 +289,8 @@ const sendEmail = async (opts) => {
           contentType: a.contentType,
         })),
       });
-      log.info('[email:smtp] mail sent successfully', { messageId: info.messageId, to });
+
+      log.info('[email:smtp] SMTP mail sent successfully', { messageId: info.messageId, to });
       result = { id: info.messageId };
     }
 
@@ -277,6 +306,7 @@ const sendEmail = async (opts) => {
       to,
       provider: currentProvider,
       error: err.message,
+      code: err.code || null,
     });
     await logEmail({ ...baseLog, status: 'failed', provider: currentProvider, error: err.message });
     throw err;
