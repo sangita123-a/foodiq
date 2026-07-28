@@ -1,6 +1,6 @@
 # Foodiq Final Production SEO Audit Report
 
-**Generated:** 2026-07-28T15:47:16.438Z · **Version:** 4.1.0
+**Generated:** 2026-07-28T16:17:46.967Z · **Version:** 4.1.0
 **Scope:** Production build · No UI redesign
 
 ## Final Verdict

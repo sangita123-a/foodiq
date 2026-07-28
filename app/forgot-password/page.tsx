@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
         <p className="text-gray-text text-sm text-center mb-6">
           {step === "request"
             ? "Enter your email to receive reset instructions."
-            : "Enter the 6-digit code sent to your email and your new password."}
+            : "Enter the 6-digit OTP sent to your email and your new password."}
         </p>
 
         {error && (
