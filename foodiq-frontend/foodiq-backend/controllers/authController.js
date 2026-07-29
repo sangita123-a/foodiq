@@ -219,14 +219,14 @@ const registerUser = async (req, res) => {
 
       try {
         const { dispatchEmailSms } = require('../services/commsService');
-        await dispatchEmailSms({
+        void dispatchEmailSms({
           userId: user.id,
           type: 'welcome',
           title: 'Welcome to Foodiq!',
           message: 'Thanks for joining. Explore restaurants and place your first order.',
           transactional: true,
           forceEmail: true,
-        });
+        }).catch((err) => log.warn('welcome email dispatch skipped', { error: err.message }));
       } catch (err) {
         log.warn('welcome email skipped', { error: err.message });
       }
