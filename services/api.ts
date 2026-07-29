@@ -37,31 +37,16 @@ export function getResolvedApiBaseUrl(): string {
 }
 
 /**
- * Browser requests use same-origin `/backend-api/*` when the configured API origin
- * differs from the page origin (avoids CORS + console noise on localhost prod builds).
+ * Always use process.env.NEXT_PUBLIC_API_URL (or production fallback URL).
  */
-function getClientApiBaseUrl(): string | undefined {
-  const resolved = getApiBaseUrl();
-  if (typeof window !== 'undefined') {
-    if (process.env.NODE_ENV === 'development') {
-      return '/backend-api';
-    }
-    try {
-      const apiOrigin = new URL(resolved).origin;
-      if (apiOrigin !== window.location.origin) {
-        return '/backend-api';
-      }
-    } catch {
-      return '/backend-api';
-    }
-  }
-  return resolved || undefined;
+function getClientApiBaseUrl(): string {
+  return getApiBaseUrl();
 }
 
 const apiBaseUrl = getClientApiBaseUrl();
 
 const api = axios.create({
-  baseURL: apiBaseUrl || undefined,
+  baseURL: apiBaseUrl,
   // Render free tier cold-starts can exceed 10s
   timeout: 45000,
   withCredentials: true,

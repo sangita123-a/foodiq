@@ -242,21 +242,10 @@ const nextConfig: NextConfig = {
     return buildLegacyRedirects();
   },
   async rewrites() {
-    const backend = (
-      process.env.NEXT_PUBLIC_API_URL ||
-      process.env.API_PROXY_TARGET ||
-      "http://localhost:4000"
-    ).replace(/\/$/, "");
-
     return [
       {
         source: "/firebase-messaging-sw.js",
         destination: "/api/firebase-messaging-sw",
-      },
-      // Dev/local: proxy API through Next.js to avoid browser CORS errors
-      {
-        source: "/backend-api/:path*",
-        destination: `${backend}/:path*`,
       },
     ];
   },

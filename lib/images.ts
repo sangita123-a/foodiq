@@ -5,33 +5,7 @@ const PRODUCTION_API_FALLBACK = "https://foodiq-2.onrender.com";
 export function getBackendBase(): string {
   const envUrl = (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL) || "";
   const trimmed = envUrl.trim().replace(/\/$/, "");
-  const isLocalApi =
-    !trimmed ||
-    trimmed.includes("localhost") ||
-    trimmed.includes("127.0.0.1");
-
-  // Dev: same-origin proxy avoids Next.js 16 private-IP image optimization blocks
-  if (process.env.NODE_ENV === "development" && isLocalApi) {
-    return "/backend-api";
-  }
-
-  if (typeof window !== "undefined") {
-    try {
-      const resolved = trimmed || PRODUCTION_API_FALLBACK;
-      const apiOrigin = new URL(resolved).origin;
-      if (apiOrigin !== window.location.origin) {
-        return `${window.location.origin}/backend-api`;
-      }
-      return resolved;
-    } catch {
-      return `${window.location.origin}/backend-api`;
-    }
-  }
-
-  if (!trimmed || trimmed.includes("foodiq-backend-api.onrender.com")) {
-    return PRODUCTION_API_FALLBACK;
-  }
-  if (process.env.NODE_ENV === "production" && trimmed.includes("localhost")) {
+  if (!trimmed || trimmed.includes("foodiq-backend-api.onrender.com") || (process.env.NODE_ENV === "production" && trimmed.includes("localhost"))) {
     return PRODUCTION_API_FALLBACK;
   }
   return trimmed || PRODUCTION_API_FALLBACK;
@@ -59,14 +33,7 @@ export function resolveBackendUrl(path: string | null | undefined): string | nul
     }
     return p;
   }
-  // Already routed through Next.js dev proxy
-  if (p.startsWith("/backend-api/")) {
-    const stripped = p.replace(/^\/backend-api/, "");
-    if (stripped.startsWith("/images/") || stripped.startsWith("/default-")) {
-      return stripped;
-    }
-    return p;
-  }
+
   // Bundled in Next.js public/ — same-origin on localhost and Vercel
   if (p.startsWith("/images/") || p.startsWith("/default-")) return p;
   // Backend-only relative paths (uploads, media, etc.)
