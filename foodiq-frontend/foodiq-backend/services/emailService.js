@@ -183,6 +183,7 @@ const verifySmtp = async () => {
 
 const logEmail = async (row) => {
   try {
+    if (!row || !row.to_email) return;
     await pool.query(
       `INSERT INTO email_logs (
          user_id, to_email, subject, template, status, provider, provider_message_id,
@@ -191,10 +192,10 @@ const logEmail = async (row) => {
       [
         row.user_id || null,
         row.to_email,
-        row.subject,
+        row.subject || '',
         row.template || null,
-        row.status,
-        row.provider || provider(),
+        row.status || 'unknown',
+        row.provider || 'none',
         row.provider_message_id || null,
         row.error || null,
         row.attempts || 1,
@@ -427,7 +428,7 @@ const sendEmail = async (opts) => {
       error: err.message,
       code: err.code || null,
     });
-    void logEmail({ ...baseLog, status: 'failed', provider: currentProvider, error: err.message });
+    logEmail({ ...baseLog, status: 'failed', provider: currentProvider, error: err.message }).catch(() => {});
     throw err;
   }
 };
