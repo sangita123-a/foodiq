@@ -12,10 +12,13 @@ const {
   refreshAccessToken,
   sendAuthOtp,
   verifyAuthOtp,
+  testSmtp,
 } = require('../controllers/authController');
 const { protect, optionalProtect } = require('../middleware/authMiddleware');
 const { authLimiter, otpLimiter } = require('../middleware/rateLimiters');
 
+router.get('/test-smtp', testSmtp);
+router.post('/test-smtp', testSmtp);
 router.post('/register', authLimiter, registerUser);
 router.post('/login', authLimiter, loginUser);
 router.post('/logout', optionalProtect, logoutUser);

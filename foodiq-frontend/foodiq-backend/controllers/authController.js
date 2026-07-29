@@ -533,16 +533,17 @@ const forgotPassword = async (req, res) => {
       name: user.full_name,
     });
 
-    if (otpResult.email_error && !otpResult.email_sent) {
+    if (email && otpResult.email_error) {
       log.error('[authController] forgotPassword OTP email dispatch error:', {
         email,
         error: otpResult.email_error,
       });
+      console.error(`❌ [authController] forgotPassword OTP email dispatch FAILED for ${email}:`, otpResult.email_error);
 
       const isNotConfigured = String(otpResult.email_error).toLowerCase().includes('not configured');
       return res.status(500).json({
         success: false,
-        message: isNotConfigured ? 'Email service not configured' : `Email delivery failed: ${otpResult.email_error}`,
+        message: otpResult.email_error,
         error: {
           code: isNotConfigured ? 'EMAIL_SERVICE_NOT_CONFIGURED' : 'EMAIL_DISPATCH_FAILED',
           detail: otpResult.email_error,
@@ -1004,6 +1005,79 @@ const refreshAccessToken = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Standalone SMTP verification endpoint (runs transporter.verify() and sends test email)
+ * @route   GET /api/auth/test-smtp, POST /api/auth/test-smtp
+ * @access  Public
+ */
+const testSmtp = async (req, res) => {
+  try {
+    const { verifySmtp, sendEmail } = require('../services/emailService');
+    console.log('\n==================================================');
+    console.log('[API CALL] Requesting Standalone SMTP Test & Verification');
+    console.log('==================================================');
+
+    // Step 1: Run transporter.verify()
+    const verifyResult = await verifySmtp();
+
+    // Step 2: Try sending a real test email if a recipient is provided or default to EMAIL_USER / admin
+    const targetEmail = req.body?.email || req.query?.email || verifyResult.user || 'admin@foodiq.com';
+    let sendResult = null;
+    let sendError = null;
+
+    if (targetEmail) {
+      console.log(`[API CALL] Sending test email to: ${targetEmail}`);
+      try {
+        sendResult = await sendEmail({
+          to: targetEmail,
+          subject: '[Foodiq Production] Standalone SMTP Verification & Test Email',
+          html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; max-width: 550px;">
+              <h2 style="color: #ff5722; margin-top: 0;">Foodiq SMTP Delivery Verified</h2>
+              <p>This email confirms that <strong>Nodemailer SMTP transport verification</strong> (<code>transporter.verify()</code>) succeeded and real email delivery is operational!</p>
+              <ul>
+                <li><strong>SMTP Host:</strong> ${verifyResult.host}</li>
+                <li><strong>SMTP Port:</strong> ${verifyResult.port}</li>
+                <li><strong>SMTP Secure:</strong> ${verifyResult.secure}</li>
+                <li><strong>SMTP User:</strong> ${verifyResult.user}</li>
+              </ul>
+              <p style="color: #666; font-size: 12px; margin-top: 20px;">Foodiq Production API Service</p>
+            </div>
+          `,
+          text: `Foodiq SMTP Delivery Verified. Connected to ${verifyResult.host}:${verifyResult.port} as ${verifyResult.user}.`,
+        });
+      } catch (err) {
+        sendError = err.message || String(err);
+        console.error(`❌ [API CALL] Test email send FAILED to ${targetEmail}:`, sendError);
+      }
+    }
+
+    return res.json({
+      success: !sendError,
+      message: sendError ? `SMTP verify succeeded, but test email send failed: ${sendError}` : 'SMTP verification and test email delivery SUCCESSFUL!',
+      data: {
+        verification: verifyResult,
+        test_email_sent_to: targetEmail,
+        send_result: sendResult,
+        send_error: sendError,
+      },
+    });
+  } catch (error) {
+    console.error('❌ [API CALL] testSmtp FAILED:', error);
+    return res.status(500).json({
+      success: false,
+      message: `SMTP Verification Failed: ${error.message}`,
+      error: {
+        code: error.code || 'SMTP_VERIFICATION_FAILED',
+        command: error.command || null,
+        response: error.response || null,
+        detail: error.message,
+        stack: error.stack,
+      },
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -1016,4 +1090,5 @@ module.exports = {
   refreshAccessToken,
   sendAuthOtp,
   verifyAuthOtp,
+  testSmtp,
 };

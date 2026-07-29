@@ -11,18 +11,47 @@ const nodemailer = require('nodemailer');
 const { pool } = require('../config/db');
 const { log } = require('../utils/logger');
 
-// Environment variable resolution with aliases
-const getSmtpHost = () => process.env.SMTP_HOST || process.env.EMAIL_HOST;
-const getSmtpPort = () => Number(process.env.SMTP_PORT || process.env.EMAIL_PORT || 587);
-const getSmtpUser = () => process.env.SMTP_USER || process.env.EMAIL_USER;
-const getSmtpPass = () => process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.EMAIL_PASSWORD;
-const getSmtpSecure = () =>
-  String(process.env.SMTP_SECURE || '').toLowerCase() === 'true' || getSmtpPort() === 465;
-const getFromAddress = () =>
-  process.env.EMAIL_FROM ||
-  process.env.EMAIL_FROM_ADDRESS ||
-  getSmtpUser() ||
-  'Foodiq <noreply@foodiq.com>';
+// Environment variable resolution with aliases & Gmail defaults
+const getSmtpUser = () => (process.env.SMTP_USER || process.env.EMAIL_USER || '').trim();
+
+const getSmtpPass = () => {
+  const raw = process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.EMAIL_PASSWORD || '';
+  // Gmail App Passwords are 16 characters (strip spaces if user included them)
+  return raw.trim().replace(/\s+/g, '');
+};
+
+const getSmtpHost = () => {
+  if (process.env.SMTP_HOST) return process.env.SMTP_HOST.trim();
+  if (process.env.EMAIL_HOST) return process.env.EMAIL_HOST.trim();
+  const user = getSmtpUser();
+  if (user.includes('gmail.com') || user.includes('googlemail.com')) {
+    return 'smtp.gmail.com';
+  }
+  return undefined;
+};
+
+const getSmtpPort = () => {
+  if (process.env.SMTP_PORT) return Number(process.env.SMTP_PORT);
+  if (process.env.EMAIL_PORT) return Number(process.env.EMAIL_PORT);
+  const host = getSmtpHost();
+  if (host === 'smtp.gmail.com') return 465;
+  return 587;
+};
+
+const getSmtpSecure = () => {
+  if (process.env.SMTP_SECURE !== undefined) {
+    return String(process.env.SMTP_SECURE).toLowerCase() === 'true';
+  }
+  return getSmtpPort() === 465;
+};
+
+const getFromAddress = () => {
+  const from = process.env.EMAIL_FROM || process.env.EMAIL_FROM_ADDRESS;
+  if (from && from.trim()) return from.trim();
+  const user = getSmtpUser();
+  if (user) return `Foodiq <${user}>`;
+  return 'Foodiq <noreply@foodiq.com>';
+};
 
 /**
  * Detect provider from process.env or auto-detect based on present keys
@@ -46,8 +75,8 @@ const isMock = () => {
   const p = provider();
   if (p === 'mock') return true;
 
-  if (p === 'smtp' && !getSmtpHost()) {
-    log.warn('[email] EMAIL_PROVIDER=smtp but SMTP_HOST/EMAIL_HOST is missing — falling back to mock');
+  if (p === 'smtp' && !getSmtpHost() && !getSmtpUser()) {
+    log.warn('[email] EMAIL_PROVIDER=smtp but SMTP_HOST/EMAIL_USER is missing — falling back to mock');
     return true;
   }
   if (p === 'resend' && !process.env.RESEND_API_KEY) {
@@ -63,29 +92,95 @@ const isMock = () => {
 
 let transporter = null;
 
-const getSmtpTransport = () => {
-  if (transporter) return transporter;
+const createSmtpTransport = () => {
   const host = getSmtpHost();
   const port = getSmtpPort();
   const user = getSmtpUser();
   const pass = getSmtpPass();
   const secure = getSmtpSecure();
 
-  log.info('[email:smtp] creating nodemailer transport', {
+  log.info('[email:smtp] Creating Nodemailer transport', {
     host,
     port,
     secure,
     user: user ? `${user.slice(0, 3)}***` : null,
+    passLength: pass ? pass.length : 0,
   });
 
-  transporter = nodemailer.createTransport({
+  return nodemailer.createTransport({
     host,
     port,
     secure,
     auth: user && pass ? { user, pass } : undefined,
-    tls: { rejectUnauthorized: false }, // Prevent self-signed cert errors in cloud
+    tls: { rejectUnauthorized: false },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
   });
+};
+
+const getSmtpTransport = () => {
+  if (!transporter) {
+    transporter = createSmtpTransport();
+  }
   return transporter;
+};
+
+/**
+ * Standalone SMTP verification helper using transporter.verify()
+ */
+const verifySmtp = async () => {
+  const host = getSmtpHost();
+  const port = getSmtpPort();
+  const user = getSmtpUser();
+  const pass = getSmtpPass();
+  const secure = getSmtpSecure();
+  const from = getFromAddress();
+  const currentProvider = provider();
+
+  console.log('==================================================');
+  console.log('[SMTP DIAGNOSTIC] Running transporter.verify()...');
+  console.log(`  EMAIL_PROVIDER : ${process.env.EMAIL_PROVIDER || 'auto'} (Resolved: ${currentProvider})`);
+  console.log(`  SMTP_HOST      : ${host || '(NOT SET)'}`);
+  console.log(`  SMTP_PORT      : ${port}`);
+  console.log(`  SMTP_SECURE    : ${secure}`);
+  console.log(`  EMAIL_USER     : ${user || '(NOT SET)'}`);
+  console.log(`  EMAIL_PASSWORD : ${pass ? '******** (Length: ' + pass.length + ')' : '(NOT SET)'}`);
+  console.log(`  EMAIL_FROM     : ${from}`);
+  console.log('==================================================');
+
+  if (!host || !user || !pass) {
+    const missing = [];
+    if (!host) missing.push('SMTP_HOST/EMAIL_HOST');
+    if (!user) missing.push('SMTP_USER/EMAIL_USER');
+    if (!pass) missing.push('SMTP_PASS/EMAIL_PASSWORD');
+    const msg = `SMTP configuration incomplete. Missing: ${missing.join(', ')}`;
+    console.error(`❌ [SMTP DIAGNOSTIC] FAILED: ${msg}`);
+    throw new Error(msg);
+  }
+
+  const t = createSmtpTransport();
+
+  try {
+    const verified = await t.verify();
+    console.log('✅ [SMTP DIAGNOSTIC] transporter.verify() SUCCESSFUL!', verified);
+    return { ok: true, host, port, user, from, secure };
+  } catch (err) {
+    console.error('❌ [SMTP DIAGNOSTIC] transporter.verify() FAILED!');
+    console.error('  Error Code    :', err.code || null);
+    console.error('  Error Command :', err.command || null);
+    console.error('  Error Response:', err.response || null);
+    console.error('  Error Message :', err.message);
+    console.error('  Full Error    :', err);
+
+    if (err.message.includes('Invalid login') || err.code === 'EAUTH' || (err.response && err.response.includes('535'))) {
+      console.error('\n💡 Gmail Authentication Help:');
+      console.error('   1. Ensure 2-Step Verification is ENABLED on your Google Account.');
+      console.error('   2. Generate a 16-character App Password at: https://myaccount.google.com/apppasswords');
+      console.error('   3. Set EMAIL_USER=<your-gmail> and EMAIL_PASSWORD=<16-char-app-password> in Render environment variables.');
+    }
+    throw err;
+  }
 };
 
 const logEmail = async (row) => {
@@ -277,21 +372,41 @@ const sendEmail = async (opts) => {
         user: user ? `${user.slice(0, 3)}***` : null,
       });
 
-      const info = await getSmtpTransport().sendMail({
-        from,
-        to,
-        subject,
-        html,
-        text: text || subject,
-        attachments: (attachments || []).map((a) => ({
-          filename: a.filename,
-          content: a.content,
-          contentType: a.contentType,
-        })),
-      });
+      try {
+        const info = await getSmtpTransport().sendMail({
+          from,
+          to,
+          subject,
+          html,
+          text: text || subject,
+          attachments: (attachments || []).map((a) => ({
+            filename: a.filename,
+            content: a.content,
+            contentType: a.contentType,
+          })),
+        });
 
-      log.info('[email:smtp] SMTP mail sent successfully', { messageId: info.messageId, to });
-      result = { id: info.messageId };
+        log.info('[email:smtp] SMTP mail sent successfully', { messageId: info.messageId, to });
+        console.log(`✅ [email:smtp] Mail delivered successfully to ${to}. MessageId: ${info.messageId}`);
+        result = { id: info.messageId };
+      } catch (smtpErr) {
+        console.error('❌ [email:smtp] Nodemailer sendMail ERROR:', {
+          code: smtpErr.code || null,
+          command: smtpErr.command || null,
+          response: smtpErr.response || null,
+          responseCode: smtpErr.responseCode || null,
+          message: smtpErr.message,
+          stack: smtpErr.stack,
+        });
+
+        const detailMsg = smtpErr.response
+          ? `${smtpErr.message} (${smtpErr.response})`
+          : smtpErr.message;
+        const errToThrow = new Error(detailMsg);
+        errToThrow.code = smtpErr.code || 'SMTP_ERROR';
+        errToThrow.response = smtpErr.response;
+        throw errToThrow;
+      }
     }
 
     await logEmail({
@@ -315,6 +430,7 @@ const sendEmail = async (opts) => {
 
 module.exports = {
   sendEmail,
+  verifySmtp,
   isMock,
   provider,
   logEmail,
