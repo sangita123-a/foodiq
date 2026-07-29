@@ -203,6 +203,33 @@ const cuisineRoutes = require('./routes/cuisineRoutes');
 const partnerRoutes = require('./routes/partnerRoutes');
 const deliveryRoutes = require('./routes/deliveryRoutes');
 
+app.get('/api/test-smtp', async (req, res) => {
+  try {
+    const { verifySmtp, sendEmail } = require('./services/emailService');
+    const verifyResult = await verifySmtp();
+    let sendResult = null;
+    const targetEmail = req.query?.email || verifyResult.user;
+    if (targetEmail) {
+      sendResult = await sendEmail({
+        to: targetEmail,
+        subject: '[Foodiq] Standalone SMTP Verification Test',
+        text: 'Foodiq SMTP test email delivery verified successfully.',
+        html: '<p>Foodiq SMTP test email delivery verified successfully.</p>'
+      });
+    }
+    return res.json({ success: true, verify: verifyResult, send: sendResult });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+      code: err.code || null,
+      command: err.command || null,
+      response: err.response || null,
+      stack: err.stack
+    });
+  }
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/restaurant-categories', categoryRoutes);
 app.use('/api/restaurants', restaurantRoutes);
