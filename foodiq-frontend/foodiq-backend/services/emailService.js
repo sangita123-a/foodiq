@@ -113,9 +113,10 @@ const createSmtpTransport = () => {
     secure,
     auth: user && pass ? { user, pass } : undefined,
     tls: { rejectUnauthorized: false },
-    connectionTimeout: 5000,
-    greetingTimeout: 5000,
-    socketTimeout: 5000,
+    family: 4, // Force IPv4 to prevent IPv6 socket timeout on cloud hosts
+    connectionTimeout: 4000,
+    greetingTimeout: 4000,
+    socketTimeout: 4000,
   });
 };
 
