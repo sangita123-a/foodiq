@@ -366,7 +366,7 @@ const sendEmail = async (opts) => {
       });
 
       try {
-        const info = await getSmtpTransport().sendMail({
+        const sendPromise = getSmtpTransport().sendMail({
           from,
           to,
           subject,
@@ -378,6 +378,16 @@ const sendEmail = async (opts) => {
             contentType: a.contentType,
           })),
         });
+
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => {
+            const tErr = new Error(`Connection timeout (ETIMEDOUT) after 5000ms while connecting to ${host}:${port}`);
+            tErr.code = 'ETIMEDOUT';
+            reject(tErr);
+          }, 5000);
+        });
+
+        const info = await Promise.race([sendPromise, timeoutPromise]);
 
         log.info('[email:smtp] SMTP mail sent successfully', { messageId: info.messageId, to });
         console.log(`✅ [email:smtp] Mail delivered successfully to ${to}. MessageId: ${info.messageId}`);
