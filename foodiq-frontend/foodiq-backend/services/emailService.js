@@ -321,36 +321,20 @@ const sendEmail = async (opts) => {
 
   try {
     if (mockMode) {
-      if (process.env.NODE_ENV === 'production' || process.env.ALLOW_MOCK_EMAIL !== 'true') {
-        const err = new Error('Email service not configured');
-        err.code = 'EMAIL_SERVICE_NOT_CONFIGURED';
-        log.error('[email] Delivery failed: Email service not configured (missing SMTP_HOST, EMAIL_USER, or EMAIL_PASSWORD)', {
-          to,
-          subject,
-          template,
-        });
-        await logEmail({
-          ...baseLog,
-          status: 'failed',
-          provider: 'none',
-          error: err.message,
-        });
-        throw err;
-      }
-
-      log.info('[email:mock] Email not sent — mock mode active (dev mode)', {
+      const err = new Error('Email service not configured. Please set EMAIL_USER and EMAIL_PASSWORD (Gmail App Password) in Render environment variables.');
+      err.code = 'EMAIL_SERVICE_NOT_CONFIGURED';
+      log.error('[email] Delivery failed: Email service not configured (missing EMAIL_USER or EMAIL_PASSWORD)', {
         to,
         subject,
         template,
-        hint: 'Configure SMTP_HOST/SMTP_USER/SMTP_PASS, RESEND_API_KEY, or SENDGRID_API_KEY in .env',
       });
-      await logEmail({
+      void logEmail({
         ...baseLog,
-        status: 'sent',
-        provider: 'mock',
-        provider_message_id: `mock_email_${Date.now()}`,
+        status: 'failed',
+        provider: 'none',
+        error: err.message,
       });
-      return { ok: true, mock: true, id: `mock_email_${Date.now()}` };
+      throw err;
     }
 
     let result;
