@@ -426,7 +426,7 @@ const sendEmail = async (opts) => {
       error: err.message,
       code: err.code || null,
     });
-    await logEmail({ ...baseLog, status: 'failed', provider: currentProvider, error: err.message });
+    void logEmail({ ...baseLog, status: 'failed', provider: currentProvider, error: err.message });
     throw err;
   }
 };
