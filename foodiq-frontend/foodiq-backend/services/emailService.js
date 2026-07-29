@@ -113,9 +113,9 @@ const createSmtpTransport = () => {
     secure,
     auth: user && pass ? { user, pass } : undefined,
     tls: { rejectUnauthorized: false },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
+    connectionTimeout: 5000,
+    greetingTimeout: 5000,
+    socketTimeout: 5000,
   });
 };
 
@@ -363,13 +363,25 @@ const sendEmail = async (opts) => {
       const host = getSmtpHost();
       const port = getSmtpPort();
       const user = getSmtpUser();
+      const pass = getSmtpPass();
+
+      if (!user || !pass) {
+        const missing = [];
+        if (!user) missing.push('EMAIL_USER');
+        if (!pass) missing.push('EMAIL_PASSWORD');
+        const err = new Error(`Email service not configured. Missing required env vars: ${missing.join(', ')}. Set EMAIL_USER and EMAIL_PASSWORD in Render dashboard.`);
+        err.code = 'EMAIL_SERVICE_NOT_CONFIGURED';
+        console.error('❌ [email:smtp] Delivery failed:', err.message);
+        throw err;
+      }
+
       log.info('[email:smtp] Attempting SMTP email delivery...', {
         to,
         subject,
         from,
         host,
         port,
-        user: user ? `${user.slice(0, 3)}***` : null,
+        user: `${user.slice(0, 3)}***`,
       });
 
       try {
