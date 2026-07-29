@@ -524,7 +524,7 @@ const forgotPassword = async (req, res) => {
 
     const { issueOtp } = require('../services/otpService');
     const destination = mobile ? toE164Indian(mobile) : email;
-    const channel = mobile ? 'sms' : user.phone_number ? 'both' : 'email';
+    const channel = mobile ? 'sms' : 'email';
     const otpResult = await issueOtp({
       userId: user.id,
       destination,
@@ -533,20 +533,21 @@ const forgotPassword = async (req, res) => {
       name: user.full_name,
     });
 
-    if (email && otpResult.email_error) {
+    if (email && (otpResult.email_error || !otpResult.email_sent)) {
+      const errDetail = otpResult.email_error || 'Email delivery failed. No OTP email could be sent.';
       log.error('[authController] forgotPassword OTP email dispatch error:', {
         email,
-        error: otpResult.email_error,
+        error: errDetail,
       });
-      console.error(`❌ [authController] forgotPassword OTP email dispatch FAILED for ${email}:`, otpResult.email_error);
+      console.error(`❌ [authController] forgotPassword OTP email dispatch FAILED for ${email}:`, errDetail);
 
-      const isNotConfigured = String(otpResult.email_error).toLowerCase().includes('not configured');
+      const isNotConfigured = String(errDetail).toLowerCase().includes('not configured');
       return res.status(500).json({
         success: false,
-        message: otpResult.email_error,
+        message: errDetail,
         error: {
           code: isNotConfigured ? 'EMAIL_SERVICE_NOT_CONFIGURED' : 'EMAIL_DISPATCH_FAILED',
-          detail: otpResult.email_error,
+          detail: errDetail,
         },
       });
     }
