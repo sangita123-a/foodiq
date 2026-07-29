@@ -120,10 +120,7 @@ const createSmtpTransport = () => {
 };
 
 const getSmtpTransport = () => {
-  if (!transporter) {
-    transporter = createSmtpTransport();
-  }
-  return transporter;
+  return createSmtpTransport();
 };
 
 /**
