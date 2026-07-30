@@ -189,27 +189,116 @@ const getSmtpTransport = async (overridePort = null, overrideSecure = null, over
 };
 
 /**
- * Standalone SMTP verification helper using transporter.verify()
+ * Standalone verification helper for SMTP and API email providers.
  */
 const verifySmtp = async () => {
+  const currentProvider = provider();
+  const from = getFromAddress();
+
+  console.log('==================================================');
+  console.log('[OUTBOUND NETWORK DIAGNOSTIC] Testing Gmail SMTP connectivity...');
+  try {
+    const addresses = await dns.promises.resolve4('smtp.gmail.com').catch(() => []);
+    const resolvedIp = addresses[0] || '142.250.102.108';
+    console.log(`  Resolved Gmail SMTP IPv4: ${resolvedIp} (All: ${addresses.join(', ') || 'none'})`);
+
+    for (const port of [465, 587]) {
+      const probeRes = await new Promise((resolve) => {
+        const start = Date.now();
+        const socket = net.createConnection({ host: resolvedIp, port, timeout: 3000 }, () => {
+          socket.end();
+          resolve(`CONNECTED in ${Date.now() - start}ms`);
+        });
+        socket.on('error', (err) => resolve(`FAILED (${err.message})`));
+        socket.on('timeout', () => {
+          socket.destroy();
+          resolve(`TIMEOUT (3000ms)`);
+        });
+      });
+      console.log(`  TCP Probe ${resolvedIp}:${port} => ${probeRes}`);
+    }
+  } catch (probeErr) {
+    console.warn(`  Outbound probe error: ${probeErr.message}`);
+  }
+  console.log('==================================================');
+
+  console.log('==================================================');
+  console.log('[EMAIL SERVICE DIAGNOSTIC] Running verification...');
+  console.log(`  EMAIL_PROVIDER setting : ${process.env.EMAIL_PROVIDER || 'auto'}`);
+  console.log(`  Resolved Provider      : ${currentProvider}`);
+  console.log(`  EMAIL_FROM             : ${from}`);
+  console.log('==================================================');
+
+  if (currentProvider === 'resend') {
+    const key = process.env.RESEND_API_KEY;
+    if (!key) {
+      const err = new Error('Resend provider selected but RESEND_API_KEY is missing.');
+      err.code = 'EMAIL_SERVICE_NOT_CONFIGURED';
+      throw err;
+    }
+    console.log('✅ [EMAIL SERVICE DIAGNOSTIC] Resend API provider configured and ready!');
+    return {
+      ok: true,
+      provider: 'resend',
+      user: from,
+      from,
+      verify_result: 'Resend API Key Configured',
+    };
+  }
+
+  if (currentProvider === 'sendgrid') {
+    const key = process.env.SENDGRID_API_KEY;
+    if (!key) {
+      const err = new Error('SendGrid provider selected but SENDGRID_API_KEY is missing.');
+      err.code = 'EMAIL_SERVICE_NOT_CONFIGURED';
+      throw err;
+    }
+    console.log('✅ [EMAIL SERVICE DIAGNOSTIC] SendGrid API provider configured and ready!');
+    return {
+      ok: true,
+      provider: 'sendgrid',
+      user: from,
+      from,
+      verify_result: 'SendGrid API Key Configured',
+    };
+  }
+
+  if (currentProvider === 'mailgun') {
+    const key = process.env.MAILGUN_API_KEY;
+    const domain = process.env.MAILGUN_DOMAIN;
+    if (!key || !domain) {
+      const err = new Error('Mailgun provider selected but MAILGUN_API_KEY or MAILGUN_DOMAIN is missing.');
+      err.code = 'EMAIL_SERVICE_NOT_CONFIGURED';
+      throw err;
+    }
+    console.log('✅ [EMAIL SERVICE DIAGNOSTIC] Mailgun API provider configured and ready!');
+    return {
+      ok: true,
+      provider: 'mailgun',
+      user: from,
+      from,
+      verify_result: 'Mailgun API Configured',
+    };
+  }
+
+  if (currentProvider === 'mock') {
+    const err = new Error('Email service not configured. Set EMAIL_PROVIDER (resend, sendgrid, mailgun, smtp) and required environment variables in Render dashboard.');
+    err.code = 'EMAIL_SERVICE_NOT_CONFIGURED';
+    throw err;
+  }
+
+  // SMTP Verification
   const host = getSmtpHost() || 'smtp.gmail.com';
   const port = getSmtpPort();
   const user = getSmtpUser();
   const pass = getSmtpPass();
   const secure = getSmtpSecure();
-  const from = getFromAddress();
-  const currentProvider = provider();
 
-  console.log('==================================================');
-  console.log('[SMTP DIAGNOSTIC] Running transporter.verify()...');
-  console.log(`  EMAIL_PROVIDER : ${process.env.EMAIL_PROVIDER || 'auto'} (Resolved: ${currentProvider})`);
   console.log(`  SMTP_HOST      : ${host}`);
   console.log(`  SMTP_PORT      : ${port}`);
   console.log(`  SMTP_SECURE    : ${secure}`);
   console.log(`  EMAIL_USER     : ${user || '(NOT SET)'}`);
   console.log(`  EMAIL_PASSWORD : ${pass ? '******** (Length: ' + pass.length + ')' : '(NOT SET)'}`);
-  console.log(`  EMAIL_FROM     : ${from}`);
-  console.log('==================================================');
 
   if (!user || !pass) {
     const missing = [];
@@ -236,7 +325,7 @@ const verifySmtp = async () => {
       console.log(`✅ [SMTP DIAGNOSTIC] Primary transporter.verify() SUCCESSFUL on IPv4 ${targetIp}:${primary.port}!`, verified);
       return {
         ok: true,
-        provider: currentProvider,
+        provider: 'smtp',
         resolvedIPv4: targetIp,
         host: targetIp,
         originalHost: primary.originalHost,
@@ -264,7 +353,7 @@ const verifySmtp = async () => {
       console.log(`✅ [SMTP DIAGNOSTIC] Fallback port 587 transporter.verify() SUCCESSFUL on IPv4 ${targetIp}:587!`, fallbackVerified);
       return {
         ok: true,
-        provider: currentProvider,
+        provider: 'smtp',
         resolvedIPv4: targetIp,
         host: targetIp,
         originalHost: primary.originalHost,
@@ -283,7 +372,7 @@ const verifySmtp = async () => {
   }
 
   console.error('❌ [SMTP DIAGNOSTIC] transporter.verify() FAILED on all IPv4 addresses!');
-  const enhancedErr = new Error(`SMTP Verification failed on all IPv4 addresses (${ipsToTry.join(', ')}): ${lastErr?.message}`);
+  const enhancedErr = new Error(`SMTP Verification failed on all IPv4 addresses (${ipsToTry.join(', ')}): ${lastErr?.message}. (Outbound network port 465/587 blocked by cloud host. Switch EMAIL_PROVIDER to resend, sendgrid, or mailgun).`);
   enhancedErr.code = lastErr?.code || 'SMTP_VERIFICATION_FAILED';
   enhancedErr.command = lastErr?.command || null;
   enhancedErr.response = lastErr?.response || null;
@@ -395,8 +484,46 @@ const sendViaSendgrid = async ({ to, subject, html, text, attachments }) => {
   return { id: msgId };
 };
 
+const sendViaMailgun = async ({ to, subject, html, text, attachments }) => {
+  const from = getFromAddress();
+  const domain = process.env.MAILGUN_DOMAIN;
+  const apiKey = process.env.MAILGUN_API_KEY;
+
+  if (!domain || !apiKey) {
+    throw new Error('Mailgun credentials incomplete. MAILGUN_DOMAIN and MAILGUN_API_KEY environment variables are required.');
+  }
+
+  log.info('[email:mailgun] sending email via Mailgun API', { to, subject, from, domain });
+
+  const formData = new URLSearchParams();
+  formData.append('from', from);
+  formData.append('to', to);
+  formData.append('subject', subject);
+  if (html) formData.append('html', html);
+  if (text) formData.append('text', text || subject);
+
+  const authHeader = 'Basic ' + Buffer.from(`api:${apiKey}`).toString('base64');
+  const res = await fetch(`https://api.mailgun.net/v3/${domain}/messages`, {
+    method: 'POST',
+    headers: {
+      Authorization: authHeader,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: formData.toString(),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    log.error('[email:mailgun] API error', { status: res.status, data });
+    throw new Error(data.message || `Mailgun HTTP ${res.status}`);
+  }
+  const msgId = data.id || `mailgun_${Date.now()}`;
+  log.info('[email:mailgun] message sent', { id: msgId, to });
+  return { id: msgId };
+};
+
 /**
- * Send an email message via configured provider (SMTP / Resend / SendGrid / Mock).
+ * Send an email message via configured provider (SMTP / Resend / SendGrid / Mailgun / Mock).
  */
 const sendEmail = async (opts) => {
   const {
@@ -437,12 +564,13 @@ const sendEmail = async (opts) => {
 
   try {
     if (mockMode) {
-      const err = new Error('Email service not configured. Please set EMAIL_USER and EMAIL_PASSWORD (Gmail App Password) in Render environment variables.');
+      const err = new Error(`Email service not configured for provider '${currentProvider}'. Please set required environment variables in Render dashboard.`);
       err.code = 'EMAIL_SERVICE_NOT_CONFIGURED';
-      log.error('[email] Delivery failed: Email service not configured (missing EMAIL_USER or EMAIL_PASSWORD)', {
+      log.error('[email] Delivery failed: Email service not configured', {
         to,
         subject,
         template,
+        provider: currentProvider,
       });
       void logEmail({
         ...baseLog,
@@ -458,6 +586,8 @@ const sendEmail = async (opts) => {
       result = await sendViaResend({ to, subject, html, text, attachments });
     } else if (currentProvider === 'sendgrid') {
       result = await sendViaSendgrid({ to, subject, html, text, attachments });
+    } else if (currentProvider === 'mailgun') {
+      result = await sendViaMailgun({ to, subject, html, text, attachments });
     } else {
       const from = getFromAddress();
       const host = getSmtpHost();
