@@ -26,50 +26,6 @@ const { log } = require('./utils/logger');
 const app = express();
 const server = http.createServer(app);
 
-app.all('/api/test-smtp', async (req, res) => {
-  try {
-    const { verifySmtp, sendEmail } = require('./services/emailService');
-    const verifyResult = await verifySmtp();
-    let sendResult = null;
-    let sendError = null;
-    const targetEmail = req.query?.email || req.body?.email || verifyResult.user || 'admin@foodiq.com';
-    if (targetEmail) {
-      try {
-        sendResult = await sendEmail({
-          to: targetEmail,
-          subject: '[Foodiq Production] Standalone SMTP Verification Test',
-          text: 'Foodiq SMTP test email delivery verified successfully.',
-          html: '<p>Foodiq SMTP test email delivery verified successfully.</p>'
-        });
-      } catch (sendErr) {
-        sendError = sendErr.message || String(sendErr);
-      }
-    }
-    return res.json({
-      success: !sendError,
-      message: sendError ? `SMTP verify succeeded, but test email send failed: ${sendError}` : 'SMTP verification and test email delivery SUCCESSFUL!',
-      data: {
-        verification: verifyResult,
-        test_email_sent_to: targetEmail,
-        send_result: sendResult,
-        send_error: sendError
-      }
-    });
-  } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: `SMTP Verification Failed: ${err.message}`,
-      error: {
-        code: err.code || 'SMTP_VERIFICATION_FAILED',
-        command: err.command || null,
-        response: err.response || null,
-        detail: err.message,
-        stack: err.stack
-      }
-    });
-  }
-});
-
 const isProduction = process.env.NODE_ENV === 'production';
 
 /** Canonical production frontends — kept in code so auth works even if Render env is stale. */
