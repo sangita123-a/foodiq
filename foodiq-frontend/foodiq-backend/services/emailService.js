@@ -88,13 +88,13 @@ const resolveSmtpHost = async () => {
   return host;
 };
 
-const createSmtpTransport = async () => {
+const createSmtpTransport = async (overridePort = null, overrideSecure = null) => {
   const host = getSmtpHost();
   const resolvedHost = await resolveSmtpHost();
-  const port = getSmtpPort();
+  const port = overridePort !== null ? overridePort : getSmtpPort();
   const user = getSmtpUser();
   const pass = getSmtpPass();
-  const secure = getSmtpSecure();
+  const secure = overrideSecure !== null ? overrideSecure : (port === 465);
 
   log.info('[email:smtp] Creating Nodemailer transport', {
     host,
@@ -120,14 +120,14 @@ const createSmtpTransport = async () => {
         callback(err, address, family);
       });
     },
-    connectionTimeout: 12000,
-    greetingTimeout: 12000,
-    socketTimeout: 12000,
+    connectionTimeout: 6000,
+    greetingTimeout: 6000,
+    socketTimeout: 6000,
   });
 };
 
-const getSmtpTransport = async () => {
-  return await createSmtpTransport();
+const getSmtpTransport = async (overridePort = null, overrideSecure = null) => {
+  return await createSmtpTransport(overridePort, overrideSecure);
 };
 
 /**
@@ -166,13 +166,24 @@ const verifySmtp = async () => {
     throw err;
   }
 
-  const t = await createSmtpTransport();
+  let t = await createSmtpTransport();
 
   try {
     const verified = await t.verify();
     console.log('✅ [SMTP DIAGNOSTIC] transporter.verify() SUCCESSFUL!', verified);
     return { ok: true, provider: currentProvider, host, port, secure, user, from, verify_result: verified };
   } catch (err) {
+    if ((err.code === 'ETIMEDOUT' || err.code === 'ESOCKET') && port === 465) {
+      console.log('⚠️ [SMTP DIAGNOSTIC] Port 465 timed out. Retrying with Port 587 (STARTTLS)...');
+      try {
+        const altTransport = await createSmtpTransport(587, false);
+        const verifiedAlt = await altTransport.verify();
+        console.log('✅ [SMTP DIAGNOSTIC] Port 587 transporter.verify() SUCCESSFUL!', verifiedAlt);
+        return { ok: true, provider: currentProvider, host, port: 587, secure: false, user, from, verify_result: verifiedAlt };
+      } catch (altErr) {
+        err = altErr;
+      }
+    }
     console.error('❌ [SMTP DIAGNOSTIC] transporter.verify() FAILED!');
     console.error('  Error Code    :', err.code || null);
     console.error('  Error Command :', err.command || null);
@@ -385,8 +396,9 @@ const sendEmail = async (opts) => {
         user: `${user.slice(0, 3)}***`,
       });
 
-      try {
-        const transport = await getSmtpTransport();
+      const doSend = async (overridePort = null, overrideSecure = null) => {
+        const transport = await getSmtpTransport(overridePort, overrideSecure);
+        const targetPort = overridePort || port;
         const sendPromise = transport.sendMail({
           from,
           to,
@@ -402,13 +414,27 @@ const sendEmail = async (opts) => {
 
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => {
-            const tErr = new Error(`Connection timeout (ETIMEDOUT) after 15000ms while connecting to ${host}:${port}`);
+            const tErr = new Error(`Connection timeout (ETIMEDOUT) after 8000ms while connecting to ${host}:${targetPort}`);
             tErr.code = 'ETIMEDOUT';
             reject(tErr);
-          }, 15000);
+          }, 8000);
         });
 
-        const info = await Promise.race([sendPromise, timeoutPromise]);
+        return await Promise.race([sendPromise, timeoutPromise]);
+      };
+
+      try {
+        let info;
+        try {
+          info = await doSend();
+        } catch (firstErr) {
+          if ((firstErr.code === 'ETIMEDOUT' || firstErr.code === 'ESOCKET') && port === 465) {
+            log.info('[email:smtp] Primary port 465 timed out. Retrying email send over port 587 (STARTTLS)...');
+            info = await doSend(587, false);
+          } else {
+            throw firstErr;
+          }
+        }
 
         log.info('[email:smtp] SMTP mail sent successfully', { messageId: info.messageId, to });
         console.log(`✅ [email:smtp] Mail delivered successfully to ${to}. MessageId: ${info.messageId}`);
