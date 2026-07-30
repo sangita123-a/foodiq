@@ -101,9 +101,9 @@ const createSmtpTransport = () => {
     auth: user && pass ? { user, pass } : undefined,
     tls: { rejectUnauthorized: false },
     family: 4, // Force IPv4 to prevent IPv6 socket timeout on cloud hosts
-    connectionTimeout: 4000,
-    greetingTimeout: 4000,
-    socketTimeout: 4000,
+    connectionTimeout: 12000,
+    greetingTimeout: 12000,
+    socketTimeout: 12000,
   });
 };
 
@@ -382,10 +382,10 @@ const sendEmail = async (opts) => {
 
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => {
-            const tErr = new Error(`Connection timeout (ETIMEDOUT) after 5000ms while connecting to ${host}:${port}`);
+            const tErr = new Error(`Connection timeout (ETIMEDOUT) after 15000ms while connecting to ${host}:${port}`);
             tErr.code = 'ETIMEDOUT';
             reject(tErr);
-          }, 5000);
+          }, 15000);
         });
 
         const info = await Promise.race([sendPromise, timeoutPromise]);
