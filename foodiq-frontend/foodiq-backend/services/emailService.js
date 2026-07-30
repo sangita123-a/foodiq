@@ -9,8 +9,19 @@
  */
 const nodemailer = require('nodemailer');
 const dns = require('dns');
+const net = require('net');
+const { promisify } = require('util');
 const { pool } = require('../config/db');
 const { log } = require('../utils/logger');
+
+// Force Node to prefer IPv4 globally for DNS resolution
+if (dns.setDefaultResultOrder) {
+  try {
+    dns.setDefaultResultOrder('ipv4first');
+  } catch (_) {}
+}
+
+const resolve4 = promisify(dns.resolve4);
 
 // Environment variable resolution with aliases & Gmail defaults
 const getSmtpUser = () => (process.env.SMTP_USER || process.env.EMAIL_USER || '').trim();
@@ -28,7 +39,7 @@ const getSmtpHost = () => {
   if (user.includes('gmail.com') || user.includes('googlemail.com')) {
     return 'smtp.gmail.com';
   }
-  return undefined;
+  return 'smtp.gmail.com';
 };
 
 const getSmtpPort = () => {
@@ -72,69 +83,94 @@ const provider = () => {
   return 'mock';
 };
 
-const resolveSmtpHost = async () => {
-  const host = getSmtpHost();
-  if (!host) return host;
-  if (/^\d+\.\d+\.\d+\.\d+$/.test(host)) return host;
-  try {
-    const addresses = await dns.promises.resolve4(host);
-    if (addresses && addresses.length > 0) {
-      log.info('[email:smtp] Resolved IPv4 address for host', { host, resolved: addresses[0] });
-      return addresses[0];
-    }
-  } catch (err) {
-    log.warn('[email:smtp] IPv4 DNS resolution failed, using hostname', { host, error: err.message });
+const isMock = () => {
+  const currentProvider = provider();
+  if (currentProvider === 'smtp') {
+    return !getSmtpUser() || !getSmtpPass();
   }
-  return host;
+  return currentProvider === 'mock';
 };
 
-const createSmtpTransport = async (overridePort = null, overrideSecure = null) => {
-  const host = getSmtpHost();
-  const resolvedHost = await resolveSmtpHost();
+/**
+ * Creates Nodemailer transport resolving IPv4 address first to bypass IPv6 ENETUNREACH issues.
+ */
+const createSmtpTransport = async (overridePort = null, overrideSecure = null, overrideRequireTLS = null) => {
+  const originalHost = getSmtpHost() || 'smtp.gmail.com';
+  let hostIp = originalHost;
+
+  if (!net.isIP(originalHost)) {
+    try {
+      const addresses = await resolve4(originalHost);
+      if (addresses && addresses.length > 0) {
+        hostIp = addresses[0];
+        log.info('[email:smtp] Resolved IPv4 address using resolve4', { originalHost, hostIp, addresses });
+      }
+    } catch (err) {
+      log.warn('[email:smtp] resolve4 failed, using fallback host', { originalHost, error: err.message });
+    }
+  }
+
   const port = overridePort !== null ? overridePort : getSmtpPort();
   const user = getSmtpUser();
   const pass = getSmtpPass();
   const secure = overrideSecure !== null ? overrideSecure : (port === 465);
+  const requireTLS = overrideRequireTLS !== null ? overrideRequireTLS : (port === 587);
 
   log.info('[email:smtp] Creating Nodemailer transport', {
-    host,
-    resolvedHost,
+    originalHost,
+    hostIp,
     port,
     secure,
+    requireTLS,
     user: user ? `${user.slice(0, 3)}***` : null,
     passLength: pass ? pass.length : 0,
   });
 
-  return nodemailer.createTransport({
-    host: resolvedHost,
+  const transporterOptions = {
+    host: hostIp,
     port,
     secure,
+    ...(requireTLS ? { requireTLS: true } : {}),
     auth: user && pass ? { user, pass } : undefined,
     tls: {
       rejectUnauthorized: false,
-      servername: host,
+      servername: originalHost,
     },
-    family: 4, // Force IPv4 to prevent IPv6 socket timeout on cloud hosts
+    family: 4, // Disable IPv6 completely for SMTP
     lookup: (hostname, options, callback) => {
-      dns.lookup(hostname, { family: 4 }, (err, address, family) => {
-        callback(err, address, family);
+      // Force IPv4 resolution, completely disabling IPv6 lookup
+      dns.lookup(hostname, { family: 4, hints: 0 }, (err, address, family) => {
+        if (err) return callback(err);
+        callback(null, address, 4);
       });
     },
-    connectionTimeout: 6000,
-    greetingTimeout: 6000,
-    socketTimeout: 6000,
-  });
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
+  };
+
+  const transporter = nodemailer.createTransport(transporterOptions);
+
+  return {
+    transporter,
+    hostIp,
+    originalHost,
+    port,
+    secure,
+    requireTLS,
+  };
 };
 
-const getSmtpTransport = async (overridePort = null, overrideSecure = null) => {
-  return await createSmtpTransport(overridePort, overrideSecure);
+const getSmtpTransport = async (overridePort = null, overrideSecure = null, overrideRequireTLS = null) => {
+  const { transporter } = await createSmtpTransport(overridePort, overrideSecure, overrideRequireTLS);
+  return transporter;
 };
 
 /**
  * Standalone SMTP verification helper using transporter.verify()
  */
 const verifySmtp = async () => {
-  const host = getSmtpHost();
+  const host = getSmtpHost() || 'smtp.gmail.com';
   const port = getSmtpPort();
   const user = getSmtpUser();
   const pass = getSmtpPass();
@@ -145,7 +181,7 @@ const verifySmtp = async () => {
   console.log('==================================================');
   console.log('[SMTP DIAGNOSTIC] Running transporter.verify()...');
   console.log(`  EMAIL_PROVIDER : ${process.env.EMAIL_PROVIDER || 'auto'} (Resolved: ${currentProvider})`);
-  console.log(`  SMTP_HOST      : ${host || '(NOT SET)'}`);
+  console.log(`  SMTP_HOST      : ${host}`);
   console.log(`  SMTP_PORT      : ${port}`);
   console.log(`  SMTP_SECURE    : ${secure}`);
   console.log(`  EMAIL_USER     : ${user || '(NOT SET)'}`);
@@ -166,47 +202,70 @@ const verifySmtp = async () => {
     throw err;
   }
 
-  let t = await createSmtpTransport();
+  const primary = await createSmtpTransport();
+  console.log(`[SMTP DIAGNOSTIC] Testing connection to ${primary.hostIp} (${primary.originalHost}) on port ${primary.port} (secure: ${primary.secure})...`);
 
   try {
-    const verified = await t.verify();
-    console.log('✅ [SMTP DIAGNOSTIC] transporter.verify() SUCCESSFUL!', verified);
-    return { ok: true, provider: currentProvider, host, port, secure, user, from, verify_result: verified };
-  } catch (err) {
-    if ((err.code === 'ETIMEDOUT' || err.code === 'ESOCKET') && port === 465) {
-      console.log('⚠️ [SMTP DIAGNOSTIC] Port 465 timed out. Retrying with Port 587 (STARTTLS)...');
-      try {
-        const altTransport = await createSmtpTransport(587, false);
-        const verifiedAlt = await altTransport.verify();
-        console.log('✅ [SMTP DIAGNOSTIC] Port 587 transporter.verify() SUCCESSFUL!', verifiedAlt);
-        return { ok: true, provider: currentProvider, host, port: 587, secure: false, user, from, verify_result: verifiedAlt };
-      } catch (altErr) {
-        err = altErr;
-      }
-    }
-    console.error('❌ [SMTP DIAGNOSTIC] transporter.verify() FAILED!');
-    console.error('  Error Code    :', err.code || null);
-    console.error('  Error Command :', err.command || null);
-    console.error('  Error Response:', err.response || null);
-    console.error('  Error Message :', err.message);
-    console.error('  Full Error    :', err);
+    const verified = await primary.transporter.verify();
+    console.log('✅ [SMTP DIAGNOSTIC] Primary transporter.verify() SUCCESSFUL!', verified);
+    return {
+      ok: true,
+      provider: currentProvider,
+      host: primary.hostIp,
+      originalHost: primary.originalHost,
+      ipUsed: primary.hostIp,
+      port: primary.port,
+      secure: primary.secure,
+      requireTLS: primary.requireTLS || false,
+      user,
+      from,
+      verify_result: verified,
+    };
+  } catch (primaryErr) {
+    console.warn(`⚠️ [SMTP DIAGNOSTIC] Primary port ${primary.port} verification failed: ${primaryErr.message} (code: ${primaryErr.code}). Retrying with Port 587...`);
 
-    if (err.message.includes('Invalid login') || err.code === 'EAUTH' || (err.response && err.response.includes('535'))) {
-      console.error('\n💡 Gmail Authentication Help:');
-      console.error('   1. Ensure 2-Step Verification is ENABLED on your Google Account.');
-      console.error('   2. Generate a 16-character App Password at: https://myaccount.google.com/apppasswords');
-      console.error('   3. Set EMAIL_USER=<your-gmail> and EMAIL_PASSWORD=<16-char-app-password> in Render environment variables.');
+    // Task 8: If port 465 fails, automatically retry: port:587, secure:false, requireTLS:true
+    try {
+      const fallback = await createSmtpTransport(587, false, true);
+      const fallbackVerified = await fallback.transporter.verify();
+      console.log('✅ [SMTP DIAGNOSTIC] Fallback port 587 transporter.verify() SUCCESSFUL!', fallbackVerified);
+      return {
+        ok: true,
+        provider: currentProvider,
+        host: fallback.hostIp,
+        originalHost: fallback.originalHost,
+        ipUsed: fallback.hostIp,
+        port: 587,
+        secure: false,
+        requireTLS: true,
+        user,
+        from,
+        verify_result: fallbackVerified,
+      };
+    } catch (fallbackErr) {
+      console.error('❌ [SMTP DIAGNOSTIC] transporter.verify() FAILED on both Port 465 and Port 587!');
+      console.error('  Port 465 Error :', primaryErr.message);
+      console.error('  Port 587 Error :', fallbackErr.message);
+
+      if (fallbackErr.message.includes('Invalid login') || fallbackErr.code === 'EAUTH' || (fallbackErr.response && fallbackErr.response.includes('535'))) {
+        console.error('\n💡 Gmail Authentication Help:');
+        console.error('   1. Ensure 2-Step Verification is ENABLED on your Google Account.');
+        console.error('   2. Generate a 16-character App Password at: https://myaccount.google.com/apppasswords');
+        console.error('   3. Set EMAIL_USER=<your-gmail> and EMAIL_PASSWORD=<16-char-app-password> in Render environment variables.');
+      }
+      const enhancedErr = new Error(`SMTP Verification failed on Port ${primary.port} (${primaryErr.message}) and Port 587 (${fallbackErr.message})`);
+      enhancedErr.code = fallbackErr.code || primaryErr.code || 'SMTP_VERIFICATION_FAILED';
+      enhancedErr.command = fallbackErr.command || primaryErr.command || null;
+      enhancedErr.response = fallbackErr.response || primaryErr.response || null;
+      enhancedErr.stack = fallbackErr.stack || primaryErr.stack;
+      enhancedErr.host = primary.hostIp;
+      enhancedErr.originalHost = primary.originalHost;
+      enhancedErr.ipUsed = primary.hostIp;
+      enhancedErr.port = 587;
+      enhancedErr.secure = false;
+      enhancedErr.user = user;
+      throw enhancedErr;
     }
-    const enhancedErr = new Error(err.message);
-    enhancedErr.code = err.code || 'SMTP_VERIFICATION_FAILED';
-    enhancedErr.command = err.command || null;
-    enhancedErr.response = err.response || null;
-    enhancedErr.stack = err.stack;
-    enhancedErr.host = host;
-    enhancedErr.port = port;
-    enhancedErr.secure = secure;
-    enhancedErr.user = user;
-    throw enhancedErr;
   }
 };
 
@@ -396,10 +455,9 @@ const sendEmail = async (opts) => {
         user: `${user.slice(0, 3)}***`,
       });
 
-      const doSend = async (overridePort = null, overrideSecure = null) => {
-        const transport = await getSmtpTransport(overridePort, overrideSecure);
-        const targetPort = overridePort || port;
-        const sendPromise = transport.sendMail({
+      const doSend = async (overridePort = null, overrideSecure = null, overrideRequireTLS = null) => {
+        const { transporter, hostIp, port: targetPort } = await createSmtpTransport(overridePort, overrideSecure, overrideRequireTLS);
+        const sendPromise = transporter.sendMail({
           from,
           to,
           subject,
@@ -414,10 +472,10 @@ const sendEmail = async (opts) => {
 
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => {
-            const tErr = new Error(`Connection timeout (ETIMEDOUT) after 8000ms while connecting to ${host}:${targetPort}`);
+            const tErr = new Error(`Connection timeout (ETIMEDOUT) after 10000ms while connecting to ${hostIp}:${targetPort}`);
             tErr.code = 'ETIMEDOUT';
             reject(tErr);
-          }, 8000);
+          }, 10000);
         });
 
         return await Promise.race([sendPromise, timeoutPromise]);
@@ -428,10 +486,10 @@ const sendEmail = async (opts) => {
         try {
           info = await doSend();
         } catch (firstErr) {
-          if ((firstErr.code === 'ETIMEDOUT' || firstErr.code === 'ESOCKET') && port === 465) {
-            log.info('[email:smtp] Primary port 465 timed out. Retrying email send over port 587 (STARTTLS)...');
-            info = await doSend(587, false);
-          } else {
+          log.info('[email:smtp] Primary port send failed. Retrying email send over port 587 (secure: false, requireTLS: true)...', { error: firstErr.message });
+          try {
+            info = await doSend(587, false, true);
+          } catch (secondErr) {
             throw firstErr;
           }
         }
@@ -481,6 +539,7 @@ const sendEmail = async (opts) => {
 module.exports = {
   sendEmail,
   verifySmtp,
+  createSmtpTransport,
   isMock,
   provider,
   logEmail,
