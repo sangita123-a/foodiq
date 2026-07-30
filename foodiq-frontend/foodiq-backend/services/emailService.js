@@ -72,16 +72,25 @@ const provider = () => {
   return 'mock';
 };
 
-const isMock = () => {
-  const p = provider();
-  if (p === 'mock') return true;
-  return false;
+const resolveSmtpHost = async () => {
+  const host = getSmtpHost();
+  if (!host) return host;
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(host)) return host;
+  try {
+    const addresses = await dns.promises.resolve4(host);
+    if (addresses && addresses.length > 0) {
+      log.info('[email:smtp] Resolved IPv4 address for host', { host, resolved: addresses[0] });
+      return addresses[0];
+    }
+  } catch (err) {
+    log.warn('[email:smtp] IPv4 DNS resolution failed, using hostname', { host, error: err.message });
+  }
+  return host;
 };
 
-let transporter = null;
-
-const createSmtpTransport = () => {
+const createSmtpTransport = async () => {
   const host = getSmtpHost();
+  const resolvedHost = await resolveSmtpHost();
   const port = getSmtpPort();
   const user = getSmtpUser();
   const pass = getSmtpPass();
@@ -89,6 +98,7 @@ const createSmtpTransport = () => {
 
   log.info('[email:smtp] Creating Nodemailer transport', {
     host,
+    resolvedHost,
     port,
     secure,
     user: user ? `${user.slice(0, 3)}***` : null,
@@ -96,11 +106,14 @@ const createSmtpTransport = () => {
   });
 
   return nodemailer.createTransport({
-    host,
+    host: resolvedHost,
     port,
     secure,
     auth: user && pass ? { user, pass } : undefined,
-    tls: { rejectUnauthorized: false },
+    tls: {
+      rejectUnauthorized: false,
+      servername: host,
+    },
     family: 4, // Force IPv4 to prevent IPv6 socket timeout on cloud hosts
     lookup: (hostname, options, callback) => {
       dns.lookup(hostname, { family: 4 }, (err, address, family) => {
@@ -113,8 +126,8 @@ const createSmtpTransport = () => {
   });
 };
 
-const getSmtpTransport = () => {
-  return createSmtpTransport();
+const getSmtpTransport = async () => {
+  return await createSmtpTransport();
 };
 
 /**
@@ -153,7 +166,7 @@ const verifySmtp = async () => {
     throw err;
   }
 
-  const t = createSmtpTransport();
+  const t = await createSmtpTransport();
 
   try {
     const verified = await t.verify();
@@ -373,7 +386,8 @@ const sendEmail = async (opts) => {
       });
 
       try {
-        const sendPromise = getSmtpTransport().sendMail({
+        const transport = await getSmtpTransport();
+        const sendPromise = transport.sendMail({
           from,
           to,
           subject,
