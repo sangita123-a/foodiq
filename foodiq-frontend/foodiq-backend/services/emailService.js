@@ -95,69 +95,91 @@ const isMock = () => {
  * Creates Nodemailer transport resolving IPv4 address first to bypass IPv6 ENETUNREACH issues.
  */
 const createSmtpTransport = async (overridePort = null, overrideSecure = null, overrideRequireTLS = null) => {
-  const originalHost = getSmtpHost() || 'smtp.gmail.com';
-  let hostIp = originalHost;
+  let addresses = [];
+  try {
+    addresses = await dns.promises.resolve4('smtp.gmail.com');
+  } catch (err) {
+    log.warn('[email:smtp] dns.resolve4("smtp.gmail.com") failed', { error: err.message });
+  }
 
-  if (!net.isIP(originalHost)) {
-    try {
-      const addresses = await resolve4(originalHost);
-      if (addresses && addresses.length > 0) {
-        hostIp = addresses[0];
-        log.info('[email:smtp] Resolved IPv4 address using resolve4', { originalHost, hostIp, addresses });
-      }
-    } catch (err) {
-      log.warn('[email:smtp] resolve4 failed, using fallback host', { originalHost, error: err.message });
+  if (!addresses || addresses.length === 0) {
+    const configuredHost = getSmtpHost() || 'smtp.gmail.com';
+    if (net.isIPv4(configuredHost)) {
+      addresses = [configuredHost];
+    } else {
+      addresses = ['142.250.102.108', '142.250.102.109', '74.125.130.108', '173.194.76.108'];
     }
   }
 
+  const primaryIp = addresses[0];
   const port = overridePort !== null ? overridePort : getSmtpPort();
   const user = getSmtpUser();
   const pass = getSmtpPass();
   const secure = overrideSecure !== null ? overrideSecure : (port === 465);
   const requireTLS = overrideRequireTLS !== null ? overrideRequireTLS : (port === 587);
 
-  log.info('[email:smtp] Creating Nodemailer transport', {
-    originalHost,
-    hostIp,
-    port,
+  // Task 8: Log:
+  // Resolved IPv4:
+  // Transport host:
+  // Transport port:
+  console.log('==================================================');
+  console.log('[SMTP CONFIG LOG]');
+  console.log(`  Resolved IPv4 : ${primaryIp} (All resolved: ${addresses.join(', ')})`);
+  console.log(`  Transport host: ${primaryIp}`);
+  console.log(`  Transport port: ${port}`);
+  console.log(`  Transport secure: ${secure}`);
+  console.log(`  Transport requireTLS: ${requireTLS}`);
+  console.log('==================================================');
+
+  log.info('[email:smtp] Creating Nodemailer transport options', {
+    resolvedIPv4: primaryIp,
+    allResolvedIPv4: addresses,
+    transportHost: primaryIp,
+    transportPort: port,
     secure,
     requireTLS,
     user: user ? `${user.slice(0, 3)}***` : null,
-    passLength: pass ? pass.length : 0,
   });
 
-  const transporterOptions = {
-    host: hostIp,
-    port,
-    secure,
-    ...(requireTLS ? { requireTLS: true } : {}),
+  // Task 5: Build transporter using host: ipv4 NOT smtp.gmail.com
+  // Task 6: tls: { servername: "smtp.gmail.com" }
+  // Task 7: Remove every custom lookup that still allows IPv6.
+  const buildOptionsForIp = (ipAddr, p = port, s = secure, reqTls = requireTLS) => ({
+    host: ipAddr,
+    port: p,
+    secure: s,
+    ...(reqTls ? { requireTLS: true } : {}),
     auth: user && pass ? { user, pass } : undefined,
     tls: {
       rejectUnauthorized: false,
-      servername: originalHost,
+      servername: 'smtp.gmail.com',
     },
-    family: 4, // Disable IPv6 completely for SMTP
-    lookup: (hostname, options, callback) => {
-      // Force IPv4 resolution, completely disabling IPv6 lookup
-      dns.lookup(hostname, { family: 4, hints: 0 }, (err, address, family) => {
-        if (err) return callback(err);
-        callback(null, address, 4);
-      });
-    },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
-  };
+    family: 4, // Disable IPv6 completely
+    connectionTimeout: 8000,
+    greetingTimeout: 8000,
+    socketTimeout: 8000,
+  });
+
+  const transporterOptions = buildOptionsForIp(primaryIp);
+
+  // Task 2: Log the exact transporter options before createTransport()
+  console.log('[SMTP TRANSPORTER OPTIONS]:', JSON.stringify({ ...transporterOptions, auth: user ? { user, pass: '***' } : undefined }, null, 2));
 
   const transporter = nodemailer.createTransport(transporterOptions);
 
   return {
     transporter,
-    hostIp,
-    originalHost,
+    hostIp: primaryIp,
+    allIps: addresses,
+    originalHost: 'smtp.gmail.com',
     port,
     secure,
     requireTLS,
+    createForIp: (ip, p = port, s = secure, reqTls = requireTLS) => {
+      const opts = buildOptionsForIp(ip, p, s, reqTls);
+      console.log(`[SMTP TRANSPORTER OPTIONS for ${ip}:${p}]:`, JSON.stringify({ ...opts, auth: user ? { user, pass: '***' } : undefined }, null, 2));
+      return nodemailer.createTransport(opts);
+    },
   };
 };
 
@@ -189,9 +211,8 @@ const verifySmtp = async () => {
   console.log(`  EMAIL_FROM     : ${from}`);
   console.log('==================================================');
 
-  if (!host || !user || !pass) {
+  if (!user || !pass) {
     const missing = [];
-    if (!host) missing.push('SMTP_HOST/EMAIL_HOST');
     if (!user) missing.push('SMTP_USER/EMAIL_USER');
     if (!pass) missing.push('SMTP_PASS/EMAIL_PASSWORD');
     const msg = `SMTP configuration incomplete. Missing required environment variables: ${missing.join(', ')}`;
@@ -203,38 +224,51 @@ const verifySmtp = async () => {
   }
 
   const primary = await createSmtpTransport();
-  console.log(`[SMTP DIAGNOSTIC] Testing connection to ${primary.hostIp} (${primary.originalHost}) on port ${primary.port} (secure: ${primary.secure})...`);
+  const ipsToTry = primary.allIps && primary.allIps.length > 0 ? primary.allIps : [primary.hostIp];
+  let lastErr = null;
 
-  try {
-    const verified = await primary.transporter.verify();
-    console.log('✅ [SMTP DIAGNOSTIC] Primary transporter.verify() SUCCESSFUL!', verified);
-    return {
-      ok: true,
-      provider: currentProvider,
-      host: primary.hostIp,
-      originalHost: primary.originalHost,
-      ipUsed: primary.hostIp,
-      port: primary.port,
-      secure: primary.secure,
-      requireTLS: primary.requireTLS || false,
-      user,
-      from,
-      verify_result: verified,
-    };
-  } catch (primaryErr) {
-    console.warn(`⚠️ [SMTP DIAGNOSTIC] Primary port ${primary.port} verification failed: ${primaryErr.message} (code: ${primaryErr.code}). Retrying with Port 587...`);
-
-    // Task 8: If port 465 fails, automatically retry: port:587, secure:false, requireTLS:true
+  // Step 1: Try Port 465 (or default configured port) across all resolved IPv4 addresses
+  for (const targetIp of ipsToTry) {
+    console.log(`[SMTP DIAGNOSTIC] Testing connection to IPv4 host: ${targetIp}, port: ${primary.port}, secure: ${primary.secure}...`);
+    const t = primary.createForIp(targetIp, primary.port, primary.secure, primary.requireTLS);
     try {
-      const fallback = await createSmtpTransport(587, false, true);
-      const fallbackVerified = await fallback.transporter.verify();
-      console.log('✅ [SMTP DIAGNOSTIC] Fallback port 587 transporter.verify() SUCCESSFUL!', fallbackVerified);
+      const verified = await t.verify();
+      console.log(`✅ [SMTP DIAGNOSTIC] Primary transporter.verify() SUCCESSFUL on IPv4 ${targetIp}:${primary.port}!`, verified);
       return {
         ok: true,
         provider: currentProvider,
-        host: fallback.hostIp,
-        originalHost: fallback.originalHost,
-        ipUsed: fallback.hostIp,
+        resolvedIPv4: targetIp,
+        host: targetIp,
+        originalHost: primary.originalHost,
+        ipUsed: targetIp,
+        port: primary.port,
+        secure: primary.secure,
+        requireTLS: primary.requireTLS || false,
+        user,
+        from,
+        verify_result: verified,
+      };
+    } catch (err) {
+      console.warn(`⚠️ [SMTP DIAGNOSTIC] Connection to IPv4 ${targetIp}:${primary.port} failed: ${err.message} (${err.code || 'NO_CODE'})`);
+      lastErr = err;
+    }
+  }
+
+  // Step 2: Try Port 587 (secure: false, requireTLS: true) across all resolved IPv4 addresses
+  console.log('🔄 [SMTP DIAGNOSTIC] Retrying all resolved IPv4 addresses on Port 587 (secure: false, requireTLS: true)...');
+  for (const targetIp of ipsToTry) {
+    console.log(`[SMTP DIAGNOSTIC] Testing connection to IPv4 host: ${targetIp}, port: 587 (secure: false, requireTLS: true)...`);
+    const tAlt = primary.createForIp(targetIp, 587, false, true);
+    try {
+      const fallbackVerified = await tAlt.verify();
+      console.log(`✅ [SMTP DIAGNOSTIC] Fallback port 587 transporter.verify() SUCCESSFUL on IPv4 ${targetIp}:587!`, fallbackVerified);
+      return {
+        ok: true,
+        provider: currentProvider,
+        resolvedIPv4: targetIp,
+        host: targetIp,
+        originalHost: primary.originalHost,
+        ipUsed: targetIp,
         port: 587,
         secure: false,
         requireTLS: true,
@@ -242,31 +276,26 @@ const verifySmtp = async () => {
         from,
         verify_result: fallbackVerified,
       };
-    } catch (fallbackErr) {
-      console.error('❌ [SMTP DIAGNOSTIC] transporter.verify() FAILED on both Port 465 and Port 587!');
-      console.error('  Port 465 Error :', primaryErr.message);
-      console.error('  Port 587 Error :', fallbackErr.message);
-
-      if (fallbackErr.message.includes('Invalid login') || fallbackErr.code === 'EAUTH' || (fallbackErr.response && fallbackErr.response.includes('535'))) {
-        console.error('\n💡 Gmail Authentication Help:');
-        console.error('   1. Ensure 2-Step Verification is ENABLED on your Google Account.');
-        console.error('   2. Generate a 16-character App Password at: https://myaccount.google.com/apppasswords');
-        console.error('   3. Set EMAIL_USER=<your-gmail> and EMAIL_PASSWORD=<16-char-app-password> in Render environment variables.');
-      }
-      const enhancedErr = new Error(`SMTP Verification failed on Port ${primary.port} (${primaryErr.message}) and Port 587 (${fallbackErr.message})`);
-      enhancedErr.code = fallbackErr.code || primaryErr.code || 'SMTP_VERIFICATION_FAILED';
-      enhancedErr.command = fallbackErr.command || primaryErr.command || null;
-      enhancedErr.response = fallbackErr.response || primaryErr.response || null;
-      enhancedErr.stack = fallbackErr.stack || primaryErr.stack;
-      enhancedErr.host = primary.hostIp;
-      enhancedErr.originalHost = primary.originalHost;
-      enhancedErr.ipUsed = primary.hostIp;
-      enhancedErr.port = 587;
-      enhancedErr.secure = false;
-      enhancedErr.user = user;
-      throw enhancedErr;
+    } catch (err) {
+      console.warn(`⚠️ [SMTP DIAGNOSTIC] Connection to IPv4 ${targetIp}:587 failed: ${err.message} (${err.code || 'NO_CODE'})`);
+      lastErr = err;
     }
   }
+
+  console.error('❌ [SMTP DIAGNOSTIC] transporter.verify() FAILED on all IPv4 addresses!');
+  const enhancedErr = new Error(`SMTP Verification failed on all IPv4 addresses (${ipsToTry.join(', ')}): ${lastErr?.message}`);
+  enhancedErr.code = lastErr?.code || 'SMTP_VERIFICATION_FAILED';
+  enhancedErr.command = lastErr?.command || null;
+  enhancedErr.response = lastErr?.response || null;
+  enhancedErr.stack = lastErr?.stack;
+  enhancedErr.resolvedIPv4 = ipsToTry[0];
+  enhancedErr.host = ipsToTry[0];
+  enhancedErr.originalHost = primary.originalHost;
+  enhancedErr.ipUsed = ipsToTry[0];
+  enhancedErr.port = 587;
+  enhancedErr.secure = false;
+  enhancedErr.user = user;
+  throw enhancedErr;
 };
 
 const logEmail = async (row) => {
@@ -455,9 +484,28 @@ const sendEmail = async (opts) => {
         user: `${user.slice(0, 3)}***`,
       });
 
-      const doSend = async (overridePort = null, overrideSecure = null, overrideRequireTLS = null) => {
-        const { transporter, hostIp, port: targetPort } = await createSmtpTransport(overridePort, overrideSecure, overrideRequireTLS);
-        const sendPromise = transporter.sendMail({
+      const doSendOnIp = async (targetIp, overridePort = null, overrideSecure = null, overrideRequireTLS = null) => {
+        const targetPort = overridePort !== null ? overridePort : port;
+        const targetSecure = overrideSecure !== null ? overrideSecure : (targetPort === 465);
+        const targetRequireTLS = overrideRequireTLS !== null ? overrideRequireTLS : (targetPort === 587);
+
+        const transport = nodemailer.createTransport({
+          host: targetIp,
+          port: targetPort,
+          secure: targetSecure,
+          ...(targetRequireTLS ? { requireTLS: true } : {}),
+          auth: user && pass ? { user, pass } : undefined,
+          tls: {
+            rejectUnauthorized: false,
+            servername: 'smtp.gmail.com',
+          },
+          family: 4,
+          connectionTimeout: 8000,
+          greetingTimeout: 8000,
+          socketTimeout: 8000,
+        });
+
+        const sendPromise = transport.sendMail({
           from,
           to,
           subject,
@@ -472,26 +520,46 @@ const sendEmail = async (opts) => {
 
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => {
-            const tErr = new Error(`Connection timeout (ETIMEDOUT) after 10000ms while connecting to ${hostIp}:${targetPort}`);
+            const tErr = new Error(`Connection timeout (ETIMEDOUT) after 8000ms while connecting to ${targetIp}:${targetPort}`);
             tErr.code = 'ETIMEDOUT';
             reject(tErr);
-          }, 10000);
+          }, 8000);
         });
 
         return await Promise.race([sendPromise, timeoutPromise]);
       };
 
       try {
-        let info;
-        try {
-          info = await doSend();
-        } catch (firstErr) {
-          log.info('[email:smtp] Primary port send failed. Retrying email send over port 587 (secure: false, requireTLS: true)...', { error: firstErr.message });
+        const primaryMeta = await createSmtpTransport();
+        const ipsToTry = primaryMeta.allIps && primaryMeta.allIps.length > 0 ? primaryMeta.allIps : [primaryMeta.hostIp];
+        let info = null;
+        let lastSmtpErr = null;
+
+        // Try primary port (465) across IPv4 addresses
+        for (const targetIp of ipsToTry) {
           try {
-            info = await doSend(587, false, true);
-          } catch (secondErr) {
-            throw firstErr;
+            info = await doSendOnIp(targetIp);
+            if (info) break;
+          } catch (err) {
+            lastSmtpErr = err;
           }
+        }
+
+        // If primary port failed on all IPv4 addresses, try port 587 across IPv4 addresses
+        if (!info) {
+          log.info('[email:smtp] Primary port send failed across IPv4 addresses. Retrying over port 587 (secure: false, requireTLS: true)...');
+          for (const targetIp of ipsToTry) {
+            try {
+              info = await doSendOnIp(targetIp, 587, false, true);
+              if (info) break;
+            } catch (err) {
+              lastSmtpErr = err;
+            }
+          }
+        }
+
+        if (!info) {
+          throw lastSmtpErr || new Error('SMTP email delivery failed across all resolved IPv4 addresses.');
         }
 
         log.info('[email:smtp] SMTP mail sent successfully', { messageId: info.messageId, to });
