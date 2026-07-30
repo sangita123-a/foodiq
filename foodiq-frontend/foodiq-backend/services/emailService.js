@@ -8,6 +8,7 @@
  * - SendGrid: SENDGRID_API_KEY, EMAIL_FROM_ADDRESS
  */
 const nodemailer = require('nodemailer');
+const dns = require('dns');
 const { pool } = require('../config/db');
 const { log } = require('../utils/logger');
 
@@ -101,6 +102,11 @@ const createSmtpTransport = () => {
     auth: user && pass ? { user, pass } : undefined,
     tls: { rejectUnauthorized: false },
     family: 4, // Force IPv4 to prevent IPv6 socket timeout on cloud hosts
+    lookup: (hostname, options, callback) => {
+      dns.lookup(hostname, { family: 4 }, (err, address, family) => {
+        callback(err, address, family);
+      });
+    },
     connectionTimeout: 12000,
     greetingTimeout: 12000,
     socketTimeout: 12000,
