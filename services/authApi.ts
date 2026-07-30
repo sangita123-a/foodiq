@@ -61,12 +61,13 @@ export async function loginWithPassword(payload: {
   return parseAuthApiResponse(res.data as AuthApiPayload);
 }
 
-export async function forgotPassword(payload: { mobile: string }) {
+export async function forgotPassword(payload: { mobile?: string; email?: string }) {
   const res = await api.post("/api/auth/forgot-password", payload);
   return res.data as {
     success: boolean;
     message?: string;
-    data?: { mobile?: string; debug_code?: string; expires_at?: string };
+    data?: { mobile?: string; email?: string; debug_code?: string; expires_at?: string };
+    error?: any;
   };
 }
 

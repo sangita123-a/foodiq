@@ -74,19 +74,6 @@ const provider = () => {
 const isMock = () => {
   const p = provider();
   if (p === 'mock') return true;
-
-  if (p === 'smtp' && !getSmtpHost() && !getSmtpUser()) {
-    log.warn('[email] EMAIL_PROVIDER=smtp but SMTP_HOST/EMAIL_USER is missing — falling back to mock');
-    return true;
-  }
-  if (p === 'resend' && !process.env.RESEND_API_KEY) {
-    log.warn('[email] EMAIL_PROVIDER=resend but RESEND_API_KEY is missing — falling back to mock');
-    return true;
-  }
-  if (p === 'sendgrid' && !process.env.SENDGRID_API_KEY) {
-    log.warn('[email] EMAIL_PROVIDER=sendgrid but SENDGRID_API_KEY is missing — falling back to mock');
-    return true;
-  }
   return false;
 };
 
@@ -152,9 +139,12 @@ const verifySmtp = async () => {
     if (!host) missing.push('SMTP_HOST/EMAIL_HOST');
     if (!user) missing.push('SMTP_USER/EMAIL_USER');
     if (!pass) missing.push('SMTP_PASS/EMAIL_PASSWORD');
-    const msg = `SMTP configuration incomplete. Missing: ${missing.join(', ')}`;
+    const msg = `SMTP configuration incomplete. Missing required environment variables: ${missing.join(', ')}`;
     console.error(`❌ [SMTP DIAGNOSTIC] FAILED: ${msg}`);
-    throw new Error(msg);
+    const err = new Error(msg);
+    err.code = 'EMAIL_SERVICE_NOT_CONFIGURED';
+    err.missing = missing;
+    throw err;
   }
 
   const t = createSmtpTransport();
@@ -162,7 +152,7 @@ const verifySmtp = async () => {
   try {
     const verified = await t.verify();
     console.log('✅ [SMTP DIAGNOSTIC] transporter.verify() SUCCESSFUL!', verified);
-    return { ok: true, host, port, user, from, secure };
+    return { ok: true, provider: currentProvider, host, port, secure, user, from, verify_result: verified };
   } catch (err) {
     console.error('❌ [SMTP DIAGNOSTIC] transporter.verify() FAILED!');
     console.error('  Error Code    :', err.code || null);
@@ -177,7 +167,16 @@ const verifySmtp = async () => {
       console.error('   2. Generate a 16-character App Password at: https://myaccount.google.com/apppasswords');
       console.error('   3. Set EMAIL_USER=<your-gmail> and EMAIL_PASSWORD=<16-char-app-password> in Render environment variables.');
     }
-    throw err;
+    const enhancedErr = new Error(err.message);
+    enhancedErr.code = err.code || 'SMTP_VERIFICATION_FAILED';
+    enhancedErr.command = err.command || null;
+    enhancedErr.response = err.response || null;
+    enhancedErr.stack = err.stack;
+    enhancedErr.host = host;
+    enhancedErr.port = port;
+    enhancedErr.secure = secure;
+    enhancedErr.user = user;
+    throw enhancedErr;
   }
 };
 
