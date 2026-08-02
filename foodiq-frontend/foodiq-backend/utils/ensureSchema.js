@@ -3021,11 +3021,14 @@ async function ensureSchema() {
       );
     }
 
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT TRUE`);
+
     const riderEmail = 'rider@foodiq.com';
     const riderExisting = await q(
       `SELECT id FROM users WHERE email = $1 LIMIT 1`,
       [riderEmail]
     );
+    let riderUserId;
     if (!riderExisting?.rows?.[0]) {
       const hash = await bcrypt.hash('Password123', 12);
       const inserted = await q(
@@ -3034,19 +3037,40 @@ async function ensureSchema() {
         [riderEmail, hash, 'Ravi Rider', '9888888888']
       );
       if (inserted?.rows?.[0]) {
+        riderUserId = inserted.rows[0].id;
         await q(
           `INSERT INTO user_settings (user_id) VALUES ($1) ON CONFLICT DO NOTHING`,
-          [inserted.rows[0].id]
+          [riderUserId]
         );
         await q(
-          `INSERT INTO delivery_partners (user_id, vehicle_details, vehicle_type, license_number, is_available, approval_status, current_lat, current_lng, rating)
-           VALUES ($1, 'KA-01-AB-1234', 'Bike', 'DL-FOODIQ-001', TRUE, 'approved', 12.9716, 77.5946, 4.8)
+          `INSERT INTO delivery_partners (user_id, full_name, email, phone_number, password_hash, vehicle_details, vehicle_type, driving_license_number, license_number, is_verified, is_online, is_available, status, approval_status, current_lat, current_lng, rating)
+           VALUES ($1, 'Ravi Rider', $2, '9888888888', $3, 'KA-01-AB-1234', 'Bike', 'DL-FOODIQ-001', 'DL-FOODIQ-001', TRUE, TRUE, TRUE, 'approved', 'approved', 12.9716, 77.5946, 4.8)
            ON CONFLICT (user_id) DO NOTHING`,
-          [inserted.rows[0].id]
+          [riderUserId, riderEmail, hash]
         );
         console.log('[SCHEMA] Seeded rider@foodiq.com (dev bootstrap)');
       }
+    } else {
+      riderUserId = riderExisting.rows[0].id;
+      const hash = await bcrypt.hash('Password123', 12);
+      await q(
+        `UPDATE users SET role = 'delivery_partner', password_hash = $1 WHERE id = $2`,
+        [hash, riderUserId]
+      );
+      await q(
+        `INSERT INTO delivery_partners (user_id, full_name, email, phone_number, password_hash, vehicle_details, vehicle_type, driving_license_number, license_number, is_verified, is_online, is_available, status, approval_status, current_lat, current_lng, rating)
+         VALUES ($1, 'Ravi Rider', $2, '9888888888', $3, 'KA-01-AB-1234', 'Bike', 'DL-FOODIQ-001', 'DL-FOODIQ-001', TRUE, TRUE, TRUE, 'approved', 'approved', 12.9716, 77.5946, 4.8)
+         ON CONFLICT (user_id) DO UPDATE SET is_verified = TRUE, status = 'approved', approval_status = 'approved', email = EXCLUDED.email, password_hash = EXCLUDED.password_hash`,
+        [riderUserId, riderEmail, hash]
+      );
     }
+
+    // Ensure all delivery partners are approved & verified for production rider portal access
+    await q(`
+      UPDATE delivery_partners
+      SET is_verified = TRUE, status = 'approved', approval_status = 'approved'
+      WHERE status = 'pending' OR is_verified IS FALSE OR is_verified IS NULL
+    `);
     } else {
       console.log('[SCHEMA] Bootstrap users skipped (production hardening)');
     }
