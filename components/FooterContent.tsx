@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -110,6 +110,8 @@ const RESTAURANT_LINKS: FooterLink[] = [
   { label: "Partner With Us", href: "/partner" },
   { label: "Add Your Restaurant", href: "/restaurant/register" },
   { label: "Restaurant Login", href: "/restaurant/login" },
+  { label: "Become a Delivery Partner", href: "/delivery/register" },
+  { label: "Delivery Partner Login", href: "/delivery/login" },
 ];
 
 const CUSTOMER_LINKS: FooterLink[] = [

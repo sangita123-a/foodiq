@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
-import { usePwaInstall } from "@/components/pwa/PwaProvider";
+import { usePwaInstall } from "@/components/pwa/PwaContext";
 
 const DISMISS_KEY = "foodiq_pwa_install_dismissed";
 

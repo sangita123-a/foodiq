@@ -162,6 +162,110 @@ const patchPartner = async (req, res) => {
   }
 };
 
+const getWithdrawals = async (req, res) => {
+  try {
+    const wallet = require('../models/deliveryWalletModel');
+    const data = await wallet.listWithdrawals({
+      status: req.query.status || '',
+      page: req.query.page,
+      limit: req.query.limit,
+    });
+    ok(res, 'Withdrawal requests retrieved', data);
+  } catch (error) {
+    fail(res, error.status || 500, error.message || 'Server Error', error.message);
+  }
+};
+
+const patchWithdrawal = async (req, res) => {
+  try {
+    const wallet = require('../models/deliveryWalletModel');
+    const rawAction = String(req.body.action || req.body.status || '').toLowerCase();
+    const action = rawAction === 'approved' ? 'approve' : rawAction === 'rejected' ? 'reject' : rawAction;
+    const adminNote = req.body.admin_note || req.body.note || '';
+    const data = await wallet.processWithdrawal(req.params.id, action, adminNote);
+    ok(res, `Withdrawal request ${data.status}`, data);
+  } catch (error) {
+    fail(res, error.status || 500, error.message || 'Server Error', error.message);
+  }
+};
+
+const getKycDocuments = async (req, res) => {
+  try {
+    const docs = require('../models/deliveryDocumentModel');
+    const data = await docs.listAllForAdmin({
+      status: req.query.status || '',
+      documentType: req.query.document_type || '',
+      search: req.query.search || '',
+      page: req.query.page,
+      limit: req.query.limit,
+    });
+    ok(res, 'KYC documents retrieved', data);
+  } catch (error) {
+    fail(res, error.status || 500, error.message || 'Server Error', error.message);
+  }
+};
+
+const patchKycDocument = async (req, res) => {
+  try {
+    const docs = require('../models/deliveryDocumentModel');
+    const rawStatus = String(req.body.status || req.body.action || '').toLowerCase();
+    const status = rawStatus === 'approve' ? 'approved' : rawStatus === 'reject' ? 'rejected' : rawStatus;
+    const reason = req.body.reason || req.body.rejection_reason || '';
+
+    if (status === 'rejected' && !reason) {
+      return fail(res, 400, 'reason is required when rejecting a document');
+    }
+
+    const data = await docs.reviewDocument(req.params.id, {
+      status,
+      reason,
+      verifiedBy: req.user.id,
+    });
+    if (!data) return fail(res, 404, 'Document not found');
+    ok(res, `Document ${status}`, data);
+  } catch (error) {
+    fail(res, error.status || 500, error.message || 'Server Error', error.message);
+  }
+};
+
+const getDeliveryBankAccounts = async (req, res) => {
+  try {
+    const bankAccounts = require('../models/deliveryBankAccountModel');
+    const data = await bankAccounts.listAllForAdmin({
+      status: req.query.status || '',
+      search: req.query.search || '',
+      page: req.query.page,
+      limit: req.query.limit,
+    });
+    ok(res, 'Delivery partner bank accounts retrieved', data);
+  } catch (error) {
+    fail(res, error.status || 500, error.message || 'Server Error', error.message);
+  }
+};
+
+const patchDeliveryBankAccount = async (req, res) => {
+  try {
+    const bankAccounts = require('../models/deliveryBankAccountModel');
+    const rawStatus = String(req.body.status || req.body.action || '').toLowerCase();
+    const status = rawStatus === 'approve' ? 'approved' : rawStatus === 'reject' ? 'rejected' : rawStatus;
+    const reason = req.body.reason || req.body.rejection_reason || '';
+
+    if (status === 'rejected' && !reason) {
+      return fail(res, 400, 'reason is required when rejecting a bank account');
+    }
+
+    const data = await bankAccounts.reviewBankAccount(req.params.id, {
+      status,
+      reason,
+      verifiedBy: req.user.id,
+    });
+    if (!data) return fail(res, 404, 'Bank account not found');
+    ok(res, `Bank account ${status}`, bankAccounts.mapAccount(data));
+  } catch (error) {
+    fail(res, error.status || 500, error.message || 'Server Error', error.message);
+  }
+};
+
 const getOrders = async (req, res) => {
   try {
     const data = await admin.listOrders({
@@ -982,6 +1086,84 @@ const getAdminInventory = async (req, res) => {
   }
 };
 
+/**
+ * POST /api/admin/delivery/notifications/send — Admin sends a notification to one delivery partner.
+ */
+const sendDeliveryNotification = async (req, res) => {
+  try {
+    const dn = require('../models/deliveryNotificationModel');
+    const { partner_id, title, message, type } = req.body || {};
+    if (!partner_id || !title || !message) {
+      return fail(res, 400, 'partner_id, title and message are required.');
+    }
+    const notification = await dn.createNotification({
+      partnerId: partner_id,
+      type: type || 'admin_message',
+      title,
+      message,
+    });
+    ok(res, 'Notification sent to delivery partner', notification);
+  } catch (error) {
+    fail(res, error.status || 500, error.message || 'Failed to send notification.');
+  }
+};
+
+/**
+ * GET /api/admin/delivery/notifications — recent sends across all partners (audit view).
+ */
+const getDeliveryNotifications = async (req, res) => {
+  try {
+    const dn = require('../models/deliveryNotificationModel');
+    const { pool } = require('../config/db');
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 50));
+    const { rows } = await pool.query(
+      `SELECT n.*, u.full_name AS partner_name, u.email AS partner_email
+       FROM delivery_notifications n
+       JOIN delivery_partners dp ON dp.id = n.partner_id
+       JOIN users u ON u.id = dp.user_id
+       ORDER BY n.created_at DESC
+       LIMIT $1`,
+      [limit]
+    );
+    ok(res, 'Recent notifications retrieved', { notifications: rows, types: dn.NOTIFICATION_TYPES });
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+/**
+ * GET /api/admin/delivery/support — list/search/filter delivery partner support tickets.
+ */
+const getDeliverySupportTickets = async (req, res) => {
+  try {
+    const support = require('../models/deliverySupportModel');
+    const data = await support.listAllTickets({
+      page: req.query.page,
+      limit: req.query.limit,
+      status: req.query.status || '',
+      search: req.query.search || '',
+    });
+    ok(res, 'Support tickets retrieved', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+/**
+ * PATCH /api/admin/delivery/support/:id — reply to and/or change the status of a ticket.
+ */
+const patchDeliverySupportTicket = async (req, res) => {
+  try {
+    const support = require('../models/deliverySupportModel');
+    const { admin_reply, status } = req.body || {};
+    const ticket = await support.replyToTicket(req.params.id, { adminReply: admin_reply, status });
+    if (!ticket) return fail(res, 404, 'Support ticket not found.');
+    ok(res, 'Support ticket updated', ticket);
+  } catch (error) {
+    fail(res, error.status || 500, error.message || 'Failed to update support ticket.');
+  }
+};
+
 module.exports = {
   getDashboard,
   getLiveDeliveries,
@@ -995,6 +1177,16 @@ module.exports = {
   userOrders,
   getPartners,
   patchPartner,
+  getWithdrawals,
+  patchWithdrawal,
+  getKycDocuments,
+  patchKycDocument,
+  getDeliveryBankAccounts,
+  patchDeliveryBankAccount,
+  sendDeliveryNotification,
+  getDeliveryNotifications,
+  getDeliverySupportTickets,
+  patchDeliverySupportTicket,
   getOrders,
   getOrder,
   patchOrder,

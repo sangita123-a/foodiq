@@ -1,14 +1,7 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
-
-const DeliveryShellInner = dynamic(() => import("./DeliveryShellInner"), {
-  ssr: false,
-  loading: () => (
-    <div className="min-h-screen bg-section animate-pulse" aria-hidden />
-  ),
-});
+import DeliveryShellInner from "./DeliveryShellInner";
 
 type Props = {
   children: ReactNode;

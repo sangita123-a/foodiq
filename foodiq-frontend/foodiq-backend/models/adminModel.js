@@ -198,7 +198,7 @@ const listDeliveryPartners = async ({ search = '', status = '' } = {}) => {
     `SELECT dp.*, u.full_name, u.email, u.phone_number, u.is_suspended,
        (SELECT COUNT(*)::int FROM delivery_assignments da WHERE da.delivery_partner_id = dp.id AND da.status = 'delivered') AS delivery_count,
        (SELECT COALESCE(SUM(amount), 0)::float FROM delivery_earnings e WHERE e.delivery_partner_id = dp.id) AS total_earnings,
-       (SELECT COALESCE(balance, 0)::float FROM driver_wallets w WHERE w.delivery_partner_id = dp.id) AS wallet_balance
+       (SELECT COALESCE(available_balance, 0)::float FROM delivery_wallets w WHERE w.partner_id = dp.id) AS wallet_balance
      FROM delivery_partners dp
      JOIN users u ON u.id = dp.user_id
      WHERE ($1 = '' OR u.full_name ILIKE '%' || $1 || '%' OR u.email ILIKE '%' || $1 || '%')
@@ -311,6 +311,22 @@ const updateOrderAdmin = async (id, { status, delivery_partner_id }) => {
   }
   if (!order) return null;
 
+  if (status && String(status).toLowerCase() === 'cancelled' && order.delivery_partner_id) {
+    try {
+      const dn = require('./deliveryNotificationModel');
+      await dn.createNotification({
+        partnerId: order.delivery_partner_id,
+        type: 'order_cancelled',
+        title: 'Order Cancelled',
+        message: `Order #${String(id).slice(0, 8)} has been cancelled by the admin.`,
+        relatedOrderId: id,
+        actionUrl: '/delivery/orders',
+      });
+    } catch {
+      /* non-blocking */
+    }
+  }
+
   if (delivery_partner_id) {
     await pool.query(
       `INSERT INTO order_tracking (order_id, delivery_partner_id, current_status, estimated_delivery_time)
@@ -341,6 +357,19 @@ const updateOrderAdmin = async (id, { status, delivery_partner_id }) => {
       }
     } catch {
       /* ignore */
+    }
+    try {
+      const dn = require('./deliveryNotificationModel');
+      await dn.createNotification({
+        partnerId: delivery_partner_id,
+        type: 'order_assigned',
+        title: 'Order Assigned',
+        message: `Admin assigned you order #${String(id).slice(0, 8)}. Accept within 2 minutes.`,
+        relatedOrderId: id,
+        actionUrl: '/delivery/orders/assigned',
+      });
+    } catch {
+      /* non-blocking */
     }
   } else if (status) {
     await pool.query(

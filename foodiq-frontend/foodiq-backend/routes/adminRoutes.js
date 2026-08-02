@@ -23,8 +23,36 @@ router.get('/users/:id/orders', requirePermission('customers'), c.userOrders);
 router.get('/users/:id/wallet', requirePermission('customers'), c.userWallet);
 router.get('/users/:id/referrals', requirePermission('customers'), c.userReferrals);
 
+const sc = require('../controllers/shiftController');
+router.get('/shifts', requirePermission('delivery'), sc.getAdminShifts);
+router.post('/shifts', requirePermission('delivery'), sc.createAdminShift);
+router.patch('/shifts/:id', requirePermission('delivery'), sc.updateAdminShift);
+router.delete('/shifts/:id', requirePermission('delivery'), sc.deleteAdminShift);
+
 router.get('/delivery-partners', requirePermission('delivery'), c.getPartners);
 router.put('/delivery-partners/:id', requirePermission('delivery'), c.patchPartner);
+
+router.get('/withdrawals', requirePermission('delivery', 'payments'), c.getWithdrawals);
+router.patch('/withdrawals/:id', requirePermission('delivery', 'payments'), c.patchWithdrawal);
+
+router.get('/delivery/documents', requirePermission('delivery'), c.getKycDocuments);
+router.patch('/delivery/documents/:id', requirePermission('delivery'), c.patchKycDocument);
+
+router.get('/delivery/bank-accounts', requirePermission('delivery', 'payments'), c.getDeliveryBankAccounts);
+router.patch('/delivery/bank-accounts/:id', requirePermission('delivery', 'payments'), c.patchDeliveryBankAccount);
+
+const deliveryPartnerReviewAdmin = require('../controllers/deliveryPartnerReviewController');
+router.get('/delivery-reviews/trends', requirePermission('delivery', 'feedback'), deliveryPartnerReviewAdmin.adminReviewTrends);
+router.get('/delivery-reviews', requirePermission('delivery', 'feedback'), deliveryPartnerReviewAdmin.adminListPartnerReviews);
+router.delete('/delivery-reviews/:id', requirePermission('delivery', 'feedback'), deliveryPartnerReviewAdmin.adminDeletePartnerReview);
+
+const { notificationLimiter, supportLimiter } = require('../middleware/rateLimiters');
+router.get('/delivery/notifications', requirePermission('delivery', 'notifications'), c.getDeliveryNotifications);
+router.post('/delivery/notifications/send', notificationLimiter, requirePermission('delivery', 'notifications'), c.sendDeliveryNotification);
+
+const { validateAdminReply } = require('../validators/deliverySupportValidator');
+router.get('/delivery/support', requirePermission('delivery', 'feedback'), c.getDeliverySupportTickets);
+router.patch('/delivery/support/:id', supportLimiter, requirePermission('delivery', 'feedback'), validateAdminReply, c.patchDeliverySupportTicket);
 
 router.get('/orders', requirePermission('orders'), c.getOrders);
 router.get('/orders/:id', requirePermission('orders'), c.getOrder);
@@ -89,8 +117,14 @@ router.post('/loyalty/adjust', requirePermission('loyalty'), c.postLoyaltyAdjust
 router.post('/loyalty/expire', requirePermission('loyalty'), c.postLoyaltyExpire);
 router.post('/loyalty/campaign', requirePermission('loyalty'), c.postLoyaltyCampaign);
 
+const driverSupportAdmin = require('../controllers/deliverySupportController');
+router.get('/support/tickets', requirePermission('delivery', 'feedback'), driverSupportAdmin.adminListTickets);
+router.get('/support/ticket/:id', requirePermission('delivery', 'feedback'), driverSupportAdmin.adminGetTicket);
+router.patch('/support/assign', requirePermission('delivery', 'feedback'), driverSupportAdmin.adminAssignTicket);
+router.patch('/support/status', requirePermission('delivery', 'feedback'), driverSupportAdmin.adminUpdateStatus);
+router.post('/support/message', supportLimiter, requirePermission('delivery', 'feedback'), driverSupportAdmin.adminSendMessage);
+
 router.get('/support', requirePermission('feedback'), c.getSupportCenter);
-router.get('/support/tickets', requirePermission('feedback'), c.getSupportTickets);
 router.put('/support/tickets/:id/assign', requirePermission('feedback'), c.assignSupportTicket);
 router.put('/support/tickets/:id/resolve', requirePermission('feedback'), c.resolveSupportTicket);
 router.get('/support/live-chats', requirePermission('feedback'), c.getSupportLiveChats);
@@ -100,6 +134,7 @@ router.get('/support/ai-sessions', requirePermission('feedback'), c.getSupportAi
 
 const ticketAdmin = require('../controllers/ticketController');
 router.get('/tickets', requirePermission('feedback'), ticketAdmin.adminListTickets);
+
 router.get('/tickets/:id', requirePermission('feedback'), ticketAdmin.adminGetTicket);
 router.put('/tickets/:id/assign', requirePermission('feedback'), ticketAdmin.adminAssignTicket);
 router.put('/tickets/:id/status', requirePermission('feedback'), ticketAdmin.adminUpdateStatus);
@@ -147,5 +182,10 @@ router.put('/feature-flags/:key', (req, res) => {
   req.body.key = req.params.key;
   return featuresAdmin.adminUpsertFlag(req, res);
 });
+
+const syncAdmin = require('../controllers/deliverySyncController');
+router.get('/sync/queue', syncAdmin.getAdminSyncList);
+router.get('/sync/stats', syncAdmin.getAdminSyncStats);
+router.post('/sync/retry', syncAdmin.retryAdminSync);
 
 module.exports = router;

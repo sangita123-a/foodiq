@@ -61,6 +61,7 @@ const issueOtp = async ({
   channel = 'email',
   purpose = 'verification',
   name = null,
+  ttlMinutes = null,
 }) => {
   if (!destination) {
     const err = new Error('destination is required');
@@ -74,13 +75,14 @@ const issueOtp = async ({
 
   const code = generateCode(6);
   const codeHash = hashCode(code);
-  const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60_000);
+  const effectiveTtl = Number(ttlMinutes || process.env.OTP_TTL_MINUTES || 10);
+  const expiresAt = new Date(Date.now() + effectiveTtl * 60_000);
 
   log.info('[otp] code generated', {
     destination,
     purpose,
     expiresAt,
-    ttl_minutes: OTP_TTL_MINUTES,
+    ttl_minutes: effectiveTtl,
   });
 
   // Invalidate previous unused codes for this destination+purpose

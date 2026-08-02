@@ -9,7 +9,9 @@ import {
   deliveryFetcher,
   type DeliveryDashboard,
   type DeliveryEarnings,
-  type DeliveryNotification,
+  type DeliveryNotificationCategory,
+  type DeliveryNotificationsResponse,
+  type DeliveryNotificationType,
   type DeliveryOrder,
   type DeliveryRoute,
 } from "@/services/deliveryApi";
@@ -106,12 +108,44 @@ export function useDeliveryEarnings() {
   );
 }
 
-export function useDeliveryNotifications() {
+export function useDeliveryNotifications(params?: {
+  page?: number;
+  limit?: number;
+  unread?: boolean;
+  type?: DeliveryNotificationType | "";
+  category?: DeliveryNotificationCategory | "All" | "";
+}) {
   const hasToken = useAuthToken();
   const refreshInterval = useSocketAwareInterval(30000);
-  return useSWR<DeliveryNotification[]>(
-    hasToken ? "/api/delivery/notifications" : null,
-    deliveryFetcher,
-    { revalidateOnFocus: false, refreshInterval }
-  );
+  const { socket, connected } = useSocket();
+
+  const sp = new URLSearchParams();
+  if (params?.page) sp.set("page", String(params.page));
+  if (params?.limit) sp.set("limit", String(params.limit));
+  if (params?.unread) sp.set("unread", "true");
+  if (params?.type) sp.set("type", params.type);
+  if (params?.category && params.category !== "All") sp.set("category", params.category);
+  const qs = sp.toString();
+  const key = hasToken ? `/api/delivery/notifications${qs ? `?${qs}` : ""}` : null;
+
+  const result = useSWR<DeliveryNotificationsResponse>(key, deliveryFetcher, {
+    revalidateOnFocus: false,
+    refreshInterval,
+  });
+
+  useEffect(() => {
+    if (!socket || !connected) return;
+    const refresh = () => result.mutate();
+    socket.on(SOCKET_EVENTS.DELIVERY_NOTIFICATION, refresh);
+    socket.on(SOCKET_EVENTS.DELIVERY_NOTIFICATION_READ, refresh);
+    socket.on(SOCKET_EVENTS.DELIVERY_NOTIFICATION_ALL_READ, refresh);
+    return () => {
+      socket.off(SOCKET_EVENTS.DELIVERY_NOTIFICATION, refresh);
+      socket.off(SOCKET_EVENTS.DELIVERY_NOTIFICATION_READ, refresh);
+      socket.off(SOCKET_EVENTS.DELIVERY_NOTIFICATION_ALL_READ, refresh);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket, connected]);
+
+  return result;
 }

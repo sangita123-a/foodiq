@@ -8,6 +8,7 @@ declare namespace google.maps {
     constructor(opts: MarkerOptions);
     setMap(map: Map | null): void;
     setPosition(latLng: LatLngLiteral | LatLng): void;
+    setTitle(title: string): void;
   }
   class Polyline {
     constructor(opts: PolylineOptions);

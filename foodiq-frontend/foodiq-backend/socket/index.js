@@ -14,6 +14,7 @@ const {
 const {
   setIO,
   emitLocationUpdated,
+  emitDeliveryTracking,
   emitRiderPresence,
   EVENTS: E,
 } = require('./emitters');
@@ -295,9 +296,83 @@ const initSocket = (httpServer, { allowedOrigins = [], isOriginAllowed, corsStri
     });
 
     /**
-     * Delivery partner pushes GPS (also accepted via HTTP; socket is preferred for live map).
+     * Delivery partner announces the start/stop of live tracking for an order.
+     * Authorized the same way as joinOrder (customer, restaurant owner, assigned partner, admin).
      */
-    socket.on(EVENTS.UPDATE_LOCATION, async (payload, ack) => {
+    const authorizeTrackingRoom = async (orderId) => {
+      const { rows } = await pool.query(
+        `SELECT o.id, o.user_id, o.restaurant_id, r.owner_id
+         FROM orders o
+         JOIN restaurants r ON r.id = o.restaurant_id
+         WHERE o.id = $1`,
+        [orderId]
+      );
+      const order = rows[0];
+      if (!order) return null;
+      const allowed =
+        role === 'admin' ||
+        order.user_id === userId ||
+        order.owner_id === userId ||
+        (await isAssignedDeliveryPartner(userId, orderId));
+      return allowed ? order : null;
+    };
+
+    socket.on(EVENTS.DELIVERY_TRACKING_START, async (payload, ack) => {
+      try {
+        const orderId = payload?.order_id || payload?.orderId;
+        if (!orderId) {
+          if (typeof ack === 'function') ack({ ok: false, error: 'ORDER_ID_REQUIRED' });
+          return;
+        }
+        const order = await authorizeTrackingRoom(orderId);
+        if (!order) {
+          if (typeof ack === 'function') ack({ ok: false, error: 'FORBIDDEN' });
+          return;
+        }
+        socket.join(orderRoom(orderId));
+        emitDeliveryTracking(EVENTS.DELIVERY_TRACKING_START, {
+          order_id: orderId,
+          delivery_partner_id: socket.data.deliveryPartnerId,
+          user_id: order.user_id,
+          restaurant_id: order.restaurant_id,
+        });
+        if (typeof ack === 'function') ack({ ok: true, order_id: orderId });
+      } catch (err) {
+        console.error('[socket] delivery:tracking:start', err.message);
+        if (typeof ack === 'function') ack({ ok: false, error: 'SERVER_ERROR' });
+      }
+    });
+
+    socket.on(EVENTS.DELIVERY_TRACKING_STOP, async (payload, ack) => {
+      try {
+        const orderId = payload?.order_id || payload?.orderId;
+        if (!orderId) {
+          if (typeof ack === 'function') ack({ ok: false, error: 'ORDER_ID_REQUIRED' });
+          return;
+        }
+        const order = await authorizeTrackingRoom(orderId);
+        if (!order) {
+          if (typeof ack === 'function') ack({ ok: false, error: 'FORBIDDEN' });
+          return;
+        }
+        emitDeliveryTracking(EVENTS.DELIVERY_TRACKING_STOP, {
+          order_id: orderId,
+          delivery_partner_id: socket.data.deliveryPartnerId,
+          user_id: order.user_id,
+          restaurant_id: order.restaurant_id,
+        });
+        if (typeof ack === 'function') ack({ ok: true, order_id: orderId });
+      } catch (err) {
+        console.error('[socket] delivery:tracking:stop', err.message);
+        if (typeof ack === 'function') ack({ ok: false, error: 'SERVER_ERROR' });
+      }
+    });
+
+    /**
+     * Delivery partner pushes GPS (also accepted via HTTP; socket is preferred for live map).
+     * Bound to both the legacy `updateLocation` event and the namespaced `delivery:location` event.
+     */
+    const handleLocationUpdate = async (payload, ack) => {
       try {
         if (role !== 'delivery_partner' && role !== 'admin') {
           if (typeof ack === 'function') ack({ ok: false, error: 'FORBIDDEN' });
@@ -308,10 +383,12 @@ const initSocket = (httpServer, { allowedOrigins = [], isOriginAllowed, corsStri
           return;
         }
 
-        const lat = Number(payload?.lat ?? payload?.location_lat);
-        const lng = Number(payload?.lng ?? payload?.location_lng);
+        const lat = Number(payload?.lat ?? payload?.location_lat ?? payload?.latitude);
+        const lng = Number(payload?.lng ?? payload?.location_lng ?? payload?.longitude);
         const orderId = payload?.order_id || payload?.orderId || null;
         const heading = payload?.heading != null ? Number(payload.heading) : null;
+        const accuracy = payload?.accuracy != null ? Number(payload.accuracy) : null;
+        const speed = payload?.speed != null ? Number(payload.speed) : null;
 
         if (Number.isNaN(lat) || Number.isNaN(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
           if (typeof ack === 'function') ack({ ok: false, error: 'INVALID_COORDS' });
@@ -335,7 +412,62 @@ const initSocket = (httpServer, { allowedOrigins = [], isOriginAllowed, corsStri
              WHERE id = $3`,
             [lat, lng, partnerId]
           );
+          require('../models/deliveryLocationModel')
+            .recordLocation({ partnerId, orderId, latitude: lat, longitude: lng, accuracy, speed, heading })
+            .catch((err) => console.warn('[socket] recordLocation failed', err.message));
           touchRider(partnerId, { lat, lng, user_id: userId, name: socket.user.full_name });
+
+          // Live GPS Geo-fencing & Zone Verification
+          try {
+            const { isPointInZone, distanceToZoneBoundaryMeters } = require('../services/geoZoneService');
+            const zonesRes = await pool.query(
+              `SELECT z.* FROM delivery_zones z
+               JOIN delivery_partner_zones dpz ON dpz.zone_id = z.id
+               WHERE dpz.partner_id = $1 AND z.is_active = TRUE`,
+              [partnerId]
+            );
+
+            if (zonesRes.rows.length > 0) {
+              let inAssignedZone = false;
+              let currentZone = null;
+              let minBoundaryDist = Infinity;
+
+              for (const zone of zonesRes.rows) {
+                const inside = isPointInZone(lat, lng, zone);
+                const dist = distanceToZoneBoundaryMeters(lat, lng, zone);
+                if (inside) {
+                  inAssignedZone = true;
+                  currentZone = zone;
+                  minBoundaryDist = dist;
+                  break;
+                } else if (dist < minBoundaryDist) {
+                  minBoundaryDist = dist;
+                }
+              }
+
+              const prevInZone = socket.data.inZone;
+              socket.data.inZone = inAssignedZone;
+
+              if (inAssignedZone) {
+                if (prevInZone === false) {
+                  socket.emit(EVENTS.DELIVERY_ZONE_ENTER, { partner_id: partnerId, zone: currentZone });
+                  io.to('admin_live').emit(EVENTS.DELIVERY_ZONE_ENTER, { partner_id: partnerId, zone: currentZone, partner_name: socket.user.full_name });
+                }
+              } else {
+                if (prevInZone === true || prevInZone === undefined) {
+                  socket.emit(EVENTS.DELIVERY_ZONE_EXIT, { partner_id: partnerId, distance_meters: Math.round(minBoundaryDist) });
+                  io.to('admin_live').emit(EVENTS.DELIVERY_ZONE_EXIT, { partner_id: partnerId, partner_name: socket.user.full_name, distance_meters: Math.round(minBoundaryDist) });
+                }
+
+                if (minBoundaryDist >= 100) {
+                  const warningLevel = minBoundaryDist >= 300 ? 'second_warning' : 'first_warning';
+                  socket.emit(EVENTS.DELIVERY_ZONE_WARNING, { partner_id: partnerId, warning_level: warningLevel, distance_meters: Math.round(minBoundaryDist) });
+                }
+              }
+            }
+          } catch (err) {
+            console.warn('[socket] geo-fencing check error:', err.message);
+          }
         }
 
         let restaurantId = null;
@@ -418,7 +550,10 @@ const initSocket = (httpServer, { allowedOrigins = [], isOriginAllowed, corsStri
         console.error('[socket] updateLocation', err.message);
         if (typeof ack === 'function') ack({ ok: false, error: 'SERVER_ERROR' });
       }
-    });
+    };
+
+    socket.on(EVENTS.UPDATE_LOCATION, handleLocationUpdate);
+    socket.on(EVENTS.DELIVERY_LOCATION, handleLocationUpdate);
 
     socket.on('disconnect', (reason) => {
       console.log('[socket] disconnected', userId, reason);

@@ -231,6 +231,7 @@ app.use('/api/wallet', require('./routes/walletRoutes'));
 app.use('/api/profile', profileRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/sessions', sessionRoutes);
+app.use('/api/admin/dispatch', require('./routes/dispatchRoutes'));
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/v3', require('./routes/v3AdminRoutes'));
 app.use('/api/admin/v4', require('./routes/v4AdminRoutes'));
@@ -245,6 +246,15 @@ app.use('/api/tickets', require('./routes/ticketRoutes'));
 app.use('/api/feedback', require('./routes/feedbackRoutes'));
 app.use('/api/bugs', require('./routes/bugRoutes'));
 app.use('/api/partner', partnerRoutes);
+app.use('/api', require('./routes/emergencyRoutes'));
+app.use('/api', require('./routes/deliveryZoneRoutes'));
+app.use('/api', require('./routes/fraudRoutes'));
+app.use('/api', require('./routes/analyticsRoutes'));
+app.use('/api', require('./routes/referralRoutes'));
+// Must be mounted BEFORE deliveryRoutes: deliveryRoutes ends with an
+// unconditional `router.use(hybridDeliveryAuth)` that would otherwise force
+// authentication on this public endpoint before its request ever got there.
+app.use('/api/delivery', require('./routes/deliveryPartnerReviewPublicRoutes'));
 app.use('/api/delivery', deliveryRoutes);
 app.use('/api/driver', require('./routes/driverRoutes'));
 app.use('/api/messaging', require('./routes/messagingRoutes'));
@@ -428,8 +438,9 @@ pool
     startListening();
     try {
       require('./services/scheduledPushService').startScheduledPushWorker();
+      require('./services/emergencyEscalationService').startEmergencyEscalationWorker();
     } catch (err) {
-      log.warn('Scheduled push worker skipped', { error: err.message });
+      log.warn('Scheduled push/emergency worker skipped', { error: err.message });
     }
   })
   .catch((err) => {

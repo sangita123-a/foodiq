@@ -177,13 +177,24 @@ export function useOrderLiveTracking(orderId: string | null) {
       SOCKET_EVENTS.ORDER_CANCELLED,
     ];
 
+    const onEtaUpdate = (payload: { order_id?: string; eta_minutes?: number | null; distance_km?: number | null }) => {
+      if (payload.order_id && payload.order_id !== orderId) return;
+      setLiveLocation((prev) =>
+        prev ? { ...prev, eta_minutes: payload.eta_minutes ?? prev.eta_minutes, distance_km: payload.distance_km ?? prev.distance_km } : prev
+      );
+    };
+
     events.forEach((e) => socket.on(e, onStatus));
     socket.on(SOCKET_EVENTS.LOCATION_UPDATED, onLocation);
+    socket.on(SOCKET_EVENTS.DELIVERY_LOCATION, onLocation);
+    socket.on(SOCKET_EVENTS.DELIVERY_ETA_UPDATE, onEtaUpdate);
     socket.on("connect", joinOrder);
 
     return () => {
       events.forEach((e) => socket.off(e, onStatus));
       socket.off(SOCKET_EVENTS.LOCATION_UPDATED, onLocation);
+      socket.off(SOCKET_EVENTS.DELIVERY_LOCATION, onLocation);
+      socket.off(SOCKET_EVENTS.DELIVERY_ETA_UPDATE, onEtaUpdate);
       socket.off("connect", joinOrder);
       socket.emit(SOCKET_EVENTS.LEAVE_ORDER, { order_id: orderId });
     };

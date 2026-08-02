@@ -15,6 +15,42 @@ async function ensureSchema() {
     }
   };
   try {
+    // ── Delivery Partners table ───────────────────────────────────────────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_partners (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        full_name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        phone_number VARCHAR(20) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        vehicle_type VARCHAR(50),
+        vehicle_number VARCHAR(50),
+        driving_license_number VARCHAR(100),
+        aadhaar_number VARCHAR(50),
+        profile_photo TEXT,
+        city VARCHAR(100),
+        state VARCHAR(100),
+        address TEXT,
+        is_verified BOOLEAN DEFAULT FALSE,
+        is_online BOOLEAN DEFAULT FALSE,
+        status VARCHAR(30) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'suspended')),
+        rating DECIMAL(3,2) DEFAULT 5.0,
+        wallet_balance DECIMAL(10,2) DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partners_email ON delivery_partners(email)`);
+    await q(`CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partners_phone ON delivery_partners(phone_number)`);
+    await q(`CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partners_dl ON delivery_partners(driving_license_number) WHERE driving_license_number IS NOT NULL`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_partners_status ON delivery_partners(status)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_partners_online ON delivery_partners(is_online)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_assignments_partner_status ON delivery_assignments(delivery_partner_id, status)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_assignments_order_status ON delivery_assignments(order_id, status)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_earnings_partner_earned ON delivery_earnings(delivery_partner_id, earned_at DESC)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_transactions_partner_created ON delivery_transactions(partner_id, created_at DESC)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_notifications_partner_unread ON delivery_notifications(partner_id, is_read, created_at DESC)`);
+
     // ── OTP / SMS / Email tables (must exist before any auth request) ──────────
     await q(`
       CREATE TABLE IF NOT EXISTS otp_codes (
@@ -89,7 +125,12 @@ async function ensureSchema() {
     await q(`
       ALTER TABLE orders
         ADD COLUMN IF NOT EXISTS platform_fee NUMERIC(10,2) DEFAULT 0,
-        ADD COLUMN IF NOT EXISTS tax_amount NUMERIC(10,2) DEFAULT 0
+        ADD COLUMN IF NOT EXISTS tax_amount NUMERIC(10,2) DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS delivery_otp_hash VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS delivery_otp_expires_at TIMESTAMP WITH TIME ZONE,
+        ADD COLUMN IF NOT EXISTS delivery_otp_attempts INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS delivery_verified_at TIMESTAMP WITH TIME ZONE,
+        ADD COLUMN IF NOT EXISTS delivery_otp VARCHAR(10)
     `);
     await q(`
       ALTER TABLE users
@@ -478,6 +519,29 @@ async function ensureSchema() {
         ON driver_locations(order_id, last_updated DESC)
     `);
 
+    // ── Live Delivery Tracking: GPS ping history (accuracy/speed/heading) ─────
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_locations (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+        latitude NUMERIC(10,7) NOT NULL,
+        longitude NUMERIC(10,7) NOT NULL,
+        accuracy NUMERIC(10,2),
+        speed NUMERIC(10,2),
+        heading NUMERIC(6,2),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_delivery_locations_partner_time
+        ON delivery_locations(partner_id, created_at DESC)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_delivery_locations_order_time
+        ON delivery_locations(order_id, created_at DESC)
+    `);
+
     await q(`
       CREATE TABLE IF NOT EXISTS order_tracking_history (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -522,41 +586,216 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS aadhaar_last4 VARCHAR(4)
     `);
 
+    // Superseded by delivery_wallets / delivery_transactions / withdrawal_requests below.
+    await q(`DROP TABLE IF EXISTS driver_withdrawal_requests CASCADE`);
+    await q(`DROP TABLE IF EXISTS driver_wallet_transactions CASCADE`);
+    await q(`DROP TABLE IF EXISTS driver_wallets CASCADE`);
+
+    // ── Delivery Partner Wallet & Earnings ────────────────────────────────────
     await q(`
-      CREATE TABLE IF NOT EXISTS driver_wallets (
+      CREATE TABLE IF NOT EXISTS delivery_wallets (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        delivery_partner_id UUID NOT NULL UNIQUE REFERENCES delivery_partners(id) ON DELETE CASCADE,
-        balance NUMERIC(12,2) NOT NULL DEFAULT 0,
+        partner_id UUID NOT NULL UNIQUE REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        available_balance NUMERIC(12,2) NOT NULL DEFAULT 0,
+        pending_balance NUMERIC(12,2) NOT NULL DEFAULT 0,
+        lifetime_earnings NUMERIC(12,2) NOT NULL DEFAULT 0,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
     await q(`
-      CREATE TABLE IF NOT EXISTS driver_wallet_transactions (
+      CREATE TABLE IF NOT EXISTS delivery_transactions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        delivery_partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
-        type VARCHAR(20) NOT NULL CHECK (type IN ('credit', 'debit', 'withdrawal')),
+        partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+        type VARCHAR(20) NOT NULL CHECK (type IN ('credit', 'debit')),
         amount NUMERIC(12,2) NOT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'completed',
-        reference_type VARCHAR(40),
-        reference_id UUID,
-        note TEXT,
+        description TEXT,
+        status VARCHAR(20) NOT NULL DEFAULT 'completed' CHECK (status IN ('pending', 'completed', 'failed')),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_transactions_partner ON delivery_transactions(partner_id, created_at DESC)`);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS withdrawal_requests (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        amount NUMERIC(12,2) NOT NULL,
+        bank_account_id UUID,
+        status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+        admin_note TEXT,
+        requested_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        processed_at TIMESTAMP WITH TIME ZONE
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_withdrawal_requests_partner ON withdrawal_requests(partner_id, requested_at DESC)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_withdrawal_requests_status ON withdrawal_requests(status)`);
+
+    // ── Delivery Partner Notification System ──────────────────────────────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_notifications (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        title VARCHAR(255) NOT NULL,
+        message TEXT NOT NULL,
+        type VARCHAR(50) NOT NULL CHECK (type IN (
+          'new_order', 'order_assigned', 'order_cancelled', 'order_updated',
+          'delivery_completed', 'wallet_credit', 'withdrawal_approved',
+          'withdrawal_rejected', 'kyc_approved', 'kyc_rejected', 'admin_message',
+          'support_ticket_reply', 'support_ticket_resolved'
+        )),
+        related_order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+        action_url TEXT,
+        is_read BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_notifications_partner ON delivery_notifications(partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_notifications_is_read ON delivery_notifications(is_read)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_notifications_created_at ON delivery_notifications(created_at DESC)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_notifications_partner_created ON delivery_notifications(partner_id, created_at DESC)`);
+    // Migrate pre-existing installs: add action_url and widen the type CHECK to include support ticket types.
+    await q(`ALTER TABLE delivery_notifications ADD COLUMN IF NOT EXISTS action_url TEXT`);
+    await q(`ALTER TABLE delivery_notifications DROP CONSTRAINT IF EXISTS delivery_notifications_type_check`);
+    await q(`
+      ALTER TABLE delivery_notifications ADD CONSTRAINT delivery_notifications_type_check CHECK (type IN (
+        'new_order', 'order_assigned', 'order_cancelled', 'order_updated',
+        'delivery_completed', 'wallet_credit', 'withdrawal_approved',
+        'withdrawal_rejected', 'kyc_approved', 'kyc_rejected', 'admin_message',
+        'support_ticket_reply', 'support_ticket_resolved',
+        'referral_registered', 'reward_credited', 'referral_expired', 'first_delivery_completed'
+      ))
+    `);
+
+    // ── Delivery Partner Referral Module Tables & Indexes ──────────────────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_referrals (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        referrer_partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        referred_partner_id UUID REFERENCES delivery_partners(id) ON DELETE SET NULL,
+        referral_code VARCHAR(30) UNIQUE NOT NULL,
+        status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'registered', 'kyc_completed', 'first_delivery_completed', 'rewarded', 'expired')),
+        reward_amount NUMERIC(10, 2) DEFAULT 500.00,
+        reward_type VARCHAR(50) DEFAULT 'cash',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_referral_rewards (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        referral_id UUID REFERENCES delivery_referrals(id) ON DELETE CASCADE,
+        amount NUMERIC(10, 2) NOT NULL,
+        wallet_transaction_id UUID,
+        status VARCHAR(50) DEFAULT 'credited' CHECK (status IN ('pending', 'credited', 'cancelled')),
+        credited_at TIMESTAMP WITH TIME ZONE,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
     await q(`
-      CREATE TABLE IF NOT EXISTS driver_withdrawal_requests (
+      CREATE TABLE IF NOT EXISTS delivery_referral_settings (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        delivery_partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
-        amount NUMERIC(12,2) NOT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'pending',
-        note TEXT,
-        processed_at TIMESTAMP WITH TIME ZONE,
+        default_reward_amount NUMERIC(10, 2) DEFAULT 500.00,
+        reward_type VARCHAR(50) DEFAULT 'cash',
+        expiry_days INTEGER DEFAULT 30,
+        min_deliveries_required INTEGER DEFAULT 1,
+        auto_credit_enabled BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await q(`
+      INSERT INTO delivery_referral_settings (default_reward_amount, reward_type, expiry_days, min_deliveries_required, auto_credit_enabled)
+      SELECT 500.00, 'cash', 30, 1, TRUE
+      WHERE NOT EXISTS (SELECT 1 FROM delivery_referral_settings)
+    `);
+
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referrals_partner_id ON delivery_referrals(referrer_partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referrals_referred_id ON delivery_referrals(referred_partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referrals_code ON delivery_referrals(referral_code)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referrals_status ON delivery_referrals(status)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referrals_created_at ON delivery_referrals(created_at DESC)`);
+
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referral_rewards_partner_id ON delivery_referral_rewards(partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referral_rewards_referral_id ON delivery_referral_rewards(referral_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referral_rewards_status ON delivery_referral_rewards(status)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referral_rewards_created_at ON delivery_referral_rewards(created_at DESC)`);
+
+
+    // ── Delivery Partner Support Tickets (Full Chat Module) ────────────────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS support_tickets (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        ticket_number VARCHAR(30) UNIQUE NOT NULL,
+        partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        subject VARCHAR(255) NOT NULL,
+        category VARCHAR(100),
+        priority VARCHAR(20) DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
+        status VARCHAR(20) DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'resolved', 'closed')),
+        assigned_admin UUID REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        closed_at TIMESTAMP WITH TIME ZONE
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_support_tickets_partner_id ON support_tickets(partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_support_tickets_status ON support_tickets(status)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_support_tickets_priority ON support_tickets(priority)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_support_tickets_created_at ON support_tickets(created_at DESC)`);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS support_messages (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        ticket_id UUID NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+        sender_type VARCHAR(20) NOT NULL CHECK (sender_type IN ('partner', 'admin')),
+        sender_id UUID NOT NULL,
+        message TEXT,
+        attachment_url TEXT,
+        message_type VARCHAR(20) DEFAULT 'text' CHECK (message_type IN ('text', 'image', 'file')),
+        is_read BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_support_messages_ticket_id ON support_messages(ticket_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_support_messages_created_at ON support_messages(created_at ASC)`);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS support_ticket_logs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        ticket_id UUID NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+        action VARCHAR(100) NOT NULL,
+        performed_by UUID,
+        old_status VARCHAR(20),
+        new_status VARCHAR(20),
+        notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_support_ticket_logs_ticket_id ON support_ticket_logs(ticket_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_support_ticket_logs_created_at ON support_ticket_logs(created_at DESC)`);
+
+    // Legacy table compatibility
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_support_tickets (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        subject VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'pending', 'resolved', 'closed')),
+        admin_reply TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_support_tickets_partner ON delivery_support_tickets(partner_id, created_at DESC)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_support_tickets_status ON delivery_support_tickets(status)`);
+
 
     await q(`
       CREATE TABLE IF NOT EXISTS customer_wallets (
@@ -1218,6 +1457,101 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS insurance_doc_url TEXT
     `);
 
+    // ── Delivery Partner KYC & Vehicle Verification ───────────────────────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_partner_documents (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        document_type VARCHAR(30) NOT NULL
+          CHECK (document_type IN ('aadhaar', 'pan', 'driving_license', 'rc', 'insurance', 'profile_photo')),
+        document_number VARCHAR(100),
+        file_url TEXT NOT NULL,
+        verification_status VARCHAR(20) NOT NULL DEFAULT 'pending'
+          CHECK (verification_status IN ('pending', 'approved', 'rejected')),
+        rejection_reason TEXT,
+        expiry_date DATE,
+        verified_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        verified_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      DROP TRIGGER IF EXISTS update_delivery_partner_documents_modtime ON delivery_partner_documents
+    `);
+    await q(`
+      CREATE TRIGGER update_delivery_partner_documents_modtime
+        BEFORE UPDATE ON delivery_partner_documents
+        FOR EACH ROW EXECUTE PROCEDURE update_modified_column()
+    `);
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partner_documents_partner_type
+        ON delivery_partner_documents(partner_id, document_type)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_delivery_partner_documents_partner
+        ON delivery_partner_documents(partner_id)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_delivery_partner_documents_status
+        ON delivery_partner_documents(verification_status)
+    `);
+
+    // ── Delivery Partner Bank Account & Payout Management ─────────────────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_partner_bank_accounts (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        account_holder_name VARCHAR(150) NOT NULL,
+        account_number_encrypted TEXT NOT NULL,
+        account_number_last4 VARCHAR(4) NOT NULL,
+        bank_name VARCHAR(150) NOT NULL,
+        ifsc_code VARCHAR(20) NOT NULL,
+        account_type VARCHAR(30) NOT NULL DEFAULT 'savings'
+          CHECK (account_type IN ('savings', 'current')),
+        upi_id TEXT NULL,
+        is_primary BOOLEAN NOT NULL DEFAULT TRUE,
+        verification_status VARCHAR(30) NOT NULL DEFAULT 'pending'
+          CHECK (verification_status IN ('pending', 'approved', 'rejected')),
+        rejection_reason TEXT,
+        verified_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        verified_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      DROP TRIGGER IF EXISTS update_delivery_partner_bank_accounts_modtime ON delivery_partner_bank_accounts
+    `);
+    await q(`
+      CREATE TRIGGER update_delivery_partner_bank_accounts_modtime
+        BEFORE UPDATE ON delivery_partner_bank_accounts
+        FOR EACH ROW EXECUTE PROCEDURE update_modified_column()
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_delivery_partner_bank_accounts_partner
+        ON delivery_partner_bank_accounts(partner_id)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_delivery_partner_bank_accounts_partner_primary
+        ON delivery_partner_bank_accounts(partner_id, is_primary)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_delivery_partner_bank_accounts_status
+        ON delivery_partner_bank_accounts(verification_status)
+    `);
+    // Only one primary bank account per partner.
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partner_bank_accounts_primary
+        ON delivery_partner_bank_accounts(partner_id) WHERE is_primary = TRUE
+    `);
+    // withdrawal_requests.bank_account_id was a loose UUID column with no FK — attach it now.
+    await q(`
+      ALTER TABLE withdrawal_requests
+        ADD CONSTRAINT fk_withdrawal_requests_bank_account
+        FOREIGN KEY (bank_account_id) REFERENCES delivery_partner_bank_accounts(id) ON DELETE SET NULL
+    `);
+
     await q(`
       CREATE TABLE IF NOT EXISTS media_assets (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1376,6 +1710,50 @@ async function ensureSchema() {
     await q(`
       CREATE INDEX IF NOT EXISTS idx_delivery_reviews_partner
         ON delivery_reviews(delivery_partner_id, created_at DESC)
+    `);
+
+    // ── Delivery Partner Ratings & Reviews (dedicated feature) ───────────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_partner_reviews (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        customer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+        review TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partner_reviews_order
+        ON delivery_partner_reviews(order_id)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_delivery_partner_reviews_partner
+        ON delivery_partner_reviews(partner_id, created_at DESC)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_delivery_partner_reviews_customer
+        ON delivery_partner_reviews(customer_id)
+    `);
+    await q(`
+      DROP TRIGGER IF EXISTS update_delivery_partner_reviews_modtime ON delivery_partner_reviews
+    `);
+    await q(`
+      CREATE TRIGGER update_delivery_partner_reviews_modtime
+        BEFORE UPDATE ON delivery_partner_reviews
+        FOR EACH ROW EXECUTE PROCEDURE update_modified_column()
+    `);
+    await q(`
+      ALTER TABLE delivery_partners
+        ADD COLUMN IF NOT EXISTS review_average_rating NUMERIC(3,2) NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS review_total_count INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS review_5_star_count INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS review_4_star_count INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS review_3_star_count INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS review_2_star_count INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS review_1_star_count INTEGER NOT NULL DEFAULT 0
     `);
 
     await q(`
@@ -2410,7 +2788,9 @@ async function ensureSchema() {
     // ========== CPI Task 4 — Analytics query indexes ==========
     await q(`
       ALTER TABLE orders
-        ADD COLUMN IF NOT EXISTS delivery_partner_id UUID REFERENCES delivery_partners(id) ON DELETE SET NULL
+        ADD COLUMN IF NOT EXISTS delivery_partner_id UUID REFERENCES delivery_partners(id) ON DELETE SET NULL,
+        ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMP WITH TIME ZONE,
+        ADD COLUMN IF NOT EXISTS payment_status VARCHAR(50) DEFAULT 'paid'
     `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC)
@@ -2450,6 +2830,68 @@ async function ensureSchema() {
       )
     `);
     console.log('[SCHEMA] CPI Task 4 analytics indexes ensured');
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_shifts (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        shift_name VARCHAR(100) NOT NULL DEFAULT 'Standard Shift',
+        start_time VARCHAR(10) NOT NULL DEFAULT '09:00',
+        end_time VARCHAR(10) NOT NULL DEFAULT '17:00',
+        working_days JSONB DEFAULT '["mon","tue","wed","thu","fri","sat","sun"]'::jsonb,
+        status VARCHAR(20) NOT NULL DEFAULT 'scheduled',
+        is_recurring BOOLEAN DEFAULT TRUE,
+        timezone VARCHAR(50) DEFAULT 'Asia/Kolkata',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_shift_logs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        shift_id UUID REFERENCES delivery_shifts(id) ON DELETE SET NULL,
+        partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        check_in TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        check_out TIMESTAMP WITH TIME ZONE,
+        total_hours NUMERIC(6,2) DEFAULT 0.0,
+        late_minutes INTEGER DEFAULT 0,
+        early_checkout BOOLEAN DEFAULT FALSE,
+        gps_latitude NUMERIC(10,7),
+        gps_longitude NUMERIC(10,7),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_shifts_partner ON delivery_shifts(partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_shifts_status ON delivery_shifts(status)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_shift_logs_shift ON delivery_shift_logs(shift_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_shift_logs_partner ON delivery_shift_logs(partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_shift_logs_created ON delivery_shift_logs(created_at DESC)`);
+    console.log('[SCHEMA] Shift Scheduling Module schema ensured');
+
+    // ── Delivery Emergencies (SOS Module) ──────────────────────────────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_emergencies (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID NOT NULL,
+        order_id UUID,
+        latitude DOUBLE PRECISION NOT NULL,
+        longitude DOUBLE PRECISION NOT NULL,
+        accuracy DOUBLE PRECISION,
+        battery_level INTEGER,
+        network_type VARCHAR(50),
+        device_info JSONB DEFAULT '{}'::jsonb,
+        reason VARCHAR(100) NOT NULL,
+        description TEXT,
+        status VARCHAR(30) DEFAULT 'active' CHECK (status IN ('active', 'resolved', 'cancelled')),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        resolved_at TIMESTAMP WITH TIME ZONE,
+        resolved_by UUID
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_emergencies_partner ON delivery_emergencies(partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_emergencies_order ON delivery_emergencies(order_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_emergencies_status ON delivery_emergencies(status)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_emergencies_created ON delivery_emergencies(created_at DESC)`);
+    console.log('[SCHEMA] Delivery Emergencies (SOS) schema ensured');
 
     // Bootstrap demo users ONLY when explicitly allowed (never default in production).
     const allowBootstrap =
@@ -2516,6 +2958,230 @@ async function ensureSchema() {
     } else {
       console.log('[SCHEMA] Bootstrap users skipped (production hardening)');
     }
+
+    // ── Delivery Zones System ──────────────────────────────────────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_zones (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255) NOT NULL,
+        city VARCHAR(100) NOT NULL,
+        state VARCHAR(100),
+        country VARCHAR(100) DEFAULT 'India',
+        polygon JSONB,
+        center_latitude DECIMAL(10,8),
+        center_longitude DECIMAL(11,8),
+        radius_km DECIMAL(6,2),
+        zone_type VARCHAR(20) DEFAULT 'polygon' CHECK (zone_type IN ('polygon', 'circle')),
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_zones_active ON delivery_zones(is_active)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_zones_city ON delivery_zones(city)`);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_partner_zones (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID NOT NULL,
+        zone_id UUID NOT NULL REFERENCES delivery_zones(id) ON DELETE CASCADE,
+        assigned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        assigned_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        CONSTRAINT uq_partner_zone UNIQUE (partner_id, zone_id)
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_dpz_partner_id ON delivery_partner_zones(partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_dpz_zone_id ON delivery_partner_zones(zone_id)`);
+
+    // ── Fraud Detection & Risk Monitoring System ──────────────────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS fraud_cases (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+        fraud_type VARCHAR(100) NOT NULL,
+        risk_score INTEGER NOT NULL DEFAULT 0,
+        severity VARCHAR(30) NOT NULL DEFAULT 'Low' CHECK (severity IN ('Low', 'Medium', 'High', 'Critical')),
+        reason TEXT NOT NULL,
+        gps_data JSONB DEFAULT '{}'::jsonb,
+        device_data JSONB DEFAULT '{}'::jsonb,
+        status VARCHAR(30) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'under_review', 'resolved', 'dismissed', 'blocked', 'suspended')),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        resolved_at TIMESTAMP WITH TIME ZONE,
+        resolved_by UUID REFERENCES users(id) ON DELETE SET NULL
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_fraud_cases_partner ON fraud_cases(partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_fraud_cases_order ON fraud_cases(order_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_fraud_cases_status ON fraud_cases(status)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_fraud_cases_severity ON fraud_cases(severity)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_fraud_cases_created ON fraud_cases(created_at)`);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS fraud_rules (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        rule_name VARCHAR(255) NOT NULL UNIQUE,
+        rule_type VARCHAR(100) NOT NULL,
+        threshold INTEGER NOT NULL DEFAULT 50,
+        enabled BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_fraud_rules_enabled ON fraud_rules(enabled)`);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS fraud_logs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        case_id UUID REFERENCES fraud_cases(id) ON DELETE CASCADE,
+        event VARCHAR(100) NOT NULL,
+        details JSONB DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_fraud_logs_case ON fraud_logs(case_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_fraud_logs_event ON fraud_logs(event)`);
+
+    // Seed default fraud rules if empty
+    const rulesCheck = await q(`SELECT COUNT(*) as count FROM fraud_rules`);
+    if (parseInt(rulesCheck?.rows?.[0]?.count || '0', 10) === 0) {
+      const defaultRules = [
+        ['GPS Spoofing Check', 'GPS_SPOOFING', 35, true],
+        ['Impossible Speed Velocity Check', 'IMPOSSIBLE_SPEED', 40, true],
+        ['Fake Delivery Distance Check', 'FAKE_DELIVERY', 50, true],
+        ['OTP Abuse Multi-Attempts', 'OTP_ABUSE', 25, true],
+        ['Multiple Failed OTP Attempts', 'FAILED_OTP', 20, true],
+        ['Location Jump Anomaly', 'LOCATION_JUMP', 30, true],
+        ['Outside Delivery Zone', 'OUTSIDE_ZONE', 25, true],
+        ['Multiple Device Login Check', 'MULTIPLE_DEVICE_LOGIN', 30, true],
+        ['VPN / Proxy Detection', 'VPN_DETECTION', 20, true],
+        ['Rapid Account Switching', 'RAPID_ACCOUNT_SWITCH', 35, true],
+        ['Fake Online Status Check', 'FAKE_ONLINE_STATUS', 30, true],
+        ['Abnormal Order Completion Time', 'ABNORMAL_COMPLETION_TIME', 25, true],
+        ['Repeated Order Cancellation', 'REPEATED_CANCELLATION', 30, true],
+        ['Suspicious Wallet Withdrawals', 'SUSPICIOUS_WITHDRAWAL', 40, true],
+      ];
+      for (const r of defaultRules) {
+        await q(
+          `INSERT INTO fraud_rules (rule_name, rule_type, threshold, enabled) VALUES ($1, $2, $3, $4) ON CONFLICT (rule_name) DO NOTHING`,
+          r
+        );
+      }
+      console.log('[SCHEMA] Seeded default fraud detection rules');
+    }
+
+    // ── Delivery Analytics & Performance History tables ───────────────────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_daily_analytics (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        date DATE NOT NULL,
+        orders_completed INTEGER DEFAULT 0,
+        orders_cancelled INTEGER DEFAULT 0,
+        total_distance_km DECIMAL(10,2) DEFAULT 0,
+        online_hours DECIMAL(5,2) DEFAULT 0,
+        active_hours DECIMAL(5,2) DEFAULT 0,
+        idle_hours DECIMAL(5,2) DEFAULT 0,
+        earnings DECIMAL(10,2) DEFAULT 0,
+        tips DECIMAL(10,2) DEFAULT 0,
+        bonuses DECIMAL(10,2) DEFAULT 0,
+        average_rating DECIMAL(3,2) DEFAULT 5.0,
+        acceptance_rate DECIMAL(5,2) DEFAULT 100.0,
+        completion_rate DECIMAL(5,2) DEFAULT 100.0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (partner_id, date)
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_daily_analytics_partner_date ON delivery_daily_analytics(partner_id, date)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_daily_analytics_date ON delivery_daily_analytics(date)`);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_performance_history (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        metric VARCHAR(100) NOT NULL,
+        old_value DECIMAL(10,2),
+        new_value DECIMAL(10,2),
+        reason TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_performance_history_partner ON delivery_performance_history(partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_performance_history_metric ON delivery_performance_history(metric)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_performance_history_created ON delivery_performance_history(created_at)`);
+
+    // ── Referral Program Module tables ──────────────────────────────────────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_referrals (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        referrer_partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        referred_partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        referral_code VARCHAR(30) UNIQUE NOT NULL,
+        status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'registered', 'kyc_completed', 'first_delivery_completed', 'rewarded', 'expired')),
+        reward_amount NUMERIC(10, 2) DEFAULT 500.00,
+        reward_type VARCHAR(50) DEFAULT 'cash',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referrals_referrer ON delivery_referrals(referrer_partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referrals_referred ON delivery_referrals(referred_partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referrals_code ON delivery_referrals(referral_code)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referrals_status ON delivery_referrals(status)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referrals_created ON delivery_referrals(created_at)`);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_referral_rewards (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        referral_id UUID REFERENCES delivery_referrals(id) ON DELETE CASCADE,
+        amount NUMERIC(10, 2) NOT NULL,
+        wallet_transaction_id UUID,
+        status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'credited', 'cancelled')),
+        credited_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referral_rewards_partner ON delivery_referral_rewards(partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referral_rewards_status ON delivery_referral_rewards(status)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referral_rewards_created ON delivery_referral_rewards(created_at)`);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_referral_settings (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        default_reward_amount NUMERIC(10, 2) DEFAULT 500.00,
+        reward_type VARCHAR(50) DEFAULT 'cash',
+        expiry_days INTEGER DEFAULT 30,
+        min_deliveries_required INTEGER DEFAULT 1,
+        auto_credit_enabled BOOLEAN DEFAULT TRUE,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      INSERT INTO delivery_referral_settings (default_reward_amount, reward_type, expiry_days, min_deliveries_required, auto_credit_enabled)
+      SELECT 500.00, 'cash', 30, 1, TRUE
+      WHERE NOT EXISTS (SELECT 1 FROM delivery_referral_settings)
+    `);
+
+    // ── Delivery Offline Sync Logs Table ─────────────────────────────────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_sync_logs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        sync_type VARCHAR(100) NOT NULL,
+        entity_type VARCHAR(100) NOT NULL,
+        entity_id UUID,
+        payload JSONB DEFAULT '{}'::jsonb,
+        sync_status VARCHAR(30) DEFAULT 'pending' CHECK (sync_status IN ('pending', 'syncing', 'completed', 'failed')),
+        retry_count INTEGER DEFAULT 0,
+        error_message TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_sync_logs_partner ON delivery_sync_logs(partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_sync_logs_status ON delivery_sync_logs(sync_status)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_sync_logs_created ON delivery_sync_logs(created_at)`);
 
     console.log('[SCHEMA] Critical schema checks completed');
   } catch (err) {

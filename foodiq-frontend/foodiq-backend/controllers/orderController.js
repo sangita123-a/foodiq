@@ -23,6 +23,11 @@ const getSingleOrder = async (req, res) => {
     const allowed = await canManageOrder(req.user, order);
     if (!allowed) return fail(res, 403, 'Not authorized');
 
+    if (req.user.id !== order.user_id && req.user.role !== 'customer') {
+      delete order.delivery_otp;
+      delete order.delivery_otp_hash;
+    }
+
     return ok(res, 'Order retrieved', order);
   } catch (error) {
     return fail(res, 500, 'Server Error', error);

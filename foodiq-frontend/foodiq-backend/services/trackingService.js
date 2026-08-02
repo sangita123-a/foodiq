@@ -49,10 +49,11 @@ async function getLiveDeliveries() {
        r.lat AS restaurant_lat,
        r.lng AS restaurant_lng,
        ot.current_status AS tracking_status,
-       ot.location_lat AS rider_lat,
-       ot.location_lng AS rider_lng,
+       COALESCE(ot.location_lat, dp.current_lat) AS rider_lat,
+       COALESCE(ot.location_lng, dp.current_lng) AS rider_lng,
        ot.estimated_delivery_time,
        dp.id AS driver_id,
+       dp.vehicle_type,
        u.full_name AS driver_name,
        u.phone_number AS driver_phone,
        a.lat AS customer_lat,
@@ -61,7 +62,7 @@ async function getLiveDeliveries() {
      FROM orders o
      JOIN restaurants r ON r.id = o.restaurant_id
      LEFT JOIN order_tracking ot ON ot.order_id = o.id
-     LEFT JOIN delivery_partners dp ON dp.id = ot.delivery_partner_id
+     LEFT JOIN delivery_partners dp ON dp.id = COALESCE(ot.delivery_partner_id, o.delivery_partner_id)
      LEFT JOIN users u ON u.id = dp.user_id
      LEFT JOIN addresses a ON a.id = o.delivery_address_id
      WHERE LOWER(o.status) NOT IN ('delivered', 'cancelled', 'rejected')

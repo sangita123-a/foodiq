@@ -199,17 +199,17 @@ export default function Navbar() {
           )}
         </div>
 
-        <div className="flex md:hidden items-center gap-1 shrink-0">
+        <div className="flex md:hidden touch-target items-center gap-1 shrink-0">
           <Link
             href="/search"
-            className="touch-target flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-white text-foreground"
+            className="touch-target flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-white text-foreground"
             aria-label="Search"
           >
             <Search className="w-4 h-4" />
           </Link>
           <Link
             href="/cart"
-            className="relative touch-target flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-white text-foreground"
+            className="relative touch-target flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-white text-foreground"
             aria-label={`Cart with ${cartCount} items`}
           >
             <ShoppingCart className="w-4 h-4" />
@@ -221,7 +221,7 @@ export default function Navbar() {
           </Link>
           <button
             type="button"
-            className="touch-target flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-white text-foreground"
+            className="touch-target flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-white text-foreground"
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
           >

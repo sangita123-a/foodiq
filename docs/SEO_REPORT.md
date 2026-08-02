@@ -1,6 +1,6 @@
 # Foodiq Google Search Readiness Report
 
-Generated: 2026-07-28T16:25:57.502Z
+Generated: 2026-08-02T14:22:36.912Z
 
 ## Final Verdict
 
@@ -201,9 +201,9 @@ No legacy internal links detected in `app/` or `components/`.
 
 ## Route Inventory
 
-- Total routes: **121**
+- Total routes: **151**
 - Public routes: **20**
-- Private routes: **100**
+- Private routes: **130**
 - SEO layout files: **47**
 
 ## Google Search Console Setup

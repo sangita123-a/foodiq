@@ -6,6 +6,7 @@ const {
   recordOrderTrackingHistory,
   recordDriverLocation,
 } = require('../services/trackingService');
+const { getLatestForOrder } = require('../models/deliveryLocationModel');
 
 const authorizeOrderAccess = async (req, order) => {
   if (req.user.role === 'admin') return true;
@@ -178,6 +179,8 @@ const getOrderLocation = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Not authorized', error: {} });
     }
 
+    const latestPing = await getLatestForOrder(id).catch(() => null);
+
     res.json({
       success: true,
       message: 'Live location retrieved',
@@ -187,8 +190,11 @@ const getOrderLocation = async (req, res) => {
         driver_id: rider?.id || tracking.delivery_partner_id || null,
         driver_name: rider?.name || null,
         driver_phone: rider?.phone || null,
-        latitude: riderLat,
-        longitude: riderLng,
+        latitude: latestPing ? Number(latestPing.latitude) : riderLat,
+        longitude: latestPing ? Number(latestPing.longitude) : riderLng,
+        accuracy: latestPing?.accuracy != null ? Number(latestPing.accuracy) : null,
+        speed: latestPing?.speed != null ? Number(latestPing.speed) : null,
+        heading: latestPing?.heading != null ? Number(latestPing.heading) : null,
         restaurant: {
           lat: order.restaurant_lat != null ? Number(order.restaurant_lat) : null,
           lng: order.restaurant_lng != null ? Number(order.restaurant_lng) : null,
@@ -197,7 +203,7 @@ const getOrderLocation = async (req, res) => {
         customer: { lat: custLat, lng: custLng },
         distance_km,
         eta_minutes,
-        last_updated: tracking.updated_at,
+        last_updated: latestPing?.created_at || tracking.updated_at,
       },
     });
   } catch (error) {
@@ -285,6 +291,22 @@ const updateLocation = async (req, res) => {
       eta_minutes,
       distance_km,
     });
+
+    // Run Fraud Detection check asynchronously
+    const FraudDetectionService = require('../services/fraudDetectionService');
+    FraudDetectionService.evaluateEvent({
+      partner_id: req.user.id,
+      order_id: id,
+      event_type: 'GPS_UPDATE',
+      data: {
+        lat,
+        lng,
+        timestamp: Date.now(),
+        is_mock: Boolean(req.body.is_mock),
+        accuracy: req.body.accuracy ? Number(req.body.accuracy) : null,
+        speed_kph: req.body.speed ? Number(req.body.speed) : null
+      }
+    }).catch(err => console.error('[FraudCheck] error:', err.message));
 
     res.json({
       success: true,

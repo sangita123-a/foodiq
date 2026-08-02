@@ -113,6 +113,20 @@ const reviewLimiter = makeLimiter({
   message: 'Too many review submissions. Please try again later.',
 });
 
+const notificationLimiter = makeLimiter({
+  label: 'notification',
+  windowMs: 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_NOTIFICATION_MAX || 120),
+  message: 'Too many notification requests. Please slow down.',
+});
+
+const supportLimiter = makeLimiter({
+  label: 'support',
+  windowMs: Number(process.env.RATE_LIMIT_SUPPORT_WINDOW_MS || 15 * 60 * 1000),
+  max: Number(process.env.RATE_LIMIT_SUPPORT_MAX || 15),
+  message: 'Too many support requests. Please try again later.',
+});
+
 module.exports = {
   authLimiter,
   otpLimiter,
@@ -122,4 +136,6 @@ module.exports = {
   feedbackLimiter,
   paymentLimiter,
   reviewLimiter,
+  notificationLimiter,
+  supportLimiter,
 };

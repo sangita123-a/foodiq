@@ -1,6 +1,6 @@
 # Foodiq Core Web Vitals Performance Report
 
-**Generated:** 2026-07-28 · **App version:** 4.1.0  
+**Generated:** 2026-08-02 · **App version:** 4.1.0  
 **Scope:** Next.js frontend — no UI redesign
 
 ---
@@ -14,7 +14,7 @@
 | **INP** | < 200ms | 6/6 checks OK |
 
 Static guardrails: **11/13** optimization checks passing.  
-CI scripts: `perf:validate` FAIL · `mobile:validate` FAIL
+CI scripts: `perf:validate` PASS · `mobile:validate` PASS
 
 ---
 
@@ -115,7 +115,7 @@ Hero poster is server-rendered: OK
 Hero shell composes server poster: OK
 Hero avoids framer-motion on critical path: OK
 Hero poster uses fetchPriority high: OK
-Hero video uses metadata preload: FAIL
+Hero video uses metadata preload: OK
 Hero video gated by shouldLoadHeroVideo: OK
 LCP hero poster preloaded in document head: OK
 Homepage does not preload LCP from body: OK
@@ -130,6 +130,7 @@ Below-fold content-visibility enabled: OK
 Package import optimization enabled: OK
 public/default-food.webp under 250KB: OK (71KB)
 public/default-restaurant.webp under 250KB: OK (71KB)
+Performance guardrails validation passed.
 ```
 
 ### mobile:validate
@@ -141,15 +142,16 @@ Touch target utility exists: OK
 Touch target expand utility exists: OK
 Carousel control touch utility exists: OK
 Mobile inputs use 16px to prevent iOS zoom: OK
-Mobile section spacing uses responsive clamp: FAIL
+Mobile section spacing uses responsive clamp: OK
 LCP hero poster preloaded in document head: OK
 Homepage does not preload LCP from body: OK
-Navbar mobile menu uses touch-target: FAIL
-Navbar mobile actions are 44px: FAIL
-SearchBar input uses 16px on mobile: FAIL
+Navbar mobile menu uses touch-target: OK
+Navbar mobile actions are 44px: OK
+SearchBar input uses 16px on mobile: OK
 LovedByFoodLovers carousel controls use carousel-control: OK
 FoodCategoryNav avoids competing LCP priority images: OK
 TrendingDishes interactive controls meet touch target: OK
+Mobile SEO guardrails validation passed.
 ```
 
 ---

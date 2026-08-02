@@ -303,12 +303,28 @@ const updatePartnerOrderStatus = async (req, res) => {
       }
       try {
         const delivery = require('../models/deliveryModel');
+        const { REQUIRED_DOCUMENT_TYPES, EXPIRY_TRACKED_TYPES } = require('../models/deliveryDocumentModel');
         const nearby = await pool.query(
-          `SELECT id FROM delivery_partners
-           WHERE is_available = TRUE
-             AND COALESCE(approval_status, 'approved') = 'approved'
-           ORDER BY updated_at DESC
-           LIMIT 1`
+          `SELECT dp.id FROM delivery_partners dp
+           WHERE dp.is_available = TRUE
+             AND COALESCE(dp.approval_status, 'approved') = 'approved'
+             AND NOT EXISTS (
+               SELECT 1 FROM unnest($1::text[]) AS req(document_type)
+               WHERE NOT EXISTS (
+                 SELECT 1 FROM delivery_partner_documents d
+                 WHERE d.partner_id = dp.id
+                   AND d.document_type = req.document_type
+                   AND d.verification_status = 'approved'
+                   AND (
+                     d.document_type != ALL($2::text[])
+                     OR d.expiry_date IS NULL
+                     OR d.expiry_date >= CURRENT_DATE
+                   )
+               )
+             )
+           ORDER BY dp.updated_at DESC
+           LIMIT 1`,
+          [REQUIRED_DOCUMENT_TYPES, EXPIRY_TRACKED_TYPES]
         );
         if (nearby.rows[0]) {
           await delivery.createAssignmentOffer(req.params.id, nearby.rows[0].id);
@@ -321,7 +337,7 @@ const updatePartnerOrderStatus = async (req, res) => {
     if (dbStatus === 'Cancelled') {
       try {
         const assigned = await pool.query(
-          `SELECT dp.user_id FROM delivery_assignments da
+          `SELECT dp.user_id, dp.id AS partner_id FROM delivery_assignments da
            JOIN delivery_partners dp ON dp.id = da.delivery_partner_id
            WHERE da.order_id = $1
              AND da.status NOT IN ('rejected', 'expired', 'delivered')
@@ -337,6 +353,19 @@ const updatePartnerOrderStatus = async (req, res) => {
             `Order #${String(req.params.id).slice(0, 8)} was cancelled.`,
             { order_id: req.params.id, link: '/delivery/orders' }
           );
+          try {
+            const dn = require('../models/deliveryNotificationModel');
+            await dn.createNotification({
+              partnerId: assigned.rows[0].partner_id,
+              type: 'order_cancelled',
+              title: 'Order Cancelled',
+              message: `Order #${String(req.params.id).slice(0, 8)} was cancelled by the restaurant.`,
+              relatedOrderId: req.params.id,
+              actionUrl: '/delivery/orders',
+            });
+          } catch (notifyErr) {
+            console.warn('[partnerController] delivery notification skipped:', notifyErr.message);
+          }
           await pool.query(
             `UPDATE delivery_assignments
              SET status = 'expired', updated_at = CURRENT_TIMESTAMP

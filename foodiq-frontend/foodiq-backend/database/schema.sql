@@ -179,6 +179,11 @@ CREATE TABLE IF NOT EXISTS orders (
     discount_amount DECIMAL(10,2) DEFAULT 0.0,
     delivery_fee DECIMAL(10,2) DEFAULT 0.0,
     total_amount DECIMAL(10,2) NOT NULL,
+    delivery_otp_hash VARCHAR(255),
+    delivery_otp_expires_at TIMESTAMP WITH TIME ZONE,
+    delivery_otp_attempts INTEGER DEFAULT 0,
+    delivery_verified_at TIMESTAMP WITH TIME ZONE,
+    delivery_otp VARCHAR(10),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -301,6 +306,21 @@ CREATE TABLE IF NOT EXISTS order_tracking (
 );
 DROP TRIGGER IF EXISTS update_order_tracking_modtime ON order_tracking;
 CREATE TRIGGER update_order_tracking_modtime BEFORE UPDATE ON order_tracking FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+-- 16b. delivery_locations (live GPS ping history for tracking/replay)
+CREATE TABLE IF NOT EXISTS delivery_locations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+    order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+    latitude NUMERIC(10,7) NOT NULL,
+    longitude NUMERIC(10,7) NOT NULL,
+    accuracy NUMERIC(10,2),
+    speed NUMERIC(10,2),
+    heading NUMERIC(6,2),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_delivery_locations_partner_time ON delivery_locations(partner_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_delivery_locations_order_time ON delivery_locations(order_id, created_at DESC);
 
 -- 17. favorites
 CREATE TABLE IF NOT EXISTS favorites (
@@ -1121,4 +1141,270 @@ ALTER TABLE addresses
 ALTER TABLE order_tracking
   ADD COLUMN IF NOT EXISTS eta_minutes INTEGER,
   ADD COLUMN IF NOT EXISTS eta_source VARCHAR(40) DEFAULT 'haversine';
+
+-- delivery_partners
+CREATE TABLE IF NOT EXISTS delivery_partners (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    full_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone_number VARCHAR(20) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    vehicle_type VARCHAR(50),
+    vehicle_number VARCHAR(50),
+    driving_license_number VARCHAR(100),
+    aadhaar_number VARCHAR(50),
+    profile_photo TEXT,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    address TEXT,
+    is_verified BOOLEAN DEFAULT FALSE,
+    is_online BOOLEAN DEFAULT FALSE,
+    status VARCHAR(30) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'suspended')),
+    rating DECIMAL(3,2) DEFAULT 5.0,
+    wallet_balance DECIMAL(10,2) DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+DROP TRIGGER IF EXISTS update_delivery_partners_modtime ON delivery_partners;
+CREATE TRIGGER update_delivery_partners_modtime BEFORE UPDATE ON delivery_partners FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partners_email ON delivery_partners(email);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partners_phone ON delivery_partners(phone_number);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partners_dl ON delivery_partners(driving_license_number) WHERE driving_license_number IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_delivery_partners_status ON delivery_partners(status);
+CREATE INDEX IF NOT EXISTS idx_delivery_partners_online ON delivery_partners(is_online);
+
+-- delivery_partner_documents (KYC & Vehicle Verification)
+CREATE TABLE IF NOT EXISTS delivery_partner_documents (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+    document_type VARCHAR(30) NOT NULL
+      CHECK (document_type IN ('aadhaar', 'pan', 'driving_license', 'rc', 'insurance', 'profile_photo')),
+    document_number VARCHAR(100),
+    file_url TEXT NOT NULL,
+    verification_status VARCHAR(20) NOT NULL DEFAULT 'pending'
+      CHECK (verification_status IN ('pending', 'approved', 'rejected')),
+    rejection_reason TEXT,
+    expiry_date DATE,
+    verified_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    verified_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+DROP TRIGGER IF EXISTS update_delivery_partner_documents_modtime ON delivery_partner_documents;
+CREATE TRIGGER update_delivery_partner_documents_modtime BEFORE UPDATE ON delivery_partner_documents FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partner_documents_partner_type ON delivery_partner_documents(partner_id, document_type);
+CREATE INDEX IF NOT EXISTS idx_delivery_partner_documents_partner ON delivery_partner_documents(partner_id);
+CREATE INDEX IF NOT EXISTS idx_delivery_partner_documents_status ON delivery_partner_documents(verification_status);
+
+-- delivery_partner_bank_accounts (Bank Account & Payout Management)
+CREATE TABLE IF NOT EXISTS delivery_partner_bank_accounts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+    account_holder_name VARCHAR(150) NOT NULL,
+    account_number_encrypted TEXT NOT NULL,
+    account_number_last4 VARCHAR(4) NOT NULL,
+    bank_name VARCHAR(150) NOT NULL,
+    ifsc_code VARCHAR(20) NOT NULL,
+    account_type VARCHAR(30) NOT NULL DEFAULT 'savings' CHECK (account_type IN ('savings', 'current')),
+    upi_id TEXT NULL,
+    is_primary BOOLEAN NOT NULL DEFAULT TRUE,
+    verification_status VARCHAR(30) NOT NULL DEFAULT 'pending' CHECK (verification_status IN ('pending', 'approved', 'rejected')),
+    rejection_reason TEXT,
+    verified_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    verified_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+DROP TRIGGER IF EXISTS update_delivery_partner_bank_accounts_modtime ON delivery_partner_bank_accounts;
+CREATE TRIGGER update_delivery_partner_bank_accounts_modtime BEFORE UPDATE ON delivery_partner_bank_accounts FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+CREATE INDEX IF NOT EXISTS idx_delivery_partner_bank_accounts_partner ON delivery_partner_bank_accounts(partner_id);
+CREATE INDEX IF NOT EXISTS idx_delivery_partner_bank_accounts_partner_primary ON delivery_partner_bank_accounts(partner_id, is_primary);
+CREATE INDEX IF NOT EXISTS idx_delivery_partner_bank_accounts_status ON delivery_partner_bank_accounts(verification_status);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partner_bank_accounts_primary ON delivery_partner_bank_accounts(partner_id) WHERE is_primary = TRUE;
+
+-- delivery_partner_reviews (Delivery Partner Ratings & Reviews)
+CREATE TABLE IF NOT EXISTS delivery_partner_reviews (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+    customer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    review TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+DROP TRIGGER IF EXISTS update_delivery_partner_reviews_modtime ON delivery_partner_reviews;
+CREATE TRIGGER update_delivery_partner_reviews_modtime BEFORE UPDATE ON delivery_partner_reviews FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partner_reviews_order ON delivery_partner_reviews(order_id);
+CREATE INDEX IF NOT EXISTS idx_delivery_partner_reviews_partner ON delivery_partner_reviews(partner_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_delivery_partner_reviews_customer ON delivery_partner_reviews(customer_id);
+
+-- Delivery partner rating statistics (kept in sync by deliveryPartnerReviewModel on every write)
+ALTER TABLE delivery_partners
+  ADD COLUMN IF NOT EXISTS review_average_rating NUMERIC(3,2) NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS review_total_count INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS review_5_star_count INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS review_4_star_count INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS review_3_star_count INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS review_2_star_count INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS review_1_star_count INTEGER NOT NULL DEFAULT 0;
+
+-- delivery_daily_analytics
+CREATE TABLE IF NOT EXISTS delivery_daily_analytics (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
+    date DATE NOT NULL,
+    orders_completed INTEGER DEFAULT 0,
+    orders_cancelled INTEGER DEFAULT 0,
+    total_distance_km DECIMAL(10,2) DEFAULT 0,
+    online_hours DECIMAL(5,2) DEFAULT 0,
+    active_hours DECIMAL(5,2) DEFAULT 0,
+    idle_hours DECIMAL(5,2) DEFAULT 0,
+    earnings DECIMAL(10,2) DEFAULT 0,
+    tips DECIMAL(10,2) DEFAULT 0,
+    bonuses DECIMAL(10,2) DEFAULT 0,
+    average_rating DECIMAL(3,2) DEFAULT 5.0,
+    acceptance_rate DECIMAL(5,2) DEFAULT 100.0,
+    completion_rate DECIMAL(5,2) DEFAULT 100.0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (partner_id, date)
+);
+CREATE INDEX IF NOT EXISTS idx_delivery_daily_analytics_partner_date ON delivery_daily_analytics(partner_id, date);
+CREATE INDEX IF NOT EXISTS idx_delivery_daily_analytics_date ON delivery_daily_analytics(date);
+
+-- delivery_performance_history
+CREATE TABLE IF NOT EXISTS delivery_performance_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
+    metric VARCHAR(100) NOT NULL,
+    old_value DECIMAL(10,2),
+    new_value DECIMAL(10,2),
+    reason TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_delivery_performance_history_partner ON delivery_performance_history(partner_id);
+CREATE INDEX IF NOT EXISTS idx_delivery_performance_history_metric ON delivery_performance_history(metric);
+CREATE INDEX IF NOT EXISTS idx_delivery_performance_history_created ON delivery_performance_history(created_at);
+
+-- Driver Support Chat Module
+CREATE TABLE IF NOT EXISTS support_tickets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    ticket_number VARCHAR(30) UNIQUE NOT NULL,
+    partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
+    subject VARCHAR(255) NOT NULL,
+    category VARCHAR(100),
+    priority VARCHAR(20) DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
+    status VARCHAR(20) DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'resolved', 'closed')),
+    assigned_admin UUID REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    closed_at TIMESTAMP WITH TIME ZONE
+);
+CREATE INDEX IF NOT EXISTS idx_support_tickets_partner_id ON support_tickets(partner_id);
+CREATE INDEX IF NOT EXISTS idx_support_tickets_status ON support_tickets(status);
+CREATE INDEX IF NOT EXISTS idx_support_tickets_priority ON support_tickets(priority);
+CREATE INDEX IF NOT EXISTS idx_support_tickets_created_at ON support_tickets(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS support_messages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    ticket_id UUID NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+    sender_type VARCHAR(20) NOT NULL CHECK (sender_type IN ('partner', 'admin')),
+    sender_id UUID NOT NULL,
+    message TEXT,
+    attachment_url TEXT,
+    message_type VARCHAR(20) DEFAULT 'text' CHECK (message_type IN ('text', 'image', 'file')),
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_support_messages_ticket_id ON support_messages(ticket_id);
+CREATE INDEX IF NOT EXISTS idx_support_messages_created_at ON support_messages(created_at ASC);
+
+CREATE TABLE IF NOT EXISTS support_ticket_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    ticket_id UUID NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+    action VARCHAR(100) NOT NULL,
+    performed_by UUID,
+    old_status VARCHAR(20),
+    new_status VARCHAR(20),
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_support_ticket_logs_ticket_id ON support_ticket_logs(ticket_id);
+CREATE INDEX IF NOT EXISTS idx_support_ticket_logs_created_at ON support_ticket_logs(created_at DESC);
+
+-- AI Dispatch & Smart Order Assignment Engine
+CREATE TABLE IF NOT EXISTS dispatch_rules (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    rule_name VARCHAR(100) NOT NULL UNIQUE DEFAULT 'default_scoring',
+    weight_distance DECIMAL(5,2) DEFAULT 25.0,
+    weight_gps DECIMAL(5,2) DEFAULT 10.0,
+    weight_online_status DECIMAL(5,2) DEFAULT 10.0,
+    weight_shift_status DECIMAL(5,2) DEFAULT 10.0,
+    weight_kyc DECIMAL(5,2) DEFAULT 10.0,
+    weight_fraud_score DECIMAL(5,2) DEFAULT 10.0,
+    weight_workload DECIMAL(5,2) DEFAULT 10.0,
+    weight_vehicle DECIMAL(5,2) DEFAULT 5.0,
+    weight_avg_delivery_time DECIMAL(5,2) DEFAULT 5.0,
+    weight_acceptance_rate DECIMAL(5,2) DEFAULT 5.0,
+    weight_completion_rate DECIMAL(5,2) DEFAULT 5.0,
+    weight_rating DECIMAL(5,2) DEFAULT 10.0,
+    weight_geofence DECIMAL(5,2) DEFAULT 10.0,
+    weight_traffic_delay DECIMAL(5,2) DEFAULT 5.0,
+    weight_estimated_arrival DECIMAL(5,2) DEFAULT 5.0,
+    weight_idle_time DECIMAL(5,2) DEFAULT 5.0,
+    max_search_radius_km DECIMAL(5,2) DEFAULT 15.0,
+    max_active_orders_per_partner INTEGER DEFAULT 2,
+    auto_assign_enabled BOOLEAN DEFAULT TRUE,
+    max_retry_attempts INTEGER DEFAULT 3,
+    reassign_timeout_seconds INTEGER DEFAULT 45,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+DROP TRIGGER IF EXISTS update_dispatch_rules_modtime ON dispatch_rules;
+CREATE TRIGGER update_dispatch_rules_modtime BEFORE UPDATE ON dispatch_rules FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+CREATE TABLE IF NOT EXISTS dispatch_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    dispatch_run_id UUID NOT NULL,
+    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
+    total_score DECIMAL(6,2) NOT NULL,
+    scoring_breakdown JSONB NOT NULL DEFAULT '{}'::jsonb,
+    decision_reason TEXT NOT NULL,
+    status VARCHAR(40) NOT NULL DEFAULT 'calculated',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_dispatch_logs_run ON dispatch_logs(dispatch_run_id);
+CREATE INDEX IF NOT EXISTS idx_dispatch_logs_order ON dispatch_logs(order_id);
+CREATE INDEX IF NOT EXISTS idx_dispatch_logs_partner ON dispatch_logs(partner_id);
+
+CREATE TABLE IF NOT EXISTS dispatch_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    dispatch_run_id UUID NOT NULL UNIQUE,
+    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    assigned_partner_id UUID REFERENCES delivery_partners(id) ON DELETE SET NULL,
+    trigger_type VARCHAR(50) DEFAULT 'auto',
+    attempt_number INTEGER DEFAULT 1,
+    status VARCHAR(40) DEFAULT 'assigned',
+    candidates_evaluated INTEGER DEFAULT 0,
+    ai_decision_summary TEXT,
+    execution_time_ms INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+DROP TRIGGER IF EXISTS update_dispatch_history_modtime ON dispatch_history;
+CREATE TRIGGER update_dispatch_history_modtime BEFORE UPDATE ON dispatch_history FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+CREATE INDEX IF NOT EXISTS idx_dispatch_history_order ON dispatch_history(order_id);
+CREATE INDEX IF NOT EXISTS idx_dispatch_history_partner ON dispatch_history(assigned_partner_id);
+CREATE INDEX IF NOT EXISTS idx_dispatch_history_created ON dispatch_history(created_at DESC);
+
+
+
 

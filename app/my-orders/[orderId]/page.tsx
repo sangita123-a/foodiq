@@ -9,6 +9,7 @@ import { MapPin, Receipt, Navigation, ArrowLeft } from "lucide-react";
 import SafeImage from "@/components/ui/SafeImage";
 import { RESTAURANT_FALLBACK } from "@/lib/images";
 import OrderFeedbackForm from "@/components/feedback/OrderFeedbackForm";
+import DeliveryPartnerReviewCard from "@/components/feedback/DeliveryPartnerReviewCard";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ orderId: string }> }) {
   const { orderId } = use(params);
@@ -152,7 +153,10 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
         </div>
 
         {status === "Delivered" && (
-          <OrderFeedbackForm orderId={orderId} hasDeliveryPartner />
+          <>
+            <OrderFeedbackForm orderId={orderId} hasDeliveryPartner />
+            <DeliveryPartnerReviewCard orderId={orderId} />
+          </>
         )}
       </div>
 

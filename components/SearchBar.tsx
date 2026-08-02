@@ -473,7 +473,7 @@ export default function SearchBar() {
               }}
               onKeyDown={onSearchKeyDown}
               placeholder="Search for restaurants, dishes or cuisines"
-              className="w-full min-w-0 bg-transparent text-sm font-medium text-foreground outline-none placeholder:text-muted md:text-base"
+              className="w-full min-w-0 bg-transparent text-base sm:text-[16px] font-medium text-foreground outline-none placeholder:text-muted md:text-base"
               autoComplete="off"
               aria-autocomplete="list"
               aria-controls={searchListId}

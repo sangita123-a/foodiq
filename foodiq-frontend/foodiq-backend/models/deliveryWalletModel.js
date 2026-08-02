@@ -1,37 +1,55 @@
 const { pool } = require('../config/db');
 
+const MIN_WITHDRAWAL = 100;
+
 const getOrCreateWallet = async (partnerId, client = pool) => {
   const { rows } = await client.query(
-    `INSERT INTO driver_wallets (delivery_partner_id, balance)
-     VALUES ($1, 0)
-     ON CONFLICT (delivery_partner_id) DO UPDATE SET updated_at = CURRENT_TIMESTAMP
+    `INSERT INTO delivery_wallets (partner_id)
+     VALUES ($1)
+     ON CONFLICT (partner_id) DO UPDATE SET updated_at = delivery_wallets.updated_at
      RETURNING *`,
     [partnerId]
   );
   return rows[0];
 };
 
-const creditWallet = async (partnerId, amount, reference, note = 'Delivery earnings') => {
+const creditWallet = async (partnerId, amount, orderId = null, description = 'Delivery earnings') => {
   if (!amount || amount <= 0) return null;
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const wallet = await getOrCreateWallet(partnerId, client);
+    await getOrCreateWallet(partnerId, client);
     const { rows } = await client.query(
-      `UPDATE driver_wallets
-       SET balance = balance + $1, updated_at = CURRENT_TIMESTAMP
-       WHERE delivery_partner_id = $2
+      `UPDATE delivery_wallets
+       SET available_balance = available_balance + $1,
+           lifetime_earnings = lifetime_earnings + $1,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE partner_id = $2
        RETURNING *`,
       [amount, partnerId]
     );
     await client.query(
-      `INSERT INTO driver_wallet_transactions (
-         delivery_partner_id, type, amount, status, reference_type, reference_id, note
-       ) VALUES ($1, 'credit', $2, 'completed', 'order', $3, $4)`,
-      [partnerId, amount, reference, note]
+      `INSERT INTO delivery_transactions (partner_id, order_id, type, amount, description, status)
+       VALUES ($1, $2, 'credit', $3, $4, 'completed')`,
+      [partnerId, orderId, amount, description]
     );
     await client.query('COMMIT');
-    return rows[0] || wallet;
+
+    try {
+      const dn = require('./deliveryNotificationModel');
+      await dn.createNotification({
+        partnerId,
+        type: 'wallet_credit',
+        title: 'Wallet Credited',
+        message: `₹${amount} credited to your wallet${orderId ? ` for order #${String(orderId).slice(0, 8)}` : ''}. ${description}`,
+        relatedOrderId: orderId,
+        actionUrl: '/delivery/wallet',
+      });
+    } catch (err) {
+      console.warn('[deliveryWallet] wallet_credit notification skipped:', err.message);
+    }
+
+    return rows[0];
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;
@@ -42,76 +60,122 @@ const creditWallet = async (partnerId, amount, reference, note = 'Delivery earni
 
 const getWalletSummary = async (partnerId) => {
   const wallet = await getOrCreateWallet(partnerId);
-  const txns = await pool.query(
-    `SELECT id, type, amount, status, note, reference_type, reference_id, created_at
-     FROM driver_wallet_transactions
-     WHERE delivery_partner_id = $1
-     ORDER BY created_at DESC
-     LIMIT 50`,
+  const earnings = await pool.query(
+    `SELECT
+       COALESCE(SUM(amount) FILTER (WHERE created_at::date = CURRENT_DATE), 0)::float AS today,
+       COALESCE(SUM(amount) FILTER (WHERE created_at >= date_trunc('week', CURRENT_DATE)), 0)::float AS weekly,
+       COALESCE(SUM(amount) FILTER (WHERE created_at >= date_trunc('month', CURRENT_DATE)), 0)::float AS monthly
+     FROM delivery_transactions
+     WHERE partner_id = $1 AND type = 'credit' AND status = 'completed'`,
     [partnerId]
   );
-  const withdrawals = await pool.query(
-    `SELECT id, amount, status, note, created_at, processed_at
-     FROM driver_withdrawal_requests
-     WHERE delivery_partner_id = $1
-     ORDER BY created_at DESC
-     LIMIT 20`,
-    [partnerId]
-  );
-  const totalEarned = await pool.query(
-    `SELECT COALESCE(SUM(amount), 0)::float AS total
-     FROM delivery_earnings WHERE delivery_partner_id = $1`,
-    [partnerId]
-  );
+
   return {
-    balance: Number(wallet.balance || 0),
-    total_earned: totalEarned.rows[0].total,
-    transactions: txns.rows,
-    withdrawals: withdrawals.rows,
+    available_balance: Number(wallet.available_balance || 0),
+    pending_balance: Number(wallet.pending_balance || 0),
+    lifetime_earnings: Number(wallet.lifetime_earnings || 0),
+    today_earnings: earnings.rows[0].today,
+    weekly_earnings: earnings.rows[0].weekly,
+    monthly_earnings: earnings.rows[0].monthly,
   };
 };
 
-const requestWithdrawal = async (partnerId, amount, note = '') => {
-  const wallet = await getOrCreateWallet(partnerId);
-  const amt = Number(amount);
-  if (!Number.isFinite(amt) || amt < 100) {
-    throw Object.assign(new Error('Minimum withdrawal amount is ₹100'), { status: 400 });
+const listTransactions = async (partnerId, { page = 1, limit = 20, type = '', status = '' } = {}) => {
+  const pageNum = Math.max(1, Number(page) || 1);
+  const pageSize = Math.min(100, Math.max(1, Number(limit) || 20));
+  const offset = (pageNum - 1) * pageSize;
+
+  const conditions = ['partner_id = $1'];
+  const params = [partnerId];
+  if (type) {
+    params.push(type);
+    conditions.push(`type = $${params.length}`);
   }
-  if (Number(wallet.balance) < amt) {
-    throw Object.assign(new Error('Insufficient wallet balance'), { status: 400 });
+  if (status) {
+    params.push(status);
+    conditions.push(`status = $${params.length}`);
+  }
+  const where = conditions.join(' AND ');
+
+  const countRes = await pool.query(
+    `SELECT COUNT(*)::int AS total FROM delivery_transactions WHERE ${where}`,
+    params
+  );
+
+  const rowsRes = await pool.query(
+    `SELECT id, order_id, type, amount, description, status, created_at
+     FROM delivery_transactions
+     WHERE ${where}
+     ORDER BY created_at DESC
+     LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+    [...params, pageSize, offset]
+  );
+
+  const total = countRes.rows[0].total;
+  return {
+    transactions: rowsRes.rows,
+    pagination: {
+      page: pageNum,
+      limit: pageSize,
+      total,
+      total_pages: Math.max(1, Math.ceil(total / pageSize)),
+    },
+  };
+};
+
+const requestWithdrawal = async (partnerId, amount, bankAccountId = null) => {
+  const amt = Number(amount);
+  if (!Number.isFinite(amt) || amt < MIN_WITHDRAWAL) {
+    throw Object.assign(new Error(`Minimum withdrawal amount is ₹${MIN_WITHDRAWAL}`), { status: 400 });
   }
 
-  const partner = await pool.query(
-    `SELECT bank_account_name, bank_account_number, bank_ifsc, upi_id
-     FROM delivery_partners WHERE id = $1`,
+  const existing = await pool.query(
+    `SELECT id FROM withdrawal_requests WHERE partner_id = $1 AND status = 'pending'`,
     [partnerId]
   );
-  if (!partner.rows[0]?.bank_account_number && !partner.rows[0]?.upi_id) {
-    throw Object.assign(new Error('Add bank or UPI details in profile before withdrawing'), {
-      status: 400,
-    });
+  if (existing.rows[0]) {
+    throw Object.assign(new Error('You already have a pending withdrawal request'), { status: 409 });
+  }
+
+  const bankAccounts = require('./deliveryBankAccountModel');
+  let bankAccount = bankAccountId
+    ? await bankAccounts.getByIdForPartner(bankAccountId, partnerId)
+    : await bankAccounts.getPrimaryForPartner(partnerId);
+
+  if (!bankAccount) {
+    throw Object.assign(
+      new Error('Please add and verify your bank account before requesting a withdrawal.'),
+      { status: 400 }
+    );
+  }
+  if (bankAccount.verification_status !== 'approved') {
+    throw Object.assign(
+      new Error('Please add and verify your bank account before requesting a withdrawal.'),
+      { status: 400 }
+    );
   }
 
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    await client.query(
-      `UPDATE driver_wallets
-       SET balance = balance - $1, updated_at = CURRENT_TIMESTAMP
-       WHERE delivery_partner_id = $2 AND balance >= $1`,
+    await getOrCreateWallet(partnerId, client);
+    const { rows: walletRows } = await client.query(
+      `UPDATE delivery_wallets
+       SET available_balance = available_balance - $1,
+           pending_balance = pending_balance + $1,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE partner_id = $2 AND available_balance >= $1
+       RETURNING *`,
       [amt, partnerId]
     );
+    if (!walletRows[0]) {
+      throw Object.assign(new Error('Insufficient available balance'), { status: 400 });
+    }
     const { rows } = await client.query(
-      `INSERT INTO driver_withdrawal_requests (delivery_partner_id, amount, status, note)
-       VALUES ($1, $2, 'pending', $3)
+      `INSERT INTO withdrawal_requests (partner_id, amount, bank_account_id, status)
+       VALUES ($1, $2, $3, 'pending')
        RETURNING *`,
-      [partnerId, amt, note || 'Withdrawal request']
-    );
-    await client.query(
-      `INSERT INTO driver_wallet_transactions (
-         delivery_partner_id, type, amount, status, reference_type, reference_id, note
-       ) VALUES ($1, 'withdrawal', $2, 'pending', 'withdrawal', $3, $4)`,
-      [partnerId, amt, rows[0].id, 'Withdrawal request submitted']
+      [partnerId, amt, bankAccount.id]
     );
     await client.query('COMMIT');
     return rows[0];
@@ -123,9 +187,132 @@ const requestWithdrawal = async (partnerId, amount, note = '') => {
   }
 };
 
+const listWithdrawals = async ({ status = '', page = 1, limit = 20 } = {}) => {
+  const pageNum = Math.max(1, Number(page) || 1);
+  const pageSize = Math.min(100, Math.max(1, Number(limit) || 20));
+  const offset = (pageNum - 1) * pageSize;
+
+  const conditions = [];
+  const params = [];
+  if (status) {
+    params.push(status);
+    conditions.push(`wr.status = $${params.length}`);
+  }
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
+  const countRes = await pool.query(
+    `SELECT COUNT(*)::int AS total FROM withdrawal_requests wr ${where}`,
+    params
+  );
+
+  const rowsRes = await pool.query(
+    `SELECT wr.*, u.full_name AS partner_name, u.email AS partner_email, u.phone_number AS partner_phone
+     FROM withdrawal_requests wr
+     JOIN delivery_partners dp ON dp.id = wr.partner_id
+     JOIN users u ON u.id = dp.user_id
+     ${where}
+     ORDER BY wr.requested_at DESC
+     LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+    [...params, pageSize, offset]
+  );
+
+  const total = countRes.rows[0].total;
+  return {
+    withdrawals: rowsRes.rows,
+    pagination: {
+      page: pageNum,
+      limit: pageSize,
+      total,
+      total_pages: Math.max(1, Math.ceil(total / pageSize)),
+    },
+  };
+};
+
+const processWithdrawal = async (id, action, adminNote = '') => {
+  if (!['approve', 'reject'].includes(action)) {
+    throw Object.assign(new Error('Action must be approve or reject'), { status: 400 });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows: reqRows } = await client.query(
+      `SELECT * FROM withdrawal_requests WHERE id = $1 FOR UPDATE`,
+      [id]
+    );
+    const request = reqRows[0];
+    if (!request) {
+      throw Object.assign(new Error('Withdrawal request not found'), { status: 404 });
+    }
+    if (request.status !== 'pending') {
+      throw Object.assign(new Error('Withdrawal request has already been processed'), { status: 409 });
+    }
+
+    if (action === 'approve') {
+      await client.query(
+        `UPDATE delivery_wallets
+         SET pending_balance = pending_balance - $1, updated_at = CURRENT_TIMESTAMP
+         WHERE partner_id = $2`,
+        [request.amount, request.partner_id]
+      );
+      await client.query(
+        `INSERT INTO delivery_transactions (partner_id, type, amount, description, status)
+         VALUES ($1, 'debit', $2, 'Withdrawal approved', 'completed')`,
+        [request.partner_id, request.amount]
+      );
+    } else {
+      await client.query(
+        `UPDATE delivery_wallets
+         SET pending_balance = pending_balance - $1,
+             available_balance = available_balance + $1,
+             updated_at = CURRENT_TIMESTAMP
+         WHERE partner_id = $2`,
+        [request.amount, request.partner_id]
+      );
+    }
+
+    const { rows } = await client.query(
+      `UPDATE withdrawal_requests
+       SET status = $1, admin_note = $2, processed_at = CURRENT_TIMESTAMP
+       WHERE id = $3
+       RETURNING *`,
+      [action === 'approve' ? 'approved' : 'rejected', adminNote || null, id]
+    );
+
+    await client.query('COMMIT');
+
+    try {
+      const dn = require('./deliveryNotificationModel');
+      const approved = action === 'approve';
+      await dn.createNotification({
+        partnerId: request.partner_id,
+        type: approved ? 'withdrawal_approved' : 'withdrawal_rejected',
+        title: approved ? 'Withdrawal Approved' : 'Withdrawal Rejected',
+        message: approved
+          ? `Your withdrawal request of ₹${request.amount} has been approved.`
+          : `Your withdrawal request of ₹${request.amount} was rejected.${adminNote ? ` Reason: ${adminNote}` : ''}`,
+        actionUrl: '/delivery/wallet',
+      });
+    } catch (err) {
+      console.warn('[deliveryWallet] withdrawal notification skipped:', err.message);
+    }
+
+    return rows[0];
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
+  MIN_WITHDRAWAL,
   getOrCreateWallet,
   creditWallet,
   getWalletSummary,
+  listTransactions,
   requestWithdrawal,
+  listWithdrawals,
+  processWithdrawal,
 };

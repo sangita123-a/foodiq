@@ -7,6 +7,7 @@ const IMAGE_CACHE = `${SW_VERSION}-images`;
 const PRECACHE_URLS = [
   "/",
   "/offline",
+  "/delivery/offline",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
@@ -44,7 +45,8 @@ function isRestaurantPage(url) {
   return (
     url.pathname === "/" ||
     url.pathname.startsWith("/restaurant/") ||
-    url.pathname.startsWith("/order-online")
+    url.pathname.startsWith("/order-online") ||
+    url.pathname.startsWith("/delivery/")
   );
 }
 
@@ -60,7 +62,7 @@ async function cacheFirst(request, cacheName) {
   return response;
 }
 
-async function networkFirst(request, cacheName, offlineUrl = "/offline") {
+async function networkFirst(request, cacheName, offlineUrl = "/delivery/offline") {
   const cache = await caches.open(cacheName);
   try {
     const response = await fetch(request);
@@ -73,7 +75,7 @@ async function networkFirst(request, cacheName, offlineUrl = "/offline") {
     if (cached) return cached;
 
     if (isNavigationRequest(request)) {
-      const offline = await cache.match(offlineUrl);
+      const offline = await cache.match(offlineUrl) || await cache.match("/offline");
       if (offline) return offline;
     }
 
@@ -124,6 +126,20 @@ self.addEventListener("message", (event) => {
   }
 });
 
+// Service Worker Background Sync API
+self.addEventListener("sync", (event) => {
+  if (event.tag === "foodiq-auto-sync") {
+    event.waitUntil(
+      (async () => {
+        const clients = await self.clients.matchAll();
+        for (const client of clients) {
+          client.postMessage({ type: "TRIGGER_AUTO_SYNC" });
+        }
+      })()
+    );
+  }
+});
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
@@ -158,3 +174,4 @@ try {
 } catch (error) {
   console.warn("[sw] firebase messaging import skipped", error);
 }
+

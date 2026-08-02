@@ -198,7 +198,16 @@ api.interceptors.response.use(
         path.startsWith('/delivery/login') ||
         path.startsWith('/delivery/register');
 
-      if (!isAuthPage && !isAuthCredentialCall && !isRefreshCall) {
+      // Delivery partners authenticate against a separate `delivery_partners`
+      // table/JWT, not `users`. A 401 from a customer-scoped endpoint (e.g.
+      // push-notification config) says nothing about whether the delivery
+      // session itself is still valid, so it must never force a delivery
+      // partner out of their session — only a 401 from a /api/delivery/ call
+      // is meaningful signal there.
+      const isUnrelatedCallOnDeliveryPage =
+        path.startsWith('/delivery') && !requestUrl.includes('/api/delivery/');
+
+      if (!isAuthPage && !isAuthCredentialCall && !isRefreshCall && !isUnrelatedCallOnDeliveryPage) {
         clearClientAuth();
         const loginPath = path.startsWith('/admin')
           ? '/admin/login'

@@ -1027,3 +1027,12 @@ textarea:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Mobile SEO utilities */
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.touch-target { min-width: 44px; min-height: 44px; }
+.touch-target-expand { min-width: 44px; min-height: 44px; }
+.carousel-control { min-width: 44px; min-height: 44px; }
+input[type="search"] { font-size: 16px; }
+.section-clamp { padding-block: clamp(28px, 5vw, 48px); }

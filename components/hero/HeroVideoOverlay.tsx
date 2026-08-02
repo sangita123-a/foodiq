@@ -40,7 +40,7 @@ export default function HeroVideoOverlay() {
       loop
       muted
       playsInline
-      preload={isMobile ? "auto" : "metadata"}
+      preload="metadata"
       poster={HERO_POSTER_WEBP}
       aria-label="Foodiq hero background showing food delivery atmosphere"
       className="absolute inset-0 z-[1] h-full w-full object-cover object-center transform-gpu scale-[1.01]"

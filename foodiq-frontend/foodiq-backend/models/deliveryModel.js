@@ -79,7 +79,7 @@ const getDashboard = async (partnerId) => {
   try {
     const { getOrCreateWallet } = require('./deliveryWalletModel');
     const wallet = await getOrCreateWallet(partnerId);
-    walletBalance = Number(wallet.balance || 0);
+    walletBalance = Number(wallet.available_balance || 0);
   } catch {
     walletBalance = 0;
   }
@@ -107,22 +107,42 @@ const getDashboard = async (partnerId) => {
 
 const orderDetailSelect = `
   SELECT
-    o.id, o.status AS order_status, o.total_amount, o.delivery_fee, o.delivery_instructions,
-    o.created_at, o.user_id, o.restaurant_id,
-    r.name AS restaurant_name, r.address AS restaurant_address, r.phone AS restaurant_phone,
+    o.id,
+    o.id AS order_id,
+    o.status AS order_status,
+    COALESCE(o.payment_status, p.status, 'paid') AS payment_status,
+    o.total_amount,
+    o.delivery_fee,
+    o.delivery_instructions,
+    o.created_at,
+    o.user_id,
+    o.restaurant_id,
+    o.delivery_partner_id,
+    o.assigned_at,
+    r.name AS restaurant_name,
+    r.address AS restaurant_address,
+    r.phone AS restaurant_phone,
     r.image_url AS restaurant_image,
-    COALESCE(r.current_lat, 12.9716)::float AS restaurant_lat,
-    COALESCE(r.current_lng, 77.5946)::float AS restaurant_lng,
-    u.full_name AS customer_name, u.phone_number AS customer_phone,
+    COALESCE(r.current_lat, 17.3850)::float AS restaurant_lat,
+    COALESCE(r.current_lng, 78.4867)::float AS restaurant_lng,
+    COALESCE(r.estimated_delivery_time, 30) AS est_prep_min,
+    u.full_name AS customer_name,
+    u.phone_number AS customer_phone,
     a.street, a.house_no, a.city, a.state, a.zip_code, a.landmark,
-    COALESCE(a.lat, 12.9784)::float AS customer_lat,
-    COALESCE(a.lng, 77.6408)::float AS customer_lng,
-    da.id AS assignment_id, da.status AS assignment_status, da.offered_at, da.responded_at,
-    da.expires_at, da.delivery_partner_id
+    COALESCE(a.lat, 17.4401)::float AS customer_lat,
+    COALESCE(a.lng, 78.3489)::float AS customer_lng,
+    COALESCE((SELECT SUM(quantity)::int FROM order_items oi WHERE oi.order_id = o.id), 1) AS item_count,
+    da.id AS assignment_id,
+    da.status AS assignment_status,
+    da.offered_at,
+    da.responded_at,
+    da.expires_at,
+    da.delivery_partner_id AS assignment_partner_id
   FROM orders o
   JOIN restaurants r ON r.id = o.restaurant_id
   JOIN users u ON u.id = o.user_id
   LEFT JOIN addresses a ON a.id = o.delivery_address_id
+  LEFT JOIN payments p ON p.order_id = o.id
   LEFT JOIN LATERAL (
     SELECT * FROM delivery_assignments dax
     WHERE dax.order_id = o.id
@@ -131,54 +151,78 @@ const orderDetailSelect = `
   ) da ON TRUE
 `;
 
-const formatOrder = (row) => ({
-  id: row.id,
-  order_status: row.order_status,
-  assignment_id: row.assignment_id,
-  assignment_status: row.assignment_status,
-  offered_at: row.offered_at,
-  expires_at: row.expires_at,
-  total_amount: Number(row.total_amount),
-  delivery_fee: Number(row.delivery_fee || BASE_DELIVERY_FEE),
-  delivery_instructions: row.delivery_instructions,
-  created_at: row.created_at,
-  restaurant: {
+const formatOrder = (row) => {
+  const customerAddress = [row.house_no, row.street, row.landmark, row.city, row.state, row.zip_code]
+    .filter(Boolean)
+    .join(', ') || 'Address details provided upon order acceptance';
+
+  const totalAmt = Number(row.total_amount || 0);
+  const deliveryFee = Number(row.delivery_fee || BASE_DELIVERY_FEE);
+  const estimatedEarnings = deliveryFee + 25;
+  const itemCount = Number(row.item_count || 1);
+
+  const restaurantObj = {
     id: row.restaurant_id,
     name: row.restaurant_name,
-    address: row.restaurant_address,
+    address: row.restaurant_address || 'Address provided upon acceptance',
     phone: row.restaurant_phone,
     image: row.restaurant_image,
     lat: Number(row.restaurant_lat),
     lng: Number(row.restaurant_lng),
-  },
-  customer: {
-    name: row.customer_name,
+  };
+
+  const customerObj = {
+    name: row.customer_name || 'Customer',
     phone: row.customer_phone,
-    address: [row.house_no, row.street, row.landmark, row.city, row.state, row.zip_code]
-      .filter(Boolean)
-      .join(', '),
+    address: customerAddress,
     lat: Number(row.customer_lat),
     lng: Number(row.customer_lng),
-  },
-});
+  };
+
+  return {
+    id: row.id,
+    order_id: row.id,
+    order_status: row.order_status,
+    payment_status: row.payment_status,
+    delivery_partner_id: row.delivery_partner_id,
+    assigned_at: row.assigned_at,
+    assignment_id: row.assignment_id,
+    assignment_status: row.assignment_status,
+    offered_at: row.offered_at,
+    expires_at: row.expires_at,
+    total_amount: totalAmt,
+    delivery_fee: deliveryFee,
+    estimated_earnings: estimatedEarnings,
+    item_count: itemCount,
+    restaurant: restaurantObj,
+    restaurant_name: row.restaurant_name,
+    restaurant_address: row.restaurant_address || 'Address provided upon acceptance',
+    customer: customerObj,
+    customer_name: row.customer_name || 'Customer',
+    customer_address: customerAddress,
+    distance: '3.5 km',
+    estimated_delivery_time: `${row.est_prep_min || 30} mins`,
+    delivery_instructions: row.delivery_instructions,
+    created_at: row.created_at,
+  };
+};
 
 const listAvailableOrders = async (partnerId) => {
   await expireStaleAssignments();
   const { rows } = await pool.query(
     `${orderDetailSelect}
-     WHERE LOWER(o.status) IN ('ready for pickup', 'accepted', 'preparing')
-       AND (
-         (da.id IS NULL)
-         OR (da.delivery_partner_id = $1 AND da.status = 'offered')
-       )
+     WHERE (
+       LOWER(o.status) IN ('ready_for_pickup', 'ready for pickup', 'preparing', 'paid', 'accepted')
+       OR LOWER(COALESCE(o.payment_status, p.status, 'paid')) IN ('paid', 'completed')
+     )
+       AND (o.delivery_partner_id IS NULL)
        AND NOT EXISTS (
          SELECT 1 FROM delivery_assignments x
          WHERE x.order_id = o.id
-           AND x.status IN ('accepted', 'reached_restaurant', 'picked_up', 'on_the_way', 'delivered', 'assigned')
+           AND x.status IN ('accepted', 'assigned', 'reached_restaurant', 'picked_up', 'on_the_way', 'delivered')
        )
      ORDER BY o.created_at ASC
-     LIMIT 50`,
-    [partnerId]
+     LIMIT 50`
   );
   return rows.map(formatOrder);
 };
@@ -187,19 +231,46 @@ const listAssignedOrders = async (partnerId) => {
   await expireStaleAssignments();
   const { rows } = await pool.query(
     `${orderDetailSelect}
-     WHERE da.delivery_partner_id = $1
-       AND da.status IN ('offered', 'accepted', 'reached_restaurant', 'picked_up', 'on_the_way', 'assigned')
-     ORDER BY da.updated_at DESC`,
+     WHERE (da.delivery_partner_id = $1 OR o.delivery_partner_id = $1)
+       AND (
+         da.status IN ('offered', 'accepted', 'assigned', 'reached_restaurant', 'picked_up', 'out_for_delivery', 'on_the_way', 'near_customer')
+         OR o.status IN ('assigned', 'Accepted', 'Ready for Pickup', 'Reached Restaurant', 'Picked Up', 'Out For Delivery', 'On The Way')
+       )
+     ORDER BY COALESCE(da.updated_at, o.updated_at) DESC`,
     [partnerId]
   );
-  return rows.map(formatOrder);
+  const formatted = rows.map(formatOrder);
+  if (formatted.length > 0) {
+    const orderIds = formatted.map((o) => o.id);
+    const itemsRes = await pool.query(
+      `SELECT oi.order_id, oi.quantity, oi.price_at_time, m.name
+       FROM order_items oi JOIN menu_items m ON m.id = oi.menu_item_id
+       WHERE oi.order_id = ANY($1::uuid[])`,
+      [orderIds]
+    );
+    const itemsByOrder = {};
+    for (const item of itemsRes.rows) {
+      if (!itemsByOrder[item.order_id]) itemsByOrder[item.order_id] = [];
+      itemsByOrder[item.order_id].push({
+        quantity: item.quantity,
+        price_at_time: item.price_at_time,
+        name: item.name,
+      });
+    }
+    for (const order of formatted) {
+      const items = itemsByOrder[order.id] || [];
+      order.items = items;
+      order.order_items = items;
+    }
+  }
+  return formatted;
 };
 
 const getOrderForPartner = async (orderId, partnerId) => {
   const { rows } = await pool.query(
     `${orderDetailSelect}
      WHERE o.id = $1
-       AND (da.delivery_partner_id = $2 OR da.id IS NULL OR da.status IN ('rejected', 'expired'))`,
+       AND (da.delivery_partner_id = $2 OR o.delivery_partner_id = $2 OR da.id IS NULL OR da.status IN ('rejected', 'expired'))`,
     [orderId, partnerId]
   );
   if (!rows[0]) return null;
@@ -245,47 +316,119 @@ const createAssignmentOffer = async (orderId, partnerId) => {
         { order_id: orderId, link: '/delivery/orders' }
       );
     }
+    try {
+      const dn = require('./deliveryNotificationModel');
+      await dn.createNotification({
+        partnerId,
+        type: 'new_order',
+        title: 'New Delivery Request',
+        message: `You have a new delivery request for order #${String(orderId).slice(0, 8)}. Respond within 2 minutes.`,
+        relatedOrderId: orderId,
+        actionUrl: '/delivery/orders?tab=available',
+      });
+    } catch (err) {
+      console.warn('[delivery] new_order notification skipped:', err.message);
+    }
   }
   return rows[0] || null;
 };
 
 const acceptOrder = async (orderId, partnerId) => {
-  await expireStaleAssignments();
-  let assignment = await pool.query(
-    `SELECT * FROM delivery_assignments
-     WHERE order_id = $1 AND delivery_partner_id = $2 AND status = 'offered'`,
-    [orderId, partnerId]
-  );
+  const { assertPartnerKycVerified } = require('./deliveryDocumentModel');
+  await assertPartnerKycVerified(partnerId);
 
-  if (!assignment.rows[0]) {
-    // Claim available order
-    const offered = await createAssignmentOffer(orderId, partnerId);
-    if (!offered) {
-      throw Object.assign(new Error('Order no longer available'), { status: 409 });
+  const client = await pool.connect();
+  let updatedOrder = null;
+  try {
+    await client.query('BEGIN');
+
+    // Lock the target order row to prevent concurrent claims
+    const orderRes = await client.query(
+      `SELECT id, status, delivery_partner_id, restaurant_id, total_amount, user_id
+       FROM orders
+       WHERE id = $1
+       FOR UPDATE`,
+      [orderId]
+    );
+
+    const orderRow = orderRes.rows[0];
+    if (!orderRow) {
+      await client.query('ROLLBACK');
+      const err = new Error('Order not found');
+      err.status = 404;
+      throw err;
     }
-    assignment = { rows: [offered] };
+
+    if (orderRow.delivery_partner_id && orderRow.delivery_partner_id !== partnerId) {
+      await client.query('ROLLBACK');
+      const err = new Error('Order is no longer available or already accepted by another delivery partner');
+      err.status = 409;
+      throw err;
+    }
+
+    // Update order with delivery_partner_id, status = 'assigned', assigned_at = CURRENT_TIMESTAMP
+    await client.query(
+      `UPDATE orders
+       SET delivery_partner_id = $1,
+           status = 'assigned',
+           assigned_at = CURRENT_TIMESTAMP,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2`,
+      [partnerId, orderId]
+    );
+
+    // Update or insert delivery assignment
+    const assignRes = await client.query(
+      `SELECT id FROM delivery_assignments WHERE order_id = $1 AND delivery_partner_id = $2 FOR UPDATE`,
+      [orderId, partnerId]
+    );
+
+    let assignmentId;
+    if (assignRes.rows[0]) {
+      assignmentId = assignRes.rows[0].id;
+      await client.query(
+        `UPDATE delivery_assignments
+         SET status = 'accepted', responded_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+         WHERE id = $1`,
+        [assignmentId]
+      );
+    } else {
+      const insRes = await client.query(
+        `INSERT INTO delivery_assignments (
+           order_id, delivery_partner_id, status, offered_at, responded_at
+         ) VALUES ($1, $2, 'accepted', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+         RETURNING id`,
+        [orderId, partnerId]
+      );
+      assignmentId = insRes.rows[0].id;
+    }
+
+    // Upsert order_tracking
+    await client.query(
+      `INSERT INTO order_tracking (order_id, delivery_partner_id, current_status, estimated_delivery_time)
+       VALUES ($1, $2, 'Assigned', CURRENT_TIMESTAMP + INTERVAL '30 minutes')
+       ON CONFLICT (order_id) DO UPDATE SET
+         delivery_partner_id = EXCLUDED.delivery_partner_id,
+         current_status = 'Assigned',
+         updated_at = CURRENT_TIMESTAMP`,
+      [orderId, partnerId]
+    );
+
+    // Status history
+    await client.query(
+      `INSERT INTO delivery_status_history (assignment_id, order_id, delivery_partner_id, status, note)
+       VALUES ($1, $2, $3, 'accepted', 'Partner accepted delivery')`,
+      [assignmentId, orderId, partnerId]
+    );
+
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    client.release();
   }
 
-  const { rows } = await pool.query(
-    `UPDATE delivery_assignments
-     SET status = 'accepted', responded_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-     WHERE id = $1 AND status = 'offered'
-     RETURNING *`,
-    [assignment.rows[0].id]
-  );
-  if (!rows[0]) throw Object.assign(new Error('Assignment expired or already handled'), { status: 409 });
-
-  await pool.query(
-    `INSERT INTO order_tracking (order_id, delivery_partner_id, current_status, estimated_delivery_time)
-     VALUES ($1, $2, 'Assigned', CURRENT_TIMESTAMP + INTERVAL '30 minutes')
-     ON CONFLICT (order_id) DO UPDATE SET
-       delivery_partner_id = EXCLUDED.delivery_partner_id,
-       current_status = 'Assigned',
-       updated_at = CURRENT_TIMESTAMP`,
-    [orderId, partnerId]
-  );
-
-  await recordHistory(rows[0].id, orderId, partnerId, 'accepted', 'Partner accepted delivery');
   try {
     const { recordOrderTrackingHistory } = require('../services/trackingService');
     await recordOrderTrackingHistory({
@@ -298,12 +441,27 @@ const acceptOrder = async (orderId, partnerId) => {
   } catch {
     /* non-blocking */
   }
+
   await notifyStakeholders(
     orderId,
     'Delivery partner assigned',
     'A delivery partner has accepted your order.',
     'Delivery Partner Assigned'
   );
+
+  try {
+    const dn = require('./deliveryNotificationModel');
+    await dn.createNotification({
+      partnerId,
+      type: 'order_assigned',
+      title: 'Order Assigned',
+      message: `Order #${String(orderId).slice(0, 8)} has been assigned to you. Head to the restaurant to pick it up.`,
+      relatedOrderId: orderId,
+      actionUrl: '/delivery/orders/assigned',
+    });
+  } catch (err) {
+    console.warn('[delivery] order_assigned notification skipped:', err.message);
+  }
 
   return getOrderForPartner(orderId, partnerId);
 };
@@ -327,6 +485,7 @@ const STATUS_FLOW = [
   'accepted',
   'reached_restaurant',
   'picked_up',
+  'out_for_delivery',
   'on_the_way',
   'near_customer',
   'delivered',
@@ -334,10 +493,11 @@ const STATUS_FLOW = [
 
 const mapToOrderStatus = (status) => {
   if (status === 'picked_up') return 'Picked Up';
+  if (status === 'out_for_delivery') return 'Out For Delivery';
   if (status === 'on_the_way') return 'On The Way';
   if (status === 'near_customer') return 'On The Way';
   if (status === 'delivered') return 'Delivered';
-  if (status === 'reached_restaurant') return 'Ready for Pickup';
+  if (status === 'reached_restaurant') return 'Reached Restaurant';
   return null;
 };
 
@@ -347,6 +507,7 @@ const mapToTrackingStatus = (status) => {
     accepted: 'Accepted',
     reached_restaurant: 'Reached Restaurant',
     picked_up: 'Picked Up',
+    out_for_delivery: 'Out For Delivery',
     on_the_way: 'On The Way',
     near_customer: 'Near Customer',
     delivered: 'Delivered',
@@ -428,8 +589,42 @@ const updateDeliveryStatus = async (orderId, partnerId, status) => {
     );
   }
 
+  if (status === 'out_for_delivery' || status === 'on_the_way') {
+    const crypto = require('crypto');
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await pool.query(
+      `UPDATE orders
+       SET delivery_otp_hash = $1,
+           delivery_otp_expires_at = $2,
+           delivery_otp_attempts = 0,
+           delivery_otp = $3,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $4`,
+      [otpHash, expiresAt, otp, orderId]
+    );
+  }
+
   await recordHistory(rows[0].id, orderId, partnerId, status, `Status updated to ${trackingStatus}`);
   await notifyStakeholders(orderId, 'Order Update', `Your order is now: ${trackingStatus}.`, orderStatus || trackingStatus);
+
+  if (status === 'picked_up') {
+    try {
+      const dn = require('./deliveryNotificationModel');
+      await dn.createNotification({
+        partnerId,
+        type: 'order_updated',
+        title: 'Order Picked Up',
+        message: `You picked up order #${String(orderId).slice(0, 8)}. Deliver it to the customer.`,
+        relatedOrderId: orderId,
+        actionUrl: '/delivery/orders/assigned',
+      });
+    } catch (err) {
+      console.warn('[delivery] order_updated notification skipped:', err.message);
+    }
+  }
 
   // Notify restaurant owner
   const rest = await pool.query(
@@ -452,6 +647,19 @@ const updateDeliveryStatus = async (orderId, partnerId, status) => {
       `UPDATE delivery_partners SET is_available = TRUE, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
       [partnerId]
     );
+    try {
+      const dn = require('./deliveryNotificationModel');
+      await dn.createNotification({
+        partnerId,
+        type: 'delivery_completed',
+        title: 'Delivery Completed',
+        message: `Order #${String(orderId).slice(0, 8)} delivered successfully. Earnings have been credited to your wallet.`,
+        relatedOrderId: orderId,
+        actionUrl: '/delivery/wallet',
+      });
+    } catch (err) {
+      console.warn('[delivery] delivery_completed notification skipped:', err.message);
+    }
   }
 
   const result = await getOrderForPartner(orderId, partnerId);
@@ -623,6 +831,11 @@ const getEarnings = async (partnerId) => {
 };
 
 const updateAvailability = async (partnerId, isAvailable) => {
+  if (isAvailable) {
+    const { assertPartnerKycVerified } = require('./deliveryDocumentModel');
+    await assertPartnerKycVerified(partnerId);
+  }
+
   const { rows } = await pool.query(
     `UPDATE delivery_partners
      SET is_available = $1, updated_at = CURRENT_TIMESTAMP
@@ -718,6 +931,200 @@ const updatePartnerDocuments = async (userId, data = {}) => {
   return rows[0] || null;
 };
 
+const VALID_NEXT_STATUS = {
+  assigned: ['reached_restaurant'],
+  accepted: ['reached_restaurant'],
+  reached_restaurant: ['picked_up'],
+  picked_up: ['out_for_delivery', 'on_the_way'],
+  out_for_delivery: ['delivered'],
+  on_the_way: ['delivered'],
+};
+
+const updateDeliveryStatusWithRules = async (orderId, partnerId, targetStatus) => {
+  const { rows: orderRows } = await pool.query(
+    `SELECT o.id, o.status AS order_status, o.delivery_partner_id, da.status AS assignment_status, da.delivery_partner_id AS assignment_partner_id
+     FROM orders o
+     LEFT JOIN LATERAL (
+       SELECT * FROM delivery_assignments
+       WHERE order_id = o.id
+       ORDER BY created_at DESC
+       LIMIT 1
+     ) da ON TRUE
+     WHERE o.id = $1`,
+    [orderId]
+  );
+
+  const order = orderRows[0];
+  if (!order) {
+    throw Object.assign(new Error('Order not found'), { status: 404 });
+  }
+
+  const assignedPartnerId = order.delivery_partner_id || order.assignment_partner_id;
+  if (!assignedPartnerId || String(assignedPartnerId) !== String(partnerId)) {
+    throw Object.assign(new Error('Only the assigned delivery partner can update this order'), { status: 403 });
+  }
+
+  let currentRawStatus = (order.assignment_status || order.order_status || '').toLowerCase().replace(/\s+/g, '_');
+  if (currentRawStatus === 'ready_for_pickup' || currentRawStatus === 'ready for pickup') {
+    currentRawStatus = 'reached_restaurant';
+  } else if (currentRawStatus === 'picked_up' || currentRawStatus === 'picked up') {
+    currentRawStatus = 'picked_up';
+  } else if (currentRawStatus === 'on_the_way' || currentRawStatus === 'on the way' || currentRawStatus === 'out_for_delivery') {
+    currentRawStatus = 'out_for_delivery';
+  }
+
+  const allowedNext = VALID_NEXT_STATUS[currentRawStatus] || [];
+  const normalizedTarget = targetStatus === 'on_the_way' ? 'out_for_delivery' : targetStatus;
+
+  if (!allowedNext.includes(targetStatus) && !allowedNext.includes(normalizedTarget)) {
+    throw Object.assign(
+      new Error(`Invalid status transition: Cannot transition order from '${currentRawStatus}' to '${targetStatus}'`),
+      { status: 400 }
+    );
+  }
+
+  return await updateDeliveryStatus(orderId, partnerId, targetStatus);
+};
+
+const verifyDeliveryOtp = async (orderId, partnerId, inputOtp) => {
+  const crypto = require('crypto');
+  const { rows: orderRows } = await pool.query(
+    `SELECT o.id, o.status AS order_status, o.user_id, o.delivery_partner_id,
+            o.delivery_otp_hash, o.delivery_otp_expires_at, o.delivery_otp_attempts,
+            o.delivery_verified_at, da.id AS assignment_id, da.status AS assignment_status,
+            da.delivery_partner_id AS assignment_partner_id
+     FROM orders o
+     LEFT JOIN LATERAL (
+       SELECT * FROM delivery_assignments
+       WHERE order_id = o.id
+       ORDER BY created_at DESC
+       LIMIT 1
+     ) da ON TRUE
+     WHERE o.id = $1`,
+    [orderId]
+  );
+
+  const order = orderRows[0];
+  if (!order) {
+    throw Object.assign(new Error('Order not found'), { status: 404 });
+  }
+
+  const assignedPartnerId = order.delivery_partner_id || order.assignment_partner_id;
+  if (!assignedPartnerId || String(assignedPartnerId) !== String(partnerId)) {
+    throw Object.assign(new Error('Only assigned delivery partner can verify OTP'), { status: 403 });
+  }
+
+  const currentStatus = (order.assignment_status || order.order_status || '').toLowerCase().replace(/\s+/g, '_');
+  if (currentStatus !== 'out_for_delivery' && currentStatus !== 'on_the_way') {
+    throw Object.assign(new Error('Order must be out for delivery to verify OTP'), { status: 400 });
+  }
+
+  if (Number(order.delivery_otp_attempts || 0) >= 5) {
+    throw Object.assign(new Error('Maximum OTP verification attempts (5) exceeded. Please contact support.'), { status: 400 });
+  }
+
+  if (order.delivery_otp_expires_at && new Date() > new Date(order.delivery_otp_expires_at)) {
+    throw Object.assign(new Error('OTP has expired. Please ask customer to refresh page.'), { status: 400 });
+  }
+
+  const rawInput = String(inputOtp || '').trim();
+  const inputHash = crypto.createHash('sha256').update(rawInput).digest('hex');
+
+  if (inputHash !== order.delivery_otp_hash) {
+    const nextAttempts = Number(order.delivery_otp_attempts || 0) + 1;
+    await pool.query(
+      `UPDATE orders SET delivery_otp_attempts = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
+      [nextAttempts, orderId]
+    );
+    const remaining = Math.max(0, 5 - nextAttempts);
+    throw Object.assign(new Error(`Invalid OTP. ${remaining} attempt(s) remaining.`), { status: 400 });
+  }
+
+  const assignmentId = order.assignment_id;
+  await pool.query(
+    `UPDATE orders
+     SET delivery_verified_at = CURRENT_TIMESTAMP,
+         status = 'Delivered',
+         updated_at = CURRENT_TIMESTAMP
+     WHERE id = $1`,
+    [orderId]
+  );
+
+  if (assignmentId) {
+    await pool.query(
+      `UPDATE delivery_assignments SET status = 'delivered', updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+      [assignmentId]
+    );
+  }
+
+  await pool.query(
+    `INSERT INTO order_tracking (order_id, delivery_partner_id, current_status, estimated_delivery_time)
+     VALUES ($1, $2, 'Delivered', CURRENT_TIMESTAMP)
+     ON CONFLICT (order_id) DO UPDATE SET
+       delivery_partner_id = EXCLUDED.delivery_partner_id,
+       current_status = 'Delivered',
+       updated_at = CURRENT_TIMESTAMP`,
+    [orderId, partnerId]
+  );
+
+  await pool.query(
+    `UPDATE delivery_partners SET is_available = TRUE, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+    [partnerId]
+  );
+
+  if (assignmentId) {
+    await settleEarnings(orderId, partnerId, assignmentId);
+  }
+
+  await recordHistory(assignmentId, orderId, partnerId, 'delivered', 'OTP verified and order delivered successfully');
+  await notifyStakeholders(orderId, 'Order Delivered', 'Your order has been verified and delivered successfully!', 'Delivered');
+
+  try {
+    const dn = require('./deliveryNotificationModel');
+    await dn.createNotification({
+      partnerId,
+      type: 'delivery_completed',
+      title: 'Delivery Completed',
+      message: `Order #${String(orderId).slice(0, 8)} delivered successfully. Earnings have been credited to your wallet.`,
+      relatedOrderId: orderId,
+    });
+  } catch (err) {
+    console.warn('[delivery] delivery_completed notification skipped:', err.message);
+  }
+
+  try {
+    const ReferralService = require('../services/referralService');
+    await ReferralService.handleFirstDeliveryCompleted(partnerId);
+  } catch (refErr) {
+    console.warn('[delivery] referral first delivery check skipped:', refErr.message);
+  }
+
+  try {
+    const { emitOrderStatus } = require('../socket/emitters');
+    const partnerUser = await pool.query('SELECT user_id FROM delivery_partners WHERE id = $1', [partnerId]);
+    const orderRow = await pool.query('SELECT user_id, restaurant_id, total_amount FROM orders WHERE id = $1', [orderId]);
+    emitOrderStatus(
+      {
+        id: orderId,
+        status: 'Delivered',
+        user_id: orderRow.rows[0]?.user_id,
+        restaurant_id: orderRow.rows[0]?.restaurant_id,
+        total_amount: orderRow.rows[0]?.total_amount,
+      },
+      {
+        source: 'delivery',
+        delivery_status: 'delivered',
+        delivery_partner_id: partnerId,
+        delivery_partner_user_id: partnerUser.rows[0]?.user_id,
+      }
+    );
+  } catch (socketErr) {
+    console.warn('[delivery] verify-otp socket emit skipped:', socketErr.message);
+  }
+
+  return await getOrderForPartner(orderId, partnerId);
+};
+
 module.exports = {
   getPartnerByUserId,
   getDashboard,
@@ -728,6 +1135,8 @@ module.exports = {
   acceptOrder,
   rejectOrder,
   updateDeliveryStatus,
+  updateDeliveryStatusWithRules,
+  verifyDeliveryOtp,
   getEarnings,
   getDeliveryHistory,
   updateAvailability,

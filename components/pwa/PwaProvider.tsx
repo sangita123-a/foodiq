@@ -16,24 +16,9 @@ import {
   isStandaloneMode,
 } from "@/lib/pwa/config";
 import MobileInstallBanner from "@/components/pwa/MobileInstallBanner";
+import { PwaContext, usePwaInstall } from "./PwaContext";
 
-type PwaContextValue = {
-  canInstall: boolean;
-  isInstalled: boolean;
-  isMobile: boolean;
-  installApp: () => Promise<boolean>;
-};
-
-const PwaContext = createContext<PwaContextValue>({
-  canInstall: false,
-  isInstalled: false,
-  isMobile: false,
-  installApp: async () => false,
-});
-
-export function usePwaInstall() {
-  return useContext(PwaContext);
-}
+export { usePwaInstall };
 
 export default function PwaProvider({ children }: { children: ReactNode }) {
   const [deferredPrompt, setDeferredPrompt] =

@@ -5,7 +5,7 @@ import { Menu } from "lucide-react";
 import { mutate } from "swr";
 import { useDeliveryMe } from "@/hooks/useDeliveryData";
 import { setDeliveryAvailability } from "@/services/deliveryApi";
-import NotificationBell from "@/components/notifications/NotificationBell";
+import NotificationBell from "@/components/delivery/NotificationBell";
 import MobileDrawer from "@/components/ui/MobileDrawer";
 import DeliverySidebar from "@/components/delivery/DeliverySidebar";
 
@@ -75,10 +75,7 @@ export default function DeliveryHeader({ title, online }: DeliveryHeaderProps) {
             {isOnline ? "Online" : "Offline"}
           </button>
 
-          <NotificationBell
-            endpoint="/api/delivery/notifications"
-            inboxHref="/delivery/notifications"
-          />
+          <NotificationBell />
         </div>
       </div>
 

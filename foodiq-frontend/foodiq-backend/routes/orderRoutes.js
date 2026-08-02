@@ -8,6 +8,10 @@ const {
   updateFeedback,
   deleteFeedback,
 } = require('../controllers/orderFeedbackController');
+const {
+  createOrderReview,
+  getOrderReview,
+} = require('../controllers/deliveryPartnerReviewController');
 
 router.use(protect);
 
@@ -18,6 +22,8 @@ router.get('/:id/feedback', getFeedback);
 router.post('/:id/feedback', submitFeedback);
 router.put('/:id/feedback', updateFeedback);
 router.delete('/:id/feedback', deleteFeedback);
+router.get('/:id/review', getOrderReview);
+router.post('/:id/review', createOrderReview);
 router.get('/:id', getSingleOrder);
 router.put('/:id/cancel', cancelOrder);
 router.put('/:id/status', updateStatus);

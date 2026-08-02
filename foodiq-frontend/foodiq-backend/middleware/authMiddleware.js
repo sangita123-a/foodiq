@@ -120,4 +120,7 @@ module.exports = {
   optionalProtect,
   invalidateUserSession,
   resolveUser,
+  // Aliases used by newer route files
+  verifyToken: protect,
+  requireRole: (roles) => authorize(...(Array.isArray(roles) ? roles : [roles])),
 };

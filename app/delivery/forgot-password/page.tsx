@@ -1,58 +1,67 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Mail, Loader2, ArrowRight, AlertCircle, KeyRound } from "lucide-react";
 import api from "@/services/api";
 import { useToast } from "@/contexts/ToastContext";
-
-type Step = "request" | "reset";
+import { getAuthErrorMessage } from "@/lib/authErrors";
+import DeliveryAuthLayout from "@/components/delivery/DeliveryAuthLayout";
 
 export default function DeliveryForgotPasswordPage() {
   const router = useRouter();
   const { showToast } = useToast();
-  const [step, setStep] = useState<Step>("request");
+
   const [email, setEmail] = useState("");
-  const [resetCode, setResetCode] = useState("");
-  const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [fieldError, setFieldError] = useState("");
 
-  const handleRequestReset = async (e: React.FormEvent) => {
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setFieldError("");
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      setFieldError("Email address is required");
+      setLoading(false);
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setFieldError("Please enter a valid email address");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await api.post("/api/auth/forgot-password", {
-        email: email.trim().toLowerCase(),
+      const res = await api.post("/api/delivery/forgot-password", {
+        email: normalizedEmail,
       });
-      showToast(res.data.message || "Reset instructions sent", "success");
-      setStep("reset");
-    } catch (err: unknown) {
-      const ax = err as { response?: { data?: { message?: string } } };
-      const msg = ax.response?.data?.message || "Failed to send reset instructions";
+
+      if (res.data && res.data.success) {
+        showToast(
+          res.data.message || "Reset OTP sent successfully to your email.",
+          "success"
+        );
+        router.push(
+          `/delivery/reset-password?email=${encodeURIComponent(normalizedEmail)}`
+        );
+        return;
+      }
+
+      const msg = res.data?.message || "Failed to send reset code. Please check your email.";
       setError(msg);
       showToast(msg, "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    try {
-      const res = await api.post("/api/auth/reset-password", {
-        email: email.trim().toLowerCase(),
-        reset_code: resetCode.trim(),
-        new_password: newPassword,
-      });
-      showToast(res.data.message || "Password reset successful", "success");
-      router.push("/delivery/login");
     } catch (err: unknown) {
-      const ax = err as { response?: { data?: { message?: string } } };
-      const msg = ax.response?.data?.message || "Failed to reset password";
+      const msg = getAuthErrorMessage(
+        err,
+        "Failed to send reset code. Please check your email address."
+      );
       setError(msg);
       showToast(msg, "error");
     } finally {
@@ -61,74 +70,81 @@ export default function DeliveryForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-section flex items-center justify-center p-6">
-      <div className="w-full max-w-md bg-white border border-border rounded-2xl p-8 shadow-sm">
-        <h1 className="text-2xl font-black text-foreground mb-2">Reset Rider Password</h1>
-        <p className="text-sm text-gray-text mb-6">
-          {step === "request"
-            ? "Enter your registered email to receive a reset code."
-            : "Enter the reset code and your new password."}
-        </p>
+    <DeliveryAuthLayout
+      title="Forgot Password"
+      subtitle="Enter your delivery partner email to receive a password reset OTP."
+      badge="Password Recovery"
+      showBackButton
+      backHref="/delivery/login"
+    >
+      {error && (
+        <div className="flex items-start gap-3 p-4 mb-6 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+          <AlertCircle className="w-5 h-5 shrink-0 text-red-600 mt-0.5" />
+          <span className="flex-1 font-medium">{error}</span>
+        </div>
+      )}
 
-        {error && (
-          <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        {step === "request" ? (
-          <form onSubmit={handleRequestReset} className="space-y-4">
+      <form onSubmit={handleSendOtp} className="space-y-5" noValidate>
+        {/* Email Field */}
+        <div>
+          <label htmlFor="forgot-email" className="block text-sm font-semibold text-foreground mb-2">
+            Email Address
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
+              <Mail className="w-5 h-5" />
+            </div>
             <input
+              id="forgot-email"
               type="email"
+              autoComplete="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (fieldError) setFieldError("");
+                setError("");
+              }}
               placeholder="rider@foodiq.com"
-              required
-              className="w-full border border-border rounded-xl px-4 py-3 text-sm"
+              className={`w-full bg-white text-foreground border rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none transition-all ${
+                fieldError ? "border-red-500" : "border-border focus:border-primary"
+              }`}
             />
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl disabled:opacity-60"
-            >
-              {loading ? "Sending..." : "Send Reset Code"}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleResetPassword} className="space-y-4">
-            <input
-              type="text"
-              value={resetCode}
-              onChange={(e) => setResetCode(e.target.value)}
-              placeholder="Reset code"
-              required
-              className="w-full border border-border rounded-xl px-4 py-3 text-sm"
-            />
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="New password"
-              required
-              minLength={8}
-              className="w-full border border-border rounded-xl px-4 py-3 text-sm"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl disabled:opacity-60"
-            >
-              {loading ? "Resetting..." : "Reset Password"}
-            </button>
-          </form>
-        )}
+          </div>
+          {fieldError && (
+            <p className="mt-1.5 text-xs font-medium text-red-600">{fieldError}</p>
+          )}
+        </div>
 
-        <p className="text-center text-sm text-gray-text mt-6">
-          <Link href="/delivery/login" className="text-primary font-bold hover:underline">
-            Back to rider login
-          </Link>
-        </p>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-button disabled:opacity-60 disabled:cursor-not-allowed text-sm mt-2"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span>Sending OTP...</span>
+            </>
+          ) : (
+            <>
+              <KeyRound className="w-5 h-5" />
+              <span>Send OTP</span>
+            </>
+          )}
+        </button>
+      </form>
+
+      {/* Footer Link */}
+      <div className="mt-8 pt-6 border-t border-border text-center text-sm text-gray-text">
+        <span>Remember your password? </span>
+        <Link
+          href="/delivery/login"
+          className="font-bold text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/20 rounded"
+        >
+          Back to Sign In
+        </Link>
       </div>
-    </div>
+    </DeliveryAuthLayout>
   );
 }
