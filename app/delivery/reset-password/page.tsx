@@ -36,10 +36,20 @@ function ResetPasswordForm() {
 
   useEffect(() => {
     const emailParam = searchParams.get("email");
+    const otpParam = searchParams.get("otp") || searchParams.get("code");
     if (emailParam) {
       setEmail(emailParam);
     }
+    if (otpParam) {
+      setOtp(otpParam);
+    }
   }, [searchParams]);
+
+  const hasLength = newPassword.length >= 8;
+  const hasUpper = /[A-Z]/.test(newPassword);
+  const hasLower = /[a-z]/.test(newPassword);
+  const hasNumber = /[0-9]/.test(newPassword);
+  const hasSpecial = /[!@#$%^&*(),.?":{}|<>_\-\\\/\[\]]/.test(newPassword);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,8 +73,8 @@ function ResetPasswordForm() {
 
     if (!newPassword) {
       errors.new_password = "New password is required";
-    } else if (newPassword.length < 8) {
-      errors.new_password = "Password must be at least 8 characters";
+    } else if (!hasLength || !hasUpper || !hasLower || !hasNumber || !hasSpecial) {
+      errors.new_password = "Password must be at least 8 characters with upper, lower, number, and special character";
     }
 
     if (!confirmPassword) {

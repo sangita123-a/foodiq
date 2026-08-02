@@ -1,7 +1,9 @@
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const { pool } = require('../config/db');
 const generateToken = require('../utils/generateToken');
 const { issueOtp, verifyOtp } = require('./otpService');
+const { sendEmail } = require('./emailService');
 const { log } = require('../utils/logger');
 const deliveryModel = require('../models/deliveryModel');
 
@@ -439,101 +441,251 @@ const verifyDeliveryOtp = async ({ destination, email, phone, purpose = 'deliver
 
 /**
  * Handle forgot password request for delivery partner.
- * Always returns exact same generic response whether account exists or not.
+ * Verifies email & account status, generates 6-digit OTP, stores SHA-256 hash in DB,
+ * and emails OTP via SMTP service.
  */
 const forgotPassword = async (email) => {
   const cleanEmail = String(email || '').trim().toLowerCase();
 
+  if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+    const err = new Error('Please enter a valid email address.');
+    err.status = 400;
+    throw err;
+  }
+
   log.info('[delivery:forgot-password] Forgot password requested', { email: cleanEmail });
 
   const { rows } = await pool.query(
-    `SELECT id FROM delivery_partners WHERE LOWER(email) = $1`,
-    [cleanEmail]
-  );
-
-  const genericResponse = {
-    message: 'If an account with that email exists, an OTP code has been sent.',
-  };
-
-  if (rows.length === 0) {
-    log.info('[delivery:forgot-password] Email not found in delivery_partners, returning generic response for privacy', { email: cleanEmail });
-    return genericResponse;
-  }
-
-  try {
-    const otpResult = await issueOtp({
-      destination: cleanEmail,
-      purpose: 'delivery_password_reset',
-      channel: 'email',
-      ttlMinutes: 10,
-    });
-
-    log.info('[delivery:forgot-password] OTP sent via Resend', {
-      email: cleanEmail,
-      expires_at: otpResult.expires_at,
-    });
-  } catch (err) {
-    log.error('[delivery:forgot-password] Failed to send OTP email', {
-      email: cleanEmail,
-      error: err.message,
-    });
-  }
-
-  return genericResponse;
-};
-
-/**
- * Reset password for delivery partner using OTP.
- */
-const resetPassword = async ({ email, code, otp, new_password, password, newPassword }) => {
-  const cleanEmail = String(email || '').trim().toLowerCase();
-  const otpCode = String(code || otp || '').trim();
-  const newPass = new_password || newPassword || password;
-
-  try {
-    await verifyOtp({
-      destination: cleanEmail,
-      purpose: 'delivery_password_reset',
-      code: otpCode,
-    });
-  } catch (err) {
-    log.warn('[delivery:reset-password] Password reset failure: Invalid or expired OTP', {
-      email: cleanEmail,
-      error: err.message,
-    });
-    const customErr = new Error(err.message || 'Invalid or expired OTP code.');
-    customErr.status = err.status || 400;
-    throw customErr;
-  }
-
-  const { rows } = await pool.query(
-    `SELECT id FROM delivery_partners WHERE LOWER(email) = $1`,
+    `SELECT dp.id, dp.user_id, COALESCE(dp.status, dp.approval_status, 'approved') AS status
+     FROM delivery_partners dp
+     LEFT JOIN users u ON u.id = dp.user_id
+     WHERE LOWER(COALESCE(dp.email, u.email)) = $1`,
     [cleanEmail]
   );
 
   if (rows.length === 0) {
-    log.warn('[delivery:reset-password] Password reset failure: Partner account not found', { email: cleanEmail });
+    log.warn('[delivery:forgot-password] Account not found', { email: cleanEmail });
     const err = new Error('Delivery partner account not found.');
     err.status = 404;
     throw err;
   }
 
-  const password_hash = await bcrypt.hash(newPass, BCRYPT_ROUNDS);
+  const partner = rows[0];
+  const status = (partner.status || 'approved').toLowerCase();
+  if (status === 'rejected' || status === 'suspended') {
+    log.warn('[delivery:forgot-password] Account not eligible for reset', { email: cleanEmail, status });
+    const err = new Error(`Your account has been ${status}. Password reset is not allowed.`);
+    err.status = 403;
+    throw err;
+  }
 
+  // Generate secure 6-digit OTP
+  const crypto = require('crypto');
+  const otp = String(crypto.randomInt(100000, 999999));
+  const resetOtpHash = crypto.createHash('sha256').update(otp).digest('hex');
+  const resetOtpExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+  // Store in delivery_partners table
   await pool.query(
-    `UPDATE delivery_partners SET password_hash = $1, updated_at = CURRENT_TIMESTAMP WHERE LOWER(email) = $2`,
-    [password_hash, cleanEmail]
+    `UPDATE delivery_partners
+     SET reset_otp_hash = $1, reset_otp_expiry = $2, reset_otp_attempts = 0, updated_at = CURRENT_TIMESTAMP
+     WHERE id = $3`,
+    [resetOtpHash, resetOtpExpiry, partner.id]
   );
 
-  // Mark all reset OTPs for this email as consumed to prevent reuse
-  await pool.query(
-    `UPDATE otp_codes SET consumed_at = CURRENT_TIMESTAMP WHERE destination = $1 AND purpose = 'delivery_password_reset'`,
+  // Send HTML Email via SMTP service
+  try {
+    const htmlContent = `
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #F3F4F6;">
+        <div style="text-align: center; margin-bottom: 28px;">
+          <div style="display: inline-block; background-color: #E53935; color: #FFFFFF; font-weight: 900; font-size: 24px; padding: 10px 20px; border-radius: 12px; letter-spacing: -0.5px;">
+            Foodiq <span style="font-size: 14px; font-weight: 500; opacity: 0.9;">RIDER</span>
+          </div>
+        </div>
+        <h2 style="color: #111827; font-size: 20px; font-weight: 700; margin-bottom: 12px; text-align: center;">Delivery Partner Password Reset</h2>
+        <p style="color: #4B5563; font-size: 15px; line-height: 1.6; margin-bottom: 24px; text-align: center;">
+          You requested a password reset for your Foodiq Delivery Partner account. Use the OTP code below to verify your request:
+        </p>
+        <div style="background-color: #FEF2F2; border: 2px dashed #EF4444; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px;">
+          <span style="font-family: 'Courier New', Courier, monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #DC2626;">${otp}</span>
+        </div>
+        <div style="background-color: #F9FAFB; border-radius: 8px; padding: 14px 16px; margin-bottom: 24px; font-size: 13px; color: #6B7280; text-align: center;">
+          ⏱️ This OTP code is valid for <strong>15 minutes</strong>. Maximum 5 attempts allowed.
+        </div>
+        <p style="color: #9CA3AF; font-size: 13px; line-height: 1.5; text-align: center;">
+          If you did not request a password reset, please ignore this email or contact Foodiq Support immediately.
+        </p>
+      </div>
+    `;
+
+    await sendEmail({
+      to: cleanEmail,
+      subject: 'Foodiq Delivery Password Reset OTP',
+      html: htmlContent,
+      text: `Your Foodiq Delivery Password Reset OTP is ${otp}. It will expire in 15 minutes.`,
+    });
+
+    log.info('[delivery:forgot-password] OTP email sent successfully', { email: cleanEmail });
+  } catch (emailErr) {
+    log.error('[delivery:forgot-password] Email dispatch failed', { email: cleanEmail, error: emailErr.message });
+  }
+
+  return {
+    success: true,
+    message: 'A 6-digit OTP code has been sent to your email.',
+  };
+};
+
+/**
+ * Verify reset OTP for delivery partner.
+ */
+const verifyResetOtp = async ({ email, otp, code }) => {
+  const cleanEmail = String(email || '').trim().toLowerCase();
+  const inputOtp = String(otp || code || '').trim();
+  const crypto = require('crypto');
+
+  if (!cleanEmail || !inputOtp) {
+    const err = new Error('Email and OTP code are required.');
+    err.status = 400;
+    throw err;
+  }
+
+  const { rows } = await pool.query(
+    `SELECT dp.id, dp.reset_otp_hash, dp.reset_otp_expiry, COALESCE(dp.reset_otp_attempts, 0) AS reset_otp_attempts
+     FROM delivery_partners dp
+     LEFT JOIN users u ON u.id = dp.user_id
+     WHERE LOWER(COALESCE(dp.email, u.email)) = $1`,
     [cleanEmail]
   );
 
-  log.info('[delivery:reset-password] Password reset success', { email: cleanEmail });
+  if (rows.length === 0) {
+    const err = new Error('Delivery partner account not found.');
+    err.status = 404;
+    throw err;
+  }
+
+  const partner = rows[0];
+
+  if (Number(partner.reset_otp_attempts) >= 5) {
+    log.warn('[delivery:verify-otp] Max attempts reached', { email: cleanEmail });
+    const err = new Error('Too many failed OTP attempts. Please request a new OTP.');
+    err.status = 429;
+    throw err;
+  }
+
+  if (!partner.reset_otp_expiry || new Date(partner.reset_otp_expiry) < new Date()) {
+    log.warn('[delivery:verify-otp] OTP expired', { email: cleanEmail });
+    const err = new Error('OTP has expired. Please request a new OTP.');
+    err.status = 400;
+    throw err;
+  }
+
+  const inputHash = crypto.createHash('sha256').update(inputOtp).digest('hex');
+  if (inputHash !== partner.reset_otp_hash) {
+    const newAttempts = Number(partner.reset_otp_attempts) + 1;
+    await pool.query(
+      `UPDATE delivery_partners SET reset_otp_attempts = $1 WHERE id = $2`,
+      [newAttempts, partner.id]
+    );
+
+    const remaining = 5 - newAttempts;
+    log.warn('[delivery:verify-otp] Mismatched OTP', { email: cleanEmail, attempts: newAttempts });
+
+    if (remaining <= 0) {
+      const err = new Error('Too many failed OTP attempts. Please request a new OTP.');
+      err.status = 429;
+      throw err;
+    }
+
+    const err = new Error(`Invalid OTP code. ${remaining} attempts remaining.`);
+    err.status = 400;
+    throw err;
+  }
+
+  log.info('[delivery:verify-otp] OTP verified successfully', { email: cleanEmail });
+  return {
+    success: true,
+    message: 'OTP verified successfully.',
+  };
+};
+
+/**
+ * Reset password for delivery partner using verified OTP.
+ */
+const resetPassword = async ({ email, code, otp, new_password, password, newPassword }) => {
+  const cleanEmail = String(email || '').trim().toLowerCase();
+  const inputOtp = String(otp || code || '').trim();
+  const pass = String(newPassword || new_password || password || '').trim();
+
+  // Validate Password Complexity
+  const hasUpper = /[A-Z]/.test(pass);
+  const hasLower = /[a-z]/.test(pass);
+  const hasNumber = /[0-9]/.test(pass);
+  const hasSpecial = /[!@#$%^&*(),.?":{}|<>_\-\\\/\[\]]/.test(pass);
+
+  if (pass.length < 8 || !hasUpper || !hasLower || !hasNumber || !hasSpecial) {
+    const err = new Error(
+      'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.'
+    );
+    err.status = 400;
+    throw err;
+  }
+
+  // Verify OTP first
+  await verifyResetOtp({ email: cleanEmail, otp: inputOtp });
+
+  // Find partner record
+  const { rows } = await pool.query(
+    `SELECT dp.id, dp.user_id
+     FROM delivery_partners dp
+     LEFT JOIN users u ON u.id = dp.user_id
+     WHERE LOWER(COALESCE(dp.email, u.email)) = $1`,
+    [cleanEmail]
+  );
+
+  if (rows.length === 0) {
+    const err = new Error('Delivery partner account not found.');
+    err.status = 404;
+    throw err;
+  }
+
+  const partner = rows[0];
+  const password_hash = await bcrypt.hash(pass, BCRYPT_ROUNDS);
+
+  // Clear OTP fields & update password in delivery_partners
+  await pool.query(
+    `UPDATE delivery_partners
+     SET password_hash = $1, reset_otp_hash = NULL, reset_otp_expiry = NULL, reset_otp_attempts = 0, updated_at = CURRENT_TIMESTAMP
+     WHERE id = $2`,
+    [password_hash, partner.id]
+  );
+
+  // Update password in linked users table record if user_id exists
+  if (partner.user_id) {
+    await pool.query(
+      `UPDATE users SET password_hash = $1 WHERE id = $2`,
+      [password_hash, partner.user_id]
+    );
+  }
+  await pool.query(
+    `UPDATE users SET password_hash = $1 WHERE LOWER(email) = $2`,
+    [password_hash, cleanEmail]
+  );
+
+  // Invalidate refresh tokens and revoke previous sessions
+  try {
+    await pool.query(
+      `DELETE FROM refresh_tokens WHERE user_id = $1 OR user_id = $2`,
+      [partner.id, partner.user_id || partner.id]
+    );
+  } catch (tokenErr) {
+    log.warn('[delivery:reset-password] Token invalidation warning', { error: tokenErr.message });
+  }
+
+  log.info('[delivery:reset-password] Password reset completed successfully', { email: cleanEmail, partnerId: partner.id });
 
   return {
+    success: true,
     message: 'Password reset successfully. You can now log in with your new password.',
   };
 };
@@ -600,6 +752,7 @@ module.exports = {
   sendDeliveryOtp,
   verifyDeliveryOtp,
   forgotPassword,
+  verifyResetOtp,
   resetPassword,
   getProfile,
   updateOnlineStatus,

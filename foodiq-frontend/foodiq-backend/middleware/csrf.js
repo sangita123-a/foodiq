@@ -33,7 +33,9 @@ const isAuthCredentialPath = (path) => {
     p.startsWith('/api/delivery/send-otp') ||
     p.startsWith('/api/delivery/verify-otp') ||
     p.startsWith('/api/delivery/forgot-password') ||
-    p.startsWith('/api/delivery/reset-password')
+    p.startsWith('/api/delivery/verify-reset-otp') ||
+    p.startsWith('/api/delivery/reset-password') ||
+    p.startsWith('/api/delivery/auth/')
   );
 };
 

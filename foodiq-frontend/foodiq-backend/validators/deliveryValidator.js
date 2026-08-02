@@ -140,6 +140,18 @@ const validateResetPassword = (req, res, next) => {
   next();
 };
 
+const validateVerifyResetOtp = (req, res, next) => {
+  const { email, otp, code } = req.body || {};
+  const userEmail = String(email || '').trim().toLowerCase();
+  const otpCode = String(otp || code || '').trim();
+
+  if (!userEmail) return fail(res, 400, 'Email is required');
+  if (!isValidEmail(userEmail)) return fail(res, 400, 'A valid email address is required');
+  if (!otpCode) return fail(res, 400, 'OTP code is required');
+
+  next();
+};
+
 const validateOnlineStatus = (req, res, next) => {
   const isOnline = req.body.is_online ?? req.body.online ?? req.body.is_available;
   if (isOnline === undefined || isOnline === null) {
@@ -177,6 +189,7 @@ module.exports = {
   validateSendOtp,
   validateVerifyOtp,
   validateForgotPassword,
+  validateVerifyResetOtp,
   validateResetPassword,
   validateOnlineStatus,
   validateLocationUpdate,

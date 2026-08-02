@@ -53,6 +53,9 @@ async function ensureSchema() {
         bank_ifsc TEXT,
         upi_id TEXT,
         aadhaar_last4 VARCHAR(4),
+        reset_otp_hash VARCHAR(255),
+        reset_otp_expiry TIMESTAMP WITH TIME ZONE,
+        reset_otp_attempts INTEGER DEFAULT 0,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
@@ -88,6 +91,9 @@ async function ensureSchema() {
     await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS wallet_balance DECIMAL(10,2) DEFAULT 0`);
     await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS current_lat NUMERIC(10,7)`);
     await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS current_lng NUMERIC(10,7)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS reset_otp_hash VARCHAR(255)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS reset_otp_expiry TIMESTAMP WITH TIME ZONE`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS reset_otp_attempts INTEGER DEFAULT 0`);
     await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS bank_account_name TEXT`);
     await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS bank_account_number TEXT`);
     await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS bank_ifsc TEXT`);

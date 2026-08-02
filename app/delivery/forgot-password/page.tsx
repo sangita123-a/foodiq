@@ -49,7 +49,7 @@ export default function DeliveryForgotPasswordPage() {
           "success"
         );
         router.push(
-          `/delivery/reset-password?email=${encodeURIComponent(normalizedEmail)}`
+          `/delivery/verify-reset-otp?email=${encodeURIComponent(normalizedEmail)}`
         );
         return;
       }

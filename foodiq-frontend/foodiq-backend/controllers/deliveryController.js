@@ -152,6 +152,19 @@ const forgotPassword = async (req, res) => {
 };
 
 /**
+ * POST /api/delivery/verify-reset-otp
+ */
+const verifyResetOtp = async (req, res) => {
+  try {
+    const result = await deliveryService.verifyResetOtp(req.body);
+    return ok(res, result.message || 'OTP verified successfully.', result);
+  } catch (error) {
+    log.error('[deliveryController] Verify reset OTP error', { error: error.message });
+    return fail(res, error.status || 400, error.message || 'OTP verification failed.');
+  }
+};
+
+/**
  * POST /api/delivery/reset-password
  */
 const resetPassword = async (req, res) => {
@@ -784,6 +797,7 @@ module.exports = {
   sendOtp,
   verifyOtp,
   forgotPassword,
+  verifyResetOtp,
   resetPassword,
   getProfile,
   updateOnlineStatus,

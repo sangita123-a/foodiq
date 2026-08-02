@@ -5,7 +5,7 @@ const v = require('../validators/deliveryValidator');
 const { protectDelivery } = require('../middleware/deliveryAuth');
 const { protect, authorize } = require('../middleware/authMiddleware');
 const { singleUpload } = require('../middleware/uploadMiddleware');
-const { uploadLimiter } = require('../middleware/rateLimiters');
+const { uploadLimiter, authLimiter, otpLimiter } = require('../middleware/rateLimiters');
 
 // Hybrid auth middleware for backward compatibility on legacy endpoints
 const hybridDeliveryAuth = (req, res, next) => {
@@ -44,16 +44,22 @@ router.post('/refresh', c.refreshToken);
 router.post('/logout', c.logout);
 
 // POST /api/delivery/send-otp
-router.post('/send-otp', v.validateSendOtp, c.sendOtp);
+router.post('/send-otp', otpLimiter, v.validateSendOtp, c.sendOtp);
 
 // POST /api/delivery/verify-otp
-router.post('/verify-otp', v.validateVerifyOtp, c.verifyOtp);
+router.post('/verify-otp', otpLimiter, v.validateVerifyOtp, c.verifyOtp);
 
-// POST /api/delivery/forgot-password
-router.post('/forgot-password', v.validateForgotPassword, c.forgotPassword);
+// POST /api/delivery/forgot-password & /api/delivery/auth/forgot-password
+router.post('/forgot-password', otpLimiter, v.validateForgotPassword, c.forgotPassword);
+router.post('/auth/forgot-password', otpLimiter, v.validateForgotPassword, c.forgotPassword);
 
-// POST /api/delivery/reset-password
-router.post('/reset-password', v.validateResetPassword, c.resetPassword);
+// POST /api/delivery/verify-reset-otp & /api/delivery/auth/verify-reset-otp
+router.post('/verify-reset-otp', otpLimiter, v.validateVerifyResetOtp, c.verifyResetOtp);
+router.post('/auth/verify-reset-otp', otpLimiter, v.validateVerifyResetOtp, c.verifyResetOtp);
+
+// POST /api/delivery/reset-password & /api/delivery/auth/reset-password
+router.post('/reset-password', authLimiter, v.validateResetPassword, c.resetPassword);
+router.post('/auth/reset-password', authLimiter, v.validateResetPassword, c.resetPassword);
 
 const sc = require('../controllers/shiftController');
 
