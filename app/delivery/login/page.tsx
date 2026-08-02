@@ -53,6 +53,7 @@ function DeliveryLoginForm() {
       const res = await api.post("/api/delivery/login", {
         email: normalizedEmail,
         password,
+        rememberMe,
       });
 
       if (res.data && res.data.success) {
@@ -61,7 +62,7 @@ function DeliveryLoginForm() {
         const partner = payload?.partner || payload?.user || payload;
 
         if (token) {
-          markAuthenticated(token);
+          markAuthenticated(token, rememberMe);
         }
         if (partner) {
           persistAuthUser(partner);

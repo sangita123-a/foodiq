@@ -98,6 +98,7 @@ const protectedRoutes = [
   "/delivery/referrals",
   "/delivery/shifts",
   "/delivery/fraud",
+  "/delivery/performance",
 ];
 
 // Define which routes should redirect away if already authenticated

@@ -4,9 +4,9 @@ import { clearAuthUser } from "@/lib/authUser";
 
 const SESSION_COOKIE = "foodiq_session";
 
-export function authCookieOptions() {
+export function authCookieOptions(rememberMe: boolean = false) {
   return {
-    expires: 7,
+    expires: rememberMe ? 30 : 7,
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
   };
@@ -24,9 +24,9 @@ export function hasSessionMarker() {
 }
 
 /** Store access JWT in memory only; set non-sensitive session marker cookie. */
-export function markAuthenticated(accessJwt?: string | null) {
+export function markAuthenticated(accessJwt?: string | null, rememberMe: boolean = false) {
   if (accessJwt) setAccessToken(accessJwt);
-  Cookies.set(SESSION_COOKIE, "1", authCookieOptions());
+  Cookies.set(SESSION_COOKIE, "1", authCookieOptions(rememberMe));
   notifyAuthChanged();
 }
 
