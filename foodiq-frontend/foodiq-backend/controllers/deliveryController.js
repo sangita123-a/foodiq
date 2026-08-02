@@ -36,11 +36,79 @@ const register = async (req, res) => {
  */
 const login = async (req, res) => {
   try {
-    const result = await deliveryService.loginPartner(req.body);
+    const result = await deliveryService.loginPartner({
+      ...req.body,
+      meta: { userAgent: req.headers['user-agent'], ip: req.ip },
+    });
+
+    const cookieOpts = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    };
+
+    const isRemember = Boolean(result.rememberMe);
+    const maxAgeAccess = isRemember ? 30 * 86400 * 1000 : 7 * 86400 * 1000;
+    const maxAgeRefresh = isRemember ? 60 * 86400 * 1000 : 14 * 86400 * 1000;
+
+    res.cookie('delivery_token', result.token, { ...cookieOpts, maxAge: maxAgeAccess });
+    if (result.refreshToken) {
+      res.cookie('delivery_refresh_token', result.refreshToken, { ...cookieOpts, maxAge: maxAgeRefresh });
+    }
+
     return ok(res, 'Login successful', result);
   } catch (error) {
     log.error('[deliveryController] Login error', { error: error.message });
     return fail(res, error.status || 401, error.message || 'Invalid credentials.');
+  }
+};
+
+/**
+ * POST /api/delivery/refresh
+ */
+const refreshToken = async (req, res) => {
+  try {
+    const tokenInput = req.body.refreshToken || req.body.refresh_token || req.cookies?.delivery_refresh_token;
+    const result = await deliveryService.refreshDeliveryToken(tokenInput, {
+      userAgent: req.headers['user-agent'],
+      ip: req.ip,
+    });
+
+    const cookieOpts = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    };
+
+    res.cookie('delivery_token', result.token, { ...cookieOpts, maxAge: 7 * 86400 * 1000 });
+    res.cookie('delivery_refresh_token', result.refreshToken, { ...cookieOpts, maxAge: 30 * 86400 * 1000 });
+
+    return ok(res, 'Token refreshed successfully', result);
+  } catch (error) {
+    log.error('[deliveryController] Refresh token error', { error: error.message });
+    return fail(res, error.status || 401, error.message || 'Invalid refresh token.');
+  }
+};
+
+/**
+ * POST /api/delivery/logout
+ */
+const logout = async (req, res) => {
+  try {
+    const partnerId = req.deliveryPartner?.id || req.user?.id;
+    const refreshTokenInput = req.body?.refreshToken || req.body?.refresh_token || req.cookies?.delivery_refresh_token;
+    await deliveryService.logoutPartner(partnerId, refreshTokenInput);
+
+    const cookieOpts = { path: '/' };
+    res.clearCookie('delivery_token', cookieOpts);
+    res.clearCookie('delivery_refresh_token', cookieOpts);
+
+    return ok(res, 'Logged out successfully');
+  } catch (error) {
+    log.error('[deliveryController] Logout error', { error: error.message });
+    return fail(res, 500, 'Logout failed.');
   }
 };
 
@@ -711,6 +779,8 @@ const notifyCustomerCalling = async (req, res) => {
 module.exports = {
   register,
   login,
+  refreshToken,
+  logout,
   sendOtp,
   verifyOtp,
   forgotPassword,

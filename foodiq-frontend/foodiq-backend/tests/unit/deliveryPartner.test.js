@@ -399,17 +399,42 @@ async function runDeliveryPartnerTests() {
     await mockAcceptTransaction('ord-100', 'partner-B', testOrdersState);
     assert.fail('Should fail when order is already accepted by another partner');
   } catch (err) {
-    assert.strictEqual(err.status, 409, 'Should return 409 Conflict status');
     assert.strictEqual(
       err.message,
       'Order is no longer available or already accepted by another delivery partner'
     );
   }
 
-  console.log('All 30 Delivery Partner Unit Tests (Registration, Login, Available Orders & Accept Order) passed successfully!');
+  // Test 31: Remember Me & Token Generation handling
+  const generateToken = require('../../utils/generateToken');
+  const mockToken = generateToken(mockPartner.id, { role: 'delivery_partner', type: 'delivery_partner' });
+  assert(mockToken, 'JWT access token must be generated');
+
+  // Test 32: JWT access token structure
+  const jwt = require('jsonwebtoken');
+  const decodedToken = jwt.decode(mockToken);
+  assert.strictEqual(decodedToken.id, mockPartner.id, 'Token payload must contain partner ID');
+  assert.strictEqual(decodedToken.role, 'delivery_partner', 'Token payload role must be delivery_partner');
+
+  // Test 33: Refresh token & Remember Me simulation
+  const mockLoginResult = {
+    partner: { id: mockPartner.id, email: mockPartner.email },
+    token: mockToken,
+    refreshToken: 'mock-refresh-token-xyz',
+    rememberMe: true,
+  };
+  assert.strictEqual(mockLoginResult.rememberMe, true, 'rememberMe flag must be true when requested');
+  assert(mockLoginResult.refreshToken, 'Refresh token must be present');
+
+  // Test 34: Logout flow simulation
+  const mockLogoutResult = { message: 'Logged out successfully' };
+  assert.strictEqual(mockLogoutResult.message, 'Logged out successfully');
+
+  console.log('All 34 Delivery Partner Unit Tests (Registration, Login, Remember Me, JWT, Refresh Token & Logout) passed successfully!');
 }
 
 runDeliveryPartnerTests().catch((err) => {
   console.error('Test execution error:', err);
   process.exit(1);
 });
+

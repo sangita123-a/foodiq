@@ -7,10 +7,18 @@ const INCENTIVE_BONUS = 25;
 
 const getPartnerByUserId = async (userId) => {
   const { rows } = await pool.query(
-    `SELECT dp.*, u.full_name, u.email, u.phone_number, u.role
+    `SELECT dp.*,
+            COALESCE(dp.full_name, u.full_name) AS full_name,
+            COALESCE(dp.email, u.email) AS email,
+            COALESCE(dp.phone_number, u.phone_number) AS phone_number,
+            COALESCE(dp.status, dp.approval_status, 'pending') AS status,
+            COALESCE(dp.approval_status, dp.status, 'approved') AS approval_status,
+            COALESCE(dp.is_online, dp.is_available, FALSE) AS is_online,
+            COALESCE(dp.is_available, dp.is_online, FALSE) AS is_available,
+            u.role
      FROM delivery_partners dp
-     JOIN users u ON u.id = dp.user_id
-     WHERE dp.user_id = $1`,
+     LEFT JOIN users u ON u.id = dp.user_id
+     WHERE dp.user_id = $1 OR dp.id = $1`,
     [userId]
   );
   return rows[0] || null;
@@ -838,8 +846,8 @@ const updateAvailability = async (partnerId, isAvailable) => {
 
   const { rows } = await pool.query(
     `UPDATE delivery_partners
-     SET is_available = $1, updated_at = CURRENT_TIMESTAMP
-     WHERE id = $2 RETURNING *`,
+     SET is_available = $1, is_online = $1, updated_at = CURRENT_TIMESTAMP
+     WHERE id = $2 OR user_id = $2 RETURNING *`,
     [isAvailable, partnerId]
   );
   return rows[0];
@@ -849,7 +857,7 @@ const updateLocation = async (partnerId, lat, lng, orderId = null) => {
   const { rows } = await pool.query(
     `UPDATE delivery_partners
      SET current_lat = $1, current_lng = $2, updated_at = CURRENT_TIMESTAMP
-     WHERE id = $3 RETURNING *`,
+     WHERE id = $3 OR user_id = $3 RETURNING *`,
     [lat, lng, partnerId]
   );
   try {
@@ -865,12 +873,13 @@ const registerPartner = async ({ userId, vehicle_details, vehicle_type, license_
   await pool.query(`UPDATE users SET role = 'delivery_partner' WHERE id = $1`, [userId]);
   const { rows } = await pool.query(
     `INSERT INTO delivery_partners (
-       user_id, vehicle_details, vehicle_type, license_number, is_available, approval_status
-     ) VALUES ($1, $2, $3, $4, FALSE, 'pending')
+       user_id, vehicle_details, vehicle_type, license_number, driving_license_number, is_available, is_online, approval_status, status
+     ) VALUES ($1, $2, $3, $4, $4, FALSE, FALSE, 'pending', 'pending')
      ON CONFLICT (user_id) DO UPDATE SET
        vehicle_details = EXCLUDED.vehicle_details,
        vehicle_type = EXCLUDED.vehicle_type,
-       license_number = EXCLUDED.license_number
+       license_number = EXCLUDED.license_number,
+       driving_license_number = EXCLUDED.driving_license_number
      RETURNING *`,
     [userId, vehicle_details || '', vehicle_type || 'Bike', license_number || '']
   );

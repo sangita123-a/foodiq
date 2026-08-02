@@ -37,6 +37,12 @@ router.post('/register', v.validateRegister, c.register);
 // POST /api/delivery/login
 router.post('/login', v.validateLogin, c.login);
 
+// POST /api/delivery/refresh
+router.post('/refresh', c.refreshToken);
+
+// POST /api/delivery/logout
+router.post('/logout', c.logout);
+
 // POST /api/delivery/send-otp
 router.post('/send-otp', v.validateSendOtp, c.sendOtp);
 

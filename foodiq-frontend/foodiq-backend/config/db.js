@@ -38,8 +38,10 @@ function buildPoolConfig() {
     application_name: 'foodiq-api',
   };
 
-  if (password !== undefined && password !== '') {
+  if (password !== undefined) {
     config.password = String(password);
+  } else {
+    config.password = 'postgres';
   }
 
   if (process.env.DB_SSL === 'true') {

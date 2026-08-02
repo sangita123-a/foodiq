@@ -70,10 +70,14 @@ const generateToken = (id, extras = {}) => {
 };
 
 const generateRefreshToken = async (userId, meta = {}) => {
-  const token = jwt.sign({ id: userId, typ: 'refresh' }, getRefreshSecret(), {
-    expiresIn: refreshTtl(),
-    ...SIGN_OPTS,
-  });
+  const token = jwt.sign(
+    { id: userId, typ: 'refresh', jti: crypto.randomUUID() },
+    getRefreshSecret(),
+    {
+      expiresIn: refreshTtl(),
+      ...SIGN_OPTS,
+    }
+  );
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
   const decoded = jwt.decode(token);
   const expiresAt = decoded?.exp

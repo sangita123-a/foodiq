@@ -45,12 +45,22 @@ const protectDelivery = async (req, res, next) => {
     }
 
     const { rows } = await pool.query(
-      `SELECT id, user_id, full_name, email, phone_number, vehicle_type, vehicle_number,
-              driving_license_number, aadhaar_number, profile_photo, city, state,
-              address, is_verified, is_online, status, rating, wallet_balance,
-              created_at, updated_at
-       FROM delivery_partners
-       WHERE id = $1 OR user_id = $1`,
+      `SELECT dp.id, dp.user_id,
+              COALESCE(dp.full_name, u.full_name) AS full_name,
+              COALESCE(dp.email, u.email) AS email,
+              COALESCE(dp.phone_number, u.phone_number) AS phone_number,
+              dp.vehicle_type, dp.vehicle_number,
+              COALESCE(dp.driving_license_number, dp.license_number) AS driving_license_number,
+              dp.aadhaar_number, dp.profile_photo, dp.city, dp.state, dp.address,
+              COALESCE(dp.is_verified, FALSE) AS is_verified,
+              COALESCE(dp.is_online, dp.is_available, FALSE) AS is_online,
+              COALESCE(dp.is_available, dp.is_online, FALSE) AS is_available,
+              COALESCE(dp.status, dp.approval_status, 'pending') AS status,
+              COALESCE(dp.approval_status, dp.status, 'approved') AS approval_status,
+              dp.rating, dp.wallet_balance, dp.created_at, dp.updated_at
+       FROM delivery_partners dp
+       LEFT JOIN users u ON u.id = dp.user_id
+       WHERE dp.id = $1 OR dp.user_id = $1`,
       [partnerId]
     );
 
@@ -61,7 +71,8 @@ const protectDelivery = async (req, res, next) => {
       return fail(res, 401, 'Delivery partner profile not found.');
     }
 
-    if (partner.status === 'suspended') {
+    const partnerStatus = (partner.status || partner.approval_status || '').toLowerCase();
+    if (partnerStatus === 'suspended') {
       log.warn('[deliveryAuth] Suspended partner attempt', { partnerId });
       return fail(res, 403, 'Your delivery partner account has been suspended.');
     }

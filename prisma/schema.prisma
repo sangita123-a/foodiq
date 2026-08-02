@@ -444,5 +444,52 @@ model DispatchHistory {
   @@map("dispatch_history")
 }
 
+model DeliveryPartner {
+  id                   String    @id @default(uuid())
+  userId               String?   @map("user_id")
+  fullName             String?   @map("full_name")
+  email                String?   @unique
+  phoneNumber          String?   @unique @map("phone_number")
+  passwordHash         String?   @map("password_hash")
+  vehicleType          String?   @map("vehicle_type")
+  vehicleNumber        String?   @map("vehicle_number")
+  vehicleDetails       String?   @map("vehicle_details")
+  drivingLicenseNumber String?   @map("driving_license_number")
+  licenseNumber        String?   @map("license_number")
+  aadhaarNumber        String?   @map("aadhaar_number")
+  profilePhoto         String?   @map("profile_photo")
+  profilePhotoUrl      String?   @map("profile_photo_url")
+  vehiclePhotoUrl      String?   @map("vehicle_photo_url")
+  licensePhotoUrl      String?   @map("license_photo_url")
+  vehicleRcUrl         String?   @map("vehicle_rc_url")
+  insuranceDocUrl      String?   @map("insurance_doc_url")
+  city                 String?
+  state                String?
+  address              String?
+  isVerified           Boolean   @default(false) @map("is_verified")
+  isOnline             Boolean   @default(false) @map("is_online")
+  isAvailable          Boolean   @default(false) @map("is_available")
+  status               String    @default("pending")
+  approvalStatus       String    @default("approved") @map("approval_status")
+  rating               Float     @default(5.0)
+  walletBalance        Float     @default(0.0) @map("wallet_balance")
+  currentLat           Float?    @map("current_lat")
+  currentLng           Float?    @map("current_lng")
+  bankAccountName      String?   @map("bank_account_name")
+  bankAccountNumber    String?   @map("bank_account_number")
+  bankIfsc             String?   @map("bank_ifsc")
+  upiId                String?   @map("upi_id")
+  aadhaarLast4         String?   @map("aadhaar_last4")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([status])
+  @@index([isOnline])
+  @@index([isAvailable])
+  @@map("delivery_partners")
+}
+
+
 
 

@@ -1405,6 +1405,55 @@ CREATE INDEX IF NOT EXISTS idx_dispatch_history_order ON dispatch_history(order_
 CREATE INDEX IF NOT EXISTS idx_dispatch_history_partner ON dispatch_history(assigned_partner_id);
 CREATE INDEX IF NOT EXISTS idx_dispatch_history_created ON dispatch_history(created_at DESC);
 
+-- delivery_partners table
+CREATE TABLE IF NOT EXISTS delivery_partners (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    full_name VARCHAR(255),
+    email VARCHAR(255) UNIQUE,
+    phone_number VARCHAR(20) UNIQUE,
+    password_hash VARCHAR(255),
+    vehicle_type VARCHAR(50),
+    vehicle_number VARCHAR(50),
+    vehicle_details TEXT,
+    driving_license_number VARCHAR(100),
+    license_number VARCHAR(100),
+    aadhaar_number VARCHAR(50),
+    profile_photo TEXT,
+    profile_photo_url TEXT,
+    vehicle_photo_url TEXT,
+    license_photo_url TEXT,
+    vehicle_rc_url TEXT,
+    insurance_doc_url TEXT,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    address TEXT,
+    is_verified BOOLEAN DEFAULT FALSE,
+    is_online BOOLEAN DEFAULT FALSE,
+    is_available BOOLEAN DEFAULT FALSE,
+    status VARCHAR(30) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'suspended')),
+    approval_status VARCHAR(20) DEFAULT 'approved',
+    rating DECIMAL(3,2) DEFAULT 5.0,
+    wallet_balance DECIMAL(10,2) DEFAULT 0,
+    current_lat NUMERIC(10,7),
+    current_lng NUMERIC(10,7),
+    bank_account_name TEXT,
+    bank_account_number TEXT,
+    bank_ifsc TEXT,
+    upi_id TEXT,
+    aadhaar_last4 VARCHAR(4),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+DROP TRIGGER IF EXISTS update_delivery_partners_modtime ON delivery_partners;
+CREATE TRIGGER update_delivery_partners_modtime BEFORE UPDATE ON delivery_partners FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+CREATE INDEX IF NOT EXISTS idx_delivery_partners_user_id ON delivery_partners(user_id);
+CREATE INDEX IF NOT EXISTS idx_delivery_partners_status ON delivery_partners(status);
+CREATE INDEX IF NOT EXISTS idx_delivery_partners_online ON delivery_partners(is_online);
+CREATE INDEX IF NOT EXISTS idx_delivery_partners_available ON delivery_partners(is_available);
+
+
 
 
 

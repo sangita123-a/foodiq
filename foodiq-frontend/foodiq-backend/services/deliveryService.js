@@ -3,6 +3,7 @@ const { pool } = require('../config/db');
 const generateToken = require('../utils/generateToken');
 const { issueOtp, verifyOtp } = require('./otpService');
 const { log } = require('../utils/logger');
+const deliveryModel = require('../models/deliveryModel');
 
 const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS || 12);
 
@@ -54,7 +55,9 @@ const registerPartner = async (partnerData) => {
 
   // 1. Check duplicate Email
   const existingEmail = await pool.query(
-    'SELECT id FROM delivery_partners WHERE LOWER(email) = $1',
+    `SELECT dp.id FROM delivery_partners dp
+     LEFT JOIN users u ON u.id = dp.user_id
+     WHERE LOWER(COALESCE(dp.email, u.email)) = $1`,
     [email]
   );
   if (existingEmail.rows.length > 0) {
@@ -65,7 +68,9 @@ const registerPartner = async (partnerData) => {
 
   // 2. Check duplicate Phone
   const existingPhone = await pool.query(
-    'SELECT id FROM delivery_partners WHERE phone_number = $1',
+    `SELECT dp.id FROM delivery_partners dp
+     LEFT JOIN users u ON u.id = dp.user_id
+     WHERE COALESCE(dp.phone_number, u.phone_number) = $1`,
     [phone_number]
   );
   if (existingPhone.rows.length > 0) {
@@ -76,7 +81,7 @@ const registerPartner = async (partnerData) => {
 
   // 3. Check duplicate Driving License
   const existingDl = await pool.query(
-    'SELECT id FROM delivery_partners WHERE LOWER(driving_license_number) = $1',
+    `SELECT id FROM delivery_partners WHERE LOWER(COALESCE(driving_license_number, license_number)) = $1`,
     [driving_license_number.toLowerCase()]
   );
   if (existingDl.rows.length > 0) {
@@ -88,18 +93,18 @@ const registerPartner = async (partnerData) => {
   // 4. Hash password with bcrypt
   const password_hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
-  // 5. Insert into delivery_partners (status='pending', is_verified=false, is_online=false)
+  // 5. Insert into delivery_partners (status='pending', is_verified=false, is_online=false, is_available=false)
   const { rows } = await pool.query(
     `INSERT INTO delivery_partners (
       full_name, email, phone_number, password_hash,
-      vehicle_type, vehicle_number, driving_license_number, aadhaar_number,
+      vehicle_type, vehicle_number, driving_license_number, license_number, aadhaar_number,
       state, city, address, profile_photo,
-      is_verified, is_online, status, rating, wallet_balance
+      is_verified, is_online, is_available, status, approval_status, rating, wallet_balance
     ) VALUES (
       $1, $2, $3, $4,
-      $5, $6, $7, $8,
+      $5, $6, $7, $7, $8,
       $9, $10, $11, $12,
-      FALSE, FALSE, 'pending', 5.0, 0
+      FALSE, FALSE, FALSE, 'pending', 'pending', 5.0, 0
     ) RETURNING *`,
     [
       full_name,
@@ -173,11 +178,23 @@ const registerPartner = async (partnerData) => {
  * Authenticate delivery partner via delivery_partners table.
  * Enforces bcrypt match, email verification AND admin approval.
  */
-const loginPartner = async ({ email, password }) => {
+const loginPartner = async ({ email, password, remember_me, rememberMe, meta = {} }) => {
   const cleanEmail = String(email || '').trim().toLowerCase();
 
   const { rows } = await pool.query(
-    `SELECT * FROM delivery_partners WHERE LOWER(email) = $1`,
+    `SELECT dp.*,
+            COALESCE(dp.email, u.email) AS email,
+            COALESCE(dp.password_hash, u.password_hash) AS password_hash,
+            COALESCE(dp.full_name, u.full_name) AS full_name,
+            COALESCE(dp.phone_number, u.phone_number) AS phone_number,
+            COALESCE(dp.status, dp.approval_status, 'pending') AS status,
+            COALESCE(dp.approval_status, dp.status, 'approved') AS approval_status,
+            COALESCE(dp.is_verified, FALSE) AS is_verified,
+            COALESCE(dp.is_online, dp.is_available, FALSE) AS is_online,
+            COALESCE(dp.is_available, dp.is_online, FALSE) AS is_available
+     FROM delivery_partners dp
+     LEFT JOIN users u ON u.id = dp.user_id
+     WHERE LOWER(COALESCE(dp.email, u.email)) = $1`,
     [cleanEmail]
   );
 
@@ -205,22 +222,23 @@ const loginPartner = async ({ email, password }) => {
     throw err;
   }
 
-  // 2. Enforce Admin Approval
-  if (partner.status === 'pending') {
+  // 2. Enforce Admin Approval / Account Status
+  const status = (partner.status || partner.approval_status || 'pending').toLowerCase();
+  if (status === 'pending') {
     log.warn('[delivery:login] Failed login attempt: Account waiting for admin approval', { partnerId: partner.id, email: cleanEmail });
     const err = new Error('Your account is waiting for admin approval.');
     err.status = 403;
     throw err;
   }
 
-  if (partner.status === 'rejected') {
+  if (status === 'rejected') {
     log.warn('[delivery:login] Failed login attempt: Account rejected', { partnerId: partner.id, email: cleanEmail });
     const err = new Error('Your account has been rejected.');
     err.status = 403;
     throw err;
   }
 
-  if (partner.status === 'suspended') {
+  if (status === 'suspended') {
     log.warn('[delivery:login] Failed login attempt: Account suspended', { partnerId: partner.id, email: cleanEmail });
     const err = new Error('Your account has been suspended.');
     err.status = 403;
@@ -228,13 +246,67 @@ const loginPartner = async ({ email, password }) => {
   }
 
   const token = generateToken(partner.id, { role: 'delivery_partner', type: 'delivery_partner' });
+  const { generateRefreshToken } = require('../utils/generateToken');
+  const refreshToken = await generateRefreshToken(partner.user_id || partner.id, meta);
 
   log.info('[delivery:login] Successful login', { partnerId: partner.id, email: cleanEmail });
 
   return {
     partner: sanitizePartner(partner),
     token,
+    refreshToken,
+    rememberMe: Boolean(remember_me || rememberMe),
   };
+};
+
+/**
+ * Refresh Delivery Partner JWT Access Token using Refresh Token.
+ */
+const refreshDeliveryToken = async (refreshTokenInput, meta = {}) => {
+  if (!refreshTokenInput) {
+    const err = new Error('Refresh token is required');
+    err.status = 400;
+    throw err;
+  }
+
+  const { rotateRefreshToken } = require('../utils/generateToken');
+  const { refresh, userId } = await rotateRefreshToken(refreshTokenInput, meta);
+
+  let partner = await deliveryModel.getPartnerByUserId(userId);
+  if (!partner) {
+    partner = await deliveryModel.getPartnerById(userId);
+  }
+
+  if (!partner) {
+    const err = new Error('Delivery partner not found');
+    err.status = 404;
+    throw err;
+  }
+
+  const token = generateToken(partner.id, { role: 'delivery_partner', type: 'delivery_partner' });
+
+  return {
+    token,
+    refreshToken: refresh,
+    partner: sanitizePartner(partner),
+  };
+};
+
+/**
+ * Logout Delivery Partner and revoke refresh token.
+ */
+const logoutPartner = async (partnerId, refreshTokenInput = null) => {
+  if (refreshTokenInput) {
+    try {
+      const crypto = require('crypto');
+      const tokenHash = crypto.createHash('sha256').update(refreshTokenInput).digest('hex');
+      await pool.query('DELETE FROM refresh_tokens WHERE token_hash = $1', [tokenHash]);
+    } catch (err) {
+      log.warn('[delivery:logout] Refresh token deletion skipped', { error: err.message });
+    }
+  }
+  log.info('[delivery:logout] Delivery partner logged out', { partnerId });
+  return { message: 'Logged out successfully' };
 };
 
 /**
@@ -460,6 +532,8 @@ const updateOnlineStatus = async (partnerId, isOnline) => {
 module.exports = {
   registerPartner,
   loginPartner,
+  refreshDeliveryToken,
+  logoutPartner,
   sendDeliveryOtp,
   verifyDeliveryOtp,
   forgotPassword,
@@ -467,3 +541,4 @@ module.exports = {
   getProfile,
   updateOnlineStatus,
 };
+

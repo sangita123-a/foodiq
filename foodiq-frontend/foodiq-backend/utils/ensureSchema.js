@@ -19,37 +19,122 @@ async function ensureSchema() {
     await q(`
       CREATE TABLE IF NOT EXISTS delivery_partners (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        full_name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        phone_number VARCHAR(20) UNIQUE NOT NULL,
-        password_hash VARCHAR(255) NOT NULL,
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        full_name VARCHAR(255),
+        email VARCHAR(255),
+        phone_number VARCHAR(20),
+        password_hash VARCHAR(255),
         vehicle_type VARCHAR(50),
         vehicle_number VARCHAR(50),
+        vehicle_details TEXT,
         driving_license_number VARCHAR(100),
+        license_number VARCHAR(100),
         aadhaar_number VARCHAR(50),
         profile_photo TEXT,
+        profile_photo_url TEXT,
+        vehicle_photo_url TEXT,
+        license_photo_url TEXT,
+        vehicle_rc_url TEXT,
+        insurance_doc_url TEXT,
         city VARCHAR(100),
         state VARCHAR(100),
         address TEXT,
         is_verified BOOLEAN DEFAULT FALSE,
         is_online BOOLEAN DEFAULT FALSE,
+        is_available BOOLEAN DEFAULT FALSE,
         status VARCHAR(30) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'suspended')),
+        approval_status VARCHAR(20) DEFAULT 'approved',
         rating DECIMAL(3,2) DEFAULT 5.0,
         wallet_balance DECIMAL(10,2) DEFAULT 0,
+        current_lat NUMERIC(10,7),
+        current_lng NUMERIC(10,7),
+        bank_account_name TEXT,
+        bank_account_number TEXT,
+        bank_ifsc TEXT,
+        upi_id TEXT,
+        aadhaar_last4 VARCHAR(4),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await q(`CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partners_email ON delivery_partners(email)`);
-    await q(`CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partners_phone ON delivery_partners(phone_number)`);
+
+    // Ensure all columns exist even if delivery_partners was created previously
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES users(id) ON DELETE SET NULL`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS full_name VARCHAR(255)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS email VARCHAR(255)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS phone_number VARCHAR(20)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS vehicle_type VARCHAR(50)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS vehicle_number VARCHAR(50)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS vehicle_details TEXT`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS driving_license_number VARCHAR(100)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS license_number VARCHAR(100)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS aadhaar_number VARCHAR(50)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS profile_photo TEXT`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS profile_photo_url TEXT`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS vehicle_photo_url TEXT`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS license_photo_url TEXT`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS vehicle_rc_url TEXT`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS insurance_doc_url TEXT`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS city VARCHAR(100)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS state VARCHAR(100)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS address TEXT`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS is_online BOOLEAN DEFAULT FALSE`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS is_available BOOLEAN DEFAULT FALSE`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS status VARCHAR(30) DEFAULT 'pending'`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS approval_status VARCHAR(20) DEFAULT 'approved'`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS rating DECIMAL(3,2) DEFAULT 5.0`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS wallet_balance DECIMAL(10,2) DEFAULT 0`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS current_lat NUMERIC(10,7)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS current_lng NUMERIC(10,7)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS bank_account_name TEXT`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS bank_account_number TEXT`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS bank_ifsc TEXT`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS upi_id TEXT`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS aadhaar_last4 VARCHAR(4)`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP`);
+    await q(`ALTER TABLE delivery_partners ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP`);
+
+    // Data sync routines for existing production rows
+    await q(`
+      UPDATE delivery_partners dp
+      SET
+        email = COALESCE(dp.email, u.email),
+        password_hash = COALESCE(dp.password_hash, u.password_hash),
+        full_name = COALESCE(dp.full_name, u.full_name),
+        phone_number = COALESCE(dp.phone_number, u.phone_number)
+      FROM users u
+      WHERE u.id = dp.user_id
+        AND (dp.email IS NULL OR dp.password_hash IS NULL OR dp.full_name IS NULL OR dp.phone_number IS NULL)
+    `);
+    await q(`
+      UPDATE delivery_partners
+      SET
+        driving_license_number = COALESCE(driving_license_number, license_number),
+        license_number = COALESCE(license_number, driving_license_number)
+      WHERE driving_license_number IS NULL OR license_number IS NULL
+    `);
+    await q(`
+      UPDATE delivery_partners
+      SET
+        status = COALESCE(status, approval_status, 'pending'),
+        approval_status = COALESCE(approval_status, status, 'approved')
+    `);
+    await q(`
+      UPDATE delivery_partners
+      SET
+        is_online = COALESCE(is_online, is_available, FALSE),
+        is_available = COALESCE(is_available, is_online, FALSE)
+    `);
+
+    await q(`CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partners_email ON delivery_partners(email) WHERE email IS NOT NULL`);
+    await q(`CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partners_phone ON delivery_partners(phone_number) WHERE phone_number IS NOT NULL`);
     await q(`CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partners_dl ON delivery_partners(driving_license_number) WHERE driving_license_number IS NOT NULL`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_partners_user_id ON delivery_partners(user_id) WHERE user_id IS NOT NULL`);
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_partners_status ON delivery_partners(status)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_partners_online ON delivery_partners(is_online)`);
-    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_assignments_partner_status ON delivery_assignments(delivery_partner_id, status)`);
-    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_assignments_order_status ON delivery_assignments(order_id, status)`);
-    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_earnings_partner_earned ON delivery_earnings(delivery_partner_id, earned_at DESC)`);
-    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_transactions_partner_created ON delivery_transactions(partner_id, created_at DESC)`);
-    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_notifications_partner_unread ON delivery_notifications(partner_id, is_read, created_at DESC)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_partners_available ON delivery_partners(is_available)`);
 
     // ── OTP / SMS / Email tables (must exist before any auth request) ──────────
     await q(`
@@ -744,6 +829,7 @@ async function ensureSchema() {
         closed_at TIMESTAMP WITH TIME ZONE
       )
     `);
+    await q(`ALTER TABLE support_tickets ADD COLUMN IF NOT EXISTS partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE`);
     await q(`CREATE INDEX IF NOT EXISTS idx_support_tickets_partner_id ON support_tickets(partner_id)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_support_tickets_status ON support_tickets(status)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_support_tickets_priority ON support_tickets(priority)`);
@@ -1545,11 +1631,17 @@ async function ensureSchema() {
       CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partner_bank_accounts_primary
         ON delivery_partner_bank_accounts(partner_id) WHERE is_primary = TRUE
     `);
-    // withdrawal_requests.bank_account_id was a loose UUID column with no FK — attach it now.
     await q(`
-      ALTER TABLE withdrawal_requests
-        ADD CONSTRAINT fk_withdrawal_requests_bank_account
-        FOREIGN KEY (bank_account_id) REFERENCES delivery_partner_bank_accounts(id) ON DELETE SET NULL
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'fk_withdrawal_requests_bank_account'
+        ) THEN
+          ALTER TABLE withdrawal_requests
+            ADD CONSTRAINT fk_withdrawal_requests_bank_account
+            FOREIGN KEY (bank_account_id) REFERENCES delivery_partner_bank_accounts(id) ON DELETE SET NULL;
+        END IF;
+      END $$;
     `);
 
     await q(`
@@ -3011,6 +3103,7 @@ async function ensureSchema() {
         resolved_by UUID REFERENCES users(id) ON DELETE SET NULL
       )
     `);
+    await q(`ALTER TABLE fraud_cases ADD COLUMN IF NOT EXISTS partner_id UUID REFERENCES users(id) ON DELETE CASCADE`);
     await q(`CREATE INDEX IF NOT EXISTS idx_fraud_cases_partner ON fraud_cases(partner_id)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_fraud_cases_order ON fraud_cases(order_id)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_fraud_cases_status ON fraud_cases(status)`);
