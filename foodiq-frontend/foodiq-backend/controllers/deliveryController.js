@@ -417,8 +417,8 @@ const getAvailable = async (req, res) => {
     if (!partner) return;
     ok(res, 'Available orders', await deliveryModel.listAvailableOrders(partner.id));
   } catch (error) {
-    log.error('[deliveryController] getAvailable error', { error: error.message });
-    fail(res, 500, 'Server Error', error.message);
+    log.error('[deliveryController] getAvailable error', { error: error.message, stack: error.stack });
+    fail(res, 500, 'Failed to load available orders. Please try again.');
   }
 };
 
@@ -453,8 +453,10 @@ const accept = async (req, res) => {
     const data = await deliveryModel.acceptOrder(req.params.id, partner.id);
     ok(res, 'Order accepted', data);
   } catch (error) {
-    log.error('[deliveryController] accept error', { error: error.message });
-    fail(res, error.status || 500, error.message, error.message);
+    log.error('[deliveryController] accept error', { error: error.message, stack: error.stack });
+    const status = error.status && error.status < 500 ? error.status : 500;
+    const message = status < 500 ? error.message : 'Failed to accept order. Please try again.';
+    fail(res, status, message);
   }
 };
 
@@ -465,8 +467,10 @@ const reject = async (req, res) => {
     const data = await deliveryModel.rejectOrder(req.params.id, partner.id);
     ok(res, 'Order rejected', data);
   } catch (error) {
-    log.error('[deliveryController] reject error', { error: error.message });
-    fail(res, error.status || 500, error.message, error.message);
+    log.error('[deliveryController] reject error', { error: error.message, stack: error.stack });
+    const status = error.status && error.status < 500 ? error.status : 500;
+    const message = status < 500 ? error.message : 'Failed to reject order. Please try again.';
+    fail(res, status, message);
   }
 };
 

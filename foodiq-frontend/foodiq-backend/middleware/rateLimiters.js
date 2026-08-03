@@ -113,6 +113,13 @@ const reviewLimiter = makeLimiter({
   message: 'Too many review submissions. Please try again later.',
 });
 
+const orderActionLimiter = makeLimiter({
+  label: 'order_action',
+  windowMs: 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_ORDER_ACTION_MAX || 20),
+  message: 'Too many order actions. Please slow down.',
+});
+
 const notificationLimiter = makeLimiter({
   label: 'notification',
   windowMs: 60 * 1000,
@@ -138,4 +145,5 @@ module.exports = {
   reviewLimiter,
   notificationLimiter,
   supportLimiter,
+  orderActionLimiter,
 };

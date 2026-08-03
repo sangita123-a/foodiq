@@ -2,6 +2,10 @@ const EVENTS = require('./events');
 const { userRoom, roleRoom, orderRoom, restaurantRoom, deliveryRoom } = require('./rooms');
 const { listOnlineRiders, onlineRiderCount } = require('./presence');
 
+// Available Orders board: an order at/above this value is nudged to partners as "priority".
+// Kept in sync with the same threshold used by deliveryModel's listAvailableOrders scoring.
+const AVAILABLE_ORDERS_PRIORITY_VALUE = Number(process.env.PRIORITY_ORDER_VALUE_THRESHOLD || 500);
+
 let ioInstance = null;
 
 const setIO = (io) => {
@@ -81,6 +85,26 @@ const emitOrderStatus = (order, extras = {}) => {
   });
 
   console.log('[socket:emit]', event, payload.order_id, payload.status);
+
+  // Available Orders board: a "Ready for Pickup" order just became visible to every
+  // online, unassigned delivery partner — nudge them to refetch (and flag if it also
+  // qualifies as a priority order by order value, matching deliveryModel's own threshold).
+  if (event === EVENTS.ORDER_READY && !order.delivery_partner_id) {
+    io.to(roleRoom('delivery_partner')).emit(EVENTS.DELIVERY_NEW_ORDER, payload);
+    if (payload.total_amount != null && Number(payload.total_amount) >= AVAILABLE_ORDERS_PRIORITY_VALUE) {
+      io.to(roleRoom('delivery_partner')).emit(EVENTS.DELIVERY_PRIORITY_ORDER, payload);
+    }
+  }
+
+  // An order was cancelled or otherwise updated while still sitting unassigned on the
+  // Available Orders board — tell every partner watching the board to drop/refresh it.
+  if (!order.delivery_partner_id && !extras.delivery_partner_id) {
+    if (event === EVENTS.ORDER_CANCELLED) {
+      io.to(roleRoom('delivery_partner')).emit(EVENTS.DELIVERY_ORDER_CANCELLED, payload);
+    } else if (event !== EVENTS.ORDER_READY) {
+      io.to(roleRoom('delivery_partner')).emit(EVENTS.DELIVERY_ORDER_UPDATED, payload);
+    }
+  }
 
   // Trigger Analytics auto-update if delivery partner is involved
   const partnerId = extras.delivery_partner_id || order.delivery_partner_id || order.driver_id;
@@ -519,6 +543,23 @@ const emitSyncFailed = (partnerId, data = {}) => {
   io.to(roleRoom('admin')).emit(EVENTS.DELIVERY_SYNC_FAILED, payload);
 };
 
+/** Available Orders board: order was claimed — tell every other browsing partner to drop it. */
+const emitDeliveryOrderAccepted = ({ order_id, delivery_partner_id }) => {
+  const io = getIO();
+  if (!io || !order_id) return;
+  const payload = { order_id, delivery_partner_id, at: new Date().toISOString() };
+  io.to(roleRoom('delivery_partner')).emit(EVENTS.DELIVERY_ORDER_ACCEPTED, payload);
+};
+
+/** Available Orders board: an offered assignment auto-timed-out — tell the offered partner to drop it. */
+const emitDeliveryOrderExpired = ({ order_id, partner_id }) => {
+  const io = getIO();
+  if (!io || !order_id) return;
+  const payload = { order_id, partner_id, at: new Date().toISOString() };
+  if (partner_id) io.to(deliveryRoom(partner_id)).emit(EVENTS.DELIVERY_ORDER_EXPIRED, payload);
+  io.to(roleRoom('delivery_partner')).emit(EVENTS.DELIVERY_ORDER_EXPIRED, payload);
+};
+
 const emitDispatchNewOrder = (data = {}) => {
   const io = getIO();
   if (!io) return;
@@ -593,6 +634,8 @@ module.exports = {
   emitDispatchNewOrder,
   emitDispatchAssigned,
   emitDispatchReassigned,
+  emitDeliveryOrderAccepted,
+  emitDeliveryOrderExpired,
   EVENTS,
 };
 

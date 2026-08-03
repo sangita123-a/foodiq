@@ -1,9 +1,18 @@
 const { pool } = require('../config/db');
 const { createNotification } = require('./notificationModel');
+const { haversineDistanceMeters, isPointInZone, isValidCoordinate } = require('../services/geoZoneService');
 
 const ASSIGNMENT_EXPIRE_SECONDS = 120;
 const BASE_DELIVERY_FEE = 40;
 const INCENTIVE_BONUS = 25;
+
+// Available Orders board tuning (real, deterministic, DB-derived — no randomness/mock data).
+const PRIORITY_ORDER_VALUE_THRESHOLD = Number(process.env.PRIORITY_ORDER_VALUE_THRESHOLD || 500);
+const PRIORITY_ORDER_AGE_MINUTES = Number(process.env.PRIORITY_ORDER_AGE_MINUTES || 10);
+const PRIORITY_BONUS_EXTRA = Number(process.env.PRIORITY_ORDER_BONUS || 15);
+const EXPRESS_PREP_MAX_MINUTES = Number(process.env.EXPRESS_PREP_MAX_MINUTES || 20);
+const AVG_RIDER_SPEED_KMH = Number(process.env.AVG_RIDER_SPEED_KMH || 22);
+const DEFAULT_MAX_ACTIVE_ORDERS_PER_PARTNER = Number(process.env.MAX_ACTIVE_ORDERS_PER_PARTNER || 2);
 
 const getPartnerByUserId = async (userId) => {
   const { rows } = await pool.query(
@@ -25,16 +34,25 @@ const getPartnerByUserId = async (userId) => {
 };
 
 const expireStaleAssignments = async () => {
-  await pool.query(
+  const { rows } = await pool.query(
     `UPDATE delivery_assignments
      SET status = 'expired', updated_at = CURRENT_TIMESTAMP
      WHERE status = 'offered'
        AND (
          (expires_at IS NOT NULL AND expires_at < CURRENT_TIMESTAMP)
          OR (expires_at IS NULL AND offered_at < CURRENT_TIMESTAMP - make_interval(secs => $1))
-       )`,
+       )
+     RETURNING order_id, delivery_partner_id`,
     [ASSIGNMENT_EXPIRE_SECONDS]
   );
+  if (rows.length > 0) {
+    try {
+      const { emitDeliveryOrderExpired } = require('../socket/emitters');
+      rows.forEach((r) => emitDeliveryOrderExpired({ order_id: r.order_id, partner_id: r.delivery_partner_id }));
+    } catch {
+      /* non-blocking */
+    }
+  }
 };
 
 const getDashboard = async (partnerId) => {
@@ -123,10 +141,12 @@ const orderDetailSelect = `
     o.delivery_fee,
     o.delivery_instructions,
     o.created_at,
+    o.updated_at,
     o.user_id,
     o.restaurant_id,
     o.delivery_partner_id,
     o.assigned_at,
+    p.method AS payment_method,
     r.name AS restaurant_name,
     r.address AS restaurant_address,
     r.phone AS restaurant_phone,
@@ -192,6 +212,7 @@ const formatOrder = (row) => {
     order_id: row.id,
     order_status: row.order_status,
     payment_status: row.payment_status,
+    payment_method: row.payment_method === 'cod' ? 'cod' : 'online',
     delivery_partner_id: row.delivery_partner_id,
     assigned_at: row.assigned_at,
     assignment_id: row.assignment_id,
@@ -215,15 +236,99 @@ const formatOrder = (row) => {
   };
 };
 
+/**
+ * Formats an available-order row using the partner's live GPS (for real distance/ETA)
+ * and their assigned delivery zones (for priority scoring). Kept separate from the
+ * generic `formatOrder` so assigned-order/order-detail responses are untouched.
+ */
+const formatAvailableOrder = (row, partnerLoc, zones) => {
+  const base = formatOrder(row);
+
+  let distanceKm = null;
+  if (
+    partnerLoc &&
+    isValidCoordinate(partnerLoc.lat, partnerLoc.lng) &&
+    isValidCoordinate(base.restaurant.lat, base.restaurant.lng)
+  ) {
+    distanceKm =
+      Math.round(
+        (haversineDistanceMeters(partnerLoc.lat, partnerLoc.lng, base.restaurant.lat, base.restaurant.lng) / 1000) *
+          10
+      ) / 10;
+  }
+
+  const prepMin = Number(row.est_prep_min || 30);
+  const travelMin = distanceKm != null ? Math.round((distanceKm / AVG_RIDER_SPEED_KMH) * 60) : null;
+  const etaMin = travelMin != null ? prepMin + travelMin : prepMin;
+
+  const ageMinutes = row.updated_at ? (Date.now() - new Date(row.updated_at).getTime()) / 60000 : 0;
+
+  let matchedZone = null;
+  if (Array.isArray(zones) && zones.length > 0) {
+    matchedZone = zones.find((z) => isPointInZone(base.restaurant.lat, base.restaurant.lng, z)) || null;
+  }
+
+  const isPriority =
+    base.total_amount >= PRIORITY_ORDER_VALUE_THRESHOLD ||
+    ageMinutes >= PRIORITY_ORDER_AGE_MINUTES ||
+    Number(matchedZone?.priority || 0) > 0;
+  const isExpress = prepMin <= EXPRESS_PREP_MAX_MINUTES;
+  const bonus = isPriority ? INCENTIVE_BONUS + PRIORITY_BONUS_EXTRA : INCENTIVE_BONUS;
+
+  return {
+    ...base,
+    distance_km: distanceKm,
+    distance: distanceKm != null ? `${distanceKm} km` : 'Distance unavailable',
+    estimated_delivery_time: `${etaMin} mins`,
+    estimated_delivery_minutes: etaMin,
+    bonus,
+    estimated_earnings: base.delivery_fee + bonus,
+    is_priority: isPriority,
+    is_express: isExpress,
+    zone_id: matchedZone?.id || null,
+    zone_name: matchedZone?.name || null,
+    ready_since: row.updated_at,
+  };
+};
+
+/**
+ * Available Orders board — the self-service pull list a delivery partner browses to
+ * accept ready-for-pickup orders. Enforces: partner online, verified, approved (not
+ * suspended/pending) [Step 8]; restaurant preparation complete (status is exactly
+ * "Ready for Pickup" — NOT "Preparing"/"Accepted"); zone-restricted when the partner
+ * has assigned zones (falls back to unrestricted for partners with none, for backward
+ * compatibility); never returns orders another partner already has an active claim on.
+ */
 const listAvailableOrders = async (partnerId) => {
   await expireStaleAssignments();
+
+  const { rows: partnerRows } = await pool.query(
+    `SELECT id, current_lat, current_lng,
+            COALESCE(is_online, is_available, FALSE) AS is_online,
+            COALESCE(is_verified, FALSE) AS is_verified,
+            LOWER(COALESCE(approval_status, status, 'pending')) AS approval_status
+     FROM delivery_partners WHERE id = $1`,
+    [partnerId]
+  );
+  const partner = partnerRows[0];
+  if (!partner) return [];
+
+  // Business rules: online, verified, and approved (i.e. not suspended/pending) only.
+  if (!partner.is_online || !partner.is_verified || partner.approval_status !== 'approved') {
+    return [];
+  }
+
+  const { rows: zoneRows } = await pool.query(
+    `SELECT z.* FROM delivery_zones z
+     JOIN delivery_partner_zones dpz ON dpz.zone_id = z.id
+     WHERE dpz.partner_id = $1 AND z.is_active = TRUE`,
+    [partnerId]
+  );
+
   const { rows } = await pool.query(
     `${orderDetailSelect}
-     WHERE (
-       LOWER(o.status) IN ('ready_for_pickup', 'ready for pickup', 'preparing', 'paid', 'accepted')
-       OR LOWER(COALESCE(o.payment_status, p.status, 'paid')) IN ('paid', 'completed')
-     )
-       AND (o.delivery_partner_id IS NULL)
+     WHERE o.status = 'Ready for Pickup'
+       AND o.delivery_partner_id IS NULL
        AND NOT EXISTS (
          SELECT 1 FROM delivery_assignments x
          WHERE x.order_id = o.id
@@ -232,7 +337,27 @@ const listAvailableOrders = async (partnerId) => {
      ORDER BY o.created_at ASC
      LIMIT 50`
   );
-  return rows.map(formatOrder);
+
+  const partnerLoc =
+    partner.current_lat != null && partner.current_lng != null
+      ? { lat: Number(partner.current_lat), lng: Number(partner.current_lng) }
+      : null;
+
+  const formatted = rows
+    .map((row) => formatAvailableOrder(row, partnerLoc, zoneRows))
+    // Partner is zone-restricted (has at least one assigned zone) — only show orders
+    // whose restaurant falls inside one of those zones.
+    .filter((order) => zoneRows.length === 0 || order.zone_id);
+
+  formatted.sort((a, b) => {
+    if (a.is_priority !== b.is_priority) return a.is_priority ? -1 : 1;
+    const aDist = a.distance_km ?? Infinity;
+    const bDist = b.distance_km ?? Infinity;
+    if (aDist !== bDist) return aDist - bDist;
+    return new Date(a.created_at) - new Date(b.created_at);
+  });
+
+  return formatted;
 };
 
 const listAssignedOrders = async (partnerId) => {
@@ -346,16 +471,68 @@ const acceptOrder = async (orderId, partnerId) => {
   await assertPartnerKycVerified(partnerId);
 
   const client = await pool.connect();
-  let updatedOrder = null;
   try {
     await client.query('BEGIN');
 
+    // Lock the partner row first (consistent lock ordering with the order-row lock below
+    // avoids deadlocks) — this also serializes concurrent accept attempts BY THIS PARTNER
+    // across different orders, so the max-active-orders cap check below is race-free.
+    const partnerRes = await client.query(
+      `SELECT id, current_lat, current_lng,
+              COALESCE(is_online, is_available, FALSE) AS is_online,
+              COALESCE(is_verified, FALSE) AS is_verified,
+              LOWER(COALESCE(approval_status, status, 'pending')) AS approval_status
+       FROM delivery_partners WHERE id = $1 FOR UPDATE`,
+      [partnerId]
+    );
+    const partnerRow = partnerRes.rows[0];
+    if (!partnerRow) {
+      await client.query('ROLLBACK');
+      throw Object.assign(new Error('Delivery partner not found'), { status: 404 });
+    }
+    if (!partnerRow.is_online) {
+      await client.query('ROLLBACK');
+      throw Object.assign(new Error('Go online to accept orders.'), { status: 403 });
+    }
+    if (!partnerRow.is_verified || partnerRow.approval_status !== 'approved') {
+      await client.query('ROLLBACK');
+      throw Object.assign(new Error('Your account is not verified/approved to accept orders yet.'), { status: 403 });
+    }
+
+    const activeCountRes = await client.query(
+      `SELECT COUNT(*)::int AS total FROM orders
+       WHERE delivery_partner_id = $1
+         AND id != $2
+         AND status NOT IN ('delivered', 'cancelled', 'rejected')`,
+      [partnerId, orderId]
+    );
+    let maxActive = DEFAULT_MAX_ACTIVE_ORDERS_PER_PARTNER;
+    try {
+      const rulesRes = await client.query(
+        `SELECT max_active_orders_per_partner FROM dispatch_rules WHERE is_active = TRUE ORDER BY updated_at DESC LIMIT 1`
+      );
+      if (rulesRes.rows[0]?.max_active_orders_per_partner != null) {
+        maxActive = Number(rulesRes.rows[0].max_active_orders_per_partner);
+      }
+    } catch {
+      /* dispatch_rules not provisioned yet — fall back to default cap */
+    }
+    if (activeCountRes.rows[0].total >= maxActive) {
+      await client.query('ROLLBACK');
+      throw Object.assign(
+        new Error(`You already have ${maxActive} active order(s). Complete or hand off an order before accepting another.`),
+        { status: 409 }
+      );
+    }
+
     // Lock the target order row to prevent concurrent claims
     const orderRes = await client.query(
-      `SELECT id, status, delivery_partner_id, restaurant_id, total_amount, user_id
-       FROM orders
-       WHERE id = $1
-       FOR UPDATE`,
+      `SELECT o.id, o.status, o.delivery_partner_id, o.restaurant_id, o.total_amount, o.user_id,
+              r.current_lat AS restaurant_lat, r.current_lng AS restaurant_lng
+       FROM orders o
+       LEFT JOIN restaurants r ON r.id = o.restaurant_id
+       WHERE o.id = $1
+       FOR UPDATE OF o`,
       [orderId]
     );
 
@@ -372,6 +549,30 @@ const acceptOrder = async (orderId, partnerId) => {
       const err = new Error('Order is no longer available or already accepted by another delivery partner');
       err.status = 409;
       throw err;
+    }
+
+    // Re-validate zone eligibility server-side (defense in depth — the available-orders
+    // list already filters by zone, but this closes the gap for stale clients / direct API calls).
+    if (
+      orderRow.restaurant_lat != null &&
+      orderRow.restaurant_lng != null &&
+      isValidCoordinate(orderRow.restaurant_lat, orderRow.restaurant_lng)
+    ) {
+      const { rows: zoneRows } = await client.query(
+        `SELECT z.* FROM delivery_zones z
+         JOIN delivery_partner_zones dpz ON dpz.zone_id = z.id
+         WHERE dpz.partner_id = $1 AND z.is_active = TRUE`,
+        [partnerId]
+      );
+      if (zoneRows.length > 0) {
+        const inZone = zoneRows.some((z) =>
+          isPointInZone(Number(orderRow.restaurant_lat), Number(orderRow.restaurant_lng), z)
+        );
+        if (!inZone) {
+          await client.query('ROLLBACK');
+          throw Object.assign(new Error('This order is outside your assigned delivery zone.'), { status: 403 });
+        }
+      }
     }
 
     // Update order with delivery_partner_id, status = 'assigned', assigned_at = CURRENT_TIMESTAMP
@@ -435,6 +636,13 @@ const acceptOrder = async (orderId, partnerId) => {
     throw err;
   } finally {
     client.release();
+  }
+
+  try {
+    const { emitDeliveryOrderAccepted } = require('../socket/emitters');
+    emitDeliveryOrderAccepted({ order_id: orderId, delivery_partner_id: partnerId });
+  } catch {
+    /* non-blocking */
   }
 
   try {

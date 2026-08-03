@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { mutate } from "swr";
 import {
@@ -17,6 +17,12 @@ import {
   Store,
   User,
   ExternalLink,
+  Zap,
+  Star,
+  Wallet,
+  CreditCard,
+  SlidersHorizontal,
+  WifiOff,
 } from "lucide-react";
 import DeliveryShell from "@/components/delivery/DeliveryShell";
 import {
@@ -31,10 +37,40 @@ import {
   type DeliveryOrder,
 } from "@/services/deliveryApi";
 
+type SortKey = "nearest" | "earnings" | "newest" | "oldest";
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "nearest", label: "Nearest" },
+  { value: "earnings", label: "Highest Earnings" },
+  { value: "newest", label: "Newest" },
+  { value: "oldest", label: "Oldest" },
+];
+
+type QuickFilter = "priority" | "express" | "cod" | "online";
+
+const QUICK_FILTERS: { value: QuickFilter; label: string }[] = [
+  { value: "priority", label: "Priority" },
+  { value: "express", label: "Express" },
+  { value: "cod", label: "COD" },
+  { value: "online", label: "Online Paid" },
+];
+
+const PULL_THRESHOLD = 70;
+
 export default function DeliveryOrdersPage() {
   const { data: dashboard } = useDeliveryDashboard();
-  const { data: assigned, isLoading: isLoadingAssigned } = useAssignedOrders();
-  const { data: available, isLoading: isLoadingAvailable } = useAvailableOrders();
+  const {
+    data: assigned,
+    isLoading: isLoadingAssigned,
+    error: assignedError,
+    mutate: mutateAssigned,
+  } = useAssignedOrders();
+  const {
+    data: available,
+    isLoading: isLoadingAvailable,
+    error: availableError,
+    mutate: mutateAvailable,
+  } = useAvailableOrders();
 
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -42,15 +78,44 @@ export default function DeliveryOrdersPage() {
   const [activeTab, setActiveTab] = useState<"available" | "assigned">("available");
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [sortBy, setSortBy] = useState<SortKey>("nearest");
+  const [activeFilters, setActiveFilters] = useState<Set<QuickFilter>>(new Set());
+  const [restaurantFilter, setRestaurantFilter] = useState("");
+  const [zoneFilter, setZoneFilter] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Pull-to-refresh (mobile)
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const pullStartY = useRef<number | null>(null);
+  const [pullDistance, setPullDistance] = useState(0);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await Promise.all([
       mutate("/api/delivery/dashboard"),
-      mutate("/api/delivery/orders/available"),
-      mutate("/api/delivery/orders/assigned"),
+      mutateAvailable(),
+      mutateAssigned(),
     ]);
     setTimeout(() => setIsRefreshing(false), 500);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if ((scrollRef.current?.scrollTop ?? 0) > 0) return;
+    pullStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (pullStartY.current == null) return;
+    const delta = e.touches[0].clientY - pullStartY.current;
+    if (delta > 0) setPullDistance(Math.min(delta, 120));
+  };
+
+  const handleTouchEnd = async () => {
+    if (pullDistance >= PULL_THRESHOLD) {
+      await handleRefresh();
+    }
+    pullStartY.current = null;
+    setPullDistance(0);
   };
 
   const handleAcceptOrder = async (orderId: string) => {
@@ -70,28 +135,89 @@ export default function DeliveryOrdersPage() {
           ? err.message
           : "Failed to accept order. It may have been claimed by another rider.";
       setErrorMsg(msg);
+      // The order was likely claimed elsewhere or is no longer eligible — refresh the board.
+      await mutateAvailable();
     } finally {
       setAcceptingId(null);
     }
   };
 
-  const availableList = available || [];
+  const availableList = useMemo(() => available || [], [available]);
   const assignedList = assigned || [];
 
-  const filteredAvailable = availableList.filter((order) => {
-    const restName =
-      typeof order.restaurant === "string"
-        ? order.restaurant
-        : order.restaurant_name || order.restaurant?.name || "";
-    const pickup = order.restaurant_address || "";
-    const drop = order.customer_address || order.customer?.address || "";
+  const restaurantOptions = useMemo(() => {
+    const names = new Set<string>();
+    availableList.forEach((o) => {
+      const name = typeof o.restaurant === "string" ? o.restaurant : o.restaurant_name || o.restaurant?.name;
+      if (name) names.add(name);
+    });
+    return Array.from(names).sort();
+  }, [availableList]);
+
+  const zoneOptions = useMemo(() => {
+    const names = new Set<string>();
+    availableList.forEach((o) => {
+      if (o.zone_name) names.add(o.zone_name);
+    });
+    return Array.from(names).sort();
+  }, [availableList]);
+
+  const toggleFilter = (filter: QuickFilter) => {
+    setActiveFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(filter)) next.delete(filter);
+      else next.add(filter);
+      return next;
+    });
+  };
+
+  const filteredAvailable = useMemo(() => {
     const query = searchQuery.toLowerCase();
-    return (
-      restName.toLowerCase().includes(query) ||
-      pickup.toLowerCase().includes(query) ||
-      drop.toLowerCase().includes(query)
-    );
-  });
+    let list = availableList.filter((order) => {
+      const restName =
+        typeof order.restaurant === "string"
+          ? order.restaurant
+          : order.restaurant_name || order.restaurant?.name || "";
+      const pickup = order.restaurant_address || "";
+      const drop = order.customer_address || order.customer?.address || "";
+      const matchesQuery =
+        !query ||
+        restName.toLowerCase().includes(query) ||
+        pickup.toLowerCase().includes(query) ||
+        drop.toLowerCase().includes(query);
+      if (!matchesQuery) return false;
+
+      if (restaurantFilter && restName !== restaurantFilter) return false;
+      if (zoneFilter && order.zone_name !== zoneFilter) return false;
+
+      if (activeFilters.has("priority") && !order.is_priority) return false;
+      if (activeFilters.has("express") && !order.is_express) return false;
+      if (activeFilters.has("cod") && order.payment_method !== "cod") return false;
+      if (activeFilters.has("online") && order.payment_method === "cod") return false;
+
+      return true;
+    });
+
+    list = [...list].sort((a, b) => {
+      switch (sortBy) {
+        case "nearest": {
+          const aD = a.distance_km ?? Infinity;
+          const bD = b.distance_km ?? Infinity;
+          return aD - bD;
+        }
+        case "earnings":
+          return (b.estimated_earnings || 0) - (a.estimated_earnings || 0);
+        case "newest":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "oldest":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        default:
+          return 0;
+      }
+    });
+
+    return list;
+  }, [availableList, searchQuery, restaurantFilter, zoneFilter, activeFilters, sortBy]);
 
   const getRestaurantName = (order: DeliveryOrder) => {
     if (typeof order.restaurant === "string" && order.restaurant) {
@@ -130,7 +256,35 @@ export default function DeliveryOrdersPage() {
 
   return (
     <DeliveryShell title="Orders" online={dashboard?.is_online}>
-      <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      <div
+        ref={scrollRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="space-y-6 max-w-7xl mx-auto pb-12"
+      >
+        {/* Pull-to-refresh indicator (mobile) */}
+        {pullDistance > 0 && (
+          <div
+            className="flex items-center justify-center text-primary transition-all overflow-hidden"
+            style={{ height: Math.min(pullDistance, 60) }}
+          >
+            <RefreshCw
+              className={`w-5 h-5 ${pullDistance >= PULL_THRESHOLD ? "animate-spin" : ""}`}
+              style={{ transform: `rotate(${pullDistance * 3}deg)` }}
+            />
+          </div>
+        )}
+
+        {dashboard && !dashboard.is_online && (
+          <div className="bg-amber-500/10 border border-amber-500/30 text-amber-700 rounded-2xl p-4 flex items-center gap-3 shadow-sm">
+            <WifiOff className="w-5 h-5 shrink-0" />
+            <p className="text-sm font-semibold">
+              You&apos;re offline. Go online from your dashboard to see and accept available orders.
+            </p>
+          </div>
+        )}
+
         {/* Top Notification Banner */}
         {errorMsg && (
           <div className="bg-red-500/10 border border-red-500/30 text-red-600 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm animate-in fade-in">
@@ -186,6 +340,25 @@ export default function DeliveryOrdersPage() {
               />
             </div>
 
+            {/* Filters toggle */}
+            <button
+              onClick={() => setShowFilters((v) => !v)}
+              className={`px-3 py-2 border rounded-xl text-xs font-bold flex items-center gap-2 transition-all shrink-0 active:scale-95 ${
+                showFilters || activeFilters.size > 0 || restaurantFilter || zoneFilter
+                  ? "bg-primary/10 border-primary/30 text-primary"
+                  : "bg-section hover:bg-border/60 text-foreground border-border"
+              }`}
+              title="Filters"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Filters</span>
+              {activeFilters.size > 0 && (
+                <span className="bg-primary text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
+                  {activeFilters.size}
+                </span>
+              )}
+            </button>
+
             {/* Refresh Button */}
             <button
               onClick={handleRefresh}
@@ -200,6 +373,92 @@ export default function DeliveryOrdersPage() {
             </button>
           </div>
         </div>
+
+        {/* Filter Panel */}
+        {showFilters && (
+          <div className="bg-white border border-border rounded-2xl p-5 shadow-sm space-y-4 animate-in fade-in">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-extrabold text-gray-text uppercase tracking-wider mr-1">
+                Sort:
+              </span>
+              {SORT_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setSortBy(opt.value)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    sortBy === opt.value
+                      ? "bg-primary text-white"
+                      : "bg-section text-gray-text hover:text-foreground border border-border"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-extrabold text-gray-text uppercase tracking-wider mr-1">
+                Type:
+              </span>
+              {QUICK_FILTERS.map((f) => (
+                <button
+                  key={f.value}
+                  onClick={() => toggleFilter(f.value)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    activeFilters.has(f.value)
+                      ? "bg-primary text-white"
+                      : "bg-section text-gray-text hover:text-foreground border border-border"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              {restaurantOptions.length > 0 && (
+                <select
+                  value={restaurantFilter}
+                  onChange={(e) => setRestaurantFilter(e.target.value)}
+                  className="bg-section border border-border rounded-lg px-3 py-1.5 text-xs font-bold text-foreground"
+                >
+                  <option value="">All Restaurants</option>
+                  {restaurantOptions.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {zoneOptions.length > 0 && (
+                <select
+                  value={zoneFilter}
+                  onChange={(e) => setZoneFilter(e.target.value)}
+                  className="bg-section border border-border rounded-lg px-3 py-1.5 text-xs font-bold text-foreground"
+                >
+                  <option value="">All Zones</option>
+                  {zoneOptions.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {(activeFilters.size > 0 || restaurantFilter || zoneFilter) && (
+                <button
+                  onClick={() => {
+                    setActiveFilters(new Set());
+                    setRestaurantFilter("");
+                    setZoneFilter("");
+                  }}
+                  className="text-xs font-bold text-primary hover:underline"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Tab Navigation */}
         <div className="flex gap-2 border-b border-border pb-1">
@@ -263,20 +522,49 @@ export default function DeliveryOrdersPage() {
                   </div>
                 ))}
               </div>
+            ) : availableError ? (
+              <div className="bg-white border border-red-200 rounded-2xl p-12 text-center max-w-md mx-auto shadow-sm">
+                <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
+                  <AlertCircle className="w-8 h-8" />
+                </div>
+                <h3 className="text-lg font-black text-foreground">Couldn&apos;t Load Orders</h3>
+                <p className="text-xs text-gray-text mt-1 max-w-xs mx-auto">
+                  Something went wrong while fetching the order feed. Check your connection and try again.
+                </p>
+                <button
+                  onClick={() => mutateAvailable()}
+                  className="mt-5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-all shadow-sm"
+                >
+                  Retry
+                </button>
+              </div>
             ) : filteredAvailable.length === 0 ? (
               <div className="bg-white border border-border rounded-2xl p-12 text-center max-w-md mx-auto shadow-sm">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
                   <ShoppingBag className="w-8 h-8" />
                 </div>
-                <h3 className="text-lg font-black text-foreground">No Available Orders Nearby</h3>
+                <h3 className="text-lg font-black text-foreground">
+                  {availableList.length === 0 ? "No Available Orders Nearby" : "No Orders Match Your Filters"}
+                </h3>
                 <p className="text-xs text-gray-text mt-1 max-w-xs mx-auto">
-                  New pickup requests appear automatically when restaurants finish preparing paid customer orders.
+                  {availableList.length === 0
+                    ? "New pickup requests appear automatically when restaurants finish preparing paid customer orders."
+                    : "Try clearing a filter or searching a broader area."}
                 </p>
                 <button
-                  onClick={handleRefresh}
+                  onClick={
+                    availableList.length === 0
+                      ? handleRefresh
+                      : () => {
+                          setActiveFilters(new Set());
+                          setRestaurantFilter("");
+                          setZoneFilter("");
+                          setSearchQuery("");
+                        }
+                  }
                   className="mt-5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-all shadow-sm"
                 >
-                  Check Again
+                  {availableList.length === 0 ? "Check Again" : "Clear Filters"}
                 </button>
               </div>
             ) : (
@@ -286,18 +574,52 @@ export default function DeliveryOrdersPage() {
                   const pickupAddress = getPickupAddress(order);
                   const dropAddress = getDropAddress(order);
                   const custName = getCustomerName(order);
-                  const estEarnings = order.estimated_earnings || (order.delivery_fee + 25);
+                  const estEarnings = order.estimated_earnings || order.delivery_fee + 25;
                   const isProcessingThis = acceptingId === order.id;
 
                   return (
                     <div
                       key={order.id}
-                      className="bg-white border border-border rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group hover:border-primary/40 relative overflow-hidden"
+                      className={`bg-white border rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group relative overflow-hidden ${
+                        order.is_priority
+                          ? "border-amber-400/60 hover:border-amber-500"
+                          : "border-border hover:border-primary/40"
+                      }`}
                     >
                       {/* Top Accent Gradient Bar */}
-                      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary to-amber-500 opacity-90" />
+                      <div
+                        className={`absolute top-0 left-0 right-0 h-1.5 opacity-90 ${
+                          order.is_priority
+                            ? "bg-gradient-to-r from-amber-500 to-red-500"
+                            : "bg-gradient-to-r from-primary to-amber-500"
+                        }`}
+                      />
 
                       <div className="space-y-4 pt-1">
+                        {/* Badges row */}
+                        {(order.is_priority || order.is_express || order.zone_name) && (
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {order.is_priority && (
+                              <span className="inline-flex items-center gap-1 bg-amber-500/15 text-amber-700 border border-amber-500/30 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase animate-pulse">
+                                <Star className="w-3 h-3 fill-amber-600 text-amber-600" />
+                                Priority
+                              </span>
+                            )}
+                            {order.is_express && (
+                              <span className="inline-flex items-center gap-1 bg-blue-500/15 text-blue-700 border border-blue-500/30 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase">
+                                <Zap className="w-3 h-3 fill-blue-600 text-blue-600" />
+                                Express
+                              </span>
+                            )}
+                            {order.zone_name && (
+                              <span className="inline-flex items-center gap-1 bg-purple-500/10 text-purple-700 border border-purple-500/20 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase">
+                                <MapPin className="w-3 h-3" />
+                                {order.zone_name}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
                         {/* Header: Restaurant & Earnings */}
                         <div className="flex items-start justify-between gap-3">
                           <div>
@@ -312,7 +634,7 @@ export default function DeliveryOrdersPage() {
 
                           <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 px-3 py-1.5 rounded-xl text-right shrink-0">
                             <span className="text-[10px] font-bold uppercase block text-emerald-600 leading-tight">
-                              Earnings
+                              Earnings{order.bonus ? ` (+₹${order.bonus} bonus)` : ""}
                             </span>
                             <span className="text-base font-black tracking-tight">
                               {formatCurrency(estEarnings)}
@@ -329,12 +651,26 @@ export default function DeliveryOrdersPage() {
 
                           <span className="bg-section border border-border px-2.5 py-1 rounded-lg font-bold text-gray-text flex items-center gap-1">
                             <Navigation className="w-3.5 h-3.5 text-primary" />
-                            <span>{order.distance || "3.5 km"}</span>
+                            <span>{order.distance || "Distance unavailable"}</span>
                           </span>
 
                           <span className="bg-section border border-border px-2.5 py-1 rounded-lg font-bold text-gray-text flex items-center gap-1">
                             <Clock className="w-3.5 h-3.5 text-amber-500" />
                             <span>{order.estimated_delivery_time || "25 mins"}</span>
+                          </span>
+
+                          <span className="bg-section border border-border px-2.5 py-1 rounded-lg font-bold text-gray-text flex items-center gap-1">
+                            {order.payment_method === "cod" ? (
+                              <>
+                                <Wallet className="w-3.5 h-3.5 text-orange-500" />
+                                <span>COD</span>
+                              </>
+                            ) : (
+                              <>
+                                <CreditCard className="w-3.5 h-3.5 text-green-600" />
+                                <span>Paid Online</span>
+                              </>
+                            )}
                           </span>
 
                           {order.item_count && (
@@ -433,6 +769,22 @@ export default function DeliveryOrdersPage() {
                     <div className="h-16 bg-section rounded-xl" />
                   </div>
                 ))}
+              </div>
+            ) : assignedError ? (
+              <div className="bg-white border border-red-200 rounded-2xl p-12 text-center max-w-md mx-auto shadow-sm">
+                <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
+                  <AlertCircle className="w-8 h-8" />
+                </div>
+                <h3 className="text-lg font-black text-foreground">Couldn&apos;t Load Assignments</h3>
+                <p className="text-xs text-gray-text mt-1 max-w-xs mx-auto">
+                  Something went wrong while fetching your assignments. Try again.
+                </p>
+                <button
+                  onClick={() => mutateAssigned()}
+                  className="mt-5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-all shadow-sm"
+                >
+                  Retry
+                </button>
               </div>
             ) : assignedList.length === 0 ? (
               <div className="bg-white border border-border rounded-2xl p-12 text-center max-w-md mx-auto shadow-sm">

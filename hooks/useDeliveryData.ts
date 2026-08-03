@@ -63,11 +63,35 @@ export function useDeliveryMe() {
 export function useAvailableOrders() {
   const hasToken = useAuthToken();
   const refreshInterval = useSocketAwareInterval(15000);
-  return useSWR<DeliveryOrder[]>(
+  const { socket, connected } = useSocket();
+
+  const result = useSWR<DeliveryOrder[]>(
     hasToken ? "/api/delivery/orders/available" : null,
     deliveryFetcher,
     { revalidateOnFocus: false, refreshInterval }
   );
+
+  useEffect(() => {
+    if (!socket || !connected) return;
+    const refresh = () => result.mutate();
+    socket.on(SOCKET_EVENTS.DELIVERY_NEW_ORDER, refresh);
+    socket.on(SOCKET_EVENTS.DELIVERY_ORDER_UPDATED, refresh);
+    socket.on(SOCKET_EVENTS.DELIVERY_ORDER_EXPIRED, refresh);
+    socket.on(SOCKET_EVENTS.DELIVERY_ORDER_ACCEPTED, refresh);
+    socket.on(SOCKET_EVENTS.DELIVERY_ORDER_CANCELLED, refresh);
+    socket.on(SOCKET_EVENTS.DELIVERY_PRIORITY_ORDER, refresh);
+    return () => {
+      socket.off(SOCKET_EVENTS.DELIVERY_NEW_ORDER, refresh);
+      socket.off(SOCKET_EVENTS.DELIVERY_ORDER_UPDATED, refresh);
+      socket.off(SOCKET_EVENTS.DELIVERY_ORDER_EXPIRED, refresh);
+      socket.off(SOCKET_EVENTS.DELIVERY_ORDER_ACCEPTED, refresh);
+      socket.off(SOCKET_EVENTS.DELIVERY_ORDER_CANCELLED, refresh);
+      socket.off(SOCKET_EVENTS.DELIVERY_PRIORITY_ORDER, refresh);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket, connected]);
+
+  return result;
 }
 
 export function useAssignedOrders() {

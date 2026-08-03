@@ -5,7 +5,8 @@ const v = require('../validators/deliveryValidator');
 const { protectDelivery } = require('../middleware/deliveryAuth');
 const { protect, authorize } = require('../middleware/authMiddleware');
 const { singleUpload } = require('../middleware/uploadMiddleware');
-const { uploadLimiter, authLimiter, otpLimiter } = require('../middleware/rateLimiters');
+const { uploadLimiter, authLimiter, otpLimiter, orderActionLimiter } = require('../middleware/rateLimiters');
+const { validateUuidParam } = require('../middleware/validateParams');
 
 // Hybrid auth middleware for backward compatibility on legacy endpoints
 const hybridDeliveryAuth = (req, res, next) => {
@@ -93,7 +94,7 @@ router.get('/orders/available', protectDelivery, c.getAvailable);
 router.get('/orders/assigned', protectDelivery, c.getAssigned);
 
 // POST /api/delivery/orders/:id/accept
-router.post('/orders/:id/accept', protectDelivery, c.accept);
+router.post('/orders/:id/accept', protectDelivery, validateUuidParam('id'), orderActionLimiter, c.accept);
 
 // POST /api/delivery/location/update — live GPS ping (Live Delivery Tracking)
 router.post('/location/update', protectDelivery, v.validateLocationUpdate, c.updateLocationDetailed);
@@ -159,7 +160,7 @@ router.put('/availability', c.setAvailability);
 router.put('/location', c.setLocation);
 router.get('/orders/assigned', c.getAssigned);
 router.get('/orders/:id', c.getOrder);
-router.post('/orders/:id/reject', c.reject);
+router.post('/orders/:id/reject', validateUuidParam('id'), orderActionLimiter, c.reject);
 router.put('/orders/:id/status', c.updateStatus);
 router.post('/orders/:id/customer-call', c.notifyCustomerCalling);
 router.get('/orders/:id/route', c.getRoute);

@@ -21,6 +21,14 @@ export const SOCKET_EVENTS = {
   DELIVERY_TRACKING_STOP: "delivery:tracking:stop",
   DELIVERY_ETA_UPDATE: "delivery:eta:update",
 
+  // Available Orders board (broadcast to all online delivery partners)
+  DELIVERY_NEW_ORDER: "delivery:new-order",
+  DELIVERY_ORDER_UPDATED: "delivery:order-updated",
+  DELIVERY_ORDER_EXPIRED: "delivery:order-expired",
+  DELIVERY_ORDER_ACCEPTED: "delivery:order-accepted",
+  DELIVERY_ORDER_CANCELLED: "delivery:order-cancelled",
+  DELIVERY_PRIORITY_ORDER: "delivery:priority-order",
+
   // AI Route Optimization System
   DELIVERY_ROUTE_UPDATE: "delivery:route:update",
   DELIVERY_ROUTE_OPTIMIZED: "delivery:route:optimized",

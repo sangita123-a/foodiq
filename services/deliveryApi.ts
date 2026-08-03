@@ -5,6 +5,7 @@ export type DeliveryOrder = {
   order_id?: string;
   order_status: string;
   payment_status?: string;
+  payment_method?: "cod" | "online";
   delivery_partner_id?: string | null;
   assigned_at?: string | null;
   assignment_id?: string | null;
@@ -14,9 +15,17 @@ export type DeliveryOrder = {
   total_amount: number;
   delivery_fee: number;
   estimated_earnings?: number;
+  bonus?: number;
   item_count?: number;
   distance?: string;
+  distance_km?: number | null;
   estimated_delivery_time?: string;
+  estimated_delivery_minutes?: number;
+  is_priority?: boolean;
+  is_express?: boolean;
+  zone_id?: string | null;
+  zone_name?: string | null;
+  ready_since?: string | null;
   restaurant: {
     id: string;
     name: string;

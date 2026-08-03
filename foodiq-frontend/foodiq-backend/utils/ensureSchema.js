@@ -578,6 +578,22 @@ async function ensureSchema() {
       CREATE INDEX IF NOT EXISTS idx_delivery_assignments_order
         ON delivery_assignments(order_id)
     `);
+    // Composite index for the Available Orders "does this order already have an
+    // active claim?" NOT EXISTS check (filters by order_id AND status together).
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_delivery_assignments_order_status
+        ON delivery_assignments(order_id, status)
+    `);
+    // At most one *committed* (accepted-or-later) assignment per order at a time —
+    // hard DB-level guarantee against duplicate/double acceptance, on top of the
+    // row-locked transaction in deliveryModel.acceptOrder. Deliberately excludes
+    // 'offered' so the Available Orders broadcast/pull model (multiple partners may
+    // see the same order until one truly accepts it) keeps working unchanged.
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_assignments_committed_order
+        ON delivery_assignments(order_id)
+        WHERE status IN ('accepted', 'assigned', 'reached_restaurant', 'picked_up', 'on_the_way')
+    `);
 
     await q(`
       CREATE TABLE IF NOT EXISTS delivery_status_history (
@@ -2896,6 +2912,18 @@ async function ensureSchema() {
     await q(`
       CREATE INDEX IF NOT EXISTS idx_orders_status_created
         ON orders(status, created_at DESC)
+    `);
+    // Available Orders board hot path: "ready, unassigned orders, oldest first".
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_orders_ready_unassigned
+        ON orders(created_at ASC)
+        WHERE status = 'Ready for Pickup' AND delivery_partner_id IS NULL
+    `);
+    // Accept-order max-active-orders-per-partner cap check.
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_orders_partner_active_status
+        ON orders(delivery_partner_id, status)
+        WHERE delivery_partner_id IS NOT NULL
     `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_orders_restaurant_created
