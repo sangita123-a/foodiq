@@ -528,12 +528,22 @@ const forgotPassword = async (email) => {
     log.info('[delivery:forgot-password] OTP email sent successfully', { email: cleanEmail });
   } catch (emailErr) {
     log.error('[delivery:forgot-password] Email dispatch failed', { email: cleanEmail, error: emailErr.message });
+    const err = new Error(emailErr.message || 'Failed to send OTP email via configured email provider.');
+    err.status = emailErr.status || 500;
+    err.code = emailErr.code || 'EMAIL_DISPATCH_FAILED';
+    throw err;
   }
 
-  return {
+  const response = {
     success: true,
     message: 'A 6-digit OTP code has been sent to your email.',
   };
+
+  if (process.env.OTP_EXPOSE_CODE === 'true' && process.env.NODE_ENV !== 'production') {
+    response.debug_otp = otp;
+  }
+
+  return response;
 };
 
 /**

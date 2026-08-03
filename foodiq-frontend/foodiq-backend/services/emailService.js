@@ -36,10 +36,10 @@ const getSmtpHost = () => {
   if (process.env.SMTP_HOST) return process.env.SMTP_HOST.trim();
   if (process.env.EMAIL_HOST) return process.env.EMAIL_HOST.trim();
   const user = getSmtpUser();
-  if (user.includes('gmail.com') || user.includes('googlemail.com')) {
+  if (user && (user.includes('gmail.com') || user.includes('googlemail.com'))) {
     return 'smtp.gmail.com';
   }
-  return 'smtp.gmail.com';
+  return user ? 'smtp.gmail.com' : null;
 };
 
 const getSmtpPort = () => {
@@ -70,15 +70,12 @@ const getFromAddress = () => {
  */
 const provider = () => {
   const configured = String(process.env.EMAIL_PROVIDER || '').toLowerCase().trim();
-
-  // If SMTP or service keys exist and EMAIL_PROVIDER is auto, empty, or default mock, auto-upgrade
-  if (!configured || configured === 'auto' || configured === 'mock') {
-    if (getSmtpHost() || getSmtpUser()) return 'smtp';
-    if (process.env.RESEND_API_KEY) return 'resend';
-    if (process.env.SENDGRID_API_KEY) return 'sendgrid';
-  }
-
   if (configured && configured !== 'auto') return configured;
+
+  if (getSmtpUser() && getSmtpPass()) return 'smtp';
+  if (process.env.RESEND_API_KEY) return 'resend';
+  if (process.env.SENDGRID_API_KEY) return 'sendgrid';
+  if (process.env.MAILGUN_API_KEY) return 'mailgun';
 
   return 'mock';
 };
@@ -564,21 +561,38 @@ const sendEmail = async (opts) => {
 
   try {
     if (mockMode) {
-      const err = new Error(`Email service not configured for provider '${currentProvider}'. Please set required environment variables in Render dashboard.`);
-      err.code = 'EMAIL_SERVICE_NOT_CONFIGURED';
-      log.error('[email] Delivery failed: Email service not configured', {
-        to,
-        subject,
-        template,
-        provider: currentProvider,
-      });
-      void logEmail({
+      if (process.env.NODE_ENV === 'production') {
+        const err = new Error(`Email service not configured for provider '${currentProvider}'. Please set required environment variables in Render dashboard.`);
+        err.code = 'EMAIL_SERVICE_NOT_CONFIGURED';
+        log.error('[email] Delivery failed: Email service not configured', {
+          to,
+          subject,
+          template,
+          provider: currentProvider,
+        });
+        void logEmail({
+          ...baseLog,
+          status: 'failed',
+          provider: 'none',
+          error: err.message,
+        });
+        throw err;
+      }
+
+      console.log('==================================================');
+      console.log('[MOCK EMAIL DELIVERY]');
+      console.log(`  To      : ${to}`);
+      console.log(`  Subject : ${subject}`);
+      console.log(`  Text    : ${text || subject}`);
+      console.log('==================================================');
+      log.info('[email:mock] Mock email dispatched in development', { to, subject });
+      await logEmail({
         ...baseLog,
-        status: 'failed',
-        provider: 'none',
-        error: err.message,
+        status: 'sent',
+        provider: 'mock',
+        provider_message_id: `mock_${Date.now()}`,
       });
-      throw err;
+      return { ok: true, mock: true, id: `mock_${Date.now()}` };
     }
 
     let result;

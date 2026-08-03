@@ -127,13 +127,12 @@ const validateResetPassword = (req, res, next) => {
   const userEmail = String(body.email || '').trim().toLowerCase();
   const otpCode = String(body.code || body.otp || '').trim();
   const newPass = body.new_password || body.newPassword || body.password;
-  const confirmPass = body.confirm_password || body.confirmPassword;
+  const confirmPass = body.confirm_password || body.confirmPassword || newPass;
 
   if (!userEmail) return fail(res, 400, 'Email is required');
   if (!isValidEmail(userEmail)) return fail(res, 400, 'A valid email address is required');
   if (!otpCode) return fail(res, 400, 'OTP code is required');
   if (!newPass) return fail(res, 400, 'New password is required');
-  if (!confirmPass) return fail(res, 400, 'Confirm password is required');
   if (newPass !== confirmPass) return fail(res, 400, 'Passwords do not match');
   if (!isValidPassword(newPass)) return fail(res, 400, 'Password must be at least 8 characters');
 
