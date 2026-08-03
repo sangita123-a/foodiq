@@ -33,6 +33,10 @@ const errorHandler = (err, req, res, _next) => {
     stack: err.stack,
   });
 
+  // TEMP diagnostic — no Render dashboard log access available; remove once
+  // the delivery shift check-in/check-out 500 is root-caused.
+  res.setHeader('X-Debug-Global-Error', String(err?.message || 'unknown').slice(0, 300));
+
   const clientMessage = isDbErr
     ? getClientDatabaseErrorMessage(err)
     : statusCode >= 500
