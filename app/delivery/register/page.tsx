@@ -122,13 +122,8 @@ export default function DeliveryRegisterPage() {
       const res = await api.post("/api/delivery/register", payload);
 
       if (res.data && res.data.success) {
-        showToast(
-          res.data.message || "Registration successful! Please verify your OTP code.",
-          "success"
-        );
-        router.push(
-          `/delivery/verify-otp?email=${encodeURIComponent(form.email.trim().toLowerCase())}`
-        );
+        showToast("Registration successful! You can now sign in.", "success");
+        router.push(`/delivery/login?registered=true`);
         return;
       }
 
