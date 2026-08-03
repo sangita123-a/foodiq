@@ -82,7 +82,7 @@ export default function DeliveryNavigationPage() {
   const eta = liveEta ?? aiRoute?.remainingDurationMin ?? fallbackRoute?.duration_min ?? null;
 
   const stage = String(activeOrder?.assignment_status || activeOrder?.order_status || "").toLowerCase();
-  const pickedUp = ["picked_up", "on_the_way", "out_for_delivery", "near_customer"].some((s) => stage.includes(s));
+  const pickedUp = ["picked_up", "on_the_way", "out_for_delivery"].some((s) => stage.includes(s));
 
   const navigateUrl = useMemo(() => {
     if (fallbackRoute) return pickedUp ? fallbackRoute.google_maps_dropoff_url : fallbackRoute.google_maps_pickup_url;

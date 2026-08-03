@@ -103,7 +103,9 @@ router.post('/location/update', protectDelivery, v.validateLocationUpdate, c.upd
 router.patch('/orders/:id/reached-restaurant', protectDelivery, c.reachedRestaurant);
 router.patch('/orders/:id/picked-up', protectDelivery, c.pickedUp);
 router.patch('/orders/:id/out-for-delivery', protectDelivery, c.outForDelivery);
-router.patch('/orders/:id/delivered', protectDelivery, c.delivered);
+// NOTE: there is intentionally no direct PATCH .../delivered route. The only way to
+// reach 'delivered' is the customer OTP check below — see VALID_NEXT_STATUS in
+// deliveryModel.js for why a direct transition is blocked server-side too.
 router.post('/orders/:id/verify-otp', protectDelivery, c.verifyOrderOtp);
 
 /* ── Wallet & Earnings ────────────────────────────────────────────────────── */
@@ -162,7 +164,6 @@ router.get('/orders/assigned', c.getAssigned);
 router.get('/orders/:id', c.getOrder);
 router.post('/orders/:id/reject', validateUuidParam('id'), orderActionLimiter, c.reject);
 router.put('/orders/:id/status', c.updateStatus);
-router.post('/orders/:id/customer-call', c.notifyCustomerCalling);
 router.get('/orders/:id/route', c.getRoute);
 router.get('/earnings', c.getEarnings);
 router.get('/history', c.getHistory);

@@ -85,7 +85,7 @@ const getDashboard = async (partnerId) => {
     `SELECT COUNT(*)::int AS total
      FROM delivery_assignments
      WHERE delivery_partner_id = $1
-       AND status IN ('offered', 'accepted', 'assigned', 'reached_restaurant', 'picked_up', 'on_the_way', 'near_customer')`,
+       AND status IN ('offered', 'accepted', 'assigned', 'reached_restaurant', 'picked_up', 'out_for_delivery', 'on_the_way')`,
     [partnerId]
   );
 
@@ -366,7 +366,7 @@ const listAssignedOrders = async (partnerId) => {
     `${orderDetailSelect}
      WHERE (da.delivery_partner_id = $1 OR o.delivery_partner_id = $1)
        AND (
-         da.status IN ('offered', 'accepted', 'assigned', 'reached_restaurant', 'picked_up', 'out_for_delivery', 'on_the_way', 'near_customer')
+         da.status IN ('offered', 'accepted', 'assigned', 'reached_restaurant', 'picked_up', 'out_for_delivery', 'on_the_way')
          OR o.status IN ('assigned', 'Accepted', 'Ready for Pickup', 'Reached Restaurant', 'Picked Up', 'Out For Delivery', 'On The Way')
        )
      ORDER BY COALESCE(da.updated_at, o.updated_at) DESC`,
@@ -575,11 +575,14 @@ const acceptOrder = async (orderId, partnerId) => {
       }
     }
 
-    // Update order with delivery_partner_id, status = 'assigned', assigned_at = CURRENT_TIMESTAMP
+    // Update order with delivery_partner_id, assigned_at = CURRENT_TIMESTAMP.
+    // orders.status is intentionally left as 'Ready for Pickup' here — it's the only
+    // customer-facing status accurate at this point, and it's also the only value the
+    // orders_status_check CHECK constraint allows for this phase (no 'assigned' variant
+    // exists in that constraint; writing one throws and rolled back every accept attempt).
     await client.query(
       `UPDATE orders
        SET delivery_partner_id = $1,
-           status = 'assigned',
            assigned_at = CURRENT_TIMESTAMP,
            updated_at = CURRENT_TIMESTAMP
        WHERE id = $2`,
@@ -703,17 +706,18 @@ const STATUS_FLOW = [
   'picked_up',
   'out_for_delivery',
   'on_the_way',
-  'near_customer',
   'delivered',
 ];
 
+// Only values present in the orders_status_check CHECK constraint may be returned here.
+// 'reached_restaurant' has no constraint-legal equivalent — the order stays
+// 'Ready for Pickup' (customer-facing view is unaffected; the assignment/order_tracking
+// rows already record the finer-grained rider-side state).
 const mapToOrderStatus = (status) => {
   if (status === 'picked_up') return 'Picked Up';
-  if (status === 'out_for_delivery') return 'Out For Delivery';
+  if (status === 'out_for_delivery') return 'Out for Delivery';
   if (status === 'on_the_way') return 'On The Way';
-  if (status === 'near_customer') return 'On The Way';
   if (status === 'delivered') return 'Delivered';
-  if (status === 'reached_restaurant') return 'Reached Restaurant';
   return null;
 };
 
@@ -725,7 +729,6 @@ const mapToTrackingStatus = (status) => {
     picked_up: 'Picked Up',
     out_for_delivery: 'Out For Delivery',
     on_the_way: 'On The Way',
-    near_customer: 'Near Customer',
     delivered: 'Delivered',
   };
   return map[status] || status;
@@ -739,7 +742,7 @@ const updateDeliveryStatus = async (orderId, partnerId, status) => {
   const { rows: assignments } = await pool.query(
     `SELECT * FROM delivery_assignments
      WHERE order_id = $1 AND delivery_partner_id = $2
-       AND status IN ('accepted', 'assigned', 'reached_restaurant', 'picked_up', 'on_the_way', 'near_customer')`,
+       AND status IN ('accepted', 'assigned', 'reached_restaurant', 'picked_up', 'out_for_delivery', 'on_the_way')`,
     [orderId, partnerId]
   );
   if (!assignments[0] && status === 'accepted') {
@@ -1148,13 +1151,17 @@ const updatePartnerDocuments = async (userId, data = {}) => {
   return rows[0] || null;
 };
 
+// 'delivered' is deliberately unreachable here — the only legitimate path to Delivered
+// is verifyDeliveryOtp(), which requires the customer's drop-off OTP. Allowing a direct
+// out_for_delivery/on_the_way -> delivered transition would let a rider mark an order
+// delivered (and collect earnings) without ever handing it to the customer.
 const VALID_NEXT_STATUS = {
   assigned: ['reached_restaurant'],
   accepted: ['reached_restaurant'],
   reached_restaurant: ['picked_up'],
   picked_up: ['out_for_delivery', 'on_the_way'],
-  out_for_delivery: ['delivered'],
-  on_the_way: ['delivered'],
+  out_for_delivery: [],
+  on_the_way: [],
 };
 
 const updateDeliveryStatusWithRules = async (orderId, partnerId, targetStatus) => {

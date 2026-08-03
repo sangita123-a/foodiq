@@ -13,7 +13,7 @@ export default function DeliveryRealtimeBridge() {
   const online = Boolean(me?.partner?.is_available);
   const activeOrderId =
     assigned?.find((o) =>
-      ["accepted", "assigned", "reached_restaurant", "picked_up", "on_the_way", "near_customer"].includes(
+      ["accepted", "assigned", "reached_restaurant", "picked_up", "out_for_delivery", "on_the_way"].includes(
         String(o.assignment_status || o.order_status || "").toLowerCase()
       )
     )?.id || null;

@@ -225,7 +225,7 @@ async function computeOptimizedRoute(partnerId, orderIds = [], opts = {}) {
   // 3. Build stop list
   const stops = orderRows.map((o) => {
     const stage = String(o.tracking_status || o.status || '').toLowerCase();
-    const pickedUp = ['picked_up', 'on_the_way', 'out_for_delivery', 'near_customer'].some((s) => stage.includes(s));
+    const pickedUp = ['picked_up', 'on_the_way', 'out_for_delivery'].some((s) => stage.includes(s));
     const target = pickedUp
       ? { lat: Number(o.customer_lat), lng: Number(o.customer_lng) }
       : { lat: Number(o.restaurant_lat), lng: Number(o.restaurant_lng) };

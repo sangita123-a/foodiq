@@ -1,9 +1,9 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 import { mutate } from "swr";
-import { Phone, Navigation } from "lucide-react";
+import { Phone, Navigation, AlertCircle, ShieldCheck } from "lucide-react";
 import DeliveryShell from "@/components/delivery/DeliveryShell";
 import DeliveryMap from "@/components/delivery/DeliveryMap";
 import OrderExpiryCountdown from "@/components/delivery/OrderExpiryCountdown";
@@ -30,6 +30,8 @@ export default function DeliveryOrderDetailPage({
   const { data: dashboard } = useDeliveryDashboard();
   const { data: order, error, isLoading } = useDeliveryOrder(id);
   const { data: route } = useDeliveryRoute(id);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [isActing, setIsActing] = useState(false);
 
   const refresh = () => {
     mutate(`/api/delivery/orders/${id}`);
@@ -42,8 +44,23 @@ export default function DeliveryOrderDetailPage({
     mutate("/api/delivery/history");
   };
 
+  const runAction = async (action: () => Promise<unknown>) => {
+    try {
+      setIsActing(true);
+      setActionError(null);
+      await action();
+      refresh();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Action failed. Please check connectivity and try again.";
+      setActionError(msg);
+    } finally {
+      setIsActing(false);
+    }
+  };
+
   const status = order?.assignment_status || "";
   const next = NEXT_STATUS[status];
+  const awaitingDropoffOtp = status === "out_for_delivery" || status === "on_the_way";
   const navUrl =
     status === "accepted" || status === "reached_restaurant" || status === "assigned"
       ? route?.google_maps_pickup_url || route?.google_maps_url
@@ -145,27 +162,33 @@ export default function DeliveryOrderDetailPage({
               </div>
             )}
 
+            {actionError && (
+              <div className="mb-3 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span className="flex-1">{actionError}</span>
+                <button onClick={() => setActionError(null)} className="font-bold text-red-500 hover:text-red-700">
+                  ×
+                </button>
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-2">
               {(status === "offered" || !status) && (
                 <>
                   <button
                     type="button"
-                    onClick={async () => {
-                      await acceptDeliveryOrder(order.id);
-                      refresh();
-                    }}
-                    className="bg-primary hover:bg-primary-hover text-white font-bold px-4 py-2.5 rounded-xl"
+                    disabled={isActing}
+                    onClick={() => runAction(() => acceptDeliveryOrder(order.id))}
+                    className="bg-primary hover:bg-primary-hover text-white font-bold px-4 py-2.5 rounded-xl disabled:opacity-50"
                   >
                     Accept Order
                   </button>
                   {status === "offered" && (
                     <button
                       type="button"
-                      onClick={async () => {
-                        await rejectDeliveryOrder(order.id);
-                        refresh();
-                      }}
-                      className="border border-border text-gray-text font-bold px-4 py-2.5 rounded-xl"
+                      disabled={isActing}
+                      onClick={() => runAction(() => rejectDeliveryOrder(order.id))}
+                      className="border border-border text-gray-text font-bold px-4 py-2.5 rounded-xl disabled:opacity-50"
                     >
                       Reject
                     </button>
@@ -175,14 +198,21 @@ export default function DeliveryOrderDetailPage({
               {next && status !== "offered" && (
                 <button
                   type="button"
-                  onClick={async () => {
-                    await updateDeliveryStatus(order.id, next);
-                    refresh();
-                  }}
-                  className="bg-primary hover:bg-primary-hover text-white font-bold px-4 py-2.5 rounded-xl"
+                  disabled={isActing}
+                  onClick={() => runAction(() => updateDeliveryStatus(order.id, next))}
+                  className="bg-primary hover:bg-primary-hover text-white font-bold px-4 py-2.5 rounded-xl disabled:opacity-50"
                 >
                   Mark: {STATUS_LABELS[next]}
                 </button>
+              )}
+              {awaitingDropoffOtp && (
+                <Link
+                  href={`/delivery/orders/verify?orderId=${order.id}`}
+                  className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  Enter Delivery OTP
+                </Link>
               )}
               {navUrl && (
                 <a

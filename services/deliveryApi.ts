@@ -332,11 +332,6 @@ export async function outForDeliveryOrder(orderId: string) {
   return res.data.data as DeliveryOrder;
 }
 
-export async function deliverOrder(orderId: string) {
-  const res = await api.patch(`/api/delivery/orders/${orderId}/delivered`);
-  return res.data.data as DeliveryOrder;
-}
-
 export async function verifyDeliveryOrderOtp(orderId: string, otp: string) {
   const res = await api.post(`/api/delivery/orders/${orderId}/verify-otp`, { otp });
   return res.data.data as DeliveryOrder;
@@ -531,22 +526,25 @@ export const STATUS_LABELS: Record<string, string> = {
   accepted: "Accepted",
   reached_restaurant: "Reached Restaurant",
   picked_up: "Food Picked Up",
+  out_for_delivery: "Out For Delivery",
   on_the_way: "On The Way",
-  near_customer: "Near Customer",
   delivered: "Delivered",
   rejected: "Rejected",
   expired: "Expired",
   cancelled: "Cancelled",
 };
 
+// Terminal transition to "delivered" is intentionally absent here — it can only be
+// reached via the customer OTP screen (/delivery/orders/verify), never a generic
+// status PUT. See VALID_NEXT_STATUS in the backend deliveryModel.js.
 export const NEXT_STATUS: Record<string, string | null> = {
   offered: "accepted",
   assigned: "accepted",
   accepted: "reached_restaurant",
   reached_restaurant: "picked_up",
-  picked_up: "on_the_way",
-  on_the_way: "near_customer",
-  near_customer: "delivered",
+  picked_up: "out_for_delivery",
+  out_for_delivery: null,
+  on_the_way: null,
   delivered: null,
 };
 

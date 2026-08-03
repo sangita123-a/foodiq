@@ -523,18 +523,6 @@ const outForDelivery = async (req, res) => {
   }
 };
 
-const delivered = async (req, res) => {
-  try {
-    const partnerId = req.deliveryPartner?.id || req.user?.id;
-    if (!partnerId) return fail(res, 401, 'Unauthorized access.');
-    const data = await deliveryModel.updateDeliveryStatusWithRules(req.params.id, partnerId, 'delivered');
-    return ok(res, 'Delivered status recorded successfully', data);
-  } catch (error) {
-    log.error('[deliveryController] delivered error', { error: error.message });
-    return fail(res, error.status || 500, error.message || 'Failed to update order status.');
-  }
-};
-
 const verifyOrderOtp = async (req, res) => {
   try {
     const partnerId = req.deliveryPartner?.id || req.user?.id;
@@ -611,7 +599,7 @@ const getRoute = async (req, res) => {
     };
 
     const stage = String(order.assignment_status || order.order_status || '').toLowerCase();
-    const pickedUp = ['picked_up', 'on_the_way', 'out_for_delivery', 'near_customer'].some((s) => stage.includes(s));
+    const pickedUp = ['picked_up', 'on_the_way', 'out_for_delivery'].some((s) => stage.includes(s));
     const destination = pickedUp ? customer : restaurant;
 
     const distance_km = Math.round(haversineKm(partnerLocation.lat, partnerLocation.lng, destination.lat, destination.lng) * 100) / 100;
@@ -791,18 +779,6 @@ const getHistory = async (req, res) => {
   }
 };
 
-const notifyCustomerCalling = async (req, res) => {
-  try {
-    const partner = await requirePartnerLegacy(req, res);
-    if (!partner) return;
-    const orderId = req.params.id;
-    ok(res, 'Customer calling alert recorded', { order_id: orderId });
-  } catch (error) {
-    log.error('[deliveryController] notifyCustomerCalling error', { error: error.message });
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
 module.exports = {
   register,
   login,
@@ -838,10 +814,8 @@ module.exports = {
   uploadDocument,
   getDocuments,
   getHistory,
-  notifyCustomerCalling,
   reachedRestaurant,
   pickedUp,
   outForDelivery,
-  delivered,
   verifyOrderOtp,
 };

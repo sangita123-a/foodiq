@@ -29,7 +29,6 @@ import {
   reachRestaurantOrder,
   pickUpOrder,
   outForDeliveryOrder,
-  deliverOrder,
   formatCurrency,
   formatRelativeTime,
   STATUS_LABELS,
@@ -56,7 +55,7 @@ function getStepIndex(status: string): number {
   if (norm === "accepted" || norm === "assigned" || norm === "offered") return 0;
   if (norm === "reached_restaurant" || norm === "ready_for_pickup") return 1;
   if (norm === "picked_up") return 2;
-  if (norm === "out_for_delivery" || norm === "on_the_way" || norm === "near_customer") return 3;
+  if (norm === "out_for_delivery" || norm === "on_the_way") return 3;
   if (norm === "delivered") return 4;
   return 0;
 }
@@ -78,7 +77,7 @@ export default function AssignedOrdersPage() {
     setTimeout(() => setIsRefreshing(false), 500);
   };
 
-  const handleStatusUpdate = async (orderId: string, action: "reached" | "picked" | "out" | "deliver") => {
+  const handleStatusUpdate = async (orderId: string, action: "reached" | "picked" | "out") => {
     try {
       setUpdatingId(orderId);
       setErrorMsg(null);
@@ -91,12 +90,9 @@ export default function AssignedOrdersPage() {
       } else if (action === "picked") {
         updatedOrder = await pickUpOrder(orderId);
         setSuccessMsg("Status updated: Order picked up from restaurant!");
-      } else if (action === "out") {
+      } else {
         updatedOrder = await outForDeliveryOrder(orderId);
         setSuccessMsg("Status updated: Out for delivery to customer!");
-      } else {
-        updatedOrder = await deliverOrder(orderId);
-        setSuccessMsg("Order marked as delivered! Great job!");
       }
 
       await handleRefresh();

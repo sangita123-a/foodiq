@@ -36,7 +36,7 @@ const getActiveOrderIdForPartner = async (partnerId) => {
   const { rows } = await pool.query(
     `SELECT order_id FROM delivery_assignments
      WHERE delivery_partner_id = $1
-       AND status IN ('accepted', 'assigned', 'reached_restaurant', 'picked_up', 'on_the_way', 'near_customer')
+       AND status IN ('accepted', 'assigned', 'reached_restaurant', 'picked_up', 'out_for_delivery', 'on_the_way')
      ORDER BY updated_at DESC
      LIMIT 1`,
     [partnerId]
