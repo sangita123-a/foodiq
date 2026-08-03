@@ -1,9 +1,16 @@
 const { trackError } = require('../services/errorTracker');
 const { log } = require('../utils/logger');
+const { isDatabaseError, logFirstDbError, getClientDatabaseErrorMessage } = require('../config/db');
 
 const errorHandler = (err, req, res, _next) => {
-  const statusCode =
-    err.status || err.statusCode || (res.statusCode !== 200 ? res.statusCode : 500);
+  const isDbErr = isDatabaseError(err);
+  if (isDbErr) {
+    logFirstDbError(err, `errorHandler: ${req.method} ${req.originalUrl}`);
+  }
+
+  const statusCode = isDbErr
+    ? 503
+    : err.status || err.statusCode || (res.statusCode !== 200 ? res.statusCode : 500);
   const isProd = process.env.NODE_ENV === 'production';
 
   trackError({
@@ -19,13 +26,16 @@ const errorHandler = (err, req, res, _next) => {
   }).catch(() => {});
 
   log.error(err.message || 'Unhandled error', {
+    code: err.code,
     request_id: req.requestId,
     path: req.originalUrl,
     status: statusCode,
+    stack: err.stack,
   });
 
-  const clientMessage =
-    statusCode >= 500
+  const clientMessage = isDbErr
+    ? getClientDatabaseErrorMessage(err)
+    : statusCode >= 500
       ? 'Server Error'
       : err.expose === false
         ? 'Request failed'
@@ -33,10 +43,10 @@ const errorHandler = (err, req, res, _next) => {
 
   res.status(statusCode).json({
     success: false,
-    message: isProd && statusCode >= 500 ? 'Server Error' : clientMessage,
+    message: isProd && statusCode >= 500 && !isDbErr ? 'Server Error' : clientMessage,
     error: isProd
       ? { request_id: req.requestId || null }
-      : { stack: err.stack, request_id: req.requestId || null },
+      : { code: err.code, stack: err.stack, request_id: req.requestId || null },
   });
 };
 

@@ -59,6 +59,16 @@ const login = async (req, res) => {
 
     return ok(res, 'Login successful', result);
   } catch (error) {
+    const { isDatabaseError, logFirstDbError, getClientDatabaseErrorMessage } = require('../config/db');
+    if (isDatabaseError(error)) {
+      logFirstDbError(error, 'deliveryController:login');
+      log.error('[deliveryController] Database error during login', {
+        error: error.message,
+        code: error.code,
+        stack: error.stack,
+      });
+      return fail(res, 503, getClientDatabaseErrorMessage(error));
+    }
     log.error('[deliveryController] Login error', { error: error.message });
     return fail(res, error.status || 401, error.message || 'Invalid credentials.');
   }
