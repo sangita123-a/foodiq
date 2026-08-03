@@ -34,7 +34,8 @@ const checkIn = async (req, res) => {
     const result = await shiftService.checkInPartner(partnerId, { shift_id, lat, lng });
     return ok(res, 'Checked into shift successfully', result);
   } catch (err) {
-    logger.error('[shiftController] checkIn error', { error: err.message });
+    logger.error('[shiftController] checkIn error', { error: err.message, stack: err.stack });
+    res.setHeader('X-Debug-Error', String(err?.message || 'unknown').slice(0, 300));
     return fail(res, err.status || 400, err.message || 'Check-in failed', err);
   }
 };
@@ -47,7 +48,8 @@ const checkOut = async (req, res) => {
     const result = await shiftService.checkOutPartner(partnerId, { lat, lng });
     return ok(res, 'Checked out of shift successfully', { log: result });
   } catch (err) {
-    logger.error('[shiftController] checkOut error', { error: err.message });
+    logger.error('[shiftController] checkOut error', { error: err.message, stack: err.stack });
+    res.setHeader('X-Debug-Error', String(err?.message || 'unknown').slice(0, 300));
     return fail(res, err.status || 400, err.message || 'Check-out failed', err);
   }
 };
