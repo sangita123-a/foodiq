@@ -11,6 +11,8 @@ const {
   isPointInCircle,
   isPointInZone,
   distanceToZoneBoundaryMeters,
+  isValidCoordinate,
+  getNearestZone,
 } = require("../../foodiq-frontend/foodiq-backend/services/geoZoneService.js");
 
 describe("Geo-fencing & Delivery Zones Logic", () => {
@@ -72,5 +74,30 @@ describe("Geo-fencing & Delivery Zones Logic", () => {
     // Distance from center 12.9716, 77.5946 to radius 2000m
     const distAtCenter = distanceToZoneBoundaryMeters(12.9716, 77.5946, circleZone);
     assert.strictEqual(Math.round(distAtCenter), 2000);
+  });
+
+  it("validates GPS coordinates and rejects spoofed/out-of-range values", () => {
+    assert.strictEqual(isValidCoordinate(12.9716, 77.5946), true);
+    assert.strictEqual(isValidCoordinate(90, 180), true);
+    assert.strictEqual(isValidCoordinate(-90, -180), true);
+    assert.strictEqual(isValidCoordinate(91, 77.5946), false);
+    assert.strictEqual(isValidCoordinate(12.9716, 181), false);
+    assert.strictEqual(isValidCoordinate(null, 77.5946), false);
+    assert.strictEqual(isValidCoordinate(NaN, 77.5946), false);
+  });
+
+  it("finds the nearest zone among several candidates", () => {
+    const farCircle = { ...circleZone, id: "zone-far", center_latitude: 13.5, center_longitude: 78.2 };
+
+    // Point inside the polygon zone should report 0m distance and select that zone.
+    const insideResult = getNearestZone(12.9750, 77.6000, [farCircle, polygonZone]);
+    assert.strictEqual(insideResult.zone.id, "zone-1");
+    assert.strictEqual(insideResult.distance_meters, 0);
+
+    // Point far from everything should still resolve to the closer of the two zones.
+    const outsideResult = getNearestZone(12.9716, 77.5946, [farCircle, circleZone]);
+    assert.strictEqual(outsideResult.zone.id, "zone-2");
+
+    assert.strictEqual(getNearestZone(12.9716, 77.5946, []), null);
   });
 });

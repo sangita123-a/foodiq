@@ -324,6 +324,66 @@ const emitShiftBreakEnd = ({ shift_log_id, partner_id, break_end, duration_minut
   io.to(roleRoom('admin')).emit(EVENTS.SHIFT_BREAK_END, payload);
 };
 
+/** Rider enters an assigned zone (including "returning" after a prior exit). */
+const emitZoneEnter = ({ partner_id, zone, partner_name }) => {
+  const io = getIO();
+  if (!io) return;
+  const payload = { partner_id, zone, at: new Date().toISOString() };
+  if (partner_id) io.to(deliveryRoom(partner_id)).emit(EVENTS.DELIVERY_ZONE_ENTER, payload);
+  io.to(roleRoom('admin')).emit(EVENTS.DELIVERY_ZONE_ENTER, { ...payload, partner_name });
+};
+
+/** Rider exits all assigned zones. */
+const emitZoneExit = ({ partner_id, distance_meters, nearest_zone, partner_name }) => {
+  const io = getIO();
+  if (!io) return;
+  const payload = { partner_id, distance_meters, nearest_zone, at: new Date().toISOString() };
+  if (partner_id) io.to(deliveryRoom(partner_id)).emit(EVENTS.DELIVERY_ZONE_EXIT, payload);
+  io.to(roleRoom('admin')).emit(EVENTS.DELIVERY_ZONE_EXIT, { ...payload, partner_name });
+};
+
+/** 100m/300m boundary warning while outside an assigned zone. */
+const emitZoneWarning = ({ partner_id, warning_level, distance_meters, nearest_zone }) => {
+  const io = getIO();
+  if (!io) return;
+  const payload = { partner_id, warning_level, distance_meters, nearest_zone, at: new Date().toISOString() };
+  if (partner_id) io.to(deliveryRoom(partner_id)).emit(EVENTS.DELIVERY_ZONE_WARNING, payload);
+};
+
+/** Admin CRUD (create/update/delete) or an auto zone-switch for a rider. */
+const emitZoneChanged = ({ action, zone, zone_id, partner_id }) => {
+  const io = getIO();
+  if (!io) return;
+  const payload = { action, zone, zone_id, partner_id, at: new Date().toISOString() };
+  io.to(roleRoom('admin')).emit(EVENTS.DELIVERY_ZONE_CHANGED, payload);
+  if (partner_id) io.to(deliveryRoom(partner_id)).emit(EVENTS.DELIVERY_ZONE_CHANGED, payload);
+};
+
+/** Zone-scoped GPS tick — coordinates plus live geo-fencing status. */
+const emitZoneGpsUpdate = ({ partner_id, lat, lng, heading, accuracy, in_zone, current_zone_id, distance_to_boundary_meters, orders_eligible }) => {
+  const io = getIO();
+  if (!io) return;
+  const payload = {
+    partner_id, lat, lng, heading, accuracy,
+    in_zone, current_zone_id, distance_to_boundary_meters, orders_eligible,
+    at: new Date().toISOString(),
+  };
+  io.to(roleRoom('admin')).emit(EVENTS.DELIVERY_ZONE_GPS_UPDATE, payload);
+  if (partner_id) io.to(deliveryRoom(partner_id)).emit(EVENTS.DELIVERY_ZONE_GPS_UPDATE, payload);
+};
+
+/** Admin-only alert for zone violations (confirmed exit / suspected GPS spoofing). */
+const emitAdminZoneAlert = ({ partner_id, partner_name, alert_type, zone, distance_meters, message }) => {
+  const io = getIO();
+  if (!io) return;
+  const payload = {
+    partner_id, partner_name, alert_type, zone, distance_meters, message,
+    at: new Date().toISOString(),
+  };
+  io.to(roleRoom('admin')).emit(EVENTS.ADMIN_ZONE_ALERT, payload);
+  io.to(roleRoom('admin')).emit(EVENTS.ADMIN_LIVE, { type: 'zone_alert', ...payload });
+};
+
 const emitEmergencyNew = (emergency = {}) => {
   const io = getIO();
   if (!io) return;
@@ -508,6 +568,12 @@ module.exports = {
   emitShiftUpdated,
   emitShiftBreakStart,
   emitShiftBreakEnd,
+  emitZoneEnter,
+  emitZoneExit,
+  emitZoneWarning,
+  emitZoneChanged,
+  emitZoneGpsUpdate,
+  emitAdminZoneAlert,
   emitEmergencyNew,
   emitEmergencyUpdate,
   emitEmergencyResolved,

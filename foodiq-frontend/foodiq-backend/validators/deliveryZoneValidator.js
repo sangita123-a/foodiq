@@ -14,6 +14,10 @@ const validateCreateZone = [
     const zoneType = req.body.zone_type || 'polygon';
     if (zoneType === 'polygon') {
       if (!val) throw new Error('Polygon geometry is required for polygon zones');
+      const points = Array.isArray(val) ? val : null;
+      if (points && points.length > 0 && points.length < 3) {
+        throw new Error('A polygon needs at least 3 points');
+      }
     }
     return true;
   }),
@@ -29,6 +33,10 @@ const validateCreateZone = [
     .optional()
     .isFloat({ min: 0.01 })
     .withMessage('radius_km must be greater than 0'),
+  body('priority')
+    .optional()
+    .isInt({ min: 0, max: 1000 })
+    .withMessage('priority must be an integer between 0 and 1000'),
   handleValidationErrors,
 ];
 
@@ -49,7 +57,16 @@ const validateUpdateZone = [
   body('radius_km')
     .optional()
     .isFloat({ min: 0.01 }),
+  body('priority')
+    .optional()
+    .isInt({ min: 0, max: 1000 })
+    .withMessage('priority must be an integer between 0 and 1000'),
   body('is_active').optional().isBoolean(),
+  handleValidationErrors,
+];
+
+const validateZoneIdParam = [
+  param('id').isUUID().withMessage('Invalid zone ID'),
   handleValidationErrors,
 ];
 
@@ -65,9 +82,18 @@ const validateRemovePartner = [
   handleValidationErrors,
 ];
 
+const validateNearbyQuery = [
+  query('latitude').optional().isFloat({ min: -90, max: 90 }).withMessage('latitude must be between -90 and 90'),
+  query('longitude').optional().isFloat({ min: -180, max: 180 }).withMessage('longitude must be between -180 and 180'),
+  query('radius_km').optional().isFloat({ min: 0.1, max: 200 }).withMessage('radius_km must be between 0.1 and 200'),
+  handleValidationErrors,
+];
+
 module.exports = {
   validateCreateZone,
   validateUpdateZone,
+  validateZoneIdParam,
   validateAssignPartner,
   validateRemovePartner,
+  validateNearbyQuery,
 };

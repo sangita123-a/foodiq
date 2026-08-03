@@ -135,10 +135,41 @@ function distanceToSegmentMeters(lat, lng, lat1, lng1, lat2, lng2) {
   return Math.hypot(px - projX, py - projY);
 }
 
+// Basic GPS sanity check: rejects NaN, out-of-range, or null/undefined coordinates.
+function isValidCoordinate(lat, lng) {
+  const latNum = Number(lat);
+  const lngNum = Number(lng);
+  if (lat == null || lng == null) return false;
+  if (Number.isNaN(latNum) || Number.isNaN(lngNum)) return false;
+  return latNum >= -90 && latNum <= 90 && lngNum >= -180 && lngNum <= 180;
+}
+
+// Finds the closest zone (by center/boundary distance) to a point among a list of zones.
+// Returns { zone, distance_meters } or null if the list is empty.
+function getNearestZone(lat, lng, zones) {
+  if (!Array.isArray(zones) || zones.length === 0) return null;
+
+  let nearest = null;
+  let minDistance = Infinity;
+
+  for (const zone of zones) {
+    const dist = isPointInZone(lat, lng, zone) ? 0 : distanceToZoneBoundaryMeters(lat, lng, zone);
+    if (dist < minDistance) {
+      minDistance = dist;
+      nearest = zone;
+    }
+  }
+
+  if (!nearest) return null;
+  return { zone: nearest, distance_meters: Math.round(minDistance) };
+}
+
 module.exports = {
   haversineDistanceMeters,
   isPointInPolygon,
   isPointInCircle,
   isPointInZone,
   distanceToZoneBoundaryMeters,
+  isValidCoordinate,
+  getNearestZone,
 };

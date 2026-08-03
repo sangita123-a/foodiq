@@ -16,7 +16,7 @@ export function loadGoogleMapsScript(apiKey: string): Promise<boolean> {
       return;
     }
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=geometry`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=geometry,visualization`;
     script.async = true;
     script.defer = true;
     script.dataset.foodiqGmaps = "1";

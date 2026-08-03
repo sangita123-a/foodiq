@@ -3150,17 +3150,24 @@ async function ensureSchema() {
         radius_km DECIMAL(6,2),
         zone_type VARCHAR(20) DEFAULT 'polygon' CHECK (zone_type IN ('polygon', 'circle')),
         is_active BOOLEAN DEFAULT TRUE,
+        priority INTEGER NOT NULL DEFAULT 0,
+        created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        updated_by UUID REFERENCES users(id) ON DELETE SET NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    await q(`ALTER TABLE delivery_zones ADD COLUMN IF NOT EXISTS priority INTEGER NOT NULL DEFAULT 0`);
+    await q(`ALTER TABLE delivery_zones ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES users(id) ON DELETE SET NULL`);
+    await q(`ALTER TABLE delivery_zones ADD COLUMN IF NOT EXISTS updated_by UUID REFERENCES users(id) ON DELETE SET NULL`);
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_zones_active ON delivery_zones(is_active)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_zones_city ON delivery_zones(city)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_zones_priority ON delivery_zones(priority DESC)`);
 
     await q(`
       CREATE TABLE IF NOT EXISTS delivery_partner_zones (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        partner_id UUID NOT NULL,
+        partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
         zone_id UUID NOT NULL REFERENCES delivery_zones(id) ON DELETE CASCADE,
         assigned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         assigned_by UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -3169,6 +3176,29 @@ async function ensureSchema() {
     `);
     await q(`CREATE INDEX IF NOT EXISTS idx_dpz_partner_id ON delivery_partner_zones(partner_id)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_dpz_zone_id ON delivery_partner_zones(zone_id)`);
+    // Additive FK backfill for pre-existing installs where the table was created before the FK existed above.
+    await q(`
+      ALTER TABLE delivery_partner_zones
+        ADD CONSTRAINT fk_dpz_partner FOREIGN KEY (partner_id) REFERENCES delivery_partners(id) ON DELETE CASCADE
+    `);
+
+    // ── Delivery Zone Violations (geo-fencing exit/spoof audit log) ────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_zone_violations (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        zone_id UUID REFERENCES delivery_zones(id) ON DELETE SET NULL,
+        violation_type VARCHAR(20) NOT NULL CHECK (violation_type IN ('exit', 'spoof')),
+        distance_meters NUMERIC(10,2),
+        latitude NUMERIC(10,7),
+        longitude NUMERIC(10,7),
+        resolved BOOLEAN NOT NULL DEFAULT FALSE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_zone_violations_partner ON delivery_zone_violations(partner_id, created_at DESC)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_zone_violations_zone ON delivery_zone_violations(zone_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_zone_violations_type ON delivery_zone_violations(violation_type)`);
 
     // ── Fraud Detection & Risk Monitoring System ──────────────────────
     await q(`

@@ -43,6 +43,8 @@ export const SOCKET_EVENTS = {
   DELIVERY_ZONE_EXIT: "delivery:zone-exit",
   DELIVERY_ZONE_WARNING: "delivery:zone-warning",
   DELIVERY_ZONE_CHANGED: "delivery:zone-changed",
+  DELIVERY_ZONE_GPS_UPDATE: "delivery:gps-update",
+  ADMIN_ZONE_ALERT: "admin:zone-alert",
 
   // Fraud Detection & Risk Monitoring System
   DELIVERY_FRAUD_WARNING: "delivery:fraud:warning",

@@ -16,6 +16,12 @@ const {
   emitLocationUpdated,
   emitDeliveryTracking,
   emitRiderPresence,
+  emitZoneEnter,
+  emitZoneExit,
+  emitZoneWarning,
+  emitZoneChanged,
+  emitZoneGpsUpdate,
+  emitAdminZoneAlert,
   EVENTS: E,
 } = require('./emitters');
 
@@ -419,7 +425,38 @@ const initSocket = (httpServer, { allowedOrigins = [], isOriginAllowed, corsStri
 
           // Live GPS Geo-fencing & Zone Verification
           try {
-            const { isPointInZone, distanceToZoneBoundaryMeters } = require('../services/geoZoneService');
+            const { isPointInZone, getNearestZone, isValidCoordinate } = require('../services/geoZoneService');
+
+            if (!isValidCoordinate(lat, lng)) {
+              throw new Error('invalid coordinates for zone check');
+            }
+
+            // Spoof / impossible-speed detection between consecutive zone-check ticks.
+            // Reuses the existing (already built) GPS_UPDATE fraud rule — flags, does not block.
+            const lastTick = socket.data.lastZoneGpsTick;
+            const nowTs = Date.now();
+            if (lastTick) {
+              try {
+                const FraudDetectionService = require('../services/fraudDetectionService');
+                await FraudDetectionService.evaluateEvent({
+                  partner_id: partnerId,
+                  event_type: 'GPS_UPDATE',
+                  data: {
+                    lat,
+                    lng,
+                    prev_lat: lastTick.lat,
+                    prev_lng: lastTick.lng,
+                    timestamp: nowTs,
+                    prev_timestamp: lastTick.at,
+                    accuracy,
+                  },
+                });
+              } catch (fraudErr) {
+                console.warn('[socket] zone spoof-check error:', fraudErr.message);
+              }
+            }
+            socket.data.lastZoneGpsTick = { lat, lng, at: nowTs };
+
             const zonesRes = await pool.query(
               `SELECT z.* FROM delivery_zones z
                JOIN delivery_partner_zones dpz ON dpz.zone_id = z.id
@@ -430,40 +467,91 @@ const initSocket = (httpServer, { allowedOrigins = [], isOriginAllowed, corsStri
             if (zonesRes.rows.length > 0) {
               let inAssignedZone = false;
               let currentZone = null;
-              let minBoundaryDist = Infinity;
+              const nearest = getNearestZone(lat, lng, zonesRes.rows);
+              let minBoundaryDist = nearest ? nearest.distance_meters : Infinity;
 
               for (const zone of zonesRes.rows) {
-                const inside = isPointInZone(lat, lng, zone);
-                const dist = distanceToZoneBoundaryMeters(lat, lng, zone);
-                if (inside) {
+                if (isPointInZone(lat, lng, zone)) {
                   inAssignedZone = true;
                   currentZone = zone;
-                  minBoundaryDist = dist;
+                  minBoundaryDist = 0;
                   break;
-                } else if (dist < minBoundaryDist) {
-                  minBoundaryDist = dist;
                 }
               }
 
               const prevInZone = socket.data.inZone;
+              const prevZoneId = socket.data.currentZoneId;
               socket.data.inZone = inAssignedZone;
+              socket.data.currentZoneId = currentZone?.id || null;
 
               if (inAssignedZone) {
                 if (prevInZone === false) {
-                  socket.emit(EVENTS.DELIVERY_ZONE_ENTER, { partner_id: partnerId, zone: currentZone });
-                  io.to('admin_live').emit(EVENTS.DELIVERY_ZONE_ENTER, { partner_id: partnerId, zone: currentZone, partner_name: socket.user.full_name });
+                  // Rider re-entered / entered an assigned zone — also serves as the "return" notification.
+                  emitZoneEnter({ partner_id: partnerId, zone: currentZone, partner_name: socket.user.full_name });
+                } else if (prevInZone === true && prevZoneId && prevZoneId !== currentZone.id) {
+                  // Auto zone switching — moved directly from one assigned zone into another.
+                  emitZoneChanged({ action: 'switched', zone: currentZone, partner_id: partnerId });
                 }
               } else {
-                if (prevInZone === true || prevInZone === undefined) {
-                  socket.emit(EVENTS.DELIVERY_ZONE_EXIT, { partner_id: partnerId, distance_meters: Math.round(minBoundaryDist) });
-                  io.to('admin_live').emit(EVENTS.DELIVERY_ZONE_EXIT, { partner_id: partnerId, partner_name: socket.user.full_name, distance_meters: Math.round(minBoundaryDist) });
+                if (prevInZone === true) {
+                  emitZoneExit({
+                    partner_id: partnerId,
+                    distance_meters: Math.round(minBoundaryDist),
+                    nearest_zone: nearest?.zone ? { id: nearest.zone.id, name: nearest.zone.name } : null,
+                    partner_name: socket.user.full_name,
+                  });
                 }
 
                 if (minBoundaryDist >= 100) {
                   const warningLevel = minBoundaryDist >= 300 ? 'second_warning' : 'first_warning';
-                  socket.emit(EVENTS.DELIVERY_ZONE_WARNING, { partner_id: partnerId, warning_level: warningLevel, distance_meters: Math.round(minBoundaryDist) });
+                  emitZoneWarning({
+                    partner_id: partnerId,
+                    warning_level: warningLevel,
+                    distance_meters: Math.round(minBoundaryDist),
+                    nearest_zone: nearest?.zone ? { id: nearest.zone.id, name: nearest.zone.name } : null,
+                  });
+
+                  if (warningLevel === 'second_warning') {
+                    try {
+                      const FraudDetectionService = require('../services/fraudDetectionService');
+                      await FraudDetectionService.evaluateEvent({
+                        partner_id: partnerId,
+                        event_type: 'ZONE_EXIT',
+                        data: { is_outside: true, zone_name: nearest?.zone?.name },
+                      });
+                    } catch (fraudErr) {
+                      console.warn('[socket] zone-exit fraud evaluation error:', fraudErr.message);
+                    }
+
+                    pool.query(
+                      `INSERT INTO delivery_zone_violations (partner_id, zone_id, violation_type, distance_meters, latitude, longitude)
+                       VALUES ($1, $2, 'exit', $3, $4, $5)`,
+                      [partnerId, nearest?.zone?.id || null, Math.round(minBoundaryDist), lat, lng]
+                    ).catch((e) => console.warn('[socket] zone violation log failed:', e.message));
+
+                    emitAdminZoneAlert({
+                      partner_id: partnerId,
+                      partner_name: socket.user.full_name,
+                      alert_type: 'zone_exit',
+                      zone: nearest?.zone ? { id: nearest.zone.id, name: nearest.zone.name } : null,
+                      distance_meters: Math.round(minBoundaryDist),
+                      message: `${socket.user.full_name || 'Rider'} is ${Math.round(minBoundaryDist)}m outside their assigned zone.`,
+                    });
+                  }
                 }
               }
+
+              emitZoneGpsUpdate({
+                partner_id: partnerId,
+                lat,
+                lng,
+                heading,
+                accuracy,
+                in_zone: inAssignedZone,
+                current_zone_id: currentZone?.id || null,
+                distance_to_boundary_meters: Math.round(Number.isFinite(minBoundaryDist) ? minBoundaryDist : 0),
+                orders_eligible: inAssignedZone,
+              });
             }
           } catch (err) {
             console.warn('[socket] geo-fencing check error:', err.message);
