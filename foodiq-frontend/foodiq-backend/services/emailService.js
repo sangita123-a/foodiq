@@ -413,7 +413,7 @@ const logEmail = async (row) => {
 
 const sendViaResend = async ({ to, subject, html, text, attachments }) => {
   const from = getFromAddress();
-  log.info('[email:resend] sending email', { to, subject, from });
+  log.info('[email:resend] Provider request', { provider: 'resend', recipient: to, subject, from });
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -435,16 +435,26 @@ const sendViaResend = async ({ to, subject, html, text, attachments }) => {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    log.error('[email:resend] API error', { status: res.status, data });
+    log.error('[email:resend] Provider response: FAILED', {
+      provider: 'resend',
+      recipient: to,
+      status: res.status,
+      providerResponse: data,
+    });
     throw new Error(data.message || `Resend HTTP ${res.status}`);
   }
-  log.info('[email:resend] message sent', { id: data.id, to });
+  log.info('[email:resend] Provider response: OK', {
+    provider: 'resend',
+    recipient: to,
+    messageId: data.id,
+    providerResponse: data,
+  });
   return { id: data.id };
 };
 
 const sendViaSendgrid = async ({ to, subject, html, text, attachments }) => {
   const from = getFromAddress();
-  log.info('[email:sendgrid] sending email', { to, subject, from });
+  log.info('[email:sendgrid] Provider request', { provider: 'sendgrid', recipient: to, subject, from });
 
   const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
     method: 'POST',
@@ -473,11 +483,21 @@ const sendViaSendgrid = async ({ to, subject, html, text, attachments }) => {
   });
   if (!res.ok) {
     const body = await res.text();
-    log.error('[email:sendgrid] API error', { status: res.status, body });
+    log.error('[email:sendgrid] Provider response: FAILED', {
+      provider: 'sendgrid',
+      recipient: to,
+      status: res.status,
+      providerResponse: body,
+    });
     throw new Error(`SendGrid HTTP ${res.status}: ${body}`);
   }
   const msgId = res.headers.get('x-message-id') || `sendgrid_${Date.now()}`;
-  log.info('[email:sendgrid] message sent', { id: msgId, to });
+  log.info('[email:sendgrid] Provider response: OK', {
+    provider: 'sendgrid',
+    recipient: to,
+    messageId: msgId,
+    status: res.status,
+  });
   return { id: msgId };
 };
 
@@ -490,7 +510,7 @@ const sendViaMailgun = async ({ to, subject, html, text, attachments }) => {
     throw new Error('Mailgun credentials incomplete. MAILGUN_DOMAIN and MAILGUN_API_KEY environment variables are required.');
   }
 
-  log.info('[email:mailgun] sending email via Mailgun API', { to, subject, from, domain });
+  log.info('[email:mailgun] Provider request', { provider: 'mailgun', recipient: to, subject, from, domain });
 
   const formData = new URLSearchParams();
   formData.append('from', from);
@@ -511,11 +531,21 @@ const sendViaMailgun = async ({ to, subject, html, text, attachments }) => {
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    log.error('[email:mailgun] API error', { status: res.status, data });
+    log.error('[email:mailgun] Provider response: FAILED', {
+      provider: 'mailgun',
+      recipient: to,
+      status: res.status,
+      providerResponse: data,
+    });
     throw new Error(data.message || `Mailgun HTTP ${res.status}`);
   }
   const msgId = data.id || `mailgun_${Date.now()}`;
-  log.info('[email:mailgun] message sent', { id: msgId, to });
+  log.info('[email:mailgun] Provider response: OK', {
+    provider: 'mailgun',
+    recipient: to,
+    messageId: msgId,
+    providerResponse: data,
+  });
   return { id: msgId };
 };
 
@@ -633,6 +663,15 @@ const sendEmail = async (opts) => {
         const targetSecure = overrideSecure !== null ? overrideSecure : (targetPort === 465);
         const targetRequireTLS = overrideRequireTLS !== null ? overrideRequireTLS : (targetPort === 587);
 
+        log.info('[email:smtp] SMTP connection attempt', {
+          provider: 'smtp',
+          recipient: to,
+          host: targetIp,
+          port: targetPort,
+          secure: targetSecure,
+          authUser: `${user.slice(0, 3)}***`,
+        });
+
         const transport = nodemailer.createTransport({
           host: targetIp,
           port: targetPort,
@@ -706,17 +745,24 @@ const sendEmail = async (opts) => {
           throw lastSmtpErr || new Error('SMTP email delivery failed across all resolved IPv4 addresses.');
         }
 
-        log.info('[email:smtp] SMTP mail sent successfully', { messageId: info.messageId, to });
-        console.log(`✅ [email:smtp] Mail delivered successfully to ${to}. MessageId: ${info.messageId}`);
+        log.info('[email:smtp] Authentication succeeded, provider response: OK', {
+          provider: 'smtp',
+          recipient: to,
+          messageId: info.messageId,
+          providerResponse: info.response,
+          accepted: info.accepted,
+          rejected: info.rejected,
+        });
         result = { id: info.messageId };
       } catch (smtpErr) {
-        console.error('❌ [email:smtp] Nodemailer sendMail ERROR:', {
+        log.error('[email:smtp] Provider response: FAILED', {
+          provider: 'smtp',
+          recipient: to,
           code: smtpErr.code || null,
           command: smtpErr.command || null,
-          response: smtpErr.response || null,
+          providerResponse: smtpErr.response || null,
           responseCode: smtpErr.responseCode || null,
           message: smtpErr.message,
-          stack: smtpErr.stack,
         });
 
         const detailMsg = smtpErr.response

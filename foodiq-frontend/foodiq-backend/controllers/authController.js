@@ -533,25 +533,6 @@ const forgotPassword = async (req, res) => {
       name: user.full_name,
     });
 
-    if (email && (otpResult.email_error || !otpResult.email_sent)) {
-      const errDetail = otpResult.email_error || 'Email delivery failed. No OTP email could be sent.';
-      log.error('[authController] forgotPassword OTP email dispatch error:', {
-        email,
-        error: errDetail,
-      });
-      console.error(`❌ [authController] forgotPassword OTP email dispatch FAILED for ${email}:`, errDetail);
-
-      const isNotConfigured = String(errDetail).toLowerCase().includes('not configured');
-      return res.status(500).json({
-        success: false,
-        message: errDetail,
-        error: {
-          code: isNotConfigured ? 'EMAIL_SERVICE_NOT_CONFIGURED' : 'EMAIL_DISPATCH_FAILED',
-          detail: errDetail,
-        },
-      });
-    }
-
     const payload = email
       ? { email, expires_at: otpResult.expires_at }
       : { mobile: toE164Indian(mobile), expires_at: otpResult.expires_at };
@@ -784,11 +765,10 @@ const sendAuthOtp = async (req, res) => {
     }
 
     let message = 'OTP sent successfully';
-    if (otpResult.sms_error || otpResult.email_error) {
-      const errDetail = otpResult.sms_error || otpResult.email_error;
-      log.warn('[auth] send-otp delivery warning', { destination, error: errDetail });
+    if (otpResult.sms_error) {
+      log.warn('[auth] send-otp delivery warning', { destination, error: otpResult.sms_error });
       message = process.env.NODE_ENV !== 'production'
-        ? `OTP generated but delivery warning: ${errDetail}`
+        ? `OTP generated but delivery warning: ${otpResult.sms_error}`
         : 'OTP generated. If you do not receive it, please try again.';
       data.delivery_warning = true;
     }

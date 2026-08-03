@@ -82,10 +82,24 @@ type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 let refreshPromise: Promise<string | null> | null = null;
 
+/**
+ * Delivery partners authenticate against a separate `delivery_partners`
+ * JWT/refresh-token cookie (`delivery_refresh_token`), not the generic
+ * `refresh_token` cookie used by /api/auth/refresh. Posting to the wrong
+ * endpoint always 400s, which silently breaks session persistence (and
+ * Remember Me) for every delivery partner once their access token expires.
+ */
+function getRefreshEndpoint(): string {
+  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/delivery')) {
+    return '/api/delivery/refresh';
+  }
+  return '/api/auth/refresh';
+}
+
 async function refreshAccessToken(): Promise<string | null> {
   if (!refreshPromise) {
     refreshPromise = api
-      .post('/api/auth/refresh', {})
+      .post(getRefreshEndpoint(), {})
       .then((res) => {
         const token = res.data?.data?.token as string | undefined;
         if (token) {
@@ -145,7 +159,8 @@ api.interceptors.response.use(
     const original = error.config as RetryConfig | undefined;
     const status = error.response?.status;
     const requestUrl = original?.url || '';
-    const isRefreshCall = requestUrl.includes('/api/auth/refresh');
+    const isRefreshCall =
+      requestUrl.includes('/api/auth/refresh') || requestUrl.includes('/api/delivery/refresh');
     const isAuthCredentialCall =
       requestUrl.includes('/api/auth/login') ||
       requestUrl.includes('/api/auth/register') ||

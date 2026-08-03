@@ -10,7 +10,7 @@ const getShifts = async (req, res) => {
     return ok(res, 'Shifts fetched successfully', { shifts });
   } catch (err) {
     logger.error('[shiftController] getShifts error', { error: err.message });
-    return fail(res, err.status || 500, err.message || 'Failed to fetch shifts');
+    return fail(res, err.status || 500, err.message || 'Failed to fetch shifts', err);
   }
 };
 
@@ -22,7 +22,7 @@ const getTodayShift = async (req, res) => {
     return ok(res, 'Today shift fetched', result);
   } catch (err) {
     logger.error('[shiftController] getTodayShift error', { error: err.message });
-    return fail(res, err.status || 500, err.message || 'Failed to fetch today shift');
+    return fail(res, err.status || 500, err.message || 'Failed to fetch today shift', err);
   }
 };
 
@@ -35,7 +35,7 @@ const checkIn = async (req, res) => {
     return ok(res, 'Checked into shift successfully', result);
   } catch (err) {
     logger.error('[shiftController] checkIn error', { error: err.message });
-    return fail(res, err.status || 400, err.message || 'Check-in failed');
+    return fail(res, err.status || 400, err.message || 'Check-in failed', err);
   }
 };
 
@@ -48,7 +48,7 @@ const checkOut = async (req, res) => {
     return ok(res, 'Checked out of shift successfully', { log: result });
   } catch (err) {
     logger.error('[shiftController] checkOut error', { error: err.message });
-    return fail(res, err.status || 400, err.message || 'Check-out failed');
+    return fail(res, err.status || 400, err.message || 'Check-out failed', err);
   }
 };
 
@@ -60,7 +60,7 @@ const breakStart = async (req, res) => {
     return ok(res, 'Break started', { break: brk });
   } catch (err) {
     logger.error('[shiftController] breakStart error', { error: err.message });
-    return fail(res, err.status || 400, err.message || 'Failed to start break');
+    return fail(res, err.status || 400, err.message || 'Failed to start break', err);
   }
 };
 
@@ -72,7 +72,7 @@ const breakEnd = async (req, res) => {
     return ok(res, 'Break ended', { break: brk });
   } catch (err) {
     logger.error('[shiftController] breakEnd error', { error: err.message });
-    return fail(res, err.status || 400, err.message || 'Failed to end break');
+    return fail(res, err.status || 400, err.message || 'Failed to end break', err);
   }
 };
 
@@ -84,7 +84,7 @@ const getAttendance = async (req, res) => {
     return ok(res, 'Attendance fetched successfully', attendance);
   } catch (err) {
     logger.error('[shiftController] getAttendance error', { error: err.message });
-    return fail(res, err.status || 500, err.message || 'Failed to fetch attendance');
+    return fail(res, err.status || 500, err.message || 'Failed to fetch attendance', err);
   }
 };
 
@@ -96,7 +96,7 @@ const getHistory = async (req, res) => {
     return ok(res, 'Shift history fetched successfully', history);
   } catch (err) {
     logger.error('[shiftController] getHistory error', { error: err.message });
-    return fail(res, err.status || 500, err.message || 'Failed to fetch shift history');
+    return fail(res, err.status || 500, err.message || 'Failed to fetch shift history', err);
   }
 };
 
@@ -107,7 +107,7 @@ const createAdminShift = async (req, res) => {
     return ok(res, 'Shift created successfully', { shift }, 201);
   } catch (err) {
     logger.error('[shiftController] createAdminShift error', { error: err.message });
-    return fail(res, err.status || 400, err.message || 'Failed to create shift');
+    return fail(res, err.status || 400, err.message || 'Failed to create shift', err);
   }
 };
 
@@ -118,7 +118,7 @@ const assignAdminShift = async (req, res) => {
     return ok(res, 'Shift assigned successfully', { shift }, 201);
   } catch (err) {
     logger.error('[shiftController] assignAdminShift error', { error: err.message });
-    return fail(res, err.status || 400, err.message || 'Failed to assign shift');
+    return fail(res, err.status || 400, err.message || 'Failed to assign shift', err);
   }
 };
 
@@ -129,7 +129,7 @@ const updateAdminShift = async (req, res) => {
     return ok(res, 'Shift updated successfully', { shift });
   } catch (err) {
     logger.error('[shiftController] updateAdminShift error', { error: err.message });
-    return fail(res, err.status || 400, err.message || 'Failed to update shift');
+    return fail(res, err.status || 400, err.message || 'Failed to update shift', err);
   }
 };
 
@@ -140,7 +140,7 @@ const deleteAdminShift = async (req, res) => {
     return ok(res, 'Shift deleted successfully', result);
   } catch (err) {
     logger.error('[shiftController] deleteAdminShift error', { error: err.message });
-    return fail(res, err.status || 400, err.message || 'Failed to delete shift');
+    return fail(res, err.status || 400, err.message || 'Failed to delete shift', err);
   }
 };
 
@@ -151,7 +151,7 @@ const getAdminShifts = async (req, res) => {
     return ok(res, 'Admin shifts fetched', result);
   } catch (err) {
     logger.error('[shiftController] getAdminShifts error', { error: err.message });
-    return fail(res, err.status || 500, err.message || 'Failed to fetch admin shifts');
+    return fail(res, err.status || 500, err.message || 'Failed to fetch admin shifts', err);
   }
 };
 
@@ -162,7 +162,7 @@ const getAdminPartnerAttendance = async (req, res) => {
     return ok(res, 'Partner attendance fetched', attendance);
   } catch (err) {
     logger.error('[shiftController] getAdminPartnerAttendance error', { error: err.message });
-    return fail(res, err.status || 500, err.message || 'Failed to fetch partner attendance');
+    return fail(res, err.status || 500, err.message || 'Failed to fetch partner attendance', err);
   }
 };
 

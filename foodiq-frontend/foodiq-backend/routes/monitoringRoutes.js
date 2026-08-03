@@ -1,16 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const { protect, authorize } = require('../middleware/authMiddleware');
+const { verifyAccessToken } = require('../utils/generateToken');
 const c = require('../controllers/monitoringController');
 
 // Deep health for load balancers (no secrets)
 router.get('/health', c.getPublicHealth);
 
-// Client error beacon (optional auth)
+// Client error beacon (optional auth). Best-effort decode only — this beacon
+// must never hard-401, since non-customer actors (delivery partners, etc.)
+// carry Bearer tokens whose `id` doesn't resolve via the customer-only
+// `protect` middleware, which would otherwise reject every report from them.
 router.post('/client-error', (req, res, next) => {
   const header = req.headers.authorization;
   if (header?.startsWith('Bearer ')) {
-    return protect(req, res, () => c.postClientError(req, res).catch(next));
+    try {
+      const decoded = verifyAccessToken(header.split(' ')[1]);
+      req.user = { id: decoded.id, role: decoded.role };
+    } catch (_) {
+      // ignore invalid/foreign token — report anonymously
+    }
   }
   return c.postClientError(req, res).catch(next);
 });

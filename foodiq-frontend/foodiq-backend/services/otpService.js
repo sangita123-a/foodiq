@@ -163,6 +163,8 @@ const issueOtp = async ({
         });
       }
     } else {
+      emailFailed = true;
+      emailError = 'No email address found for this account.';
       log.warn('[otp] Email channel requested but no email address resolved', {
         destination,
         userId,
@@ -212,6 +214,23 @@ const issueOtp = async ({
         userId,
       });
     }
+  }
+
+  // Email OTP is only meaningful if it actually reached the provider — a
+  // 200-looking response that silently dropped the email (e.g. Resend's
+  // sandbox rejecting the recipient) must never be reported as success.
+  if (channels.includes('email') && !emailSent) {
+    log.error('[otp] OTP request failed: email channel required but not delivered', {
+      destination,
+      purpose,
+      otp_id: otpId,
+      error: emailError,
+    });
+    const err = new Error('Failed to send OTP email.');
+    err.status = 500;
+    err.code = 'OTP_EMAIL_DELIVERY_FAILED';
+    err.detail = emailError;
+    throw err;
   }
 
   const response = {
