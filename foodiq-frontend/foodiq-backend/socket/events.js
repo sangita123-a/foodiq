@@ -76,6 +76,12 @@ module.exports = {
   DISPATCH_ASSIGNED: 'dispatch:assigned',
   DISPATCH_REASSIGNED: 'dispatch:reassigned',
 
+  // AI Route Optimization System
+  DELIVERY_ROUTE_UPDATE: 'delivery:route:update',
+  DELIVERY_ROUTE_OPTIMIZED: 'delivery:route:optimized',
+  DELIVERY_ROUTE_REROUTED: 'delivery:route:rerouted',
+  DELIVERY_ETA_CHANGED: 'delivery:eta:changed',
+
   // Client → Server
   JOIN_ORDER: 'joinOrder',
   LEAVE_ORDER: 'leaveOrder',

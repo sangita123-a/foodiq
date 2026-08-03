@@ -188,4 +188,8 @@ router.get('/sync/queue', syncAdmin.getAdminSyncList);
 router.get('/sync/stats', syncAdmin.getAdminSyncStats);
 router.post('/sync/retry', syncAdmin.retryAdminSync);
 
+const routeAdmin = require('../controllers/routeController');
+router.get('/routes', routeAdmin.getAdminRoutes);
+router.get('/routes/analytics', routeAdmin.getAdminRouteAnalytics);
+
 module.exports = router;

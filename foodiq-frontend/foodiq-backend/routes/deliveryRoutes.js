@@ -72,6 +72,12 @@ router.get('/attendance', protectDelivery, sc.getAttendance);
 
 /* ── Protected Delivery Partner Routes (delivery_partners auth) ───────────── */
 
+const rc = require('../controllers/routeController');
+
+// AI Route Optimization
+router.get('/route/optimized', protectDelivery, rc.getOptimizedRoute);
+router.post('/route/recalculate', protectDelivery, rc.recalculateRoute);
+
 // GET /api/delivery/profile
 router.get('/profile', protectDelivery, c.getProfile);
 

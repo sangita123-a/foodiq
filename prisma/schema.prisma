@@ -490,6 +490,67 @@ model DeliveryPartner {
   @@map("delivery_partners")
 }
 
+model OptimizedRoute {
+  id                String   @id @default(uuid())
+  partnerId         String   @map("partner_id")
+  orderIds          String[] @map("order_ids")
+  routeType         String   @default("multi_stop") @map("route_type")
+  routeDistance     Float    @map("route_distance")
+  estimatedDuration Int      @map("estimated_duration")
+  optimizationScore Float    @map("optimization_score")
+  fuelEstimate      Float    @map("fuel_estimate")
+  trafficLevel      String   @default("normal") @map("traffic_level")
+  polyline          String?
+  status            String   @default("active")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
+
+  waypoints RouteWaypoint[]
+
+  @@index([partnerId])
+  @@index([status])
+  @@map("optimized_routes")
+}
+
+model RouteWaypoint {
+  id               String    @id @default(uuid())
+  routeId          String    @map("route_id")
+  orderId          String?   @map("order_id")
+  waypointType     String    @map("waypoint_type")
+  latitude         Float
+  longitude        Float
+  sequenceOrder    Int       @map("sequence_order")
+  estimatedArrival DateTime? @map("estimated_arrival")
+  actualArrival    DateTime? @map("actual_arrival")
+  status           String    @default("pending")
+
+  route OptimizedRoute @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
+  @@index([routeId])
+  @@map("route_waypoints")
+}
+
+model RouteHistory {
+  id                String   @id @default(uuid())
+  partnerId         String   @map("partner_id")
+  routeId           String   @map("route_id")
+  action            String   @map("action")
+  reason            String?
+  oldDistance       Float?   @map("old_distance")
+  newDistance       Float?   @map("new_distance")
+  oldEta            Int?     @map("old_eta")
+  newEta            Int?     @map("new_eta")
+  optimizationScore Float?   @map("optimization_score")
+  fuelEstimate      Float?   @map("fuel_estimate")
+  trafficLevel      String?  @map("traffic_level")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@index([partnerId])
+  @@index([routeId])
+  @@map("route_history")
+}
+
+
 
 
 

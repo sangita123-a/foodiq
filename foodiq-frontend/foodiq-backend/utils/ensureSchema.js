@@ -3306,6 +3306,80 @@ async function ensureSchema() {
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_sync_logs_status ON delivery_sync_logs(sync_status)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_sync_logs_created ON delivery_sync_logs(created_at)`);
 
+    // ── AI Route Optimization tables ───────────────────────────────────────
+    await q(`
+      CREATE TABLE IF NOT EXISTS optimized_routes (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
+        algorithm VARCHAR(50) DEFAULT 'nearest_neighbor',
+        route_type VARCHAR(30) DEFAULT 'fastest',
+        origin_lat NUMERIC(10,7),
+        origin_lng NUMERIC(10,7),
+        destination_lat NUMERIC(10,7),
+        destination_lng NUMERIC(10,7),
+        distance_km NUMERIC(10,3),
+        duration_min NUMERIC(10,2),
+        fuel_estimate_liters NUMERIC(8,3),
+        traffic_level VARCHAR(20) DEFAULT 'normal',
+        optimization_score NUMERIC(5,2),
+        polyline TEXT,
+        waypoints JSONB DEFAULT '[]'::jsonb,
+        turn_instructions JSONB DEFAULT '[]'::jsonb,
+        is_active BOOLEAN DEFAULT TRUE,
+        recalculation_count INTEGER DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_optimized_routes_partner ON optimized_routes(partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_optimized_routes_order ON optimized_routes(order_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_optimized_routes_active ON optimized_routes(is_active) WHERE is_active = TRUE`);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS route_waypoints (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        route_id UUID REFERENCES optimized_routes(id) ON DELETE CASCADE,
+        order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+        sequence_order INTEGER NOT NULL,
+        waypoint_type VARCHAR(30) DEFAULT 'delivery',
+        lat NUMERIC(10,7),
+        lng NUMERIC(10,7),
+        address TEXT,
+        eta_minutes NUMERIC(10,2),
+        distance_from_prev_km NUMERIC(10,3),
+        status VARCHAR(20) DEFAULT 'pending',
+        arrived_at TIMESTAMP WITH TIME ZONE,
+        completed_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_route_waypoints_route ON route_waypoints(route_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_route_waypoints_status ON route_waypoints(status)`);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS route_history (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID REFERENCES delivery_partners(id) ON DELETE SET NULL,
+        order_ids UUID[] DEFAULT '{}',
+        algorithm VARCHAR(50),
+        route_type VARCHAR(30),
+        total_distance_km NUMERIC(10,3),
+        total_duration_min NUMERIC(10,2),
+        fuel_estimate_liters NUMERIC(8,3),
+        optimization_score NUMERIC(5,2),
+        traffic_level VARCHAR(20),
+        waypoint_count INTEGER DEFAULT 0,
+        deviation_detected BOOLEAN DEFAULT FALSE,
+        recalculation_reason VARCHAR(100),
+        polyline TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_route_history_partner ON route_history(partner_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_route_history_created ON route_history(created_at)`);
+
+    console.log('[SCHEMA] AI Route Optimization tables ensured');
     console.log('[SCHEMA] Critical schema checks completed');
   } catch (err) {
     console.error('[SCHEMA] ensureSchema warning:', err.message);

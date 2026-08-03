@@ -14,6 +14,8 @@ type Props = {
   restaurant?: MapPoint | null;
   customer?: MapPoint | null;
   rider?: MapPoint | null;
+  polyline?: string | Array<{ lat: number; lng: number }>;
+  waypoints?: Array<{ lat: number; lng: number; label?: string; type?: string; sequenceOrder?: number }>;
   className?: string;
   heightClass?: string;
 };
@@ -38,6 +40,8 @@ export default function LiveTrackingMap({
   restaurant,
   customer,
   rider,
+  polyline,
+  waypoints,
   className = "",
   heightClass = "h-[300px] md:h-[400px]",
 }: Props) {
@@ -48,7 +52,8 @@ export default function LiveTrackingMap({
     customer?: L.Marker;
     rider?: L.Marker;
     route?: L.Polyline;
-  }>({});
+    extraWaypoints?: L.Marker[];
+  }>({ extraWaypoints: [] });
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -74,7 +79,7 @@ export default function LiveTrackingMap({
     return () => {
       map.remove();
       mapRef.current = null;
-      markersRef.current = {};
+      markersRef.current = { extraWaypoints: [] };
     };
   }, []);
 
@@ -115,11 +120,49 @@ export default function LiveTrackingMap({
     upsert("customer", customer, "#0F766E", "H");
     upsert("rider", rider, "#111827", "🛵");
 
-    // Route line restaurant → rider → customer (when available)
+    // Clear previous extra waypoints
+    if (markersRef.current.extraWaypoints) {
+      markersRef.current.extraWaypoints.forEach((m) => map.removeLayer(m));
+      markersRef.current.extraWaypoints = [];
+    }
+
+    if (waypoints && waypoints.length > 0) {
+      waypoints.forEach((wp, idx) => {
+        const glyph = wp.sequenceOrder ? `${wp.sequenceOrder}` : `${idx + 1}`;
+        const color = wp.type === "pickup" ? "#D97706" : wp.type === "dropoff" ? "#2563EB" : "#4B5563";
+        const latlng: L.LatLngExpression = [wp.lat, wp.lng];
+        pts.push(latlng);
+        const marker = L.marker(latlng, {
+          icon: makeIcon(color, glyph),
+          title: wp.label || `Waypoint ${idx + 1}`,
+        })
+          .addTo(map)
+          .bindTooltip(wp.label || `Stop ${idx + 1}`, { permanent: false });
+        markersRef.current.extraWaypoints!.push(marker);
+      });
+    }
+
+    // Polyline rendering
     const linePts: L.LatLngExpression[] = [];
-    if (restaurant?.lat != null) linePts.push([restaurant.lat, restaurant.lng]);
-    if (rider?.lat != null) linePts.push([rider.lat, rider.lng]);
-    if (customer?.lat != null) linePts.push([customer.lat, customer.lng]);
+
+    if (Array.isArray(polyline)) {
+      polyline.forEach((p) => linePts.push([p.lat, p.lng]));
+    } else if (typeof polyline === "string" && polyline.includes(";")) {
+      polyline.split(";").forEach((pair) => {
+        const [latStr, lngStr] = pair.split(",");
+        const lat = parseFloat(latStr);
+        const lng = parseFloat(lngStr);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          linePts.push([lat, lng]);
+        }
+      });
+    }
+
+    if (linePts.length === 0) {
+      if (restaurant?.lat != null) linePts.push([restaurant.lat, restaurant.lng]);
+      if (rider?.lat != null) linePts.push([rider.lat, rider.lng]);
+      if (customer?.lat != null) linePts.push([customer.lat, customer.lng]);
+    }
 
     if (markersRef.current.route) {
       map.removeLayer(markersRef.current.route);
@@ -127,10 +170,11 @@ export default function LiveTrackingMap({
     }
     if (linePts.length >= 2) {
       markersRef.current.route = L.polyline(linePts, {
-        color: "#0F766E",
-        weight: 4,
-        opacity: 0.75,
-        dashArray: "8 10",
+        color: "#2563EB",
+        weight: 5,
+        opacity: 0.85,
+        lineCap: "round",
+        lineJoin: "round",
       }).addTo(map);
     }
 
@@ -138,7 +182,7 @@ export default function LiveTrackingMap({
       const bounds = L.latLngBounds(pts);
       map.fitBounds(bounds.pad(0.35), { animate: true, maxZoom: 15 });
     }
-  }, [restaurant, customer, rider]);
+  }, [restaurant, customer, rider, polyline, waypoints]);
 
   const hasAny = restaurant || customer || rider;
 

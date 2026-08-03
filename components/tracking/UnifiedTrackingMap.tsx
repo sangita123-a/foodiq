@@ -11,6 +11,8 @@ type Props = {
   restaurant?: MapPoint | null;
   customer?: MapPoint | null;
   rider?: MapPoint | null;
+  polyline?: string | Array<{ lat: number; lng: number }>;
+  waypoints?: Array<{ lat: number; lng: number; label?: string; type?: string; sequenceOrder?: number }>;
   className?: string;
   heightClass?: string;
 };

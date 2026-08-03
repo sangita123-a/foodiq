@@ -21,6 +21,12 @@ export const SOCKET_EVENTS = {
   DELIVERY_TRACKING_STOP: "delivery:tracking:stop",
   DELIVERY_ETA_UPDATE: "delivery:eta:update",
 
+  // AI Route Optimization System
+  DELIVERY_ROUTE_UPDATE: "delivery:route:update",
+  DELIVERY_ROUTE_OPTIMIZED: "delivery:route:optimized",
+  DELIVERY_ROUTE_REROUTED: "delivery:route:rerouted",
+  DELIVERY_ETA_CHANGED: "delivery:eta:changed",
+
   // Delivery Partner Notification System
   DELIVERY_NOTIFICATION: "delivery:notification",
   DELIVERY_NOTIFICATION_READ: "delivery:notification-read",

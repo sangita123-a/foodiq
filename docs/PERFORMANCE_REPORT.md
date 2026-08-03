@@ -1,6 +1,6 @@
 # Foodiq Core Web Vitals Performance Report
 
-**Generated:** 2026-08-02 · **App version:** 4.1.0  
+**Generated:** 2026-08-03 · **App version:** 4.1.0  
 **Scope:** Next.js frontend — no UI redesign
 
 ---
