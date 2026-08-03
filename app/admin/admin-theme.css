@@ -1,0 +1,66 @@
+/*
+ * Admin-module theme override. Scoped to `.admin-scope` so it never leaks into
+ * Customer/Restaurant/Delivery/Auth/Payment surfaces, which keep the site-wide
+ * teal theme defined in app/globals.css. CSS custom properties cascade by DOM
+ * position, not by stylesheet origin, so redefining them here on `.admin-scope`
+ * is enough for every Tailwind utility (bg-primary, text-primary, etc.) used
+ * inside the admin tree to resolve to the red enterprise palette below.
+ */
+.admin-scope {
+  --color-primary: #e23744;
+  --color-primary-hover: #c81e2c;
+  --color-primary-soft: #fdecee;
+  --color-accent: #e23744;
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --surface: #ffffff;
+  --surface-elevated: #f7f7f7;
+  --surface-hover: #f2f2f2;
+  --color-section: #f7f7f7;
+  --border: #e8e8e8;
+  --color-gray-text: #6b7280;
+  --color-muted: #9ca3af;
+}
+
+@media (prefers-color-scheme: dark) {
+  .admin-scope {
+    --background: #0f1115;
+    --foreground: #f4f4f5;
+    --surface: #16181d;
+    --surface-elevated: #1c1f26;
+    --surface-hover: #21242c;
+    --color-section: #16181d;
+    --border: #2a2d35;
+    --color-gray-text: #9ca3af;
+    --color-muted: #6b7280;
+  }
+}
+
+/* Explicit override wins regardless of OS preference, for an in-app toggle. */
+.admin-scope[data-theme="dark"] {
+  --background: #0f1115;
+  --foreground: #f4f4f5;
+  --surface: #16181d;
+  --surface-elevated: #1c1f26;
+  --surface-hover: #21242c;
+  --color-section: #16181d;
+  --border: #2a2d35;
+  --color-gray-text: #9ca3af;
+  --color-muted: #6b7280;
+}
+
+.admin-scope[data-theme="light"] {
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --surface: #ffffff;
+  --surface-elevated: #f7f7f7;
+  --surface-hover: #f2f2f2;
+  --color-section: #f7f7f7;
+  --border: #e8e8e8;
+  --color-gray-text: #6b7280;
+  --color-muted: #9ca3af;
+}

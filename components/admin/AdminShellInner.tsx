@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminHeader from "@/components/admin/AdminHeader";
 
@@ -8,11 +9,39 @@ type AdminShellProps = {
   children: React.ReactNode;
 };
 
+const COLLAPSE_KEY = "admin_sidebar_collapsed";
+
 export default function AdminShellInner({ title, children }: AdminShellProps) {
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    try {
+      setCollapsed(localStorage.getItem(COLLAPSE_KEY) === "1");
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-section flex selection:bg-primary selection:text-white">
-      <div className="hidden lg:block w-64 flex-shrink-0">
-        <AdminSidebar />
+    <div className="admin-scope min-h-screen bg-section flex selection:bg-primary selection:text-white">
+      <div
+        className={`hidden lg:block flex-shrink-0 transition-[width] duration-300 ease-in-out ${
+          collapsed ? "w-20" : "w-64"
+        }`}
+      >
+        <AdminSidebar collapsed={collapsed} onToggleCollapsed={toggleCollapsed} />
       </div>
       <div className="flex-1 flex flex-col min-w-0">
         <AdminHeader title={title} />

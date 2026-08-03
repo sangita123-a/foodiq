@@ -2,191 +2,204 @@
 
 import { useMemo } from "react";
 import AdminShell from "@/components/admin/AdminShell";
-import { useAdminDashboard } from "@/hooks/useAdminData";
+import { useAdminLive } from "@/hooks/useAdminLive";
 import { formatCurrency } from "@/services/adminApi";
+import StatCard from "@/components/admin/dashboard/StatCard";
+import LiveOrderStatusPipeline from "@/components/admin/dashboard/LiveOrderStatusPipeline";
+import RecentOrdersTable from "@/components/admin/dashboard/RecentOrdersTable";
+import LiveDeliveryPartnersPanel from "@/components/admin/dashboard/LiveDeliveryPartnersPanel";
+import LiveRestaurantsPanel from "@/components/admin/dashboard/LiveRestaurantsPanel";
+import SalesAnalyticsPanel from "@/components/admin/dashboard/SalesAnalyticsPanel";
+import TopRestaurantsPanel from "@/components/admin/dashboard/TopRestaurantsPanel";
+import TopDeliveryPartnersPanel from "@/components/admin/dashboard/TopDeliveryPartnersPanel";
+import CustomerInsightsPanel from "@/components/admin/dashboard/CustomerInsightsPanel";
+import NotificationsActivityPanel from "@/components/admin/dashboard/NotificationsActivityPanel";
+import SystemHealthPanel from "@/components/admin/dashboard/SystemHealthPanel";
 import {
-  Users,
-  Store,
   ShoppingBag,
-  DollarSign,
   Clock,
-  Bike,
-  UtensilsCrossed,
-  Star,
-  Timer,
-  TrendingUp,
   CheckCircle2,
   XCircle,
-  Activity,
+  DollarSign,
+  CalendarDays,
+  CalendarRange,
+  Store,
+  Bike,
+  UserPlus,
+  Headphones,
+  Star,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 
 export default function AdminDashboardPage() {
-  const { data: stats, error: errorMsg, isLoading: loading } = useAdminDashboard();
+  const { data: stats, error: errorMsg, isLoading: loading, connected, offline } = useAdminLive();
 
-  const revenueCards = useMemo(
+  const statCards = useMemo(
     () => [
-      { title: "Today's Revenue", value: stats?.todaysRevenue ?? 0, money: true },
-      { title: "Weekly Revenue", value: stats?.weeklyRevenue ?? 0, money: true },
-      { title: "Monthly Revenue", value: stats?.monthlyRevenue ?? 0, money: true },
-      { title: "Yearly Revenue", value: stats?.yearlyRevenue ?? 0, money: true },
-    ],
-    [stats]
-  );
-
-  const orderCards = useMemo(
-    () => [
-      { title: "Today's Orders", value: stats?.todaysOrders ?? 0, icon: Clock, color: "text-sky-500", bg: "bg-sky-500/10" },
-      { title: "Active Orders", value: stats?.activeOrders ?? 0, icon: Activity, color: "text-amber-500", bg: "bg-amber-500/10" },
-      { title: "Completed Orders", value: stats?.deliveredOrders ?? 0, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-      { title: "Cancelled Orders", value: stats?.cancelledOrders ?? 0, icon: XCircle, color: "text-red-500", bg: "bg-red-500/10" },
-    ],
-    [stats]
-  );
-
-  const platformCards = useMemo(
-    () => [
-      { title: "Total Customers", value: stats?.totalUsers ?? 0, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
-      { title: "Total Restaurants", value: stats?.totalRestaurants ?? 0, icon: Store, color: "text-primary", bg: "bg-primary/10" },
-      { title: "Delivery Partners", value: stats?.totalDeliveryPartners ?? 0, icon: Bike, color: "text-violet-500", bg: "bg-violet-500/10" },
-      { title: "Total Menu Items", value: stats?.totalMenuItems ?? 0, icon: UtensilsCrossed, color: "text-orange-500", bg: "bg-orange-500/10" },
       {
-        title: "Avg Delivery Time",
-        value: stats?.avgDeliveryTimeMinutes
-          ? `${Math.round(stats.avgDeliveryTimeMinutes)} min`
-          : "—",
-        icon: Timer,
-        color: "text-cyan-500",
+        label: "Today's Orders",
+        value: stats?.todaysOrders ?? 0,
+        icon: ShoppingBag,
+        color: "text-sky-600",
+        bg: "bg-sky-500/10",
+      },
+      {
+        label: "Pending Orders",
+        value: stats?.orderStatusToday?.pending ?? 0,
+        icon: Clock,
+        color: "text-amber-600",
+        bg: "bg-amber-500/10",
+      },
+      {
+        label: "Completed Orders",
+        value: stats?.deliveredOrders ?? 0,
+        icon: CheckCircle2,
+        color: "text-emerald-600",
+        bg: "bg-emerald-500/10",
+      },
+      {
+        label: "Cancelled Orders",
+        value: stats?.cancelledOrders ?? 0,
+        icon: XCircle,
+        color: "text-red-500",
+        bg: "bg-red-500/10",
+      },
+      {
+        label: "Today's Revenue",
+        value: stats?.todaysRevenue ?? 0,
+        icon: DollarSign,
+        color: "text-primary",
+        bg: "bg-primary/10",
+        format: formatCurrency,
+      },
+      {
+        label: "Weekly Revenue",
+        value: stats?.weeklyRevenue ?? 0,
+        icon: CalendarDays,
+        color: "text-primary",
+        bg: "bg-primary/10",
+        format: formatCurrency,
+      },
+      {
+        label: "Monthly Revenue",
+        value: stats?.monthlyRevenue ?? 0,
+        icon: CalendarRange,
+        color: "text-primary",
+        bg: "bg-primary/10",
+        format: formatCurrency,
+      },
+      {
+        label: "Active Restaurants",
+        value: stats?.restaurantStatus?.active ?? stats?.totalRestaurants ?? 0,
+        icon: Store,
+        color: "text-violet-600",
+        bg: "bg-violet-500/10",
+      },
+      {
+        label: "Online Delivery Partners",
+        value: stats?.activeDeliveryPartners ?? 0,
+        icon: Bike,
+        color: "text-cyan-600",
         bg: "bg-cyan-500/10",
-        raw: true,
       },
       {
-        title: "Customer Satisfaction",
-        value: stats?.customerSatisfaction
-          ? `${Number(stats.customerSatisfaction).toFixed(1)} ★`
-          : "—",
+        label: "New Customers",
+        value: stats?.customerInsights?.new_today ?? 0,
+        icon: UserPlus,
+        color: "text-blue-600",
+        bg: "bg-blue-500/10",
+      },
+      {
+        label: "Support Tickets",
+        value: stats?.openSupportTickets ?? 0,
+        icon: Headphones,
+        color: "text-orange-600",
+        bg: "bg-orange-500/10",
+      },
+      {
+        label: "Average Rating",
+        value: stats?.customerSatisfaction ?? 0,
         icon: Star,
-        color: "text-yellow-500",
+        color: "text-yellow-600",
         bg: "bg-yellow-500/10",
-        raw: true,
+        format: (n: number) => `${n.toFixed(1)} ★`,
       },
     ],
     [stats]
   );
-
-  const weeklyMax = Math.max(...(stats?.weekly || []).map((d) => d.revenue), 1);
 
   return (
     <AdminShell title="Enterprise Dashboard">
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-3xl font-black text-foreground mb-1">Enterprise Overview</h1>
+          <p className="text-gray-text">
+            Real-time platform analytics across revenue, orders, and operations.
+          </p>
+        </div>
+        <div
+          className={`inline-flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full border ${
+            connected && !offline
+              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+              : "bg-amber-50 text-amber-700 border-amber-200"
+          }`}
+        >
+          {connected && !offline ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
+          {offline ? "Offline" : connected ? "Live" : "Reconnecting…"}
+        </div>
+      </div>
+
       {errorMsg && (
         <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           Unable to load admin dashboard. Sign in as an admin.
         </div>
       )}
-      {loading && !stats && <p className="text-gray-text mb-4 text-sm">Loading…</p>}
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-black text-foreground mb-1">Enterprise Overview</h1>
-        <p className="text-gray-text">Real-time platform analytics across revenue, orders, and operations.</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+        {statCards.map((c) => (
+          <StatCard
+            key={c.label}
+            label={c.label}
+            value={c.value}
+            icon={c.icon}
+            color={c.color}
+            bg={c.bg}
+            format={c.format}
+            loading={loading && !stats}
+          />
+        ))}
       </div>
 
-      <section className="mb-8">
-        <h2 className="text-sm font-black uppercase tracking-widest text-[#9CA3AF] mb-4 flex items-center gap-2">
-          <DollarSign className="w-4 h-4" /> Revenue
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          {revenueCards.map((c) => (
-            <div key={c.title} className="bg-white rounded-2xl p-5 border border-border shadow-sm">
-              <p className="text-sm font-bold text-gray-text mb-2">{c.title}</p>
-              <p className="text-2xl font-black text-foreground">{formatCurrency(c.value)}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <div className="mb-6">
+        <LiveOrderStatusPipeline statusCounts={stats?.orderStatusToday} loading={loading && !stats} />
+      </div>
 
-      <section className="mb-8">
-        <h2 className="text-sm font-black uppercase tracking-widest text-[#9CA3AF] mb-4 flex items-center gap-2">
-          <ShoppingBag className="w-4 h-4" /> Orders
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          {orderCards.map((c) => (
-            <div key={c.title} className="bg-white rounded-2xl p-5 border border-border shadow-sm">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-bold text-gray-text">{c.title}</p>
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${c.bg}`}>
-                  <c.icon className={`w-4 h-4 ${c.color}`} />
-                </div>
-              </div>
-              <p className="text-2xl font-black text-foreground">{c.value.toLocaleString("en-IN")}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <div className="mb-6">
+        <RecentOrdersTable />
+      </div>
 
-      <section className="mb-8">
-        <h2 className="text-sm font-black uppercase tracking-widest text-[#9CA3AF] mb-4 flex items-center gap-2">
-          <TrendingUp className="w-4 h-4" /> Platform Metrics
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {platformCards.map((c) => (
-            <div key={c.title} className="bg-white rounded-2xl p-5 border border-border shadow-sm">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-bold text-gray-text">{c.title}</p>
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${c.bg}`}>
-                  <c.icon className={`w-4 h-4 ${c.color}`} />
-                </div>
-              </div>
-              <p className="text-2xl font-black text-foreground">
-                {"raw" in c && c.raw ? c.value : Number(c.value).toLocaleString("en-IN")}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <LiveDeliveryPartnersPanel />
+        <LiveRestaurantsPanel restaurants={stats?.liveRestaurants} loading={loading && !stats} />
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-3xl p-6 border border-border shadow-sm">
-          <h2 className="text-lg font-bold text-foreground mb-4">Weekly Revenue</h2>
-          <div className="h-48 flex items-end gap-2">
-            {(stats?.weekly || []).length === 0 && (
-              <p className="text-sm text-gray-text">No weekly data yet.</p>
-            )}
-            {(stats?.weekly || []).map((d) => (
-              <div key={d.day} className="flex-1 flex flex-col items-center gap-2">
-                <div
-                  className="w-full max-w-[36px] bg-[#EAEAEA] border border-[#D4D4D4] rounded-t-lg"
-                  style={{ height: `${Math.max(8, Math.round((d.revenue / weeklyMax) * 100))}%` }}
-                  title={formatCurrency(d.revenue)}
-                />
-                <span className="text-[10px] font-bold text-gray-text">
-                  {new Date(d.day).toLocaleDateString("en-US", { weekday: "short" })}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="mb-6">
+        <SalesAnalyticsPanel stats={stats} loading={loading && !stats} />
+      </div>
 
-        <div className="bg-white rounded-3xl p-6 border border-border shadow-sm">
-          <h2 className="text-lg font-bold text-foreground mb-4">Monthly Analytics</h2>
-          <div className="space-y-3 max-h-48 overflow-y-auto custom-scrollbar">
-            {(stats?.monthly || []).length === 0 && (
-              <p className="text-sm text-gray-text">No monthly data yet.</p>
-            )}
-            {(stats?.monthly || []).map((m) => (
-              <div
-                key={m.month}
-                className="flex items-center justify-between bg-section rounded-xl px-4 py-3 border border-border"
-              >
-                <span className="text-sm font-bold text-foreground">
-                  {new Date(m.month).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-                </span>
-                <div className="text-right">
-                  <p className="text-sm font-black text-foreground">{formatCurrency(m.revenue)}</p>
-                  <p className="text-xs text-gray-text">{m.orders} orders</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <TopRestaurantsPanel restaurants={stats?.topRestaurants} loading={loading && !stats} />
+        <TopDeliveryPartnersPanel />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <CustomerInsightsPanel insights={stats?.customerInsights} loading={loading && !stats} />
+        <NotificationsActivityPanel />
+      </div>
+
+      <div className="mb-6">
+        <SystemHealthPanel />
       </div>
     </AdminShell>
   );

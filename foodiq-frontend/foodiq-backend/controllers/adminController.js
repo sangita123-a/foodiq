@@ -29,6 +29,13 @@ const getDashboard = async (req, res) => {
       customerSatisfaction: data.customer_satisfaction,
       weekly: data.weekly,
       monthly: data.monthly,
+      orderStatusToday: data.order_status_today,
+      customerInsights: data.customer_insights,
+      restaurantStatus: data.restaurant_status,
+      topRestaurants: data.top_restaurants,
+      liveRestaurants: data.live_restaurants,
+      peakHours: data.peak_hours,
+      openSupportTickets: data.open_support_tickets,
     });
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);

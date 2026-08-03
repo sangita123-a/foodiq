@@ -24,6 +24,33 @@ export type AdminDashboard = {
   customerSatisfaction: number;
   weekly: Array<{ day: string; orders: number; revenue: number }>;
   monthly: Array<{ month: string; orders: number; revenue: number }>;
+  orderStatusToday?: Record<string, number>;
+  customerInsights?: {
+    new_today: number;
+    returning: number;
+    active_30d: number;
+    blocked: number;
+  };
+  restaurantStatus?: { active: number; pending: number; closed: number };
+  topRestaurants?: Array<{
+    id: string;
+    name: string;
+    revenue: number;
+    orders: number;
+    rating: number;
+    growth_pct: number;
+  }>;
+  liveRestaurants?: Array<{
+    id: string;
+    name: string;
+    is_active: boolean;
+    approval_status: string;
+    avg_prep_minutes: number;
+    rating: number;
+    queue: number;
+  }>;
+  peakHours?: Array<{ hour: number; orders: number }>;
+  openSupportTickets?: number;
 };
 
 export function formatCurrency(n: number) {

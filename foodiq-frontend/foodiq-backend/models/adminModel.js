@@ -62,7 +62,118 @@ const getDashboardStats = async () => {
     GROUP BY 1 ORDER BY 1
   `);
 
-  return { ...rows[0], weekly: weekly.rows, monthly: monthly.rows };
+  // Today's live order-status pipeline (Preparing / Ready / Picked Up / On The Way / Delivered / Cancelled).
+  const orderStatusToday = await pool.query(`
+    SELECT LOWER(status) AS status, COUNT(*)::int AS count
+    FROM orders
+    WHERE created_at::date = CURRENT_DATE
+    GROUP BY 1
+  `);
+
+  // New / returning / active / blocked customers.
+  const customerInsights = await pool.query(`
+    SELECT
+      (SELECT COUNT(*)::int FROM users WHERE role = 'customer'
+        AND created_at::date = CURRENT_DATE) AS new_today,
+      (SELECT COUNT(*)::int FROM users u WHERE u.role = 'customer'
+        AND (SELECT COUNT(*) FROM orders o WHERE o.user_id = u.id) > 1) AS returning,
+      (SELECT COUNT(DISTINCT o.user_id)::int FROM orders o
+        JOIN users u ON u.id = o.user_id
+        WHERE u.role = 'customer' AND o.created_at >= CURRENT_DATE - INTERVAL '30 days') AS active_30d,
+      (SELECT COUNT(*)::int FROM users WHERE role = 'customer'
+        AND COALESCE(is_suspended, FALSE) = TRUE) AS blocked
+  `);
+
+  // Restaurant availability breakdown.
+  const restaurantStatus = await pool.query(`
+    SELECT
+      COUNT(*) FILTER (WHERE COALESCE(is_active, TRUE) = TRUE
+        AND COALESCE(approval_status, 'approved') = 'approved')::int AS active,
+      COUNT(*) FILTER (WHERE COALESCE(approval_status, 'approved') = 'pending')::int AS pending,
+      COUNT(*) FILTER (WHERE COALESCE(is_active, TRUE) = FALSE
+        OR COALESCE(approval_status, 'approved') = 'suspended')::int AS closed
+    FROM restaurants
+  `);
+
+  // Top restaurants by trailing-30-day revenue, with rating and week-over-week growth.
+  const topRestaurants = await pool.query(`
+    SELECT r.id, r.name,
+      COALESCE(cur.revenue, 0)::float AS revenue,
+      COALESCE(cur.orders, 0)::int AS orders,
+      COALESCE(rv.avg_rating, 0)::float AS rating,
+      CASE WHEN COALESCE(prev.revenue, 0) > 0
+        THEN ROUND((((COALESCE(cur.revenue, 0) - prev.revenue) / prev.revenue) * 100)::numeric, 1)::float
+        ELSE 0 END AS growth_pct
+    FROM restaurants r
+    LEFT JOIN LATERAL (
+      SELECT SUM(o.total_amount)::float AS revenue, COUNT(*)::int AS orders
+      FROM orders o WHERE o.restaurant_id = r.id
+        AND o.created_at >= CURRENT_DATE - INTERVAL '30 days'
+        AND LOWER(o.status) = 'delivered'
+    ) cur ON TRUE
+    LEFT JOIN LATERAL (
+      SELECT SUM(o.total_amount)::float AS revenue
+      FROM orders o WHERE o.restaurant_id = r.id
+        AND o.created_at >= CURRENT_DATE - INTERVAL '60 days'
+        AND o.created_at < CURRENT_DATE - INTERVAL '30 days'
+        AND LOWER(o.status) = 'delivered'
+    ) prev ON TRUE
+    LEFT JOIN LATERAL (
+      SELECT AVG(rating)::float AS avg_rating FROM reviews WHERE restaurant_id = r.id AND status = 'visible'
+    ) rv ON TRUE
+    ORDER BY revenue DESC NULLS LAST
+    LIMIT 5
+  `);
+
+  // Live restaurants — open ones ranked by current active-order queue.
+  const liveRestaurants = await pool.query(`
+    SELECT r.id, r.name,
+      COALESCE(r.is_active, TRUE) AS is_active,
+      COALESCE(r.approval_status, 'approved') AS approval_status,
+      COALESCE(r.estimated_delivery_time, 30)::int AS avg_prep_minutes,
+      COALESCE(rv.avg_rating, 0)::float AS rating,
+      COALESCE(q.queue, 0)::int AS queue
+    FROM restaurants r
+    LEFT JOIN LATERAL (
+      SELECT COUNT(*)::int AS queue FROM orders o
+      WHERE o.restaurant_id = r.id AND LOWER(o.status) NOT IN ('delivered', 'cancelled', 'rejected')
+    ) q ON TRUE
+    LEFT JOIN LATERAL (
+      SELECT AVG(rating)::float AS avg_rating FROM reviews WHERE restaurant_id = r.id AND status = 'visible'
+    ) rv ON TRUE
+    WHERE COALESCE(r.approval_status, 'approved') = 'approved'
+    ORDER BY queue DESC, r.name ASC
+    LIMIT 10
+  `);
+
+  // Today's order volume by hour — peak-hours chart.
+  const peakHours = await pool.query(`
+    SELECT EXTRACT(HOUR FROM created_at)::int AS hour, COUNT(*)::int AS orders
+    FROM orders
+    WHERE created_at::date = CURRENT_DATE
+    GROUP BY 1 ORDER BY 1
+  `);
+
+  const supportTickets = await pool.query(`
+    SELECT COUNT(*)::int AS open_count FROM support_tickets
+    WHERE status IN ('Open', 'In Progress')
+  `);
+
+  const statusCounts = {};
+  for (const row of orderStatusToday.rows) statusCounts[row.status] = row.count;
+
+  return {
+    ...rows[0],
+    weekly: weekly.rows,
+    monthly: monthly.rows,
+    order_status_today: statusCounts,
+    customer_insights: customerInsights.rows[0],
+    restaurant_status: restaurantStatus.rows[0],
+    top_restaurants: topRestaurants.rows,
+    live_restaurants: liveRestaurants.rows,
+    peak_hours: peakHours.rows,
+    open_support_tickets: supportTickets.rows[0].open_count,
+  };
 };
 
 const listRestaurants = async ({ search = '', status = '' } = {}) => {
@@ -198,7 +309,11 @@ const listDeliveryPartners = async ({ search = '', status = '' } = {}) => {
     `SELECT dp.*, u.full_name, u.email, u.phone_number, u.is_suspended,
        (SELECT COUNT(*)::int FROM delivery_assignments da WHERE da.delivery_partner_id = dp.id AND da.status = 'delivered') AS delivery_count,
        (SELECT COALESCE(SUM(amount), 0)::float FROM delivery_earnings e WHERE e.delivery_partner_id = dp.id) AS total_earnings,
-       (SELECT COALESCE(available_balance, 0)::float FROM delivery_wallets w WHERE w.partner_id = dp.id) AS wallet_balance
+       (SELECT COALESCE(available_balance, 0)::float FROM delivery_wallets w WHERE w.partner_id = dp.id) AS wallet_balance,
+       (SELECT da.order_id FROM delivery_assignments da
+         WHERE da.delivery_partner_id = dp.id
+           AND da.status NOT IN ('delivered', 'cancelled', 'rejected', 'expired')
+         ORDER BY da.created_at DESC LIMIT 1) AS current_order_id
      FROM delivery_partners dp
      JOIN users u ON u.id = dp.user_id
      WHERE ($1 = '' OR u.full_name ILIKE '%' || $1 || '%' OR u.email ILIKE '%' || $1 || '%')

@@ -38,6 +38,8 @@ import {
   Landmark,
   Star,
   MapPin,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { clearClientAuth } from "@/lib/authSession";
 import {
@@ -101,12 +103,21 @@ const menuItems: MenuItem[] = [
 type AdminSidebarProps = {
   variant?: "fixed" | "drawer";
   onNavigate?: () => void;
+  collapsed?: boolean;
+  onToggleCollapsed?: () => void;
 };
 
-export default function AdminSidebar({ variant = "fixed", onNavigate }: AdminSidebarProps) {
+export default function AdminSidebar({
+  variant = "fixed",
+  onNavigate,
+  collapsed = false,
+  onToggleCollapsed,
+}: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const adminRole = getStoredAdminRole();
+  // Mobile drawer always renders expanded — collapsing only applies to the fixed desktop rail.
+  const isCollapsed = variant === "fixed" && collapsed;
 
   const visibleItems = useMemo(() => {
     return menuItems.filter((item) =>
@@ -121,27 +132,29 @@ export default function AdminSidebar({ variant = "fixed", onNavigate }: AdminSid
 
   return (
     <div
-      className={`w-64 bg-background h-full border-r border-border flex flex-col ${
-        variant === "fixed" ? "h-screen fixed left-0 top-0 z-40" : "relative"
-      }`}
+      className={`bg-background h-full border-r border-border flex flex-col transition-all duration-300 ease-in-out ${
+        variant === "fixed" ? "h-screen fixed left-0 top-0 z-40" : "relative w-64"
+      } ${isCollapsed ? "w-20" : "w-64"}`}
     >
-      <div className="h-20 flex items-center px-6 border-b border-border">
-        <Link href="/admin/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-black text-white text-xl">
+      <div className={`h-20 flex items-center border-b border-border ${isCollapsed ? "justify-center px-2" : "px-6"}`}>
+        <Link href="/admin/dashboard" className="flex items-center gap-2 min-w-0" title="Foodiq Enterprise Admin">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-black text-white text-xl shrink-0">
             F
           </div>
-          <div>
-            <span className="text-xl font-black text-foreground tracking-tight block">
-              Foodiq
-            </span>
-            <span className="text-[10px] uppercase tracking-widest font-bold text-primary">
-              Enterprise Admin
-            </span>
-          </div>
+          {!isCollapsed && (
+            <div className="min-w-0">
+              <span className="text-xl font-black text-foreground tracking-tight block truncate">
+                Foodiq
+              </span>
+              <span className="text-[10px] uppercase tracking-widest font-bold text-primary">
+                Enterprise Admin
+              </span>
+            </div>
+          )}
         </Link>
       </div>
 
-      {adminRole && (
+      {adminRole && !isCollapsed && (
         <div className="px-4 py-3 border-b border-border">
           <p className="text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF] mb-1">
             Role
@@ -160,7 +173,10 @@ export default function AdminSidebar({ variant = "fixed", onNavigate }: AdminSid
               key={item.name}
               href={item.href}
               onClick={onNavigate}
+              title={isCollapsed ? item.name : undefined}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
+                isCollapsed ? "justify-center" : ""
+              } ${
                 isActive
                   ? "bg-primary text-white shadow-[0_0_15px_rgba(226,55,68,0.3)]"
                   : "text-gray-text hover:text-foreground hover:bg-section"
@@ -169,7 +185,7 @@ export default function AdminSidebar({ variant = "fixed", onNavigate }: AdminSid
               <item.icon
                 className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-[#9CA3AF] group-hover:text-foreground"}`}
               />
-              <span className="font-bold text-xs">{item.name}</span>
+              {!isCollapsed && <span className="font-bold text-xs truncate">{item.name}</span>}
             </Link>
           );
         })}
@@ -178,13 +194,32 @@ export default function AdminSidebar({ variant = "fixed", onNavigate }: AdminSid
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-red-500 hover:bg-red-500/10 text-left"
+            title={isCollapsed ? "Logout" : undefined}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-red-500 hover:bg-red-500/10 text-left ${
+              isCollapsed ? "justify-center" : ""
+            }`}
           >
-            <LogOut className="w-4 h-4" />
-            <span className="font-bold text-xs">Logout</span>
+            <LogOut className="w-4 h-4 shrink-0" />
+            {!isCollapsed && <span className="font-bold text-xs">Logout</span>}
           </button>
         </div>
       </div>
+
+      {variant === "fixed" && onToggleCollapsed && (
+        <button
+          type="button"
+          onClick={onToggleCollapsed}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="flex items-center justify-center gap-2 h-11 border-t border-border text-[#9CA3AF] hover:text-foreground hover:bg-section transition-colors duration-200 shrink-0"
+        >
+          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : (
+            <>
+              <ChevronLeft className="w-4 h-4" />
+              <span className="text-xs font-bold">Collapse</span>
+            </>
+          )}
+        </button>
+      )}
     </div>
   );
 }
