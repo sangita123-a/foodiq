@@ -26,6 +26,8 @@ router.get('/users/:id/referrals', requirePermission('customers'), c.userReferra
 const sc = require('../controllers/shiftController');
 router.get('/shifts', requirePermission('delivery'), sc.getAdminShifts);
 router.post('/shifts', requirePermission('delivery'), sc.createAdminShift);
+router.post('/shifts/assign', requirePermission('delivery'), sc.assignAdminShift);
+router.get('/shifts/partner/:partnerId/attendance', requirePermission('delivery'), sc.getAdminPartnerAttendance);
 router.patch('/shifts/:id', requirePermission('delivery'), sc.updateAdminShift);
 router.delete('/shifts/:id', requirePermission('delivery'), sc.deleteAdminShift);
 

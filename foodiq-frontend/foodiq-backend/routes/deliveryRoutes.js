@@ -66,6 +66,11 @@ const sc = require('../controllers/shiftController');
 /* ── Shift Scheduling & Attendance Routes ───────────────────────────────── */
 router.get('/shifts', protectDelivery, sc.getShifts);
 router.get('/shifts/today', protectDelivery, sc.getTodayShift);
+router.get('/shifts/history', protectDelivery, sc.getHistory);
+router.post('/shifts/check-in', protectDelivery, sc.checkIn);
+router.post('/shifts/check-out', protectDelivery, sc.checkOut);
+router.post('/shifts/break/start', protectDelivery, sc.breakStart);
+router.post('/shifts/break/end', protectDelivery, sc.breakEnd);
 router.post('/check-in', protectDelivery, sc.checkIn);
 router.post('/check-out', protectDelivery, sc.checkOut);
 router.get('/attendance', protectDelivery, sc.getAttendance);

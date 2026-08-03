@@ -18,15 +18,15 @@ const getShifts = async (req, res) => {
 const getTodayShift = async (req, res) => {
   try {
     const partnerId = req.deliveryPartner.id;
-    const shift = await shiftService.getTodayShift(partnerId);
-    return ok(res, 'Today shift fetched', { shift });
+    const result = await shiftService.getTodayShift(partnerId);
+    return ok(res, 'Today shift fetched', result);
   } catch (err) {
     logger.error('[shiftController] getTodayShift error', { error: err.message });
     return fail(res, err.status || 500, err.message || 'Failed to fetch today shift');
   }
 };
 
-/** POST /api/delivery/check-in */
+/** POST /api/delivery/check-in, POST /api/delivery/shifts/check-in */
 const checkIn = async (req, res) => {
   try {
     const partnerId = req.deliveryPartner.id;
@@ -39,7 +39,7 @@ const checkIn = async (req, res) => {
   }
 };
 
-/** POST /api/delivery/check-out */
+/** POST /api/delivery/check-out, POST /api/delivery/shifts/check-out */
 const checkOut = async (req, res) => {
   try {
     const partnerId = req.deliveryPartner.id;
@@ -49,6 +49,30 @@ const checkOut = async (req, res) => {
   } catch (err) {
     logger.error('[shiftController] checkOut error', { error: err.message });
     return fail(res, err.status || 400, err.message || 'Check-out failed');
+  }
+};
+
+/** POST /api/delivery/shifts/break/start */
+const breakStart = async (req, res) => {
+  try {
+    const partnerId = req.deliveryPartner.id;
+    const brk = await shiftService.startBreak(partnerId);
+    return ok(res, 'Break started', { break: brk });
+  } catch (err) {
+    logger.error('[shiftController] breakStart error', { error: err.message });
+    return fail(res, err.status || 400, err.message || 'Failed to start break');
+  }
+};
+
+/** POST /api/delivery/shifts/break/end */
+const breakEnd = async (req, res) => {
+  try {
+    const partnerId = req.deliveryPartner.id;
+    const brk = await shiftService.endBreak(partnerId);
+    return ok(res, 'Break ended', { break: brk });
+  } catch (err) {
+    logger.error('[shiftController] breakEnd error', { error: err.message });
+    return fail(res, err.status || 400, err.message || 'Failed to end break');
   }
 };
 
@@ -64,14 +88,37 @@ const getAttendance = async (req, res) => {
   }
 };
 
+/** GET /api/delivery/shifts/history */
+const getHistory = async (req, res) => {
+  try {
+    const partnerId = req.deliveryPartner.id;
+    const history = await shiftService.getPartnerHistory(partnerId, req.query);
+    return ok(res, 'Shift history fetched successfully', history);
+  } catch (err) {
+    logger.error('[shiftController] getHistory error', { error: err.message });
+    return fail(res, err.status || 500, err.message || 'Failed to fetch shift history');
+  }
+};
+
 /** POST /api/admin/shifts */
 const createAdminShift = async (req, res) => {
   try {
     const shift = await shiftService.createAdminShift(req.body);
-    return ok(res, 'Shift assigned successfully', { shift }, 201);
+    return ok(res, 'Shift created successfully', { shift }, 201);
   } catch (err) {
     logger.error('[shiftController] createAdminShift error', { error: err.message });
     return fail(res, err.status || 400, err.message || 'Failed to create shift');
+  }
+};
+
+/** POST /api/admin/shifts/assign */
+const assignAdminShift = async (req, res) => {
+  try {
+    const shift = await shiftService.assignShiftToPartner(req.body, req.user?.id);
+    return ok(res, 'Shift assigned successfully', { shift }, 201);
+  } catch (err) {
+    logger.error('[shiftController] assignAdminShift error', { error: err.message });
+    return fail(res, err.status || 400, err.message || 'Failed to assign shift');
   }
 };
 
@@ -108,14 +155,30 @@ const getAdminShifts = async (req, res) => {
   }
 };
 
+/** GET /api/admin/shifts/partner/:partnerId/attendance */
+const getAdminPartnerAttendance = async (req, res) => {
+  try {
+    const attendance = await shiftService.getPartnerAttendance(req.params.partnerId, req.query);
+    return ok(res, 'Partner attendance fetched', attendance);
+  } catch (err) {
+    logger.error('[shiftController] getAdminPartnerAttendance error', { error: err.message });
+    return fail(res, err.status || 500, err.message || 'Failed to fetch partner attendance');
+  }
+};
+
 module.exports = {
   getShifts,
   getTodayShift,
   checkIn,
   checkOut,
+  breakStart,
+  breakEnd,
   getAttendance,
+  getHistory,
   createAdminShift,
+  assignAdminShift,
   updateAdminShift,
   deleteAdminShift,
   getAdminShifts,
+  getAdminPartnerAttendance,
 };

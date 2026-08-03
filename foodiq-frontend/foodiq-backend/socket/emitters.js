@@ -288,6 +288,42 @@ const emitAttendanceUpdate = (data = {}) => {
   io.to(roleRoom('admin')).emit(EVENTS.DELIVERY_ATTENDANCE_UPDATE, payload);
 };
 
+/** Emitted when an admin creates/assigns a shift to a partner. */
+const emitShiftAssigned = ({ shift_id, partner_id, shift_name, start_time, end_time }) => {
+  const io = getIO();
+  if (!io) return;
+  const payload = { shift_id, partner_id, shift_name, start_time, end_time, at: new Date().toISOString() };
+  if (partner_id) io.to(deliveryRoom(partner_id)).emit(EVENTS.SHIFT_ASSIGNED, payload);
+  io.to(roleRoom('admin')).emit(EVENTS.SHIFT_ASSIGNED, payload);
+  io.to(roleRoom('admin')).emit(EVENTS.ADMIN_LIVE, { type: 'shift_assigned', ...payload });
+};
+
+/** Emitted when an admin edits a shift's schedule. */
+const emitShiftUpdated = (shift = {}) => {
+  const io = getIO();
+  if (!io) return;
+  const payload = { ...shift, at: new Date().toISOString() };
+  if (shift.partner_id) io.to(deliveryRoom(shift.partner_id)).emit(EVENTS.SHIFT_UPDATED, payload);
+  io.to(roleRoom('admin')).emit(EVENTS.SHIFT_UPDATED, payload);
+};
+
+/** Emitted when a partner starts/ends a break on an active shift. */
+const emitShiftBreakStart = ({ shift_log_id, partner_id, break_start }) => {
+  const io = getIO();
+  if (!io) return;
+  const payload = { shift_log_id, partner_id, break_start, at: new Date().toISOString() };
+  if (partner_id) io.to(deliveryRoom(partner_id)).emit(EVENTS.SHIFT_BREAK_START, payload);
+  io.to(roleRoom('admin')).emit(EVENTS.SHIFT_BREAK_START, payload);
+};
+
+const emitShiftBreakEnd = ({ shift_log_id, partner_id, break_end, duration_minutes }) => {
+  const io = getIO();
+  if (!io) return;
+  const payload = { shift_log_id, partner_id, break_end, duration_minutes, at: new Date().toISOString() };
+  if (partner_id) io.to(deliveryRoom(partner_id)).emit(EVENTS.SHIFT_BREAK_END, payload);
+  io.to(roleRoom('admin')).emit(EVENTS.SHIFT_BREAK_END, payload);
+};
+
 const emitEmergencyNew = (emergency = {}) => {
   const io = getIO();
   if (!io) return;
@@ -468,6 +504,10 @@ module.exports = {
   emitShiftEnd,
   emitShiftLate,
   emitAttendanceUpdate,
+  emitShiftAssigned,
+  emitShiftUpdated,
+  emitShiftBreakStart,
+  emitShiftBreakEnd,
   emitEmergencyNew,
   emitEmergencyUpdate,
   emitEmergencyResolved,

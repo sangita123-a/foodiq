@@ -2965,6 +2965,61 @@ async function ensureSchema() {
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_shift_logs_created ON delivery_shift_logs(created_at DESC)`);
     console.log('[SCHEMA] Shift Scheduling Module schema ensured');
 
+    // ── Shift Scheduling Module: assignments, breaks, daily attendance ─────
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_shift_assignments (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        shift_id UUID NOT NULL REFERENCES delivery_shifts(id) ON DELETE CASCADE,
+        partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        assigned_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'active',
+        assigned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_shift_assignments_shift ON delivery_shift_assignments(shift_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_shift_assignments_partner ON delivery_shift_assignments(partner_id, created_at DESC)`);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_shift_breaks (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        shift_log_id UUID NOT NULL REFERENCES delivery_shift_logs(id) ON DELETE CASCADE,
+        partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        break_start TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        break_end TIMESTAMP WITH TIME ZONE,
+        duration_minutes INTEGER,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_shift_breaks_log ON delivery_shift_breaks(shift_log_id)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_shift_breaks_partner ON delivery_shift_breaks(partner_id, created_at DESC)`);
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_shift_breaks_one_open
+        ON delivery_shift_breaks(shift_log_id) WHERE break_end IS NULL
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS delivery_shift_attendance (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id UUID NOT NULL REFERENCES delivery_partners(id) ON DELETE CASCADE,
+        shift_id UUID REFERENCES delivery_shifts(id) ON DELETE SET NULL,
+        attendance_date DATE NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'scheduled',
+        first_check_in TIMESTAMP WITH TIME ZONE,
+        last_check_out TIMESTAMP WITH TIME ZONE,
+        working_minutes INTEGER NOT NULL DEFAULT 0,
+        break_minutes INTEGER NOT NULL DEFAULT 0,
+        late_minutes INTEGER NOT NULL DEFAULT 0,
+        overtime_minutes INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (partner_id, attendance_date)
+      )
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_shift_attendance_partner_date ON delivery_shift_attendance(partner_id, attendance_date DESC)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_shift_attendance_status ON delivery_shift_attendance(status)`);
+    console.log('[SCHEMA] Shift assignments/breaks/attendance schema ensured');
+
     // ── Delivery Emergencies (SOS Module) ──────────────────────────────────
     await q(`
       CREATE TABLE IF NOT EXISTS delivery_emergencies (

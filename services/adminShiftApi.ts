@@ -1,5 +1,5 @@
 import api from "@/services/api";
-import type { DeliveryShift } from "@/services/deliveryApi";
+import type { DeliveryShift, DeliveryAttendanceResponse } from "@/services/deliveryApi";
 
 export type AdminShiftSummary = {
   active_riders: number;
@@ -27,7 +27,7 @@ export async function fetchAdminShifts(params?: {
   return res.data.data;
 }
 
-export async function createAdminShift(data: {
+export type AdminShiftInput = {
   partner_id: string;
   shift_name?: string;
   start_time?: string;
@@ -35,8 +35,22 @@ export async function createAdminShift(data: {
   working_days?: string[];
   is_recurring?: boolean;
   timezone?: string;
-}): Promise<{ shift: DeliveryShift }> {
+};
+
+export async function createAdminShift(data: AdminShiftInput): Promise<{ shift: DeliveryShift }> {
   const res = await api.post("/api/admin/shifts", data);
+  return res.data.data;
+}
+
+/** POST /api/admin/shifts/assign — assign a new shift to a rider (records an assignment audit row). */
+export async function assignAdminShift(data: AdminShiftInput): Promise<{ shift: DeliveryShift }> {
+  const res = await api.post("/api/admin/shifts/assign", data);
+  return res.data.data;
+}
+
+/** GET /api/admin/shifts/partner/:partnerId/attendance — drill down into one rider's attendance. */
+export async function fetchAdminPartnerAttendance(partnerId: string): Promise<DeliveryAttendanceResponse> {
+  const res = await api.get(`/api/admin/shifts/partner/${partnerId}/attendance`);
   return res.data.data;
 }
 

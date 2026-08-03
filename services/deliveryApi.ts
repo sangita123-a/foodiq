@@ -558,6 +558,7 @@ export type DeliveryShift = {
   partner_name?: string;
   partner_email?: string;
   partner_phone?: string;
+  today_status?: "checked_in" | "completed" | "not_checked_in";
 };
 
 export type DeliveryShiftLog = {
@@ -586,6 +587,8 @@ export type DeliveryAttendanceStats = {
   early_checkouts: number;
   overtime_hours: number;
   missed_shifts: number;
+  break_minutes: number;
+  grace_period_minutes: number;
 };
 
 export type DeliveryAttendanceResponse = {
@@ -593,28 +596,81 @@ export type DeliveryAttendanceResponse = {
   logs: DeliveryShiftLog[];
 };
 
+export type DeliveryShiftBreak = {
+  id: string;
+  shift_log_id: string;
+  partner_id: string;
+  break_start: string;
+  break_end: string | null;
+  duration_minutes: number | null;
+  created_at: string;
+};
+
+export type DeliveryShiftAttendanceDay = {
+  id: string;
+  partner_id: string;
+  shift_id: string | null;
+  attendance_date: string;
+  status: "scheduled" | "present" | "late" | "missed";
+  first_check_in: string | null;
+  last_check_out: string | null;
+  working_minutes: number;
+  break_minutes: number;
+  late_minutes: number;
+  overtime_minutes: number;
+  shift_name?: string;
+  start_time?: string;
+  end_time?: string;
+};
+
+export type DeliveryShiftHistoryResponse = {
+  attendance: DeliveryShiftAttendanceDay[];
+  breaks: DeliveryShiftBreak[];
+};
+
+export type DeliveryTodayShiftResponse = {
+  shift: DeliveryShift | null;
+  active_log: DeliveryShiftLog | null;
+  active_break: DeliveryShiftBreak | null;
+};
+
 export async function fetchDeliveryShifts(): Promise<{ shifts: DeliveryShift[] }> {
   const res = await api.get("/api/delivery/shifts");
   return res.data.data;
 }
 
-export async function fetchTodayShift(): Promise<{ shift: DeliveryShift | null }> {
+export async function fetchTodayShift(): Promise<DeliveryTodayShiftResponse> {
   const res = await api.get("/api/delivery/shifts/today");
   return res.data.data;
 }
 
-export async function checkInShift(data: { shift_id?: string; lat?: number; lng?: number }) {
-  const res = await api.post("/api/delivery/check-in", data);
+export async function checkInShift(data: { shift_id?: string; lat: number; lng: number }) {
+  const res = await api.post("/api/delivery/shifts/check-in", data);
   return res.data.data as { log: DeliveryShiftLog; shift: DeliveryShift };
 }
 
-export async function checkOutShift(data?: { lat?: number; lng?: number }) {
-  const res = await api.post("/api/delivery/check-out", data || {});
+export async function checkOutShift(data: { lat: number; lng: number }) {
+  const res = await api.post("/api/delivery/shifts/check-out", data);
   return res.data.data as { log: DeliveryShiftLog };
+}
+
+export async function startShiftBreak() {
+  const res = await api.post("/api/delivery/shifts/break/start");
+  return res.data.data as { break: DeliveryShiftBreak };
+}
+
+export async function endShiftBreak() {
+  const res = await api.post("/api/delivery/shifts/break/end");
+  return res.data.data as { break: DeliveryShiftBreak };
 }
 
 export async function fetchDeliveryAttendance(limit = 30): Promise<DeliveryAttendanceResponse> {
   const res = await api.get(`/api/delivery/attendance?limit=${limit}`);
+  return res.data.data;
+}
+
+export async function fetchDeliveryShiftHistory(limit = 90): Promise<DeliveryShiftHistoryResponse> {
+  const res = await api.get(`/api/delivery/shifts/history?limit=${limit}`);
   return res.data.data;
 }
 

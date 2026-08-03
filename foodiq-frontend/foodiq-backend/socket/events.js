@@ -30,6 +30,16 @@ module.exports = {
   DELIVERY_NOTIFICATION_READ: 'delivery:notification-read',
   DELIVERY_NOTIFICATION_ALL_READ: 'delivery:notification-all-read',
 
+  // Shift Scheduling & Attendance Module
+  DELIVERY_SHIFT_START: 'shift:checkedin',
+  DELIVERY_SHIFT_END: 'shift:checkout',
+  DELIVERY_LATE: 'shift:late',
+  DELIVERY_ATTENDANCE_UPDATE: 'attendance:update',
+  SHIFT_ASSIGNED: 'shift:assigned',
+  SHIFT_UPDATED: 'shift:updated',
+  SHIFT_BREAK_START: 'shift:break:start',
+  SHIFT_BREAK_END: 'shift:break:end',
+
   // SOS Emergency Module System
   EMERGENCY_NEW: 'delivery:emergency:new',
   EMERGENCY_UPDATE: 'delivery:emergency:update',
