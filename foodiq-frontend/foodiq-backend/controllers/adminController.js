@@ -1758,104 +1758,6 @@ const postLoyaltyCampaign = async (req, res) => {
   }
 };
 
-const getSupportCenter = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    const analytics = await helpCenter.getAnalytics();
-    ok(res, 'Support analytics retrieved', analytics);
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-const getSupportTickets = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    ok(res, 'Tickets retrieved', await helpCenter.listAllTickets({
-      status: req.query.status || '',
-      category: req.query.category || '',
-    }));
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-const assignSupportTicket = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    const ticket = await helpCenter.assignTicket(req.params.id, req.body.agent_id || req.user.id);
-    if (!ticket) return fail(res, 404, 'Ticket not found');
-    ok(res, 'Ticket assigned', ticket);
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-const resolveSupportTicket = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    const ticket = await helpCenter.resolveTicket(req.params.id, req.body.admin_notes);
-    if (!ticket) return fail(res, 404, 'Ticket not found');
-    ok(res, 'Ticket resolved', ticket);
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-const getSupportLiveChats = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    ok(res, 'Live chats retrieved', await helpCenter.listActiveChats());
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-const getSupportLiveChatDetail = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    const chat = await helpCenter.getLiveChat(req.params.id);
-    if (!chat) return fail(res, 404, 'Chat not found');
-    const messages = await helpCenter.getLiveMessages(req.params.id);
-    ok(res, 'Live chat detail', { chat, messages });
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-const postSupportAgentMessage = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    await helpCenter.assignLiveChat(req.params.id, req.user.id);
-    const msg = await helpCenter.addLiveMessage({
-      chatId: req.params.id,
-      senderId: req.user.id,
-      senderRole: 'agent',
-      message: req.body.message,
-      attachmentUrl: req.body.attachment_url,
-      attachmentType: req.body.attachment_type,
-    });
-    try {
-      const { getIO } = require('../socket/emitters');
-      getIO()?.to(`support:${req.params.id}`).emit('supportMessage', msg);
-    } catch {
-      /* optional */
-    }
-    ok(res, 'Message sent', msg, 201);
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-const getSupportAiSessions = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    ok(res, 'AI sessions retrieved', await helpCenter.listAiSessions({ limit: 50 }));
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
 const getAdminInventory = async (req, res) => {
   try {
     const inventory = require('../models/inventoryModel');
@@ -1911,35 +1813,17 @@ const getDeliveryNotifications = async (req, res) => {
 };
 
 /**
- * GET /api/admin/delivery/support — list/search/filter delivery partner support tickets.
+ * GET /api/admin/customers/:id/support — a customer's real support ticket history
+ * (used by the CustomerProfileModal "Support" tab). Read-only, no reply/assign here —
+ * full ticket management happens in the unified Support Center.
  */
-const getDeliverySupportTickets = async (req, res) => {
+const getCustomerSupportTickets = async (req, res) => {
   try {
-    const support = require('../models/deliverySupportModel');
-    const data = await support.listAllTickets({
-      page: req.query.page,
-      limit: req.query.limit,
-      status: req.query.status || '',
-      search: req.query.search || '',
-    });
-    ok(res, 'Support tickets retrieved', data);
+    const ticketModel = require('../models/ticketModel');
+    const tickets = await ticketModel.listUserTickets(req.params.id);
+    ok(res, 'Customer support tickets retrieved', tickets);
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-/**
- * PATCH /api/admin/delivery/support/:id — reply to and/or change the status of a ticket.
- */
-const patchDeliverySupportTicket = async (req, res) => {
-  try {
-    const support = require('../models/deliverySupportModel');
-    const { admin_reply, status } = req.body || {};
-    const ticket = await support.replyToTicket(req.params.id, { adminReply: admin_reply, status });
-    if (!ticket) return fail(res, 404, 'Support ticket not found.');
-    ok(res, 'Support ticket updated', ticket);
-  } catch (error) {
-    fail(res, error.status || 500, error.message || 'Failed to update support ticket.');
   }
 };
 
@@ -1980,8 +1864,7 @@ module.exports = {
   patchDeliveryBankAccount,
   sendDeliveryNotification,
   getDeliveryNotifications,
-  getDeliverySupportTickets,
-  patchDeliverySupportTicket,
+  getCustomerSupportTickets,
   getOrders,
   getOrderStats,
   getOrder,
@@ -2046,13 +1929,5 @@ module.exports = {
   postLoyaltyAdjust,
   postLoyaltyExpire,
   postLoyaltyCampaign,
-  getSupportCenter,
-  getSupportTickets,
-  assignSupportTicket,
-  resolveSupportTicket,
-  getSupportLiveChats,
-  getSupportLiveChatDetail,
-  postSupportAgentMessage,
-  getSupportAiSessions,
   getAdminInventory,
 };

@@ -1845,6 +1845,10 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS attachment_urls JSONB DEFAULT '[]'::jsonb
     `);
     await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_email_support_ticket_number
+        ON email_support(ticket_number) WHERE ticket_number IS NOT NULL
+    `);
+    await q(`
       CREATE UNIQUE INDEX IF NOT EXISTS idx_reviews_user_order
         ON reviews(user_id, order_id) WHERE order_id IS NOT NULL
     `);
@@ -2029,6 +2033,72 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS admin_notes TEXT,
         ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     `);
+
+    // ── Support Center canonical consolidation ──────────────────────────────
+    // Unifies the 3 independent ticket subsystems (customer/ticketModel,
+    // partner/deliverySupportModel, help-center/helpCenterModel) onto one
+    // normalized vocabulary without touching the legacy free-text status/
+    // priority columns those subsystems still write in 3 different casings.
+    // `user_id`/`description` are relaxed to nullable because
+    // deliverySupportModel.createTicket inserts partner tickets with neither
+    // (a partner ticket's initial description lives in support_messages, not
+    // the ticket header) — both currently violate NOT NULL constraints from
+    // schema.sql, which means partner ticket creation has been failing with a
+    // 500 in production. This fixes that.
+    await q(`ALTER TABLE support_tickets ALTER COLUMN user_id DROP NOT NULL`);
+    await q(`ALTER TABLE support_tickets ALTER COLUMN description DROP NOT NULL`);
+    await q(`
+      ALTER TABLE support_tickets
+        ADD COLUMN IF NOT EXISTS requester_type VARCHAR(20),
+        ADD COLUMN IF NOT EXISTS source_channel VARCHAR(20) DEFAULT 'app',
+        ADD COLUMN IF NOT EXISTS status_norm VARCHAR(20),
+        ADD COLUMN IF NOT EXISTS priority_norm VARCHAR(20)
+    `);
+    await q(`
+      UPDATE support_tickets SET requester_type = 'partner'
+      WHERE requester_type IS NULL AND partner_id IS NOT NULL
+    `);
+    await q(`
+      UPDATE support_tickets SET requester_type = 'restaurant'
+      WHERE requester_type IS NULL AND category = 'Restaurant Complaint' AND restaurant_id IS NOT NULL
+    `);
+    await q(`
+      UPDATE support_tickets SET requester_type = 'customer'
+      WHERE requester_type IS NULL AND user_id IS NOT NULL
+    `);
+    await q(`
+      UPDATE support_tickets SET status_norm = CASE
+        WHEN lower(status) = 'open' THEN 'open'
+        WHEN lower(status) IN ('in progress', 'in_progress', 'pending', 'assigned') THEN 'in_progress'
+        WHEN lower(status) = 'resolved' THEN 'resolved'
+        WHEN lower(status) = 'closed' THEN 'closed'
+        ELSE 'open' END
+      WHERE status_norm IS NULL
+    `);
+    await q(`
+      UPDATE support_tickets SET priority_norm = CASE
+        WHEN lower(priority) = 'low' THEN 'low'
+        WHEN lower(priority) IN ('medium', 'normal') THEN 'medium'
+        WHEN lower(priority) = 'high' THEN 'high'
+        WHEN lower(priority) = 'urgent' THEN 'urgent'
+        ELSE 'medium' END
+      WHERE priority_norm IS NULL
+    `);
+    await q(`ALTER TABLE support_tickets ALTER COLUMN status_norm SET DEFAULT 'open'`);
+    await q(`ALTER TABLE support_tickets ALTER COLUMN priority_norm SET DEFAULT 'medium'`);
+    await q(`
+      ALTER TABLE support_tickets ADD CONSTRAINT chk_support_tickets_status_norm
+        CHECK (status_norm IN ('open', 'in_progress', 'resolved', 'closed'))
+    `);
+    await q(`
+      ALTER TABLE support_tickets ADD CONSTRAINT chk_support_tickets_priority_norm
+        CHECK (priority_norm IN ('low', 'medium', 'high', 'urgent'))
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_support_tickets_requester_type ON support_tickets(requester_type)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_support_tickets_status_norm ON support_tickets(status_norm)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_support_tickets_priority_norm ON support_tickets(priority_norm)`);
+    console.log('[SCHEMA] Support Center canonical consolidation ensured');
+
     await q(`
       CREATE INDEX IF NOT EXISTS idx_orders_user_created
         ON orders(user_id, created_at DESC)
@@ -3168,6 +3238,11 @@ async function ensureSchema() {
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_emergencies_order ON delivery_emergencies(order_id)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_emergencies_status ON delivery_emergencies(status)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_emergencies_created ON delivery_emergencies(created_at DESC)`);
+    await q(`
+      ALTER TABLE delivery_emergencies
+        ADD COLUMN IF NOT EXISTS escalated BOOLEAN DEFAULT FALSE,
+        ADD COLUMN IF NOT EXISTS escalated_at TIMESTAMP WITH TIME ZONE
+    `);
     console.log('[SCHEMA] Delivery Emergencies (SOS) schema ensured');
 
     // Bootstrap demo users ONLY when explicitly allowed (never default in production).

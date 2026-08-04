@@ -143,14 +143,16 @@ const createTicket = async ({
     await client.query('BEGIN');
     const ticketNumber = await nextTicketNumber(client);
     const pri = normalizePriority(priority);
+    const requesterType = cat === 'Restaurant Complaint' && restaurantId ? 'restaurant' : 'customer';
 
     const { rows } = await client.query(
       `INSERT INTO support_tickets (
          user_id, ticket_number, category, subject, description, priority,
-         order_id, restaurant_id, ai_session_id, status
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'Open')
+         order_id, restaurant_id, ai_session_id, status,
+         requester_type, source_channel, status_norm, priority_norm
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'Open', $10, 'app', 'open', $11)
        RETURNING *`,
-      [userId, ticketNumber, cat, subject, description, pri, orderId, restaurantId, aiSessionId]
+      [userId, ticketNumber, cat, subject, description, pri, orderId, restaurantId, aiSessionId, requesterType, pri.toLowerCase()]
     );
     const ticket = rows[0];
 
@@ -199,7 +201,7 @@ const addMessage = async ({
   }
 
   await pool.query(
-    `UPDATE support_tickets SET status = $1, updated_at = NOW() WHERE id = $2`,
+    `UPDATE support_tickets SET status = $1, status_norm = LOWER(REPLACE($1, ' ', '_')), updated_at = NOW() WHERE id = $2`,
     [newStatus, ticketId]
   );
 
@@ -217,6 +219,7 @@ const updateStatus = async (id, status, { adminNotes = null } = {}) => {
   const { rows } = await pool.query(
     `UPDATE support_tickets SET
        status = $1,
+       status_norm = LOWER(REPLACE($1, ' ', '_')),
        admin_notes = COALESCE($2, admin_notes),
        resolved_at = CASE WHEN $1 = 'Resolved' THEN NOW() ELSE resolved_at END,
        closed_at = CASE WHEN $1 = 'Closed' THEN NOW() ELSE closed_at END,
@@ -233,6 +236,7 @@ const assignAgent = async (id, agentId) => {
     `UPDATE support_tickets SET
        assigned_agent_id = $1,
        status = CASE WHEN status = 'Open' THEN 'In Progress' ELSE status END,
+       status_norm = CASE WHEN status = 'Open' THEN 'in_progress' ELSE status_norm END,
        updated_at = NOW()
      WHERE id = $2
      RETURNING *`,

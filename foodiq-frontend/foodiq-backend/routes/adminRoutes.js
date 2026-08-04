@@ -40,6 +40,7 @@ router.delete('/users/:id', requirePermission('customers'), c.removeUser);
 router.get('/users/:id/orders', requirePermission('customers'), c.userOrders);
 router.get('/users/:id/wallet', requirePermission('customers'), c.userWallet);
 router.get('/users/:id/referrals', requirePermission('customers'), c.userReferrals);
+router.get('/customers/:id/support', requirePermission('customers'), c.getCustomerSupportTickets);
 
 const sc = require('../controllers/shiftController');
 router.get('/shifts', requirePermission('delivery'), sc.getAdminShifts);
@@ -69,10 +70,6 @@ router.delete('/delivery-reviews/:id', requirePermission('delivery', 'feedback')
 const { notificationLimiter, supportLimiter } = require('../middleware/rateLimiters');
 router.get('/delivery/notifications', requirePermission('delivery', 'notifications'), c.getDeliveryNotifications);
 router.post('/delivery/notifications/send', notificationLimiter, requirePermission('delivery', 'notifications'), c.sendDeliveryNotification);
-
-const { validateAdminReply } = require('../validators/deliverySupportValidator');
-router.get('/delivery/support', requirePermission('delivery', 'feedback'), c.getDeliverySupportTickets);
-router.patch('/delivery/support/:id', supportLimiter, requirePermission('delivery', 'feedback'), validateAdminReply, c.patchDeliverySupportTicket);
 
 router.get('/orders', requirePermission('orders'), c.getOrders);
 router.get('/orders/stats', requirePermission('orders'), c.getOrderStats);
@@ -155,14 +152,6 @@ router.get('/support/ticket/:id', requirePermission('delivery', 'feedback'), dri
 router.patch('/support/assign', requirePermission('delivery', 'feedback'), driverSupportAdmin.adminAssignTicket);
 router.patch('/support/status', requirePermission('delivery', 'feedback'), driverSupportAdmin.adminUpdateStatus);
 router.post('/support/message', supportLimiter, requirePermission('delivery', 'feedback'), driverSupportAdmin.adminSendMessage);
-
-router.get('/support', requirePermission('feedback'), c.getSupportCenter);
-router.put('/support/tickets/:id/assign', requirePermission('feedback'), c.assignSupportTicket);
-router.put('/support/tickets/:id/resolve', requirePermission('feedback'), c.resolveSupportTicket);
-router.get('/support/live-chats', requirePermission('feedback'), c.getSupportLiveChats);
-router.get('/support/live-chats/:id', requirePermission('feedback'), c.getSupportLiveChatDetail);
-router.post('/support/live-chats/:id/messages', requirePermission('feedback'), c.postSupportAgentMessage);
-router.get('/support/ai-sessions', requirePermission('feedback'), c.getSupportAiSessions);
 
 const ticketAdmin = require('../controllers/ticketController');
 router.get('/tickets', requirePermission('feedback'), ticketAdmin.adminListTickets);
