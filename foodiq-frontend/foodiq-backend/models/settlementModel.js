@@ -267,6 +267,7 @@ const bulkApproveSettlements = async (ids, approvedBy) => {
 };
 
 module.exports = {
+  SETTLEMENT_REVENUE_CTE,
   getCommissionRate,
   getRestaurantSettlements,
   getPartnerEarningsSummary,

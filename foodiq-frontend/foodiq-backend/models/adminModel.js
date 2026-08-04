@@ -1,4 +1,5 @@
 const { pool } = require('../config/db');
+const { SETTLEMENT_REVENUE_CTE, getCommissionRate } = require('./settlementModel');
 
 const getDashboardStats = async () => {
   const { rows } = await pool.query(`
@@ -159,6 +160,35 @@ const getDashboardStats = async () => {
     WHERE status IN ('Open', 'In Progress')
   `);
 
+  // Today's refunds, active coupons, and platform-wide wallet balances.
+  const financeToday = await pool.query(`
+    SELECT
+      (SELECT COALESCE(SUM(amount), 0)::float FROM refunds
+        WHERE status = 'processed' AND created_at::date = CURRENT_DATE) AS refund_amount_today,
+      (SELECT COUNT(*)::int FROM coupons
+        WHERE is_active = TRUE AND (valid_until IS NULL OR valid_until > NOW())) AS active_coupons,
+      (SELECT COALESCE(SUM(balance + cashback_balance + refund_balance), 0)::float
+        FROM customer_wallets) AS customer_wallet_balance,
+      (SELECT COALESCE(SUM(available_balance), 0)::float FROM delivery_wallets) AS delivery_wallet_balance,
+      (SELECT COALESCE(SUM(de.amount), 0)::float FROM delivery_earnings de
+        WHERE de.earned_at::date = CURRENT_DATE) AS delivery_earnings_today
+  `);
+
+  // Today's platform commission / restaurant payout split — reuses
+  // settlementModel's single source of truth for commission-bearing revenue
+  // (delivered + paid, net of processed refunds) rather than re-deriving a
+  // third revenue predicate here.
+  const commissionRate = await getCommissionRate();
+  const revenueSplitToday = await pool.query(`
+    WITH ${SETTLEMENT_REVENUE_CTE}
+    SELECT COALESCE(SUM(net_amount), 0)::float AS net_revenue_today
+    FROM orders_revenue
+    WHERE created_at::date = CURRENT_DATE
+  `);
+  const netRevenueToday = revenueSplitToday.rows[0].net_revenue_today;
+  const platformEarningsToday = Math.round(netRevenueToday * commissionRate * 100) / 100;
+  const restaurantEarningsToday = Math.round((netRevenueToday - platformEarningsToday) * 100) / 100;
+
   const statusCounts = {};
   for (const row of orderStatusToday.rows) statusCounts[row.status] = row.count;
 
@@ -173,6 +203,15 @@ const getDashboardStats = async () => {
     live_restaurants: liveRestaurants.rows,
     peak_hours: peakHours.rows,
     open_support_tickets: supportTickets.rows[0].open_count,
+    refund_amount_today: financeToday.rows[0].refund_amount_today,
+    active_coupons: financeToday.rows[0].active_coupons,
+    wallet_balance: Math.round(
+      (financeToday.rows[0].customer_wallet_balance + financeToday.rows[0].delivery_wallet_balance) * 100
+    ) / 100,
+    platform_earnings_today: platformEarningsToday,
+    restaurant_earnings_today: restaurantEarningsToday,
+    delivery_earnings_today: financeToday.rows[0].delivery_earnings_today,
+    profit_today: platformEarningsToday,
   };
 };
 

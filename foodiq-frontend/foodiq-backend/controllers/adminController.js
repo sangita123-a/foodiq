@@ -45,6 +45,13 @@ const getDashboard = async (req, res) => {
       liveRestaurants: data.live_restaurants,
       peakHours: data.peak_hours,
       openSupportTickets: data.open_support_tickets,
+      refundAmountToday: data.refund_amount_today,
+      activeCoupons: data.active_coupons,
+      walletBalance: data.wallet_balance,
+      platformEarningsToday: data.platform_earnings_today,
+      restaurantEarningsToday: data.restaurant_earnings_today,
+      deliveryEarningsToday: data.delivery_earnings_today,
+      profitToday: data.profit_today,
     });
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
@@ -1585,34 +1592,46 @@ const exportReport = async (req, res) => {
       columns = ORDER_EXPORT_COLUMNS;
     }
 
-    if (format === 'pdf' && type === 'orders') {
-      const { buildOrdersExportPdf } = require('../services/orderExportPdfService');
-      const pdf = await buildOrdersExportPdf(rows, ORDER_EXPORT_COLUMNS);
+    // Every report type gets labeled columns for PDF/XLSX rendering — reuse
+    // the hand-authored ones where they exist, otherwise derive from the
+    // first row (same fallback the CSV branch already used).
+    const exportColumns = columns || (rows.length ? Object.keys(rows[0]).map((k) => ({ key: k, label: k.replace(/_/g, ' ') })) : []);
+    const auditAction = `${type}.export`;
+    const logExport = () => {
       const { writeAudit } = require('../services/auditService');
       writeAudit({
         userId: req.user.id,
         role: req.user.role,
-        action: 'order.export',
-        category: 'orders',
+        action: auditAction,
+        category: type,
         meta: { format, count: rows.length },
         req,
       }).catch(() => {});
+      const { logReportRun } = require('../services/analyticsExportService');
+      logReportRun({ reportType: type, format, createdBy: req.user.id, rowCount: rows.length }).catch(() => {});
+    };
+
+    if (format === 'pdf' && type === 'orders') {
+      const { buildOrdersExportPdf } = require('../services/orderExportPdfService');
+      const pdf = await buildOrdersExportPdf(rows, ORDER_EXPORT_COLUMNS);
+      logExport();
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', 'attachment; filename="orders-export.pdf"');
       return res.send(pdf);
     }
 
+    if (format === 'xlsx' && type === 'orders') {
+      const { buildExportXlsx } = require('../services/genericReportExportService');
+      const xlsx = await buildExportXlsx(rows, ORDER_EXPORT_COLUMNS, { sheetName: 'Orders' });
+      logExport();
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename="orders-report.xlsx"');
+      return res.send(xlsx);
+    }
+
     if ((format === 'pdf' || format === 'xlsx') && type === 'restaurants') {
       const restaurantExport = require('../services/restaurantExportService');
-      const { writeAudit } = require('../services/auditService');
-      writeAudit({
-        userId: req.user.id,
-        role: req.user.role,
-        action: 'restaurant.export',
-        category: 'restaurant',
-        meta: { format, count: rows.length },
-        req,
-      }).catch(() => {});
+      logExport();
 
       if (format === 'pdf') {
         const pdf = await restaurantExport.buildRestaurantsExportPdf(rows, RESTAURANT_EXPORT_COLUMNS);
@@ -1626,26 +1645,32 @@ const exportReport = async (req, res) => {
       return res.send(xlsx);
     }
 
+    if ((format === 'pdf' || format === 'xlsx') && ['sales', 'payment', 'customers', 'delivery'].includes(type)) {
+      const { buildExportPdf, buildExportXlsx } = require('../services/genericReportExportService');
+      logExport();
+
+      if (format === 'pdf') {
+        const pdf = await buildExportPdf(rows, exportColumns, { title: `${type[0].toUpperCase()}${type.slice(1)} Report` });
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${type}-report.pdf"`);
+        return res.send(pdf);
+      }
+      const xlsx = await buildExportXlsx(rows, exportColumns, { sheetName: type });
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${type}-report.xlsx"`);
+      return res.send(xlsx);
+    }
+
     if (format === 'csv') {
       if (!rows.length) {
         res.setHeader('Content-Type', 'text/csv');
         return res.send('No data');
       }
-      const cols = columns || Object.keys(rows[0]).map((k) => ({ key: k, label: k }));
-      const csv = [cols.map((c) => c.label).join(',')].concat(
-        rows.map((r) => cols.map((c) => JSON.stringify(r[c.key] ?? '')).join(','))
-      ).join('\n');
-      if (type === 'orders' || type === 'restaurants') {
-        const { writeAudit } = require('../services/auditService');
-        writeAudit({
-          userId: req.user.id,
-          role: req.user.role,
-          action: `${type === 'orders' ? 'order' : 'restaurant'}.export`,
-          category: type === 'orders' ? 'orders' : 'restaurant',
-          meta: { format, count: rows.length },
-          req,
-        }).catch(() => {});
-      }
+      const { rowsToCsv } = require('../services/analyticsExportService');
+      const csv = rowsToCsv(exportColumns.map((c) => c.label), rows.map((r) =>
+        exportColumns.reduce((acc, c) => ({ ...acc, [c.label]: r[c.key] ?? '' }), {})
+      ));
+      logExport();
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', `attachment; filename="${type}-report.csv"`);
       return res.send(csv);
