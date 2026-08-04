@@ -162,6 +162,59 @@ const emitPaymentCompleted = ({ order_id, user_id, restaurant_id, amount, paymen
   });
 };
 
+/** Customer or delivery-partner wallet balance changed (credit/debit/refund). */
+const emitWalletUpdated = ({ wallet_type, user_id, partner_id, balance, reason }) => {
+  const io = getIO();
+  if (!io) return;
+  const payload = { wallet_type, balance, reason, at: new Date().toISOString() };
+  if (user_id) io.to(userRoom(user_id)).emit(EVENTS.WALLET_UPDATED, { ...payload, user_id });
+  if (partner_id) io.to(deliveryRoom(partner_id)).emit(EVENTS.WALLET_UPDATED, { ...payload, partner_id });
+  io.to(roleRoom('admin')).emit(EVENTS.WALLET_UPDATED, { ...payload, user_id, partner_id });
+};
+
+/** A refund request was created (pending or auto-approved). */
+const emitRefundInitiated = ({ order_id, user_id, amount, refund_id }) => {
+  const io = getIO();
+  if (!io) return;
+  const payload = { order_id, user_id, amount, refund_id, at: new Date().toISOString() };
+  const targets = [roleRoom('admin')];
+  if (order_id) targets.push(orderRoom(order_id));
+  if (user_id) targets.push(userRoom(user_id));
+  [...new Set(targets)].forEach((room) => io.to(room).emit(EVENTS.REFUND_INITIATED, payload));
+};
+
+/** A refund finished processing (money actually moved to wallet/Razorpay). */
+const emitRefundCompleted = ({ order_id, user_id, amount, refund_id, method }) => {
+  const io = getIO();
+  if (!io) return;
+  const payload = { order_id, user_id, amount, refund_id, method, at: new Date().toISOString() };
+  const targets = [roleRoom('admin')];
+  if (order_id) targets.push(orderRoom(order_id));
+  if (user_id) targets.push(userRoom(user_id));
+  [...new Set(targets)].forEach((room) => io.to(room).emit(EVENTS.REFUND_COMPLETED, payload));
+  io.to(roleRoom('admin')).emit(EVENTS.ADMIN_LIVE, { type: 'refund_completed', ...payload });
+};
+
+/** A restaurant settlement batch was marked paid. */
+const emitSettlementCompleted = ({ settlement_id, restaurant_id, net_payout }) => {
+  const io = getIO();
+  if (!io) return;
+  const payload = { settlement_id, restaurant_id, net_payout, at: new Date().toISOString() };
+  if (restaurant_id) io.to(restaurantRoom(restaurant_id)).emit(EVENTS.SETTLEMENT_COMPLETED, payload);
+  io.to(roleRoom('admin')).emit(EVENTS.SETTLEMENT_COMPLETED, payload);
+  io.to(roleRoom('admin')).emit(EVENTS.ADMIN_LIVE, { type: 'settlement_completed', ...payload });
+};
+
+/** A payout (restaurant settlement or delivery withdrawal) was approved. */
+const emitPayoutApproved = ({ type, id, restaurant_id, partner_id, amount }) => {
+  const io = getIO();
+  if (!io) return;
+  const payload = { type, id, restaurant_id, partner_id, amount, at: new Date().toISOString() };
+  if (restaurant_id) io.to(restaurantRoom(restaurant_id)).emit(EVENTS.PAYOUT_APPROVED, payload);
+  if (partner_id) io.to(deliveryRoom(partner_id)).emit(EVENTS.PAYOUT_APPROVED, payload);
+  io.to(roleRoom('admin')).emit(EVENTS.PAYOUT_APPROVED, payload);
+};
+
 /**
  * Live rider GPS update → order watchers + restaurant + admin.
  */
@@ -619,6 +672,11 @@ module.exports = {
   emitOrderStatus,
   emitOrderCreated,
   emitPaymentCompleted,
+  emitWalletUpdated,
+  emitRefundInitiated,
+  emitRefundCompleted,
+  emitSettlementCompleted,
+  emitPayoutApproved,
   emitLocationUpdated,
   emitDeliveryTracking,
   emitRiderPresence,

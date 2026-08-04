@@ -49,6 +49,7 @@ const creditWallet = async (partnerId, amount, orderId = null, description = 'De
       console.warn('[deliveryWallet] wallet_credit notification skipped:', err.message);
     }
 
+    notifyWalletUpdated(partnerId, rows[0].available_balance, 'credit');
     return rows[0];
   } catch (error) {
     await client.query('ROLLBACK');
@@ -57,6 +58,15 @@ const creditWallet = async (partnerId, amount, orderId = null, description = 'De
     client.release();
   }
 };
+
+function notifyWalletUpdated(partnerId, balance, reason) {
+  try {
+    const { emitWalletUpdated } = require('../socket/emitters');
+    emitWalletUpdated({ wallet_type: 'delivery', partner_id: partnerId, balance: Number(balance), reason });
+  } catch {
+    /* ignore */
+  }
+}
 
 const getWalletSummary = async (partnerId) => {
   const wallet = await getOrCreateWallet(partnerId);
@@ -129,6 +139,10 @@ const requestWithdrawal = async (partnerId, amount, bankAccountId = null) => {
     throw Object.assign(new Error(`Minimum withdrawal amount is ₹${MIN_WITHDRAWAL}`), { status: 400 });
   }
 
+  // Cheap early exit for the common case. The authoritative guard against
+  // concurrent double-submits is the uq_withdrawal_requests_one_pending
+  // partial unique index (ensureSchema.js) — this check alone was racy,
+  // since two simultaneous requests could both pass it before either inserted.
   const existing = await pool.query(
     `SELECT id FROM withdrawal_requests WHERE partner_id = $1 AND status = 'pending'`,
     [partnerId]
@@ -171,12 +185,20 @@ const requestWithdrawal = async (partnerId, amount, bankAccountId = null) => {
     if (!walletRows[0]) {
       throw Object.assign(new Error('Insufficient available balance'), { status: 400 });
     }
-    const { rows } = await client.query(
-      `INSERT INTO withdrawal_requests (partner_id, amount, bank_account_id, status)
-       VALUES ($1, $2, $3, 'pending')
-       RETURNING *`,
-      [partnerId, amt, bankAccount.id]
-    );
+    let rows;
+    try {
+      ({ rows } = await client.query(
+        `INSERT INTO withdrawal_requests (partner_id, amount, bank_account_id, status)
+         VALUES ($1, $2, $3, 'pending')
+         RETURNING *`,
+        [partnerId, amt, bankAccount.id]
+      ));
+    } catch (insertErr) {
+      if (insertErr.code === '23505') {
+        throw Object.assign(new Error('You already have a pending withdrawal request'), { status: 409 });
+      }
+      throw insertErr;
+    }
     await client.query('COMMIT');
     return rows[0];
   } catch (error) {
@@ -248,27 +270,32 @@ const processWithdrawal = async (id, action, adminNote = '') => {
       throw Object.assign(new Error('Withdrawal request has already been processed'), { status: 409 });
     }
 
+    let updatedWallet;
     if (action === 'approve') {
-      await client.query(
+      const walletRes = await client.query(
         `UPDATE delivery_wallets
          SET pending_balance = pending_balance - $1, updated_at = CURRENT_TIMESTAMP
-         WHERE partner_id = $2`,
+         WHERE partner_id = $2
+         RETURNING *`,
         [request.amount, request.partner_id]
       );
+      updatedWallet = walletRes.rows[0];
       await client.query(
         `INSERT INTO delivery_transactions (partner_id, type, amount, description, status)
          VALUES ($1, 'debit', $2, 'Withdrawal approved', 'completed')`,
         [request.partner_id, request.amount]
       );
     } else {
-      await client.query(
+      const walletRes = await client.query(
         `UPDATE delivery_wallets
          SET pending_balance = pending_balance - $1,
              available_balance = available_balance + $1,
              updated_at = CURRENT_TIMESTAMP
-         WHERE partner_id = $2`,
+         WHERE partner_id = $2
+         RETURNING *`,
         [request.amount, request.partner_id]
       );
+      updatedWallet = walletRes.rows[0];
     }
 
     const { rows } = await client.query(
@@ -295,6 +322,25 @@ const processWithdrawal = async (id, action, adminNote = '') => {
       });
     } catch (err) {
       console.warn('[deliveryWallet] withdrawal notification skipped:', err.message);
+    }
+
+    notifyWalletUpdated(
+      request.partner_id,
+      updatedWallet?.available_balance,
+      action === 'approve' ? 'withdrawal_approved' : 'withdrawal_rejected'
+    );
+    if (action === 'approve') {
+      try {
+        const { emitPayoutApproved } = require('../socket/emitters');
+        emitPayoutApproved({
+          type: 'delivery_withdrawal',
+          id: rows[0].id,
+          partner_id: request.partner_id,
+          amount: Number(request.amount),
+        });
+      } catch {
+        /* ignore */
+      }
     }
 
     return rows[0];

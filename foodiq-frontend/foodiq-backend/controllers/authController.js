@@ -208,9 +208,9 @@ const registerUser = async (req, res) => {
       // Referral invite code (optional)
       try {
         const referralCode = req.body.referral_code || req.body.invite_code;
-        const { applyReferralOnSignup, getOrCreateReferralCode } = require('../models/referralModel');
+        const { redeemReferralCode, getOrCreateReferralCode } = require('../services/customerReferralService');
         if (referralCode) {
-          await applyReferralOnSignup({ refereeId: user.id, code: referralCode });
+          await redeemReferralCode({ code: referralCode, refereeId: user.id });
         }
         await getOrCreateReferralCode(user.id, full_name);
       } catch (refErr) {

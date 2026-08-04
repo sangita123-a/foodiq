@@ -8,7 +8,7 @@ const {
 const { getCartByUserId, getCartItems } = require('../models/cartModel');
 const { getOfferByCouponCode, validateOfferEligibility } = require('../models/offerModel');
 const { validateRestaurantCoupon } = require('../models/liveDealModel');
-const { listReferralStats } = require('../models/referralModel');
+const { listReferralStats } = require('../services/customerReferralService');
 const { pool } = require('../config/db');
 
 const getCoupons = async (req, res) => {
@@ -42,7 +42,7 @@ const getMyRewards = async (req, res) => {
   try {
     const [summary, referral] = await Promise.all([
       getMyRewardsSummary(req.user.id),
-      listReferralStats(req.user.id),
+      listReferralStats(req.user.id, req.user.full_name),
     ]);
     res.json({
       success: true,

@@ -397,11 +397,26 @@ class DispatchModel {
       UPDATE orders
       SET delivery_partner_id = $1,
           status = 'Out for Delivery',
+          assigned_at = CURRENT_TIMESTAMP,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = $2
       RETURNING *
     `;
     const { rows } = await pool.query(query, [partnerId, orderId]);
+    if (rows[0]) {
+      // AI dispatch commits the assignment immediately (no offer/accept step) — keep
+      // order_tracking + delivery_assignments + delivery_status_history in sync with
+      // that so the admin panel and the partner's own order list agree on who has
+      // this order, instead of only orders.delivery_partner_id knowing about it.
+      const { syncAssignmentState } = require('./deliveryModel');
+      await syncAssignmentState({
+        orderId,
+        partnerId,
+        assignmentStatus: 'accepted',
+        trackingStatus: 'Out for Delivery',
+        note: 'Auto-assigned by AI dispatch',
+      }).catch((err) => console.error('[dispatch] syncAssignmentState failed:', err.message));
+    }
     return rows[0];
   }
 

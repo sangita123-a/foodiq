@@ -8,7 +8,7 @@ const { recordView, listRecent } = require('../models/recentlyViewedModel');
 const {
   getOrCreateReferralCode,
   listReferralStats,
-} = require('../models/referralModel');
+} = require('../services/customerReferralService');
 const {
   purchaseGiftCard,
   getByCode,
@@ -101,7 +101,7 @@ const getRecentViews = async (req, res) => {
 
 const getReferral = async (req, res) => {
   try {
-    const stats = await listReferralStats(req.user.id);
+    const stats = await listReferralStats(req.user.id, req.user.full_name);
     return ok(res, 'Referral', stats);
   } catch (err) {
     return fail(res, 500, 'Server Error', err);

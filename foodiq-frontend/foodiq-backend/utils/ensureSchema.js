@@ -2105,6 +2105,58 @@ async function ensureSchema() {
         ON coupon_history(user_id, created_at DESC)
     `);
     await q(`
+      CREATE TABLE IF NOT EXISTS coupon_usage (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        coupon_id UUID NOT NULL REFERENCES coupons(id) ON DELETE CASCADE,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        used_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_coupon_usage_coupon
+        ON coupon_usage(coupon_id)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_coupon_usage_coupon_user
+        ON coupon_usage(coupon_id, user_id)
+    `);
+    await q(`
+      CREATE TABLE IF NOT EXISTS live_deals (
+        id SERIAL PRIMARY KEY,
+        deal_key VARCHAR(50) UNIQUE NOT NULL,
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        coupon_id UUID REFERENCES coupons(id) ON DELETE SET NULL,
+        offer_title VARCHAR(255) NOT NULL,
+        description TEXT,
+        logo_url TEXT,
+        banner_url TEXT,
+        delivery_time_label VARCHAR(50) DEFAULT '30 min',
+        timer_seconds INTEGER DEFAULT 3600,
+        is_active BOOLEAN DEFAULT TRUE,
+        sort_order INTEGER DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_live_deals_restaurant
+        ON live_deals(restaurant_id)
+    `);
+    await q(`
+      CREATE TABLE IF NOT EXISTS restaurant_coupons (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        coupon_id UUID NOT NULL REFERENCES coupons(id) ON DELETE CASCADE,
+        UNIQUE(restaurant_id, coupon_id)
+      )
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_restaurant_coupons_coupon
+        ON restaurant_coupons(coupon_id)
+    `);
+    await q(`
       INSERT INTO coupons (code, discount_amount, discount_type, coupon_type, min_order_amount, title, description, one_time_per_user, valid_until, is_active)
       SELECT 'WELCOME50', 50, 'fixed', 'first_order', 199, 'First Order Offer', 'Flat ₹50 off on your first order', TRUE, CURRENT_TIMESTAMP + INTERVAL '1 year', TRUE
       WHERE NOT EXISTS (SELECT 1 FROM coupons WHERE code = 'WELCOME50')
@@ -3645,6 +3697,67 @@ async function ensureSchema() {
         ON restaurant_bank_accounts(restaurant_id) WHERE is_primary = TRUE
     `);
     console.log('[SCHEMA] Admin Restaurant Management tables ensured');
+
+    // Persisted restaurant payout/settlement batches. Previously restaurant
+    // settlements were only ever computed on the fly (see settlementModel.js)
+    // with no way to track approve/pay/reject status — this table gives the
+    // admin finance payout workflow something to actually act on.
+    await q(`
+      CREATE TABLE IF NOT EXISTS restaurant_settlements (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        period_start TIMESTAMP WITH TIME ZONE NOT NULL,
+        period_end TIMESTAMP WITH TIME ZONE NOT NULL,
+        delivered_orders INT NOT NULL DEFAULT 0,
+        gross_revenue NUMERIC(12,2) NOT NULL DEFAULT 0,
+        commission_percent NUMERIC(5,2) NOT NULL DEFAULT 0,
+        commission_amount NUMERIC(12,2) NOT NULL DEFAULT 0,
+        net_payout NUMERIC(12,2) NOT NULL DEFAULT 0,
+        status VARCHAR(20) NOT NULL DEFAULT 'pending'
+          CHECK (status IN ('pending', 'approved', 'paid', 'rejected')),
+        bank_account_id UUID REFERENCES restaurant_bank_accounts(id) ON DELETE SET NULL,
+        created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        approved_at TIMESTAMP WITH TIME ZONE,
+        paid_at TIMESTAMP WITH TIME ZONE,
+        rejection_reason TEXT,
+        notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      DROP TRIGGER IF EXISTS update_restaurant_settlements_modtime ON restaurant_settlements
+    `);
+    await q(`
+      CREATE TRIGGER update_restaurant_settlements_modtime
+        BEFORE UPDATE ON restaurant_settlements
+        FOR EACH ROW EXECUTE PROCEDURE update_modified_column()
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_restaurant_settlements_restaurant
+        ON restaurant_settlements(restaurant_id)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_restaurant_settlements_status
+        ON restaurant_settlements(status)
+    `);
+    // One settlement batch per restaurant per period — prevents duplicate settlements.
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_restaurant_settlements_period
+        ON restaurant_settlements(restaurant_id, period_start, period_end)
+    `);
+    console.log('[SCHEMA] Restaurant settlements table ensured');
+
+    // Delivery partners may only have one pending withdrawal request at a
+    // time (enforced in application code today, but that check-then-insert
+    // was racy under concurrent requests) — a partial unique index makes the
+    // rule airtight at the database level regardless of request timing.
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_withdrawal_requests_one_pending
+        ON withdrawal_requests(partner_id) WHERE status = 'pending'
+    `);
+    console.log('[SCHEMA] Withdrawal single-pending constraint ensured');
 
     console.log('[SCHEMA] Critical schema checks completed');
   } catch (err) {

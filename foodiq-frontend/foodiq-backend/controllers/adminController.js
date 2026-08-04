@@ -4,6 +4,15 @@ const ok = (res, message, data) => res.json({ success: true, message, data });
 const fail = (res, status, message, error = {}) =>
   res.status(status).json({ success: false, message, error });
 
+// Mirrors the orders_status_check CHECK constraint (utils/ensureSchema.js) — kept
+// here rather than trusting the DB constraint alone so a bad status string from an
+// admin API caller gets a clean 400 instead of a raw Postgres constraint-violation 500.
+const ADMIN_ORDER_STATUSES = new Set([
+  'Pending', 'Paid', 'Accepted', 'Preparing', 'Ready for Pickup', 'Picked Up',
+  'On The Way', 'Out for Delivery', 'Delivered', 'Cancelled',
+  'pending', 'paid', 'confirmed', 'cancelled',
+]);
+
 const getDashboard = async (req, res) => {
   try {
     const data = await admin.getDashboardStats();
@@ -667,6 +676,9 @@ const downloadOrderInvoice = async (req, res) => {
 
 const patchOrder = async (req, res) => {
   try {
+    if (req.body?.status && !ADMIN_ORDER_STATUSES.has(req.body.status)) {
+      return fail(res, 400, `Invalid status: ${req.body.status}`);
+    }
     const data = await admin.updateOrderAdmin(req.params.id, req.body, { id: req.user.id });
     if (!data) return fail(res, 404, 'Order not found');
 
@@ -708,15 +720,26 @@ const patchOrder = async (req, res) => {
 
 const refund = async (req, res) => {
   try {
-    const { processRefund } = require('./paymentController');
-    const data = await processRefund({
+    // Routed through refundService for its dedupe + row-locked balance
+    // protection (a double-click or retried request can no longer refund
+    // the same order twice past the payment amount). refundMethod:
+    // 'original' keeps this endpoint's existing behavior of refunding to
+    // Razorpay — refundService still coerces COD payments to a wallet
+    // credit under the hood, since COD has no original payment to refund to.
+    const { createRefundRequest } = require('../services/refundService');
+    const result = await createRefundRequest({
       orderId: req.params.id,
       amount: req.body?.amount,
+      refundType: req.body?.type || (req.body?.amount ? 'partial' : 'full'),
+      refundMethod: 'original',
       reason: req.body?.reason || 'Admin refund',
       initiatedBy: req.user.id,
-      type: req.body?.type || (req.body?.amount ? 'partial' : 'full'),
-      cancelOrder: req.body?.cancel_order !== false,
+      autoApprove: true,
     });
+    if (result.duplicate) {
+      return ok(res, 'Refund already processed for this order', result.request);
+    }
+    const data = result.refund;
 
     try {
       const { recordStatusChange } = require('../models/orderStatusHistoryModel');
@@ -755,6 +778,9 @@ const bulkUpdateStatus = async (req, res) => {
     const { ids, status, reason } = req.body || {};
     if (!Array.isArray(ids) || !ids.length || !status) {
       return fail(res, 400, 'ids (array) and status are required');
+    }
+    if (!ADMIN_ORDER_STATUSES.has(status)) {
+      return fail(res, 400, `Invalid status: ${status}`);
     }
     const result = await admin.bulkUpdateOrderStatus(ids, status, reason, { id: req.user.id });
     try {
@@ -930,7 +956,7 @@ const postCoupon = async (req, res) => {
     }
     res.status(201).json({ success: true, message: 'Coupon created', data });
   } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
+    fail(res, error.status || 500, error.status ? error.message : 'Server Error', error.message);
   }
 };
 
@@ -940,7 +966,7 @@ const patchCoupon = async (req, res) => {
     if (!data) return fail(res, 404, 'Coupon not found');
     ok(res, 'Coupon updated', data);
   } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
+    fail(res, error.status || 500, error.status ? error.message : 'Server Error', error.message);
   }
 };
 
@@ -1285,6 +1311,11 @@ const sendMarketingCampaign = async (req, res) => {
     const campaign = await admin.updateMarketingCampaign(req.params.id, { status: 'sending' });
     if (!campaign) return fail(res, 404, 'Campaign not found');
 
+    if (!['push', 'email', 'sms'].includes(campaign.channel)) {
+      await admin.updateMarketingCampaign(req.params.id, { status: 'draft' });
+      return fail(res, 400, `Campaigns with channel "${campaign.channel}" cannot be sent from here`);
+    }
+
     let sent = 0;
     if (campaign.channel === 'push') {
       const result = await admin.broadcastNotification({
@@ -1293,27 +1324,28 @@ const sendMarketingCampaign = async (req, res) => {
         message: campaign.message,
       });
       sent = result.sent;
-    } else if (campaign.channel === 'email' || campaign.channel === 'sms') {
-      const messaging = require('../controllers/messagingController');
-      const fakeReq = {
-        body: {
-          audience: campaign.audience || 'all',
-          subject: campaign.subject || campaign.name,
+    } else {
+      // Email/SMS campaigns reuse the same real audience-resolution + per-user
+      // dispatch pipeline as push (notify() -> commsService.dispatchEmailSms,
+      // which has real Nodemailer/SendGrid/Twilio/MSG91 provider integration).
+      // Previously this routed through messagingController.postPromo with a
+      // fake single-recipient request that always failed silently, so every
+      // email/SMS campaign reported "sent" while reaching nobody.
+      const { resolveAudienceUsers } = require('../services/pushNotificationService');
+      const { notify } = require('../services/notificationService');
+      const users = await resolveAudienceUsers({ audience: campaign.audience || 'all' });
+      for (const u of users) {
+        await notify({
+          userId: u.id,
+          type: 'coupon_alert',
+          title: campaign.subject || campaign.name,
           message: campaign.message,
-          template: 'promo',
-        },
-        user: req.user,
-      };
-      const fakeRes = {
-        json: (payload) => payload,
-        status: () => ({ json: () => ({}) }),
-      };
-      if (campaign.channel === 'email') {
-        await messaging.postPromo(fakeReq, fakeRes);
-      } else {
-        await messaging.postPromo(fakeReq, fakeRes);
+          role: u.role,
+          link: '/notifications',
+          dedupeKey: `campaign:${req.params.id}:${u.id}`,
+        });
+        sent += 1;
       }
-      sent = 1;
     }
 
     const updated = await admin.updateMarketingCampaign(req.params.id, {
@@ -1360,6 +1392,117 @@ const getDeliveryReportHandler = async (req, res) => {
 const getSettlements = async (req, res) => {
   try {
     ok(res, 'Settlements retrieved', await admin.getRestaurantSettlements());
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const settlementModel = require('../models/settlementModel');
+
+/** GET /admin/payments/settlements/batches — persisted settlement batches (status/date/restaurant filters). */
+const listSettlementBatches = async (req, res) => {
+  try {
+    const data = await settlementModel.listSettlements({
+      status: req.query.status || '',
+      restaurant_id: req.query.restaurant_id || '',
+      date_from: req.query.date_from || '',
+      date_to: req.query.date_to || '',
+      limit: req.query.limit,
+    });
+    ok(res, 'Settlement batches retrieved', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+/** POST /admin/payments/settlements/generate — snapshot a payable settlement batch for one restaurant/period. */
+const generateSettlementBatch = async (req, res) => {
+  try {
+    const { restaurant_id, period_start, period_end, bank_account_id } = req.body || {};
+    if (!restaurant_id || !period_start || !period_end) {
+      return fail(res, 400, 'restaurant_id, period_start, and period_end are required');
+    }
+    const result = await settlementModel.createSettlementBatch({
+      restaurantId: restaurant_id,
+      periodStart: period_start,
+      periodEnd: period_end,
+      bankAccountId: bank_account_id || null,
+      createdBy: req.user.id,
+    });
+    const msg = result.duplicate ? 'Settlement already exists for this period' : 'Settlement batch created';
+    ok(res, msg, result);
+  } catch (error) {
+    fail(res, error.status || 500, error.message);
+  }
+};
+
+const approveSettlementBatch = async (req, res) => {
+  try {
+    const settlement = await settlementModel.approveSettlement(req.params.id, req.user.id);
+    try {
+      const { emitPayoutApproved } = require('../socket/emitters');
+      emitPayoutApproved({
+        type: 'restaurant_settlement',
+        id: settlement.id,
+        restaurant_id: settlement.restaurant_id,
+        amount: Number(settlement.net_payout),
+      });
+    } catch {
+      /* ignore */
+    }
+    ok(res, 'Settlement approved', settlement);
+  } catch (error) {
+    fail(res, error.status || 500, error.message);
+  }
+};
+
+const paySettlementBatch = async (req, res) => {
+  try {
+    const settlement = await settlementModel.markSettlementPaid(req.params.id);
+    try {
+      const { emitSettlementCompleted } = require('../socket/emitters');
+      emitSettlementCompleted({
+        settlement_id: settlement.id,
+        restaurant_id: settlement.restaurant_id,
+        net_payout: Number(settlement.net_payout),
+      });
+    } catch {
+      /* ignore */
+    }
+    ok(res, 'Settlement marked paid', settlement);
+  } catch (error) {
+    fail(res, error.status || 500, error.message);
+  }
+};
+
+const rejectSettlementBatch = async (req, res) => {
+  try {
+    const settlement = await settlementModel.rejectSettlement(req.params.id, req.body?.reason || '');
+    ok(res, 'Settlement rejected', settlement);
+  } catch (error) {
+    fail(res, error.status || 500, error.message);
+  }
+};
+
+const bulkApproveSettlementBatches = async (req, res) => {
+  try {
+    const { ids } = req.body || {};
+    if (!Array.isArray(ids) || !ids.length) return fail(res, 400, 'ids array is required');
+    const settlements = await settlementModel.bulkApproveSettlements(ids, req.user.id);
+    try {
+      const { emitPayoutApproved } = require('../socket/emitters');
+      settlements.forEach((settlement) =>
+        emitPayoutApproved({
+          type: 'restaurant_settlement',
+          id: settlement.id,
+          restaurant_id: settlement.restaurant_id,
+          amount: Number(settlement.net_payout),
+        })
+      );
+    } catch {
+      /* ignore */
+    }
+    ok(res, `${settlements.length} settlement(s) approved`, settlements);
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
   }
@@ -1865,6 +2008,12 @@ module.exports = {
   getPaymentReportHandler,
   getDeliveryReportHandler,
   getSettlements,
+  listSettlementBatches,
+  generateSettlementBatch,
+  approveSettlementBatch,
+  paySettlementBatch,
+  rejectSettlementBatch,
+  bulkApproveSettlementBatches,
   exportReport,
   getLoyaltyOverview,
   patchLoyaltyRule,

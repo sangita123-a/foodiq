@@ -46,6 +46,9 @@ const expireStaleAssignments = async () => {
     [ASSIGNMENT_EXPIRE_SECONDS]
   );
   if (rows.length > 0) {
+    for (const r of rows) {
+      await releaseAssignment({ orderId: r.order_id, partnerId: r.delivery_partner_id }).catch(() => {});
+    }
     try {
       const { emitDeliveryOrderExpired } = require('../socket/emitters');
       rows.forEach((r) => emitDeliveryOrderExpired({ order_id: r.order_id, partner_id: r.delivery_partner_id }));
@@ -696,6 +699,7 @@ const rejectOrder = async (orderId, partnerId) => {
   );
   if (!rows[0]) throw Object.assign(new Error('No pending offer to reject'), { status: 404 });
   await recordHistory(rows[0].id, orderId, partnerId, 'rejected', 'Partner rejected delivery');
+  await releaseAssignment({ orderId, partnerId }).catch(() => {});
   return { rejected: true };
 };
 
@@ -967,6 +971,99 @@ const recordHistory = async (assignmentId, orderId, partnerId, status, note) => 
     `INSERT INTO delivery_status_history (assignment_id, order_id, delivery_partner_id, status, note)
      VALUES ($1, $2, $3, $4, $5)`,
     [assignmentId, orderId, partnerId, status, note]
+  );
+};
+
+/**
+ * Writes order_tracking + delivery_assignments + delivery_status_history for a
+ * partner assignment made outside the self-accept flow (admin push-assign, AI
+ * dispatch, offline-sync). Callers own the `orders.delivery_partner_id`/
+ * `assigned_at` write themselves since each has slightly different status logic;
+ * this only keeps the three tables the admin panel and rider app both read
+ * ("who is delivering this order") in sync with that write. Does not touch
+ * `orders` at all. See models/adminModel.js, models/dispatchModel.js,
+ * services/deliverySyncService.js for the three callers this replaces
+ * divergent ad hoc writes in.
+ */
+const syncAssignmentState = async ({
+  orderId,
+  partnerId,
+  assignmentStatus, // 'offered' | 'accepted'
+  trackingStatus,
+  note,
+  estimatedDeliveryAt = null, // Date | ISO string; defaults to +30 min from now
+  client = pool,
+}) => {
+  const eta = estimatedDeliveryAt || new Date(Date.now() + 30 * 60000);
+  await client.query(
+    `INSERT INTO order_tracking (order_id, delivery_partner_id, current_status, estimated_delivery_time)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (order_id) DO UPDATE SET
+       delivery_partner_id = EXCLUDED.delivery_partner_id,
+       current_status = EXCLUDED.current_status,
+       estimated_delivery_time = EXCLUDED.estimated_delivery_time,
+       updated_at = CURRENT_TIMESTAMP`,
+    [orderId, partnerId, trackingStatus, eta]
+  );
+
+  const existing = await client.query(
+    `SELECT id FROM delivery_assignments WHERE order_id = $1 AND delivery_partner_id = $2`,
+    [orderId, partnerId]
+  );
+
+  let assignmentId;
+  if (existing.rows[0]) {
+    assignmentId = existing.rows[0].id;
+    await client.query(
+      `UPDATE delivery_assignments
+       SET status = $1,
+           responded_at = CASE WHEN $1 = 'accepted' THEN CURRENT_TIMESTAMP ELSE responded_at END,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2`,
+      [assignmentStatus, assignmentId]
+    );
+  } else {
+    const expiresAt = assignmentStatus === 'offered'
+      ? new Date(Date.now() + ASSIGNMENT_EXPIRE_SECONDS * 1000)
+      : null;
+    const inserted = await client.query(
+      `INSERT INTO delivery_assignments (order_id, delivery_partner_id, status, offered_at, responded_at, expires_at)
+       VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CASE WHEN $3 = 'accepted' THEN CURRENT_TIMESTAMP ELSE NULL END, $4)
+       RETURNING id`,
+      [orderId, partnerId, assignmentStatus, expiresAt]
+    );
+    assignmentId = inserted.rows[0].id;
+  }
+
+  await client.query(
+    `INSERT INTO delivery_status_history (assignment_id, order_id, delivery_partner_id, status, note)
+     VALUES ($1, $2, $3, $4, $5)`,
+    [assignmentId, orderId, partnerId, assignmentStatus, note || null]
+  );
+
+  return assignmentId;
+};
+
+/**
+ * Releases an order back to the unassigned pool when an offered assignment
+ * falls through (rider rejects it, or the offer window expires) — undoes the
+ * orders.delivery_partner_id / order_tracking write made at offer time so the
+ * order reappears in the available-orders pool instead of staying invisibly
+ * stuck on a partner who never accepted. No-op if the order has since moved on
+ * (e.g. a different partner already accepted it).
+ */
+const releaseAssignment = async ({ orderId, partnerId, client = pool }) => {
+  await client.query(
+    `UPDATE orders
+     SET delivery_partner_id = NULL, assigned_at = NULL, updated_at = CURRENT_TIMESTAMP
+     WHERE id = $1 AND delivery_partner_id = $2`,
+    [orderId, partnerId]
+  );
+  await client.query(
+    `UPDATE order_tracking
+     SET delivery_partner_id = NULL, updated_at = CURRENT_TIMESTAMP
+     WHERE order_id = $1 AND delivery_partner_id = $2`,
+    [orderId, partnerId]
   );
 };
 
@@ -1369,4 +1466,6 @@ module.exports = {
   updatePartnerDocuments,
   expireStaleAssignments,
   ASSIGNMENT_EXPIRE_SECONDS,
+  syncAssignmentState,
+  releaseAssignment,
 };

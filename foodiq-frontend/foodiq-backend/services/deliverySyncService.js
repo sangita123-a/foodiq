@@ -113,10 +113,25 @@ const dispatchAction = async (partnerId, log) => {
 
       await pool.query(
         `UPDATE orders
-         SET delivery_partner_id = $1, status = 'Preparing', updated_at = CURRENT_TIMESTAMP
+         SET delivery_partner_id = $1, status = 'Preparing', assigned_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
          WHERE id = $2`,
         [partnerId, orderId]
       );
+      // Keep order_tracking / delivery_assignments / delivery_status_history in sync
+      // with the orders.delivery_partner_id write above — otherwise an order accepted
+      // while offline shows as unassigned in the admin panel until the next status change.
+      try {
+        const { syncAssignmentState } = require('../models/deliveryModel');
+        await syncAssignmentState({
+          orderId,
+          partnerId,
+          assignmentStatus: 'accepted',
+          trackingStatus: 'Assigned',
+          note: 'Accepted via offline sync',
+        });
+      } catch (err) {
+        console.warn('[deliverySync] syncAssignmentState failed:', err.message);
+      }
       return { success: true, orderId, accepted: true };
     }
 

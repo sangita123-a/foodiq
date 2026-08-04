@@ -202,6 +202,34 @@ CREATE TABLE IF NOT EXISTS coupon_usage (
 );
 DROP TRIGGER IF EXISTS update_coupon_usage_modtime ON coupon_usage;
 CREATE TRIGGER update_coupon_usage_modtime BEFORE UPDATE ON coupon_usage FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+CREATE INDEX IF NOT EXISTS idx_coupon_usage_coupon ON coupon_usage(coupon_id);
+CREATE INDEX IF NOT EXISTS idx_coupon_usage_coupon_user ON coupon_usage(coupon_id, user_id);
+
+-- 12b. live_deals / restaurant_coupons (Live Deals Ending Soon + restaurant-restricted coupons)
+CREATE TABLE IF NOT EXISTS live_deals (
+    id SERIAL PRIMARY KEY,
+    deal_key VARCHAR(50) UNIQUE NOT NULL,
+    restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+    coupon_id UUID REFERENCES coupons(id) ON DELETE SET NULL,
+    offer_title VARCHAR(255) NOT NULL,
+    description TEXT,
+    logo_url TEXT,
+    banner_url TEXT,
+    delivery_time_label VARCHAR(50) DEFAULT '30 min',
+    timer_seconds INTEGER DEFAULT 3600,
+    is_active BOOLEAN DEFAULT TRUE,
+    sort_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_live_deals_restaurant ON live_deals(restaurant_id);
+
+CREATE TABLE IF NOT EXISTS restaurant_coupons (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+    coupon_id UUID NOT NULL REFERENCES coupons(id) ON DELETE CASCADE,
+    UNIQUE(restaurant_id, coupon_id)
+);
+CREATE INDEX IF NOT EXISTS idx_restaurant_coupons_coupon ON restaurant_coupons(coupon_id);
 
 -- 13. order_items
 CREATE TABLE IF NOT EXISTS order_items (

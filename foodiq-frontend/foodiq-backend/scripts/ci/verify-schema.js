@@ -65,6 +65,9 @@ const FULL_TABLES = [
   'restaurant_collections',
   'collection_restaurants',
   'seasonal_campaigns',
+  'coupon_usage',
+  'live_deals',
+  'restaurant_coupons',
   'product_feature_flags',
   'audit_logs',
 ];

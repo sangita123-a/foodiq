@@ -174,23 +174,26 @@ const getAdminPaymentStats = async () => {
        ), 0)::float AS todays_revenue,
        COUNT(*) FILTER (WHERE status = 'completed')::int AS successful_payments,
        COUNT(*) FILTER (WHERE status = 'failed')::int AS failed_payments,
-       COUNT(*) FILTER (WHERE status = 'pending')::int AS pending_payments,
-       COALESCE(SUM(amount) FILTER (WHERE status = 'refunded' OR status = 'partially_refunded'), 0)::float AS refunded_amount
+       COUNT(*) FILTER (WHERE status = 'pending')::int AS pending_payments
      FROM payments`
   );
   const txnFails = await pool.query(
     `SELECT COUNT(*)::int AS failed_checkouts
      FROM payment_transactions WHERE status = 'failed'`
   );
+  // Single source of truth for refund totals: the actual amount refunded
+  // (from the refunds ledger), not payments.amount — a partially_refunded
+  // payment previously double-counted its full original amount here.
   const refunds = await pool.query(
     `SELECT COUNT(*)::int AS refund_count,
             COALESCE(SUM(amount), 0)::float AS refund_total
-     FROM refunds WHERE status IN ('processed', 'pending')`
+     FROM refunds WHERE status = 'processed'`
   );
   return {
     ...rows[0],
     failed_payments: Number(rows[0].failed_payments || 0) + Number(txnFails.rows[0].failed_checkouts || 0),
     failed_checkouts: txnFails.rows[0].failed_checkouts,
+    refunded_amount: refunds.rows[0].refund_total,
     ...refunds.rows[0],
   };
 };
@@ -233,49 +236,11 @@ const listRefunds = async ({ limit = 100 } = {}) => {
   return rows;
 };
 
-const getPartnerSettlements = async (restaurantId) => {
-  const summary = await pool.query(
-    `SELECT
-       COALESCE(SUM(o.total_amount) FILTER (WHERE o.created_at::date = CURRENT_DATE AND LOWER(p.status) = 'completed'), 0)::float AS today,
-       COALESCE(SUM(o.total_amount) FILTER (WHERE o.created_at >= date_trunc('week', CURRENT_DATE) AND LOWER(p.status) = 'completed'), 0)::float AS week,
-       COALESCE(SUM(o.total_amount) FILTER (WHERE o.created_at >= date_trunc('month', CURRENT_DATE) AND LOWER(p.status) = 'completed'), 0)::float AS month,
-       COUNT(*) FILTER (WHERE LOWER(p.status) = 'completed')::int AS paid_orders,
-       COUNT(*) FILTER (WHERE LOWER(p.status) = 'pending')::int AS pending_payments
-     FROM orders o
-     LEFT JOIN payments p ON p.order_id = o.id
-     WHERE o.restaurant_id = $1
-       AND LOWER(o.status) NOT IN ('cancelled', 'rejected')`,
-    [restaurantId]
-  );
-
-  const settings = await pool.query('SELECT commission_percent FROM admin_settings WHERE id = 1');
-  const commission = Number(settings.rows[0]?.commission_percent || 15);
-  const monthGross = summary.rows[0].month;
-  const commissionAmount = (monthGross * commission) / 100;
-  const netPayout = monthGross - commissionAmount;
-
-  const paidOrders = await pool.query(
-    `SELECT o.id, o.total_amount, o.status, o.created_at,
-            p.status AS payment_status, p.method AS payment_method, p.transaction_time
-     FROM orders o
-     JOIN payments p ON p.order_id = o.id
-     WHERE o.restaurant_id = $1
-       AND LOWER(p.status) IN ('completed', 'refunded', 'partially_refunded', 'pending')
-     ORDER BY o.created_at DESC
-     LIMIT 50`,
-    [restaurantId]
-  );
-
-  return {
-    summary: {
-      ...summary.rows[0],
-      commission_percent: commission,
-      commission_amount: Math.round(commissionAmount * 100) / 100,
-      net_payout: Math.round(netPayout * 100) / 100,
-    },
-    paid_orders: paidOrders.rows,
-  };
-};
+// Delegates to settlementModel's shared revenue calculation (see comment on
+// adminModel.getRestaurantSettlements) so partner-facing earnings and
+// admin-facing settlements always agree on the same numbers.
+const getPartnerSettlements = (restaurantId) =>
+  require('./settlementModel').getPartnerEarningsSummary(restaurantId);
 
 module.exports = {
   createPaymentRecord,
