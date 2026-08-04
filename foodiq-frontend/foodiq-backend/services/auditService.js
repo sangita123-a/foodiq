@@ -39,9 +39,11 @@ const writeAudit = async (opts = {}) => {
     req = null,
     organizationId = null,
     actorType = 'user',
+    client: dbClient = null,
   } = opts;
 
   if (!action) return null;
+  const db = dbClient || pool;
 
   const client = req ? clientMeta(req) : {};
   const orgId =
@@ -70,7 +72,7 @@ const writeAudit = async (opts = {}) => {
   log.audit(action, row);
 
   try {
-    const { rows } = await pool.query(
+    const { rows } = await db.query(
       `INSERT INTO audit_logs (
          user_id, role, action, category, resource_type, resource_id,
          status, message, ip_address, device, browser, user_agent, meta,
@@ -99,7 +101,7 @@ const writeAudit = async (opts = {}) => {
   } catch (err) {
     // Fallback without V4 columns if migrate not yet applied
     try {
-      const { rows } = await pool.query(
+      const { rows } = await db.query(
         `INSERT INTO audit_logs (
            user_id, role, action, category, resource_type, resource_id,
            status, message, ip_address, device, browser, user_agent, meta
