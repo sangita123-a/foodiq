@@ -83,6 +83,7 @@ const create = async (req, res) => {
       role: req.user.role,
       action: 'restaurant_create',
       category: 'catalog',
+      resourceType: 'restaurant',
       resourceId: newRestaurant?.id,
       req,
     }).catch(() => {});
@@ -110,6 +111,7 @@ const update = async (req, res) => {
       role: req.user.role,
       action: 'restaurant_update',
       category: 'catalog',
+      resourceType: 'restaurant',
       resourceId: id,
       req,
     }).catch(() => {});
@@ -136,6 +138,7 @@ const remove = async (req, res) => {
       role: req.user.role,
       action: 'restaurant_delete',
       category: 'catalog',
+      resourceType: 'restaurant',
       resourceId: id,
       req,
     }).catch(() => {});

@@ -1,6 +1,13 @@
 const { pool } = require('../config/db');
 
-const getMenuCategories = async () => {
+const getMenuCategories = async (restaurantId) => {
+  if (restaurantId) {
+    const { rows } = await pool.query(
+      'SELECT * FROM menu_categories WHERE restaurant_id = $1 ORDER BY name ASC',
+      [restaurantId]
+    );
+    return rows;
+  }
   const { rows } = await pool.query('SELECT * FROM menu_categories ORDER BY name ASC');
   return rows;
 };

@@ -45,7 +45,7 @@ const buildGetRestaurantsQuery = (filters) => {
       FROM reviews
       GROUP BY restaurant_id
     ) rv ON rv.restaurant_id = r.id
-    WHERE r.is_active = true`;
+    WHERE r.is_active = true AND r.deleted_at IS NULL`;
   const values = [];
   let valueIndex = 1;
 
@@ -206,7 +206,7 @@ const getRestaurantById = async (id) => {
        FROM reviews
        GROUP BY restaurant_id
      ) rv ON rv.restaurant_id = r.id
-     WHERE r.id = $1 AND r.is_active = TRUE`,
+     WHERE r.id = $1 AND r.is_active = TRUE AND r.deleted_at IS NULL`,
     [id]
   );
   return rows[0];
@@ -246,7 +246,11 @@ const updateRestaurant = async (id, data) => {
 };
 
 const deleteRestaurant = async (id) => {
-  const { rows } = await pool.query('DELETE FROM restaurants WHERE id = $1 RETURNING id', [id]);
+  const { rows } = await pool.query(
+    `UPDATE restaurants SET deleted_at = CURRENT_TIMESTAMP
+     WHERE id = $1 AND deleted_at IS NULL RETURNING id`,
+    [id]
+  );
   return rows[0];
 };
 

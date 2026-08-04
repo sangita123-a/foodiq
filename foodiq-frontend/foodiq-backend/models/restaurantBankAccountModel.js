@@ -3,7 +3,19 @@ const { encryptField, decryptField } = require('../utils/fieldCrypto');
 
 const maskAccountNumber = (last4) => `XXXXXX${String(last4 || '').padStart(4, 'X')}`;
 
-/** Strips encrypted/plain account number and decrypts UPI — safe to return over the API. */
+/** Masks a decrypted UPI ID for API responses, keeping the provider suffix legible. */
+const maskUpi = (upi) => {
+  if (!upi) return upi;
+  const [handle, provider] = String(upi).split('@');
+  if (!handle) return upi;
+  const masked =
+    handle.length <= 3
+      ? `${handle[0]}${'*'.repeat(Math.max(handle.length - 1, 1))}`
+      : `${handle.slice(0, 2)}${'*'.repeat(handle.length - 3)}${handle.slice(-1)}`;
+  return provider ? `${masked}@${provider}` : masked;
+};
+
+/** Strips encrypted/plain account number and masks UPI — safe to return over the API. */
 const mapAccount = (row) => {
   if (!row) return row;
   const {
@@ -13,7 +25,7 @@ const mapAccount = (row) => {
   return {
     ...safe,
     account_number_masked: maskAccountNumber(row.account_number_last4),
-    upi_id: decryptField(row.upi_id),
+    upi_id: maskUpi(decryptField(row.upi_id)),
   };
 };
 
@@ -105,6 +117,7 @@ const reviewBankAccount = async (id, { status, reason, verifiedBy }) => {
 
 module.exports = {
   maskAccountNumber,
+  maskUpi,
   mapAccount,
   getPrimaryForRestaurant,
   createOrReplacePrimary,

@@ -203,7 +203,7 @@ const listRestaurants = async ({
   const { parsePagination, paginatedMeta } = require('../utils/pagination');
   const pg = parsePagination({ page, limit }, { page: 1, limit: 25, maxLimit });
 
-  const conditions = [];
+  const conditions = ['r.deleted_at IS NULL'];
   const values = [];
   const push = (v) => {
     values.push(v);
@@ -289,7 +289,11 @@ const updateRestaurant = async (id, data) => {
 };
 
 const deleteRestaurant = async (id) => {
-  const { rows } = await pool.query('DELETE FROM restaurants WHERE id = $1 RETURNING id', [id]);
+  const { rows } = await pool.query(
+    `UPDATE restaurants SET deleted_at = CURRENT_TIMESTAMP
+     WHERE id = $1 AND deleted_at IS NULL RETURNING id`,
+    [id]
+  );
   return rows[0];
 };
 
@@ -331,6 +335,7 @@ const getRestaurantStats = async () => {
         AND COALESCE(approval_status, 'approved') = 'approved')::int AS open_now,
       COALESCE(AVG(rating) FILTER (WHERE rating > 0), 0)::float AS avg_rating
     FROM restaurants
+    WHERE deleted_at IS NULL
   `);
 
   const busyRes = await pool.query(`
@@ -368,7 +373,7 @@ const getRestaurantDetail = async (id) => {
      FROM restaurants r
      LEFT JOIN users u ON u.id = r.owner_id
      LEFT JOIN restaurant_categories rc ON rc.id = r.category_id
-     WHERE r.id = $1`,
+     WHERE r.id = $1 AND r.deleted_at IS NULL`,
     [id]
   );
   const restaurant = rows[0];

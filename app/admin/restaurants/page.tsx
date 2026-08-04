@@ -1,150 +1,132 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { mutate } from "swr";
+import { RefreshCw, Wifi, WifiOff } from "lucide-react";
 import AdminShell from "@/components/admin/AdminShell";
-import { useAdminList } from "@/hooks/useAdminData";
-import { adminPut, adminDelete, formatCurrency, formatDate } from "@/services/adminApi";
+import { useAdminRestaurants, useAdminRestaurantStats } from "@/hooks/useAdminData";
+import { useAdminRestaurantsLive } from "@/hooks/useAdminRestaurantsLive";
+import type { AdminRestaurantFilters } from "@/services/adminApi";
+import RestaurantStatsStrip from "@/components/admin/restaurants/RestaurantStatsStrip";
+import RestaurantSearchBar from "@/components/admin/restaurants/RestaurantSearchBar";
+import RestaurantFilterBar from "@/components/admin/restaurants/RestaurantFilterBar";
+import ExportMenu from "@/components/admin/restaurants/ExportMenu";
+import RestaurantTable from "@/components/admin/restaurants/RestaurantTable";
+import RestaurantDetailsDrawer from "@/components/admin/restaurants/RestaurantDetailsDrawer";
+import BulkActionBar from "@/components/admin/restaurants/BulkActionBar";
 
-type Restaurant = {
-  id: string;
-  name: string;
-  address?: string;
-  phone?: string;
-  is_active?: boolean;
-  approval_status?: string;
-  owner_name?: string;
-  owner_email?: string;
-  order_count?: number;
-  revenue?: number;
-  rating?: number;
-  created_at?: string;
-};
+const DEFAULT_FILTERS: AdminRestaurantFilters = { sort: "latest", page: 1, limit: 25 };
 
 export default function AdminRestaurantsPage() {
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
-  const path = useMemo(() => {
-    const q = new URLSearchParams();
-    if (search) q.set("search", search);
-    if (status) q.set("status", status);
-    const qs = q.toString();
-    return `/api/admin/restaurants${qs ? `?${qs}` : ""}`;
-  }, [search, status]);
+  const [filters, setFilters] = useState<AdminRestaurantFilters>(DEFAULT_FILTERS);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [detailsRestaurantId, setDetailsRestaurantId] = useState<string | null>(null);
 
-  const { data, isLoading, error } = useAdminList<Restaurant[]>(path);
-  const restaurants = data || [];
+  const { data, error, isLoading, mutate } = useAdminRestaurants(filters);
+  const { data: stats, isLoading: statsLoading, mutate: mutateStats } = useAdminRestaurantStats();
+  const { connected } = useAdminRestaurantsLive();
 
-  const refresh = () => mutate(path);
+  const rows = useMemo(() => data?.rows || [], [data]);
+  const selectedRows = useMemo(() => rows.filter((r) => selectedIds.has(r.id)), [rows, selectedIds]);
 
-  const setApproval = async (id: string, approval_status: string) => {
-    await adminPut(`/api/admin/restaurants/${id}`, { approval_status, is_active: approval_status === "approved" });
-    refresh();
+  const updateFilters = (patch: Partial<AdminRestaurantFilters>) => {
+    setFilters((prev) => ({ ...prev, ...patch, page: "page" in patch ? patch.page : 1 }));
   };
 
-  const toggleActive = async (r: Restaurant) => {
-    await adminPut(`/api/admin/restaurants/${r.id}`, { is_active: !r.is_active });
-    refresh();
+  const refreshAll = () => {
+    mutate();
+    mutateStats();
   };
 
-  const remove = async (id: string) => {
-    if (!confirm("Delete this restaurant and related menu data?")) return;
-    await adminDelete(`/api/admin/restaurants/${id}`);
-    refresh();
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedIds((prev) => {
+      if (rows.every((r) => prev.has(r.id)) && rows.length > 0) return new Set();
+      return new Set(rows.map((r) => r.id));
+    });
   };
 
   return (
     <AdminShell title="Restaurant Management">
-      <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="mb-6 flex flex-col lg:flex-row lg:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-foreground">Restaurants</h1>
-          <p className="text-gray-text">Approve, suspend, and manage restaurant partners.</p>
+          <h1 className="text-3xl font-black text-foreground flex items-center gap-3">
+            Restaurants
+            <span
+              className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                connected ? "bg-emerald-50 text-emerald-700" : "bg-section text-gray-text"
+              }`}
+            >
+              {connected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+              {connected ? "Live" : "Offline"}
+            </span>
+          </h1>
+          <p className="text-gray-text">
+            {data?.pagination?.total ?? 0} restaurants · approve, verify, and manage restaurant partners.
+          </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search restaurants…"
-            className="bg-white border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
-          />
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="bg-white border border-border rounded-xl px-4 py-2.5 text-sm"
+        <div className="flex flex-wrap gap-2.5">
+          <RestaurantSearchBar value={filters.search || ""} onChange={(v) => updateFilters({ search: v })} />
+          <button
+            type="button"
+            onClick={refreshAll}
+            className="flex items-center gap-2 bg-white border border-border rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-section"
           >
-            <option value="">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
+            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} /> Refresh
+          </button>
+          <ExportMenu filters={filters} />
         </div>
       </div>
 
-      {error && <p className="text-red-600 text-sm mb-4">Failed to load restaurants.</p>}
-      {isLoading && <p className="text-gray-text text-sm mb-4">Loading…</p>}
+      <RestaurantStatsStrip stats={stats} loading={statsLoading} />
 
-      <div className="bg-white rounded-3xl border border-border overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left min-w-[900px]">
-            <thead className="bg-section border-b border-border">
-              <tr>
-                <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">Restaurant</th>
-                <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">Owner</th>
-                <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">Status</th>
-                <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">Orders</th>
-                <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">Revenue</th>
-                <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {restaurants.map((r) => (
-                <tr key={r.id} className="border-b border-border hover:bg-section">
-                  <td className="p-4">
-                    <p className="font-bold text-foreground">{r.name}</p>
-                    <p className="text-xs text-gray-text mt-0.5">{r.address || "—"}</p>
-                    <p className="text-[10px] text-[#9CA3AF] mt-1">{formatDate(r.created_at)}</p>
-                  </td>
-                  <td className="p-4 text-sm">
-                    <p className="font-bold text-foreground">{r.owner_name || "—"}</p>
-                    <p className="text-xs text-gray-text">{r.owner_email}</p>
-                  </td>
-                  <td className="p-4">
-                    <span className={`text-xs font-bold px-2 py-1 rounded-full border ${
-                      (r.approval_status || "approved") === "approved"
-                        ? "bg-green-50 text-green-600 border-green-200"
-                        : (r.approval_status || "") === "pending"
-                          ? "bg-amber-50 text-amber-600 border-amber-200"
-                          : "bg-red-50 text-red-600 border-red-200"
-                    }`}>
-                      {r.approval_status || "approved"}
-                    </span>
-                    <p className="text-[10px] mt-1 text-gray-text">
-                      {r.is_active ? "Active" : "Suspended"}
-                    </p>
-                  </td>
-                  <td className="p-4 font-bold text-sm">{r.order_count || 0}</td>
-                  <td className="p-4 font-bold text-sm text-green-600">{formatCurrency(r.revenue || 0)}</td>
-                  <td className="p-4 text-right space-x-2">
-                    {(r.approval_status || "approved") === "pending" && (
-                      <>
-                        <button type="button" onClick={() => setApproval(r.id, "approved")} className="text-xs font-bold text-green-600">Approve</button>
-                        <button type="button" onClick={() => setApproval(r.id, "rejected")} className="text-xs font-bold text-red-500">Reject</button>
-                      </>
-                    )}
-                    <button type="button" onClick={() => toggleActive(r)} className="text-xs font-bold text-primary">
-                      {r.is_active ? "Suspend" : "Activate"}
-                    </button>
-                    <button type="button" onClick={() => remove(r.id)} className="text-xs font-bold text-red-500">Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {!restaurants.length && !isLoading && (
-            <p className="text-center text-[#9CA3AF] py-16">No restaurants found.</p>
-          )}
-        </div>
+      <div className="mb-4">
+        <RestaurantFilterBar filters={filters} onChange={updateFilters} onClear={() => setFilters(DEFAULT_FILTERS)} />
       </div>
+
+      {selectedIds.size > 0 && (
+        <BulkActionBar
+          selectedIds={Array.from(selectedIds)}
+          selectedRows={selectedRows}
+          onClear={() => setSelectedIds(new Set())}
+          onChanged={() => {
+            setSelectedIds(new Set());
+            refreshAll();
+          }}
+        />
+      )}
+
+      <RestaurantTable
+        rows={rows}
+        loading={isLoading}
+        error={error}
+        onRetry={refreshAll}
+        selectedIds={selectedIds}
+        onToggleSelect={toggleSelect}
+        onToggleSelectAll={toggleSelectAll}
+        allSelected={rows.length > 0 && rows.every((r) => selectedIds.has(r.id))}
+        onOpenDetails={setDetailsRestaurantId}
+        onChanged={refreshAll}
+        sort={filters.sort || "latest"}
+        onSortChange={(sort) => updateFilters({ sort })}
+        pagination={data?.pagination}
+        onPageChange={(page) => updateFilters({ page })}
+      />
+
+      {detailsRestaurantId && (
+        <RestaurantDetailsDrawer
+          restaurantId={detailsRestaurantId}
+          onClose={() => setDetailsRestaurantId(null)}
+          onChanged={refreshAll}
+        />
+      )}
     </AdminShell>
   );
 }

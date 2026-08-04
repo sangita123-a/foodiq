@@ -120,6 +120,14 @@ const orderActionLimiter = makeLimiter({
   message: 'Too many order actions. Please slow down.',
 });
 
+/** High-impact admin restaurant writes: verify/bulk/document/bank-account review. */
+const restaurantAdminActionLimiter = makeLimiter({
+  label: 'restaurant_admin_action',
+  windowMs: 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_RESTAURANT_ADMIN_ACTION_MAX || 30),
+  message: 'Too many restaurant management actions. Please slow down.',
+});
+
 const notificationLimiter = makeLimiter({
   label: 'notification',
   windowMs: 60 * 1000,
@@ -146,4 +154,5 @@ module.exports = {
   notificationLimiter,
   supportLimiter,
   orderActionLimiter,
+  restaurantAdminActionLimiter,
 };

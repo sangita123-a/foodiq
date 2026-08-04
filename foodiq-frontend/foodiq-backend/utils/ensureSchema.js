@@ -3546,11 +3546,13 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS gst_number VARCHAR(20),
         ADD COLUMN IF NOT EXISTS fssai_number VARCHAR(20),
         ADD COLUMN IF NOT EXISTS pan_number VARCHAR(15),
-        ADD COLUMN IF NOT EXISTS is_open BOOLEAN NOT NULL DEFAULT TRUE
+        ADD COLUMN IF NOT EXISTS is_open BOOLEAN NOT NULL DEFAULT TRUE,
+        ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP WITH TIME ZONE
     `);
     await q(`CREATE INDEX IF NOT EXISTS idx_restaurants_approval_status ON restaurants(approval_status)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_restaurants_is_active ON restaurants(is_active)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_restaurants_city ON restaurants(city)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_restaurants_not_deleted ON restaurants(id) WHERE deleted_at IS NULL`);
 
     await q(`
       ALTER TABLE menu_items
