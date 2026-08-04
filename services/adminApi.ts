@@ -440,6 +440,173 @@ export async function fetchAdminDeliveryAnalytics(params?: {
   return adminGet<AdminDeliveryAnalyticsData>(`/api/admin/delivery-analytics${q}`);
 }
 
+// ── Admin Order Management Types & APIs ─────────────────────────────────────
+export type AdminOrderRow = {
+  id: string;
+  status: string;
+  total_amount: number;
+  subtotal?: number;
+  discount_amount?: number;
+  delivery_fee?: number;
+  platform_fee?: number;
+  tax_amount?: number;
+  delivery_mode?: string;
+  scheduled_for?: string | null;
+  created_at: string;
+  updated_at?: string;
+  customer_name?: string;
+  customer_phone?: string;
+  restaurant_id?: string;
+  restaurant_name?: string;
+  payment_method?: string;
+  payment_status?: string;
+  payment_id?: string;
+  delivery_partner_id?: string;
+  delivery_partner_name?: string;
+  estimated_delivery_time?: string | null;
+  tracking_status?: string;
+  city?: string;
+  street?: string;
+  house_no?: string;
+  item_count?: number;
+};
+
+export type AdminOrdersPagination = { total: number; page: number; limit: number; totalPages: number };
+
+export type AdminOrdersResponse = { rows: AdminOrderRow[]; pagination: AdminOrdersPagination };
+
+export type AdminOrderStats = {
+  today_orders: number;
+  pending: number;
+  accepted: number;
+  preparing: number;
+  ready: number;
+  picked_up: number;
+  out_for_delivery: number;
+  delivered: number;
+  cancelled: number;
+  refunded: number;
+  failed_payments: number;
+  scheduled_orders: number;
+};
+
+export type AdminOrderTimelineEvent = {
+  label: string;
+  status: string;
+  from_status?: string | null;
+  source: string;
+  changed_by_name?: string | null;
+  reason?: string | null;
+  created_at: string | null;
+  derived?: boolean;
+};
+
+export type AdminOrderItem = {
+  id: string;
+  menu_item_id: string;
+  quantity: number;
+  price_at_time: number;
+  name: string;
+  image_url?: string;
+};
+
+export type AdminOrderDetails = AdminOrderRow & {
+  customer_email?: string;
+  restaurant_phone?: string;
+  state?: string;
+  zip_code?: string;
+  provider_transaction_id?: string;
+  razorpay_payment_id?: string;
+  transaction_time?: string;
+  delivery_partner_phone?: string;
+  coupon_code?: string;
+  coupon_discount_type?: string;
+  refund_id?: string;
+  refund_amount?: number;
+  refund_status?: string;
+  refund_reason?: string;
+  items: AdminOrderItem[];
+  timeline: AdminOrderTimelineEvent[];
+};
+
+export type AdminOrderFilters = {
+  search?: string;
+  status?: string;
+  restaurant_id?: string;
+  delivery_partner_id?: string;
+  payment_method?: string;
+  payment_status?: string;
+  city?: string;
+  from?: string;
+  to?: string;
+  sort?: string;
+  page?: number;
+  limit?: number;
+};
+
+export function buildOrdersQuery(filters: AdminOrderFilters) {
+  const sp = new URLSearchParams();
+  if (filters.search) sp.set("search", filters.search);
+  if (filters.status) sp.set("status", filters.status);
+  if (filters.restaurant_id) sp.set("restaurant_id", filters.restaurant_id);
+  if (filters.delivery_partner_id) sp.set("delivery_partner_id", filters.delivery_partner_id);
+  if (filters.payment_method) sp.set("payment_method", filters.payment_method);
+  if (filters.payment_status) sp.set("payment_status", filters.payment_status);
+  if (filters.city) sp.set("city", filters.city);
+  if (filters.from) sp.set("from", filters.from);
+  if (filters.to) sp.set("to", filters.to);
+  if (filters.sort) sp.set("sort", filters.sort);
+  if (filters.page) sp.set("page", String(filters.page));
+  if (filters.limit) sp.set("limit", String(filters.limit));
+  return sp.toString();
+}
+
+export type AdminBulkResult = {
+  succeeded: Array<{ id: string; status?: string }>;
+  failed: Array<{ id: string; error: string }>;
+  partial: boolean;
+};
+
+export async function fetchOrderInvoiceBlob(orderId: string): Promise<Blob> {
+  const { getAccessToken } = await import("@/lib/accessToken");
+  const token = getAccessToken();
+  const base = process.env.NEXT_PUBLIC_API_URL || "https://foodiq-2.onrender.com";
+  const res = await fetch(`${base}/api/admin/orders/${orderId}/invoice`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to download invoice");
+  return res.blob();
+}
+
+export async function fetchOrdersExportBlob(
+  filters: AdminOrderFilters,
+  format: "csv" | "pdf"
+): Promise<Blob> {
+  const { getAccessToken } = await import("@/lib/accessToken");
+  const token = getAccessToken();
+  const base = process.env.NEXT_PUBLIC_API_URL || "https://foodiq-2.onrender.com";
+  const qs = buildOrdersQuery(filters);
+  const res = await fetch(
+    `${base}/api/admin/reports/export?type=orders&format=${format}${qs ? `&${qs}` : ""}`,
+    {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      credentials: "include",
+    }
+  );
+  if (!res.ok) throw new Error("Export failed");
+  return res.blob();
+}
+
+export function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ── Admin Referral Program Types & APIs ─────────────────────────────────────
 export type AdminReferralRecord = {
   id: string;

@@ -66,7 +66,7 @@ const menuItems: MenuItem[] = [
   { name: "AI Dispatch", icon: Bot, href: "/admin/dispatch", permission: "delivery" },
   { name: "Fleet", icon: Truck, href: "/admin/fleet", permission: "fleet" },
   { name: "Orders", icon: ShoppingBag, href: "/admin/orders", permission: "orders" },
-  { name: "Customers", icon: Users, href: "/admin/users", permission: "customers" },
+  { name: "Customers", icon: Users, href: "/admin/customers", permission: "customers" },
   { name: "Restaurants", icon: Store, href: "/admin/restaurants", permission: "restaurants" },
   { name: "Inventory", icon: Package, href: "/admin/inventory", permission: "restaurants" },
   { name: "Delivery Partners", icon: Bike, href: "/admin/delivery-partners", permission: "delivery" },

@@ -223,6 +223,50 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS delivery_verified_at TIMESTAMP WITH TIME ZONE,
         ADD COLUMN IF NOT EXISTS delivery_otp VARCHAR(10)
     `);
+    // ── Order status history (Admin Order Management audit trail) ──────────────
+    // Additive-only: new table + trigger, no changes to existing order columns.
+    // Captures every orders.status transition regardless of which module wrote
+    // it; admin-initiated changes are additionally attributed via GUCs set just
+    // before the UPDATE in adminModel.updateOrderAdmin.
+    await q(`
+      CREATE TABLE IF NOT EXISTS order_status_history (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        from_status VARCHAR(60),
+        to_status VARCHAR(60) NOT NULL,
+        changed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        source VARCHAR(30) NOT NULL DEFAULT 'system',
+        reason TEXT,
+        meta JSONB DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_order_status_history_order
+        ON order_status_history(order_id, created_at DESC)
+    `);
+    await q(`
+      CREATE OR REPLACE FUNCTION record_order_status_history() RETURNS TRIGGER AS $$
+      BEGIN
+        IF NEW.status IS DISTINCT FROM OLD.status THEN
+          INSERT INTO order_status_history (order_id, from_status, to_status, changed_by, source, reason)
+          VALUES (
+            NEW.id, OLD.status, NEW.status,
+            NULLIF(current_setting('app.order_actor_id', true), '')::uuid,
+            COALESCE(NULLIF(current_setting('app.order_actor_source', true), ''), 'system'),
+            NULLIF(current_setting('app.order_actor_reason', true), '')
+          );
+        END IF;
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql
+    `);
+    await q(`DROP TRIGGER IF EXISTS trg_order_status_history ON orders`);
+    await q(`
+      CREATE TRIGGER trg_order_status_history
+        AFTER UPDATE ON orders
+        FOR EACH ROW EXECUTE PROCEDURE record_order_status_history()
+    `);
     await q(`
       ALTER TABLE users
         ADD COLUMN IF NOT EXISTS is_phone_verified BOOLEAN DEFAULT FALSE
@@ -3493,6 +3537,113 @@ async function ensureSchema() {
     await q(`CREATE INDEX IF NOT EXISTS idx_route_history_created ON route_history(created_at)`);
 
     console.log('[SCHEMA] AI Route Optimization tables ensured');
+
+    // ── Admin Restaurant Management: verification + city/zone + featured items ──
+    await q(`
+      ALTER TABLE restaurants
+        ADD COLUMN IF NOT EXISTS city VARCHAR(100),
+        ADD COLUMN IF NOT EXISTS zone VARCHAR(100),
+        ADD COLUMN IF NOT EXISTS gst_number VARCHAR(20),
+        ADD COLUMN IF NOT EXISTS fssai_number VARCHAR(20),
+        ADD COLUMN IF NOT EXISTS pan_number VARCHAR(15),
+        ADD COLUMN IF NOT EXISTS is_open BOOLEAN NOT NULL DEFAULT TRUE
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_restaurants_approval_status ON restaurants(approval_status)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_restaurants_is_active ON restaurants(is_active)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_restaurants_city ON restaurants(city)`);
+
+    await q(`
+      ALTER TABLE menu_items
+        ADD COLUMN IF NOT EXISTS is_featured BOOLEAN NOT NULL DEFAULT FALSE
+    `);
+    await q(`
+      ALTER TABLE reviews
+        ADD COLUMN IF NOT EXISTS is_reported BOOLEAN NOT NULL DEFAULT FALSE
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS restaurant_documents (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        document_type VARCHAR(20) NOT NULL
+          CHECK (document_type IN ('gst', 'fssai', 'pan')),
+        document_number VARCHAR(100),
+        file_url TEXT,
+        verification_status VARCHAR(20) NOT NULL DEFAULT 'pending'
+          CHECK (verification_status IN ('pending', 'approved', 'rejected')),
+        rejection_reason TEXT,
+        verified_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        verified_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      DROP TRIGGER IF EXISTS update_restaurant_documents_modtime ON restaurant_documents
+    `);
+    await q(`
+      CREATE TRIGGER update_restaurant_documents_modtime
+        BEFORE UPDATE ON restaurant_documents
+        FOR EACH ROW EXECUTE PROCEDURE update_modified_column()
+    `);
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_restaurant_documents_restaurant_type
+        ON restaurant_documents(restaurant_id, document_type)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_restaurant_documents_restaurant
+        ON restaurant_documents(restaurant_id)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_restaurant_documents_status
+        ON restaurant_documents(verification_status)
+    `);
+
+    await q(`
+      CREATE TABLE IF NOT EXISTS restaurant_bank_accounts (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        account_holder_name VARCHAR(150) NOT NULL,
+        account_number_encrypted TEXT NOT NULL,
+        account_number_last4 VARCHAR(4) NOT NULL,
+        bank_name VARCHAR(150) NOT NULL,
+        ifsc_code VARCHAR(20) NOT NULL,
+        account_type VARCHAR(30) NOT NULL DEFAULT 'savings'
+          CHECK (account_type IN ('savings', 'current')),
+        upi_id TEXT NULL,
+        is_primary BOOLEAN NOT NULL DEFAULT TRUE,
+        verification_status VARCHAR(30) NOT NULL DEFAULT 'pending'
+          CHECK (verification_status IN ('pending', 'approved', 'rejected')),
+        rejection_reason TEXT,
+        verified_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        verified_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      DROP TRIGGER IF EXISTS update_restaurant_bank_accounts_modtime ON restaurant_bank_accounts
+    `);
+    await q(`
+      CREATE TRIGGER update_restaurant_bank_accounts_modtime
+        BEFORE UPDATE ON restaurant_bank_accounts
+        FOR EACH ROW EXECUTE PROCEDURE update_modified_column()
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_restaurant_bank_accounts_restaurant
+        ON restaurant_bank_accounts(restaurant_id)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_restaurant_bank_accounts_status
+        ON restaurant_bank_accounts(verification_status)
+    `);
+    // Only one primary bank account per restaurant.
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_restaurant_bank_accounts_primary
+        ON restaurant_bank_accounts(restaurant_id) WHERE is_primary = TRUE
+    `);
+    console.log('[SCHEMA] Admin Restaurant Management tables ensured');
+
     console.log('[SCHEMA] Critical schema checks completed');
   } catch (err) {
     console.error('[SCHEMA] ensureSchema warning:', err.message);

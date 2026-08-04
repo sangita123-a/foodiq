@@ -45,6 +45,7 @@ const protectedRoutes = [
   "/partner/settings",
   "/admin/dashboard",
   "/admin/restaurants",
+  "/admin/customers",
   "/admin/users",
   "/admin/delivery-partners",
   "/admin/orders",

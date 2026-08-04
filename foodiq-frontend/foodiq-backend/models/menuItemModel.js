@@ -192,6 +192,7 @@ const updateMenuItem = async (id, itemData) => {
     image_url,
     is_trending,
     is_bestseller,
+    is_featured,
   } = itemData;
 
   const vegetarian =
@@ -215,8 +216,9 @@ const updateMenuItem = async (id, itemData) => {
         image_url = COALESCE($10, image_url),
         is_trending = COALESCE($11, is_trending),
         is_bestseller = COALESCE($12, is_bestseller),
+        is_featured = COALESCE($13, is_featured),
         updated_at = CURRENT_TIMESTAMP
-    WHERE id = $13
+    WHERE id = $14
     RETURNING *
   `;
   const values = [
@@ -232,6 +234,7 @@ const updateMenuItem = async (id, itemData) => {
     image_url,
     is_trending,
     is_bestseller,
+    is_featured != null ? Boolean(is_featured) : null,
     id,
   ];
   const { rows } = await pool.query(query, values);

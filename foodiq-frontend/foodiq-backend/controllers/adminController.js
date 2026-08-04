@@ -47,8 +47,326 @@ const getRestaurants = async (req, res) => {
     const data = await admin.listRestaurants({
       search: req.query.search || '',
       status: req.query.status || '',
+      verification: req.query.verification || '',
+      city: req.query.city || '',
+      zone: req.query.zone || '',
+      cuisine: req.query.cuisine || '',
+      rating_min: req.query.rating_min || '',
+      date_from: req.query.date_from || '',
+      date_to: req.query.date_to || '',
+      sort: req.query.sort || 'latest',
+      page: req.query.page,
+      limit: req.query.limit,
     });
     ok(res, 'Restaurants retrieved', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getRestaurantStats = async (req, res) => {
+  try {
+    const data = await admin.getRestaurantStats();
+    ok(res, 'Restaurant stats retrieved', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getRestaurantDetail = async (req, res) => {
+  try {
+    const data = await admin.getRestaurantDetail(req.params.id);
+    if (!data) return fail(res, 404, 'Restaurant not found');
+    ok(res, 'Restaurant retrieved', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const VERIFY_ACTIONS = ['approve', 'reject', 'suspend', 'activate'];
+
+const verifyRestaurantAction = async (req, res) => {
+  try {
+    const { action, reason } = req.body || {};
+    if (!VERIFY_ACTIONS.includes(action)) {
+      return fail(res, 400, `action must be one of ${VERIFY_ACTIONS.join(', ')}`);
+    }
+    if (action === 'reject' && !reason) {
+      return fail(res, 400, 'reason is required when rejecting a restaurant');
+    }
+
+    const data = await admin.verifyRestaurant(req.params.id, { action, reason });
+    if (!data) return fail(res, 404, 'Restaurant not found');
+
+    const { writeAudit } = require('../services/auditService');
+    writeAudit({
+      userId: req.user.id,
+      role: req.user.role,
+      action: `restaurant.${action}`,
+      category: 'restaurant',
+      resourceType: 'restaurant',
+      resourceId: req.params.id,
+      message: reason || null,
+      meta: { reason: reason || null },
+      req,
+    }).catch(() => {});
+
+    try {
+      const { emitRestaurantStatus } = require('../socket/emitters');
+      emitRestaurantStatus(data, { action });
+    } catch {
+      /* non-blocking */
+    }
+
+    if (data.owner_id) {
+      try {
+        const { notify } = require('../services/notificationService');
+        const titles = {
+          approve: 'Restaurant Approved',
+          reject: 'Restaurant Rejected',
+          suspend: 'Restaurant Suspended',
+          activate: 'Restaurant Activated',
+        };
+        const messages = {
+          approve: `${data.name} has been approved and is now live.`,
+          reject: `${data.name} was rejected.${reason ? ` Reason: ${reason}` : ''}`,
+          suspend: `${data.name} has been suspended by the admin team.${reason ? ` Reason: ${reason}` : ''}`,
+          activate: `${data.name} has been reactivated and is now live.`,
+        };
+        await notify({
+          userId: data.owner_id,
+          type: `restaurant_${action}`,
+          title: titles[action],
+          message: messages[action],
+          link: '/restaurant/dashboard',
+        });
+      } catch (err) {
+        console.warn('[admin] restaurant verify notification skipped', err.message);
+      }
+    }
+
+    try {
+      const { sendRestaurantStatusEmail } = require('../services/reportEmailService');
+      const emailStatus = action === 'reject' ? 'rejected' : action === 'suspend' ? 'suspended' : 'approved';
+      await sendRestaurantStatusEmail(req.params.id, emailStatus);
+    } catch (err) {
+      console.warn('[admin] restaurant status email skipped', err.message);
+    }
+
+    const pastTense = { approve: 'approved', reject: 'rejected', suspend: 'suspended', activate: 'activated' };
+    ok(res, `Restaurant ${pastTense[action]} successfully`, data);
+  } catch (error) {
+    fail(res, error.status || 500, error.message || 'Server Error', error.message);
+  }
+};
+
+const getRestaurantVerificationTimeline = async (req, res) => {
+  try {
+    const data = await admin.getRestaurantVerificationTimeline(req.params.id);
+    ok(res, 'Verification timeline retrieved', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getRestaurantDocuments = async (req, res) => {
+  try {
+    const docs = require('../models/restaurantDocumentModel');
+    const data = await docs.listDocumentsByRestaurant(req.params.id);
+    ok(res, 'Restaurant documents retrieved', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const patchRestaurantDocument = async (req, res) => {
+  try {
+    const docs = require('../models/restaurantDocumentModel');
+    const { document_type, document_number, file_url, status, reason } = req.body || {};
+
+    if (status) {
+      const rawStatus = String(status).toLowerCase();
+      const normalized = rawStatus === 'approve' ? 'approved' : rawStatus === 'reject' ? 'rejected' : rawStatus;
+      if (normalized === 'rejected' && !reason) {
+        return fail(res, 400, 'reason is required when rejecting a document');
+      }
+      const data = await docs.reviewDocument(req.params.docId, {
+        status: normalized,
+        reason,
+        verifiedBy: req.user.id,
+      });
+      if (!data) return fail(res, 404, 'Document not found');
+      return ok(res, `Document ${normalized}`, data);
+    }
+
+    if (!document_type) return fail(res, 400, 'document_type is required');
+    const data = await docs.upsertDocument({
+      restaurantId: req.params.id,
+      documentType: document_type,
+      documentNumber: document_number,
+      fileUrl: file_url,
+    });
+    ok(res, 'Document saved', data);
+  } catch (error) {
+    fail(res, error.status || 500, error.message || 'Server Error', error.message);
+  }
+};
+
+const getRestaurantBankAccount = async (req, res) => {
+  try {
+    const bankAccounts = require('../models/restaurantBankAccountModel');
+    const data = await bankAccounts.getPrimaryForRestaurant(req.params.id);
+    ok(res, 'Bank account retrieved', bankAccounts.mapAccount(data));
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const patchRestaurantBankAccount = async (req, res) => {
+  try {
+    const bankAccounts = require('../models/restaurantBankAccountModel');
+    const { status, reason } = req.body || {};
+
+    if (status) {
+      const rawStatus = String(status).toLowerCase();
+      const normalized = rawStatus === 'approve' ? 'approved' : rawStatus === 'reject' ? 'rejected' : rawStatus;
+      if (normalized === 'rejected' && !reason) {
+        return fail(res, 400, 'reason is required when rejecting a bank account');
+      }
+      const existing = await bankAccounts.getPrimaryForRestaurant(req.params.id);
+      if (!existing) return fail(res, 404, 'Bank account not found');
+      const data = await bankAccounts.reviewBankAccount(existing.id, {
+        status: normalized,
+        reason,
+        verifiedBy: req.user.id,
+      });
+      return ok(res, `Bank account ${normalized}`, bankAccounts.mapAccount(data));
+    }
+
+    const { account_holder_name, account_number, bank_name, ifsc_code, account_type, upi_id } = req.body || {};
+    if (!account_holder_name || !account_number || !bank_name || !ifsc_code) {
+      return fail(res, 400, 'account_holder_name, account_number, bank_name, and ifsc_code are required');
+    }
+    const data = await bankAccounts.createOrReplacePrimary({
+      restaurantId: req.params.id,
+      accountHolderName: account_holder_name,
+      accountNumber: account_number,
+      bankName: bank_name,
+      ifscCode: ifsc_code,
+      accountType: account_type,
+      upiId: upi_id,
+    });
+    ok(res, 'Bank account saved', bankAccounts.mapAccount(data));
+  } catch (error) {
+    fail(res, error.status || 500, error.message || 'Server Error', error.message);
+  }
+};
+
+const getRestaurantRevenueTrend = async (req, res) => {
+  try {
+    const data = await admin.getRestaurantRevenueTrend(req.params.id, {
+      from: req.query.from || '',
+      to: req.query.to || '',
+    });
+    ok(res, 'Revenue trend retrieved', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getRestaurantAnalytics = async (req, res) => {
+  try {
+    const data = await admin.getRestaurantAnalytics(req.params.id, {
+      from: req.query.from || '',
+      to: req.query.to || '',
+    });
+    ok(res, 'Restaurant analytics retrieved', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getRestaurantReviews = async (req, res) => {
+  try {
+    const data = await admin.listRestaurantReviews(req.params.id, {
+      status: req.query.status || '',
+      page: req.query.page,
+      limit: req.query.limit,
+    });
+    ok(res, 'Reviews retrieved', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const patchRestaurantReview = async (req, res) => {
+  try {
+    const { reply, status, reported } = req.body || {};
+    let data = null;
+    if (reply !== undefined) data = await admin.replyToReview(req.params.reviewId, reply);
+    if (status !== undefined) data = await admin.setReviewStatus(req.params.reviewId, status);
+    if (reported !== undefined) data = await admin.setReviewReported(req.params.reviewId, reported);
+    if (!data) return fail(res, 404, 'Review not found or no changes provided');
+
+    const { writeAudit } = require('../services/auditService');
+    writeAudit({
+      userId: req.user.id,
+      role: req.user.role,
+      action: 'review.moderate',
+      category: 'restaurant',
+      resourceType: 'review',
+      resourceId: req.params.reviewId,
+      meta: { reply: reply !== undefined, status, reported },
+      req,
+    }).catch(() => {});
+
+    ok(res, 'Review updated', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getRestaurantSettlementsScoped = async (req, res) => {
+  try {
+    const data = await admin.getRestaurantSettlements({
+      restaurant_id: req.params.id,
+      date_from: req.query.date_from || '',
+      date_to: req.query.date_to || '',
+    });
+    ok(res, 'Settlements retrieved', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const bulkRestaurants = async (req, res) => {
+  try {
+    const { ids, action, reason } = req.body || {};
+    if (!Array.isArray(ids) || !ids.length || !VERIFY_ACTIONS.concat('delete').includes(action)) {
+      return fail(res, 400, `ids (array) and action (one of ${VERIFY_ACTIONS.concat('delete').join(', ')}) are required`);
+    }
+    const result = await admin.bulkUpdateRestaurants(ids, action);
+
+    try {
+      const { emitRestaurantStatus } = require('../socket/emitters');
+      result.succeeded.forEach((row) => {
+        emitRestaurantStatus({ id: row.id }, { action });
+      });
+    } catch {
+      /* non-blocking */
+    }
+
+    const { writeAudit } = require('../services/auditService');
+    writeAudit({
+      userId: req.user.id,
+      role: req.user.role,
+      action: `restaurant.bulk_${action}`,
+      category: 'restaurant',
+      meta: { count: ids.length, action, reason: reason || null, succeeded: result.succeeded.length, failed: result.failed.length },
+      req,
+    }).catch(() => {});
+
+    ok(res, `${result.succeeded.length} of ${ids.length} restaurants updated`, result);
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
   }
@@ -278,8 +596,27 @@ const getOrders = async (req, res) => {
     const data = await admin.listOrders({
       search: req.query.search || '',
       status: req.query.status || '',
+      restaurant_id: req.query.restaurant_id || '',
+      delivery_partner_id: req.query.delivery_partner_id || '',
+      payment_method: req.query.payment_method || '',
+      payment_status: req.query.payment_status || '',
+      city: req.query.city || '',
+      from: req.query.from || '',
+      to: req.query.to || '',
+      sort: req.query.sort || 'latest',
+      page: req.query.page,
+      limit: req.query.limit,
     });
-    ok(res, 'Orders retrieved', data);
+    ok(res, 'Orders retrieved', { rows: data.rows, pagination: data.pagination });
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const getOrderStats = async (req, res) => {
+  try {
+    const data = await admin.getOrderStats();
+    ok(res, 'Order stats retrieved', data);
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
   }
@@ -295,9 +632,42 @@ const getOrder = async (req, res) => {
   }
 };
 
+const getOrderHistory = async (req, res) => {
+  try {
+    const order = await admin.getOrderDetails(req.params.id);
+    if (!order) return fail(res, 404, 'Order not found');
+    ok(res, 'Order history retrieved', order.timeline);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const downloadOrderInvoice = async (req, res) => {
+  try {
+    const { buildInvoicePdfForOrder } = require('../services/invoiceService');
+    const pdf = await buildInvoicePdfForOrder(req.params.id, null);
+    const { writeAudit } = require('../services/auditService');
+    writeAudit({
+      userId: req.user.id,
+      role: req.user.role,
+      action: 'order.invoice_download',
+      category: 'orders',
+      resourceType: 'order',
+      resourceId: req.params.id,
+      req,
+    }).catch(() => {});
+    const shortId = String(req.params.id).replace(/-/g, '').slice(0, 8).toUpperCase();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="foodiq-invoice-${shortId}.pdf"`);
+    res.send(pdf);
+  } catch (error) {
+    fail(res, error.status || 500, error.message || 'Server Error');
+  }
+};
+
 const patchOrder = async (req, res) => {
   try {
-    const data = await admin.updateOrderAdmin(req.params.id, req.body);
+    const data = await admin.updateOrderAdmin(req.params.id, req.body, { id: req.user.id });
     if (!data) return fail(res, 404, 'Order not found');
 
     if (req.body?.status) {
@@ -318,6 +688,18 @@ const patchOrder = async (req, res) => {
       }
     }
 
+    const { writeAudit } = require('../services/auditService');
+    writeAudit({
+      userId: req.user.id,
+      role: req.user.role,
+      action: 'order.update',
+      category: 'orders',
+      resourceType: 'order',
+      resourceId: req.params.id,
+      meta: { status: req.body?.status, delivery_partner_id: req.body?.delivery_partner_id, estimated_delivery_time: req.body?.estimated_delivery_time, scheduled_for: req.body?.scheduled_for },
+      req,
+    }).catch(() => {});
+
     ok(res, 'Order updated', data);
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
@@ -335,9 +717,118 @@ const refund = async (req, res) => {
       type: req.body?.type || (req.body?.amount ? 'partial' : 'full'),
       cancelOrder: req.body?.cancel_order !== false,
     });
+
+    try {
+      const { recordStatusChange } = require('../models/orderStatusHistoryModel');
+      await recordStatusChange({
+        orderId: req.params.id,
+        toStatus: 'Refund Completed',
+        changedBy: req.user.id,
+        source: 'admin',
+        reason: req.body?.reason || 'Admin refund',
+        meta: { amount: req.body?.amount, type: req.body?.type },
+      });
+    } catch {
+      /* non-blocking */
+    }
+
+    const { writeAudit } = require('../services/auditService');
+    writeAudit({
+      userId: req.user.id,
+      role: req.user.role,
+      action: 'order.refund',
+      category: 'orders',
+      resourceType: 'order',
+      resourceId: req.params.id,
+      meta: { amount: req.body?.amount, type: req.body?.type },
+      req,
+    }).catch(() => {});
+
     ok(res, 'Order refunded', data);
   } catch (error) {
     fail(res, error.status || 500, error.message || 'Server Error');
+  }
+};
+
+const bulkUpdateStatus = async (req, res) => {
+  try {
+    const { ids, status, reason } = req.body || {};
+    if (!Array.isArray(ids) || !ids.length || !status) {
+      return fail(res, 400, 'ids (array) and status are required');
+    }
+    const result = await admin.bulkUpdateOrderStatus(ids, status, reason, { id: req.user.id });
+    try {
+      const { emitOrderStatus } = require('../socket/emitters');
+      result.succeeded.forEach((row) => {
+        emitOrderStatus({ id: row.id, status }, { source: 'admin' });
+      });
+    } catch {
+      /* non-blocking */
+    }
+    const { writeAudit } = require('../services/auditService');
+    writeAudit({
+      userId: req.user.id,
+      role: req.user.role,
+      action: 'order.bulk_status',
+      category: 'orders',
+      meta: { count: ids.length, status, succeeded: result.succeeded.length, failed: result.failed.length },
+      req,
+    }).catch(() => {});
+    ok(res, `${result.succeeded.length} of ${ids.length} orders updated`, result);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const bulkAssignPartner = async (req, res) => {
+  try {
+    const { ids, delivery_partner_id } = req.body || {};
+    if (!Array.isArray(ids) || !ids.length || !delivery_partner_id) {
+      return fail(res, 400, 'ids (array) and delivery_partner_id are required');
+    }
+    const result = await admin.bulkAssignDeliveryPartner(ids, delivery_partner_id, { id: req.user.id });
+    const { writeAudit } = require('../services/auditService');
+    writeAudit({
+      userId: req.user.id,
+      role: req.user.role,
+      action: 'order.bulk_assign',
+      category: 'orders',
+      meta: { count: ids.length, delivery_partner_id, succeeded: result.succeeded.length, failed: result.failed.length },
+      req,
+    }).catch(() => {});
+    ok(res, `${result.succeeded.length} of ${ids.length} orders assigned`, result);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const bulkCancelOrders = async (req, res) => {
+  try {
+    const { ids, reason } = req.body || {};
+    if (!Array.isArray(ids) || !ids.length) {
+      return fail(res, 400, 'ids (array) is required');
+    }
+    const result = await admin.bulkUpdateOrderStatus(ids, 'Cancelled', reason, { id: req.user.id });
+    try {
+      const { emitOrderStatus } = require('../socket/emitters');
+      result.succeeded.forEach((row) => {
+        emitOrderStatus({ id: row.id, status: 'Cancelled' }, { source: 'admin' });
+      });
+    } catch {
+      /* non-blocking */
+    }
+    const { writeAudit } = require('../services/auditService');
+    writeAudit({
+      userId: req.user.id,
+      role: req.user.role,
+      action: 'order.bulk_cancel',
+      category: 'orders',
+      meta: { count: ids.length, succeeded: result.succeeded.length, failed: result.failed.length },
+      req,
+    }).catch(() => {});
+    ok(res, `${result.succeeded.length} of ${ids.length} orders cancelled`, result);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
   }
 };
 
@@ -874,20 +1365,122 @@ const getSettlements = async (req, res) => {
   }
 };
 
+const ORDER_EXPORT_COLUMNS = [
+  { key: 'id', label: 'Order ID' },
+  { key: 'created_at', label: 'Created' },
+  { key: 'customer_name', label: 'Customer' },
+  { key: 'restaurant_name', label: 'Restaurant' },
+  { key: 'delivery_partner_name', label: 'Delivery Partner' },
+  { key: 'item_count', label: 'Items' },
+  { key: 'total_amount', label: 'Total Amount' },
+  { key: 'payment_method', label: 'Payment Method' },
+  { key: 'payment_status', label: 'Payment Status' },
+  { key: 'status', label: 'Order Status' },
+  { key: 'city', label: 'City' },
+  { key: 'estimated_delivery_time', label: 'Expected Delivery' },
+];
+
+const RESTAURANT_EXPORT_COLUMNS = [
+  { key: 'id', label: 'Restaurant ID' },
+  { key: 'name', label: 'Restaurant Name' },
+  { key: 'owner_name', label: 'Owner' },
+  { key: 'owner_email', label: 'Email' },
+  { key: 'owner_phone', label: 'Phone' },
+  { key: 'city', label: 'City' },
+  { key: 'zone', label: 'Zone' },
+  { key: 'category_name', label: 'Cuisine' },
+  { key: 'rating', label: 'Rating' },
+  { key: 'approval_status', label: 'Status' },
+  { key: 'orders_today', label: 'Orders Today' },
+  { key: 'revenue_today', label: 'Revenue Today' },
+  { key: 'created_at', label: 'Created' },
+];
+
 const exportReport = async (req, res) => {
   try {
     const { type = 'sales', format = 'json', start_date, end_date } = req.query;
     let rows = [];
+    let columns = null;
     if (type === 'sales' || type === 'payment') {
       rows = await admin.getPaymentReport({ start_date, end_date, group_by: 'day' });
     } else if (type === 'delivery') {
       rows = await admin.getDeliveryReport();
     } else if (type === 'restaurants') {
-      rows = await admin.listRestaurants({});
+      const data = await admin.listRestaurants({
+        search: req.query.search || '',
+        status: req.query.status || '',
+        verification: req.query.verification || '',
+        city: req.query.city || '',
+        zone: req.query.zone || '',
+        cuisine: req.query.cuisine || '',
+        sort: req.query.sort || 'latest',
+        page: 1,
+        limit: 500,
+        maxLimit: 500,
+      });
+      rows = data.rows;
+      columns = RESTAURANT_EXPORT_COLUMNS;
     } else if (type === 'customers') {
       rows = await admin.listUsers({ role: 'customer' });
     } else if (type === 'orders') {
-      rows = await admin.listOrders({});
+      const data = await admin.listOrders({
+        search: req.query.search || '',
+        status: req.query.status || '',
+        restaurant_id: req.query.restaurant_id || '',
+        delivery_partner_id: req.query.delivery_partner_id || '',
+        payment_method: req.query.payment_method || '',
+        payment_status: req.query.payment_status || '',
+        city: req.query.city || '',
+        from: req.query.from || start_date || '',
+        to: req.query.to || end_date || '',
+        sort: req.query.sort || 'latest',
+        page: 1,
+        limit: 500,
+        maxLimit: 500,
+      });
+      rows = data.rows;
+      columns = ORDER_EXPORT_COLUMNS;
+    }
+
+    if (format === 'pdf' && type === 'orders') {
+      const { buildOrdersExportPdf } = require('../services/orderExportPdfService');
+      const pdf = await buildOrdersExportPdf(rows, ORDER_EXPORT_COLUMNS);
+      const { writeAudit } = require('../services/auditService');
+      writeAudit({
+        userId: req.user.id,
+        role: req.user.role,
+        action: 'order.export',
+        category: 'orders',
+        meta: { format, count: rows.length },
+        req,
+      }).catch(() => {});
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename="orders-export.pdf"');
+      return res.send(pdf);
+    }
+
+    if ((format === 'pdf' || format === 'xlsx') && type === 'restaurants') {
+      const restaurantExport = require('../services/restaurantExportService');
+      const { writeAudit } = require('../services/auditService');
+      writeAudit({
+        userId: req.user.id,
+        role: req.user.role,
+        action: 'restaurant.export',
+        category: 'restaurant',
+        meta: { format, count: rows.length },
+        req,
+      }).catch(() => {});
+
+      if (format === 'pdf') {
+        const pdf = await restaurantExport.buildRestaurantsExportPdf(rows, RESTAURANT_EXPORT_COLUMNS);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename="restaurants-export.pdf"');
+        return res.send(pdf);
+      }
+      const xlsx = await restaurantExport.buildRestaurantsExportXlsx(rows, RESTAURANT_EXPORT_COLUMNS);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename="restaurants-export.xlsx"');
+      return res.send(xlsx);
     }
 
     if (format === 'csv') {
@@ -895,10 +1488,21 @@ const exportReport = async (req, res) => {
         res.setHeader('Content-Type', 'text/csv');
         return res.send('No data');
       }
-      const keys = Object.keys(rows[0]);
-      const csv = [keys.join(',')].concat(
-        rows.map((r) => keys.map((k) => JSON.stringify(r[k] ?? '')).join(','))
+      const cols = columns || Object.keys(rows[0]).map((k) => ({ key: k, label: k }));
+      const csv = [cols.map((c) => c.label).join(',')].concat(
+        rows.map((r) => cols.map((c) => JSON.stringify(r[c.key] ?? '')).join(','))
       ).join('\n');
+      if (type === 'orders' || type === 'restaurants') {
+        const { writeAudit } = require('../services/auditService');
+        writeAudit({
+          userId: req.user.id,
+          role: req.user.role,
+          action: `${type === 'orders' ? 'order' : 'restaurant'}.export`,
+          category: type === 'orders' ? 'orders' : 'restaurant',
+          meta: { format, count: rows.length },
+          req,
+        }).catch(() => {});
+      }
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', `attachment; filename="${type}-report.csv"`);
       return res.send(csv);
@@ -1172,9 +1776,25 @@ const patchDeliverySupportTicket = async (req, res) => {
 };
 
 module.exports = {
+  ORDER_EXPORT_COLUMNS,
+  RESTAURANT_EXPORT_COLUMNS,
   getDashboard,
   getLiveDeliveries,
   getRestaurants,
+  getRestaurantStats,
+  getRestaurantDetail,
+  verifyRestaurantAction,
+  getRestaurantVerificationTimeline,
+  getRestaurantDocuments,
+  patchRestaurantDocument,
+  getRestaurantBankAccount,
+  patchRestaurantBankAccount,
+  getRestaurantRevenueTrend,
+  getRestaurantAnalytics,
+  getRestaurantReviews,
+  patchRestaurantReview,
+  getRestaurantSettlementsScoped,
+  bulkRestaurants,
   patchRestaurant,
   removeRestaurant,
   restaurantPerformance,
@@ -1195,9 +1815,15 @@ module.exports = {
   getDeliverySupportTickets,
   patchDeliverySupportTicket,
   getOrders,
+  getOrderStats,
   getOrder,
+  getOrderHistory,
+  downloadOrderInvoice,
   patchOrder,
   refund,
+  bulkUpdateStatus,
+  bulkAssignPartner,
+  bulkCancelOrders,
   getPaymentsOverview,
   getPaymentTransactions,
   getRefunds,

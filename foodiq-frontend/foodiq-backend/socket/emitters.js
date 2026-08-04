@@ -587,6 +587,31 @@ const emitDispatchReassigned = (data = {}) => {
   }
 };
 
+/**
+ * Lightweight admin live tick for restaurant verification/status changes
+ * (approve/reject/suspend/activate), mirroring the order_status ADMIN_LIVE
+ * tick in emitOrderStatus. Also nudges the restaurant's own room so a
+ * restaurant-portal session reflects an admin-driven status change live.
+ */
+const emitRestaurantStatus = (restaurant = {}, extras = {}) => {
+  const io = getIO();
+  if (!io) return;
+  const restaurantId = restaurant.id || extras.restaurant_id;
+  if (!restaurantId) return;
+
+  const payload = {
+    type: 'restaurant_status',
+    restaurant_id: restaurantId,
+    approval_status: restaurant.approval_status ?? extras.approval_status ?? null,
+    is_active: restaurant.is_active ?? extras.is_active ?? null,
+    action: extras.action || null,
+    at: new Date().toISOString(),
+  };
+
+  io.to(roleRoom('admin')).emit(EVENTS.ADMIN_LIVE, payload);
+  io.to(restaurantRoom(restaurantId)).emit(EVENTS.ADMIN_LIVE, payload);
+};
+
 module.exports = {
   setIO,
   getIO,

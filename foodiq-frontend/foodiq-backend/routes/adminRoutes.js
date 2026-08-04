@@ -12,9 +12,23 @@ router.get('/live-deliveries', requirePermission('live'), c.getLiveDeliveries);
 router.get('/analytics', requirePermission('analytics'), c.getAnalytics);
 
 router.get('/restaurants', requirePermission('restaurants'), c.getRestaurants);
+router.get('/restaurants/stats', requirePermission('restaurants'), c.getRestaurantStats);
+router.post('/restaurants/bulk', requirePermission('restaurants'), c.bulkRestaurants);
+router.patch('/restaurants/reviews/:reviewId', requirePermission('restaurants'), c.patchRestaurantReview);
+router.get('/restaurants/:id', requirePermission('restaurants'), c.getRestaurantDetail);
 router.put('/restaurants/:id', requirePermission('restaurants'), c.patchRestaurant);
 router.delete('/restaurants/:id', requirePermission('restaurants'), c.removeRestaurant);
+router.post('/restaurants/:id/verify', requirePermission('restaurants'), c.verifyRestaurantAction);
+router.get('/restaurants/:id/verification-timeline', requirePermission('restaurants'), c.getRestaurantVerificationTimeline);
 router.get('/restaurants/:id/performance', requirePermission('restaurants'), c.restaurantPerformance);
+router.get('/restaurants/:id/documents', requirePermission('restaurants'), c.getRestaurantDocuments);
+router.patch('/restaurants/:id/documents/:docId', requirePermission('restaurants'), c.patchRestaurantDocument);
+router.get('/restaurants/:id/bank-account', requirePermission('restaurants', 'payments'), c.getRestaurantBankAccount);
+router.patch('/restaurants/:id/bank-account', requirePermission('restaurants', 'payments'), c.patchRestaurantBankAccount);
+router.get('/restaurants/:id/revenue-trend', requirePermission('restaurants', 'analytics'), c.getRestaurantRevenueTrend);
+router.get('/restaurants/:id/analytics', requirePermission('restaurants', 'analytics'), c.getRestaurantAnalytics);
+router.get('/restaurants/:id/reviews', requirePermission('restaurants', 'feedback'), c.getRestaurantReviews);
+router.get('/restaurants/:id/settlements', requirePermission('restaurants', 'payments'), c.getRestaurantSettlementsScoped);
 
 router.get('/users', requirePermission('customers'), c.getUsers);
 router.put('/users/:id', requirePermission('customers'), c.patchUser);
@@ -57,7 +71,13 @@ router.get('/delivery/support', requirePermission('delivery', 'feedback'), c.get
 router.patch('/delivery/support/:id', supportLimiter, requirePermission('delivery', 'feedback'), validateAdminReply, c.patchDeliverySupportTicket);
 
 router.get('/orders', requirePermission('orders'), c.getOrders);
+router.get('/orders/stats', requirePermission('orders'), c.getOrderStats);
+router.post('/orders/bulk-status', requirePermission('orders'), c.bulkUpdateStatus);
+router.post('/orders/bulk-assign', requirePermission('orders', 'delivery'), c.bulkAssignPartner);
+router.post('/orders/bulk-cancel', requirePermission('orders'), c.bulkCancelOrders);
 router.get('/orders/:id', requirePermission('orders'), c.getOrder);
+router.get('/orders/:id/history', requirePermission('orders'), c.getOrderHistory);
+router.get('/orders/:id/invoice', requirePermission('orders'), c.downloadOrderInvoice);
 router.put('/orders/:id', requirePermission('orders'), c.patchOrder);
 router.post('/orders/:id/refund', requirePermission('orders', 'payments'), c.refund);
 router.get('/payments', requirePermission('payments'), c.getPaymentsOverview);
