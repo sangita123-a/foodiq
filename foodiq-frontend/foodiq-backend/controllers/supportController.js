@@ -18,45 +18,9 @@ const nextTicketNumber = async (client = pool) => {
   return `TKT-${rows[0].n}`;
 };
 
-const initSupportExtras = async () => {
-  try {
-    await pool.query(`CREATE SEQUENCE IF NOT EXISTS support_ticket_number_seq START 1000`);
-    await pool.query(`
-      ALTER TABLE support_tickets
-        ADD COLUMN IF NOT EXISTS priority VARCHAR(20) DEFAULT 'normal',
-        ADD COLUMN IF NOT EXISTS ticket_number VARCHAR(20),
-        ADD COLUMN IF NOT EXISTS order_id UUID,
-        ADD COLUMN IF NOT EXISTS restaurant_id UUID,
-        ADD COLUMN IF NOT EXISTS problem_type VARCHAR(80),
-        ADD COLUMN IF NOT EXISTS image_url TEXT,
-        ADD COLUMN IF NOT EXISTS expected_resolution_at TIMESTAMP WITH TIME ZONE,
-        ADD COLUMN IF NOT EXISTS attachment_urls JSONB DEFAULT '[]'::jsonb,
-        ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    `);
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS email_support (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-        ticket_number VARCHAR(20),
-        name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        subject VARCHAR(255) NOT NULL,
-        message TEXT NOT NULL,
-        attachment_url TEXT,
-        status VARCHAR(40) NOT NULL DEFAULT 'Open',
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    await pool.query(`
-      CREATE UNIQUE INDEX IF NOT EXISTS uq_email_support_ticket_number
-        ON email_support(ticket_number) WHERE ticket_number IS NOT NULL
-    `);
-  } catch (e) {
-    console.error('[support] schema init error', e.message);
-  }
-};
-initSupportExtras();
+// Schema for support_tickets/email_support/support_ticket_number_seq is owned by
+// utils/ensureSchema.js (run once at server boot) — see "Support Center canonical
+// consolidation" and the email_support block there.
 
 const submitSupport = async (req, res) => {
   try {
@@ -67,8 +31,10 @@ const submitSupport = async (req, res) => {
     const ticketNumber = await nextTicketNumber();
     const { rows } = await pool.query(
       `INSERT INTO support_tickets
-         (user_id, category, subject, description, ticket_number, status, expected_resolution_at)
-       VALUES ($1, $2, $3, $4, $5, 'Open', NOW() + INTERVAL '24 hours')
+         (user_id, category, subject, description, ticket_number, status, expected_resolution_at,
+          requester_type, source_channel, status_norm, priority_norm)
+       VALUES ($1, $2, $3, $4, $5, 'Open', NOW() + INTERVAL '24 hours',
+               'customer', 'app', 'open', 'medium')
        RETURNING *`,
       [req.user.id, category, subject, description, ticketNumber]
     );
@@ -135,11 +101,11 @@ const submitOrderProblem = async (req, res) => {
       `INSERT INTO support_tickets (
          user_id, category, subject, description, status, ticket_number,
          order_id, restaurant_id, problem_type, image_url, expected_resolution_at,
-         attachment_urls
+         attachment_urls, requester_type, source_channel, status_norm, priority_norm
        ) VALUES (
          $1, 'Order Problem', $2, $3, 'Open', $4,
          $5, $6, $7, $8, NOW() + ($9::int * INTERVAL '1 hour'),
-         $10::jsonb
+         $10::jsonb, 'customer', 'app', 'open', 'medium'
        ) RETURNING *`,
       [
         req.user.id,

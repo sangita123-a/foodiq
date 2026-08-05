@@ -2,6 +2,7 @@
  * Analytics export helpers — CSV, Excel-compatible CSV, PDF (pdfkit).
  */
 const PDFDocument = require('pdfkit');
+const { pool } = require('../config/db');
 
 const escapeCsv = (v) => {
   const s = v == null ? '' : String(v);
@@ -129,10 +130,24 @@ const exportBiPdf = (data) =>
     }
   });
 
+/**
+ * Audit trail for report generation — who generated what, when, in what
+ * format. Writes to analytics_report_runs (schema already existed, table
+ * was never actually populated by any code path before this).
+ */
+const logReportRun = async ({ reportType, format = 'download', createdBy = null, rowCount = 0, extra = {} }) => {
+  await pool.query(
+    `INSERT INTO analytics_report_runs (report_type, format, payload, created_by)
+     VALUES ($1, $2, $3, $4)`,
+    [reportType, format, JSON.stringify({ row_count: rowCount, ...extra }), createdBy]
+  );
+};
+
 module.exports = {
   rowsToCsv,
   exportBiCsv,
   exportBiExcelCsv,
   exportBiPdf,
   biDashboardToTables,
+  logReportRun,
 };

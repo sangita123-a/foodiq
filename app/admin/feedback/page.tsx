@@ -13,8 +13,13 @@ import {
   formatDate,
   type FeedbackInbox,
 } from "@/services/adminApi";
-import { MessageSquare, RefreshCw } from "lucide-react";
+import { MessageSquare, RefreshCw, Star, ThumbsUp, Bike } from "lucide-react";
 import ContactMessagesAdmin from "@/components/admin/ContactMessagesAdmin";
+import StatCard from "@/components/admin/dashboard/StatCard";
+import Badge from "@/components/admin/ui/Badge";
+import Button from "@/components/admin/ui/Button";
+import EmptyState from "@/components/admin/ui/EmptyState";
+import Pagination from "@/components/admin/ui/Pagination";
 
 type Tab = "orders" | "analytics" | "product" | "support" | "contact" | "reviews";
 
@@ -144,24 +149,20 @@ export default function AdminFeedbackPage() {
   }>;
 
   return (
-    <AdminShell>
+    <AdminShell title="Feedback">
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-black text-foreground flex items-center gap-2">
+            <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight flex items-center gap-2">
               <MessageSquare className="w-6 h-6 text-primary" /> Feedback
             </h1>
-            <p className="text-sm text-gray-text mt-1">
+            <p className="text-gray-text mt-1">
               Order ratings, analytics, product feedback, and review moderation.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => void load()}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm font-bold text-gray-text hover:text-foreground"
-          >
-            <RefreshCw className="w-4 h-4" /> Refresh
-          </button>
+          <Button variant="secondary" size="sm" icon={<RefreshCw className="w-4 h-4" />} onClick={() => void load()}>
+            Refresh
+          </Button>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -170,10 +171,10 @@ export default function AdminFeedbackPage() {
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
-              className={`px-4 py-2 rounded-xl text-sm font-bold ${
+              className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors duration-150 ${
                 tab === t.id
-                  ? "bg-primary text-white"
-                  : "bg-white border border-border text-gray-text"
+                  ? "bg-primary text-white shadow-[var(--shadow-button)]"
+                  : "bg-white border border-border text-gray-text hover:text-foreground"
               }`}
             >
               {t.label}
@@ -182,7 +183,7 @@ export default function AdminFeedbackPage() {
         </div>
 
         {(tab === "orders" || tab === "reviews") && (
-          <div className="bg-white rounded-3xl border border-border p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             <input
               value={filters.restaurant_id}
               onChange={(e) =>
@@ -237,17 +238,15 @@ export default function AdminFeedbackPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-3xl border border-border overflow-hidden">
+        <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] overflow-hidden">
           {loading ? (
             <div className="p-8 text-sm text-gray-text">Loading…</div>
           ) : tab === "orders" ? (
             <div>
+              {orderRows.length === 0 && (
+                <EmptyState icon={Star} title="No order feedback yet" description="Ratings submitted after order delivery will appear here." />
+              )}
               <div className="divide-y divide-[#E5E7EB]">
-                {orderRows.length === 0 && (
-                  <p className="p-6 text-sm text-gray-text">
-                    No order feedback yet.
-                  </p>
-                )}
                 {orderRows.map((r) => (
                   <div
                     key={String(r.order_id)}
@@ -288,60 +287,61 @@ export default function AdminFeedbackPage() {
                   </div>
                 ))}
               </div>
-              <Pagination
-                page={page}
-                totalPages={totalPages}
-                total={orderTotal}
-                onPage={setPage}
-              />
+              {orderTotal > PAGE_SIZE && (
+                <Pagination
+                  page={page + 1}
+                  totalPages={totalPages}
+                  total={orderTotal}
+                  limit={PAGE_SIZE}
+                  onPageChange={(p) => setPage(p - 1)}
+                />
+              )}
             </div>
           ) : tab === "analytics" ? (
-            <div className="p-6 space-y-6">
+            <div className="p-5 sm:p-6 space-y-6">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                  {
-                    label: "Avg restaurant rating",
-                    value: restaurant?.avg_rating ?? "—",
-                  },
-                  {
-                    label: "Avg delivery rating",
-                    value: delivery?.avg_rating ?? "—",
-                  },
-                  {
-                    label: "CSAT score",
-                    value:
-                      analytics?.csat_score != null
-                        ? `${analytics.csat_score}%`
-                        : "—",
-                  },
-                  {
-                    label: "Reviews (30d)",
-                    value: restaurant?.total ?? "—",
-                  },
-                ].map((k) => (
-                  <div
-                    key={k.label}
-                    className="rounded-2xl border border-border p-4"
-                  >
-                    <p className="text-xs font-bold text-[#9CA3AF] uppercase">
-                      {k.label}
-                    </p>
-                    <p className="text-2xl font-black text-foreground mt-1">
-                      {String(k.value)}
-                    </p>
-                  </div>
-                ))}
+                <StatCard
+                  label="Avg Restaurant Rating"
+                  value={restaurant?.avg_rating ?? 0}
+                  icon={Star}
+                  color="text-amber-600"
+                  bg="bg-amber-500/10"
+                  format={(n) => (restaurant?.avg_rating != null ? `${n.toFixed(1)} ★` : "—")}
+                />
+                <StatCard
+                  label="Avg Delivery Rating"
+                  value={delivery?.avg_rating ?? 0}
+                  icon={Bike}
+                  color="text-cyan-600"
+                  bg="bg-cyan-500/10"
+                  format={(n) => (delivery?.avg_rating != null ? `${n.toFixed(1)} ★` : "—")}
+                />
+                <StatCard
+                  label="CSAT Score"
+                  value={Number(analytics?.csat_score ?? 0)}
+                  icon={ThumbsUp}
+                  color="text-emerald-600"
+                  bg="bg-emerald-500/10"
+                  format={(n) => (analytics?.csat_score != null ? `${n}%` : "—")}
+                />
+                <StatCard
+                  label="Reviews (30d)"
+                  value={Number(restaurant?.total ?? 0)}
+                  icon={MessageSquare}
+                  color="text-primary"
+                  bg="bg-primary/10"
+                />
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="font-bold mb-3">Most reviewed restaurants</h3>
+                  <h3 className="text-sm font-black text-foreground tracking-tight mb-3">Most reviewed restaurants</h3>
                   <div className="space-y-2">
                     {topRestaurants.map((r) => (
                       <div
                         key={r.name}
                         className="flex justify-between text-sm border-b border-border py-2"
                       >
-                        <span className="font-bold">{r.name}</span>
+                        <span className="font-bold text-foreground">{r.name}</span>
                         <span className="text-gray-text">
                           {r.review_count} · {r.avg_rating}★
                         </span>
@@ -353,14 +353,14 @@ export default function AdminFeedbackPage() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="font-bold mb-3">Most reviewed dishes</h3>
+                  <h3 className="text-sm font-black text-foreground tracking-tight mb-3">Most reviewed dishes</h3>
                   <div className="space-y-2">
                     {topDishes.map((d) => (
                       <div
                         key={d.dish_name}
                         className="flex justify-between text-sm border-b border-border py-2"
                       >
-                        <span className="font-bold">{d.dish_name}</span>
+                        <span className="font-bold text-foreground">{d.dish_name}</span>
                         <span className="text-gray-text">
                           {d.review_count} · {d.avg_rating}★
                         </span>
@@ -392,10 +392,10 @@ export default function AdminFeedbackPage() {
             />
           ) : (
             <div>
+              {reviews.length === 0 && (
+                <EmptyState icon={Star} title="No reviews yet" description="Customer reviews will appear here once submitted." />
+              )}
               <div className="divide-y divide-[#E5E7EB]">
-                {reviews.length === 0 && (
-                  <p className="p-6 text-sm text-gray-text">No reviews yet.</p>
-                )}
                 {reviews.map((r) => (
                   <div
                     key={String(r.id)}
@@ -419,78 +419,38 @@ export default function AdminFeedbackPage() {
                       <button
                         type="button"
                         onClick={() => void patchReview(String(r.id), "visible")}
-                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700"
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
                       >
                         Visible
                       </button>
                       <button
                         type="button"
                         onClick={() => void patchReview(String(r.id), "hidden")}
-                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-50 text-red-600"
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
                       >
                         Hide
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => void deleteReview(String(r.id))}
-                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#111827] text-white"
-                      >
+                      <Button variant="danger" size="sm" onClick={() => void deleteReview(String(r.id))}>
                         Delete
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))}
               </div>
-              <Pagination
-                page={page}
-                totalPages={totalPages}
-                total={reviewsTotal}
-                onPage={setPage}
-              />
+              {reviewsTotal > PAGE_SIZE && (
+                <Pagination
+                  page={page + 1}
+                  totalPages={totalPages}
+                  total={reviewsTotal}
+                  limit={PAGE_SIZE}
+                  onPageChange={(p) => setPage(p - 1)}
+                />
+              )}
             </div>
           )}
         </div>
       </div>
     </AdminShell>
-  );
-}
-
-function Pagination({
-  page,
-  totalPages,
-  total,
-  onPage,
-}: {
-  page: number;
-  totalPages: number;
-  total: number;
-  onPage: (p: number) => void;
-}) {
-  if (total <= PAGE_SIZE) return null;
-  return (
-    <div className="flex items-center justify-between gap-3 px-5 py-4 border-t border-border flex-wrap">
-      <p className="text-xs text-gray-text">
-        {total} total · Page {page + 1} / {totalPages}
-      </p>
-      <div className="flex gap-2">
-        <button
-          type="button"
-          disabled={page <= 0}
-          onClick={() => onPage(page - 1)}
-          className="px-3 py-1.5 rounded-lg text-xs font-bold border border-border disabled:opacity-40"
-        >
-          Previous
-        </button>
-        <button
-          type="button"
-          disabled={page + 1 >= totalPages}
-          onClick={() => onPage(page + 1)}
-          className="px-3 py-1.5 rounded-lg text-xs font-bold border border-border disabled:opacity-40"
-        >
-          Next
-        </button>
-      </div>
-    </div>
   );
 }
 
@@ -504,12 +464,12 @@ function FeedbackTable({
   onStatus: (id: string, status: string) => void;
 }) {
   if (!rows.length) {
-    return <p className="p-6 text-sm text-gray-text">No items.</p>;
+    return <EmptyState icon={MessageSquare} title="No items" description="Nothing to review here yet." />;
   }
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
-        <thead className="bg-section text-gray-text text-xs uppercase tracking-wider">
+        <thead className="bg-section text-[#9CA3AF] text-[11px] uppercase tracking-widest">
           <tr>
             {columns.map((c) => (
               <th key={c} className="px-4 py-3 font-bold">
@@ -521,15 +481,19 @@ function FeedbackTable({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={String(row.id)} className="border-t border-border">
+            <tr key={String(row.id)} className="border-t border-border hover:bg-section/50 transition-colors">
               {columns.map((c) => (
                 <td
                   key={c}
                   className="px-4 py-3 text-foreground max-w-xs truncate"
                 >
-                  {c === "created_at"
-                    ? formatDate(String(row[c] || ""))
-                    : String(row[c] ?? "—")}
+                  {c === "created_at" ? (
+                    formatDate(String(row[c] || ""))
+                  ) : c === "status" ? (
+                    <Badge status={String(row[c] ?? "")}>{String(row[c] ?? "—")}</Badge>
+                  ) : (
+                    String(row[c] ?? "—")
+                  )}
                 </td>
               ))}
               <td className="px-4 py-3">

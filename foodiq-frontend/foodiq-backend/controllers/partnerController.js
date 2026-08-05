@@ -385,13 +385,14 @@ const updatePartnerOrderStatus = async (req, res) => {
           [req.params.id]
         );
         if (pay.rows[0] && pay.rows[0].status === 'completed' && pay.rows[0].method !== 'cod') {
-          const { processRefund } = require('./paymentController');
-          await processRefund({
+          const { createRefundRequest } = require('../services/refundService');
+          await createRefundRequest({
             orderId: req.params.id,
             reason: 'Restaurant cancelled order',
             initiatedBy: req.user.id,
-            type: 'full',
-            cancelOrder: false,
+            refundType: 'full',
+            refundMethod: 'original',
+            autoApprove: true,
           });
         }
       } catch (refundErr) {

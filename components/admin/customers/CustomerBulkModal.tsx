@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AlertTriangle, CheckSquare, X } from "lucide-react";
+import { Button } from "@/components/admin/ui";
 
 type Props = {
   isOpen: boolean;
@@ -51,9 +52,9 @@ export default function CustomerBulkModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-      <div className="bg-white border border-gray-100 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div className="bg-white border border-border rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
         <div className="flex items-center justify-between">
-          <div className="w-10 h-10 rounded-2xl bg-red-50 text-[#E23744] flex items-center justify-center font-bold">
+          <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold">
             {action === "delete" ? (
               <AlertTriangle className="w-5 h-5" />
             ) : (
@@ -74,24 +75,19 @@ export default function CustomerBulkModal({
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-2">
-          <button
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-all"
-          >
+          <Button onClick={onClose} disabled={isSubmitting} variant="secondary" size="md" className="px-4 py-2.5">
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleConfirm}
             disabled={isSubmitting}
-            className={`px-5 py-2.5 rounded-xl text-white text-sm font-bold shadow-md transition-all ${
-              action === "delete"
-                ? "bg-[#E23744] hover:bg-red-700 shadow-red-200"
-                : "bg-gray-900 hover:bg-black shadow-gray-200"
-            }`}
+            loading={isSubmitting}
+            variant={action === "delete" || action === "block" ? "danger" : "primary"}
+            size="md"
+            className="px-5 py-2.5"
           >
             {isSubmitting ? "Processing..." : "Confirm Action"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

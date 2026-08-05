@@ -80,6 +80,7 @@ const adminDebitWallet = async (req, res) => {
       category: 'admin',
       referenceType: 'admin',
       referenceId: req.user.id,
+      dedupeKey: req.body.dedupe_key || null,
       note: note || 'Manual debit by admin',
       meta: { admin_id: req.user.id },
     });

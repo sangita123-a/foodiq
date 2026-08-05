@@ -23,14 +23,20 @@ import {
   RefreshCw,
   Download,
 } from "lucide-react";
+import StatCard from "@/components/admin/dashboard/StatCard";
+import { Badge, EmptyState } from "@/components/admin/ui";
 
 type Tab = "overview" | "audits" | "errors" | "logs" | "backups";
 
+// Kept as a bespoke pill rather than the shared `Badge`: this renders a
+// boolean health check (not a data-driven status string from the
+// STATUS_TONE registry) and always pairs its tone with an icon, which
+// `Badge` intentionally does not support.
 function StatusPill({ ok, label }: { ok: boolean; label: string }) {
   return (
     <span
       className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full ${
-        ok ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"
+        ok ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
       }`}
     >
       {ok ? <CheckCircle2 className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
@@ -96,17 +102,17 @@ export default function AdminMonitoringPage() {
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black text-foreground flex items-center gap-2">
+            <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight mb-1.5 flex items-center gap-2">
               <Activity className="w-6 h-6 text-primary" /> Monitoring & Security
             </h1>
-            <p className="text-sm text-gray-text mt-1">
+            <p className="text-sm text-gray-text">
               Server health, audits, errors, logs, and backups
             </p>
           </div>
           <button
             type="button"
             onClick={loadOverview}
-            className="px-4 py-2 rounded-xl border border-border font-bold text-sm inline-flex items-center gap-2"
+            className="px-4 py-2.5 rounded-xl border border-border bg-white font-bold text-sm inline-flex items-center gap-2 hover:bg-section transition-colors"
           >
             <RefreshCw className="w-4 h-4" /> Refresh
           </button>
@@ -144,28 +150,40 @@ export default function AdminMonitoringPage() {
             ) : (
               <>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    { label: "Active Orders", value: biz.active_orders ?? "—", icon: Activity },
-                    { label: "Online Restaurants", value: biz.online_restaurants ?? "—", icon: Server },
-                    { label: "Online Riders", value: biz.online_delivery_partners ?? "—", icon: Wifi },
-                    {
-                      label: "Live Revenue Today",
-                      value: `₹${Number(biz.live_revenue_today || 0).toFixed(0)}`,
-                      icon: CheckCircle2,
-                    },
-                  ].map((c) => (
-                    <div key={c.label} className="bg-white border border-border rounded-2xl p-4">
-                      <div className="flex items-center gap-2 text-gray-text text-xs font-bold uppercase mb-2">
-                        <c.icon className="w-4 h-4 text-primary" /> {c.label}
-                      </div>
-                      <div className="text-2xl font-black text-foreground">{c.value}</div>
-                    </div>
-                  ))}
+                  <StatCard
+                    label="Active Orders"
+                    value={Number(biz.active_orders ?? 0)}
+                    icon={Activity}
+                    color="text-sky-600"
+                    bg="bg-sky-500/10"
+                  />
+                  <StatCard
+                    label="Online Restaurants"
+                    value={Number(biz.online_restaurants ?? 0)}
+                    icon={Server}
+                    color="text-violet-600"
+                    bg="bg-violet-500/10"
+                  />
+                  <StatCard
+                    label="Online Riders"
+                    value={Number(biz.online_delivery_partners ?? 0)}
+                    icon={Wifi}
+                    color="text-cyan-600"
+                    bg="bg-cyan-500/10"
+                  />
+                  <StatCard
+                    label="Live Revenue Today"
+                    value={Number(biz.live_revenue_today || 0)}
+                    icon={CheckCircle2}
+                    color="text-primary"
+                    bg="bg-primary/10"
+                    format={(n) => `₹${n.toFixed(0)}`}
+                  />
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div className="bg-white border border-border rounded-2xl p-5 space-y-3">
-                    <h3 className="font-bold text-foreground flex items-center gap-2">
+                  <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-5 space-y-3">
+                    <h3 className="font-black text-foreground tracking-tight flex items-center gap-2">
                       <Server className="w-4 h-4 text-primary" /> Server Health
                     </h3>
                     <div className="flex flex-wrap gap-2">
@@ -195,13 +213,13 @@ export default function AdminMonitoringPage() {
                     </div>
                   </div>
 
-                  <div className="bg-white border border-border rounded-2xl p-5">
-                    <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">
+                  <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-5">
+                    <h3 className="font-black text-foreground tracking-tight mb-3 flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-primary" /> Alerts
                     </h3>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                       {(data.alerts || []).length === 0 && (
-                        <p className="text-sm text-gray-text">No alerts</p>
+                        <EmptyState icon={CheckCircle2} title="No alerts" className="py-6" />
                       )}
                       {(data.alerts || []).map((a: any) => (
                         <div
@@ -234,8 +252,8 @@ export default function AdminMonitoringPage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div className="bg-white border border-border rounded-2xl p-5">
-                    <h3 className="font-bold mb-3">Recent Errors</h3>
+                  <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-5">
+                    <h3 className="font-black text-foreground tracking-tight mb-3">Recent Errors</h3>
                     <ul className="space-y-2 text-sm max-h-56 overflow-y-auto">
                       {(data.recent_errors || []).map((e: any) => (
                         <li key={e.id} className="border-b border-[#F3F4F6] pb-2">
@@ -247,8 +265,8 @@ export default function AdminMonitoringPage() {
                       ))}
                     </ul>
                   </div>
-                  <div className="bg-white border border-border rounded-2xl p-5">
-                    <h3 className="font-bold mb-3">Recent Audits</h3>
+                  <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-5">
+                    <h3 className="font-black text-foreground tracking-tight mb-3">Recent Audits</h3>
                     <ul className="space-y-2 text-sm max-h-56 overflow-y-auto">
                       {(data.recent_audits || []).map((a: any) => (
                         <li key={a.id} className="border-b border-[#F3F4F6] pb-2">
@@ -273,12 +291,12 @@ export default function AdminMonitoringPage() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search…"
-              className="flex-1 px-4 py-2 rounded-xl border border-border text-sm"
+              className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-white text-sm"
             />
             {tab === "audits" && (
               <a
                 href={auditsExportUrl(q)}
-                className="px-4 py-2 rounded-xl bg-[#111827] text-white text-sm font-bold inline-flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl bg-white border border-border text-foreground text-sm font-bold inline-flex items-center gap-2 hover:bg-section transition-colors"
                 onClick={(e) => {
                   e.preventDefault();
                   const token = getAccessToken();
@@ -309,38 +327,41 @@ export default function AdminMonitoringPage() {
         )}
 
         {tab === "audits" && (
-          <div className="bg-white border border-border rounded-2xl overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-section text-left text-xs uppercase text-gray-text">
-                <tr>
-                  <th className="p-3">Time</th>
-                  <th className="p-3">User</th>
-                  <th className="p-3">Action</th>
-                  <th className="p-3">IP / Device</th>
-                </tr>
-              </thead>
-              <tbody>
-                {audits.map((a) => (
-                  <tr key={a.id as string} className="border-t border-border">
-                    <td className="p-3 whitespace-nowrap">
-                      {new Date(String(a.created_at)).toLocaleString()}
-                    </td>
-                    <td className="p-3">{String(a.user_email || a.role || "—")}</td>
-                    <td className="p-3 font-bold">{String(a.action)}</td>
-                    <td className="p-3 text-gray-text">
-                      {String(a.ip_address || "—")} · {String(a.browser || "")}/{String(a.device || "")}
-                    </td>
+          <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-section text-left text-xs uppercase text-gray-text">
+                  <tr>
+                    <th className="p-3">Time</th>
+                    <th className="p-3">User</th>
+                    <th className="p-3">Action</th>
+                    <th className="p-3">IP / Device</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {audits.map((a) => (
+                    <tr key={a.id as string} className="border-t border-border hover:bg-section/50">
+                      <td className="p-3 whitespace-nowrap">
+                        {new Date(String(a.created_at)).toLocaleString()}
+                      </td>
+                      <td className="p-3">{String(a.user_email || a.role || "—")}</td>
+                      <td className="p-3 font-bold">{String(a.action)}</td>
+                      <td className="p-3 text-gray-text">
+                        {String(a.ip_address || "—")} · {String(a.browser || "")}/{String(a.device || "")}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {audits.length === 0 && <EmptyState icon={Activity} title="No audit log entries" className="py-10" />}
           </div>
         )}
 
         {tab === "errors" && (
           <div className="space-y-2">
             {errors.map((e) => (
-              <div key={e.id as string} className="bg-white border border-border rounded-xl p-4">
+              <div key={e.id as string} className="bg-white border border-border rounded-xl shadow-[var(--shadow-admin-soft)] p-4">
                 <div className="flex justify-between gap-2">
                   <p className="font-bold text-foreground text-sm">
                     [{String(e.source)}] {String(e.message)}
@@ -359,12 +380,15 @@ export default function AdminMonitoringPage() {
                 ) : null}
               </div>
             ))}
+            {errors.length === 0 && (
+              <EmptyState icon={AlertTriangle} title="No errors found" className="py-16" />
+            )}
           </div>
         )}
 
         {tab === "logs" && (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            <div className="bg-white border border-border rounded-2xl p-3 space-y-1">
+            <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-3 space-y-1">
               {logFiles.map((f) => (
                 <button
                   key={f.name}
@@ -395,7 +419,7 @@ export default function AdminMonitoringPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {(backups?.health || []).map((h: any) => (
-                <div key={h.type} className="bg-white border border-border rounded-2xl p-4">
+                <div key={h.type} className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Database className="w-4 h-4 text-primary" />
                     <span className="font-bold capitalize">{h.type}</span>
@@ -407,27 +431,34 @@ export default function AdminMonitoringPage() {
                 </div>
               ))}
             </div>
-            <div className="bg-white border border-border rounded-2xl overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-section text-xs uppercase text-gray-text text-left">
-                  <tr>
-                    <th className="p-3">When</th>
-                    <th className="p-3">Type</th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3">Location</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(backups?.runs || []).map((r: any) => (
-                    <tr key={r.id} className="border-t border-border">
-                      <td className="p-3">{new Date(r.created_at).toLocaleString()}</td>
-                      <td className="p-3">{r.type}</td>
-                      <td className="p-3">{r.status}</td>
-                      <td className="p-3 truncate max-w-xs">{r.location || "—"}</td>
+            <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-section text-xs uppercase text-gray-text text-left">
+                    <tr>
+                      <th className="p-3">When</th>
+                      <th className="p-3">Type</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3">Location</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {(backups?.runs || []).map((r: any) => (
+                      <tr key={r.id} className="border-t border-border hover:bg-section/50">
+                        <td className="p-3">{new Date(r.created_at).toLocaleString()}</td>
+                        <td className="p-3">{r.type}</td>
+                        <td className="p-3">
+                          <Badge status={r.status}>{r.status}</Badge>
+                        </td>
+                        <td className="p-3 truncate max-w-xs">{r.location || "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {(backups?.runs || []).length === 0 && (
+                <EmptyState icon={Database} title="No backup runs recorded" className="py-10" />
+              )}
             </div>
           </div>
         )}

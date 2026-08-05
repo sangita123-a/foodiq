@@ -10,38 +10,6 @@ const TICKET_CATEGORIES = [
   'General Query',
 ];
 
-const listUserTickets = async (userId) => {
-  const { rows } = await pool.query(
-    `SELECT id, category, subject, description, status, priority, satisfaction_score,
-            assigned_agent_id, created_at, updated_at, resolved_at
-     FROM support_tickets WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50`,
-    [userId]
-  );
-  return rows;
-};
-
-const getTicket = async (id, userId = null) => {
-  const { rows } = await pool.query(
-    `SELECT t.*, u.full_name AS user_name, u.email AS user_email,
-            a.full_name AS agent_name
-     FROM support_tickets t
-     JOIN users u ON u.id = t.user_id
-     LEFT JOIN users a ON a.id = t.assigned_agent_id
-     WHERE t.id = $1 ${userId ? 'AND t.user_id = $2' : ''}`,
-    userId ? [id, userId] : [id]
-  );
-  return rows[0] || null;
-};
-
-const createTicket = async ({ userId, category, subject, description, priority, aiSessionId }) => {
-  const { rows } = await pool.query(
-    `INSERT INTO support_tickets (user_id, category, subject, description, priority, ai_session_id, status)
-     VALUES ($1, $2, $3, $4, COALESCE($5, 'normal'), $6, 'Open') RETURNING *`,
-    [userId, category, subject, description, priority, aiSessionId || null]
-  );
-  return rows[0];
-};
-
 const listAllTickets = async ({ status = '', category = '', limit = 100 } = {}) => {
   const { rows } = await pool.query(
     `SELECT t.*, u.full_name AS user_name, u.email AS user_email,
@@ -215,9 +183,6 @@ const listAiSessions = async ({ limit = 50 } = {}) => {
 
 module.exports = {
   TICKET_CATEGORIES,
-  listUserTickets,
-  getTicket,
-  createTicket,
   listAllTickets,
   assignTicket,
   resolveTicket,

@@ -166,7 +166,7 @@ export default function ZoneDrawMap({
   if (!apiKey) {
     return (
       <div
-        className={`bg-section rounded-xl w-full border border-border flex items-center justify-center text-xs font-bold text-muted-foreground p-4 text-center ${heightClass} ${className}`}
+        className={`bg-section rounded-xl w-full border border-border flex items-center justify-center text-xs font-bold text-gray-text p-4 text-center ${heightClass} ${className}`}
       >
         Map drawing unavailable — Google Maps API key not configured. Coordinates can still be entered manually below.
       </div>
@@ -176,7 +176,7 @@ export default function ZoneDrawMap({
   return (
     <div className={`bg-white rounded-xl w-full border border-border relative overflow-hidden ${heightClass} ${className}`}>
       <div ref={containerRef} className="absolute inset-0 z-0" />
-      <div className="absolute top-2 left-2 z-10 text-[10px] font-bold bg-white/95 text-muted-foreground px-2 py-1 rounded-lg border border-border">
+      <div className="absolute top-2 left-2 z-10 text-[10px] font-bold bg-white/95 text-gray-text px-2 py-1 rounded-lg border border-border">
         {zoneType === "polygon"
           ? `Click the map to add points (${polygonPoints.length} added, 3+ required)`
           : "Click the map to set the center, drag the pin to reposition"}

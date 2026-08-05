@@ -5,6 +5,11 @@ import { mutate } from "swr";
 import AdminShell from "@/components/admin/AdminShell";
 import { useAdminList } from "@/hooks/useAdminData";
 import { adminPost, adminPut, adminDelete, formatDate } from "@/services/adminApi";
+import StatCard from "@/components/admin/dashboard/StatCard";
+import Badge from "@/components/admin/ui/Badge";
+import Button from "@/components/admin/ui/Button";
+import EmptyState from "@/components/admin/ui/EmptyState";
+import { Ticket, CheckCircle2, PartyPopper, Repeat } from "lucide-react";
 
 type Coupon = {
   id: string;
@@ -151,36 +156,28 @@ export default function AdminCouponsPage() {
   return (
     <AdminShell title="Coupons & Offers">
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-foreground">Coupons & Referrals</h1>
+        <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Coupons & Referrals</h1>
         <p className="text-gray-text">
           Create flat, percentage, free delivery, first-order, and festival coupons with usage rules.
         </p>
       </div>
 
       {summary ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white border border-border rounded-2xl p-4">
-            <p className="text-xs font-bold text-[#9CA3AF] uppercase">Total</p>
-            <p className="text-2xl font-black text-foreground">{summary.total_coupons || 0}</p>
-          </div>
-          <div className="bg-white border border-border rounded-2xl p-4">
-            <p className="text-xs font-bold text-[#9CA3AF] uppercase">Active</p>
-            <p className="text-2xl font-black text-emerald-600">{summary.active_coupons || 0}</p>
-          </div>
-          <div className="bg-white border border-border rounded-2xl p-4">
-            <p className="text-xs font-bold text-[#9CA3AF] uppercase">Festival</p>
-            <p className="text-2xl font-black text-foreground">{summary.festival_coupons || 0}</p>
-          </div>
-          <div className="bg-white border border-border rounded-2xl p-4">
-            <p className="text-xs font-bold text-[#9CA3AF] uppercase">Total Uses</p>
-            <p className="text-2xl font-black text-primary">
-              {(analytics?.usage_by_coupon || []).reduce((s, c) => s + c.total_uses, 0)}
-            </p>
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <StatCard label="Total Coupons" value={summary.total_coupons || 0} icon={Ticket} color="text-sky-600" bg="bg-sky-500/10" />
+          <StatCard label="Active" value={summary.active_coupons || 0} icon={CheckCircle2} color="text-emerald-600" bg="bg-emerald-500/10" />
+          <StatCard label="Festival" value={summary.festival_coupons || 0} icon={PartyPopper} color="text-fuchsia-600" bg="bg-fuchsia-500/10" />
+          <StatCard
+            label="Total Uses"
+            value={(analytics?.usage_by_coupon || []).reduce((s, c) => s + c.total_uses, 0)}
+            icon={Repeat}
+            color="text-primary"
+            bg="bg-primary/10"
+          />
         </div>
       ) : null}
 
-      <form onSubmit={save} className="bg-white rounded-3xl border border-border p-6 mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <form onSubmit={save} className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-5 sm:p-6 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <input required value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="CODE" className="border border-border rounded-xl px-4 py-3 text-sm uppercase" />
         <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title" className="border border-border rounded-xl px-4 py-3 text-sm" />
         <select value={form.coupon_type} onChange={(e) => setForm({ ...form, coupon_type: e.target.value })} className="border border-border rounded-xl px-4 py-3 text-sm">
@@ -200,49 +197,52 @@ export default function AdminCouponsPage() {
         <label className="flex items-center gap-2 text-sm font-bold text-gray-text">
           <input type="checkbox" checked={form.one_time_per_user} onChange={(e) => setForm({ ...form, one_time_per_user: e.target.checked })} /> One-time per user
         </label>
-        <button type="submit" disabled={saving} className="bg-primary text-white font-black rounded-xl py-3 disabled:opacity-60">
-          {saving ? "Saving…" : editingId ? "Update Coupon" : "Create Coupon"}
-        </button>
+        <Button type="submit" variant="primary" disabled={saving} loading={saving} className="justify-center">
+          {editingId ? "Update Coupon" : "Create Coupon"}
+        </Button>
       </form>
 
       {isLoading && <p className="text-sm text-gray-text mb-4">Loading…</p>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
-          <h2 className="text-lg font-black text-foreground mb-4">All Coupons</h2>
-          <div className="space-y-3">
-            {coupons.map((c) => (
-              <div key={c.id} className="bg-white border border-border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="font-black text-foreground tracking-wider">{c.code}</p>
-                    {!c.is_active ? (
-                      <span className="text-[10px] font-bold uppercase bg-[#FEF3C7] text-amber-700 px-2 py-0.5 rounded">Disabled</span>
-                    ) : null}
+          <h2 className="text-lg font-black text-foreground tracking-tight mb-4">All Coupons</h2>
+          {coupons.length ? (
+            <div className="space-y-3">
+              {coupons.map((c) => (
+                <div key={c.id} className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-black text-foreground tracking-wider">{c.code}</p>
+                      {!c.is_active ? <Badge tone="warning">Disabled</Badge> : null}
+                    </div>
+                    <p className="text-sm text-gray-text">
+                      {c.title || c.coupon_type} ·{" "}
+                      {c.discount_type === "percentage" ? `${c.discount_amount}%` : `₹${c.discount_amount}`} · Used {c.usage_count || 0}
+                      {c.usage_limit != null ? ` / ${c.usage_limit}` : ""} · Expires {c.valid_until ? formatDate(c.valid_until) : "never"}
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-text">
-                    {c.title || c.coupon_type} ·{" "}
-                    {c.discount_type === "percentage" ? `${c.discount_amount}%` : `₹${c.discount_amount}`} · Used {c.usage_count || 0}
-                    {c.usage_limit != null ? ` / ${c.usage_limit}` : ""} · Expires {c.valid_until ? formatDate(c.valid_until) : "never"}
-                  </p>
+                  <div className="flex gap-3 flex-wrap">
+                    <button type="button" onClick={() => toggleActive(c)} className="text-xs font-bold text-gray-text hover:text-foreground">
+                      {c.is_active ? "Disable" : "Enable"}
+                    </button>
+                    <button type="button" onClick={() => edit(c)} className="text-xs font-bold text-primary hover:text-primary-hover">Edit</button>
+                    <button type="button" onClick={() => remove(c.id)} className="text-xs font-bold text-red-500 hover:text-red-600">Delete</button>
+                  </div>
                 </div>
-                <div className="flex gap-3 flex-wrap">
-                  <button type="button" onClick={() => toggleActive(c)} className="text-xs font-bold text-gray-text">
-                    {c.is_active ? "Disable" : "Enable"}
-                  </button>
-                  <button type="button" onClick={() => edit(c)} className="text-xs font-bold text-primary">Edit</button>
-                  <button type="button" onClick={() => remove(c.id)} className="text-xs font-bold text-red-500">Delete</button>
-                </div>
-              </div>
-            ))}
-            {!coupons.length && !isLoading && <p className="text-center text-[#9CA3AF] py-12">No coupons yet.</p>}
-          </div>
+              ))}
+            </div>
+          ) : !isLoading ? (
+            <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)]">
+              <EmptyState icon={Ticket} title="No coupons yet" description="Create a coupon using the form above." />
+            </div>
+          ) : null}
         </div>
 
         <div>
-          <h2 className="text-lg font-black text-foreground mb-4">Usage Analytics</h2>
-          <div className="bg-white border border-border rounded-2xl p-4 mb-4">
-            <p className="text-xs font-bold uppercase text-[#9CA3AF] mb-3">Top Coupons</p>
+          <h2 className="text-lg font-black text-foreground tracking-tight mb-4">Usage Analytics</h2>
+          <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-4 mb-4">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-[#9CA3AF] mb-3">Top Coupons</p>
             <div className="space-y-2">
               {(analytics?.usage_by_coupon || []).slice(0, 8).map((c) => (
                 <div key={c.id} className="flex justify-between text-sm border-b border-[#F3F4F6] pb-2">
@@ -254,8 +254,8 @@ export default function AdminCouponsPage() {
               ))}
             </div>
           </div>
-          <div className="bg-white border border-border rounded-2xl p-4">
-            <p className="text-xs font-bold uppercase text-[#9CA3AF] mb-3">Recent Redemptions</p>
+          <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-4">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-[#9CA3AF] mb-3">Recent Redemptions</p>
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {(analytics?.recent_usage || []).map((u, i) => (
                 <div key={i} className="text-sm border-b border-[#F3F4F6] pb-2">

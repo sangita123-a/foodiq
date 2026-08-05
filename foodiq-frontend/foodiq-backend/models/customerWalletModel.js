@@ -104,6 +104,7 @@ const creditWallet = async (
     );
 
     if (ownClient) await db.query('COMMIT');
+    if (ownClient) notifyWalletUpdated(userId, wallet.balance, category);
     return { wallet, transaction: txnRows[0] };
   } catch (err) {
     if (ownClient) await db.query('ROLLBACK');
@@ -197,6 +198,7 @@ const debitWallet = async (
     );
 
     if (ownClient) await db.query('COMMIT');
+    if (ownClient) notifyWalletUpdated(userId, rows[0].balance, category);
     return { wallet: rows[0], transaction: txnRows[0] };
   } catch (err) {
     if (ownClient) await db.query('ROLLBACK');
@@ -205,6 +207,15 @@ const debitWallet = async (
     if (ownClient) db.release();
   }
 };
+
+function notifyWalletUpdated(userId, balance, reason) {
+  try {
+    const { emitWalletUpdated } = require('../socket/emitters');
+    emitWalletUpdated({ wallet_type: 'customer', user_id: userId, balance: Number(balance), reason });
+  } catch {
+    /* ignore */
+  }
+}
 
 const getWalletSummary = async (userId) => {
   const wallet = await getOrCreateWallet(userId);

@@ -36,14 +36,14 @@ class AnalyticsModel {
     const orderMetricsRes = await pool.query(
       `
       SELECT
-        COUNT(CASE WHEN o.order_status = 'delivered' THEN 1 END)::INT as completed_orders,
-        COUNT(CASE WHEN o.order_status IN ('cancelled', 'rejected') THEN 1 END)::INT as cancelled_orders,
+        COUNT(CASE WHEN LOWER(o.status) = 'delivered' THEN 1 END)::INT as completed_orders,
+        COUNT(CASE WHEN LOWER(o.status) IN ('cancelled', 'rejected') THEN 1 END)::INT as cancelled_orders,
         COUNT(o.id)::INT as total_orders_assigned,
-        COALESCE(AVG(CASE WHEN o.order_status = 'delivered' AND o.updated_at > o.created_at 
+        COALESCE(AVG(CASE WHEN LOWER(o.status) = 'delivered' AND o.updated_at > o.created_at
           THEN EXTRACT(EPOCH FROM (o.updated_at - o.created_at))/60 END), 30.0) as avg_delivery_time_mins,
-        COALESCE(SUM(CASE WHEN o.order_status = 'delivered' THEN o.delivery_fee ELSE 0 END), 0) as total_delivery_earnings
+        COALESCE(SUM(CASE WHEN LOWER(o.status) = 'delivered' THEN o.delivery_fee ELSE 0 END), 0) as total_delivery_earnings
       FROM orders o
-      WHERE (o.delivery_partner_id = $1 OR o.driver_id = $1)
+      WHERE o.delivery_partner_id = $1
         AND ${rangeFilterOrders}
       `,
       [partnerId]
@@ -104,8 +104,8 @@ class AnalyticsModel {
         EXTRACT(HOUR FROM created_at)::INT as hour,
         COUNT(id)::INT as count
       FROM orders
-      WHERE (delivery_partner_id = $1 OR driver_id = $1)
-        AND order_status = 'delivered'
+      WHERE delivery_partner_id = $1
+        AND LOWER(status) = 'delivered'
         AND ${rangeFilterOrders}
       GROUP BY EXTRACT(HOUR FROM created_at)
       ORDER BY count DESC
@@ -121,8 +121,8 @@ class AnalyticsModel {
         COUNT(o.id)::INT as count
       FROM orders o
       LEFT JOIN restaurants r ON o.restaurant_id = r.id
-      WHERE (o.delivery_partner_id = $1 OR o.driver_id = $1)
-        AND o.order_status = 'delivered'
+      WHERE o.delivery_partner_id = $1
+        AND LOWER(o.status) = 'delivered'
         AND ${rangeFilterOrders}
       GROUP BY COALESCE(r.city, r.address, 'Main Downtown')
       ORDER BY count DESC
@@ -363,12 +363,16 @@ class AnalyticsModel {
    * Admin Delivery Analytics: fleet statistics, top riders, lowest performers, revenue charts
    */
   static async getAdminDeliveryAnalytics({ startDate, endDate, search, limit = 20, offset = 0 }) {
-    let whereClause = 'WHERE 1=1';
-    const params = [];
+    // $1/$2 bound the orders JOIN by created_at (open-ended when not supplied).
+    const params = [startDate || null, endDate || null];
+    const dateJoinFilter = `
+        AND o.created_at >= COALESCE($1::timestamptz, '-infinity'::timestamptz)
+        AND o.created_at < (COALESCE($2::date, 'infinity'::date) + INTERVAL '1 day')`;
 
+    let searchClause = '';
     if (search) {
       params.push(`%${search}%`);
-      whereClause += ` AND (dp.full_name ILIKE $${params.length} OR dp.email ILIKE $${params.length} OR dp.phone_number ILIKE $${params.length})`;
+      searchClause = `AND (dp.full_name ILIKE $${params.length} OR dp.email ILIKE $${params.length} OR dp.phone_number ILIKE $${params.length})`;
     }
 
     // Top riders by completed orders & score
@@ -382,12 +386,12 @@ class AnalyticsModel {
         dp.vehicle_type,
         dp.rating,
         dp.is_online,
-        COUNT(CASE WHEN o.order_status = 'delivered' THEN 1 END)::INT as completed_orders,
-        COUNT(CASE WHEN o.order_status IN ('cancelled', 'rejected') THEN 1 END)::INT as cancelled_orders,
-        COALESCE(SUM(CASE WHEN o.order_status = 'delivered' THEN o.delivery_fee ELSE 0 END), 0)::FLOAT as total_earnings
+        COUNT(CASE WHEN LOWER(o.status) = 'delivered' THEN 1 END)::INT as completed_orders,
+        COUNT(CASE WHEN LOWER(o.status) IN ('cancelled', 'rejected') THEN 1 END)::INT as cancelled_orders,
+        COALESCE(SUM(CASE WHEN LOWER(o.status) = 'delivered' THEN o.delivery_fee ELSE 0 END), 0)::FLOAT as total_earnings
       FROM delivery_partners dp
-      LEFT JOIN orders o ON (o.delivery_partner_id = dp.id OR o.driver_id = dp.id)
-      ${whereClause}
+      LEFT JOIN orders o ON o.delivery_partner_id = dp.id ${dateJoinFilter}
+      WHERE 1=1 ${searchClause}
       GROUP BY dp.id, dp.full_name, dp.email, dp.phone_number, dp.vehicle_type, dp.rating, dp.is_online
       ORDER BY completed_orders DESC, dp.rating DESC
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}
@@ -416,11 +420,11 @@ class AnalyticsModel {
         dp.phone_number,
         dp.vehicle_type,
         dp.rating,
-        COUNT(CASE WHEN o.order_status = 'delivered' THEN 1 END)::INT as completed_orders,
-        COUNT(CASE WHEN o.order_status IN ('cancelled', 'rejected') THEN 1 END)::INT as cancelled_orders
+        COUNT(CASE WHEN LOWER(o.status) = 'delivered' THEN 1 END)::INT as completed_orders,
+        COUNT(CASE WHEN LOWER(o.status) IN ('cancelled', 'rejected') THEN 1 END)::INT as cancelled_orders
       FROM delivery_partners dp
-      LEFT JOIN orders o ON (o.delivery_partner_id = dp.id OR o.driver_id = dp.id)
-      ${whereClause}
+      LEFT JOIN orders o ON o.delivery_partner_id = dp.id ${dateJoinFilter}
+      WHERE 1=1 ${searchClause}
       GROUP BY dp.id, dp.full_name, dp.email, dp.phone_number, dp.vehicle_type, dp.rating
       ORDER BY cancelled_orders DESC, dp.rating ASC
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}
@@ -438,20 +442,58 @@ class AnalyticsModel {
       })
     );
 
-    // Fleet Summary Totals
+    // Fleet Summary Totals (respects the same date range)
     const fleetSummaryRes = await pool.query(
       `
       SELECT
         COUNT(DISTINCT dp.id)::INT as total_partners,
         COUNT(DISTINCT CASE WHEN dp.is_online THEN dp.id END)::INT as online_partners,
         COALESCE(AVG(dp.rating), 5.0)::FLOAT as average_fleet_rating,
-        COALESCE(SUM(CASE WHEN o.order_status = 'delivered' THEN o.delivery_fee ELSE 0 END), 0)::FLOAT as total_fleet_revenue,
-        COUNT(CASE WHEN o.order_status = 'delivered' THEN 1 END)::INT as total_delivered_orders,
-        COUNT(CASE WHEN o.order_status = 'cancelled' THEN 1 END)::INT as total_cancelled_orders
+        COALESCE(SUM(CASE WHEN LOWER(o.status) = 'delivered' THEN o.delivery_fee ELSE 0 END), 0)::FLOAT as total_fleet_revenue,
+        COUNT(CASE WHEN LOWER(o.status) = 'delivered' THEN 1 END)::INT as total_delivered_orders,
+        COUNT(CASE WHEN LOWER(o.status) = 'cancelled' THEN 1 END)::INT as total_cancelled_orders
       FROM delivery_partners dp
-      LEFT JOIN orders o ON (o.delivery_partner_id = dp.id OR o.driver_id = dp.id)
-      `
+      LEFT JOIN orders o ON o.delivery_partner_id = dp.id ${dateJoinFilter}
+      `,
+      [params[0], params[1]]
     );
+
+    // Real monthly fleet revenue trend (trailing 7 months) — replaces the
+    // frontend's hardcoded Jan-Jul chart.
+    const revenueTrendRes = await pool.query(`
+      SELECT
+        to_char(date_trunc('month', o.created_at), 'Mon') as month,
+        date_trunc('month', o.created_at)::date as month_start,
+        COALESCE(SUM(o.delivery_fee), 0)::FLOAT as revenue
+      FROM orders o
+      WHERE LOWER(o.status) = 'delivered'
+        AND o.delivery_partner_id IS NOT NULL
+        AND o.created_at >= date_trunc('month', CURRENT_DATE) - INTERVAL '6 months'
+      GROUP BY 1, 2
+      ORDER BY 2
+    `);
+
+    // Real delivery order density by restaurant city — replaces the
+    // frontend's hardcoded zone heatmap.
+    const zoneDensityRes = await pool.query(`
+      SELECT
+        COALESCE(r.city, 'Unknown') as zone,
+        COUNT(o.id)::INT as orders
+      FROM orders o
+      LEFT JOIN restaurants r ON o.restaurant_id = r.id
+      WHERE LOWER(o.status) = 'delivered'
+        AND o.delivery_partner_id IS NOT NULL
+      GROUP BY COALESCE(r.city, 'Unknown')
+      ORDER BY orders DESC
+      LIMIT 6
+    `);
+
+    const maxZoneOrders = Math.max(1, ...zoneDensityRes.rows.map((z) => z.orders));
+    const zoneDensity = zoneDensityRes.rows.map((z) => {
+      const pct = Math.round((z.orders / maxZoneOrders) * 100);
+      const intensity = pct >= 80 ? 'Very High' : pct >= 50 ? 'High' : pct >= 25 ? 'Medium' : 'Low';
+      return { zone: z.zone, orders: z.orders, pct, intensity };
+    });
 
     const summary = fleetSummaryRes.rows[0] || {};
     const totalDelivered = parseInt(summary.total_delivered_orders || 0, 10);
@@ -471,6 +513,8 @@ class AnalyticsModel {
       },
       top_riders: topRidersWithScores,
       worst_performers: worstPerformersWithScores,
+      revenue_trend: revenueTrendRes.rows,
+      zone_density: zoneDensity,
     };
   }
 }

@@ -29,7 +29,7 @@ type LiveOrderStatusPipelineProps = {
 
 export default function LiveOrderStatusPipeline({ statusCounts, loading }: LiveOrderStatusPipelineProps) {
   return (
-    <section className="bg-white border border-border rounded-2xl p-5 shadow-sm">
+    <section className="bg-white border border-border rounded-2xl p-5 sm:p-6 shadow-[var(--shadow-admin-soft)] hover:shadow-[var(--shadow-admin-lifted)] transition-shadow duration-200">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-black text-foreground">Live Order Status</h2>
         <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-600">

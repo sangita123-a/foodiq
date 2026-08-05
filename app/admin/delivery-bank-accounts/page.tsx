@@ -2,19 +2,15 @@
 
 import { useMemo, useState } from "react";
 import { mutate } from "swr";
+import { Landmark } from "lucide-react";
 import AdminShell from "@/components/admin/AdminShell";
+import { Badge, EmptyState, Pagination } from "@/components/admin/ui";
 import { useAdminList } from "@/hooks/useAdminData";
 import {
   adminPatch,
   formatDate,
   type AdminBankAccountsResponse,
 } from "@/services/adminApi";
-
-const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-amber-50 text-amber-600",
-  approved: "bg-green-50 text-green-600",
-  rejected: "bg-red-50 text-red-600",
-};
 
 export default function AdminDeliveryBankAccountsPage() {
   const [status, setStatus] = useState<"" | "pending" | "approved" | "rejected">("pending");
@@ -90,7 +86,7 @@ export default function AdminDeliveryBankAccountsPage() {
 
       {isLoading && <p className="text-sm text-gray-text mb-4">Loading…</p>}
 
-      <div className="bg-white border border-border rounded-2xl overflow-hidden">
+      <div className="bg-white border border-border rounded-2xl overflow-hidden shadow-[var(--shadow-admin-soft)]">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-section text-left">
@@ -108,7 +104,7 @@ export default function AdminDeliveryBankAccountsPage() {
             </thead>
             <tbody className="divide-y divide-border">
               {accounts.map((a) => (
-                <tr key={a.id}>
+                <tr key={a.id} className="hover:bg-section/50 transition-colors">
                   <td className="px-5 py-4">
                     <p className="font-bold text-foreground">{a.partner_name || "Partner"}</p>
                     <p className="text-xs text-gray-text">{a.partner_email}</p>
@@ -122,13 +118,7 @@ export default function AdminDeliveryBankAccountsPage() {
                   <td className="px-5 py-4 font-mono text-xs text-foreground">{a.ifsc_code}</td>
                   <td className="px-5 py-4 text-xs text-gray-text capitalize">{a.account_type}</td>
                   <td className="px-5 py-4">
-                    <span
-                      className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full ${
-                        STATUS_STYLES[a.verification_status] || "bg-gray-100 text-gray-500"
-                      }`}
-                    >
-                      {a.verification_status}
-                    </span>
+                    <Badge status={a.verification_status}>{a.verification_status}</Badge>
                     {a.verification_status === "rejected" && a.rejection_reason && (
                       <p className="text-[10px] text-red-500 mt-1 max-w-[160px]">
                         {a.rejection_reason}
@@ -152,7 +142,7 @@ export default function AdminDeliveryBankAccountsPage() {
                             type="button"
                             disabled={processingId === a.id}
                             onClick={() => process(a.id, "approve")}
-                            className="text-xs font-bold bg-green-500 text-white px-3 py-1.5 rounded-lg disabled:opacity-50"
+                            className="text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50"
                           >
                             Approve
                           </button>
@@ -160,7 +150,7 @@ export default function AdminDeliveryBankAccountsPage() {
                             type="button"
                             disabled={processingId === a.id || !reasons[a.id]?.trim()}
                             onClick={() => process(a.id, "reject")}
-                            className="text-xs font-bold bg-red-500 text-white px-3 py-1.5 rounded-lg disabled:opacity-50"
+                            className="text-xs font-bold bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50"
                           >
                             Reject
                           </button>
@@ -176,35 +166,22 @@ export default function AdminDeliveryBankAccountsPage() {
           </table>
         </div>
         {!accounts.length && !isLoading && (
-          <p className="text-center text-[#9CA3AF] py-16">No bank accounts found.</p>
+          <EmptyState
+            icon={Landmark}
+            title="No bank accounts found"
+            description="Delivery partner payout accounts will appear here once submitted."
+          />
+        )}
+        {pagination && pagination.total_pages > 1 && (
+          <Pagination
+            page={page}
+            totalPages={pagination.total_pages}
+            total={pagination.total}
+            limit={20}
+            onPageChange={(p) => setPage(p)}
+          />
         )}
       </div>
-
-      {pagination && pagination.total_pages > 1 && (
-        <div className="flex items-center justify-between mt-4">
-          <p className="text-xs text-gray-text">
-            Page {pagination.page} of {pagination.total_pages} · {pagination.total} accounts
-          </p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="text-xs font-bold border border-border px-3 py-1.5 rounded-lg disabled:opacity-40"
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              disabled={page >= pagination.total_pages}
-              onClick={() => setPage((p) => Math.min(pagination.total_pages, p + 1))}
-              className="text-xs font-bold border border-border px-3 py-1.5 rounded-lg disabled:opacity-40"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
     </AdminShell>
   );
 }

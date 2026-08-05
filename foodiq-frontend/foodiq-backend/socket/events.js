@@ -16,6 +16,13 @@ module.exports = {
   LOCATION_UPDATED: 'locationUpdated',
   PAYMENT_COMPLETED: 'paymentCompleted',
   NOTIFICATION: 'notification',
+
+  // Admin Finance & Payments Module
+  WALLET_UPDATED: 'wallet:updated',
+  REFUND_INITIATED: 'refund:initiated',
+  REFUND_COMPLETED: 'refund:completed',
+  SETTLEMENT_COMPLETED: 'settlement:completed',
+  PAYOUT_APPROVED: 'payout:approved',
   ADMIN_LIVE: 'adminLive',
   RIDER_PRESENCE: 'riderPresence',
 

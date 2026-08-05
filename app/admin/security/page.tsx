@@ -4,6 +4,7 @@ import { useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import { useAdminList } from "@/hooks/useAdminData";
 import { formatDate } from "@/services/adminApi";
+import { Badge, SkeletonRows } from "@/components/admin/ui";
 
 type RoleInfo = {
   id: string;
@@ -46,11 +47,11 @@ export default function AdminSecurityPage() {
   return (
     <AdminShell title="Security">
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-foreground">Security & Compliance</h1>
-        <p className="text-gray-text">Role-based access control, audit logs, and admin login history.</p>
+        <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight mb-1.5">Security & Compliance</h1>
+        <p className="text-gray-text text-sm">Role-based access control, audit logs, and admin login history.</p>
       </div>
 
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6">
         {([
           ["rbac", "Role Permissions"],
           ["audit", "Audit Logs"],
@@ -60,8 +61,10 @@ export default function AdminSecurityPage() {
             key={id}
             type="button"
             onClick={() => setTab(id)}
-            className={`px-4 py-2 rounded-xl text-sm font-bold ${
-              tab === id ? "bg-primary text-white" : "bg-white border border-border text-gray-text"
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
+              tab === id
+                ? "bg-primary text-white shadow-[var(--shadow-button)]"
+                : "bg-white border border-border text-gray-text hover:bg-section"
             }`}
           >
             {label}
@@ -69,28 +72,36 @@ export default function AdminSecurityPage() {
         ))}
       </div>
 
-      {isLoading && <p className="text-sm text-gray-text">Loading…</p>}
-
       {tab === "rbac" && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {(data?.roles || []).map((role) => (
-            <div key={role.id} className="bg-white rounded-2xl border border-border p-5">
-              <h3 className="font-black text-foreground mb-1">{role.label}</h3>
-              <p className="text-xs text-[#9CA3AF] mb-3 font-mono">{role.id}</p>
-              <div className="flex flex-wrap gap-1">
-                {role.permissions.map((p) => (
-                  <span key={p} className="text-[10px] font-bold bg-section text-gray-text px-2 py-0.5 rounded">
-                    {p}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
+          {isLoading && !data
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 h-32 animate-pulse" />
+              ))
+            : (data?.roles || []).map((role) => (
+                <div
+                  key={role.id}
+                  className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5"
+                >
+                  <h3 className="font-black text-foreground tracking-tight mb-1">{role.label}</h3>
+                  <p className="text-xs text-[#9CA3AF] mb-3 font-mono">{role.id}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {role.permissions.map((p) => (
+                      <span
+                        key={p}
+                        className="text-[10px] font-bold bg-section text-gray-text px-2 py-1 rounded-full"
+                      >
+                        {p}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
         </div>
       )}
 
       {tab === "audit" && (
-        <div className="bg-white rounded-3xl border border-border overflow-hidden">
+        <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[700px] text-left">
               <thead className="bg-section border-b border-border">
@@ -101,22 +112,22 @@ export default function AdminSecurityPage() {
                 </tr>
               </thead>
               <tbody>
-                {(data?.audit_logs || []).map((log) => (
-                  <tr key={log.id} className="border-b border-border last:border-0">
-                    <td className="p-4 text-xs text-gray-text">{formatDate(log.created_at)}</td>
-                    <td className="p-4 text-sm font-bold text-foreground">{log.action}</td>
-                    <td className="p-4 text-xs text-gray-text">{log.category}</td>
-                    <td className="p-4 text-sm">{log.full_name || log.email || "—"}</td>
-                    <td className="p-4">
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded ${
-                        log.status === "success" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
-                      }`}>
-                        {log.status}
-                      </span>
-                    </td>
-                    <td className="p-4 text-xs text-gray-text max-w-[200px] truncate">{log.message}</td>
-                  </tr>
-                ))}
+                {isLoading && !data ? (
+                  <SkeletonRows rows={5} columns={6} />
+                ) : (
+                  (data?.audit_logs || []).map((log) => (
+                    <tr key={log.id} className="border-b border-border last:border-0 hover:bg-section/50">
+                      <td className="p-4 text-xs text-gray-text">{formatDate(log.created_at)}</td>
+                      <td className="p-4 text-sm font-bold text-foreground">{log.action}</td>
+                      <td className="p-4 text-xs text-gray-text">{log.category}</td>
+                      <td className="p-4 text-sm">{log.full_name || log.email || "—"}</td>
+                      <td className="p-4">
+                        <Badge tone={log.status === "success" ? "success" : "error"}>{log.status}</Badge>
+                      </td>
+                      <td className="p-4 text-xs text-gray-text max-w-[200px] truncate">{log.message}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -124,7 +135,7 @@ export default function AdminSecurityPage() {
       )}
 
       {tab === "logins" && (
-        <div className="bg-white rounded-3xl border border-border overflow-hidden">
+        <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[700px] text-left">
               <thead className="bg-section border-b border-border">
@@ -135,22 +146,22 @@ export default function AdminSecurityPage() {
                 </tr>
               </thead>
               <tbody>
-                {(data?.login_logs || []).map((log) => (
-                  <tr key={log.id} className="border-b border-border last:border-0">
-                    <td className="p-4 text-xs text-gray-text">{formatDate(log.created_at)}</td>
-                    <td className="p-4 text-sm font-bold text-foreground">{log.full_name || log.email}</td>
-                    <td className="p-4 text-xs text-gray-text">{log.admin_role || "admin"}</td>
-                    <td className="p-4 text-xs font-mono">{log.ip_address || "—"}</td>
-                    <td className="p-4 text-xs">{log.device_name || "—"}</td>
-                    <td className="p-4">
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded ${
-                        log.status === "success" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
-                      }`}>
-                        {log.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {isLoading && !data ? (
+                  <SkeletonRows rows={5} columns={6} />
+                ) : (
+                  (data?.login_logs || []).map((log) => (
+                    <tr key={log.id} className="border-b border-border last:border-0 hover:bg-section/50">
+                      <td className="p-4 text-xs text-gray-text">{formatDate(log.created_at)}</td>
+                      <td className="p-4 text-sm font-bold text-foreground">{log.full_name || log.email}</td>
+                      <td className="p-4 text-xs text-gray-text">{log.admin_role || "admin"}</td>
+                      <td className="p-4 text-xs font-mono">{log.ip_address || "—"}</td>
+                      <td className="p-4 text-xs">{log.device_name || "—"}</td>
+                      <td className="p-4">
+                        <Badge tone={log.status === "success" ? "success" : "error"}>{log.status}</Badge>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

@@ -3,6 +3,10 @@ const { pool } = require('../config/db');
 const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
 const STATUSES = ['open', 'in_progress', 'pending', 'resolved', 'closed'];
 
+// Maps this subsystem's status vocabulary onto the canonical `status_norm`
+// column shared with ticketModel/helpCenterModel (which has no 'pending' state).
+const toStatusNorm = (status) => (status === 'pending' ? 'in_progress' : status);
+
 /** Generate unique ticket number: TK-YYYYMMDD-XXXX */
 const generateTicketNumber = async () => {
   const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -24,8 +28,11 @@ const createTicket = async ({ partnerId, subject, category = 'General', priority
     : 'medium';
 
   const { rows } = await pool.query(
-    `INSERT INTO support_tickets (ticket_number, partner_id, subject, category, priority, status)
-     VALUES ($1, $2, $3, $4, $5, 'open')
+    `INSERT INTO support_tickets (
+       ticket_number, partner_id, subject, category, priority, status,
+       requester_type, source_channel, status_norm, priority_norm
+     )
+     VALUES ($1, $2, $3, $4, $5, 'open', 'partner', 'app', 'open', $5)
      RETURNING *`,
     [ticketNumber, partnerId, subject, category, validPriority]
   );
@@ -260,11 +267,12 @@ const updateTicketStatus = async (ticketId, newStatus) => {
   const { rows } = await pool.query(
     `UPDATE support_tickets
      SET status = $1,
+         status_norm = $3,
          updated_at = CURRENT_TIMESTAMP,
          closed_at = CASE WHEN $1 = 'closed' THEN CURRENT_TIMESTAMP ELSE NULL END
      WHERE id = $2
      RETURNING *`,
-    [newStatus, ticketId]
+    [newStatus, ticketId, toStatusNorm(newStatus)]
   );
   return rows[0] || null;
 };

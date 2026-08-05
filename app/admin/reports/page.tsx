@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
+import { Button } from "@/components/admin/ui";
 import { adminGet, formatCurrency, formatDate } from "@/services/adminApi";
 import api from "@/services/api";
-import { Download, FileSpreadsheet } from "lucide-react";
+import { Download, FileSpreadsheet, FileText } from "lucide-react";
 
 type ReportRow = Record<string, unknown>;
 
@@ -46,23 +47,24 @@ export default function AdminReportsPage() {
     }
   };
 
-  const exportReport = async (format: "csv" | "json") => {
+  const EXPORT_MIME: Record<"csv" | "xlsx" | "pdf", string> = {
+    csv: "text/csv",
+    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    pdf: "application/pdf",
+  };
+
+  const exportReport = async (format: "csv" | "xlsx" | "pdf") => {
     const params = new URLSearchParams({ type, format });
     if (startDate) params.set("start_date", startDate);
     if (endDate) params.set("end_date", endDate);
     const res = await api.get(`/api/admin/reports/export?${params}`, {
-      responseType: format === "csv" ? "blob" : "json",
+      responseType: "blob",
     });
-    const blob =
-      format === "csv"
-        ? new Blob([res.data as BlobPart], { type: "text/csv" })
-        : new Blob([JSON.stringify((res.data as { data?: { rows?: ReportRow[] } }).data?.rows || res.data, null, 2)], {
-            type: "application/json",
-          });
+    const blob = new Blob([res.data as BlobPart], { type: EXPORT_MIME[format] });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${type}-report.${format === "csv" ? "csv" : "json"}`;
+    a.download = `${type}-report.${format}`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -93,14 +95,21 @@ export default function AdminReportsPage() {
             onClick={() => exportReport("csv")}
             className="inline-flex items-center gap-2 bg-white border border-border px-4 py-2.5 rounded-xl text-sm font-bold text-foreground"
           >
-            <FileSpreadsheet className="w-4 h-4" /> Export Excel (CSV)
+            <Download className="w-4 h-4" /> Export CSV
           </button>
           <button
             type="button"
-            onClick={() => exportReport("json")}
+            onClick={() => exportReport("xlsx")}
+            className="inline-flex items-center gap-2 bg-white border border-border px-4 py-2.5 rounded-xl text-sm font-bold text-foreground"
+          >
+            <FileSpreadsheet className="w-4 h-4" /> Export Excel
+          </button>
+          <button
+            type="button"
+            onClick={() => exportReport("pdf")}
             className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-xl text-sm font-bold"
           >
-            <Download className="w-4 h-4" /> Export PDF/JSON
+            <FileText className="w-4 h-4" /> Export PDF
           </button>
         </div>
       </div>
@@ -128,14 +137,16 @@ export default function AdminReportsPage() {
             onChange={(e) => setEndDate(e.target.value)}
             className="border border-border rounded-xl px-4 py-3 text-sm"
           />
-          <button
+          <Button
             type="button"
             onClick={loadReport}
             disabled={loading}
-            className="bg-[#111827] text-white font-black rounded-xl px-4 py-3 text-sm disabled:opacity-60"
+            loading={loading}
+            variant="primary"
+            className="font-black px-4 py-3 justify-center"
           >
             {loading ? "Generating…" : "Generate Report"}
-          </button>
+          </Button>
         </div>
       </div>
 

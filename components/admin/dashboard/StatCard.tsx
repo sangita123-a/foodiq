@@ -26,17 +26,18 @@ export default function StatCard({
   if (loading) return <StatCardSkeleton />;
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-border shadow-sm hover:shadow-md transition-shadow duration-200">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF]">{label}</p>
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${bg}`}>
-          <Icon className={`w-4 h-4 ${color}`} />
+    <div className="group relative bg-white rounded-2xl p-5 border border-border shadow-[var(--shadow-admin-soft)] hover:shadow-[var(--shadow-admin-lifted)] hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
+      <div className={`absolute inset-x-0 top-0 h-1 ${bg}`} />
+      <div className="flex items-start justify-between mb-4">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-[#9CA3AF] leading-tight max-w-[70%]">{label}</p>
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${bg}`}>
+          <Icon className={`w-4.5 h-4.5 ${color}`} />
         </div>
       </div>
-      <p className="text-2xl font-black text-foreground tabular-nums">
+      <p className="text-[1.7rem] leading-none font-black text-foreground tabular-nums tracking-tight">
         <AnimatedNumber value={value} format={format} />
       </p>
-      {hint && <p className="text-xs text-gray-text mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-gray-text mt-2">{hint}</p>}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 const { pool } = require('../config/db');
+const { SETTLEMENT_REVENUE_CTE, getCommissionRate } = require('./settlementModel');
 
 const getDashboardStats = async () => {
   const { rows } = await pool.query(`
@@ -159,6 +160,35 @@ const getDashboardStats = async () => {
     WHERE status IN ('Open', 'In Progress')
   `);
 
+  // Today's refunds, active coupons, and platform-wide wallet balances.
+  const financeToday = await pool.query(`
+    SELECT
+      (SELECT COALESCE(SUM(amount), 0)::float FROM refunds
+        WHERE status = 'processed' AND created_at::date = CURRENT_DATE) AS refund_amount_today,
+      (SELECT COUNT(*)::int FROM coupons
+        WHERE is_active = TRUE AND (valid_until IS NULL OR valid_until > NOW())) AS active_coupons,
+      (SELECT COALESCE(SUM(balance + cashback_balance + refund_balance), 0)::float
+        FROM customer_wallets) AS customer_wallet_balance,
+      (SELECT COALESCE(SUM(available_balance), 0)::float FROM delivery_wallets) AS delivery_wallet_balance,
+      (SELECT COALESCE(SUM(de.amount), 0)::float FROM delivery_earnings de
+        WHERE de.earned_at::date = CURRENT_DATE) AS delivery_earnings_today
+  `);
+
+  // Today's platform commission / restaurant payout split — reuses
+  // settlementModel's single source of truth for commission-bearing revenue
+  // (delivered + paid, net of processed refunds) rather than re-deriving a
+  // third revenue predicate here.
+  const commissionRate = await getCommissionRate();
+  const revenueSplitToday = await pool.query(`
+    WITH ${SETTLEMENT_REVENUE_CTE}
+    SELECT COALESCE(SUM(net_amount), 0)::float AS net_revenue_today
+    FROM orders_revenue
+    WHERE created_at::date = CURRENT_DATE
+  `);
+  const netRevenueToday = revenueSplitToday.rows[0].net_revenue_today;
+  const platformEarningsToday = Math.round(netRevenueToday * commissionRate * 100) / 100;
+  const restaurantEarningsToday = Math.round((netRevenueToday - platformEarningsToday) * 100) / 100;
+
   const statusCounts = {};
   for (const row of orderStatusToday.rows) statusCounts[row.status] = row.count;
 
@@ -173,6 +203,15 @@ const getDashboardStats = async () => {
     live_restaurants: liveRestaurants.rows,
     peak_hours: peakHours.rows,
     open_support_tickets: supportTickets.rows[0].open_count,
+    refund_amount_today: financeToday.rows[0].refund_amount_today,
+    active_coupons: financeToday.rows[0].active_coupons,
+    wallet_balance: Math.round(
+      (financeToday.rows[0].customer_wallet_balance + financeToday.rows[0].delivery_wallet_balance) * 100
+    ) / 100,
+    platform_earnings_today: platformEarningsToday,
+    restaurant_earnings_today: restaurantEarningsToday,
+    delivery_earnings_today: financeToday.rows[0].delivery_earnings_today,
+    profit_today: platformEarningsToday,
   };
 };
 
@@ -928,16 +967,39 @@ const updateOrderAdmin = async (id, { status, delivery_partner_id, estimated_del
 
   if (delivery_partner_id) {
     const isReassignment = Boolean(existing.current_delivery_partner_id) && existing.current_delivery_partner_id !== delivery_partner_id;
+    if (isReassignment) {
+      // Close out the previous partner's assignment first — otherwise they'd
+      // keep a "committed" delivery_assignments row (accepted/picked_up/...)
+      // for an order that's no longer theirs, alongside the new partner's row.
+      await pool.query(
+        `UPDATE delivery_assignments
+         SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP
+         WHERE order_id = $1 AND delivery_partner_id = $2
+           AND status IN ('offered', 'accepted', 'assigned', 'reached_restaurant', 'picked_up', 'on_the_way')`,
+        [id, existing.current_delivery_partner_id]
+      ).catch(() => {});
+    }
+    // Claim the order on `orders.delivery_partner_id` at offer time (not just
+    // order_tracking) so it drops out of the partner-pull "available orders"
+    // board immediately — otherwise another partner can self-accept this same
+    // order out from under the admin's assignment during the 2-minute offer
+    // window. Released back to NULL by deliveryModel.releaseAssignment() if
+    // the partner rejects or the offer expires without a response.
     await pool.query(
-      `INSERT INTO order_tracking (order_id, delivery_partner_id, current_status, estimated_delivery_time)
-       VALUES ($1, $2, COALESCE($3, 'Assigned'), COALESCE($4, CURRENT_TIMESTAMP + INTERVAL '30 minutes'))
-       ON CONFLICT (order_id) DO UPDATE SET
-         delivery_partner_id = EXCLUDED.delivery_partner_id,
-         current_status = COALESCE($3, order_tracking.current_status),
-         estimated_delivery_time = COALESCE($4, order_tracking.estimated_delivery_time),
-         updated_at = CURRENT_TIMESTAMP`,
-      [id, delivery_partner_id, status || null, estimated_delivery_time || null]
+      `UPDATE orders
+       SET delivery_partner_id = $1, assigned_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2`,
+      [delivery_partner_id, id]
     );
+    const { syncAssignmentState } = require('./deliveryModel');
+    await syncAssignmentState({
+      orderId: id,
+      partnerId: delivery_partner_id,
+      assignmentStatus: 'offered',
+      trackingStatus: status || 'Assigned',
+      note: isReassignment ? 'Reassigned by admin' : 'Assigned by admin — pending partner acceptance',
+      estimatedDeliveryAt: estimated_delivery_time || null,
+    });
     await recordStatusChange({
       orderId: id,
       toStatus: isReassignment ? 'Partner Reassigned' : 'Partner Assigned',
@@ -946,12 +1008,6 @@ const updateOrderAdmin = async (id, { status, delivery_partner_id, estimated_del
       reason,
       meta: { delivery_partner_id },
     }).catch(() => {});
-    const expires = new Date(Date.now() + 120 * 1000);
-    await pool.query(
-      `INSERT INTO delivery_assignments (order_id, delivery_partner_id, status, offered_at, expires_at)
-       VALUES ($1, $2, 'offered', CURRENT_TIMESTAMP, $3)`,
-      [id, delivery_partner_id, expires]
-    ).catch(() => {});
     try {
       const { createNotification } = require('./notificationModel');
       const partner = await pool.query('SELECT user_id FROM delivery_partners WHERE id = $1', [delivery_partner_id]);
@@ -1087,69 +1143,11 @@ const listCoupons = async () => {
   return rows;
 };
 
-const createCoupon = async (data) => {
-  const {
-    code, discount_amount, discount_type, min_order_amount, max_discount_amount,
-    usage_limit, valid_from, valid_until, is_active,
-    coupon_type, one_time_per_user, title, description,
-  } = data;
-  const { rows } = await pool.query(
-    `INSERT INTO coupons (
-       code, discount_amount, discount_type, min_order_amount, max_discount_amount,
-       usage_limit, valid_from, valid_until, is_active,
-       coupon_type, one_time_per_user, title, description
-     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,COALESCE($9, TRUE),$10,COALESCE($11, FALSE),$12,$13) RETURNING *`,
-    [
-      String(code).toUpperCase().trim(),
-      discount_amount,
-      discount_type || 'percentage',
-      min_order_amount || 0,
-      max_discount_amount || null,
-      usage_limit || null,
-      valid_from || null,
-      valid_until || null,
-      is_active,
-      coupon_type || (discount_type === 'fixed' ? 'flat' : 'percentage'),
-      one_time_per_user,
-      title || null,
-      description || null,
-    ]
-  );
-  return rows[0];
-};
-
-const updateCoupon = async (id, data) => {
-  const {
-    code, discount_amount, discount_type, min_order_amount, max_discount_amount,
-    usage_limit, valid_from, valid_until, is_active,
-    coupon_type, one_time_per_user, title, description,
-  } = data;
-  const { rows } = await pool.query(
-    `UPDATE coupons SET
-       code = COALESCE($1, code),
-       discount_amount = COALESCE($2, discount_amount),
-       discount_type = COALESCE($3, discount_type),
-       min_order_amount = COALESCE($4, min_order_amount),
-       max_discount_amount = COALESCE($5, max_discount_amount),
-       usage_limit = COALESCE($6, usage_limit),
-       valid_from = COALESCE($7, valid_from),
-       valid_until = COALESCE($8, valid_until),
-       is_active = COALESCE($9, is_active),
-       coupon_type = COALESCE($10, coupon_type),
-       one_time_per_user = COALESCE($11, one_time_per_user),
-       title = COALESCE($12, title),
-       description = COALESCE($13, description),
-       updated_at = CURRENT_TIMESTAMP
-     WHERE id = $14 RETURNING *`,
-    [
-      code ? String(code).toUpperCase().trim() : null,
-      discount_amount, discount_type, min_order_amount, max_discount_amount,
-      usage_limit, valid_from, valid_until, is_active,
-      coupon_type, one_time_per_user, title, description, id,
-    ]
-  );
-  return rows[0] || null;
-};
+// Coupon writes live in couponModel.js (single source of truth for
+// validation + SQL, also reused by system-generated coupons e.g. loyalty
+// point redemption) — these are thin re-exports for the admin surface.
+const createCoupon = async (data) => require('./couponModel').createCoupon(data);
+const updateCoupon = async (id, data) => require('./couponModel').updateCoupon(id, data);
 
 const deleteCoupon = async (id) => {
   const { rows } = await pool.query('DELETE FROM coupons WHERE id = $1 RETURNING id', [id]);
@@ -1249,7 +1247,8 @@ const getSettings = async () => {
   return inserted.rows[0];
 };
 
-const updateSettings = async (data) => {
+const updateSettings = async (data, client = null) => {
+  const db = client || pool;
   const {
     delivery_charge, free_delivery_min, tax_percent, commission_percent,
     app_name, support_email, support_phone, payment_cod_enabled,
@@ -1259,8 +1258,15 @@ const updateSettings = async (data) => {
     youtube_url, theme_color, footer_content, privacy_policy_text,
     terms_of_service_text, company_name,
   } = data;
-  await getSettings();
-  const { rows } = await pool.query(
+
+  // Lock (and create if missing) the singleton row, capturing the pre-update
+  // values so callers can build an old/new audit diff.
+  let before = (await db.query('SELECT * FROM admin_settings WHERE id = 1 FOR UPDATE')).rows[0];
+  if (!before) {
+    before = (await db.query('INSERT INTO admin_settings (id) VALUES (1) RETURNING *')).rows[0];
+  }
+
+  const { rows } = await db.query(
     `UPDATE admin_settings SET
        delivery_charge = COALESCE($1, delivery_charge),
        free_delivery_min = COALESCE($2, free_delivery_min),
@@ -1301,7 +1307,7 @@ const updateSettings = async (data) => {
       terms_of_service_text, company_name,
     ]
   );
-  return rows[0];
+  return { before, after: rows[0] };
 };
 
 const listAdminStaff = async () => {
@@ -1566,42 +1572,10 @@ const getDeliveryReport = async () => {
   return rows;
 };
 
-const getRestaurantSettlements = async ({ restaurant_id = '', date_from = '', date_to = '' } = {}) => {
-  const commission = await pool.query(`SELECT commission_percent FROM admin_settings WHERE id = 1`);
-  const rate = Number(commission.rows[0]?.commission_percent || 15) / 100;
-
-  const conditions = [];
-  const values = [rate];
-  if (restaurant_id) {
-    values.push(restaurant_id);
-    conditions.push(`r.id = $${values.length}`);
-  }
-  if (date_from) {
-    values.push(date_from);
-    conditions.push(`o.created_at::date >= $${values.length}::date`);
-  }
-  if (date_to) {
-    values.push(date_to);
-    conditions.push(`o.created_at::date <= $${values.length}::date`);
-  }
-  const extraWhere = conditions.length ? `AND ${conditions.join(' AND ')}` : '';
-
-  const { rows } = await pool.query(
-    `SELECT r.id, r.name,
-            COALESCE(SUM(o.total_amount) FILTER (WHERE LOWER(o.status) = 'delivered'), 0)::float AS gross_revenue,
-            COALESCE(SUM(o.total_amount) FILTER (WHERE LOWER(o.status) = 'delivered'), 0)::float * $1 AS commission,
-            COALESCE(SUM(o.total_amount) FILTER (WHERE LOWER(o.status) = 'delivered'), 0)::float * (1 - $1) AS settlement,
-            COUNT(*) FILTER (WHERE LOWER(o.status) = 'delivered')::int AS delivered_orders
-     FROM restaurants r
-     LEFT JOIN orders o ON o.restaurant_id = r.id ${extraWhere}
-     GROUP BY r.id, r.name
-     HAVING COALESCE(SUM(o.total_amount) FILTER (WHERE LOWER(o.status) = 'delivered'), 0) > 0
-     ORDER BY gross_revenue DESC
-     LIMIT 100`,
-    values
-  );
-  return { commission_rate: rate * 100, settlements: rows };
-};
+// Delegates to settlementModel's shared revenue calculation so admin and
+// partner settlement reads can never diverge again (they previously used
+// two different, inconsistent predicates and neither excluded refunds).
+const getRestaurantSettlements = (params) => require('./settlementModel').getRestaurantSettlements(params);
 
 module.exports = {
   getDashboardStats,

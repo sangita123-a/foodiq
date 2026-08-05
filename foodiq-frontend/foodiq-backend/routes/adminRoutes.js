@@ -5,6 +5,7 @@ const { requirePermission } = require('../utils/adminPermissions');
 const c = require('../controllers/adminController');
 const { restaurantAdminActionLimiter } = require('../middleware/rateLimiters');
 const { validateRestaurantDocument, validateRestaurantBankAccount } = require('../validators/restaurantValidator');
+const { validateUuidParam } = require('../middleware/validateParams');
 
 router.use(protect);
 router.use(authorize('admin'));
@@ -39,6 +40,7 @@ router.delete('/users/:id', requirePermission('customers'), c.removeUser);
 router.get('/users/:id/orders', requirePermission('customers'), c.userOrders);
 router.get('/users/:id/wallet', requirePermission('customers'), c.userWallet);
 router.get('/users/:id/referrals', requirePermission('customers'), c.userReferrals);
+router.get('/customers/:id/support', requirePermission('customers'), c.getCustomerSupportTickets);
 
 const sc = require('../controllers/shiftController');
 router.get('/shifts', requirePermission('delivery'), sc.getAdminShifts);
@@ -69,25 +71,27 @@ const { notificationLimiter, supportLimiter } = require('../middleware/rateLimit
 router.get('/delivery/notifications', requirePermission('delivery', 'notifications'), c.getDeliveryNotifications);
 router.post('/delivery/notifications/send', notificationLimiter, requirePermission('delivery', 'notifications'), c.sendDeliveryNotification);
 
-const { validateAdminReply } = require('../validators/deliverySupportValidator');
-router.get('/delivery/support', requirePermission('delivery', 'feedback'), c.getDeliverySupportTickets);
-router.patch('/delivery/support/:id', supportLimiter, requirePermission('delivery', 'feedback'), validateAdminReply, c.patchDeliverySupportTicket);
-
 router.get('/orders', requirePermission('orders'), c.getOrders);
 router.get('/orders/stats', requirePermission('orders'), c.getOrderStats);
 router.post('/orders/bulk-status', requirePermission('orders'), c.bulkUpdateStatus);
 router.post('/orders/bulk-assign', requirePermission('orders', 'delivery'), c.bulkAssignPartner);
 router.post('/orders/bulk-cancel', requirePermission('orders'), c.bulkCancelOrders);
-router.get('/orders/:id', requirePermission('orders'), c.getOrder);
-router.get('/orders/:id/history', requirePermission('orders'), c.getOrderHistory);
-router.get('/orders/:id/invoice', requirePermission('orders'), c.downloadOrderInvoice);
-router.put('/orders/:id', requirePermission('orders'), c.patchOrder);
-router.post('/orders/:id/refund', requirePermission('orders', 'payments'), c.refund);
+router.get('/orders/:id', requirePermission('orders'), validateUuidParam('id'), c.getOrder);
+router.get('/orders/:id/history', requirePermission('orders'), validateUuidParam('id'), c.getOrderHistory);
+router.get('/orders/:id/invoice', requirePermission('orders'), validateUuidParam('id'), c.downloadOrderInvoice);
+router.put('/orders/:id', requirePermission('orders'), validateUuidParam('id'), c.patchOrder);
+router.post('/orders/:id/refund', requirePermission('orders', 'payments'), validateUuidParam('id'), c.refund);
 router.get('/payments', requirePermission('payments'), c.getPaymentsOverview);
 router.get('/payments/transactions', requirePermission('payments'), c.getPaymentTransactions);
 router.get('/payments/refunds', requirePermission('payments'), c.getRefunds);
 router.post('/payments/refunds', requirePermission('payments'), c.postRefund);
 router.get('/payments/settlements', requirePermission('payments'), c.getSettlements);
+router.get('/payments/settlements/batches', requirePermission('payments'), c.listSettlementBatches);
+router.post('/payments/settlements/generate', requirePermission('payments'), c.generateSettlementBatch);
+router.post('/payments/settlements/bulk-approve', requirePermission('payments'), c.bulkApproveSettlementBatches);
+router.post('/payments/settlements/:id/approve', requirePermission('payments'), validateUuidParam('id'), c.approveSettlementBatch);
+router.post('/payments/settlements/:id/pay', requirePermission('payments'), validateUuidParam('id'), c.paySettlementBatch);
+router.post('/payments/settlements/:id/reject', requirePermission('payments'), validateUuidParam('id'), c.rejectSettlementBatch);
 
 router.get('/menu', requirePermission('menu'), c.getMenu);
 router.delete('/menu/:id', requirePermission('menu'), c.removeMenuItem);
@@ -106,9 +110,6 @@ router.get('/notifications/push/targets', requirePermission('notifications', 'ma
 
 router.get('/settings', requirePermission('settings'), c.getSettings);
 router.put('/settings', requirePermission('settings'), c.putSettings);
-
-const { updateAdminContactInfo } = require('../controllers/contactSettingsController');
-router.put('/contact', requirePermission('settings'), updateAdminContactInfo);
 
 router.get('/reports/sales', requirePermission('reports'), c.getSalesReports);
 router.get('/reports/orders', requirePermission('reports'), c.getOrderReports);
@@ -149,13 +150,8 @@ router.patch('/support/assign', requirePermission('delivery', 'feedback'), drive
 router.patch('/support/status', requirePermission('delivery', 'feedback'), driverSupportAdmin.adminUpdateStatus);
 router.post('/support/message', supportLimiter, requirePermission('delivery', 'feedback'), driverSupportAdmin.adminSendMessage);
 
-router.get('/support', requirePermission('feedback'), c.getSupportCenter);
-router.put('/support/tickets/:id/assign', requirePermission('feedback'), c.assignSupportTicket);
-router.put('/support/tickets/:id/resolve', requirePermission('feedback'), c.resolveSupportTicket);
-router.get('/support/live-chats', requirePermission('feedback'), c.getSupportLiveChats);
-router.get('/support/live-chats/:id', requirePermission('feedback'), c.getSupportLiveChatDetail);
-router.post('/support/live-chats/:id/messages', requirePermission('feedback'), c.postSupportAgentMessage);
-router.get('/support/ai-sessions', requirePermission('feedback'), c.getSupportAiSessions);
+router.get('/support-center/analytics', requirePermission('feedback'), c.getSupportCenterAnalytics);
+router.get('/support-center/agent-performance', requirePermission('feedback'), c.getSupportAgentPerformance);
 
 const ticketAdmin = require('../controllers/ticketController');
 router.get('/tickets', requirePermission('feedback'), ticketAdmin.adminListTickets);

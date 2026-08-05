@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import useSWR from "swr";
-import AdminShell from "@/components/admin/AdminShell";
 import {
   sendPushCampaign,
   fetchScheduledCampaigns,
@@ -13,6 +12,7 @@ import {
 } from "@/services/notificationApi";
 import { useAuthToken } from "@/hooks/useAuthToken";
 import { Bell, Calendar, MapPin, Store, Users } from "lucide-react";
+import { Badge, Button, EmptyState } from "@/components/admin/ui";
 
 type TargetMode = "audience" | "users" | "city" | "restaurant";
 
@@ -84,16 +84,19 @@ export default function PushNotificationPanel() {
   return (
     <div className="space-y-8">
       <div>
-        <div className="flex items-center gap-2 mb-2">
-          <Bell className="w-7 h-7 text-primary" />
-          <h1 className="text-3xl font-black text-foreground">Push Notifications</h1>
+        <div className="flex items-center gap-2 mb-1.5">
+          <Bell className="w-6 h-6 text-primary" />
+          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Push Notifications</h1>
         </div>
-        <p className="text-gray-text">
+        <p className="text-gray-text text-sm">
           Send FCM web push + in-app notifications to all users, selected users, by city, or by restaurant. Schedule for later delivery.
         </p>
       </div>
 
-      <form onSubmit={submit} className="bg-white rounded-3xl border border-border p-6 space-y-5">
+      <form
+        onSubmit={submit}
+        className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6 space-y-5"
+      >
         <div>
           <label className="block text-sm font-bold text-gray-text mb-2">Target</label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -236,42 +239,42 @@ export default function PushNotificationPanel() {
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={sending}
-          className="bg-primary text-white font-black px-8 py-3 rounded-xl disabled:opacity-60"
-        >
+        <Button type="submit" variant="primary" loading={sending}>
           {sending ? "Sending…" : scheduleAt ? "Schedule Push Notification" : "Send Push Notification"}
-        </button>
+        </Button>
 
-        {result ? <p className="text-sm font-bold text-foreground">{result}</p> : null}
+        {result ? (
+          <p className="text-sm font-bold text-foreground bg-section rounded-xl px-4 py-3">{result}</p>
+        ) : null}
       </form>
 
-      <section className="bg-white rounded-3xl border border-border p-6">
-        <h2 className="text-lg font-black text-foreground mb-4">Scheduled Campaigns</h2>
-        <div className="space-y-3 max-h-80 overflow-y-auto">
-          {scheduled.map((c) => (
-            <div key={c.id} className="border border-border rounded-xl px-4 py-3 flex justify-between gap-4">
-              <div>
-                <p className="font-bold text-foreground">{c.subject || c.name}</p>
-                <p className="text-xs text-gray-text">{c.message}</p>
+      <section className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
+        <h2 className="text-lg font-black text-foreground tracking-tight mb-4">Scheduled Campaigns</h2>
+        {scheduled.length ? (
+          <div className="space-y-3 max-h-80 overflow-y-auto">
+            {scheduled.map((c) => (
+              <div
+                key={c.id}
+                className="border border-border rounded-xl px-4 py-3 flex justify-between gap-4"
+              >
+                <div className="min-w-0">
+                  <p className="font-bold text-foreground truncate">{c.subject || c.name}</p>
+                  <p className="text-xs text-gray-text truncate">{c.message}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <Badge tone={c.status === "sent" ? "success" : c.status === "scheduled" ? "warning" : "neutral"}>
+                    {c.status}
+                  </Badge>
+                  {c.scheduled_at ? (
+                    <p className="text-[10px] text-[#9CA3AF] mt-1">{new Date(c.scheduled_at).toLocaleString()}</p>
+                  ) : null}
+                </div>
               </div>
-              <div className="text-right shrink-0">
-                <span className={`text-xs font-bold uppercase ${
-                  c.status === "sent" ? "text-emerald-600" : c.status === "scheduled" ? "text-amber-600" : "text-[#9CA3AF]"
-                }`}>
-                  {c.status}
-                </span>
-                {c.scheduled_at ? (
-                  <p className="text-[10px] text-[#9CA3AF]">{new Date(c.scheduled_at).toLocaleString()}</p>
-                ) : null}
-              </div>
-            </div>
-          ))}
-          {!scheduled.length ? (
-            <p className="text-sm text-[#9CA3AF] text-center py-6">No scheduled campaigns yet.</p>
-          ) : null}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyState icon={Calendar} title="No scheduled campaigns yet" description="Notifications you schedule for later will show up here." />
+        )}
       </section>
     </div>
   );

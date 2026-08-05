@@ -7,7 +7,8 @@ import { adminPost } from "@/services/adminApi";
 import api from "@/services/api";
 import { useAuthToken } from "@/hooks/useAuthToken";
 import { cleanNotificationMessage } from "@/lib/notificationTypes";
-import { CheckCheck, Search, Trash2 } from "lucide-react";
+import { CheckCheck, Search, Trash2, Bell } from "lucide-react";
+import { EmptyState } from "@/components/admin/ui";
 
 export default function AdminNotificationsPage() {
   const hasToken = useAuthToken();
@@ -54,8 +55,8 @@ export default function AdminNotificationsPage() {
   return (
     <AdminShell title="Notifications">
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-foreground">Notifications</h1>
-        <p className="text-gray-text">
+        <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight mb-1.5">Notifications</h1>
+        <p className="text-gray-text text-sm">
           Admin inbox, broadcasts, and platform alerts.
         </p>
       </div>
@@ -63,7 +64,7 @@ export default function AdminNotificationsPage() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-black text-foreground">Inbox</h2>
+            <h2 className="text-lg font-black text-foreground tracking-tight">Inbox</h2>
             <button
               type="button"
               onClick={async () => {
@@ -97,7 +98,7 @@ export default function AdminNotificationsPage() {
             }) => (
               <div
                 key={n.id}
-                className={`bg-white border border-border rounded-2xl p-4 flex gap-3 ${
+                className={`bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-4 flex gap-3 ${
                   !n.is_read ? "border-l-4 border-l-primary" : ""
                 }`}
               >
@@ -123,16 +124,16 @@ export default function AdminNotificationsPage() {
               </div>
             ))}
             {!isLoading && inbox.length === 0 && (
-              <p className="text-sm text-gray-text text-center py-8">No admin alerts yet.</p>
+              <EmptyState icon={Bell} title="No admin alerts yet" className="py-8" />
             )}
           </div>
         </section>
 
         <section>
-          <h2 className="text-lg font-black text-foreground mb-4">Broadcast</h2>
+          <h2 className="text-lg font-black text-foreground tracking-tight mb-4">Broadcast</h2>
           <form
             onSubmit={send}
-            className="bg-white rounded-3xl border border-border p-6 space-y-4"
+            className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6 space-y-4"
           >
             <div>
               <label className="block text-sm font-bold text-gray-text mb-2">Audience</label>

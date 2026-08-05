@@ -16,7 +16,6 @@ const {
   createPaymentTransaction,
   getTransactionByRazorpayOrderId,
   updateTransaction,
-  createRefundRecord,
   listRefunds,
   listAdminTransactions,
   getAdminPaymentStats,
@@ -27,7 +26,6 @@ const {
   verifyWebhookSignature,
   signMockPayment,
   fetchAndValidatePayment,
-  createRefund,
   getKeyId,
   isMockMode,
   toRazorpayPrefillMethod,
@@ -350,8 +348,23 @@ const finalizeVerifiedPayment = async ({
       try {
         const { deductInventoryForOrder } = require('../services/inventoryService');
         await deductInventoryForOrder(orderId, checkoutPrepared.restaurantId);
-      } catch {
-        /* non-blocking */
+      } catch (invErr) {
+        // Non-blocking (order already placed/paid) but must not be silent —
+        // an inventory desync here is otherwise invisible until stock runs out.
+        console.error('[payments/inventory] deduction failed for order', orderId, invErr.message);
+        try {
+          const { writeAudit } = require('../services/auditService');
+          writeAudit({
+            userId,
+            action: 'inventory.deduction_failed',
+            category: 'inventory',
+            status: 'failure',
+            message: invErr.message,
+            meta: { order_id: orderId, restaurant_id: checkoutPrepared.restaurantId },
+          }).catch(() => {});
+        } catch {
+          /* ignore */
+        }
       }
       return {
         already_processed: false,
@@ -705,11 +718,73 @@ const handleRazorpayWebhook = async (req, res) => {
 
     if (eventName === 'refund.processed' || eventName === 'refund.failed') {
       const refund = event.payload?.refund?.entity;
-      if (refund?.id) {
+      if (refund?.id && eventName === 'refund.failed') {
+        // The refund was marked 'processed' synchronously when we called
+        // Razorpay's refund API — Razorpay is now telling us it actually
+        // failed. Recompute payments.status from what's genuinely been
+        // refunded so far (excluding this now-failed one) instead of
+        // leaving it stuck on a refunded state that never happened.
+        const client = await pool.connect();
+        try {
+          await client.query('BEGIN');
+          const { rows: refundRows } = await client.query(
+            `UPDATE refunds SET status = 'failed', updated_at = CURRENT_TIMESTAMP
+             WHERE razorpay_refund_id = $1 AND status != 'failed'
+             RETURNING *`,
+            [refund.id]
+          );
+          const failedRefund = refundRows[0];
+          if (failedRefund) {
+            const paymentRes = await client.query(
+              `SELECT * FROM payments WHERE id = $1 FOR UPDATE`,
+              [failedRefund.payment_id]
+            );
+            const pay = paymentRes.rows[0];
+            if (pay) {
+              const remaining = await client.query(
+                `SELECT COALESCE(SUM(amount), 0)::float AS refunded FROM refunds
+                 WHERE payment_id = $1 AND status = 'processed'`,
+                [pay.id]
+              );
+              const refundedNow = Number(remaining.rows[0].refunded);
+              const paid = Number(pay.amount);
+              const correctedStatus =
+                refundedNow <= 0.01 ? 'completed' : refundedNow >= paid - 0.01 ? 'refunded' : 'partially_refunded';
+              await client.query(
+                `UPDATE payments SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
+                [correctedStatus, pay.id]
+              );
+            }
+            await client.query('COMMIT');
+
+            // Order status is not blindly reverted (we don't track the
+            // pre-refund order state) — flag it for a human instead of
+            // guessing, since this is a rare failure path.
+            try {
+              const { notifyAdmins } = require('../services/notificationService');
+              await notifyAdmins({
+                type: 'refund_failed',
+                title: 'Refund Failed After Initiation',
+                message: `Razorpay refund ${refund.id} failed after being marked processed. Payment ${failedRefund.payment_id} needs manual review.`,
+                link: '/admin/payments',
+              });
+            } catch {
+              /* non-blocking */
+            }
+          } else {
+            await client.query('COMMIT');
+          }
+        } catch (reconcileErr) {
+          await client.query('ROLLBACK');
+          console.error('[payments/webhook] refund.failed reconciliation error', reconcileErr);
+        } finally {
+          client.release();
+        }
+      } else if (refund?.id) {
         await pool.query(
-          `UPDATE refunds SET status = $1, updated_at = CURRENT_TIMESTAMP
-           WHERE razorpay_refund_id = $2`,
-          [eventName === 'refund.processed' ? 'processed' : 'failed', refund.id]
+          `UPDATE refunds SET status = 'processed', updated_at = CURRENT_TIMESTAMP
+           WHERE razorpay_refund_id = $1`,
+          [refund.id]
         );
       }
       return res.status(200).json({ success: true, message: 'Refund event recorded' });
@@ -970,119 +1045,6 @@ function escapeHtml(value) {
     .replace(/"/g, '&quot;');
 }
 
-const processRefund = async ({
-  orderId,
-  amount,
-  reason,
-  initiatedBy,
-  type = 'full',
-  cancelOrder = true,
-}) => {
-  const payment = await getPaymentByOrderId(orderId);
-  if (!payment) {
-    const err = new Error('Payment not found for order');
-    err.status = 404;
-    throw err;
-  }
-  if (!['completed', 'partially_refunded'].includes(payment.status)) {
-    const err = new Error('Only completed payments can be refunded');
-    err.status = 400;
-    throw err;
-  }
-
-  const paid = Number(payment.amount);
-  const already = await pool.query(
-    `SELECT COALESCE(SUM(amount), 0)::float AS refunded FROM refunds
-     WHERE payment_id = $1 AND status = 'processed'`,
-    [payment.id]
-  );
-  const refundedSoFar = already.rows[0].refunded;
-  const remaining = paid - refundedSoFar;
-  const refundAmount =
-    type === 'full' || amount == null ? remaining : Math.min(Number(amount), remaining);
-
-  if (refundAmount <= 0) {
-    const err = new Error('No refundable balance remaining');
-    err.status = 400;
-    throw err;
-  }
-
-  let rzRefund = null;
-  if (payment.razorpay_payment_id && payment.method !== 'cod') {
-    rzRefund = await createRefund({
-      paymentId: payment.razorpay_payment_id,
-      amountInPaise: Math.round(refundAmount * 100),
-      notes: { order_id: orderId, reason: reason || '' },
-    });
-  }
-
-  const newStatus = refundAmount >= remaining - 0.01 ? 'refunded' : 'partially_refunded';
-
-  await pool.query(
-    `UPDATE payments SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
-    [newStatus, payment.id]
-  );
-
-  if (cancelOrder && newStatus === 'refunded') {
-    await pool.query(
-      `UPDATE orders SET status = 'Cancelled', updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
-      [orderId]
-    );
-  }
-
-  const refund = await createRefundRecord({
-    payment_id: payment.id,
-    order_id: orderId,
-    user_id: payment.user_id,
-    amount: refundAmount,
-    type: refundAmount >= paid - 0.01 ? 'full' : 'partial',
-    reason,
-    status: 'processed',
-    razorpay_refund_id: rzRefund?.id || null,
-    initiated_by: initiatedBy,
-    notes: rzRefund?.mock ? 'Mock Razorpay refund' : null,
-  });
-
-  try {
-    const { createNotification } = require('../models/notificationModel');
-    await createNotification(
-      payment.user_id,
-      'refund_completed',
-      'Refund Completed',
-      `₹${refundAmount.toFixed(0)} has been refunded for order #${String(orderId).slice(0, 8)}.`,
-      {
-        order_id: orderId,
-        refund_id: refund.id,
-        amount: refundAmount,
-        link: '/notifications',
-      }
-    );
-    try {
-      const { notifyAdmins } = require('../services/notificationService');
-      await notifyAdmins({
-        type: 'refund_request',
-        title: 'Refund Completed',
-        message: `Refund of ₹${refundAmount.toFixed(0)} for order #${String(orderId).slice(0, 8)}.`,
-        orderId,
-        link: '/admin/payments',
-      });
-    } catch {
-      /* ignore */
-    }
-  } catch {
-    /* ignore */
-  }
-
-  console.log('[payments/refund]', {
-    orderId,
-    refundAmount,
-    type: refund.type,
-    rz: rzRefund?.id,
-  });
-
-  return refund;
-};
-
 const adminPaymentOverview = async (req, res) => {
   try {
     const stats = await getAdminPaymentStats();
@@ -1119,32 +1081,26 @@ const adminCreateRefund = async (req, res) => {
     const { order_id, amount, reason, type, refund_method, auto_approve } = req.body;
     if (!order_id) return fail(res, 400, 'order_id is required');
 
-    if (refund_method === 'wallet' || auto_approve !== false) {
-      const { createRefundRequest } = require('../services/refundService');
-      const payment = await getPaymentByOrderId(order_id);
-      const result = await createRefundRequest({
-        orderId: order_id,
-        userId: payment?.user_id,
-        amount,
-        refundType: type || (amount ? 'partial' : 'full'),
-        refundMethod: refund_method || 'wallet',
-        reason: reason || 'Admin refund',
-        initiatedBy: req.user.id,
-        autoApprove: auto_approve !== false,
-      });
-      const msg = result.duplicate ? 'Duplicate refund request' : 'Refund processed';
-      return ok(res, msg, result, result.duplicate ? 200 : 201);
-    }
-
-    const refund = await processRefund({
+    // Always routed through refundService — it has the dedupe protection,
+    // row-locked balance checks, and COD→wallet safety net that the old
+    // direct-processing path here lacked. auto_approve: false now correctly
+    // creates a pending refund_request for later admin approval instead of
+    // processing immediately (the previous branch bypassed the pending
+    // state entirely).
+    const { createRefundRequest } = require('../services/refundService');
+    const payment = await getPaymentByOrderId(order_id);
+    const result = await createRefundRequest({
       orderId: order_id,
+      userId: payment?.user_id,
       amount,
+      refundType: type || (amount ? 'partial' : 'full'),
+      refundMethod: refund_method || 'wallet',
       reason: reason || 'Admin refund',
       initiatedBy: req.user.id,
-      type: type || (amount ? 'partial' : 'full'),
-      cancelOrder: type !== 'partial' && !amount,
+      autoApprove: auto_approve !== false,
     });
-    return ok(res, 'Refund processed', refund);
+    const msg = result.duplicate ? 'Duplicate refund request' : 'Refund processed';
+    return ok(res, msg, result, result.duplicate ? 200 : 201);
   } catch (error) {
     return fail(res, error.status || 500, error.message);
   }
@@ -1311,7 +1267,6 @@ module.exports = {
   mockCompletePayment,
   handleRazorpayWebhook,
   downloadInvoice,
-  processRefund,
   adminPaymentOverview,
   adminListTransactions,
   adminListRefunds,

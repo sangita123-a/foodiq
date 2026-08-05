@@ -1,8 +1,19 @@
 const admin = require('../models/adminModel');
+const { pool } = require('../config/db');
+const { validateAdminSettings } = require('../validators/settingsValidator');
 
 const ok = (res, message, data) => res.json({ success: true, message, data });
 const fail = (res, status, message, error = {}) =>
   res.status(status).json({ success: false, message, error });
+
+// Mirrors the orders_status_check CHECK constraint (utils/ensureSchema.js) — kept
+// here rather than trusting the DB constraint alone so a bad status string from an
+// admin API caller gets a clean 400 instead of a raw Postgres constraint-violation 500.
+const ADMIN_ORDER_STATUSES = new Set([
+  'Pending', 'Paid', 'Accepted', 'Preparing', 'Ready for Pickup', 'Picked Up',
+  'On The Way', 'Out for Delivery', 'Delivered', 'Cancelled',
+  'pending', 'paid', 'confirmed', 'cancelled',
+]);
 
 const getDashboard = async (req, res) => {
   try {
@@ -36,6 +47,13 @@ const getDashboard = async (req, res) => {
       liveRestaurants: data.live_restaurants,
       peakHours: data.peak_hours,
       openSupportTickets: data.open_support_tickets,
+      refundAmountToday: data.refund_amount_today,
+      activeCoupons: data.active_coupons,
+      walletBalance: data.wallet_balance,
+      platformEarningsToday: data.platform_earnings_today,
+      restaurantEarningsToday: data.restaurant_earnings_today,
+      deliveryEarningsToday: data.delivery_earnings_today,
+      profitToday: data.profit_today,
     });
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
@@ -667,6 +685,9 @@ const downloadOrderInvoice = async (req, res) => {
 
 const patchOrder = async (req, res) => {
   try {
+    if (req.body?.status && !ADMIN_ORDER_STATUSES.has(req.body.status)) {
+      return fail(res, 400, `Invalid status: ${req.body.status}`);
+    }
     const data = await admin.updateOrderAdmin(req.params.id, req.body, { id: req.user.id });
     if (!data) return fail(res, 404, 'Order not found');
 
@@ -708,15 +729,26 @@ const patchOrder = async (req, res) => {
 
 const refund = async (req, res) => {
   try {
-    const { processRefund } = require('./paymentController');
-    const data = await processRefund({
+    // Routed through refundService for its dedupe + row-locked balance
+    // protection (a double-click or retried request can no longer refund
+    // the same order twice past the payment amount). refundMethod:
+    // 'original' keeps this endpoint's existing behavior of refunding to
+    // Razorpay — refundService still coerces COD payments to a wallet
+    // credit under the hood, since COD has no original payment to refund to.
+    const { createRefundRequest } = require('../services/refundService');
+    const result = await createRefundRequest({
       orderId: req.params.id,
       amount: req.body?.amount,
+      refundType: req.body?.type || (req.body?.amount ? 'partial' : 'full'),
+      refundMethod: 'original',
       reason: req.body?.reason || 'Admin refund',
       initiatedBy: req.user.id,
-      type: req.body?.type || (req.body?.amount ? 'partial' : 'full'),
-      cancelOrder: req.body?.cancel_order !== false,
+      autoApprove: true,
     });
+    if (result.duplicate) {
+      return ok(res, 'Refund already processed for this order', result.request);
+    }
+    const data = result.refund;
 
     try {
       const { recordStatusChange } = require('../models/orderStatusHistoryModel');
@@ -755,6 +787,9 @@ const bulkUpdateStatus = async (req, res) => {
     const { ids, status, reason } = req.body || {};
     if (!Array.isArray(ids) || !ids.length || !status) {
       return fail(res, 400, 'ids (array) and status are required');
+    }
+    if (!ADMIN_ORDER_STATUSES.has(status)) {
+      return fail(res, 400, `Invalid status: ${status}`);
     }
     const result = await admin.bulkUpdateOrderStatus(ids, status, reason, { id: req.user.id });
     try {
@@ -930,7 +965,7 @@ const postCoupon = async (req, res) => {
     }
     res.status(201).json({ success: true, message: 'Coupon created', data });
   } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
+    fail(res, error.status || 500, error.status ? error.message : 'Server Error', error.message);
   }
 };
 
@@ -940,7 +975,7 @@ const patchCoupon = async (req, res) => {
     if (!data) return fail(res, 404, 'Coupon not found');
     ok(res, 'Coupon updated', data);
   } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
+    fail(res, error.status || 500, error.status ? error.message : 'Server Error', error.message);
   }
 };
 
@@ -1060,10 +1095,49 @@ const getSettings = async (req, res) => {
 };
 
 const putSettings = async (req, res) => {
+  const validation = validateAdminSettings(req.body);
+  if (!validation.valid) {
+    return fail(res, 400, validation.errors[0], validation.errors);
+  }
+
+  const client = await pool.connect();
   try {
-    ok(res, 'Settings updated', await admin.updateSettings(req.body));
+    await client.query('BEGIN');
+    const { before, after } = await admin.updateSettings(validation.data, client);
+
+    const changedFields = Object.keys(validation.data).filter(
+      (key) => String(before[key]) !== String(after[key])
+    );
+    if (changedFields.length) {
+      const { writeAudit } = require('../services/auditService');
+      await writeAudit({
+        userId: req.user.id,
+        role: req.user.role,
+        action: 'settings.update',
+        category: 'settings',
+        resourceType: 'admin_settings',
+        resourceId: '1',
+        message: `Updated ${changedFields.join(', ')}`,
+        meta: {
+          old: Object.fromEntries(changedFields.map((key) => [key, before[key]])),
+          new: Object.fromEntries(changedFields.map((key) => [key, after[key]])),
+        },
+        req,
+        client,
+      });
+    }
+
+    await client.query('COMMIT');
+    ok(res, 'Settings updated', after);
   } catch (error) {
+    try {
+      await client.query('ROLLBACK');
+    } catch {
+      /* ignore */
+    }
     fail(res, 500, 'Server Error', error.message);
+  } finally {
+    client.release();
   }
 };
 
@@ -1285,6 +1359,11 @@ const sendMarketingCampaign = async (req, res) => {
     const campaign = await admin.updateMarketingCampaign(req.params.id, { status: 'sending' });
     if (!campaign) return fail(res, 404, 'Campaign not found');
 
+    if (!['push', 'email', 'sms'].includes(campaign.channel)) {
+      await admin.updateMarketingCampaign(req.params.id, { status: 'draft' });
+      return fail(res, 400, `Campaigns with channel "${campaign.channel}" cannot be sent from here`);
+    }
+
     let sent = 0;
     if (campaign.channel === 'push') {
       const result = await admin.broadcastNotification({
@@ -1293,27 +1372,28 @@ const sendMarketingCampaign = async (req, res) => {
         message: campaign.message,
       });
       sent = result.sent;
-    } else if (campaign.channel === 'email' || campaign.channel === 'sms') {
-      const messaging = require('../controllers/messagingController');
-      const fakeReq = {
-        body: {
-          audience: campaign.audience || 'all',
-          subject: campaign.subject || campaign.name,
+    } else {
+      // Email/SMS campaigns reuse the same real audience-resolution + per-user
+      // dispatch pipeline as push (notify() -> commsService.dispatchEmailSms,
+      // which has real Nodemailer/SendGrid/Twilio/MSG91 provider integration).
+      // Previously this routed through messagingController.postPromo with a
+      // fake single-recipient request that always failed silently, so every
+      // email/SMS campaign reported "sent" while reaching nobody.
+      const { resolveAudienceUsers } = require('../services/pushNotificationService');
+      const { notify } = require('../services/notificationService');
+      const users = await resolveAudienceUsers({ audience: campaign.audience || 'all' });
+      for (const u of users) {
+        await notify({
+          userId: u.id,
+          type: 'coupon_alert',
+          title: campaign.subject || campaign.name,
           message: campaign.message,
-          template: 'promo',
-        },
-        user: req.user,
-      };
-      const fakeRes = {
-        json: (payload) => payload,
-        status: () => ({ json: () => ({}) }),
-      };
-      if (campaign.channel === 'email') {
-        await messaging.postPromo(fakeReq, fakeRes);
-      } else {
-        await messaging.postPromo(fakeReq, fakeRes);
+          role: u.role,
+          link: '/notifications',
+          dedupeKey: `campaign:${req.params.id}:${u.id}`,
+        });
+        sent += 1;
       }
-      sent = 1;
     }
 
     const updated = await admin.updateMarketingCampaign(req.params.id, {
@@ -1360,6 +1440,117 @@ const getDeliveryReportHandler = async (req, res) => {
 const getSettlements = async (req, res) => {
   try {
     ok(res, 'Settlements retrieved', await admin.getRestaurantSettlements());
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+const settlementModel = require('../models/settlementModel');
+
+/** GET /admin/payments/settlements/batches — persisted settlement batches (status/date/restaurant filters). */
+const listSettlementBatches = async (req, res) => {
+  try {
+    const data = await settlementModel.listSettlements({
+      status: req.query.status || '',
+      restaurant_id: req.query.restaurant_id || '',
+      date_from: req.query.date_from || '',
+      date_to: req.query.date_to || '',
+      limit: req.query.limit,
+    });
+    ok(res, 'Settlement batches retrieved', data);
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+/** POST /admin/payments/settlements/generate — snapshot a payable settlement batch for one restaurant/period. */
+const generateSettlementBatch = async (req, res) => {
+  try {
+    const { restaurant_id, period_start, period_end, bank_account_id } = req.body || {};
+    if (!restaurant_id || !period_start || !period_end) {
+      return fail(res, 400, 'restaurant_id, period_start, and period_end are required');
+    }
+    const result = await settlementModel.createSettlementBatch({
+      restaurantId: restaurant_id,
+      periodStart: period_start,
+      periodEnd: period_end,
+      bankAccountId: bank_account_id || null,
+      createdBy: req.user.id,
+    });
+    const msg = result.duplicate ? 'Settlement already exists for this period' : 'Settlement batch created';
+    ok(res, msg, result);
+  } catch (error) {
+    fail(res, error.status || 500, error.message);
+  }
+};
+
+const approveSettlementBatch = async (req, res) => {
+  try {
+    const settlement = await settlementModel.approveSettlement(req.params.id, req.user.id);
+    try {
+      const { emitPayoutApproved } = require('../socket/emitters');
+      emitPayoutApproved({
+        type: 'restaurant_settlement',
+        id: settlement.id,
+        restaurant_id: settlement.restaurant_id,
+        amount: Number(settlement.net_payout),
+      });
+    } catch {
+      /* ignore */
+    }
+    ok(res, 'Settlement approved', settlement);
+  } catch (error) {
+    fail(res, error.status || 500, error.message);
+  }
+};
+
+const paySettlementBatch = async (req, res) => {
+  try {
+    const settlement = await settlementModel.markSettlementPaid(req.params.id);
+    try {
+      const { emitSettlementCompleted } = require('../socket/emitters');
+      emitSettlementCompleted({
+        settlement_id: settlement.id,
+        restaurant_id: settlement.restaurant_id,
+        net_payout: Number(settlement.net_payout),
+      });
+    } catch {
+      /* ignore */
+    }
+    ok(res, 'Settlement marked paid', settlement);
+  } catch (error) {
+    fail(res, error.status || 500, error.message);
+  }
+};
+
+const rejectSettlementBatch = async (req, res) => {
+  try {
+    const settlement = await settlementModel.rejectSettlement(req.params.id, req.body?.reason || '');
+    ok(res, 'Settlement rejected', settlement);
+  } catch (error) {
+    fail(res, error.status || 500, error.message);
+  }
+};
+
+const bulkApproveSettlementBatches = async (req, res) => {
+  try {
+    const { ids } = req.body || {};
+    if (!Array.isArray(ids) || !ids.length) return fail(res, 400, 'ids array is required');
+    const settlements = await settlementModel.bulkApproveSettlements(ids, req.user.id);
+    try {
+      const { emitPayoutApproved } = require('../socket/emitters');
+      settlements.forEach((settlement) =>
+        emitPayoutApproved({
+          type: 'restaurant_settlement',
+          id: settlement.id,
+          restaurant_id: settlement.restaurant_id,
+          amount: Number(settlement.net_payout),
+        })
+      );
+    } catch {
+      /* ignore */
+    }
+    ok(res, `${settlements.length} settlement(s) approved`, settlements);
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
   }
@@ -1442,34 +1633,46 @@ const exportReport = async (req, res) => {
       columns = ORDER_EXPORT_COLUMNS;
     }
 
-    if (format === 'pdf' && type === 'orders') {
-      const { buildOrdersExportPdf } = require('../services/orderExportPdfService');
-      const pdf = await buildOrdersExportPdf(rows, ORDER_EXPORT_COLUMNS);
+    // Every report type gets labeled columns for PDF/XLSX rendering — reuse
+    // the hand-authored ones where they exist, otherwise derive from the
+    // first row (same fallback the CSV branch already used).
+    const exportColumns = columns || (rows.length ? Object.keys(rows[0]).map((k) => ({ key: k, label: k.replace(/_/g, ' ') })) : []);
+    const auditAction = `${type}.export`;
+    const logExport = () => {
       const { writeAudit } = require('../services/auditService');
       writeAudit({
         userId: req.user.id,
         role: req.user.role,
-        action: 'order.export',
-        category: 'orders',
+        action: auditAction,
+        category: type,
         meta: { format, count: rows.length },
         req,
       }).catch(() => {});
+      const { logReportRun } = require('../services/analyticsExportService');
+      logReportRun({ reportType: type, format, createdBy: req.user.id, rowCount: rows.length }).catch(() => {});
+    };
+
+    if (format === 'pdf' && type === 'orders') {
+      const { buildOrdersExportPdf } = require('../services/orderExportPdfService');
+      const pdf = await buildOrdersExportPdf(rows, ORDER_EXPORT_COLUMNS);
+      logExport();
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', 'attachment; filename="orders-export.pdf"');
       return res.send(pdf);
     }
 
+    if (format === 'xlsx' && type === 'orders') {
+      const { buildExportXlsx } = require('../services/genericReportExportService');
+      const xlsx = await buildExportXlsx(rows, ORDER_EXPORT_COLUMNS, { sheetName: 'Orders' });
+      logExport();
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename="orders-report.xlsx"');
+      return res.send(xlsx);
+    }
+
     if ((format === 'pdf' || format === 'xlsx') && type === 'restaurants') {
       const restaurantExport = require('../services/restaurantExportService');
-      const { writeAudit } = require('../services/auditService');
-      writeAudit({
-        userId: req.user.id,
-        role: req.user.role,
-        action: 'restaurant.export',
-        category: 'restaurant',
-        meta: { format, count: rows.length },
-        req,
-      }).catch(() => {});
+      logExport();
 
       if (format === 'pdf') {
         const pdf = await restaurantExport.buildRestaurantsExportPdf(rows, RESTAURANT_EXPORT_COLUMNS);
@@ -1483,26 +1686,32 @@ const exportReport = async (req, res) => {
       return res.send(xlsx);
     }
 
+    if ((format === 'pdf' || format === 'xlsx') && ['sales', 'payment', 'customers', 'delivery'].includes(type)) {
+      const { buildExportPdf, buildExportXlsx } = require('../services/genericReportExportService');
+      logExport();
+
+      if (format === 'pdf') {
+        const pdf = await buildExportPdf(rows, exportColumns, { title: `${type[0].toUpperCase()}${type.slice(1)} Report` });
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${type}-report.pdf"`);
+        return res.send(pdf);
+      }
+      const xlsx = await buildExportXlsx(rows, exportColumns, { sheetName: type });
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${type}-report.xlsx"`);
+      return res.send(xlsx);
+    }
+
     if (format === 'csv') {
       if (!rows.length) {
         res.setHeader('Content-Type', 'text/csv');
         return res.send('No data');
       }
-      const cols = columns || Object.keys(rows[0]).map((k) => ({ key: k, label: k }));
-      const csv = [cols.map((c) => c.label).join(',')].concat(
-        rows.map((r) => cols.map((c) => JSON.stringify(r[c.key] ?? '')).join(','))
-      ).join('\n');
-      if (type === 'orders' || type === 'restaurants') {
-        const { writeAudit } = require('../services/auditService');
-        writeAudit({
-          userId: req.user.id,
-          role: req.user.role,
-          action: `${type === 'orders' ? 'order' : 'restaurant'}.export`,
-          category: type === 'orders' ? 'orders' : 'restaurant',
-          meta: { format, count: rows.length },
-          req,
-        }).catch(() => {});
-      }
+      const { rowsToCsv } = require('../services/analyticsExportService');
+      const csv = rowsToCsv(exportColumns.map((c) => c.label), rows.map((r) =>
+        exportColumns.reduce((acc, c) => ({ ...acc, [c.label]: r[c.key] ?? '' }), {})
+      ));
+      logExport();
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', `attachment; filename="${type}-report.csv"`);
       return res.send(csv);
@@ -1590,108 +1799,39 @@ const postLoyaltyCampaign = async (req, res) => {
   }
 };
 
-const getSupportCenter = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    const analytics = await helpCenter.getAnalytics();
-    ok(res, 'Support analytics retrieved', analytics);
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-const getSupportTickets = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    ok(res, 'Tickets retrieved', await helpCenter.listAllTickets({
-      status: req.query.status || '',
-      category: req.query.category || '',
-    }));
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-const assignSupportTicket = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    const ticket = await helpCenter.assignTicket(req.params.id, req.body.agent_id || req.user.id);
-    if (!ticket) return fail(res, 404, 'Ticket not found');
-    ok(res, 'Ticket assigned', ticket);
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-const resolveSupportTicket = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    const ticket = await helpCenter.resolveTicket(req.params.id, req.body.admin_notes);
-    if (!ticket) return fail(res, 404, 'Ticket not found');
-    ok(res, 'Ticket resolved', ticket);
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-const getSupportLiveChats = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    ok(res, 'Live chats retrieved', await helpCenter.listActiveChats());
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-const getSupportLiveChatDetail = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    const chat = await helpCenter.getLiveChat(req.params.id);
-    if (!chat) return fail(res, 404, 'Chat not found');
-    const messages = await helpCenter.getLiveMessages(req.params.id);
-    ok(res, 'Live chat detail', { chat, messages });
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-const postSupportAgentMessage = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    await helpCenter.assignLiveChat(req.params.id, req.user.id);
-    const msg = await helpCenter.addLiveMessage({
-      chatId: req.params.id,
-      senderId: req.user.id,
-      senderRole: 'agent',
-      message: req.body.message,
-      attachmentUrl: req.body.attachment_url,
-      attachmentType: req.body.attachment_type,
-    });
-    try {
-      const { getIO } = require('../socket/emitters');
-      getIO()?.to(`support:${req.params.id}`).emit('supportMessage', msg);
-    } catch {
-      /* optional */
-    }
-    ok(res, 'Message sent', msg, 201);
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-const getSupportAiSessions = async (req, res) => {
-  try {
-    const helpCenter = require('../models/helpCenterModel');
-    ok(res, 'AI sessions retrieved', await helpCenter.listAiSessions({ limit: 50 }));
-  } catch (error) {
-    fail(res, 500, 'Server Error', error.message);
-  }
-};
-
 const getAdminInventory = async (req, res) => {
   try {
     const inventory = require('../models/inventoryModel');
     ok(res, 'Inventory health overview', await inventory.adminInventoryOverview());
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+/**
+ * GET /api/admin/support-center/analytics — cross-subsystem KPI strip for the unified
+ * Support Center dashboard (spans customer/restaurant tickets, partner tickets, live
+ * chats, SOS emergencies, pending refunds). Neither ticketModel nor deliverySupportModel
+ * alone can answer this, which is why it's a new endpoint rather than reusing one of
+ * their existing per-subsystem analytics functions.
+ */
+const getSupportCenterAnalytics = async (req, res) => {
+  try {
+    const supportTicketModel = require('../models/supportTicketModel');
+    ok(res, 'Support Center analytics retrieved', await supportTicketModel.getSupportAnalyticsUnified());
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+/**
+ * GET /api/admin/support-center/agent-performance — resolution time and ticket load
+ * per assigned agent, spanning both ticketModel and deliverySupportModel assignments.
+ */
+const getSupportAgentPerformance = async (req, res) => {
+  try {
+    const supportTicketModel = require('../models/supportTicketModel');
+    ok(res, 'Agent performance retrieved', await supportTicketModel.getAgentPerformance());
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
   }
@@ -1743,35 +1883,17 @@ const getDeliveryNotifications = async (req, res) => {
 };
 
 /**
- * GET /api/admin/delivery/support — list/search/filter delivery partner support tickets.
+ * GET /api/admin/customers/:id/support — a customer's real support ticket history
+ * (used by the CustomerProfileModal "Support" tab). Read-only, no reply/assign here —
+ * full ticket management happens in the unified Support Center.
  */
-const getDeliverySupportTickets = async (req, res) => {
+const getCustomerSupportTickets = async (req, res) => {
   try {
-    const support = require('../models/deliverySupportModel');
-    const data = await support.listAllTickets({
-      page: req.query.page,
-      limit: req.query.limit,
-      status: req.query.status || '',
-      search: req.query.search || '',
-    });
-    ok(res, 'Support tickets retrieved', data);
+    const ticketModel = require('../models/ticketModel');
+    const tickets = await ticketModel.listUserTickets(req.params.id);
+    ok(res, 'Customer support tickets retrieved', tickets);
   } catch (error) {
     fail(res, 500, 'Server Error', error.message);
-  }
-};
-
-/**
- * PATCH /api/admin/delivery/support/:id — reply to and/or change the status of a ticket.
- */
-const patchDeliverySupportTicket = async (req, res) => {
-  try {
-    const support = require('../models/deliverySupportModel');
-    const { admin_reply, status } = req.body || {};
-    const ticket = await support.replyToTicket(req.params.id, { adminReply: admin_reply, status });
-    if (!ticket) return fail(res, 404, 'Support ticket not found.');
-    ok(res, 'Support ticket updated', ticket);
-  } catch (error) {
-    fail(res, error.status || 500, error.message || 'Failed to update support ticket.');
   }
 };
 
@@ -1812,8 +1934,7 @@ module.exports = {
   patchDeliveryBankAccount,
   sendDeliveryNotification,
   getDeliveryNotifications,
-  getDeliverySupportTickets,
-  patchDeliverySupportTicket,
+  getCustomerSupportTickets,
   getOrders,
   getOrderStats,
   getOrder,
@@ -1865,6 +1986,12 @@ module.exports = {
   getPaymentReportHandler,
   getDeliveryReportHandler,
   getSettlements,
+  listSettlementBatches,
+  generateSettlementBatch,
+  approveSettlementBatch,
+  paySettlementBatch,
+  rejectSettlementBatch,
+  bulkApproveSettlementBatches,
   exportReport,
   getLoyaltyOverview,
   patchLoyaltyRule,
@@ -1872,13 +1999,7 @@ module.exports = {
   postLoyaltyAdjust,
   postLoyaltyExpire,
   postLoyaltyCampaign,
-  getSupportCenter,
-  getSupportTickets,
-  assignSupportTicket,
-  resolveSupportTicket,
-  getSupportLiveChats,
-  getSupportLiveChatDetail,
-  postSupportAgentMessage,
-  getSupportAiSessions,
   getAdminInventory,
+  getSupportCenterAnalytics,
+  getSupportAgentPerformance,
 };

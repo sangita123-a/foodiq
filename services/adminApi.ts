@@ -51,6 +51,13 @@ export type AdminDashboard = {
   }>;
   peakHours?: Array<{ hour: number; orders: number }>;
   openSupportTickets?: number;
+  refundAmountToday?: number;
+  activeCoupons?: number;
+  walletBalance?: number;
+  platformEarningsToday?: number;
+  restaurantEarningsToday?: number;
+  deliveryEarningsToday?: number;
+  profitToday?: number;
 };
 
 export function formatCurrency(n: number) {
@@ -420,6 +427,17 @@ export type AdminDeliveryAnalyticsData = {
     completed_orders: number;
     cancelled_orders: number;
     performance_score: number;
+  }>;
+  revenue_trend: Array<{
+    month: string;
+    month_start: string;
+    revenue: number;
+  }>;
+  zone_density: Array<{
+    zone: string;
+    orders: number;
+    pct: number;
+    intensity: string;
   }>;
 };
 

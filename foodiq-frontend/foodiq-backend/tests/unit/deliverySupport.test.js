@@ -2,7 +2,6 @@ const assert = require('assert');
 const support = require('../../models/deliverySupportModel');
 const supportController = require('../../controllers/deliverySupportController');
 const supportRoutes = require('../../routes/deliverySupportRoutes');
-const adminController = require('../../controllers/adminController');
 const validators = require('../../validators/deliverySupportValidator');
 const { supportLimiter } = require('../../middleware/rateLimiters');
 
@@ -56,9 +55,13 @@ async function runDeliverySupportTests() {
   await supportController.getMyTickets({ query: {} }, unauthedListRes);
   assert.strictEqual(unauthedListRes.statusCode, 401);
 
-  // ── Admin controller wiring ──────────────────────────────────────────────
-  assert(typeof adminController.getDeliverySupportTickets === 'function', 'adminController.getDeliverySupportTickets must be a function');
-  assert(typeof adminController.patchDeliverySupportTicket === 'function', 'adminController.patchDeliverySupportTicket must be a function');
+  // Note: the legacy `/api/admin/delivery/support*` admin wrapper
+  // (adminController.getDeliverySupportTickets/patchDeliverySupportTicket) was
+  // retired in the Support Center consolidation — admin reads/writes to this
+  // model now go exclusively through deliverySupportController's own admin
+  // exports (adminListTickets/adminGetTicket/adminAssignTicket/adminUpdateStatus/
+  // adminSendMessage), asserted below.
+  assert(typeof supportController.adminListTickets === 'function', 'deliverySupportController.adminListTickets must be a function');
 
   // ── Validators ────────────────────────────────────────────────────────────
   assert(typeof validators.validateCreateTicket === 'function');

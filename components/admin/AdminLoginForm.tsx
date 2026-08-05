@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import api from "@/services/api";
 import { persistAuthUser } from "@/lib/authUser";
 import { markAuthenticated } from "@/lib/authSession";
+import { Button } from "@/components/admin/ui";
 
 export default function AdminLoginForm() {
   const router = useRouter();

@@ -1,7 +1,7 @@
 const loyaltyModel = require('../models/loyaltyModel');
 const loyaltyEngine = require('../services/loyaltyEngine');
-const { listReferralStats, getOrCreateReferralCode } = require('../models/referralModel');
-const { getActiveCoupons } = require('../models/couponModel');
+const { listReferralStats, getOrCreateReferralCode } = require('../services/customerReferralService');
+const { getActiveCoupons, createCoupon } = require('../models/couponModel');
 
 const ok = (res, message, data) => res.json({ success: true, message, data });
 const fail = (res, status, message, error = {}) =>
@@ -42,7 +42,7 @@ const getOverview = async (req, res) => {
   try {
     const [wallet, referral, coupons, history] = await Promise.all([
       loyaltyModel.getWallet(req.user.id),
-      listReferralStats(req.user.id),
+      listReferralStats(req.user.id, req.user.full_name),
       getActiveCoupons(),
       loyaltyModel.getHistory(req.user.id, { limit: 20 }),
     ]);
@@ -94,15 +94,21 @@ const redeemPoints = async (req, res) => {
 
     const discountAmount = pts / loyaltyModel.POINTS_TO_RUPEE;
     const couponCode = `REWARD-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-    const { pool } = require('../config/db');
     const validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    const { rows } = await pool.query(
-      `INSERT INTO coupons (code, discount_amount, discount_type, min_order_amount, usage_limit, valid_until, is_active)
-       VALUES ($1, $2, 'fixed', 199, 1, $3, TRUE) RETURNING *`,
-      [couponCode, discountAmount, validUntil]
-    );
+    const coupon = await createCoupon({
+      code: couponCode,
+      discount_amount: discountAmount,
+      discount_type: 'fixed',
+      coupon_type: 'flat',
+      min_order_amount: 199,
+      usage_limit: 1,
+      one_time_per_user: true,
+      valid_until: validUntil,
+      is_active: true,
+      title: 'Loyalty Points Reward',
+    });
 
-    ok(res, 'Points redeemed successfully', { coupon: rows[0], discount_amount: discountAmount });
+    ok(res, 'Points redeemed successfully', { coupon, discount_amount: discountAmount });
   } catch (error) {
     fail(res, error.status || 500, error.message || 'Server Error');
   }

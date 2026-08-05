@@ -12,7 +12,9 @@ import {
   sendWeeklyMaintenanceReport,
   formatDate,
 } from "@/services/adminApi";
-import { Activity, RefreshCw, FileText, Mail } from "lucide-react";
+import { Activity, RefreshCw, FileText, Mail, Database, ShieldAlert, Bug, Star } from "lucide-react";
+import StatCard from "@/components/admin/dashboard/StatCard";
+import EmptyState from "@/components/admin/ui/EmptyState";
 
 export default function AdminMaintenancePage() {
   const [health, setHealth] = useState<Record<string, unknown> | null>(null);
@@ -72,22 +74,24 @@ export default function AdminMaintenancePage() {
   const restaurant = (analytics?.restaurant || {}) as Record<string, number>;
   const delivery = (analytics?.delivery || {}) as Record<string, number>;
 
+  const dbHealthy = String(health?.database || "").toLowerCase().includes("connect") || String(health?.database || "").toLowerCase() === "ok" || String(health?.database || "").toLowerCase() === "up";
+
   return (
-    <AdminShell>
+    <AdminShell title="Maintenance">
       <div className="space-y-6">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center justify-between gap-4 flex-wrap mb-2">
           <div>
-            <h1 className="text-2xl font-black text-foreground flex items-center gap-2">
+            <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight mb-1.5 flex items-center gap-2">
               <Activity className="w-6 h-6 text-primary" /> Maintenance
             </h1>
-            <p className="text-sm text-gray-text mt-1">
+            <p className="text-sm text-gray-text">
               Health snapshot, review analytics, and weekly/monthly maintenance reports.
             </p>
           </div>
           <button
             type="button"
             onClick={() => void load()}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm font-bold text-gray-text"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-white text-sm font-bold text-gray-text hover:bg-section transition-colors"
           >
             <RefreshCw className="w-4 h-4" /> Refresh
           </button>
@@ -98,27 +102,40 @@ export default function AdminMaintenancePage() {
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { label: "Database", value: String(health?.database || "—") },
-                { label: "Errors (7d)", value: String(health?.errors_7d ?? 0) },
-                { label: "Open bugs", value: String(health?.open_bugs ?? 0) },
-                { label: "Reviews (7d)", value: String(health?.reviews_7d ?? 0) },
-              ].map((s) => (
-                <div
-                  key={s.label}
-                  className="bg-white rounded-3xl border border-border p-5"
-                >
-                  <p className="text-xs font-bold text-gray-text uppercase tracking-wider">
-                    {s.label}
-                  </p>
-                  <p className="text-2xl font-black text-foreground mt-2">{s.value}</p>
-                </div>
-              ))}
+              <StatCard
+                label="Database"
+                value={dbHealthy ? 1 : 0}
+                icon={Database}
+                color={dbHealthy ? "text-emerald-600" : "text-red-500"}
+                bg={dbHealthy ? "bg-emerald-500/10" : "bg-red-500/10"}
+                format={() => String(health?.database || "—")}
+              />
+              <StatCard
+                label="Errors (7d)"
+                value={Number(health?.errors_7d ?? 0)}
+                icon={ShieldAlert}
+                color="text-red-500"
+                bg="bg-red-500/10"
+              />
+              <StatCard
+                label="Open Bugs"
+                value={Number(health?.open_bugs ?? 0)}
+                icon={Bug}
+                color="text-amber-600"
+                bg="bg-amber-500/10"
+              />
+              <StatCard
+                label="Reviews (7d)"
+                value={Number(health?.reviews_7d ?? 0)}
+                icon={Star}
+                color="text-yellow-600"
+                bg="bg-yellow-500/10"
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white rounded-3xl border border-border p-6">
-                <h2 className="font-black text-foreground mb-4">Restaurant reviews (30d)</h2>
+              <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
+                <h2 className="text-lg font-black text-foreground tracking-tight mb-4">Restaurant reviews (30d)</h2>
                 <p className="text-sm text-gray-text">
                   Total: <span className="font-bold text-foreground">{restaurant.total ?? 0}</span>
                 </p>
@@ -133,8 +150,8 @@ export default function AdminMaintenancePage() {
                   </span>
                 </p>
               </div>
-              <div className="bg-white rounded-3xl border border-border p-6">
-                <h2 className="font-black text-foreground mb-4">Delivery reviews (30d)</h2>
+              <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
+                <h2 className="text-lg font-black text-foreground tracking-tight mb-4">Delivery reviews (30d)</h2>
                 <p className="text-sm text-gray-text">
                   Total: <span className="font-bold text-foreground">{delivery.total ?? 0}</span>
                 </p>
@@ -149,7 +166,7 @@ export default function AdminMaintenancePage() {
                 type="button"
                 disabled={busy}
                 onClick={() => void generate("weekly")}
-                className="inline-flex items-center gap-2 bg-primary text-white font-bold px-4 py-2.5 rounded-xl disabled:opacity-60"
+                className="inline-flex items-center gap-2 bg-primary text-white font-bold px-4 py-2.5 rounded-xl shadow-[var(--shadow-button)] hover:bg-primary-hover disabled:opacity-60 transition-colors"
               >
                 <FileText className="w-4 h-4" /> Generate weekly
               </button>
@@ -157,7 +174,7 @@ export default function AdminMaintenancePage() {
                 type="button"
                 disabled={busy}
                 onClick={() => void generate("monthly")}
-                className="inline-flex items-center gap-2 bg-white border border-border text-foreground font-bold px-4 py-2.5 rounded-xl disabled:opacity-60"
+                className="inline-flex items-center gap-2 bg-white border border-border text-foreground font-bold px-4 py-2.5 rounded-xl hover:bg-section disabled:opacity-60 transition-colors"
               >
                 <FileText className="w-4 h-4" /> Generate monthly
               </button>
@@ -165,23 +182,23 @@ export default function AdminMaintenancePage() {
                 type="button"
                 disabled={busy}
                 onClick={() => void sendWeekly()}
-                className="inline-flex items-center gap-2 bg-white border border-border text-foreground font-bold px-4 py-2.5 rounded-xl disabled:opacity-60"
+                className="inline-flex items-center gap-2 bg-white border border-border text-foreground font-bold px-4 py-2.5 rounded-xl hover:bg-section disabled:opacity-60 transition-colors"
               >
                 <Mail className="w-4 h-4" /> Email weekly report
               </button>
             </div>
 
             {report && (
-              <div className="bg-white rounded-3xl border border-border p-6">
-                <h2 className="font-black text-foreground mb-3">Latest generated report</h2>
+              <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
+                <h2 className="text-lg font-black text-foreground tracking-tight mb-3">Latest generated report</h2>
                 <pre className="text-xs bg-section rounded-2xl p-4 overflow-x-auto text-foreground">
                   {JSON.stringify(report.payload || report, null, 2)}
                 </pre>
               </div>
             )}
 
-            <div className="bg-white rounded-3xl border border-border p-6">
-              <h2 className="font-black text-foreground mb-4">V2.0 adoption (30d)</h2>
+            <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
+              <h2 className="text-lg font-black text-foreground tracking-tight mb-4">V2.0 adoption (30d)</h2>
               {adoption ? (
                 <div className="grid grid-cols-2 gap-3 text-sm text-gray-text">
                   <p>
@@ -216,14 +233,14 @@ export default function AdminMaintenancePage() {
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-gray-text">No adoption data yet.</p>
+                <EmptyState icon={Activity} title="No adoption data yet" className="py-8" />
               )}
             </div>
 
-            <div className="bg-white rounded-3xl border border-border p-6">
-              <h2 className="font-black text-foreground mb-4">Report history</h2>
+            <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
+              <h2 className="text-lg font-black text-foreground tracking-tight mb-4">Report history</h2>
               {history.length === 0 ? (
-                <p className="text-sm text-gray-text">No reports stored yet.</p>
+                <EmptyState icon={FileText} title="No reports stored yet" description="Generate a weekly or monthly report to see it here." className="py-8" />
               ) : (
                 <ul className="space-y-3">
                   {history.map((h) => (

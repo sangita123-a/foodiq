@@ -5,6 +5,7 @@
 const { pool } = require('../config/db');
 const { sendEmail } = require('./emailService');
 const { templates } = require('./emailTemplates');
+const { logReportRun } = require('./analyticsExportService');
 
 const sendDailyPlatformReport = async () => {
   const stats = await pool.query(`
@@ -44,6 +45,12 @@ const sendDailyPlatformReport = async () => {
       })
     );
   }
+  logReportRun({
+    reportType: 'bi_daily',
+    format: 'email',
+    rowCount: admins.rows.length,
+    extra: { stats: s },
+  }).catch(() => {});
   return { recipients: admins.rows.length, stats: s, results };
 };
 

@@ -30,6 +30,13 @@ import {
   Star,
   Wifi,
   WifiOff,
+  Undo2,
+  Ticket,
+  Wallet,
+  Landmark,
+  UtensilsCrossed,
+  Truck,
+  PiggyBank,
 } from "lucide-react";
 
 export default function AdminDashboardPage() {
@@ -125,21 +132,76 @@ export default function AdminDashboardPage() {
         bg: "bg-yellow-500/10",
         format: (n: number) => `${n.toFixed(1)} ★`,
       },
+      {
+        label: "Today's Profit",
+        value: stats?.profitToday ?? 0,
+        icon: PiggyBank,
+        color: "text-emerald-600",
+        bg: "bg-emerald-500/10",
+        format: formatCurrency,
+      },
+      {
+        label: "Refund Amount Today",
+        value: stats?.refundAmountToday ?? 0,
+        icon: Undo2,
+        color: "text-rose-600",
+        bg: "bg-rose-500/10",
+        format: formatCurrency,
+      },
+      {
+        label: "Active Coupons",
+        value: stats?.activeCoupons ?? 0,
+        icon: Ticket,
+        color: "text-fuchsia-600",
+        bg: "bg-fuchsia-500/10",
+      },
+      {
+        label: "Wallet Balance",
+        value: stats?.walletBalance ?? 0,
+        icon: Wallet,
+        color: "text-indigo-600",
+        bg: "bg-indigo-500/10",
+        format: formatCurrency,
+      },
+      {
+        label: "Platform Earnings Today",
+        value: stats?.platformEarningsToday ?? 0,
+        icon: Landmark,
+        color: "text-primary",
+        bg: "bg-primary/10",
+        format: formatCurrency,
+      },
+      {
+        label: "Restaurant Earnings Today",
+        value: stats?.restaurantEarningsToday ?? 0,
+        icon: UtensilsCrossed,
+        color: "text-orange-600",
+        bg: "bg-orange-500/10",
+        format: formatCurrency,
+      },
+      {
+        label: "Delivery Earnings Today",
+        value: stats?.deliveryEarningsToday ?? 0,
+        icon: Truck,
+        color: "text-cyan-600",
+        bg: "bg-cyan-500/10",
+        format: formatCurrency,
+      },
     ],
     [stats]
   );
 
   return (
     <AdminShell title="Enterprise Dashboard">
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-7">
         <div>
-          <h1 className="text-3xl font-black text-foreground mb-1">Enterprise Overview</h1>
-          <p className="text-gray-text">
+          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight mb-1.5">Enterprise Overview</h1>
+          <p className="text-gray-text text-sm">
             Real-time platform analytics across revenue, orders, and operations.
           </p>
         </div>
         <div
-          className={`inline-flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full border ${
+          className={`inline-flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-full border ${
             connected && !offline
               ? "bg-emerald-50 text-emerald-700 border-emerald-200"
               : "bg-amber-50 text-amber-700 border-amber-200"
@@ -151,12 +213,12 @@ export default function AdminDashboardPage() {
       </div>
 
       {errorMsg && (
-        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5 text-sm text-red-700 font-medium">
           Unable to load admin dashboard. Sign in as an admin.
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 mb-7">
         {statCards.map((c) => (
           <StatCard
             key={c.label}

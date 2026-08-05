@@ -10,6 +10,7 @@ import {
   type ContactInfo,
 } from "@/lib/contactInfo";
 import { useContactInfo } from "@/hooks/useContactInfo";
+import Button from "@/components/admin/ui/Button";
 
 export default function AdminContactSettingsPage() {
   const { contact, isLoading } = useContactInfo();
@@ -62,7 +63,7 @@ export default function AdminContactSettingsPage() {
   if (isLoading || !form) {
     return (
       <AdminShell title="Contact Settings">
-        <p className="text-[#555555]">Loading contact settings…</p>
+        <p className="text-gray-text">Loading contact settings…</p>
       </AdminShell>
     );
   }
@@ -70,13 +71,16 @@ export default function AdminContactSettingsPage() {
   return (
     <AdminShell title="Contact Settings">
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-foreground">Contact Settings</h1>
-        <p className="text-[#555555]">
+        <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Contact Settings</h1>
+        <p className="text-gray-text">
           Manage the contact information shown on the Contact Us page. Changes appear instantly for all visitors.
         </p>
       </div>
 
-      <form onSubmit={save} className="max-w-4xl space-y-6 rounded-3xl border border-border bg-white p-6">
+      <form
+        onSubmit={save}
+        className="max-w-4xl space-y-6 rounded-2xl border border-border bg-white shadow-[var(--shadow-admin-soft)] p-5 sm:p-6"
+      >
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Input
             label="Phone Number"
@@ -109,16 +113,12 @@ export default function AdminContactSettingsPage() {
           />
         </section>
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-xl bg-primary px-8 py-3 font-black text-white disabled:opacity-60"
-        >
-          {saving ? "Saving…" : "Save Changes"}
-        </button>
+        <Button type="submit" variant="primary" size="md" disabled={saving} loading={saving} className="px-8 py-3">
+          Save Changes
+        </Button>
 
         {saved && (
-          <p className="text-sm font-bold text-green-600">
+          <p className="text-sm font-bold text-emerald-600">
             Contact information saved — changes are live on the Contact Us page.
           </p>
         )}
@@ -140,7 +140,7 @@ function Input({
   className?: string;
 }) {
   return (
-    <label className={`block text-sm font-bold text-[#555555] ${className}`}>
+    <label className={`block text-sm font-bold text-gray-text ${className}`}>
       {label}
       <input
         value={value}
@@ -166,7 +166,7 @@ function TextArea({
   className?: string;
 }) {
   return (
-    <label className={`block text-sm font-bold text-[#555555] ${className}`}>
+    <label className={`block text-sm font-bold text-gray-text ${className}`}>
       {label}
       <textarea
         value={value}

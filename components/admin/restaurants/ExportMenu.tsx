@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Download, ChevronDown } from "lucide-react";
 import { fetchRestaurantsExportBlob, downloadBlob, type AdminRestaurantFilters } from "@/services/adminApi";
 import { useToast } from "@/contexts/ToastContext";
+import { Button } from "@/components/admin/ui";
 
 export default function ExportMenu({ filters }: { filters: AdminRestaurantFilters }) {
   const [open, setOpen] = useState(false);
@@ -35,18 +36,12 @@ export default function ExportMenu({ filters }: { filters: AdminRestaurantFilter
 
   return (
     <div className="relative" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        disabled={busy}
-        className="flex items-center gap-2 bg-white border border-border rounded-xl px-4 py-2.5 text-sm font-bold text-foreground hover:bg-section disabled:opacity-50"
-      >
-        <Download className="w-4 h-4" />
+      <Button variant="secondary" onClick={() => setOpen((v) => !v)} disabled={busy} icon={<Download className="w-4 h-4" />}>
         {busy ? "Exporting…" : "Export"}
         <ChevronDown className="w-3.5 h-3.5" />
-      </button>
+      </Button>
       {open && (
-        <div className="absolute right-0 mt-2 w-56 bg-white border border-border rounded-2xl shadow-lg z-20 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-56 bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-lifted)] z-20 overflow-hidden">
           <button
             type="button"
             onClick={() => run("csv", "restaurants-export.csv")}

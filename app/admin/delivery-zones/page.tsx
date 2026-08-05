@@ -16,8 +16,6 @@ import {
   Circle,
   CheckCircle2,
   RefreshCw,
-  ChevronLeft,
-  ChevronRight,
   Map as MapIcon,
   X,
   AlertTriangle,
@@ -29,6 +27,8 @@ import {
 import AdminShell from "@/components/admin/AdminShell";
 import ZoneDrawMap from "@/components/admin/ZoneDrawMap";
 import ZoneHeatmapMap from "@/components/admin/ZoneHeatmapMap";
+import StatCard from "@/components/admin/dashboard/StatCard";
+import { Badge, EmptyState, Pagination } from "@/components/admin/ui";
 import { isClientAuthenticated } from "@/lib/authSession";
 import { getSocket } from "@/lib/socket";
 import { SOCKET_EVENTS } from "@/lib/socketEvents";
@@ -271,13 +271,13 @@ export default function AdminDeliveryZonesPage() {
     <AdminShell title="Geo-fencing & Delivery Zones">
       <div className="space-y-6">
         {/* Tab Bar */}
-        <div className="flex items-center gap-1 bg-card border border-border rounded-2xl p-1.5 w-fit">
+        <div className="flex items-center gap-1 bg-white border border-border rounded-2xl p-1.5 w-fit shadow-[var(--shadow-admin-soft)]">
           {TABS.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setTab(key)}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-colors ${
-                tab === key ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:text-foreground"
+              className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors ${
+                tab === key ? "bg-primary text-white shadow-[var(--shadow-button)]" : "text-gray-text hover:text-foreground hover:bg-section"
               }`}
             >
               <Icon className="w-4 h-4" /> {label}
@@ -319,10 +319,10 @@ export default function AdminDeliveryZonesPage() {
       {/* Create / Edit Zone Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-card border border-border rounded-2xl max-w-2xl w-full p-6 shadow-xl relative my-8">
+          <div className="bg-white border border-border rounded-2xl max-w-2xl w-full p-6 shadow-[var(--shadow-admin-lifted)] relative my-8">
             <button
               onClick={() => setShowCreateModal(false)}
-              className="absolute top-4 right-4 p-1 rounded-lg text-muted-foreground hover:text-foreground"
+              className="absolute top-4 right-4 p-1 rounded-lg text-gray-text hover:text-foreground"
             >
               <X className="w-5 h-5" />
             </button>
@@ -334,7 +334,7 @@ export default function AdminDeliveryZonesPage() {
             <form onSubmit={handleSubmitZone} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-muted-foreground mb-1">Zone Name</label>
+                  <label className="block text-xs font-bold text-gray-text mb-1">Zone Name</label>
                   <input
                     type="text"
                     required
@@ -345,7 +345,7 @@ export default function AdminDeliveryZonesPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-muted-foreground mb-1">Priority</label>
+                  <label className="block text-xs font-bold text-gray-text mb-1">Priority</label>
                   <input
                     type="number"
                     min={0}
@@ -359,7 +359,7 @@ export default function AdminDeliveryZonesPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-muted-foreground mb-1">City</label>
+                  <label className="block text-xs font-bold text-gray-text mb-1">City</label>
                   <input
                     type="text"
                     required
@@ -369,7 +369,7 @@ export default function AdminDeliveryZonesPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-muted-foreground mb-1">State</label>
+                  <label className="block text-xs font-bold text-gray-text mb-1">State</label>
                   <input
                     type="text"
                     value={formState}
@@ -380,7 +380,7 @@ export default function AdminDeliveryZonesPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-muted-foreground mb-1">Zone Geometry Type</label>
+                <label className="block text-xs font-bold text-gray-text mb-1">Zone Geometry Type</label>
                 <div className="flex items-center gap-4">
                   <label className="flex items-center gap-2 text-sm font-semibold text-foreground cursor-pointer">
                     <input
@@ -419,13 +419,13 @@ export default function AdminDeliveryZonesPage() {
                   type="button"
                   onClick={() => setFormPolygonPoints((prev) => prev.slice(0, -1))}
                   disabled={formPolygonPoints.length === 0}
-                  className="text-xs font-bold text-muted-foreground hover:text-foreground disabled:opacity-40"
+                  className="text-xs font-bold text-gray-text hover:text-foreground disabled:opacity-40"
                 >
                   Undo last point
                 </button>
               ) : (
                 <div>
-                  <label className="block text-xs font-bold text-muted-foreground mb-1">Radius (km)</label>
+                  <label className="block text-xs font-bold text-gray-text mb-1">Radius (km)</label>
                   <input
                     type="number"
                     step="any"
@@ -454,7 +454,7 @@ export default function AdminDeliveryZonesPage() {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground"
+                  className="px-4 py-2 text-sm font-semibold text-gray-text hover:text-foreground"
                 >
                   Cancel
                 </button>
@@ -474,16 +474,16 @@ export default function AdminDeliveryZonesPage() {
       {/* Manage Riders Modal (assign + remove) */}
       {manageRidersZone && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl max-w-md w-full p-6 shadow-xl relative max-h-[85vh] overflow-y-auto">
+          <div className="bg-white border border-border rounded-2xl max-w-md w-full p-6 shadow-[var(--shadow-admin-lifted)] relative max-h-[85vh] overflow-y-auto">
             <button
               onClick={() => setManageRidersZone(null)}
-              className="absolute top-4 right-4 p-1 rounded-lg text-muted-foreground hover:text-foreground"
+              className="absolute top-4 right-4 p-1 rounded-lg text-gray-text hover:text-foreground"
             >
               <X className="w-5 h-5" />
             </button>
 
             <h3 className="text-lg font-bold text-foreground mb-1">Riders — {manageRidersZone.name}</h3>
-            <p className="text-xs text-muted-foreground mb-4">Assign or remove delivery partners for this zone.</p>
+            <p className="text-xs text-gray-text mb-4">Assign or remove delivery partners for this zone.</p>
 
             {loadingZonePartners ? (
               <div className="space-y-2 mb-4">
@@ -497,11 +497,11 @@ export default function AdminDeliveryZonesPage() {
                   <div key={p.id} className="flex items-center justify-between p-3 rounded-xl border border-border">
                     <div>
                       <p className="text-sm font-bold text-foreground">{p.full_name || "Delivery Partner"}</p>
-                      <p className="text-[11px] text-muted-foreground">{p.email || p.phone_number || ""}</p>
+                      <p className="text-[11px] text-gray-text">{p.email || p.phone_number || ""}</p>
                     </div>
                     <button
                       onClick={() => handleRemovePartner(p.id)}
-                      className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-red-600"
+                      className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-gray-text hover:text-red-600"
                       title="Remove Rider"
                     >
                       <UserMinus className="w-4 h-4" />
@@ -510,13 +510,13 @@ export default function AdminDeliveryZonesPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground text-center py-4 border-2 border-dashed border-border rounded-xl mb-4">
+              <p className="text-xs text-gray-text text-center py-4 border-2 border-dashed border-border rounded-xl mb-4">
                 No riders assigned to this zone yet.
               </p>
             )}
 
             <form onSubmit={handleAssignPartner} className="space-y-3 pt-3 border-t border-border">
-              <label className="block text-xs font-bold text-muted-foreground">Assign a Rider</label>
+              <label className="block text-xs font-bold text-gray-text">Assign a Rider</label>
               <select
                 value={partnerIdInput}
                 onChange={(e) => setPartnerIdInput(e.target.value)}
@@ -545,10 +545,10 @@ export default function AdminDeliveryZonesPage() {
       {/* Zone Analytics Modal */}
       {analyticsZone && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl max-w-md w-full p-6 shadow-xl relative">
+          <div className="bg-white border border-border rounded-2xl max-w-md w-full p-6 shadow-[var(--shadow-admin-lifted)] relative">
             <button
               onClick={() => setAnalyticsZone(null)}
-              className="absolute top-4 right-4 p-1 rounded-lg text-muted-foreground hover:text-foreground"
+              className="absolute top-4 right-4 p-1 rounded-lg text-gray-text hover:text-foreground"
             >
               <X className="w-5 h-5" />
             </button>
@@ -563,15 +563,15 @@ export default function AdminDeliveryZonesPage() {
             ) : zoneAnalytics ? (
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="bg-section rounded-xl p-3">
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground">Assigned Riders</p>
+                  <p className="text-[10px] font-bold uppercase text-gray-text">Assigned Riders</p>
                   <p className="text-xl font-black text-foreground">{zoneAnalytics.assigned_riders_count}</p>
                 </div>
                 <div className="bg-section rounded-xl p-3">
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground">Active Now</p>
+                  <p className="text-[10px] font-bold uppercase text-gray-text">Active Now</p>
                   <p className="text-xl font-black text-emerald-600">{zoneAnalytics.active_riders_now}</p>
                 </div>
                 <div className="bg-section rounded-xl p-3 col-span-2">
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground mb-2">
+                  <p className="text-[10px] font-bold uppercase text-gray-text mb-2">
                     Violations (30 days)
                   </p>
                   {zoneAnalytics.violations_last_30_days.length > 0 ? (
@@ -583,12 +583,12 @@ export default function AdminDeliveryZonesPage() {
                       ))}
                     </div>
                   ) : (
-                    <span className="text-xs text-muted-foreground">No violations recorded.</span>
+                    <span className="text-xs text-gray-text">No violations recorded.</span>
                   )}
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground text-center py-4">Failed to load analytics.</p>
+              <p className="text-xs text-gray-text text-center py-4">Failed to load analytics.</p>
             )}
           </div>
         </div>
@@ -632,22 +632,22 @@ function ZonesTab({
 }) {
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 rounded-2xl border border-border">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-border shadow-[var(--shadow-admin-soft)]">
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-text" />
           <input
             type="text"
             placeholder="Search delivery zones..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm bg-section border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-foreground placeholder:text-muted-foreground"
+            className="w-full pl-9 pr-4 py-2 text-sm bg-section border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-foreground placeholder:text-gray-text"
           />
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={onRefresh}
-            className="p-2 hover:bg-section rounded-xl border border-border transition-colors text-muted-foreground hover:text-foreground"
+            className="p-2 hover:bg-section rounded-xl border border-border transition-colors text-gray-text hover:text-foreground"
             title="Refresh"
           >
             <RefreshCw className="w-4 h-4" />
@@ -655,39 +655,39 @@ function ZonesTab({
 
           <button
             onClick={onCreate}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-semibold text-sm hover:bg-primary/90 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary-hover transition-colors shadow-[var(--shadow-button)]"
           >
             <Plus className="w-4 h-4" /> Draw / Add Zone
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-card p-5 rounded-2xl border border-border">
-          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total Zones</span>
-          <h3 className="text-2xl font-bold text-foreground mt-1">{total}</h3>
-        </div>
-        <div className="bg-card p-5 rounded-2xl border border-border">
-          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Active Polygons</span>
-          <h3 className="text-2xl font-bold text-emerald-600 mt-1">
-            {zones.filter((z) => z.zone_type === "polygon" && z.is_active).length}
-          </h3>
-        </div>
-        <div className="bg-card p-5 rounded-2xl border border-border">
-          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Active Circles</span>
-          <h3 className="text-2xl font-bold text-blue-600 mt-1">
-            {zones.filter((z) => z.zone_type === "circle" && z.is_active).length}
-          </h3>
-        </div>
-        <div className="bg-card p-5 rounded-2xl border border-border">
-          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Assigned Riders</span>
-          <h3 className="text-2xl font-bold text-purple-600 mt-1">
-            {zones.reduce((acc, z) => acc + (z.assigned_partners_count || 0), 0)}
-          </h3>
-        </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Total Zones" value={total} icon={MapIcon} color="text-primary" bg="bg-primary/10" />
+        <StatCard
+          label="Active Polygons"
+          value={zones.filter((z) => z.zone_type === "polygon" && z.is_active).length}
+          icon={Layers}
+          color="text-emerald-600"
+          bg="bg-emerald-500/10"
+        />
+        <StatCard
+          label="Active Circles"
+          value={zones.filter((z) => z.zone_type === "circle" && z.is_active).length}
+          icon={Circle}
+          color="text-blue-600"
+          bg="bg-blue-500/10"
+        />
+        <StatCard
+          label="Assigned Riders"
+          value={zones.reduce((acc, z) => acc + (z.assigned_partners_count || 0), 0)}
+          icon={Users}
+          color="text-violet-600"
+          bg="bg-violet-500/10"
+        />
       </div>
 
-      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white border border-border rounded-2xl overflow-hidden shadow-[var(--shadow-admin-soft)]">
         {loading ? (
           <div className="p-4 space-y-3">
             {[1, 2, 3, 4].map((i) => (
@@ -706,13 +706,15 @@ function ZonesTab({
             </button>
           </div>
         ) : zones.length === 0 ? (
-          <div className="py-12 text-center text-muted-foreground text-sm">
-            No delivery zones found. Click &quot;Draw / Add Zone&quot; to define a polygon or circle region.
-          </div>
+          <EmptyState
+            icon={MapIcon}
+            title="No delivery zones found"
+            description={'Click "Draw / Add Zone" to define a polygon or circle region.'}
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-section border-b border-border text-xs uppercase text-muted-foreground font-bold">
+              <thead className="bg-section border-b border-border text-xs uppercase text-gray-text font-bold">
                 <tr>
                   <th className="px-6 py-3.5">Zone Name</th>
                   <th className="px-6 py-3.5">City / Region</th>
@@ -732,64 +734,62 @@ function ZonesTab({
                         <span>{zone.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-muted-foreground">
+                    <td className="px-6 py-4 text-gray-text">
                       {zone.city}
                       {zone.state ? `, ${zone.state}` : ""}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md bg-muted text-muted-foreground uppercase">
+                      <Badge tone="neutral" className="uppercase">
                         {zone.zone_type === "polygon" ? (
                           <Layers className="w-3 h-3 text-primary" />
                         ) : (
                           <Circle className="w-3 h-3 text-blue-500" />
                         )}
                         {zone.zone_type}
-                      </span>
+                      </Badge>
                     </td>
-                    <td className="px-6 py-4 text-muted-foreground font-semibold">{zone.priority}</td>
+                    <td className="px-6 py-4 text-gray-text font-semibold">{zone.priority}</td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-600">
+                      <Badge tone="violet">
                         <Users className="w-3 h-3" />
                         {zone.assigned_partners_count || 0}
-                      </span>
+                      </Badge>
                     </td>
                     <td className="px-6 py-4">
                       {zone.is_active ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600">
+                        <Badge tone="success">
                           <CheckCircle2 className="w-3 h-3" /> Active
-                        </span>
+                        </Badge>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
-                          Inactive
-                        </span>
+                        <Badge tone="neutral">Inactive</Badge>
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => onViewAnalytics(zone)}
-                          className="p-1.5 hover:bg-section rounded-lg transition-colors text-muted-foreground hover:text-blue-600"
+                          className="p-1.5 hover:bg-section rounded-lg transition-colors text-gray-text hover:text-blue-600"
                           title="View Analytics"
                         >
                           <BarChart3 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => onManageRiders(zone)}
-                          className="p-1.5 hover:bg-section rounded-lg transition-colors text-muted-foreground hover:text-purple-600"
+                          className="p-1.5 hover:bg-section rounded-lg transition-colors text-gray-text hover:text-purple-600"
                           title="Manage Riders"
                         >
                           <UserPlus className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => onEdit(zone)}
-                          className="p-1.5 hover:bg-section rounded-lg transition-colors text-muted-foreground hover:text-primary"
+                          className="p-1.5 hover:bg-section rounded-lg transition-colors text-gray-text hover:text-primary"
                           title="Edit Zone"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => onDelete(zone.id)}
-                          className="p-1.5 hover:bg-section rounded-lg transition-colors text-muted-foreground hover:text-red-600"
+                          className="p-1.5 hover:bg-section rounded-lg transition-colors text-gray-text hover:text-red-600"
                           title="Delete Zone"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -804,30 +804,13 @@ function ZonesTab({
         )}
 
         {total > limit && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-border">
-            <span className="text-xs text-muted-foreground">
-              Showing {(page - 1) * limit + 1} to {Math.min(page * limit, total)} of {total} zones
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                disabled={page === 1}
-                onClick={() => onPageChange((p) => p - 1)}
-                className="p-1.5 border border-border rounded-lg text-muted-foreground hover:text-foreground disabled:opacity-50"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <span className="text-xs font-semibold px-3 py-1 bg-section rounded-lg text-foreground">
-                Page {page} of {Math.ceil(total / limit)}
-              </span>
-              <button
-                disabled={page * limit >= total}
-                onClick={() => onPageChange((p) => p + 1)}
-                className="p-1.5 border border-border rounded-lg text-muted-foreground hover:text-foreground disabled:opacity-50"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+          <Pagination
+            page={page}
+            totalPages={Math.ceil(total / limit)}
+            total={total}
+            limit={limit}
+            onPageChange={(p) => onPageChange(() => p)}
+          />
         )}
       </div>
     </div>
@@ -851,9 +834,9 @@ function ViolationsTab() {
   };
 
   return (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+    <div className="bg-white border border-border rounded-2xl overflow-hidden shadow-[var(--shadow-admin-soft)]">
       <div className="p-4 flex items-center justify-between border-b border-border">
-        <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
+        <h2 className="text-sm font-black text-foreground flex items-center gap-2">
           <ShieldAlert className="w-4 h-4 text-red-600" /> Zone Violations
         </h2>
         <select
@@ -885,11 +868,11 @@ function ViolationsTab() {
           </button>
         </div>
       ) : !data || data.violations.length === 0 ? (
-        <p className="py-10 text-center text-sm text-muted-foreground">No zone violations recorded.</p>
+        <EmptyState icon={ShieldAlert} title="No zone violations recorded" />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-section border-b border-border text-xs uppercase text-muted-foreground font-bold">
+            <thead className="bg-section border-b border-border text-xs uppercase text-gray-text font-bold">
               <tr>
                 <th className="px-6 py-3">Rider</th>
                 <th className="px-6 py-3">Zone</th>
@@ -904,22 +887,16 @@ function ViolationsTab() {
               {data.violations.map((v) => (
                 <tr key={v.id} className="hover:bg-section/50">
                   <td className="px-6 py-3 font-semibold text-foreground">{v.partner_name || v.partner_id.slice(0, 8)}</td>
-                  <td className="px-6 py-3 text-muted-foreground">{v.zone_name || "—"}</td>
+                  <td className="px-6 py-3 text-gray-text">{v.zone_name || "—"}</td>
                   <td className="px-6 py-3">
-                    <span className="text-xs font-bold uppercase px-2 py-0.5 rounded bg-red-500/10 text-red-600">
-                      {v.violation_type}
-                    </span>
+                    <Badge tone="error" className="uppercase">{v.violation_type}</Badge>
                   </td>
-                  <td className="px-6 py-3 text-muted-foreground">
+                  <td className="px-6 py-3 text-gray-text">
                     {v.distance_meters != null ? `${v.distance_meters}m` : "—"}
                   </td>
-                  <td className="px-6 py-3 text-muted-foreground">{new Date(v.created_at).toLocaleString()}</td>
+                  <td className="px-6 py-3 text-gray-text">{new Date(v.created_at).toLocaleString()}</td>
                   <td className="px-6 py-3">
-                    {v.resolved ? (
-                      <span className="text-xs font-bold text-emerald-600">Resolved</span>
-                    ) : (
-                      <span className="text-xs font-bold text-amber-600">Open</span>
-                    )}
+                    {v.resolved ? <Badge status="resolved">Resolved</Badge> : <Badge status="open">Open</Badge>}
                   </td>
                   <td className="px-6 py-3 text-right">
                     {!v.resolved && (
@@ -949,14 +926,14 @@ function LiveRidersTab() {
   );
 
   return (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+    <div className="bg-white border border-border rounded-2xl overflow-hidden shadow-[var(--shadow-admin-soft)]">
       <div className="p-4 flex items-center justify-between border-b border-border">
-        <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
+        <h2 className="text-sm font-black text-foreground flex items-center gap-2">
           <Radio className="w-4 h-4 text-emerald-600" /> Live Riders
         </h2>
         <button
           onClick={() => mutateRiders()}
-          className="p-1.5 hover:bg-section rounded-lg text-muted-foreground hover:text-foreground"
+          className="p-1.5 hover:bg-section rounded-lg text-gray-text hover:text-foreground"
           title="Refresh"
         >
           <RefreshCw className="w-4 h-4" />
@@ -981,11 +958,11 @@ function LiveRidersTab() {
           </button>
         </div>
       ) : !data || data.riders.length === 0 ? (
-        <p className="py-10 text-center text-sm text-muted-foreground">No riders are currently online.</p>
+        <EmptyState icon={Radio} title="No riders are currently online" />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-section border-b border-border text-xs uppercase text-muted-foreground font-bold">
+            <thead className="bg-section border-b border-border text-xs uppercase text-gray-text font-bold">
               <tr>
                 <th className="px-6 py-3">Rider</th>
                 <th className="px-6 py-3">Location</th>
@@ -997,12 +974,12 @@ function LiveRidersTab() {
               {data.riders.map((r) => (
                 <tr key={r.partner_id} className="hover:bg-section/50">
                   <td className="px-6 py-3 font-semibold text-foreground">{r.full_name}</td>
-                  <td className="px-6 py-3 text-muted-foreground font-mono text-xs">
+                  <td className="px-6 py-3 text-gray-text font-mono text-xs">
                     {r.lat.toFixed(4)}, {r.lng.toFixed(4)}
                   </td>
                   <td className="px-6 py-3">
                     {r.in_zone === null ? (
-                      <span className="text-xs font-bold text-muted-foreground">Unassigned</span>
+                      <span className="text-xs font-bold text-gray-text">Unassigned</span>
                     ) : r.in_zone ? (
                       <span className="text-xs font-bold text-emerald-600">
                         Inside &mdash; {r.current_zone?.name}
@@ -1011,7 +988,7 @@ function LiveRidersTab() {
                       <span className="text-xs font-bold text-red-600">Outside Zone</span>
                     )}
                   </td>
-                  <td className="px-6 py-3 text-muted-foreground text-xs">
+                  <td className="px-6 py-3 text-gray-text text-xs">
                     {new Date(r.last_updated).toLocaleTimeString()}
                   </td>
                 </tr>
@@ -1032,9 +1009,9 @@ function HeatmapTab() {
   );
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-4 shadow-sm space-y-4">
+    <div className="bg-white border border-border rounded-2xl p-4 shadow-[var(--shadow-admin-soft)] space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
+        <h2 className="text-sm font-black text-foreground flex items-center gap-2">
           <Flame className="w-4 h-4 text-orange-600" /> Activity &amp; Violation Heatmap
         </h2>
         <div className="flex items-center gap-2">
@@ -1050,7 +1027,7 @@ function HeatmapTab() {
           </select>
           <button
             onClick={() => mutateHeatmap()}
-            className="p-1.5 hover:bg-section rounded-lg text-muted-foreground hover:text-foreground"
+            className="p-1.5 hover:bg-section rounded-lg text-gray-text hover:text-foreground"
             title="Refresh"
           >
             <RefreshCw className="w-4 h-4" />

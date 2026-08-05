@@ -14,6 +14,7 @@ import {
   MediaAsset,
 } from "@/services/mediaApi";
 import { Search, Trash2, Check, X, RefreshCw, Images } from "lucide-react";
+import { EmptyState } from "@/components/admin/ui";
 
 export default function AdminMediaPage() {
   const { showToast } = useToast();
@@ -72,10 +73,10 @@ export default function AdminMediaPage() {
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black text-foreground flex items-center gap-2">
+            <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight mb-1.5 flex items-center gap-2">
               <Images className="w-6 h-6 text-primary" /> Media Library
             </h1>
-            <p className="text-sm text-gray-text mt-1">
+            <p className="text-sm text-gray-text">
               Provider: <span className="font-bold text-foreground">{info?.provider || "…"}</span>
             </p>
           </div>
@@ -83,7 +84,7 @@ export default function AdminMediaPage() {
             <button
               type="button"
               onClick={load}
-              className="px-4 py-2 rounded-xl border border-border font-bold text-sm flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl border border-border bg-white font-bold text-sm flex items-center gap-2 hover:bg-section transition-colors"
             >
               <RefreshCw className="w-4 h-4" /> Refresh
             </button>
@@ -100,7 +101,7 @@ export default function AdminMediaPage() {
                     showToast(err?.response?.data?.message || "Bulk delete failed", "error");
                   }
                 }}
-                className="px-4 py-2 rounded-xl bg-red-500 text-white font-bold text-sm flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl bg-red-600 text-white font-bold text-sm flex items-center gap-2 hover:bg-red-700 transition-colors"
               >
                 <Trash2 className="w-4 h-4" /> Delete ({selected.size})
               </button>
@@ -146,7 +147,7 @@ export default function AdminMediaPage() {
           <button
             type="button"
             onClick={load}
-            className="px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-sm"
+            className="px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-hover shadow-[var(--shadow-button)] transition-colors"
           >
             Filter
           </button>
@@ -155,7 +156,7 @@ export default function AdminMediaPage() {
         {loading ? (
           <div className="h-48 animate-pulse bg-section rounded-2xl" />
         ) : items.length === 0 ? (
-          <div className="text-center py-16 text-gray-text">No media found.</div>
+          <EmptyState icon={Images} title="No media found" description="Try adjusting your search or filters." className="py-16" />
         ) : (
           <>
             <label className="flex items-center gap-2 text-sm font-bold text-gray-text">
@@ -173,7 +174,7 @@ export default function AdminMediaPage() {
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className={`rounded-2xl border overflow-hidden bg-white ${
+                  className={`rounded-2xl border overflow-hidden bg-white shadow-[var(--shadow-admin-soft)] hover:shadow-[var(--shadow-admin-lifted)] transition-shadow ${
                     selected.has(item.id) ? "border-primary ring-2 ring-primary/30" : "border-border"
                   }`}
                 >
@@ -261,7 +262,7 @@ export default function AdminMediaPage() {
             onClick={() => setPreview(null)}
           >
             <div
-              className="bg-white rounded-2xl max-w-2xl w-full overflow-hidden"
+              className="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-[var(--shadow-admin-lifted)]"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="aspect-video bg-section relative">
@@ -297,7 +298,7 @@ export default function AdminMediaPage() {
                 </p>
                 <button
                   type="button"
-                  className="mt-3 px-4 py-2 rounded-xl border font-bold text-sm"
+                  className="mt-3 px-4 py-2.5 rounded-xl border border-border bg-white font-bold text-sm hover:bg-section transition-colors"
                   onClick={() => setPreview(null)}
                 >
                   Close

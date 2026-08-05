@@ -19,6 +19,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { fetchAdminRoutes, fetchAdminRouteAnalytics } from "@/services/routeApi";
+import AdminShell from "@/components/admin/AdminShell";
 
 export default function AdminRoutesDashboardPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -54,7 +55,8 @@ export default function AdminRoutesDashboardPage() {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
+    <AdminShell title="Route Optimization">
+    <div className="space-y-8">
       {/* Top Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-6">
         <div>
@@ -188,28 +190,28 @@ export default function AdminRoutesDashboardPage() {
         </div>
 
         {/* Operational Highlights Card */}
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-2xl p-6 shadow-sm space-y-4 flex flex-col justify-between">
+        <div className="bg-gradient-to-br from-primary to-rose-700 text-white rounded-2xl p-6 shadow-[var(--shadow-admin-glow)] space-y-4 flex flex-col justify-between">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-black text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20 mb-3">
+            <div className="inline-flex items-center gap-1.5 text-xs font-black text-white bg-white/15 px-3 py-1 rounded-full border border-white/20 mb-3">
               <ShieldAlert className="w-3.5 h-3.5" /> On-Time SLA Status
             </div>
             <h3 className="text-xl font-black">97.8% On-Time Deliveries</h3>
-            <p className="text-xs text-gray-300 mt-2 leading-relaxed">
+            <p className="text-xs text-white/80 mt-2 leading-relaxed">
               AI routing algorithms have reduced average customer delay to under 2 minutes across peak hours.
             </p>
           </div>
 
-          <div className="space-y-3 pt-4 border-t border-gray-700/60">
+          <div className="space-y-3 pt-4 border-t border-white/20">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-300">Delayed Deliveries</span>
-              <span className="font-black text-amber-400">{summary?.delayedDeliveriesCount ?? 1} Order</span>
+              <span className="text-white/80">Delayed Deliveries</span>
+              <span className="font-black text-white">{summary?.delayedDeliveriesCount ?? 1} Order</span>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-300">Idle Rider Ratio</span>
-              <span className="font-black text-green-400">4.2% (Low)</span>
+              <span className="text-white/80">Idle Rider Ratio</span>
+              <span className="font-black text-white">4.2% (Low)</span>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-300">Avg Rider Speed</span>
+              <span className="text-white/80">Avg Rider Speed</span>
               <span className="font-black text-white">26 km/h</span>
             </div>
           </div>
@@ -314,5 +316,6 @@ export default function AdminRoutesDashboardPage() {
         </div>
       </div>
     </div>
+    </AdminShell>
   );
 }

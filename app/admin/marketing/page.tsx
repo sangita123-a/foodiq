@@ -5,6 +5,8 @@ import { mutate } from "swr";
 import AdminShell from "@/components/admin/AdminShell";
 import { useAdminList } from "@/hooks/useAdminData";
 import { adminPost, formatDate } from "@/services/adminApi";
+import { Badge, EmptyState } from "@/components/admin/ui";
+import { Megaphone, PartyPopper } from "lucide-react";
 
 type Campaign = {
   id: string;
@@ -114,8 +116,8 @@ export default function AdminMarketingPage() {
   return (
     <AdminShell title="Marketing">
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-foreground">Marketing Hub</h1>
-        <p className="text-gray-text">Push notifications, email/SMS campaigns, banners, and festival offers.</p>
+        <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight mb-1.5">Marketing Hub</h1>
+        <p className="text-gray-text text-sm">Push notifications, email/SMS campaigns, banners, and festival offers.</p>
       </div>
 
       {msg && (
@@ -146,9 +148,9 @@ export default function AdminMarketingPage() {
               e.preventDefault();
               createCampaign(tab === "banner" ? "banner" : tab);
             }}
-            className="bg-white rounded-3xl border border-border p-6 space-y-4"
+            className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6 space-y-4"
           >
-            <h2 className="text-lg font-black text-foreground">Create {tabs.find((t) => t.id === tab)?.label}</h2>
+            <h2 className="text-lg font-black text-foreground tracking-tight">Create {tabs.find((t) => t.id === tab)?.label}</h2>
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -191,8 +193,8 @@ export default function AdminMarketingPage() {
             </button>
           </form>
 
-          <div className="bg-white rounded-3xl border border-border p-6">
-            <h2 className="text-lg font-black text-foreground mb-4">Recent Campaigns</h2>
+          <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
+            <h2 className="text-lg font-black text-foreground tracking-tight mb-4">Recent Campaigns</h2>
             {isLoading && <p className="text-sm text-gray-text">Loading…</p>}
             <div className="space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
               {campaigns
@@ -205,9 +207,7 @@ export default function AdminMarketingPage() {
                         <p className="text-xs text-gray-text mt-1">{c.message.slice(0, 80)}…</p>
                         <p className="text-xs text-[#9CA3AF] mt-1">{formatDate(c.created_at)}</p>
                       </div>
-                      <span className="text-xs font-bold uppercase px-2 py-1 rounded bg-section text-gray-text">
-                        {c.status}
-                      </span>
+                      <Badge status={c.status}>{c.status}</Badge>
                     </div>
                     {c.status === "draft" && (
                       <button
@@ -220,13 +220,17 @@ export default function AdminMarketingPage() {
                     )}
                   </div>
                 ))}
+              {!isLoading &&
+                campaigns.filter((c) => (tab === "banner" ? c.channel === "banner" : c.channel === tab)).length === 0 && (
+                  <EmptyState icon={Megaphone} title="No campaigns yet" description="Campaigns you create will show up here." className="py-10" />
+                )}
             </div>
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          <form onSubmit={saveSeasonal} className="bg-white rounded-3xl border border-border p-6 space-y-4">
-            <h2 className="text-lg font-black text-foreground">Festival / Flash Offer</h2>
+          <form onSubmit={saveSeasonal} className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6 space-y-4">
+            <h2 className="text-lg font-black text-foreground tracking-tight">Festival / Flash Offer</h2>
             {(["slug", "title", "subtitle", "banner_url", "offer_code"] as const).map((key) => (
               <input
                 key={key}
@@ -258,8 +262,8 @@ export default function AdminMarketingPage() {
             </button>
           </form>
 
-          <div className="bg-white rounded-3xl border border-border p-6">
-            <h2 className="text-lg font-black text-foreground mb-4">Active Festival Offers</h2>
+          <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
+            <h2 className="text-lg font-black text-foreground tracking-tight mb-4">Active Festival Offers</h2>
             <div className="space-y-3">
               {seasonalList.map((s) => (
                 <div key={s.id} className="border border-border rounded-xl p-4">
@@ -275,6 +279,9 @@ export default function AdminMarketingPage() {
                   )}
                 </div>
               ))}
+              {seasonalList.length === 0 && (
+                <EmptyState icon={PartyPopper} title="No festival offers yet" description="Save an offer to see it listed here." className="py-10" />
+              )}
             </div>
           </div>
         </div>

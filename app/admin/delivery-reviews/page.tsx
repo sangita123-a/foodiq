@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { mutate } from "swr";
-import { Star, Trash2 } from "lucide-react";
+import { Star, Trash2, MessageSquareOff } from "lucide-react";
 import AdminShell from "@/components/admin/AdminShell";
+import { EmptyState, Pagination } from "@/components/admin/ui";
 import { useAdminList } from "@/hooks/useAdminData";
 import {
   adminDelete,
@@ -100,8 +101,8 @@ export default function AdminDeliveryReviewsPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-border rounded-2xl p-6 mb-6">
-        <p className="text-xs font-bold text-gray-text uppercase tracking-wider mb-4">
+      <div className="bg-white border border-border rounded-2xl p-5 sm:p-6 mb-6 shadow-[var(--shadow-admin-soft)]">
+        <p className="text-[11px] font-bold text-[#9CA3AF] uppercase tracking-widest mb-4">
           Rating trend — last 30 days
         </p>
         {trends.length === 0 ? (
@@ -122,7 +123,7 @@ export default function AdminDeliveryReviewsPage() {
 
       {isLoading && <p className="text-sm text-gray-text mb-4">Loading…</p>}
 
-      <div className="bg-white border border-border rounded-2xl overflow-hidden">
+      <div className="bg-white border border-border rounded-2xl overflow-hidden shadow-[var(--shadow-admin-soft)]">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-section text-left">
@@ -137,7 +138,7 @@ export default function AdminDeliveryReviewsPage() {
             </thead>
             <tbody className="divide-y divide-border">
               {reviews.map((r) => (
-                <tr key={r.id}>
+                <tr key={r.id} className="hover:bg-section/50 transition-colors">
                   <td className="px-5 py-4">
                     <p className="font-bold text-foreground">{r.customer_name || "Customer"}</p>
                     <p className="text-xs text-gray-text">{r.customer_email}</p>
@@ -161,7 +162,7 @@ export default function AdminDeliveryReviewsPage() {
                       type="button"
                       disabled={deletingId === r.id}
                       onClick={() => handleDelete(r)}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       Delete
@@ -173,35 +174,22 @@ export default function AdminDeliveryReviewsPage() {
           </table>
         </div>
         {!reviews.length && !isLoading && (
-          <p className="text-center text-[#9CA3AF] py-16">No reviews found.</p>
+          <EmptyState
+            icon={MessageSquareOff}
+            title="No reviews found"
+            description="Customer ratings and reviews for delivery partners will appear here."
+          />
+        )}
+        {pagination && pagination.total_pages > 1 && (
+          <Pagination
+            page={page}
+            totalPages={pagination.total_pages}
+            total={pagination.total}
+            limit={20}
+            onPageChange={(p) => setPage(p)}
+          />
         )}
       </div>
-
-      {pagination && pagination.total_pages > 1 && (
-        <div className="flex items-center justify-between mt-4">
-          <p className="text-xs text-gray-text">
-            Page {pagination.page} of {pagination.total_pages} · {pagination.total} reviews
-          </p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="text-xs font-bold border border-border px-3 py-1.5 rounded-lg disabled:opacity-40"
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              disabled={page >= pagination.total_pages}
-              onClick={() => setPage((p) => Math.min(pagination.total_pages, p + 1))}
-              className="text-xs font-bold border border-border px-3 py-1.5 rounded-lg disabled:opacity-40"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
     </AdminShell>
   );
 }

@@ -7,6 +7,8 @@ import { useAdminList } from "@/hooks/useAdminData";
 import { adminDelete, formatCurrency } from "@/services/adminApi";
 import SafeImage from "@/components/ui/SafeImage";
 import { FOOD_FALLBACK } from "@/lib/images";
+import { EmptyState } from "@/components/admin/ui";
+import { UtensilsCrossed } from "lucide-react";
 
 type MenuItem = {
   id: string;
@@ -48,8 +50,8 @@ export default function AdminMenuPage() {
     <AdminShell title="Menu Management">
       <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-foreground">Platform Menu</h1>
-          <p className="text-gray-text">Review dishes and manage cuisine categories.</p>
+          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight mb-1.5">Platform Menu</h1>
+          <p className="text-gray-text text-sm">Review dishes and manage cuisine categories.</p>
         </div>
         <input
           value={search}
@@ -60,7 +62,7 @@ export default function AdminMenuPage() {
       </div>
 
       <div className="mb-8">
-        <h2 className="text-lg font-bold text-foreground mb-3">Categories</h2>
+        <h2 className="text-lg font-black text-foreground tracking-tight mb-3">Categories</h2>
         <div className="flex flex-wrap gap-2">
           {(categories || []).map((c) => (
             <span key={c.id} className="bg-white border border-border rounded-full px-4 py-2 text-sm font-bold text-gray-text">
@@ -74,7 +76,10 @@ export default function AdminMenuPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {items.map((item) => (
-          <div key={item.id} className="bg-white rounded-2xl border border-border overflow-hidden flex gap-3 p-3">
+          <div
+            key={item.id}
+            className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] hover:shadow-[var(--shadow-admin-lifted)] transition-shadow overflow-hidden flex gap-3 p-3"
+          >
             <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
               <SafeImage src={item.image_url || FOOD_FALLBACK} fallback={FOOD_FALLBACK} alt={item.name} className="w-full h-full object-cover" />
             </div>
@@ -84,13 +89,15 @@ export default function AdminMenuPage() {
               <p className="text-xs text-[#9CA3AF]">{item.category_name || "Uncategorized"} · {item.is_vegetarian ? "Veg" : "Non-Veg"}</p>
               <div className="flex items-center justify-between mt-2">
                 <span className="font-black text-sm">{formatCurrency(item.price)}</span>
-                <button type="button" onClick={() => remove(item.id)} className="text-xs font-bold text-red-500">Remove</button>
+                <button type="button" onClick={() => remove(item.id)} className="text-xs font-bold text-red-500 hover:text-red-600">Remove</button>
               </div>
             </div>
           </div>
         ))}
       </div>
-      {!items.length && !isLoading && <p className="text-center text-[#9CA3AF] py-16">No dishes found.</p>}
+      {!items.length && !isLoading && (
+        <EmptyState icon={UtensilsCrossed} title="No dishes found" description="Try a different search term." className="py-16" />
+      )}
     </AdminShell>
   );
 }

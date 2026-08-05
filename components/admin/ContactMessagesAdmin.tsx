@@ -4,6 +4,9 @@ import { useState } from "react";
 import { adminDelete, adminPut } from "@/services/adminApi";
 import { formatDate } from "@/services/adminApi";
 import { getAccessToken } from "@/lib/accessToken";
+import Button from "@/components/admin/ui/Button";
+import EmptyState from "@/components/admin/ui/EmptyState";
+import { Mail, Download } from "lucide-react";
 
 type Row = Record<string, unknown>;
 
@@ -53,53 +56,49 @@ export default function ContactMessagesAdmin({
   };
 
   if (!rows.length) {
-    return <p className="p-6 text-sm text-[#555555]">No contact messages yet.</p>;
+    return <EmptyState icon={Mail} title="No contact messages yet" description="Messages submitted through the Contact Us page will appear here." />;
   }
 
   return (
     <div>
       <div className="flex justify-end border-b border-border p-4">
-        <button
-          type="button"
-          onClick={exportCsv}
-          className="rounded-xl border border-border px-4 py-2 text-xs font-bold text-[#555555] hover:text-foreground"
-        >
+        <Button variant="secondary" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={exportCsv}>
           Export CSV
-        </button>
+        </Button>
       </div>
       <div className="divide-y divide-[#E5E7EB]">
         {rows.map((row) => {
           const id = String(row.id);
           const isOpenReply = replyId === id;
           return (
-            <div key={id} className="p-5">
+            <div key={id} className="p-5 hover:bg-section/50 transition-colors">
               <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
                 <div className="min-w-0 flex-1">
                   <p className="font-bold text-foreground">
                     {String(row.name)} · {String(row.email)}
                   </p>
-                  <p className="mt-1 text-sm text-[#555555]">
+                  <p className="mt-1 text-sm text-gray-text">
                     {String(row.subject)} · {String(row.reason || "General")}
                   </p>
                   <p className="mt-2 text-sm text-foreground">{String(row.message)}</p>
                   {row.admin_reply ? (
-                    <p className="mt-2 rounded-lg bg-[#F0FDF4] p-3 text-sm text-[#166534]">
+                    <p className="mt-2 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">
                       Reply: {String(row.admin_reply)}
                     </p>
                   ) : null}
-                  <p className="mt-2 text-xs text-[#888888]">
+                  <p className="mt-2 text-xs text-[#9CA3AF]">
                     {formatDate(String(row.created_at || ""))} · {String(row.status || "open")}
                     {row.is_read ? " · read" : ""}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button type="button" onClick={() => patch(id, "read")} className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
+                  <button type="button" onClick={() => patch(id, "read")} className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 transition-colors">
                     Mark Read
                   </button>
-                  <button type="button" onClick={() => setReplyId(isOpenReply ? null : id)} className="rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary">
+                  <button type="button" onClick={() => setReplyId(isOpenReply ? null : id)} className="rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary hover:bg-primary/20 transition-colors">
                     Reply
                   </button>
-                  <button type="button" onClick={() => remove(id)} className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600">
+                  <button type="button" onClick={() => remove(id)} className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-100 transition-colors">
                     Delete
                   </button>
                 </div>
@@ -112,9 +111,9 @@ export default function ContactMessagesAdmin({
                     placeholder="Type your reply…"
                     className="flex-1 rounded-xl border border-border px-3 py-2 text-sm"
                   />
-                  <button type="button" onClick={() => sendReply(id)} className="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white">
+                  <Button variant="primary" size="md" onClick={() => sendReply(id)}>
                     Send Reply
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>

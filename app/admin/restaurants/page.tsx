@@ -6,8 +6,8 @@ import AdminShell from "@/components/admin/AdminShell";
 import { useAdminRestaurants, useAdminRestaurantStats } from "@/hooks/useAdminData";
 import { useAdminRestaurantsLive } from "@/hooks/useAdminRestaurantsLive";
 import type { AdminRestaurantFilters } from "@/services/adminApi";
+import { Button, SearchInput } from "@/components/admin/ui";
 import RestaurantStatsStrip from "@/components/admin/restaurants/RestaurantStatsStrip";
-import RestaurantSearchBar from "@/components/admin/restaurants/RestaurantSearchBar";
 import RestaurantFilterBar from "@/components/admin/restaurants/RestaurantFilterBar";
 import ExportMenu from "@/components/admin/restaurants/ExportMenu";
 import RestaurantTable from "@/components/admin/restaurants/RestaurantTable";
@@ -73,14 +73,18 @@ export default function AdminRestaurantsPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2.5">
-          <RestaurantSearchBar value={filters.search || ""} onChange={(v) => updateFilters({ search: v })} />
-          <button
-            type="button"
+          <SearchInput
+            value={filters.search || ""}
+            onChange={(v) => updateFilters({ search: v })}
+            placeholder="Search by name, owner, email, phone, or restaurant ID…"
+          />
+          <Button
+            variant="secondary"
             onClick={refreshAll}
-            className="flex items-center gap-2 bg-white border border-border rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-section"
+            icon={<RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />}
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} /> Refresh
-          </button>
+            Refresh
+          </Button>
           <ExportMenu filters={filters} />
         </div>
       </div>

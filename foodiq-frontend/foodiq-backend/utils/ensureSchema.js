@@ -1065,13 +1065,15 @@ async function ensureSchema() {
       await q(`ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS ${col} ${typ}`);
     }
 
+    // One-time seed only — support_phone/support_email already get their
+    // defaults from the CREATE TABLE above. whatsapp_number has no column
+    // default (added via ALTER), so seed it once on first boot only; never
+    // overwrite an admin-edited value on subsequent restarts/deploys.
     await q(`
       UPDATE admin_settings SET
-        support_phone = '+91 6371115043',
-        support_email = 'ssangitasahoo48@gmail.com',
         whatsapp_number = '+91 6371115043',
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = 1
+      WHERE id = 1 AND whatsapp_number IS NULL
     `);
 
     await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS address_line VARCHAR(255)`);
@@ -1522,23 +1524,9 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS notify_order_updates BOOLEAN DEFAULT TRUE
     `);
 
-    await q(`
-      CREATE TABLE IF NOT EXISTS email_logs (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-        to_email VARCHAR(255) NOT NULL,
-        subject VARCHAR(500) NOT NULL,
-        template VARCHAR(80),
-        status VARCHAR(30) NOT NULL DEFAULT 'pending',
-        provider VARCHAR(40),
-        provider_message_id VARCHAR(255),
-        error TEXT,
-        attempts INTEGER NOT NULL DEFAULT 1,
-        meta JSONB DEFAULT '{}'::jsonb,
-        related_order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    // email_logs/sms_logs/otp_codes are created once, above (§ OTP / SMS /
+    // Email tables) — this used to redefine all three a second time with
+    // identical shapes. Only the (non-duplicate) indexes below are still needed.
     await q(`
       CREATE INDEX IF NOT EXISTS idx_email_logs_user_created
         ON email_logs(user_id, created_at DESC)
@@ -1547,24 +1535,6 @@ async function ensureSchema() {
       CREATE INDEX IF NOT EXISTS idx_email_logs_status
         ON email_logs(status, created_at DESC)
     `);
-
-    await q(`
-      CREATE TABLE IF NOT EXISTS sms_logs (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-        to_phone VARCHAR(30) NOT NULL,
-        body TEXT NOT NULL,
-        template VARCHAR(80),
-        status VARCHAR(30) NOT NULL DEFAULT 'pending',
-        provider VARCHAR(40),
-        provider_message_id VARCHAR(255),
-        error TEXT,
-        attempts INTEGER NOT NULL DEFAULT 1,
-        meta JSONB DEFAULT '{}'::jsonb,
-        related_order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_sms_logs_user_created
         ON sms_logs(user_id, created_at DESC)
@@ -1572,22 +1542,6 @@ async function ensureSchema() {
     await q(`
       CREATE INDEX IF NOT EXISTS idx_sms_logs_status
         ON sms_logs(status, created_at DESC)
-    `);
-
-    await q(`
-      CREATE TABLE IF NOT EXISTS otp_codes (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-        destination VARCHAR(255) NOT NULL,
-        channel VARCHAR(20) NOT NULL DEFAULT 'email',
-        purpose VARCHAR(60) NOT NULL DEFAULT 'verification',
-        code_hash VARCHAR(128) NOT NULL,
-        attempts INTEGER NOT NULL DEFAULT 0,
-        expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-        consumed_at TIMESTAMP WITH TIME ZONE,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
     `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_otp_destination_purpose
@@ -1809,19 +1763,11 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await q(`
-      CREATE TABLE IF NOT EXISTS support_tickets (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        category VARCHAR(255) NOT NULL,
-        subject VARCHAR(255) NOT NULL,
-        description TEXT NOT NULL,
-        status VARCHAR(50) DEFAULT 'Open',
-        admin_notes TEXT,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    // support_tickets is created once, above (Driver Support Chat Module) —
+    // this used to redefine it a second time with a conflicting (customer-
+    // ticket) shape; the ALTER TABLE support_tickets statements further down
+    // add the customer-facing columns (user_id, category, description, etc.)
+    // onto that single table instead.
     await q(`
       CREATE TABLE IF NOT EXISTS email_support (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1843,6 +1789,10 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS image_url TEXT,
         ADD COLUMN IF NOT EXISTS expected_resolution_at TIMESTAMP WITH TIME ZONE,
         ADD COLUMN IF NOT EXISTS attachment_urls JSONB DEFAULT '[]'::jsonb
+    `);
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_email_support_ticket_number
+        ON email_support(ticket_number) WHERE ticket_number IS NOT NULL
     `);
     await q(`
       CREATE UNIQUE INDEX IF NOT EXISTS idx_reviews_user_order
@@ -2029,6 +1979,72 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS admin_notes TEXT,
         ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     `);
+
+    // ── Support Center canonical consolidation ──────────────────────────────
+    // Unifies the 3 independent ticket subsystems (customer/ticketModel,
+    // partner/deliverySupportModel, help-center/helpCenterModel) onto one
+    // normalized vocabulary without touching the legacy free-text status/
+    // priority columns those subsystems still write in 3 different casings.
+    // `user_id`/`description` are relaxed to nullable because
+    // deliverySupportModel.createTicket inserts partner tickets with neither
+    // (a partner ticket's initial description lives in support_messages, not
+    // the ticket header) — both currently violate NOT NULL constraints from
+    // schema.sql, which means partner ticket creation has been failing with a
+    // 500 in production. This fixes that.
+    await q(`ALTER TABLE support_tickets ALTER COLUMN user_id DROP NOT NULL`);
+    await q(`ALTER TABLE support_tickets ALTER COLUMN description DROP NOT NULL`);
+    await q(`
+      ALTER TABLE support_tickets
+        ADD COLUMN IF NOT EXISTS requester_type VARCHAR(20),
+        ADD COLUMN IF NOT EXISTS source_channel VARCHAR(20) DEFAULT 'app',
+        ADD COLUMN IF NOT EXISTS status_norm VARCHAR(20),
+        ADD COLUMN IF NOT EXISTS priority_norm VARCHAR(20)
+    `);
+    await q(`
+      UPDATE support_tickets SET requester_type = 'partner'
+      WHERE requester_type IS NULL AND partner_id IS NOT NULL
+    `);
+    await q(`
+      UPDATE support_tickets SET requester_type = 'restaurant'
+      WHERE requester_type IS NULL AND category = 'Restaurant Complaint' AND restaurant_id IS NOT NULL
+    `);
+    await q(`
+      UPDATE support_tickets SET requester_type = 'customer'
+      WHERE requester_type IS NULL AND user_id IS NOT NULL
+    `);
+    await q(`
+      UPDATE support_tickets SET status_norm = CASE
+        WHEN lower(status) = 'open' THEN 'open'
+        WHEN lower(status) IN ('in progress', 'in_progress', 'pending', 'assigned') THEN 'in_progress'
+        WHEN lower(status) = 'resolved' THEN 'resolved'
+        WHEN lower(status) = 'closed' THEN 'closed'
+        ELSE 'open' END
+      WHERE status_norm IS NULL
+    `);
+    await q(`
+      UPDATE support_tickets SET priority_norm = CASE
+        WHEN lower(priority) = 'low' THEN 'low'
+        WHEN lower(priority) IN ('medium', 'normal') THEN 'medium'
+        WHEN lower(priority) = 'high' THEN 'high'
+        WHEN lower(priority) = 'urgent' THEN 'urgent'
+        ELSE 'medium' END
+      WHERE priority_norm IS NULL
+    `);
+    await q(`ALTER TABLE support_tickets ALTER COLUMN status_norm SET DEFAULT 'open'`);
+    await q(`ALTER TABLE support_tickets ALTER COLUMN priority_norm SET DEFAULT 'medium'`);
+    await q(`
+      ALTER TABLE support_tickets ADD CONSTRAINT chk_support_tickets_status_norm
+        CHECK (status_norm IN ('open', 'in_progress', 'resolved', 'closed'))
+    `);
+    await q(`
+      ALTER TABLE support_tickets ADD CONSTRAINT chk_support_tickets_priority_norm
+        CHECK (priority_norm IN ('low', 'medium', 'high', 'urgent'))
+    `);
+    await q(`CREATE INDEX IF NOT EXISTS idx_support_tickets_requester_type ON support_tickets(requester_type)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_support_tickets_status_norm ON support_tickets(status_norm)`);
+    await q(`CREATE INDEX IF NOT EXISTS idx_support_tickets_priority_norm ON support_tickets(priority_norm)`);
+    console.log('[SCHEMA] Support Center canonical consolidation ensured');
+
     await q(`
       CREATE INDEX IF NOT EXISTS idx_orders_user_created
         ON orders(user_id, created_at DESC)
@@ -2103,6 +2119,58 @@ async function ensureSchema() {
     await q(`
       CREATE INDEX IF NOT EXISTS idx_coupon_history_user
         ON coupon_history(user_id, created_at DESC)
+    `);
+    await q(`
+      CREATE TABLE IF NOT EXISTS coupon_usage (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        coupon_id UUID NOT NULL REFERENCES coupons(id) ON DELETE CASCADE,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        used_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_coupon_usage_coupon
+        ON coupon_usage(coupon_id)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_coupon_usage_coupon_user
+        ON coupon_usage(coupon_id, user_id)
+    `);
+    await q(`
+      CREATE TABLE IF NOT EXISTS live_deals (
+        id SERIAL PRIMARY KEY,
+        deal_key VARCHAR(50) UNIQUE NOT NULL,
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        coupon_id UUID REFERENCES coupons(id) ON DELETE SET NULL,
+        offer_title VARCHAR(255) NOT NULL,
+        description TEXT,
+        logo_url TEXT,
+        banner_url TEXT,
+        delivery_time_label VARCHAR(50) DEFAULT '30 min',
+        timer_seconds INTEGER DEFAULT 3600,
+        is_active BOOLEAN DEFAULT TRUE,
+        sort_order INTEGER DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_live_deals_restaurant
+        ON live_deals(restaurant_id)
+    `);
+    await q(`
+      CREATE TABLE IF NOT EXISTS restaurant_coupons (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        coupon_id UUID NOT NULL REFERENCES coupons(id) ON DELETE CASCADE,
+        UNIQUE(restaurant_id, coupon_id)
+      )
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_restaurant_coupons_coupon
+        ON restaurant_coupons(coupon_id)
     `);
     await q(`
       INSERT INTO coupons (code, discount_amount, discount_type, coupon_type, min_order_amount, title, description, one_time_per_user, valid_until, is_active)
@@ -3116,6 +3184,11 @@ async function ensureSchema() {
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_emergencies_order ON delivery_emergencies(order_id)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_emergencies_status ON delivery_emergencies(status)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_emergencies_created ON delivery_emergencies(created_at DESC)`);
+    await q(`
+      ALTER TABLE delivery_emergencies
+        ADD COLUMN IF NOT EXISTS escalated BOOLEAN DEFAULT FALSE,
+        ADD COLUMN IF NOT EXISTS escalated_at TIMESTAMP WITH TIME ZONE
+    `);
     console.log('[SCHEMA] Delivery Emergencies (SOS) schema ensured');
 
     // Bootstrap demo users ONLY when explicitly allowed (never default in production).
@@ -3410,38 +3483,12 @@ async function ensureSchema() {
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referrals_status ON delivery_referrals(status)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referrals_created ON delivery_referrals(created_at)`);
 
-    await q(`
-      CREATE TABLE IF NOT EXISTS delivery_referral_rewards (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
-        referral_id UUID REFERENCES delivery_referrals(id) ON DELETE CASCADE,
-        amount NUMERIC(10, 2) NOT NULL,
-        wallet_transaction_id UUID,
-        status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'credited', 'cancelled')),
-        credited_at TIMESTAMP WITH TIME ZONE,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referral_rewards_partner ON delivery_referral_rewards(partner_id)`);
-    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referral_rewards_status ON delivery_referral_rewards(status)`);
-    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referral_rewards_created ON delivery_referral_rewards(created_at)`);
-
-    await q(`
-      CREATE TABLE IF NOT EXISTS delivery_referral_settings (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        default_reward_amount NUMERIC(10, 2) DEFAULT 500.00,
-        reward_type VARCHAR(50) DEFAULT 'cash',
-        expiry_days INTEGER DEFAULT 30,
-        min_deliveries_required INTEGER DEFAULT 1,
-        auto_credit_enabled BOOLEAN DEFAULT TRUE,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    await q(`
-      INSERT INTO delivery_referral_settings (default_reward_amount, reward_type, expiry_days, min_deliveries_required, auto_credit_enabled)
-      SELECT 500.00, 'cash', 30, 1, TRUE
-      WHERE NOT EXISTS (SELECT 1 FROM delivery_referral_settings)
-    `);
+    // delivery_referral_rewards and delivery_referral_settings are created
+    // once, above (§ Delivery Referrals) — this used to redefine both a
+    // second time (with delivery_referral_rewards.status defaulting to
+    // 'pending' here vs 'credited' in the first definition; the first
+    // definition wins today, so 'credited' is the live default — kept as-is
+    // to avoid a silent behavior change).
 
     // ── Delivery Offline Sync Logs Table ─────────────────────────────────────
     await q(`
@@ -3645,6 +3692,67 @@ async function ensureSchema() {
         ON restaurant_bank_accounts(restaurant_id) WHERE is_primary = TRUE
     `);
     console.log('[SCHEMA] Admin Restaurant Management tables ensured');
+
+    // Persisted restaurant payout/settlement batches. Previously restaurant
+    // settlements were only ever computed on the fly (see settlementModel.js)
+    // with no way to track approve/pay/reject status — this table gives the
+    // admin finance payout workflow something to actually act on.
+    await q(`
+      CREATE TABLE IF NOT EXISTS restaurant_settlements (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+        period_start TIMESTAMP WITH TIME ZONE NOT NULL,
+        period_end TIMESTAMP WITH TIME ZONE NOT NULL,
+        delivered_orders INT NOT NULL DEFAULT 0,
+        gross_revenue NUMERIC(12,2) NOT NULL DEFAULT 0,
+        commission_percent NUMERIC(5,2) NOT NULL DEFAULT 0,
+        commission_amount NUMERIC(12,2) NOT NULL DEFAULT 0,
+        net_payout NUMERIC(12,2) NOT NULL DEFAULT 0,
+        status VARCHAR(20) NOT NULL DEFAULT 'pending'
+          CHECK (status IN ('pending', 'approved', 'paid', 'rejected')),
+        bank_account_id UUID REFERENCES restaurant_bank_accounts(id) ON DELETE SET NULL,
+        created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        approved_at TIMESTAMP WITH TIME ZONE,
+        paid_at TIMESTAMP WITH TIME ZONE,
+        rejection_reason TEXT,
+        notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await q(`
+      DROP TRIGGER IF EXISTS update_restaurant_settlements_modtime ON restaurant_settlements
+    `);
+    await q(`
+      CREATE TRIGGER update_restaurant_settlements_modtime
+        BEFORE UPDATE ON restaurant_settlements
+        FOR EACH ROW EXECUTE PROCEDURE update_modified_column()
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_restaurant_settlements_restaurant
+        ON restaurant_settlements(restaurant_id)
+    `);
+    await q(`
+      CREATE INDEX IF NOT EXISTS idx_restaurant_settlements_status
+        ON restaurant_settlements(status)
+    `);
+    // One settlement batch per restaurant per period — prevents duplicate settlements.
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_restaurant_settlements_period
+        ON restaurant_settlements(restaurant_id, period_start, period_end)
+    `);
+    console.log('[SCHEMA] Restaurant settlements table ensured');
+
+    // Delivery partners may only have one pending withdrawal request at a
+    // time (enforced in application code today, but that check-then-insert
+    // was racy under concurrent requests) — a partial unique index makes the
+    // rule airtight at the database level regardless of request timing.
+    await q(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_withdrawal_requests_one_pending
+        ON withdrawal_requests(partner_id) WHERE status = 'pending'
+    `);
+    console.log('[SCHEMA] Withdrawal single-pending constraint ensured');
 
     console.log('[SCHEMA] Critical schema checks completed');
   } catch (err) {

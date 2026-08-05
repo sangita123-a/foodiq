@@ -156,9 +156,9 @@ export default function RecentOrdersTable() {
   };
 
   return (
-    <section className="bg-white border border-border rounded-2xl shadow-sm">
-      <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border">
-        <h2 className="text-lg font-black text-foreground">Recent Orders</h2>
+    <section className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)]">
+      <div className="p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border">
+        <h2 className="text-lg font-black text-foreground tracking-tight">Recent Orders</h2>
         <div className="flex flex-wrap gap-2">
           <div className="relative">
             <Search className="w-3.5 h-3.5 text-[#9CA3AF] absolute left-3 top-1/2 -translate-y-1/2" />
@@ -169,7 +169,7 @@ export default function RecentOrdersTable() {
                 setPage(1);
               }}
               placeholder="Search orders…"
-              className="bg-section border border-border rounded-xl pl-8 pr-3 py-2 text-xs w-44"
+              className="bg-section border border-transparent rounded-xl pl-8 pr-3 py-2 text-xs w-44 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
             />
           </div>
           <select
@@ -178,7 +178,7 @@ export default function RecentOrdersTable() {
               setStatus(e.target.value);
               setPage(1);
             }}
-            className="bg-section border border-border rounded-xl px-3 py-2 text-xs"
+            className="bg-section border border-transparent rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
           >
             <option value="">All statuses</option>
             {STATUS_OPTIONS.map((s) => (
@@ -190,7 +190,7 @@ export default function RecentOrdersTable() {
         </div>
       </div>
 
-      <div className="p-5">
+      <div className="p-5 sm:p-6">
         {isLoading ? (
           <PanelSkeleton rows={5} />
         ) : (

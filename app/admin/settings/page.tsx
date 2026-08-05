@@ -8,6 +8,7 @@ import { adminPut } from "@/services/adminApi";
 import { CONTACT_INFO_SWR_KEY } from "@/lib/contactInfo";
 import MediaUploader from "@/components/media/MediaUploader";
 import type { MediaAsset } from "@/services/mediaApi";
+import { Button } from "@/components/admin/ui";
 
 type Settings = {
   delivery_charge: number;
@@ -75,7 +76,9 @@ export default function AdminSettingsPage() {
   if (!form) {
     return (
       <AdminShell title="Settings">
-        <p className="text-[#555555]">Loading settings…</p>
+        <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-8 text-center">
+          <p className="text-sm font-bold text-gray-text">Loading settings…</p>
+        </div>
       </AdminShell>
     );
   }
@@ -92,8 +95,8 @@ export default function AdminSettingsPage() {
   return (
     <AdminShell title="Platform Settings">
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-foreground">Admin Settings</h1>
-        <p className="text-[#555555]">
+        <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight mb-1.5">Admin Settings</h1>
+        <p className="text-gray-text text-sm">
           Changes apply across the website — contact page, footer, theme, and checkout fees.
         </p>
       </div>
@@ -104,8 +107,10 @@ export default function AdminSettingsPage() {
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
-            className={`rounded-xl px-4 py-2 text-sm font-bold ${
-              tab === t.id ? "bg-primary text-white" : "border border-border bg-white text-[#555555]"
+            className={`rounded-xl px-4 py-2 text-sm font-bold transition-colors ${
+              tab === t.id
+                ? "bg-primary text-white shadow-[var(--shadow-button)]"
+                : "border border-border bg-white text-gray-text hover:bg-section"
             }`}
           >
             {t.label}
@@ -113,7 +118,10 @@ export default function AdminSettingsPage() {
         ))}
       </div>
 
-      <form onSubmit={save} className="max-w-4xl space-y-6 rounded-3xl border border-border bg-white p-6">
+      <form
+        onSubmit={save}
+        className="max-w-4xl space-y-6 rounded-2xl border border-border bg-white shadow-[var(--shadow-admin-soft)] p-5 sm:p-6"
+      >
         {tab === "general" && (
           <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Input label="Website Name" value={form.app_name || ""} onChange={(v) => set("app_name", v)} />
@@ -137,7 +145,7 @@ export default function AdminSettingsPage() {
         {tab === "branding" && (
           <section className="space-y-6">
             <div>
-              <label className="mb-2 block text-sm font-bold text-[#555555]">Logo</label>
+              <label className="mb-2 block text-sm font-bold text-gray-text">Logo</label>
               <MediaUploader
                 purpose="site_logo"
                 value={form.logo_url || null}
@@ -183,7 +191,7 @@ export default function AdminSettingsPage() {
                 ["payment_card_enabled", "Cards"],
                 ["payment_razorpay_enabled", "Razorpay"],
               ] as const).map(([key, label]) => (
-                <label key={key} className="flex items-center gap-3 text-sm font-bold text-[#555555]">
+                <label key={key} className="flex items-center gap-3 text-sm font-bold text-gray-text">
                   <input
                     type="checkbox"
                     checked={Boolean(form[key])}
@@ -196,10 +204,16 @@ export default function AdminSettingsPage() {
           </section>
         )}
 
-        <button type="submit" disabled={saving} className="rounded-xl bg-primary px-8 py-3 font-black text-white disabled:opacity-60">
-          {saving ? "Saving…" : "Save Settings"}
-        </button>
-        {saved && <p className="text-sm font-bold text-green-600">Settings saved — changes reflect site-wide.</p>}
+        <div className="flex flex-wrap items-center gap-4 pt-2">
+          <Button type="submit" variant="primary" loading={saving}>
+            {saving ? "Saving…" : "Save Settings"}
+          </Button>
+          {saved && (
+            <p className="text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-3.5 py-2">
+              Settings saved — changes reflect site-wide.
+            </p>
+          )}
+        </div>
       </form>
     </AdminShell>
   );
@@ -217,7 +231,7 @@ function Input({
   className?: string;
 }) {
   return (
-    <label className={`block text-sm font-bold text-[#555555] ${className}`}>
+    <label className={`block text-sm font-bold text-gray-text ${className}`}>
       {label}
       <input
         value={value}
@@ -240,7 +254,7 @@ function NumberInput({
   step?: number;
 }) {
   return (
-    <label className="block text-sm font-bold text-[#555555]">
+    <label className="block text-sm font-bold text-gray-text">
       {label}
       <input
         type="number"
@@ -267,7 +281,7 @@ function TextArea({
   className?: string;
 }) {
   return (
-    <label className={`block text-sm font-bold text-[#555555] ${className}`}>
+    <label className={`block text-sm font-bold text-gray-text ${className}`}>
       {label}
       <textarea
         value={value}
