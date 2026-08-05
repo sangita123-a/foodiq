@@ -6,8 +6,8 @@ import AdminShell from "@/components/admin/AdminShell";
 import { useAdminOrders, useAdminOrderStats } from "@/hooks/useAdminData";
 import { useAdminOrdersLive } from "@/hooks/useAdminOrdersLive";
 import type { AdminOrderFilters } from "@/services/adminApi";
+import { Button, SearchInput } from "@/components/admin/ui";
 import OrderStatsStrip from "@/components/admin/orders/OrderStatsStrip";
-import OrderSearchBar from "@/components/admin/orders/OrderSearchBar";
 import OrderFilterBar from "@/components/admin/orders/OrderFilterBar";
 import ExportMenu from "@/components/admin/orders/ExportMenu";
 import OrderTable from "@/components/admin/orders/OrderTable";
@@ -73,14 +73,18 @@ export default function AdminOrdersPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2.5">
-          <OrderSearchBar value={filters.search || ""} onChange={(v) => updateFilters({ search: v })} />
-          <button
-            type="button"
+          <SearchInput
+            value={filters.search || ""}
+            onChange={(v) => updateFilters({ search: v })}
+            placeholder="Search by order ID, customer, restaurant, phone, or partner…"
+          />
+          <Button
+            variant="secondary"
             onClick={refreshAll}
-            className="flex items-center gap-2 bg-white border border-border rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-section"
+            icon={<RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />}
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} /> Refresh
-          </button>
+            Refresh
+          </Button>
           <ExportMenu filters={filters} />
         </div>
       </div>

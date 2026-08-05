@@ -12,10 +12,9 @@ import {
   Trash2,
   MoreVertical,
   Crown,
-  ChevronLeft,
-  ChevronRight,
   User,
 } from "lucide-react";
+import { Badge, Pagination, EmptyState } from "@/components/admin/ui";
 import type { Customer } from "@/services/customerAdminApi";
 
 type Props = {
@@ -60,11 +59,11 @@ export default function CustomerTable({
 
   if (isLoading) {
     return (
-      <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm mb-6 animate-pulse space-y-4">
-        <div className="h-6 bg-gray-200 rounded w-1/4" />
+      <div className="bg-white border border-border rounded-2xl p-6 shadow-[var(--shadow-admin-soft)] mb-6 animate-pulse space-y-4">
+        <div className="h-6 bg-section rounded w-1/4" />
         <div className="space-y-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-12 bg-gray-100 rounded-xl w-full" />
+            <div key={i} className="h-12 bg-section rounded-xl w-full" />
           ))}
         </div>
       </div>
@@ -73,30 +72,29 @@ export default function CustomerTable({
 
   if (!customers || customers.length === 0) {
     return (
-      <div className="bg-white border border-gray-100 rounded-2xl p-12 shadow-sm mb-6 text-center space-y-3">
-        <div className="w-16 h-16 bg-red-50 text-[#E23744] rounded-full flex items-center justify-center mx-auto">
-          <User className="w-8 h-8" />
-        </div>
-        <h3 className="text-lg font-bold text-gray-800">No Customers Found</h3>
-        <p className="text-sm text-gray-500 max-w-sm mx-auto">
-          Try adjusting your search keyword, date range, or status filters to find matching customer records.
-        </p>
+      <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] mb-6">
+        <EmptyState
+          icon={User}
+          title="No Customers Found"
+          description="Try adjusting your search keyword, date range, or status filters to find matching customer records."
+        />
       </div>
     );
   }
 
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden mb-6">
+    <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] overflow-hidden mb-6">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-gray-50/80 border-b border-gray-100 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            <tr className="bg-section border-b border-border text-[11px] font-bold uppercase tracking-wider text-[#9CA3AF]">
               <th className="py-3.5 px-4 w-10">
                 <input
                   type="checkbox"
                   checked={isAllSelected}
                   onChange={(e) => onSelectAll(e.target.checked)}
-                  className="rounded border-gray-300 text-[#E23744] focus:ring-[#E23744] cursor-pointer"
+                  className="rounded border-border text-primary focus:ring-primary cursor-pointer"
+                  aria-label="Select all customers"
                 />
               </th>
               <th className="py-3.5 px-4">Customer</th>
@@ -112,14 +110,14 @@ export default function CustomerTable({
               <th className="py-3.5 px-4 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 text-xs font-medium text-gray-700">
+          <tbody className="divide-y divide-border text-xs font-medium text-gray-700">
             {customers.map((c) => {
               const isSelected = selectedIds.includes(c.id);
               return (
                 <tr
                   key={c.id}
-                  className={`hover:bg-red-50/30 transition-colors ${
-                    isSelected ? "bg-red-50/50" : ""
+                  className={`hover:bg-section/50 transition-colors ${
+                    isSelected ? "bg-primary/5" : ""
                   }`}
                 >
                   <td className="py-3.5 px-4">
@@ -127,14 +125,15 @@ export default function CustomerTable({
                       type="checkbox"
                       checked={isSelected}
                       onChange={(e) => onSelectRow(c.id, e.target.checked)}
-                      className="rounded border-gray-300 text-[#E23744] focus:ring-[#E23744] cursor-pointer"
+                      className="rounded border-border text-primary focus:ring-primary cursor-pointer"
+                      aria-label={`Select customer ${c.fullName}`}
                     />
                   </td>
 
                   {/* Customer Profile & ID */}
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-3">
-                      <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 border border-gray-200 shrink-0">
+                      <div className="relative w-10 h-10 rounded-full overflow-hidden bg-section border border-border shrink-0">
                         {c.avatarUrl ? (
                           <Image
                             src={c.avatarUrl}
@@ -143,7 +142,7 @@ export default function CustomerTable({
                             className="object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center font-bold text-gray-600 text-sm bg-gray-200">
+                          <div className="w-full h-full flex items-center justify-center font-bold text-gray-700 text-sm bg-section">
                             {c.fullName.slice(0, 2).toUpperCase()}
                           </div>
                         )}
@@ -152,7 +151,7 @@ export default function CustomerTable({
                         <div className="flex items-center gap-1.5">
                           <button
                             onClick={() => onViewProfile(c)}
-                            className="font-bold text-gray-900 hover:text-[#E23744] truncate text-left"
+                            className="font-bold text-foreground hover:text-primary truncate text-left"
                           >
                             {c.fullName}
                           </button>
@@ -162,7 +161,7 @@ export default function CustomerTable({
                             </span>
                           )}
                         </div>
-                        <span className="font-mono text-[10px] text-gray-400 block truncate">
+                        <span className="font-mono text-[10px] text-[#9CA3AF] block truncate">
                           {c.customerId}
                         </span>
                       </div>
@@ -174,13 +173,13 @@ export default function CustomerTable({
                     <div className="truncate max-w-[160px] font-semibold text-gray-800" title={c.email}>
                       {c.email}
                     </div>
-                    <div className="text-[11px] text-gray-500 font-mono">{c.phone}</div>
+                    <div className="text-[11px] text-gray-text font-mono">{c.phone}</div>
                   </td>
 
                   {/* City & State */}
                   <td className="py-3.5 px-4">
                     <div className="font-semibold text-gray-800">{c.city}</div>
-                    <div className="text-[11px] text-gray-400">{c.state}</div>
+                    <div className="text-[11px] text-[#9CA3AF]">{c.state}</div>
                   </td>
 
                   {/* Registration Date */}
@@ -197,15 +196,15 @@ export default function CustomerTable({
                   {/* Verification Status */}
                   <td className="py-3.5 px-4">
                     {c.isVerified ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                        <ShieldCheck className="w-3 h-3 text-blue-600" />
+                      <Badge tone="info">
+                        <ShieldCheck className="w-3 h-3" />
                         Verified
-                      </span>
+                      </Badge>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                        <ShieldAlert className="w-3 h-3 text-amber-600" />
+                      <Badge tone="warning">
+                        <ShieldAlert className="w-3 h-3" />
                         Unverified
-                      </span>
+                      </Badge>
                     )}
                   </td>
 
@@ -214,13 +213,13 @@ export default function CustomerTable({
                     <div className="font-bold text-gray-800">
                       <span className="text-emerald-600">{c.completedOrders}</span> /{" "}
                       <span className="text-rose-500">{c.cancelledOrders}</span> /{" "}
-                      <span className="text-gray-900">{c.totalOrders}</span>
+                      <span className="text-foreground">{c.totalOrders}</span>
                     </div>
-                    <span className="text-[10px] text-gray-400">Comp / Canc / Total</span>
+                    <span className="text-[10px] text-[#9CA3AF]">Comp / Canc / Total</span>
                   </td>
 
                   {/* Total Spending */}
-                  <td className="py-3.5 px-4 text-right font-black text-gray-900 whitespace-nowrap">
+                  <td className="py-3.5 px-4 text-right font-black text-foreground whitespace-nowrap">
                     ₹{c.totalSpending.toLocaleString("en-IN")}
                   </td>
 
@@ -231,33 +230,12 @@ export default function CustomerTable({
 
                   {/* Reward Points */}
                   <td className="py-3.5 px-4 text-center">
-                    <span className="inline-block bg-purple-50 text-purple-700 font-bold px-2 py-0.5 rounded-lg border border-purple-100 text-[11px]">
-                      {c.rewardPoints} pts
-                    </span>
+                    <Badge tone="violet">{c.rewardPoints} pts</Badge>
                   </td>
 
                   {/* Status Badge */}
                   <td className="py-3.5 px-4">
-                    {c.status === "active" && (
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        Active
-                      </span>
-                    )}
-                    {c.status === "blocked" && (
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                        Blocked
-                      </span>
-                    )}
-                    {c.status === "suspended" && (
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                        Suspended
-                      </span>
-                    )}
-                    {c.status === "deactivated" && (
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200">
-                        Deactivated
-                      </span>
-                    )}
+                    <Badge status={c.status}>{c.status}</Badge>
                   </td>
 
                   {/* Context Actions */}
@@ -265,7 +243,7 @@ export default function CustomerTable({
                     <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => onViewProfile(c)}
-                        className="p-1.5 hover:bg-gray-100 text-gray-600 rounded-lg transition-colors"
+                        className="p-1.5 hover:bg-section text-gray-600 rounded-lg transition-colors"
                         title="View Profile Drawer"
                       >
                         <Eye className="w-4 h-4 text-gray-700" />
@@ -273,20 +251,20 @@ export default function CustomerTable({
 
                       <button
                         onClick={() => setActiveMenuId(activeMenuId === c.id ? null : c.id)}
-                        className="p-1.5 hover:bg-gray-100 text-gray-500 rounded-lg transition-colors"
+                        className="p-1.5 hover:bg-section text-gray-500 rounded-lg transition-colors"
                       >
                         <MoreVertical className="w-4 h-4" />
                       </button>
                     </div>
 
                     {activeMenuId === c.id && (
-                      <div className="absolute right-4 mt-1 w-44 bg-white border border-gray-100 rounded-2xl shadow-xl z-20 p-1.5 text-left space-y-0.5 animate-in fade-in">
+                      <div className="absolute right-4 mt-1 w-44 bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-lifted)] z-20 p-1.5 text-left space-y-0.5 animate-in fade-in">
                         <button
                           onClick={() => {
                             onViewProfile(c);
                             setActiveMenuId(null);
                           }}
-                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 rounded-xl"
+                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-section rounded-xl"
                         >
                           <Eye className="w-3.5 h-3.5 text-blue-600" />
                           <span>View Profile</span>
@@ -296,7 +274,7 @@ export default function CustomerTable({
                             onToggleVerify(c);
                             setActiveMenuId(null);
                           }}
-                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 rounded-xl"
+                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-section rounded-xl"
                         >
                           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                           <span>{c.isVerified ? "Mark Unverified" : "Verify Customer"}</span>
@@ -306,7 +284,7 @@ export default function CustomerTable({
                             onToggleBlock(c);
                             setActiveMenuId(null);
                           }}
-                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 rounded-xl"
+                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-section rounded-xl"
                         >
                           {c.status === "blocked" ? (
                             <>
@@ -325,7 +303,7 @@ export default function CustomerTable({
                             onResetPassword(c);
                             setActiveMenuId(null);
                           }}
-                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 rounded-xl"
+                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-section rounded-xl"
                         >
                           <KeyRound className="w-3.5 h-3.5 text-indigo-600" />
                           <span>Reset Password</span>
@@ -351,35 +329,7 @@ export default function CustomerTable({
       </div>
 
       {/* Pagination Footer */}
-      <div className="bg-gray-50/80 border-t border-gray-100 px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-medium text-gray-600">
-        <div>
-          Showing <span className="font-bold text-gray-900">{(page - 1) * limit + 1}</span> to{" "}
-          <span className="font-bold text-gray-900">
-            {Math.min(page * limit, total)}
-          </span>{" "}
-          of <span className="font-bold text-gray-900">{total}</span> customers
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => onPageChange(page - 1)}
-            disabled={page <= 1}
-            className="p-1.5 bg-white border border-gray-200 rounded-lg text-gray-700 disabled:opacity-40 hover:bg-gray-50 transition-all"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <span className="px-3 py-1 font-bold bg-white border border-gray-200 rounded-lg">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            onClick={() => onPageChange(page + 1)}
-            disabled={page >= totalPages}
-            className="p-1.5 bg-white border border-gray-200 rounded-lg text-gray-700 disabled:opacity-40 hover:bg-gray-50 transition-all"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+      <Pagination page={page} totalPages={totalPages} total={total} limit={limit} onPageChange={onPageChange} />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import AdminShell from "@/components/admin/AdminShell";
 import { useAdminList } from "@/hooks/useAdminData";
 import { formatCurrency } from "@/services/adminApi";
+import { chartColor } from "@/lib/adminChartTheme";
 
 type Analytics = {
   top_dishes: Array<{ id: string; name: string; restaurant_name: string; orders_count: number; revenue: number }>;
@@ -38,7 +39,16 @@ export default function AdminAnalyticsPage() {
           <h2 className="font-bold text-lg mb-4">Daily Sales (14 days)</h2>
           <div className="h-40 flex items-end gap-1">
             {(data?.sales_daily || []).map((d) => (
-              <div key={d.day} className="flex-1 bg-primary/25 border border-primary/40 rounded-t" style={{ height: `${Math.max(6, Math.round((d.revenue / salesMax) * 100))}%` }} title={formatCurrency(d.revenue)} />
+              <div
+                key={d.day}
+                className="flex-1 rounded-t"
+                style={{
+                  height: `${Math.max(6, Math.round((d.revenue / salesMax) * 100))}%`,
+                  backgroundColor: `${chartColor(0)}40`,
+                  border: `1px solid ${chartColor(0)}66`,
+                }}
+                title={formatCurrency(d.revenue)}
+              />
             ))}
           </div>
         </div>
@@ -47,7 +57,14 @@ export default function AdminAnalyticsPage() {
           <div className="h-40 flex items-end gap-1">
             {(data?.peak_hours || []).map((h) => (
               <div key={h.hour} className="flex-1 flex flex-col items-center gap-1">
-                <div className="w-full bg-blue-400/30 border border-blue-400/40 rounded-t" style={{ height: `${Math.max(6, Math.round((h.orders / peakMax) * 100))}%` }} />
+                <div
+                  className="w-full rounded-t"
+                  style={{
+                    height: `${Math.max(6, Math.round((h.orders / peakMax) * 100))}%`,
+                    backgroundColor: `${chartColor(1)}40`,
+                    border: `1px solid ${chartColor(1)}66`,
+                  }}
+                />
                 <span className="text-[9px] text-[#9CA3AF]">{h.hour}</span>
               </div>
             ))}

@@ -1,19 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
 import {
   ShieldAlert,
-  Search,
   Filter,
-  CheckCircle,
-  AlertTriangle,
   RefreshCw,
   Eye,
   Sliders,
-  ChevronLeft,
-  User,
-  Package,
   Activity,
   Zap,
   BarChart2,
@@ -21,6 +14,10 @@ import {
 } from "lucide-react";
 import { getSocket } from "@/lib/socket";
 import { SOCKET_EVENTS } from "@/lib/socketEvents";
+import AdminShell from "@/components/admin/AdminShell";
+import StatCard from "@/components/admin/dashboard/StatCard";
+import { Badge, EmptyState } from "@/components/admin/ui";
+import type { BadgeTone } from "@/components/admin/ui";
 
 interface FraudCaseRecord {
   id: string;
@@ -54,6 +51,13 @@ interface FraudRule {
   threshold: number;
   enabled: boolean;
 }
+
+const SEVERITY_TONE: Record<string, BadgeTone> = {
+  Critical: "error",
+  High: "warning",
+  Medium: "warning",
+  Low: "success",
+};
 
 export default function AdminFraudPage() {
   const [cases, setCases] = useState<FraudCaseRecord[]>([]);
@@ -191,18 +195,9 @@ export default function AdminFraudPage() {
     }
   };
 
-  const getSeverityBadge = (severity: string) => {
-    switch (severity) {
-      case "Critical":
-        return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30">Critical</span>;
-      case "High":
-        return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">High</span>;
-      case "Medium":
-        return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">Medium</span>;
-      default:
-        return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Low</span>;
-    }
-  };
+  const getSeverityBadge = (severity: string) => (
+    <Badge tone={SEVERITY_TONE[severity] ?? "neutral"}>{severity}</Badge>
+  );
 
   // Metrics summary
   const totalCases = cases.length;
@@ -210,113 +205,73 @@ export default function AdminFraudPage() {
   const highCases = cases.filter(c => c.severity === "High").length;
   const pendingCases = cases.filter(c => c.status === "pending" || c.status === "under_review").length;
 
+  const TABS: Array<{ key: typeof activeTab; label: string }> = [
+    { key: "cases", label: `Fraud Cases (${totalCases})` },
+    { key: "rules", label: `Fraud Rules (${rules.length})` },
+    { key: "analytics", label: "Risk Analytics" },
+  ];
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 pb-12">
-      {/* Top Admin Header */}
-      <div className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+    <AdminShell title="Fraud Detection">
+      <div className="space-y-6">
+        {/* Page header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Link
-              href="/admin"
-              className="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </Link>
+            <div className="w-12 h-12 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center shrink-0">
+              <ShieldAlert className="w-6 h-6 text-red-600" />
+            </div>
             <div>
-              <h1 className="text-xl font-bold flex items-center gap-2">
-                <ShieldAlert className="w-6 h-6 text-rose-500" />
-                Fraud Detection & Risk Control Center
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+                Fraud Detection &amp; Risk Control Center
               </h1>
-              <p className="text-xs text-slate-400">Real-time Risk Engine, Rule Enforcement & Case Audit Log</p>
+              <p className="text-xs text-gray-text mt-0.5">Real-time risk engine, rule enforcement &amp; case audit log</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setActiveTab("cases")}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                activeTab === "cases"
-                  ? "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-                  : "bg-slate-800 hover:bg-slate-700 text-slate-300"
-              }`}
-            >
-              Fraud Cases ({totalCases})
-            </button>
-            <button
-              onClick={() => setActiveTab("rules")}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                activeTab === "rules"
-                  ? "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-                  : "bg-slate-800 hover:bg-slate-700 text-slate-300"
-              }`}
-            >
-              Fraud Rules ({rules.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("analytics")}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                activeTab === "analytics"
-                  ? "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-                  : "bg-slate-800 hover:bg-slate-700 text-slate-300"
-              }`}
-            >
-              Risk Analytics
-            </button>
+          <div className="flex items-center gap-2 flex-wrap">
+            {TABS.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                  activeTab === tab.key
+                    ? "bg-primary text-white shadow-[var(--shadow-admin-glow)]"
+                    : "bg-section text-gray-text hover:text-foreground hover:bg-[var(--surface-hover)]"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
             <button
               onClick={fetchCasesAndRules}
-              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
+              className="p-2.5 rounded-xl bg-section hover:bg-[var(--surface-hover)] text-foreground border border-border"
+              aria-label="Refresh"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
             </button>
           </div>
         </div>
-      </div>
 
-      <main className="max-w-7xl mx-auto px-4 pt-6 space-y-6">
         {/* Metric Cards Banner */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800">
-            <div className="flex justify-between text-slate-400 text-xs font-medium">
-              <span>Total Flagged Cases</span>
-              <FileText className="w-4 h-4" />
-            </div>
-            <div className="text-3xl font-extrabold text-white mt-2">{totalCases}</div>
-          </div>
-          <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800">
-            <div className="flex justify-between text-slate-400 text-xs font-medium">
-              <span>Pending Action</span>
-              <Activity className="w-4 h-4 text-amber-400" />
-            </div>
-            <div className="text-3xl font-extrabold text-amber-400 mt-2">{pendingCases}</div>
-          </div>
-          <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800">
-            <div className="flex justify-between text-slate-400 text-xs font-medium">
-              <span>Critical Risk (81-100)</span>
-              <ShieldAlert className="w-4 h-4 text-rose-400" />
-            </div>
-            <div className="text-3xl font-extrabold text-rose-400 mt-2">{criticalCases}</div>
-          </div>
-          <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800">
-            <div className="flex justify-between text-slate-400 text-xs font-medium">
-              <span>High Risk (61-80)</span>
-              <Zap className="w-4 h-4 text-orange-400" />
-            </div>
-            <div className="text-3xl font-extrabold text-orange-400 mt-2">{highCases}</div>
-          </div>
+          <StatCard label="Total Flagged Cases" value={totalCases} icon={FileText} color="text-primary" bg="bg-primary/10" />
+          <StatCard label="Pending Action" value={pendingCases} icon={Activity} color="text-amber-600" bg="bg-amber-500/10" />
+          <StatCard label="Critical Risk (81-100)" value={criticalCases} icon={ShieldAlert} color="text-red-600" bg="bg-red-500/10" />
+          <StatCard label="High Risk (61-80)" value={highCases} icon={Zap} color="text-orange-600" bg="bg-orange-500/10" />
         </div>
 
         {/* TAB 1: FRAUD CASES */}
         {activeTab === "cases" && (
           <div className="space-y-6">
             {/* Filter Toolbar */}
-            <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2 text-xs text-slate-400 font-medium mr-2">
-                <Filter className="w-4 h-4 text-rose-400" /> Filters:
+            <div className="p-4 rounded-2xl bg-white border border-border shadow-[var(--shadow-admin-soft)] flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2 text-xs text-gray-text font-bold mr-2">
+                <Filter className="w-4 h-4 text-primary" /> Filters:
               </div>
               <select
                 value={filterSeverity}
                 onChange={(e) => setFilterSeverity(e.target.value)}
-                className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200"
+                className="bg-section border border-transparent rounded-lg px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
               >
                 <option value="">All Risk Levels</option>
                 <option value="Low">Low (0-30)</option>
@@ -328,7 +283,7 @@ export default function AdminFraudPage() {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200"
+                className="bg-section border border-transparent rounded-lg px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
               >
                 <option value="">All Statuses</option>
                 <option value="pending">Pending</option>
@@ -344,7 +299,7 @@ export default function AdminFraudPage() {
                 placeholder="Search Reason..."
                 value={filterReason}
                 onChange={(e) => setFilterReason(e.target.value)}
-                className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 w-40"
+                className="bg-section border border-transparent rounded-lg px-3 py-1.5 text-xs text-foreground w-40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
               />
 
               <input
@@ -352,7 +307,7 @@ export default function AdminFraudPage() {
                 placeholder="Partner UUID..."
                 value={filterPartner}
                 onChange={(e) => setFilterPartner(e.target.value)}
-                className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 w-44"
+                className="bg-section border border-transparent rounded-lg px-3 py-1.5 text-xs text-foreground w-44 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
               />
 
               <input
@@ -360,7 +315,7 @@ export default function AdminFraudPage() {
                 placeholder="Order UUID..."
                 value={filterOrder}
                 onChange={(e) => setFilterOrder(e.target.value)}
-                className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 w-44"
+                className="bg-section border border-transparent rounded-lg px-3 py-1.5 text-xs text-foreground w-44 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
               />
 
               <button
@@ -371,7 +326,7 @@ export default function AdminFraudPage() {
                   setFilterPartner("");
                   setFilterOrder("");
                 }}
-                className="text-xs text-slate-400 hover:text-white underline ml-auto"
+                className="text-xs text-gray-text hover:text-foreground font-bold underline ml-auto"
               >
                 Clear Filters
               </button>
@@ -380,47 +335,39 @@ export default function AdminFraudPage() {
             {/* Cases Table & Details Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Cases Table */}
-              <div className="lg:col-span-2 bg-slate-900/80 rounded-2xl border border-slate-800 p-5 space-y-4">
+              <div className="lg:col-span-2 bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm text-slate-300">
-                    <thead className="bg-slate-800/50 text-slate-400 text-xs uppercase">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-section">
                       <tr>
-                        <th className="py-3 px-4">Partner</th>
-                        <th className="py-3 px-4">Fraud Type</th>
-                        <th className="py-3 px-4">Score</th>
-                        <th className="py-3 px-4">Severity</th>
-                        <th className="py-3 px-4">Status</th>
-                        <th className="py-3 px-4">Action</th>
+                        <th className="py-3 px-4 text-xs font-bold text-[#9CA3AF] uppercase">Partner</th>
+                        <th className="py-3 px-4 text-xs font-bold text-[#9CA3AF] uppercase">Fraud Type</th>
+                        <th className="py-3 px-4 text-xs font-bold text-[#9CA3AF] uppercase">Score</th>
+                        <th className="py-3 px-4 text-xs font-bold text-[#9CA3AF] uppercase">Severity</th>
+                        <th className="py-3 px-4 text-xs font-bold text-[#9CA3AF] uppercase">Status</th>
+                        <th className="py-3 px-4 text-xs font-bold text-[#9CA3AF] uppercase">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/60">
+                    <tbody className="divide-y divide-border">
                       {cases.map((c) => (
                         <tr
                           key={c.id}
                           onClick={() => setSelectedCase(c)}
                           className={`cursor-pointer transition-colors ${
-                            selectedCase?.id === c.id ? "bg-slate-800/80" : "hover:bg-slate-800/30"
+                            selectedCase?.id === c.id ? "bg-primary/5" : "hover:bg-section/50"
                           }`}
                         >
                           <td className="py-3 px-4">
-                            <div className="font-semibold text-white">{c.partner_name || "Partner"}</div>
-                            <div className="text-[11px] text-slate-400">{c.partner_phone || c.partner_id?.slice(0, 8)}</div>
+                            <div className="font-bold text-foreground">{c.partner_name || "Partner"}</div>
+                            <div className="text-[11px] text-gray-text">{c.partner_phone || c.partner_id?.slice(0, 8)}</div>
                           </td>
-                          <td className="py-3 px-4 font-medium text-slate-200">{c.fraud_type}</td>
-                          <td className="py-3 px-4 font-mono font-bold text-amber-400">+{c.risk_score}</td>
+                          <td className="py-3 px-4 font-medium text-foreground">{c.fraud_type}</td>
+                          <td className="py-3 px-4 font-mono font-bold text-amber-600">+{c.risk_score}</td>
                           <td className="py-3 px-4">{getSeverityBadge(c.severity)}</td>
                           <td className="py-3 px-4">
-                            <span
-                              className={`px-2 py-0.5 text-xs rounded font-medium capitalize ${
-                                c.status === "resolved"
-                                  ? "bg-emerald-500/20 text-emerald-300"
-                                  : c.status === "blocked" || c.status === "suspended"
-                                  ? "bg-rose-500/20 text-rose-300"
-                                  : "bg-amber-500/20 text-amber-300"
-                              }`}
-                            >
+                            <Badge tone={c.status === "resolved" ? "success" : (c.status === "blocked" || c.status === "suspended") ? "error" : "warning"}>
                               {c.status}
-                            </span>
+                            </Badge>
                           </td>
                           <td className="py-3 px-4">
                             <button
@@ -428,7 +375,7 @@ export default function AdminFraudPage() {
                                 e.stopPropagation();
                                 setSelectedCase(c);
                               }}
-                              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
+                              className="p-1.5 rounded-lg bg-section hover:bg-[var(--surface-hover)] text-foreground"
                             >
                               <Eye className="w-4 h-4" />
                             </button>
@@ -437,51 +384,54 @@ export default function AdminFraudPage() {
                       ))}
                     </tbody>
                   </table>
+                  {cases.length === 0 && !loading && (
+                    <EmptyState icon={ShieldAlert} title="No fraud cases" description="No cases match the current filters." />
+                  )}
                 </div>
               </div>
 
               {/* Selected Case Timeline & Action Panel */}
-              <div className="bg-slate-900/80 rounded-2xl border border-slate-800 p-5 space-y-4">
+              <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5">
                 {selectedCase ? (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div className="flex items-center justify-between border-b border-border pb-3">
                       <div>
-                        <h3 className="font-bold text-lg text-white">{selectedCase.fraud_type}</h3>
-                        <p className="text-xs text-slate-400">Case ID: {selectedCase.id}</p>
+                        <h3 className="font-black text-lg text-foreground">{selectedCase.fraud_type}</h3>
+                        <p className="text-xs text-gray-text">Case ID: {selectedCase.id}</p>
                       </div>
                       {getSeverityBadge(selectedCase.severity)}
                     </div>
 
-                    <div className="space-y-2 text-xs text-slate-300">
+                    <div className="space-y-2 text-xs text-gray-text">
                       <div>
-                        <span className="text-slate-400">Partner:</span>{" "}
-                        <span className="font-semibold text-white">{selectedCase.partner_name || selectedCase.partner_id}</span>
+                        <span className="text-[#9CA3AF]">Partner:</span>{" "}
+                        <span className="font-bold text-foreground">{selectedCase.partner_name || selectedCase.partner_id}</span>
                       </div>
                       {selectedCase.order_id && (
                         <div>
-                          <span className="text-slate-400">Order ID:</span>{" "}
-                          <span className="font-mono text-slate-200">{selectedCase.order_id}</span>
+                          <span className="text-[#9CA3AF]">Order ID:</span>{" "}
+                          <span className="font-mono text-foreground">{selectedCase.order_id}</span>
                         </div>
                       )}
                       <div>
-                        <span className="text-slate-400">Reason:</span>{" "}
-                        <span className="text-rose-300 font-medium">{selectedCase.reason}</span>
+                        <span className="text-[#9CA3AF]">Reason:</span>{" "}
+                        <span className="text-red-600 font-medium">{selectedCase.reason}</span>
                       </div>
                       <div>
-                        <span className="text-slate-400">Created:</span>{" "}
+                        <span className="text-[#9CA3AF]">Created:</span>{" "}
                         <span>{new Date(selectedCase.created_at).toLocaleString()}</span>
                       </div>
                     </div>
 
                     {/* Resolution Notes Input */}
-                    <div className="space-y-2 pt-2 border-t border-slate-800">
-                      <label className="text-xs text-slate-400 font-medium">Review & Resolution Notes</label>
+                    <div className="space-y-2 pt-2 border-t border-border">
+                      <label className="text-xs text-foreground font-bold">Review &amp; Resolution Notes</label>
                       <textarea
                         rows={3}
                         value={resolutionNotes}
                         onChange={(e) => setResolutionNotes(e.target.value)}
                         placeholder="Add review notes or justification..."
-                        className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-rose-500"
+                        className="w-full bg-section border border-transparent rounded-xl p-2.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
                       />
                     </div>
 
@@ -490,40 +440,42 @@ export default function AdminFraudPage() {
                       <button
                         onClick={() => handleReviewCase(selectedCase.id)}
                         disabled={actionLoading}
-                        className="flex-1 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-semibold transition-colors"
+                        className="flex-1 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-bold transition-colors disabled:opacity-50"
                       >
                         Review Case
                       </button>
                       <button
                         onClick={() => handleResolveCase(selectedCase.id, "resolved")}
                         disabled={actionLoading}
-                        className="flex-1 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition-colors"
+                        className="flex-1 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold transition-colors disabled:opacity-50"
                       >
-                        Resolve & Restore
+                        Resolve &amp; Restore
                       </button>
                     </div>
 
                     {/* Case Timeline / Audit Logs */}
-                    <div className="pt-4 border-t border-slate-800 space-y-2">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Audit Log Timeline</h4>
-                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                    <div className="pt-4 border-t border-border space-y-2">
+                      <h4 className="text-xs font-bold text-[#9CA3AF] uppercase tracking-widest">Audit Log Timeline</h4>
+                      <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
                         {selectedCase.logs && selectedCase.logs.length > 0 ? (
                           selectedCase.logs.map((log) => (
-                            <div key={log.id} className="p-2 rounded-lg bg-slate-800/40 text-[11px] border border-slate-800">
-                              <div className="font-semibold text-slate-200">{log.event}</div>
-                              <div className="text-slate-400">{new Date(log.created_at).toLocaleString()}</div>
+                            <div key={log.id} className="p-2 rounded-lg bg-section text-[11px] border border-border">
+                              <div className="font-bold text-foreground">{log.event}</div>
+                              <div className="text-gray-text">{new Date(log.created_at).toLocaleString()}</div>
                             </div>
                           ))
                         ) : (
-                          <div className="text-xs text-slate-500 italic">No audit logs available for this case.</div>
+                          <div className="text-xs text-gray-text italic">No audit logs available for this case.</div>
                         )}
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="py-16 text-center text-slate-400 text-xs">
-                    Select a fraud case from the table to view details, audit timeline, and take resolution actions.
-                  </div>
+                  <EmptyState
+                    icon={Eye}
+                    title="No case selected"
+                    description="Select a fraud case from the table to view details, audit timeline, and take resolution actions."
+                  />
                 )}
               </div>
             </div>
@@ -532,19 +484,19 @@ export default function AdminFraudPage() {
 
         {/* TAB 2: FRAUD RULES CONFIGURATION */}
         {activeTab === "rules" && (
-          <div className="bg-slate-900/80 rounded-2xl border border-slate-800 p-6 space-y-4">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Sliders className="w-5 h-5 text-rose-400" />
-              Automated Risk Detection Rules & Thresholds
+          <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-6 space-y-4">
+            <h2 className="text-lg font-black text-foreground flex items-center gap-2">
+              <Sliders className="w-5 h-5 text-primary" />
+              Automated Risk Detection Rules &amp; Thresholds
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {rules.map((rule) => (
-                <div key={rule.id} className="p-4 rounded-xl bg-slate-800/50 border border-slate-800 flex items-center justify-between gap-4">
+                <div key={rule.id} className="p-4 rounded-xl bg-section border border-border flex items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <div className="font-bold text-slate-100 text-sm">{rule.rule_name}</div>
-                    <div className="text-xs text-slate-400 font-mono">Type: {rule.rule_type}</div>
-                    <div className="text-xs text-amber-400 font-medium">Risk Impact: +{rule.threshold} pts</div>
+                    <div className="font-bold text-foreground text-sm">{rule.rule_name}</div>
+                    <div className="text-xs text-gray-text font-mono">Type: {rule.rule_type}</div>
+                    <div className="text-xs text-amber-600 font-bold">Risk Impact: +{rule.threshold} pts</div>
                   </div>
 
                   <div className="flex items-center gap-3">
@@ -552,15 +504,15 @@ export default function AdminFraudPage() {
                       type="number"
                       value={rule.threshold}
                       onChange={(e) => handleUpdateRule(rule.id, parseInt(e.target.value || "0", 10), rule.enabled)}
-                      className="w-16 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs text-center text-white"
+                      className="w-16 bg-white border border-border rounded-lg px-2 py-1 text-xs text-center text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     />
 
                     <button
                       onClick={() => handleUpdateRule(rule.id, rule.threshold, !rule.enabled)}
-                      className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
                         rule.enabled
-                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                          : "bg-slate-800 text-slate-400 border border-slate-700"
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          : "bg-white text-gray-text border border-border"
                       }`}
                     >
                       {rule.enabled ? "Enabled" : "Disabled"}
@@ -574,80 +526,80 @@ export default function AdminFraudPage() {
 
         {/* TAB 3: RISK ANALYTICS */}
         {activeTab === "analytics" && (
-          <div className="bg-slate-900/80 rounded-2xl border border-slate-800 p-6 space-y-6">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <BarChart2 className="w-5 h-5 text-emerald-400" />
-              Risk Monitoring & Severity Breakdown
+          <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-6 space-y-6">
+            <h2 className="text-lg font-black text-foreground flex items-center gap-2">
+              <BarChart2 className="w-5 h-5 text-primary" />
+              Risk Monitoring &amp; Severity Breakdown
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-5 rounded-xl bg-slate-800/40 border border-slate-800 space-y-4">
-                <h3 className="text-sm font-semibold text-slate-300">Severity Distribution</h3>
+              <div className="p-5 rounded-xl bg-section border border-border space-y-4">
+                <h3 className="text-sm font-bold text-foreground">Severity Distribution</h3>
                 <div className="space-y-3">
                   <div>
-                    <div className="flex justify-between text-xs text-slate-300 mb-1">
+                    <div className="flex justify-between text-xs text-gray-text mb-1">
                       <span>Critical (81-100)</span>
                       <span>{criticalCases} cases</span>
                     </div>
-                    <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                      <div className="bg-rose-500 h-full" style={{ width: `${totalCases ? (criticalCases / totalCases) * 100 : 0}%` }} />
+                    <div className="w-full bg-border h-2 rounded-full overflow-hidden">
+                      <div className="bg-red-500 h-full" style={{ width: `${totalCases ? (criticalCases / totalCases) * 100 : 0}%` }} />
                     </div>
                   </div>
                   <div>
-                    <div className="flex justify-between text-xs text-slate-300 mb-1">
+                    <div className="flex justify-between text-xs text-gray-text mb-1">
                       <span>High (61-80)</span>
                       <span>{highCases} cases</span>
                     </div>
-                    <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-border h-2 rounded-full overflow-hidden">
                       <div className="bg-orange-500 h-full" style={{ width: `${totalCases ? (highCases / totalCases) * 100 : 0}%` }} />
                     </div>
                   </div>
                   <div>
-                    <div className="flex justify-between text-xs text-slate-300 mb-1">
+                    <div className="flex justify-between text-xs text-gray-text mb-1">
                       <span>Medium (31-60)</span>
                       <span>{cases.filter(c => c.severity === "Medium").length} cases</span>
                     </div>
-                    <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-border h-2 rounded-full overflow-hidden">
                       <div className="bg-amber-500 h-full" style={{ width: `${totalCases ? (cases.filter(c => c.severity === "Medium").length / totalCases) * 100 : 0}%` }} />
                     </div>
                   </div>
                   <div>
-                    <div className="flex justify-between text-xs text-slate-300 mb-1">
+                    <div className="flex justify-between text-xs text-gray-text mb-1">
                       <span>Low (0-30)</span>
                       <span>{cases.filter(c => c.severity === "Low").length} cases</span>
                     </div>
-                    <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-border h-2 rounded-full overflow-hidden">
                       <div className="bg-emerald-500 h-full" style={{ width: `${totalCases ? (cases.filter(c => c.severity === "Low").length / totalCases) * 100 : 0}%` }} />
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="p-5 rounded-xl bg-slate-800/40 border border-slate-800 space-y-4">
-                <h3 className="text-sm font-semibold text-slate-300">Automated Actions Executed</h3>
-                <div className="space-y-3 text-xs text-slate-300">
-                  <div className="flex justify-between p-2.5 rounded-lg bg-slate-800/60">
-                    <span>Log Only (Low):</span>
-                    <span className="font-bold text-emerald-400">{cases.filter(c => c.severity === "Low").length}</span>
+              <div className="p-5 rounded-xl bg-section border border-border space-y-4">
+                <h3 className="text-sm font-bold text-foreground">Automated Actions Executed</h3>
+                <div className="space-y-3 text-xs">
+                  <div className="flex justify-between p-2.5 rounded-lg bg-white border border-border">
+                    <span className="text-gray-text">Log Only (Low):</span>
+                    <span className="font-bold text-emerald-600">{cases.filter(c => c.severity === "Low").length}</span>
                   </div>
-                  <div className="flex justify-between p-2.5 rounded-lg bg-slate-800/60">
-                    <span>Warning Notifications Sent:</span>
-                    <span className="font-bold text-amber-400">{cases.filter(c => c.severity === "Medium").length}</span>
+                  <div className="flex justify-between p-2.5 rounded-lg bg-white border border-border">
+                    <span className="text-gray-text">Warning Notifications Sent:</span>
+                    <span className="font-bold text-amber-600">{cases.filter(c => c.severity === "Medium").length}</span>
                   </div>
-                  <div className="flex justify-between p-2.5 rounded-lg bg-slate-800/60">
-                    <span>Temporary Blocks Enforced:</span>
-                    <span className="font-bold text-orange-400">{cases.filter(c => c.severity === "High").length}</span>
+                  <div className="flex justify-between p-2.5 rounded-lg bg-white border border-border">
+                    <span className="text-gray-text">Temporary Blocks Enforced:</span>
+                    <span className="font-bold text-orange-600">{cases.filter(c => c.severity === "High").length}</span>
                   </div>
-                  <div className="flex justify-between p-2.5 rounded-lg bg-slate-800/60">
-                    <span>Partner Suspensions Triggered:</span>
-                    <span className="font-bold text-rose-400">{criticalCases}</span>
+                  <div className="flex justify-between p-2.5 rounded-lg bg-white border border-border">
+                    <span className="text-gray-text">Partner Suspensions Triggered:</span>
+                    <span className="font-bold text-red-600">{criticalCases}</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </AdminShell>
   );
 }

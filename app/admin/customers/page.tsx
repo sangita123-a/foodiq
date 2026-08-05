@@ -181,8 +181,8 @@ export default function AdminCustomersPage() {
     <AdminShell title="Customer Management">
       {/* Toast Notification Banner */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-800 text-xs font-bold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4">
-          <span className="w-2 h-2 rounded-full bg-[#E23744] animate-ping" />
+        <div className="fixed bottom-6 right-6 z-50 bg-white text-foreground px-5 py-3 rounded-2xl shadow-[var(--shadow-admin-lifted)] border border-border text-xs font-bold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4">
+          <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -190,34 +190,34 @@ export default function AdminCustomersPage() {
       {/* Main Page Title & Live Counter Strip */}
       <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
             Customer Management Module
           </h1>
-          <p className="text-xs md:text-sm text-gray-500 font-medium">
+          <p className="text-xs md:text-sm text-gray-text font-medium">
             Monitor, audit, verify, support, and manage enterprise customer accounts.
           </p>
         </div>
 
         {/* Realtime Live Socket Indicator */}
-        <div className="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm flex items-center gap-4 shrink-0">
+        <div className="bg-white border border-border rounded-2xl p-3 shadow-[var(--shadow-admin-soft)] flex items-center gap-4 shrink-0">
           <div className="flex items-center gap-2">
             <div className="relative">
               <Radio className="w-4 h-4 text-emerald-500" />
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping absolute inset-0 m-auto" />
             </div>
             <div>
-              <div className="text-[10px] uppercase font-bold text-gray-400">Live Socket</div>
-              <div className="text-xs font-bold text-gray-900">Connected</div>
+              <div className="text-[10px] uppercase font-bold text-[#9CA3AF]">Live Socket</div>
+              <div className="text-xs font-bold text-foreground">Connected</div>
             </div>
           </div>
 
-          <div className="h-8 w-px bg-gray-100" />
+          <div className="h-8 w-px bg-border" />
 
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-[#E23744]" />
+            <Users className="w-4 h-4 text-primary" />
             <div>
-              <div className="text-[10px] uppercase font-bold text-gray-400">Online Customers</div>
-              <div className="text-xs font-black text-[#E23744]">{onlineCustomersCount} Live</div>
+              <div className="text-[10px] uppercase font-bold text-[#9CA3AF]">Online Customers</div>
+              <div className="text-xs font-black text-primary">{onlineCustomersCount} Live</div>
             </div>
           </div>
         </div>

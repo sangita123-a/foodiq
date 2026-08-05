@@ -1,16 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
 import {
   Gift,
   Search,
   Filter,
-  CheckCircle2,
   AlertTriangle,
   RefreshCw,
   Sliders,
-  ChevronLeft,
   Users,
   Wallet,
   Download,
@@ -32,6 +29,19 @@ import {
   AdminReferralResponse,
   AdminReferralSettings,
 } from "@/services/adminApi";
+import AdminShell from "@/components/admin/AdminShell";
+import StatCard from "@/components/admin/dashboard/StatCard";
+import { Badge, Button, EmptyState } from "@/components/admin/ui";
+import type { BadgeTone } from "@/components/admin/ui";
+
+const STATUS_TONE: Record<string, BadgeTone> = {
+  rewarded: "success",
+  first_delivery_completed: "info",
+  kyc_completed: "violet",
+  registered: "warning",
+  pending: "warning",
+  expired: "neutral",
+};
 
 export default function AdminReferralsPage() {
   const [data, setData] = useState<AdminReferralResponse | null>(null);
@@ -157,48 +167,37 @@ export default function AdminReferralsPage() {
     `₹${Number(val || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-4 md:p-8 font-sans">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <AdminShell title="Referral Program">
+      <div className="space-y-6">
         {/* Top Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Link
-              href="/admin"
-              className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </Link>
+            <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0">
+              <Gift className="w-6 h-6 text-emerald-600" />
+            </div>
             <div>
-              <div className="flex items-center gap-2">
-                <Gift className="w-6 h-6 text-emerald-400" />
-                <h1 className="text-2xl font-bold text-zinc-100">Referral Program Management</h1>
-              </div>
-              <p className="text-sm text-zinc-400 mt-0.5">
-                Audit delivery referrals, verify eligibility rules, fraud risk checks, & adjust reward settings
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">Referral Program Management</h1>
+              <p className="text-sm text-gray-text mt-0.5">
+                Audit delivery referrals, verify eligibility rules, fraud risk checks, &amp; adjust reward settings
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={handleExportCSV}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-sm font-medium text-zinc-300 hover:text-white transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-border hover:bg-section text-sm font-bold text-foreground transition-all"
             >
-              <Download className="w-4 h-4 text-emerald-400" />
+              <Download className="w-4 h-4 text-emerald-600" />
               Export CSV
             </button>
-            <button
-              onClick={loadData}
-              disabled={loading}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-sm transition-all"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            <Button variant="primary" onClick={loadData} loading={loading} icon={<RefreshCw className="w-4 h-4" />}>
               Refresh
-            </button>
+            </Button>
           </div>
         </div>
 
         {error && (
-          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center gap-3 text-sm">
+          <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3 text-sm">
             <AlertTriangle className="w-5 h-5 flex-shrink-0" />
             <span>{error}</span>
           </div>
@@ -206,62 +205,49 @@ export default function AdminReferralsPage() {
 
         {/* Overview Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-1">
-            <span className="text-xs text-zinc-400 font-medium">Total Referrals</span>
-            <div className="text-2xl font-bold text-white">{data?.stats.total_referrals || 0}</div>
-            <span className="text-xs text-zinc-500">All registered links</span>
-          </div>
-
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-1">
-            <span className="text-xs text-zinc-400 font-medium">Registered / In Progress</span>
-            <div className="text-2xl font-bold text-amber-400">
-              {(data?.stats.registered_count || 0) + (data?.stats.kyc_completed_count || 0)}
-            </div>
-            <span className="text-xs text-zinc-500">Pending eligibility</span>
-          </div>
-
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-1">
-            <span className="text-xs text-zinc-400 font-medium">First Delivery Complete</span>
-            <div className="text-2xl font-bold text-blue-400">{data?.stats.first_delivery_count || 0}</div>
-            <span className="text-xs text-zinc-500">Ready for credit</span>
-          </div>
-
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-1">
-            <span className="text-xs text-zinc-400 font-medium">Rewarded Count</span>
-            <div className="text-2xl font-bold text-emerald-400">{data?.stats.rewarded_count || 0}</div>
-            <span className="text-xs text-zinc-500">Credited to wallet</span>
-          </div>
-
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-1 col-span-2 lg:col-span-1">
-            <span className="text-xs text-zinc-400 font-medium">Total Bonus Payout</span>
-            <div className="text-2xl font-bold text-emerald-400">
-              {formatCurrency(data?.stats.total_payout || 0)}
-            </div>
-            <span className="text-xs text-zinc-500">Delivery Wallet total</span>
-          </div>
+          <StatCard label="Total Referrals" value={data?.stats.total_referrals || 0} icon={Users} color="text-primary" bg="bg-primary/10" hint="All registered links" />
+          <StatCard
+            label="Registered / In Progress"
+            value={(data?.stats.registered_count || 0) + (data?.stats.kyc_completed_count || 0)}
+            icon={Clock}
+            color="text-amber-600"
+            bg="bg-amber-500/10"
+            hint="Pending eligibility"
+          />
+          <StatCard label="First Delivery Complete" value={data?.stats.first_delivery_count || 0} icon={Check} color="text-blue-600" bg="bg-blue-500/10" hint="Ready for credit" />
+          <StatCard label="Rewarded Count" value={data?.stats.rewarded_count || 0} icon={Sparkles} color="text-emerald-600" bg="bg-emerald-500/10" hint="Credited to wallet" />
+          <StatCard
+            label="Total Bonus Payout"
+            value={data?.stats.total_payout || 0}
+            icon={Wallet}
+            color="text-emerald-600"
+            bg="bg-emerald-500/10"
+            format={formatCurrency}
+            hint="Delivery wallet total"
+          />
         </div>
 
         {/* Tab Selection */}
-        <div className="flex items-center gap-2 border-b border-zinc-800 pb-2">
+        <div className="flex items-center gap-2 border-b border-border pb-2">
           <button
             onClick={() => setActiveTab("referrals")}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
               activeTab === "referrals"
-                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                : "text-zinc-400 hover:text-zinc-200"
+                ? "bg-primary/10 text-primary"
+                : "text-gray-text hover:text-foreground hover:bg-section"
             }`}
           >
-            <Users className="w-4 h-4" /> Referrals Audit & Rewards
+            <Users className="w-4 h-4" /> Referrals Audit &amp; Rewards
           </button>
           <button
             onClick={() => setActiveTab("settings")}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
               activeTab === "settings"
-                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                : "text-zinc-400 hover:text-zinc-200"
+                ? "bg-primary/10 text-primary"
+                : "text-gray-text hover:text-foreground hover:bg-section"
             }`}
           >
-            <Settings className="w-4 h-4" /> Reward Settings & Rules
+            <Settings className="w-4 h-4" /> Reward Settings &amp; Rules
           </button>
         </div>
 
@@ -269,24 +255,24 @@ export default function AdminReferralsPage() {
         {activeTab === "referrals" && (
           <div className="space-y-4">
             {/* Filter Bar */}
-            <div className="flex flex-col md:flex-row gap-4 justify-between bg-zinc-900 p-4 rounded-xl border border-zinc-800">
+            <div className="flex flex-col md:flex-row gap-4 justify-between bg-white p-4 rounded-2xl border border-border shadow-[var(--shadow-admin-soft)]">
               <div className="relative flex-1">
-                <Search className="w-4 h-4 absolute left-3 top-3 text-zinc-500" />
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
                 <input
                   type="text"
                   placeholder="Search code, partner name, or phone number..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg pl-9 pr-4 py-2 text-sm text-zinc-200 focus:outline-none focus:border-emerald-500/50"
+                  className="w-full bg-section border border-transparent rounded-xl pl-9 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
                 />
               </div>
 
               <div className="flex items-center gap-3">
-                <Filter className="w-4 h-4 text-zinc-400" />
+                <Filter className="w-4 h-4 text-gray-text shrink-0" />
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-emerald-500/50"
+                  className="bg-section border border-transparent rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
                 >
                   <option value="all">All Statuses</option>
                   <option value="pending">Pending</option>
@@ -300,60 +286,50 @@ export default function AdminReferralsPage() {
             </div>
 
             {/* Referrals List Table */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-lg">
+            <div className="bg-white border border-border rounded-2xl overflow-hidden shadow-[var(--shadow-admin-soft)]">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-zinc-300">
-                  <thead className="bg-zinc-950/80 border-b border-zinc-800 text-xs font-semibold uppercase text-zinc-400">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-section">
                     <tr>
-                      <th className="p-4">Referral Code</th>
-                      <th className="p-4">Referrer Partner</th>
-                      <th className="p-4">Referred Partner</th>
-                      <th className="p-4">Status & Eligibility</th>
-                      <th className="p-4">Reward Amount</th>
-                      <th className="p-4">Actions</th>
+                      <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">Referral Code</th>
+                      <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">Referrer Partner</th>
+                      <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">Referred Partner</th>
+                      <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">Status &amp; Eligibility</th>
+                      <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">Reward Amount</th>
+                      <th className="p-4 text-xs font-bold text-[#9CA3AF] uppercase">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-800/60">
+                  <tbody className="divide-y divide-border">
                     {!data?.referrals || data.referrals.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="p-8 text-center text-zinc-500">
-                          No referral records found matching criteria.
+                        <td colSpan={6}>
+                          <EmptyState icon={Gift} title="No referrals found" description="No referral records match the current criteria." />
                         </td>
                       </tr>
                     ) : (
                       data.referrals.map((r) => (
-                        <tr key={r.id} className="hover:bg-zinc-800/30 transition-colors">
-                          <td className="p-4 font-mono font-bold text-emerald-400">{r.referral_code}</td>
+                        <tr key={r.id} className="hover:bg-section/50 transition-colors">
+                          <td className="p-4 font-mono font-bold text-primary">{r.referral_code}</td>
                           <td className="p-4">
-                            <div className="font-semibold text-zinc-100">{r.referrer_name || "Unknown"}</div>
-                            <div className="text-xs text-zinc-500">{r.referrer_phone}</div>
+                            <div className="font-bold text-foreground">{r.referrer_name || "Unknown"}</div>
+                            <div className="text-xs text-gray-text">{r.referrer_phone}</div>
                           </td>
                           <td className="p-4">
-                            <div className="font-semibold text-zinc-100">{r.referred_name || "Pending Registration"}</div>
-                            <div className="text-xs text-zinc-500">{r.referred_phone}</div>
+                            <div className="font-bold text-foreground">{r.referred_name || "Pending Registration"}</div>
+                            <div className="text-xs text-gray-text">{r.referred_phone}</div>
                           </td>
                           <td className="p-4 space-y-1">
-                            <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${
-                              r.status === "rewarded"
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                : r.status === "first_delivery_completed"
-                                ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                                : r.status === "kyc_completed"
-                                ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
-                                : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                            }`}>
-                              {r.status}
-                            </span>
-                            <div className="text-[11px] text-zinc-500">
+                            <Badge tone={STATUS_TONE[r.status] ?? "neutral"}>{r.status}</Badge>
+                            <div className="text-[11px] text-gray-text">
                               KYC: {r.referred_kyc_approved ? "Approved" : "Pending"}
                             </div>
                           </td>
-                          <td className="p-4 font-bold text-emerald-400">{formatCurrency(r.reward_amount)}</td>
+                          <td className="p-4 font-bold text-emerald-600">{formatCurrency(r.reward_amount)}</td>
                           <td className="p-4">
                             {r.status !== "rewarded" && (
                               <button
                                 onClick={() => handleUpdateStatus(r.id, "rewarded", true)}
-                                className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs transition-all flex items-center gap-1"
+                                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all flex items-center gap-1"
                               >
                                 <Check className="w-3.5 h-3.5" /> Credit Reward
                               </button>
@@ -371,35 +347,35 @@ export default function AdminReferralsPage() {
 
         {/* TAB 2: Settings */}
         {activeTab === "settings" && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 max-w-2xl space-y-6">
+          <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-6 max-w-2xl space-y-6">
             <div>
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Settings className="w-5 h-5 text-emerald-400" /> Referral Reward Configuration
+              <h3 className="text-lg font-black text-foreground flex items-center gap-2">
+                <Settings className="w-5 h-5 text-primary" /> Referral Reward Configuration
               </h3>
-              <p className="text-sm text-zinc-400">Manage global referral rules, payout amount, and automation settings</p>
+              <p className="text-sm text-gray-text">Manage global referral rules, payout amount, and automation settings</p>
             </div>
 
             <form onSubmit={handleSaveSettings} className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-zinc-300 block mb-1">
+                <label className="text-sm font-bold text-foreground block mb-1.5">
                   Default Reward Amount (₹)
                 </label>
                 <input
                   type="number"
                   value={rewardAmount}
                   onChange={(e) => setRewardAmount(Number(e.target.value))}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-section border border-transparent rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
                 />
               </div>
 
               <div>
-                <label className="text-sm font-medium text-zinc-300 block mb-1">
+                <label className="text-sm font-bold text-foreground block mb-1.5">
                   Reward Type
                 </label>
                 <select
                   value={rewardType}
                   onChange={(e) => setRewardType(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-section border border-transparent rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
                 >
                   <option value="cash">Direct Cash to Delivery Wallet</option>
                   <option value="bonus">Bonus Credit</option>
@@ -407,26 +383,26 @@ export default function AdminReferralsPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-zinc-300 block mb-1">
+                <label className="text-sm font-bold text-foreground block mb-1.5">
                   Min Deliveries Required Before Reward
                 </label>
                 <input
                   type="number"
                   value={minDeliveries}
                   onChange={(e) => setMinDeliveries(Number(e.target.value))}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-section border border-transparent rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
                 />
               </div>
 
               <div>
-                <label className="text-sm font-medium text-zinc-300 block mb-1">
+                <label className="text-sm font-bold text-foreground block mb-1.5">
                   Referral Link Expiry (Days)
                 </label>
                 <input
                   type="number"
                   value={expiryDays}
                   onChange={(e) => setExpiryDays(Number(e.target.value))}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-section border border-transparent rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
                 />
               </div>
 
@@ -436,9 +412,9 @@ export default function AdminReferralsPage() {
                   id="autoCredit"
                   checked={autoCredit}
                   onChange={(e) => setAutoCredit(e.target.checked)}
-                  className="w-4 h-4 rounded border-zinc-800 bg-zinc-950 text-emerald-500 focus:ring-emerald-500"
+                  className="w-4 h-4 rounded border-border accent-primary focus:ring-primary/30"
                 />
-                <label htmlFor="autoCredit" className="text-sm text-zinc-300">
+                <label htmlFor="autoCredit" className="text-sm text-gray-text">
                   Enable Automatic Wallet Crediting upon eligibility check
                 </label>
               </div>
@@ -446,7 +422,7 @@ export default function AdminReferralsPage() {
               <button
                 type="submit"
                 disabled={savingSettings}
-                className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-sm transition-all shadow-lg disabled:opacity-50"
+                className="w-full py-3 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-sm transition-all shadow-[var(--shadow-button)] disabled:opacity-50"
               >
                 {savingSettings ? "Saving Settings..." : "Save Referral Configuration"}
               </button>
@@ -454,6 +430,6 @@ export default function AdminReferralsPage() {
           </div>
         )}
       </div>
-    </div>
+    </AdminShell>
   );
 }

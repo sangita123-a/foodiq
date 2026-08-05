@@ -22,7 +22,7 @@ const QUICK_NAV: Array<{ match: string[]; href: string }> = [
   { match: ["review", "reviews"], href: "/admin/reviews" },
   { match: ["zone", "zones", "delivery zone"], href: "/admin/delivery-zones" },
   { match: ["shift", "shifts"], href: "/admin/shifts" },
-  { match: ["support", "ticket", "tickets"], href: "/admin/tickets" },
+  { match: ["support", "ticket", "tickets"], href: "/admin/support-center" },
   { match: ["report", "reports"], href: "/admin/reports" },
   { match: ["setting", "settings"], href: "/admin/settings" },
 ];
@@ -75,19 +75,19 @@ export default function AdminHeader({ title = "Admin Console" }: AdminHeaderProp
 
   return (
     <>
-      <div className="h-16 sm:h-20 bg-background border-b border-border flex items-center justify-between gap-3 px-3 sm:px-4 lg:px-8 sticky top-0 z-30 safe-top">
+      <div className="h-16 sm:h-20 bg-white/85 backdrop-blur-xl border-b border-border flex items-center justify-between gap-3 px-3 sm:px-4 lg:px-8 sticky top-0 z-30 safe-top">
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden touch-target flex items-center justify-center text-gray-text hover:text-foreground p-2 -ml-1"
+            className="lg:hidden touch-target flex items-center justify-center text-gray-text hover:text-foreground p-2 -ml-1 rounded-lg hover:bg-section transition-colors"
             aria-label="Open navigation menu"
           >
             <Menu className="w-6 h-6" />
           </button>
           <div className="min-w-0 hidden sm:block">
-            <h2 className="text-foreground font-black leading-none text-sm sm:text-base truncate">{title}</h2>
-            <p className="text-[#9CA3AF] text-[10px] sm:text-xs mt-0.5 sm:mt-1 flex items-center gap-1">
+            <h2 className="text-foreground font-black leading-none text-base sm:text-lg tracking-tight truncate">{title}</h2>
+            <p className="text-[#9CA3AF] text-[10px] sm:text-xs mt-1 flex items-center gap-1">
               <Shield className="w-3 h-3 shrink-0" /> Platform administration
             </p>
           </div>
@@ -95,21 +95,21 @@ export default function AdminHeader({ title = "Admin Console" }: AdminHeaderProp
 
         <form onSubmit={handleSearch} className="flex-1 max-w-md hidden md:block">
           <div className="relative">
-            <Search className="w-4 h-4 text-[#9CA3AF] absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#9CA3AF] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               type="search"
               placeholder="Search orders, restaurants, customers…"
-              className="w-full bg-section border border-border rounded-full pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
+              className="w-full bg-section border border-transparent rounded-full pl-9 pr-4 py-2.5 text-sm text-foreground placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
             />
           </div>
         </form>
 
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <Link
-            href="/admin/tickets"
-            className="touch-target hidden sm:flex items-center justify-center text-gray-text hover:text-foreground p-2 rounded-full hover:bg-section transition-colors"
+            href="/admin/support-center"
+            className="touch-target hidden sm:flex items-center justify-center text-gray-text hover:text-foreground p-2.5 rounded-full hover:bg-section transition-colors"
             aria-label="Messages"
             title="Support messages"
           >
@@ -117,15 +117,15 @@ export default function AdminHeader({ title = "Admin Console" }: AdminHeaderProp
           </Link>
           <NotificationBell endpoint="/api/notifications" inboxHref="/admin/notifications" />
 
-          <div className="relative" ref={profileRef}>
+          <div className="relative ml-1" ref={profileRef}>
             <button
               type="button"
               onClick={() => setProfileOpen((v) => !v)}
-              className="flex items-center gap-2 bg-section border border-border rounded-full pl-2 pr-2 sm:pr-3 py-1.5 hover:border-border-hover transition-colors"
+              className="flex items-center gap-2 bg-section rounded-full pl-1.5 pr-2 sm:pr-3 py-1.5 hover:bg-[var(--surface-hover)] transition-colors"
               aria-haspopup="menu"
               aria-expanded={profileOpen}
             >
-              <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center text-primary font-black text-sm shrink-0">
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-black text-sm shrink-0 shadow-[var(--shadow-admin-glow)]">
                 {initial}
               </div>
               <span className="text-sm font-bold text-foreground hidden sm:block max-w-[100px] truncate">{adminName}</span>
@@ -135,9 +135,9 @@ export default function AdminHeader({ title = "Admin Console" }: AdminHeaderProp
             {profileOpen && (
               <div
                 role="menu"
-                className="absolute right-0 mt-2 w-56 bg-white border border-border rounded-2xl shadow-lg py-2 z-50"
+                className="absolute right-0 mt-2 w-56 bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-lifted)] py-2 z-50"
               >
-                <div className="px-4 py-2 border-b border-border mb-1">
+                <div className="px-4 py-2.5 border-b border-border mb-1">
                   <p className="text-sm font-black text-foreground truncate">{adminName}</p>
                   {adminEmail && <p className="text-xs text-gray-text truncate">{adminEmail}</p>}
                 </div>
@@ -161,7 +161,7 @@ export default function AdminHeader({ title = "Admin Console" }: AdminHeaderProp
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-500/10 transition-colors text-left"
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors text-left"
                     role="menuitem"
                   >
                     <LogOut className="w-4 h-4" /> Logout

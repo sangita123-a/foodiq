@@ -304,21 +304,59 @@ CREATE TABLE IF NOT EXISTS refunds (
 CREATE INDEX IF NOT EXISTS idx_refunds_order ON refunds(order_id);
 
 -- 15. delivery_partners
+-- Canonical shape kept in sync with utils/ensureSchema.js's delivery_partners
+-- CREATE TABLE block — this used to be defined 3x here with conflicting
+-- columns; only this (superset) definition is kept.
 CREATE TABLE IF NOT EXISTS delivery_partners (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
-    vehicle_details VARCHAR(255),
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    full_name VARCHAR(255),
+    email VARCHAR(255) UNIQUE,
+    phone_number VARCHAR(20) UNIQUE,
+    password_hash VARCHAR(255),
     vehicle_type VARCHAR(50),
+    vehicle_number VARCHAR(50),
+    vehicle_details TEXT,
+    driving_license_number VARCHAR(100),
     license_number VARCHAR(100),
-    current_lat DECIMAL(10,8),
-    current_lng DECIMAL(11,8),
-    is_available BOOLEAN DEFAULT TRUE,
-    rating DECIMAL(2,1) DEFAULT 0.0,
+    aadhaar_number VARCHAR(50),
+    profile_photo TEXT,
+    profile_photo_url TEXT,
+    vehicle_photo_url TEXT,
+    license_photo_url TEXT,
+    vehicle_rc_url TEXT,
+    insurance_doc_url TEXT,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    address TEXT,
+    is_verified BOOLEAN DEFAULT FALSE,
+    is_online BOOLEAN DEFAULT FALSE,
+    is_available BOOLEAN DEFAULT FALSE,
+    status VARCHAR(30) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'suspended')),
+    approval_status VARCHAR(20) DEFAULT 'approved',
+    rating DECIMAL(3,2) DEFAULT 5.0,
+    wallet_balance DECIMAL(10,2) DEFAULT 0,
+    current_lat NUMERIC(10,7),
+    current_lng NUMERIC(10,7),
+    bank_account_name TEXT,
+    bank_account_number TEXT,
+    bank_ifsc TEXT,
+    upi_id TEXT,
+    aadhaar_last4 VARCHAR(4),
+    reset_otp_hash VARCHAR(255),
+    reset_otp_expiry TIMESTAMP WITH TIME ZONE,
+    reset_otp_attempts INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 DROP TRIGGER IF EXISTS update_delivery_partners_modtime ON delivery_partners;
 CREATE TRIGGER update_delivery_partners_modtime BEFORE UPDATE ON delivery_partners FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partners_dl ON delivery_partners(driving_license_number) WHERE driving_license_number IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_delivery_partners_user_id ON delivery_partners(user_id);
+CREATE INDEX IF NOT EXISTS idx_delivery_partners_status ON delivery_partners(status);
+CREATE INDEX IF NOT EXISTS idx_delivery_partners_online ON delivery_partners(is_online);
+CREATE INDEX IF NOT EXISTS idx_delivery_partners_available ON delivery_partners(is_available);
 
 -- 16. order_tracking
 CREATE TABLE IF NOT EXISTS order_tracking (
@@ -1170,38 +1208,6 @@ ALTER TABLE order_tracking
   ADD COLUMN IF NOT EXISTS eta_minutes INTEGER,
   ADD COLUMN IF NOT EXISTS eta_source VARCHAR(40) DEFAULT 'haversine';
 
--- delivery_partners
-CREATE TABLE IF NOT EXISTS delivery_partners (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    full_name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    phone_number VARCHAR(20) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    vehicle_type VARCHAR(50),
-    vehicle_number VARCHAR(50),
-    driving_license_number VARCHAR(100),
-    aadhaar_number VARCHAR(50),
-    profile_photo TEXT,
-    city VARCHAR(100),
-    state VARCHAR(100),
-    address TEXT,
-    is_verified BOOLEAN DEFAULT FALSE,
-    is_online BOOLEAN DEFAULT FALSE,
-    status VARCHAR(30) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'suspended')),
-    rating DECIMAL(3,2) DEFAULT 5.0,
-    wallet_balance DECIMAL(10,2) DEFAULT 0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-DROP TRIGGER IF EXISTS update_delivery_partners_modtime ON delivery_partners;
-CREATE TRIGGER update_delivery_partners_modtime BEFORE UPDATE ON delivery_partners FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
-
-CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partners_email ON delivery_partners(email);
-CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partners_phone ON delivery_partners(phone_number);
-CREATE UNIQUE INDEX IF NOT EXISTS uq_delivery_partners_dl ON delivery_partners(driving_license_number) WHERE driving_license_number IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_delivery_partners_status ON delivery_partners(status);
-CREATE INDEX IF NOT EXISTS idx_delivery_partners_online ON delivery_partners(is_online);
-
 -- delivery_partner_documents (KYC & Vehicle Verification)
 CREATE TABLE IF NOT EXISTS delivery_partner_documents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1320,19 +1326,10 @@ CREATE INDEX IF NOT EXISTS idx_delivery_performance_history_metric ON delivery_p
 CREATE INDEX IF NOT EXISTS idx_delivery_performance_history_created ON delivery_performance_history(created_at);
 
 -- Driver Support Chat Module
-CREATE TABLE IF NOT EXISTS support_tickets (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    ticket_number VARCHAR(30) UNIQUE NOT NULL,
-    partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
-    subject VARCHAR(255) NOT NULL,
-    category VARCHAR(100),
-    priority VARCHAR(20) DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
-    status VARCHAR(20) DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'resolved', 'closed')),
-    assigned_admin UUID REFERENCES users(id) ON DELETE SET NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    closed_at TIMESTAMP WITH TIME ZONE
-);
+-- support_tickets is created above (§22); this used to redefine it a second
+-- time with a conflicting (partner-ticket) shape. The ALTER TABLE statements
+-- further down unify both the customer- and partner-ticket columns onto the
+-- single table created at §22 — only the indexes below are still needed.
 CREATE INDEX IF NOT EXISTS idx_support_tickets_partner_id ON support_tickets(partner_id);
 CREATE INDEX IF NOT EXISTS idx_support_tickets_status ON support_tickets(status);
 CREATE INDEX IF NOT EXISTS idx_support_tickets_priority ON support_tickets(priority);
@@ -1432,56 +1429,5 @@ CREATE TRIGGER update_dispatch_history_modtime BEFORE UPDATE ON dispatch_history
 CREATE INDEX IF NOT EXISTS idx_dispatch_history_order ON dispatch_history(order_id);
 CREATE INDEX IF NOT EXISTS idx_dispatch_history_partner ON dispatch_history(assigned_partner_id);
 CREATE INDEX IF NOT EXISTS idx_dispatch_history_created ON dispatch_history(created_at DESC);
-
--- delivery_partners table
-CREATE TABLE IF NOT EXISTS delivery_partners (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-    full_name VARCHAR(255),
-    email VARCHAR(255) UNIQUE,
-    phone_number VARCHAR(20) UNIQUE,
-    password_hash VARCHAR(255),
-    vehicle_type VARCHAR(50),
-    vehicle_number VARCHAR(50),
-    vehicle_details TEXT,
-    driving_license_number VARCHAR(100),
-    license_number VARCHAR(100),
-    aadhaar_number VARCHAR(50),
-    profile_photo TEXT,
-    profile_photo_url TEXT,
-    vehicle_photo_url TEXT,
-    license_photo_url TEXT,
-    vehicle_rc_url TEXT,
-    insurance_doc_url TEXT,
-    city VARCHAR(100),
-    state VARCHAR(100),
-    address TEXT,
-    is_verified BOOLEAN DEFAULT FALSE,
-    is_online BOOLEAN DEFAULT FALSE,
-    is_available BOOLEAN DEFAULT FALSE,
-    status VARCHAR(30) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'suspended')),
-    approval_status VARCHAR(20) DEFAULT 'approved',
-    rating DECIMAL(3,2) DEFAULT 5.0,
-    wallet_balance DECIMAL(10,2) DEFAULT 0,
-    current_lat NUMERIC(10,7),
-    current_lng NUMERIC(10,7),
-    bank_account_name TEXT,
-    bank_account_number TEXT,
-    bank_ifsc TEXT,
-    upi_id TEXT,
-    aadhaar_last4 VARCHAR(4),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-DROP TRIGGER IF EXISTS update_delivery_partners_modtime ON delivery_partners;
-CREATE TRIGGER update_delivery_partners_modtime BEFORE UPDATE ON delivery_partners FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
-
-CREATE INDEX IF NOT EXISTS idx_delivery_partners_user_id ON delivery_partners(user_id);
-CREATE INDEX IF NOT EXISTS idx_delivery_partners_status ON delivery_partners(status);
-CREATE INDEX IF NOT EXISTS idx_delivery_partners_online ON delivery_partners(is_online);
-CREATE INDEX IF NOT EXISTS idx_delivery_partners_available ON delivery_partners(is_available);
-
-
-
 
 

@@ -103,7 +103,7 @@ export default function AdminLiveDeliveriesMap({
   if (!apiKey) {
     return (
       <div
-        className={`bg-white rounded-3xl w-full border border-border relative overflow-hidden flex items-center justify-center ${heightClass} ${className}`}
+        className={`bg-white rounded-2xl w-full border border-border shadow-[var(--shadow-admin-soft)] relative overflow-hidden flex items-center justify-center ${heightClass} ${className}`}
       >
         <p className="text-sm font-bold text-gray-text px-6 text-center">
           Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to enable the live riders map.
@@ -114,7 +114,7 @@ export default function AdminLiveDeliveriesMap({
 
   return (
     <div
-      className={`bg-white rounded-3xl w-full border border-border relative overflow-hidden ${heightClass} ${className}`}
+      className={`bg-white rounded-2xl w-full border border-border shadow-[var(--shadow-admin-soft)] relative overflow-hidden ${heightClass} ${className}`}
     >
       <div ref={containerRef} className="absolute inset-0 z-0" />
       {riders.length === 0 && (

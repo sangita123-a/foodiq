@@ -108,51 +108,51 @@ export default function BulkActionBar({
   };
 
   return (
-    <div className="sticky top-0 z-10 mb-4 flex flex-wrap items-center gap-3 bg-foreground text-white rounded-2xl px-5 py-3 shadow-lg">
-      <span className="text-sm font-bold">{selectedIds.length} selected</span>
+    <div className="sticky top-0 z-10 mb-4 flex flex-wrap items-center gap-3 bg-white border border-primary/20 rounded-2xl px-5 py-3 shadow-[var(--shadow-admin-lifted)]">
+      <span className="text-sm font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-full">{selectedIds.length} selected</span>
 
-      <button type="button" onClick={bulkCancel} disabled={!!busy} className="flex items-center gap-1.5 text-xs font-bold bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg disabled:opacity-50">
+      <button type="button" onClick={bulkCancel} disabled={!!busy} className="flex items-center gap-1.5 text-xs font-bold text-foreground bg-section hover:bg-red-50 hover:text-red-600 px-3 py-2 rounded-lg disabled:opacity-50 transition-colors">
         {busy === "cancel" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Ban className="w-3.5 h-3.5" />} Bulk Cancel
       </button>
 
-      <div className="flex items-center gap-1.5 bg-white/10 rounded-lg px-2 py-1">
+      <div className="flex items-center gap-1.5 bg-section border border-border rounded-lg px-2 py-1">
         <select
           value={bulkStatus}
           onChange={(e) => setBulkStatus(e.target.value)}
-          className="bg-transparent text-xs font-bold text-white outline-none [&>option]:text-foreground"
+          className="bg-transparent text-xs font-bold text-foreground outline-none"
         >
           <option value="">Set status…</option>
           {STATUSES.map((s) => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
-        <button type="button" onClick={bulkStatusUpdate} disabled={!bulkStatus || !!busy} className="text-xs font-bold px-2 py-1 disabled:opacity-40">
+        <button type="button" onClick={bulkStatusUpdate} disabled={!bulkStatus || !!busy} className="text-xs font-bold text-primary px-2 py-1 disabled:opacity-40 disabled:text-gray-text">
           {busy === "status" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Apply"}
         </button>
       </div>
 
-      <div className="flex items-center gap-1.5 bg-white/10 rounded-lg px-2 py-1">
-        <Bike className="w-3.5 h-3.5" />
+      <div className="flex items-center gap-1.5 bg-section border border-border rounded-lg px-2 py-1">
+        <Bike className="w-3.5 h-3.5 text-gray-text" />
         <select
           value={bulkPartner}
           onChange={(e) => setBulkPartner(e.target.value)}
-          className="bg-transparent text-xs font-bold text-white outline-none [&>option]:text-foreground"
+          className="bg-transparent text-xs font-bold text-foreground outline-none"
         >
           <option value="">Assign partner…</option>
           {(partners || []).filter((p) => p.is_available !== false).map((p) => (
             <option key={p.id} value={p.id}>{p.full_name || p.id}</option>
           ))}
         </select>
-        <button type="button" onClick={bulkAssign} disabled={!bulkPartner || !!busy} className="text-xs font-bold px-2 py-1 disabled:opacity-40">
+        <button type="button" onClick={bulkAssign} disabled={!bulkPartner || !!busy} className="text-xs font-bold text-primary px-2 py-1 disabled:opacity-40 disabled:text-gray-text">
           {busy === "assign" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Apply"}
         </button>
       </div>
 
-      <button type="button" onClick={bulkExport} className="flex items-center gap-1.5 text-xs font-bold bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg">
+      <button type="button" onClick={bulkExport} className="flex items-center gap-1.5 text-xs font-bold text-foreground bg-section hover:bg-primary/10 hover:text-primary px-3 py-2 rounded-lg transition-colors">
         <Download className="w-3.5 h-3.5" /> Bulk Export
       </button>
 
-      <button type="button" onClick={onClear} className="ml-auto flex items-center gap-1 text-xs font-bold text-white/70 hover:text-white">
+      <button type="button" onClick={onClear} className="ml-auto flex items-center gap-1 text-xs font-bold text-gray-text hover:text-foreground">
         <X className="w-3.5 h-3.5" /> Clear selection
       </button>
     </div>

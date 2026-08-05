@@ -20,7 +20,7 @@ export default function CustomerInsightsPanel({
   ];
 
   return (
-    <section className="bg-white border border-border rounded-2xl p-5 shadow-sm">
+    <section className="bg-white border border-border rounded-2xl p-5 sm:p-6 shadow-[var(--shadow-admin-soft)] hover:shadow-[var(--shadow-admin-lifted)] transition-shadow duration-200">
       <h2 className="text-lg font-black text-foreground mb-4 flex items-center gap-2">
         <Users className="w-4 h-4 text-primary" /> Customer Insights
       </h2>

@@ -24,6 +24,29 @@
   --border: #e8e8e8;
   --color-gray-text: #6b7280;
   --color-muted: #9ca3af;
+
+  /* Premium surface language: soft/lifted shadows + glass cards for the
+     enterprise admin. Kept scoped here so the rest of the site is unaffected. */
+  --shadow-admin-soft: 0 1px 2px rgba(17, 17, 17, 0.04), 0 6px 20px rgba(17, 17, 17, 0.05);
+  --shadow-admin-lifted: 0 4px 10px rgba(17, 17, 17, 0.04), 0 16px 40px rgba(17, 17, 17, 0.09);
+  --shadow-admin-glow: 0 0 0 1px rgba(226, 55, 68, 0.08), 0 8px 24px rgba(226, 55, 68, 0.12);
+  --glass-surface: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(17, 17, 17, 0.06);
+
+  /* Shared qualitative chart palette — distinct hues that don't collide with
+     the brand red, consumed by lib/adminChartTheme.ts so every chart in the
+     admin (Recharts or hand-rolled) draws from one source of truth. */
+  --chart-1: #e23744;
+  --chart-2: #2563eb;
+  --chart-3: #059669;
+  --chart-4: #d97706;
+  --chart-5: #7c3aed;
+  --chart-6: #0891b2;
+  --chart-7: #db2777;
+  --chart-grid: #eef0f2;
+  --chart-axis: #9ca3af;
+  --chart-tooltip-bg: #17181c;
+  --chart-tooltip-fg: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {

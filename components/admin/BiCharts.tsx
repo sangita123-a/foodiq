@@ -1,6 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import {
+  chartColor,
+  CHART_AXIS,
+  CHART_TOOLTIP_BG,
+  CHART_TOOLTIP_FG,
+} from "@/lib/adminChartTheme";
 
 type Point = { label: string; value: number };
 
@@ -8,7 +14,7 @@ type Point = { label: string; value: number };
 export function BiBarChart({
   data,
   height = 160,
-  color = "#0F766E",
+  color = chartColor(1),
 }: {
   data: Point[];
   height?: number;
@@ -37,7 +43,10 @@ export function BiBarChart({
               title={`${d.label}: ${d.value}`}
             />
             {data.length <= 24 ? (
-              <span className="text-[9px] text-[#9CA3AF] mt-1 truncate w-full text-center">
+              <span
+                className="text-[9px] mt-1 truncate w-full text-center"
+                style={{ color: CHART_AXIS }}
+              >
                 {d.label}
               </span>
             ) : null}
@@ -45,7 +54,10 @@ export function BiBarChart({
         ))}
       </div>
       {hover != null && data[hover] ? (
-        <div className="absolute -top-1 left-1/2 -translate-x-1/2 -translate-y-full bg-[#111827] text-white text-xs font-bold px-2 py-1 rounded-lg whitespace-nowrap pointer-events-none">
+        <div
+          className="absolute -top-1 left-1/2 -translate-x-1/2 -translate-y-full text-xs font-bold px-2 py-1 rounded-lg whitespace-nowrap pointer-events-none"
+          style={{ background: CHART_TOOLTIP_BG, color: CHART_TOOLTIP_FG }}
+        >
           {data[hover].label}: {data[hover].value}
         </div>
       ) : null}
@@ -57,7 +69,7 @@ export function BiBarChart({
 export function BiLineChart({
   data,
   height = 160,
-  color = "#0F766E",
+  color = chartColor(0),
 }: {
   data: Point[];
   height?: number;

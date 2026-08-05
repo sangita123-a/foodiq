@@ -5,6 +5,9 @@ import { mutate } from "swr";
 import AdminShell from "@/components/admin/AdminShell";
 import { useAdminList } from "@/hooks/useAdminData";
 import { adminPut, adminDelete } from "@/services/adminApi";
+import Button from "@/components/admin/ui/Button";
+import EmptyState from "@/components/admin/ui/EmptyState";
+import { FileText } from "lucide-react";
 
 type CmsItem = {
   id: string;
@@ -76,7 +79,7 @@ export default function AdminCmsPage() {
   return (
     <AdminShell title="CMS">
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-foreground">Content Management</h1>
+        <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Content Management</h1>
         <p className="text-gray-text">Manage homepage banners, collections, offers, legal pages, and FAQs.</p>
       </div>
 
@@ -87,15 +90,15 @@ export default function AdminCmsPage() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-3xl border border-border p-4">
-          <h2 className="text-sm font-black uppercase tracking-widest text-[#9CA3AF] mb-3 px-2">Pages</h2>
+        <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-4">
+          <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#9CA3AF] mb-3 px-2">Pages</h2>
           <div className="space-y-1">
             {PRESET_KEYS.map((p) => (
               <button
                 key={p.key}
                 type="button"
                 onClick={() => loadPreset(p)}
-                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold transition ${
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold transition-colors duration-150 ${
                   selected.key === p.key
                     ? "bg-primary text-white"
                     : "text-gray-text hover:bg-section"
@@ -107,8 +110,8 @@ export default function AdminCmsPage() {
           </div>
         </div>
 
-        <form onSubmit={save} className="lg:col-span-3 bg-white rounded-3xl border border-border p-6 space-y-4">
-          <h2 className="text-lg font-black text-foreground">{selected.label}</h2>
+        <form onSubmit={save} className="lg:col-span-3 bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-5 sm:p-6 space-y-4">
+          <h2 className="text-lg font-black text-foreground tracking-tight">{selected.label}</h2>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -123,29 +126,33 @@ export default function AdminCmsPage() {
             placeholder='{"content": "..."}'
           />
           <div className="flex gap-3">
-            <button type="submit" disabled={busy} className="bg-primary text-white font-black px-6 py-3 rounded-xl">
+            <Button type="submit" variant="primary" disabled={busy} loading={busy}>
               Save Content
-            </button>
+            </Button>
           </div>
         </form>
       </div>
 
-      {isLoading ? null : items.length > 0 && (
-        <div className="mt-8 bg-white rounded-3xl border border-border p-6">
-          <h2 className="text-lg font-black text-foreground mb-4">Published Blocks</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {items.map((item) => (
-              <div key={item.id} className="border border-border rounded-xl p-4 flex justify-between items-start">
-                <div>
-                  <p className="font-bold text-foreground">{item.title || item.content_key}</p>
-                  <p className="text-xs text-[#9CA3AF]">{item.content_key} · {item.content_type}</p>
+      {isLoading ? null : (
+        <div className="mt-6 bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
+          <h2 className="text-lg font-black text-foreground tracking-tight mb-4">Published Blocks</h2>
+          {items.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {items.map((item) => (
+                <div key={item.id} className="border border-border rounded-xl p-4 flex justify-between items-start">
+                  <div>
+                    <p className="font-bold text-foreground">{item.title || item.content_key}</p>
+                    <p className="text-xs text-[#9CA3AF] mt-0.5">{item.content_key} · {item.content_type}</p>
+                  </div>
+                  <button type="button" onClick={() => remove(item.content_key)} className="text-xs text-red-500 font-bold hover:text-red-600">
+                    Delete
+                  </button>
                 </div>
-                <button type="button" onClick={() => remove(item.content_key)} className="text-xs text-red-500 font-bold">
-                  Delete
-                </button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState icon={FileText} title="No published blocks yet" description="Saved CMS content will appear here." />
+          )}
         </div>
       )}
     </AdminShell>

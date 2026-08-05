@@ -10,7 +10,17 @@ import {
   fetchWeeklyBugReport,
   formatDate,
 } from "@/services/adminApi";
+import Badge, { type BadgeTone } from "@/components/admin/ui/Badge";
+import Button from "@/components/admin/ui/Button";
+import EmptyState from "@/components/admin/ui/EmptyState";
 import { Bug, FileBarChart, RefreshCw } from "lucide-react";
+
+const SEVERITY_TONE: Record<string, BadgeTone> = {
+  low: "neutral",
+  medium: "info",
+  high: "warning",
+  critical: "error",
+};
 
 const STATUSES = ["open", "triaging", "in_progress", "resolved", "wont_fix"];
 const SEVERITIES = ["low", "medium", "high", "critical"];
@@ -111,33 +121,25 @@ export default function AdminBugsPage() {
   };
 
   return (
-    <AdminShell>
+    <AdminShell title="Bug Management">
       <div className="space-y-6">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center justify-between gap-4 flex-wrap mb-6">
           <div>
-            <h1 className="text-2xl font-black text-foreground flex items-center gap-2">
-              <Bug className="w-6 h-6 text-primary" /> Bug management
+            <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight flex items-center gap-2">
+              <Bug className="w-6 h-6 text-primary" /> Bug Management
             </h1>
-            <p className="text-sm text-gray-text mt-1">
+            <p className="text-gray-text mt-1">
               Track production crashes and user-reported bugs. Update status as
               you resolve issues.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => void loadWeekly(false)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm font-bold text-gray-text"
-            >
-              <FileBarChart className="w-4 h-4" /> Weekly report
-            </button>
-            <button
-              type="button"
-              onClick={() => void load()}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm font-bold text-gray-text"
-            >
-              <RefreshCw className="w-4 h-4" /> Refresh
-            </button>
+            <Button variant="secondary" size="sm" icon={<FileBarChart className="w-4 h-4" />} onClick={() => void loadWeekly(false)}>
+              Weekly report
+            </Button>
+            <Button variant="secondary" size="sm" icon={<RefreshCw className="w-4 h-4" />} onClick={() => void load()}>
+              Refresh
+            </Button>
           </div>
         </div>
 
@@ -155,10 +157,10 @@ export default function AdminBugsPage() {
                   setSeverity("");
                 }}
                 className={[
-                  "px-3 py-1.5 rounded-xl text-sm font-bold border transition-colors",
+                  "px-3 py-1.5 rounded-xl text-sm font-bold border transition-colors duration-150",
                   active
-                    ? "bg-primary text-white border-primary"
-                    : "bg-white text-gray-text border-border hover:border-primary",
+                    ? "bg-primary text-white border-primary shadow-[var(--shadow-button)]"
+                    : "bg-white text-gray-text border-border hover:border-primary hover:text-foreground",
                 ].join(" ")}
               >
                 {chip.label}
@@ -214,20 +216,16 @@ export default function AdminBugsPage() {
               placeholder="Error event UUID"
               className="border border-border rounded-xl px-3 py-2 text-sm bg-white min-w-[220px]"
             />
-            <button
-              type="button"
-              onClick={() => void createFromError()}
-              className="bg-primary text-white text-sm font-bold px-4 py-2 rounded-xl"
-            >
+            <Button variant="primary" size="md" onClick={() => void createFromError()}>
               Create from error
-            </button>
+            </Button>
           </div>
         </div>
 
         {weekly && (
-          <div className="bg-white rounded-3xl border border-border p-5 space-y-3">
+          <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-5 sm:p-6 space-y-3">
             <div className="flex items-center justify-between gap-3 flex-wrap">
-              <h2 className="font-black text-foreground text-sm">
+              <h2 className="text-lg font-black text-foreground tracking-tight">
                 Weekly bug report ({String(weekly.period_start)} →{" "}
                 {String(weekly.period_end)})
               </h2>
@@ -235,7 +233,7 @@ export default function AdminBugsPage() {
                 type="button"
                 disabled={weeklyLoading}
                 onClick={() => void loadWeekly(true)}
-                className="text-xs font-bold text-primary"
+                className="text-xs font-bold text-primary disabled:opacity-50"
               >
                 {weeklyLoading ? "Saving…" : "Persist report"}
               </button>
@@ -245,7 +243,7 @@ export default function AdminBugsPage() {
                 (weekly.summary as Record<string, number>) || {}
               ).map(([k, v]) => (
                 <div key={k} className="rounded-xl bg-section p-3">
-                  <p className="text-xs font-bold text-gray-text uppercase">{k}</p>
+                  <p className="text-[11px] font-bold text-gray-text uppercase tracking-widest">{k}</p>
                   <p className="font-black text-foreground mt-1">{v}</p>
                 </div>
               ))}
@@ -254,14 +252,14 @@ export default function AdminBugsPage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          <div className="lg:col-span-3 bg-white rounded-3xl border border-border overflow-hidden">
+          <div className="lg:col-span-3 bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] overflow-hidden">
             {loading ? (
               <p className="p-6 text-sm text-gray-text">Loading…</p>
             ) : bugs.length === 0 ? (
-              <p className="p-6 text-sm text-gray-text">No bugs found.</p>
+              <EmptyState icon={Bug} title="No bugs found" description="Nothing matches the current filters." />
             ) : (
               <div className="divide-y divide-[#E5E7EB]">
-                <p className="px-5 py-3 text-xs font-bold text-[#9CA3AF]">
+                <p className="px-5 py-3 text-[11px] font-bold text-[#9CA3AF] uppercase tracking-widest">
                   {total} bug{total === 1 ? "" : "s"}
                 </p>
                 {bugs.map((b) => (
@@ -272,39 +270,41 @@ export default function AdminBugsPage() {
                       setSelected(b);
                       setNotes(String(b.admin_notes || ""));
                     }}
-                    className="w-full text-left p-5 hover:bg-section transition-colors"
+                    className="w-full text-left p-5 hover:bg-section/50 transition-colors"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <p className="font-bold text-foreground">{String(b.title)}</p>
-                      <span className="text-xs font-bold uppercase text-primary">
-                        {String(b.severity)}
-                      </span>
+                      <Badge tone={SEVERITY_TONE[String(b.severity)] ?? "neutral"}>{String(b.severity)}</Badge>
                     </div>
                     <p className="text-sm text-gray-text mt-1 line-clamp-2">
                       {String(b.description)}
                     </p>
-                    <p className="text-xs text-[#9CA3AF] mt-2">
-                      {String(b.status === "resolved" ? "fixed" : b.status)}
-                      {Number(b.occurrence_count) > 1
-                        ? ` · ×${b.occurrence_count}`
-                        : ""}
-                      {b.browser ? ` · ${String(b.browser)}` : ""}
-                      {b.device ? `/${String(b.device)}` : ""}
-                      {" · "}
-                      {formatDate(String(b.created_at || ""))}
-                    </p>
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      <Badge status={String(b.status === "resolved" ? "resolved" : b.status)}>
+                        {String(b.status === "resolved" ? "fixed" : b.status)}
+                      </Badge>
+                      <p className="text-xs text-[#9CA3AF]">
+                        {Number(b.occurrence_count) > 1
+                          ? `×${b.occurrence_count} · `
+                          : ""}
+                        {b.browser ? `${String(b.browser)}` : ""}
+                        {b.device ? `/${String(b.device)}` : ""}
+                        {b.browser || b.device ? " · " : ""}
+                        {formatDate(String(b.created_at || ""))}
+                      </p>
+                    </div>
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          <div className="lg:col-span-2 bg-white rounded-3xl border border-border p-6">
+          <div className="lg:col-span-2 bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
             {!selected ? (
-              <p className="text-sm text-gray-text">Select a bug to manage.</p>
+              <EmptyState icon={Bug} title="No bug selected" description="Select a bug from the list to manage it." />
             ) : (
               <div className="space-y-4">
-                <h2 className="font-black text-foreground">{String(selected.title)}</h2>
+                <h2 className="text-lg font-black text-foreground tracking-tight">{String(selected.title)}</h2>
                 <p className="text-sm text-gray-text whitespace-pre-wrap">
                   {String(selected.description)}
                 </p>
@@ -382,13 +382,9 @@ export default function AdminBugsPage() {
                     className="mt-1 w-full border border-border rounded-xl px-3 py-2 resize-none"
                   />
                 </label>
-                <button
-                  type="button"
-                  onClick={() => void saveBug()}
-                  className="w-full bg-primary text-white font-bold py-3 rounded-xl"
-                >
+                <Button variant="primary" className="w-full justify-center" onClick={() => void saveBug()}>
                   Save changes
-                </button>
+                </Button>
               </div>
             )}
           </div>

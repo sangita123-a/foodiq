@@ -6,7 +6,6 @@ import {
   RefreshCw,
   Search,
   Filter,
-  Activity,
   AlertTriangle,
   CheckCircle2,
   Clock,
@@ -17,6 +16,9 @@ import {
   BarChart3,
   Layers,
 } from 'lucide-react';
+import AdminShell from '@/components/admin/AdminShell';
+import StatCard from '@/components/admin/dashboard/StatCard';
+import { Badge, EmptyState } from '@/components/admin/ui';
 
 export default function AdminSyncPage() {
   const [logs, setLogs] = useState<SyncLog[]>([]);
@@ -88,18 +90,24 @@ export default function AdminSyncPage() {
   const completedCount = Number(summary.completed_count) || 0;
   const successRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 100;
 
+  const TABS: Array<{ key: typeof activeTab; label: string; icon: typeof Layers; accent: string }> = [
+    { key: 'queue', label: 'All Sync Queue', icon: Layers, accent: 'text-primary border-primary' },
+    { key: 'failed', label: `Failed Syncs (${summary.failed_count})`, icon: AlertTriangle, accent: 'text-red-600 border-red-500' },
+    { key: 'partners', label: 'Partner Status List', icon: Users, accent: 'text-blue-600 border-blue-500' },
+  ];
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-sans">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <AdminShell title="Sync Engine">
+      <div className="space-y-6">
         {/* Header */}
-        <div className="bg-slate-900/90 border border-slate-800 backdrop-blur rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="bg-white border border-border rounded-2xl p-6 shadow-[var(--shadow-admin-soft)] flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="p-4 bg-teal-500/10 text-teal-400 border border-teal-500/20 rounded-xl">
+            <div className="p-4 bg-primary/10 text-primary rounded-xl shrink-0">
               <Zap className="w-8 h-8" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Sync Engine Control & Monitoring</h1>
-              <p className="text-slate-400 text-sm mt-1">
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">Sync Engine Control &amp; Monitoring</h1>
+              <p className="text-gray-text text-sm mt-1">
                 Real-time delivery partner offline action queues, retry logs, and conflict resolution analytics.
               </p>
             </div>
@@ -108,115 +116,58 @@ export default function AdminSyncPage() {
           <button
             onClick={fetchLogsAndStats}
             disabled={loading}
-            className="flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-teal-400 border border-teal-500/30 font-medium rounded-xl transition text-sm shadow-lg"
+            className="flex items-center gap-2 px-5 py-2.5 bg-section hover:bg-[var(--surface-hover)] text-foreground border border-border font-bold rounded-xl transition text-sm shrink-0"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh Dashboard
           </button>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex items-center gap-4">
-            <div className="p-3 bg-blue-500/10 text-blue-400 rounded-lg">
-              <Database className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 uppercase font-semibold">Total Sync Actions</p>
-              <p className="text-2xl font-bold text-slate-100">{summary.total_count}</p>
-            </div>
-          </div>
-
-          <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex items-center gap-4">
-            <div className="p-3 bg-amber-500/10 text-amber-400 rounded-lg">
-              <Clock className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 uppercase font-semibold">Pending Queue</p>
-              <p className="text-2xl font-bold text-slate-100">{summary.pending_count}</p>
-            </div>
-          </div>
-
-          <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex items-center gap-4">
-            <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-lg">
-              <CheckCircle2 className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 uppercase font-semibold">Completed Today</p>
-              <p className="text-2xl font-bold text-slate-100">{summary.completed_today}</p>
-            </div>
-          </div>
-
-          <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex items-center gap-4">
-            <div className="p-3 bg-red-500/10 text-red-400 rounded-lg">
-              <AlertTriangle className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 uppercase font-semibold">Failed Retries</p>
-              <p className="text-2xl font-bold text-slate-100">{summary.failed_count}</p>
-            </div>
-          </div>
-
-          <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex items-center gap-4">
-            <div className="p-3 bg-teal-500/10 text-teal-400 rounded-lg">
-              <BarChart3 className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 uppercase font-semibold">Success Rate</p>
-              <p className="text-2xl font-bold text-slate-100">{successRate}%</p>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+          <StatCard label="Total Sync Actions" value={Number(summary.total_count) || 0} icon={Database} color="text-blue-600" bg="bg-blue-500/10" />
+          <StatCard label="Pending Queue" value={Number(summary.pending_count) || 0} icon={Clock} color="text-amber-600" bg="bg-amber-500/10" />
+          <StatCard label="Completed Today" value={Number(summary.completed_today) || 0} icon={CheckCircle2} color="text-emerald-600" bg="bg-emerald-500/10" />
+          <StatCard label="Failed Retries" value={Number(summary.failed_count) || 0} icon={AlertTriangle} color="text-red-600" bg="bg-red-500/10" />
+          <StatCard label="Success Rate" value={successRate} icon={BarChart3} color="text-primary" bg="bg-primary/10" format={(n) => `${n}%`} />
         </div>
 
         {/* Tab Selection */}
-        <div className="flex border-b border-slate-800 gap-4 text-sm font-medium">
-          <button
-            onClick={() => { setActiveTab('queue'); setPage(1); }}
-            className={`pb-3 flex items-center gap-2 border-b-2 transition ${
-              activeTab === 'queue' ? 'border-teal-400 text-teal-400' : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Layers className="w-4 h-4" /> All Sync Queue
-          </button>
-          <button
-            onClick={() => { setActiveTab('failed'); setPage(1); }}
-            className={`pb-3 flex items-center gap-2 border-b-2 transition ${
-              activeTab === 'failed' ? 'border-red-400 text-red-400' : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <AlertTriangle className="w-4 h-4" /> Failed Syncs ({summary.failed_count})
-          </button>
-          <button
-            onClick={() => { setActiveTab('partners'); setPage(1); }}
-            className={`pb-3 flex items-center gap-2 border-b-2 transition ${
-              activeTab === 'partners' ? 'border-blue-400 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Users className="w-4 h-4" /> Partner Status List
-          </button>
+        <div className="flex border-b border-border gap-4 text-sm font-bold overflow-x-auto">
+          {TABS.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => { setActiveTab(tab.key); setPage(1); }}
+              className={`pb-3 flex items-center gap-2 border-b-2 transition whitespace-nowrap ${
+                activeTab === tab.key ? tab.accent : 'border-transparent text-gray-text hover:text-foreground'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" /> {tab.label}
+            </button>
+          ))}
         </div>
 
         {/* Filter Bar */}
         {activeTab !== 'partners' && (
-          <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="relative w-full md:w-80">
-              <Search className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
               <input
                 type="text"
                 placeholder="Search partner name, phone or action..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:border-teal-500"
+                className="w-full bg-section border border-transparent text-foreground text-xs rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
               />
             </div>
 
             <div className="flex items-center gap-3 w-full md:w-auto">
-              <div className="flex items-center gap-2 text-xs text-slate-400">
+              <div className="flex items-center gap-2 text-xs text-gray-text font-bold shrink-0">
                 <Filter className="w-4 h-4" /> Status:
               </div>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-3 py-2 focus:outline-none"
+                className="bg-section border border-transparent text-foreground text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
               >
                 <option value="">All Statuses</option>
                 <option value="pending">Pending</option>
@@ -228,7 +179,7 @@ export default function AdminSyncPage() {
               <select
                 value={syncTypeFilter}
                 onChange={(e) => setSyncTypeFilter(e.target.value)}
-                className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-3 py-2 focus:outline-none"
+                className="bg-section border border-transparent text-foreground text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary transition-all"
               >
                 <option value="">All Action Types</option>
                 <option value="LOCATION_UPDATE">LOCATION_UPDATE</option>
@@ -247,103 +198,98 @@ export default function AdminSyncPage() {
 
         {/* Content Section */}
         {activeTab === 'partners' ? (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-4">
-            <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
-              <Users className="w-5 h-5 text-blue-400" /> Active Partner Sync Status
+          <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-6 space-y-4">
+            <h2 className="text-lg font-black text-foreground flex items-center gap-2">
+              <Users className="w-5 h-5 text-blue-600" /> Active Partner Sync Status
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400">
-                    <th className="pb-3 px-2">Partner ID</th>
-                    <th className="pb-3 px-2">Full Name</th>
-                    <th className="pb-3 px-2">Pending Actions</th>
-                    <th className="pb-3 px-2">Failed Actions</th>
-                    <th className="pb-3 px-2">Last Sync Time</th>
+                  <tr className="border-b border-border text-[#9CA3AF]">
+                    <th className="pb-3 px-2 font-bold uppercase">Partner ID</th>
+                    <th className="pb-3 px-2 font-bold uppercase">Full Name</th>
+                    <th className="pb-3 px-2 font-bold uppercase">Pending Actions</th>
+                    <th className="pb-3 px-2 font-bold uppercase">Failed Actions</th>
+                    <th className="pb-3 px-2 font-bold uppercase">Last Sync Time</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/50">
+                <tbody className="divide-y divide-border">
                   {(stats?.partnerStats || []).map((p) => (
-                    <tr key={p.partner_id} className="hover:bg-slate-800/30">
-                      <td className="py-3 px-2 font-mono text-slate-500">{p.partner_id.slice(0, 8)}...</td>
-                      <td className="py-3 px-2 font-medium text-slate-200">{p.full_name || 'Delivery Partner'}</td>
+                    <tr key={p.partner_id} className="hover:bg-section/50 transition-colors">
+                      <td className="py-3 px-2 font-mono text-gray-text">{p.partner_id.slice(0, 8)}...</td>
+                      <td className="py-3 px-2 font-bold text-foreground">{p.full_name || 'Delivery Partner'}</td>
                       <td className="py-3 px-2">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                          Number(p.pending_actions) > 0 ? 'bg-amber-500/10 text-amber-400' : 'bg-slate-800 text-slate-400'
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          Number(p.pending_actions) > 0 ? 'bg-amber-50 text-amber-700' : 'bg-section text-gray-text'
                         }`}>
                           {p.pending_actions}
                         </span>
                       </td>
                       <td className="py-3 px-2">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                          Number(p.failed_actions) > 0 ? 'bg-red-500/10 text-red-400' : 'bg-slate-800 text-slate-400'
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          Number(p.failed_actions) > 0 ? 'bg-red-50 text-red-700' : 'bg-section text-gray-text'
                         }`}>
                           {p.failed_actions}
                         </span>
                       </td>
-                      <td className="py-3 px-2 text-slate-400">{new Date(p.last_sync_at).toLocaleString()}</td>
+                      <td className="py-3 px-2 text-gray-text">{new Date(p.last_sync_at).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              {(stats?.partnerStats || []).length === 0 && (
+                <EmptyState icon={Users} title="No partner sync data" description="No delivery partners have synced yet." />
+              )}
             </div>
           </div>
         ) : (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
-                <Database className="w-5 h-5 text-teal-400" />
+          <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h2 className="text-lg font-black text-foreground flex items-center gap-2">
+                <Database className="w-5 h-5 text-primary" />
                 {activeTab === 'failed' ? 'Failed Action Retries' : 'Global Sync Queue Logs'}
               </h2>
-              <span className="text-xs text-slate-400 font-mono">Page {page} of {totalPages}</span>
+              <span className="text-xs text-gray-text font-mono">Page {page} of {totalPages}</span>
             </div>
 
             {logs.length === 0 ? (
-              <div className="py-12 text-center text-slate-500 text-sm">
-                No sync logs match the selected filters.
-              </div>
+              <EmptyState icon={Database} title="No sync logs" description="No sync logs match the selected filters." />
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-slate-800 text-slate-400">
-                      <th className="pb-3 px-2">ID</th>
-                      <th className="pb-3 px-2">Partner</th>
-                      <th className="pb-3 px-2">Sync Type</th>
-                      <th className="pb-3 px-2">Entity ID</th>
-                      <th className="pb-3 px-2">Status</th>
-                      <th className="pb-3 px-2">Retries</th>
-                      <th className="pb-3 px-2">Error / Info</th>
-                      <th className="pb-3 px-2 text-right">Action</th>
+                    <tr className="border-b border-border text-[#9CA3AF]">
+                      <th className="pb-3 px-2 font-bold uppercase">ID</th>
+                      <th className="pb-3 px-2 font-bold uppercase">Partner</th>
+                      <th className="pb-3 px-2 font-bold uppercase">Sync Type</th>
+                      <th className="pb-3 px-2 font-bold uppercase">Entity ID</th>
+                      <th className="pb-3 px-2 font-bold uppercase">Status</th>
+                      <th className="pb-3 px-2 font-bold uppercase">Retries</th>
+                      <th className="pb-3 px-2 font-bold uppercase">Error / Info</th>
+                      <th className="pb-3 px-2 font-bold uppercase text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/50">
+                  <tbody className="divide-y divide-border">
                     {logs.map((log) => (
-                      <tr key={log.id} className="hover:bg-slate-800/30">
-                        <td className="py-3 px-2 font-mono text-slate-500">{log.id.slice(0, 8)}...</td>
+                      <tr key={log.id} className="hover:bg-section/50 transition-colors">
+                        <td className="py-3 px-2 font-mono text-gray-text">{log.id.slice(0, 8)}...</td>
                         <td className="py-3 px-2">
-                          <div className="font-medium text-slate-200">{log.partner_name || 'Partner'}</div>
-                          <div className="text-[10px] text-slate-500 font-mono">{log.partner_phone || log.partner_id.slice(0, 8)}</div>
+                          <div className="font-bold text-foreground">{log.partner_name || 'Partner'}</div>
+                          <div className="text-[10px] text-gray-text font-mono">{log.partner_phone || log.partner_id.slice(0, 8)}</div>
                         </td>
-                        <td className="py-3 px-2 font-mono font-semibold text-teal-300">{log.sync_type}</td>
-                        <td className="py-3 px-2 font-mono text-slate-400">{log.entity_id ? `${log.entity_id.slice(0, 8)}...` : '-'}</td>
+                        <td className="py-3 px-2 font-mono font-bold text-primary">{log.sync_type}</td>
+                        <td className="py-3 px-2 font-mono text-gray-text">{log.entity_id ? `${log.entity_id.slice(0, 8)}...` : '-'}</td>
                         <td className="py-3 px-2">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
-                            log.sync_status === 'completed'
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                              : log.sync_status === 'failed'
-                              ? 'bg-red-500/10 text-red-400 border border-red-500/30'
-                              : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-                          }`}>
+                          <Badge tone={log.sync_status === 'completed' ? 'success' : log.sync_status === 'failed' ? 'error' : 'warning'}>
                             {log.sync_status}
-                          </span>
+                          </Badge>
                         </td>
-                        <td className="py-3 px-2 text-slate-400 font-mono">{log.retry_count} / 5</td>
-                        <td className="py-3 px-2 text-slate-400 max-w-xs truncate">
+                        <td className="py-3 px-2 text-gray-text font-mono">{log.retry_count} / 5</td>
+                        <td className="py-3 px-2 text-gray-text max-w-xs truncate">
                           {log.error_message ? (
-                            <span className="text-red-400">{log.error_message}</span>
+                            <span className="text-red-600">{log.error_message}</span>
                           ) : (
-                            <span className="text-slate-500">{new Date(log.created_at).toLocaleTimeString()}</span>
+                            <span className="text-gray-text">{new Date(log.created_at).toLocaleTimeString()}</span>
                           )}
                         </td>
                         <td className="py-3 px-2 text-right">
@@ -351,7 +297,7 @@ export default function AdminSyncPage() {
                             <button
                               onClick={() => handleAdminRetry(log.id)}
                               disabled={retryingId === log.id}
-                              className="px-2.5 py-1 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 rounded text-xs transition flex items-center gap-1 ml-auto"
+                              className="px-2.5 py-1 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-lg text-xs font-bold transition flex items-center gap-1 ml-auto disabled:opacity-50"
                             >
                               <RotateCcw className={`w-3 h-3 ${retryingId === log.id ? 'animate-spin' : ''}`} />
                               <span>Retry</span>
@@ -366,19 +312,19 @@ export default function AdminSyncPage() {
             )}
 
             {/* Pagination Controls */}
-            <div className="flex justify-between items-center pt-4 border-t border-slate-800 text-xs">
+            <div className="flex justify-between items-center pt-4 border-t border-border text-xs">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage(page - 1)}
-                className="px-3 py-1.5 bg-slate-800 disabled:opacity-40 text-slate-300 rounded-lg"
+                className="px-3 py-1.5 bg-section hover:bg-[var(--surface-hover)] disabled:opacity-40 text-foreground font-bold rounded-lg"
               >
                 Previous
               </button>
-              <span className="text-slate-400">Page {page} of {totalPages}</span>
+              <span className="text-gray-text">Page {page} of {totalPages}</span>
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage(page + 1)}
-                className="px-3 py-1.5 bg-slate-800 disabled:opacity-40 text-slate-300 rounded-lg"
+                className="px-3 py-1.5 bg-section hover:bg-[var(--surface-hover)] disabled:opacity-40 text-foreground font-bold rounded-lg"
               >
                 Next
               </button>
@@ -386,6 +332,6 @@ export default function AdminSyncPage() {
           </div>
         )}
       </div>
-    </div>
+    </AdminShell>
   );
 }

@@ -193,15 +193,15 @@ export default function AdminDashboardPage() {
 
   return (
     <AdminShell title="Enterprise Dashboard">
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-7">
         <div>
-          <h1 className="text-3xl font-black text-foreground mb-1">Enterprise Overview</h1>
-          <p className="text-gray-text">
+          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight mb-1.5">Enterprise Overview</h1>
+          <p className="text-gray-text text-sm">
             Real-time platform analytics across revenue, orders, and operations.
           </p>
         </div>
         <div
-          className={`inline-flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full border ${
+          className={`inline-flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-full border ${
             connected && !offline
               ? "bg-emerald-50 text-emerald-700 border-emerald-200"
               : "bg-amber-50 text-amber-700 border-amber-200"
@@ -213,12 +213,12 @@ export default function AdminDashboardPage() {
       </div>
 
       {errorMsg && (
-        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5 text-sm text-red-700 font-medium">
           Unable to load admin dashboard. Sign in as an admin.
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 mb-7">
         {statCards.map((c) => (
           <StatCard
             key={c.label}

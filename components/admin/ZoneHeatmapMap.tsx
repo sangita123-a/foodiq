@@ -100,7 +100,7 @@ export default function ZoneHeatmapMap({
   if (!apiKey) {
     return (
       <div
-        className={`bg-section rounded-2xl w-full border border-border flex items-center justify-center text-xs font-bold text-muted-foreground ${heightClass} ${className}`}
+        className={`bg-section rounded-2xl w-full border border-border flex items-center justify-center text-xs font-bold text-gray-text ${heightClass} ${className}`}
       >
         Heatmap unavailable — Google Maps API key not configured.
       </div>
@@ -110,10 +110,10 @@ export default function ZoneHeatmapMap({
   const hasAny = activityPoints.length > 0 || violationPoints.length > 0;
 
   return (
-    <div className={`bg-white rounded-2xl w-full border border-border relative overflow-hidden ${heightClass} ${className}`}>
+    <div className={`bg-white rounded-2xl w-full border border-border shadow-[var(--shadow-admin-soft)] relative overflow-hidden ${heightClass} ${className}`}>
       <div ref={containerRef} className="absolute inset-0 z-0" />
       {!hasAny && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-section/80 text-sm font-bold text-muted-foreground">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-section/80 text-sm font-bold text-gray-text">
           No GPS activity recorded in this window yet.
         </div>
       )}

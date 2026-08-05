@@ -6,6 +6,7 @@ import { BiBarChart, BiKpi, BiLineChart } from "@/components/admin/BiCharts";
 import { useAdminList } from "@/hooks/useAdminData";
 import { formatCurrency } from "@/services/adminApi";
 import { getAccessToken as getToken } from "@/lib/accessToken";
+import { chartColor } from "@/lib/adminChartTheme";
 import { Download, LineChart, Mail, RefreshCw } from "lucide-react";
 
 type BiDash = {
@@ -255,7 +256,7 @@ export default function AdminBiPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div className="bg-white rounded-3xl border border-border p-6">
           <h2 className="font-bold text-lg mb-4">Revenue trend</h2>
-          <BiLineChart data={salesPoints} />
+          <BiLineChart data={salesPoints} color={chartColor(0)} />
         </div>
         <div className="bg-white rounded-3xl border border-border p-6">
           <h2 className="font-bold text-lg mb-4">
@@ -264,7 +265,7 @@ export default function AdminBiPage() {
               ? ` · peak ${data.peak_hours.peak_hour}:00`
               : ""}
           </h2>
-          <BiBarChart data={peakPoints} color="#60A5FA" />
+          <BiBarChart data={peakPoints} color={chartColor(1)} />
         </div>
       </div>
 

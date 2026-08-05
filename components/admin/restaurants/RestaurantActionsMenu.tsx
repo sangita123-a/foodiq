@@ -77,7 +77,7 @@ export default function RestaurantActionsMenu({
         <MoreVertical className="w-4 h-4" />
       </button>
       {open && (
-        <div className="absolute right-0 mt-1 w-52 bg-white border border-border rounded-xl shadow-lg z-20 overflow-hidden text-sm">
+        <div className="absolute right-0 mt-1 w-52 bg-white border border-border rounded-xl shadow-[var(--shadow-admin-lifted)] z-20 overflow-hidden text-sm">
           <button type="button" onClick={() => { setOpen(false); onViewDetails(); }} className="w-full flex items-center gap-2 text-left px-3.5 py-2.5 hover:bg-section font-semibold">
             <Eye className="w-4 h-4" /> View Details
           </button>

@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { mutate } from "swr";
-import { FileText } from "lucide-react";
+import { FileText, FolderSearch } from "lucide-react";
 import AdminShell from "@/components/admin/AdminShell";
+import { Badge, EmptyState, Pagination } from "@/components/admin/ui";
 import { useAdminList } from "@/hooks/useAdminData";
 import {
   adminPatch,
@@ -11,12 +12,6 @@ import {
   type AdminKycDocument,
   type AdminKycDocumentsResponse,
 } from "@/services/adminApi";
-
-const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-amber-50 text-amber-600",
-  approved: "bg-green-50 text-green-600",
-  rejected: "bg-red-50 text-red-600",
-};
 
 const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   aadhaar: "Aadhaar Card",
@@ -113,7 +108,7 @@ export default function AdminDeliveryDocumentsPage() {
 
       {isLoading && <p className="text-sm text-gray-text mb-4">Loading…</p>}
 
-      <div className="bg-white border border-border rounded-2xl overflow-hidden">
+      <div className="bg-white border border-border rounded-2xl overflow-hidden shadow-[var(--shadow-admin-soft)]">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-section text-left">
@@ -129,7 +124,7 @@ export default function AdminDeliveryDocumentsPage() {
             </thead>
             <tbody className="divide-y divide-border">
               {documents.map((doc) => (
-                <tr key={doc.id}>
+                <tr key={doc.id} className="hover:bg-section/50 transition-colors">
                   <td className="px-5 py-4">
                     <p className="font-bold text-foreground">{doc.partner_name || "Partner"}</p>
                     <p className="text-xs text-gray-text">{doc.partner_email}</p>
@@ -158,13 +153,7 @@ export default function AdminDeliveryDocumentsPage() {
                     {doc.expiry_date ? formatDate(doc.expiry_date) : "—"}
                   </td>
                   <td className="px-5 py-4">
-                    <span
-                      className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full ${
-                        STATUS_STYLES[doc.verification_status] || "bg-gray-100 text-gray-500"
-                      }`}
-                    >
-                      {doc.verification_status}
-                    </span>
+                    <Badge status={doc.verification_status}>{doc.verification_status}</Badge>
                     {doc.verified_at && (
                       <p className="text-[10px] text-[#9CA3AF] mt-1">{formatDate(doc.verified_at)}</p>
                     )}
@@ -188,7 +177,7 @@ export default function AdminDeliveryDocumentsPage() {
                           type="button"
                           disabled={processingId === doc.id}
                           onClick={() => process(doc, "approved")}
-                          className="text-xs font-bold bg-green-500 text-white px-3 py-1.5 rounded-lg disabled:opacity-50"
+                          className="text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50"
                         >
                           Approve
                         </button>
@@ -196,7 +185,7 @@ export default function AdminDeliveryDocumentsPage() {
                           type="button"
                           disabled={processingId === doc.id || !reasons[doc.id]}
                           onClick={() => process(doc, "rejected")}
-                          className="text-xs font-bold bg-red-500 text-white px-3 py-1.5 rounded-lg disabled:opacity-50"
+                          className="text-xs font-bold bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50"
                         >
                           Reject
                         </button>
@@ -211,35 +200,22 @@ export default function AdminDeliveryDocumentsPage() {
           </table>
         </div>
         {!documents.length && !isLoading && (
-          <p className="text-center text-[#9CA3AF] py-16">No documents found.</p>
+          <EmptyState
+            icon={FolderSearch}
+            title="No documents found"
+            description="KYC submissions from delivery partners will appear here for review."
+          />
+        )}
+        {pagination && pagination.total_pages > 1 && (
+          <Pagination
+            page={page}
+            totalPages={pagination.total_pages}
+            total={pagination.total}
+            limit={20}
+            onPageChange={(p) => setPage(p)}
+          />
         )}
       </div>
-
-      {pagination && pagination.total_pages > 1 && (
-        <div className="flex items-center justify-between mt-4">
-          <p className="text-xs text-gray-text">
-            Page {pagination.page} of {pagination.total_pages} · {pagination.total} documents
-          </p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="text-xs font-bold border border-border px-3 py-1.5 rounded-lg disabled:opacity-40"
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              disabled={page >= pagination.total_pages}
-              onClick={() => setPage((p) => Math.min(pagination.total_pages, p + 1))}
-              className="text-xs font-bold border border-border px-3 py-1.5 rounded-lg disabled:opacity-40"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
     </AdminShell>
   );
 }

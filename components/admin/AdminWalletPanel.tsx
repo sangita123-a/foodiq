@@ -16,6 +16,7 @@ import {
   type WalletTransaction,
 } from "@/services/walletApi";
 import { Check, X, Wallet, RotateCcw } from "lucide-react";
+import { Button, EmptyState } from "@/components/admin/ui";
 
 export default function AdminWalletPanel() {
   const hasToken = useAuthToken();
@@ -113,16 +114,16 @@ export default function AdminWalletPanel() {
   return (
     <AdminShell title="Customer Wallet">
       {message && (
-        <div className="mb-4 rounded-xl border border-border bg-section px-4 py-3 text-sm font-bold text-foreground">
+        <div className="mb-4 rounded-2xl border border-border bg-section px-4 py-3 text-sm font-bold text-foreground">
           {message}
         </div>
       )}
 
-      <div className="mb-8 grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-border bg-white p-6">
+      <div className="mb-6 grid gap-6 lg:grid-cols-2">
+        <section className="rounded-2xl border border-border bg-white shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
           <div className="mb-4 flex items-center gap-2">
             <Wallet className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-black text-foreground">Manual Credit / Debit</h2>
+            <h2 className="text-lg font-black text-foreground tracking-tight">Manual Credit / Debit</h2>
           </div>
           <div className="space-y-3">
             <input
@@ -158,30 +159,25 @@ export default function AdminWalletPanel() {
                 type="button"
                 onClick={credit}
                 disabled={busy === "credit"}
-                className="flex-1 rounded-xl bg-emerald-600 py-2.5 text-sm font-black text-white disabled:opacity-50"
+                className="flex-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 py-2.5 text-sm font-black text-white transition-colors disabled:opacity-50"
               >
                 Credit
               </button>
-              <button
-                type="button"
-                onClick={debit}
-                disabled={busy === "debit"}
-                className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-black text-white disabled:opacity-50"
-              >
+              <Button type="button" variant="danger" onClick={debit} loading={busy === "debit"} className="flex-1 justify-center">
                 Debit
-              </button>
+              </Button>
             </div>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-border bg-white p-6">
+        <section className="rounded-2xl border border-border bg-white shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
           <div className="mb-4 flex items-center gap-2">
             <RotateCcw className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-black text-foreground">Pending Refund Requests</h2>
+            <h2 className="text-lg font-black text-foreground tracking-tight">Pending Refund Requests</h2>
           </div>
           <div className="max-h-80 space-y-3 overflow-y-auto">
             {(refunds as RefundRequest[]).length === 0 ? (
-              <p className="text-sm text-[#9CA3AF]">No pending refund requests.</p>
+              <EmptyState icon={RotateCcw} title="No pending refund requests" description="Refund requests will appear here once submitted." />
             ) : (
               (refunds as RefundRequest[]).map((r) => (
                 <div key={r.id} className="rounded-xl border border-border p-4">
@@ -197,18 +193,20 @@ export default function AdminWalletPanel() {
                       type="button"
                       onClick={() => approve(r.id)}
                       disabled={busy === r.id}
-                      className="flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black text-white"
+                      className="flex items-center gap-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 text-xs font-black text-white transition-colors disabled:opacity-50"
                     >
                       <Check className="h-3.5 w-3.5" /> Approve
                     </button>
-                    <button
+                    <Button
                       type="button"
+                      variant="danger"
+                      size="sm"
                       onClick={() => reject(r.id)}
-                      disabled={busy === `reject-${r.id}`}
-                      className="flex items-center gap-1 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-black text-white"
+                      loading={busy === `reject-${r.id}`}
+                      icon={<X className="h-3.5 w-3.5" />}
                     >
-                      <X className="h-3.5 w-3.5" /> Reject
-                    </button>
+                      Reject
+                    </Button>
                   </div>
                 </div>
               ))
@@ -217,9 +215,9 @@ export default function AdminWalletPanel() {
         </section>
       </div>
 
-      <section className="rounded-2xl border border-border bg-white p-6">
+      <section className="rounded-2xl border border-border bg-white shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-black text-foreground">All Wallet Transactions</h2>
+          <h2 className="text-lg font-black text-foreground tracking-tight">All Wallet Transactions</h2>
           <input
             placeholder="Filter by user ID"
             value={filterUserId}
@@ -227,32 +225,36 @@ export default function AdminWalletPanel() {
             className="rounded-xl border border-border px-3 py-2 text-sm"
           />
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-border text-xs uppercase text-[#9CA3AF]">
-                <th className="py-2 pr-4">Type</th>
-                <th className="py-2 pr-4">Amount</th>
-                <th className="py-2 pr-4">Balance</th>
-                <th className="py-2 pr-4">Note</th>
-                <th className="py-2">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTxns.slice(0, 100).map((t) => (
-                <tr key={t.id} className="border-b border-[#F3F4F6]">
-                  <td className="py-2 pr-4 font-bold">{transactionLabel(t)}</td>
-                  <td className={`py-2 pr-4 font-bold ${Number(t.amount) >= 0 ? "text-emerald-600" : "text-red-500"}`}>
-                    {Number(t.amount) >= 0 ? "+" : ""}₹{Math.abs(Number(t.amount)).toFixed(2)}
-                  </td>
-                  <td className="py-2 pr-4">₹{Number(t.balance_after).toFixed(2)}</td>
-                  <td className="py-2 pr-4 text-gray-text">{t.note || "—"}</td>
-                  <td className="py-2 text-[#9CA3AF]">{new Date(t.created_at).toLocaleString("en-IN")}</td>
+        {filteredTxns.length ? (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-border bg-section text-xs uppercase text-[#9CA3AF]">
+                  <th className="py-2.5 px-3">Type</th>
+                  <th className="py-2.5 px-3">Amount</th>
+                  <th className="py-2.5 px-3">Balance</th>
+                  <th className="py-2.5 px-3">Note</th>
+                  <th className="py-2.5 px-3">Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filteredTxns.slice(0, 100).map((t) => (
+                  <tr key={t.id} className="border-b border-[#F3F4F6] hover:bg-section/50">
+                    <td className="py-2.5 px-3 font-bold">{transactionLabel(t)}</td>
+                    <td className={`py-2.5 px-3 font-bold ${Number(t.amount) >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                      {Number(t.amount) >= 0 ? "+" : ""}₹{Math.abs(Number(t.amount)).toFixed(2)}
+                    </td>
+                    <td className="py-2.5 px-3">₹{Number(t.balance_after).toFixed(2)}</td>
+                    <td className="py-2.5 px-3 text-gray-text">{t.note || "—"}</td>
+                    <td className="py-2.5 px-3 text-[#9CA3AF]">{new Date(t.created_at).toLocaleString("en-IN")}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <EmptyState icon={Wallet} title="No transactions found" description="Wallet activity will appear here." />
+        )}
       </section>
     </AdminShell>
   );

@@ -1247,7 +1247,8 @@ const getSettings = async () => {
   return inserted.rows[0];
 };
 
-const updateSettings = async (data) => {
+const updateSettings = async (data, client = null) => {
+  const db = client || pool;
   const {
     delivery_charge, free_delivery_min, tax_percent, commission_percent,
     app_name, support_email, support_phone, payment_cod_enabled,
@@ -1257,8 +1258,15 @@ const updateSettings = async (data) => {
     youtube_url, theme_color, footer_content, privacy_policy_text,
     terms_of_service_text, company_name,
   } = data;
-  await getSettings();
-  const { rows } = await pool.query(
+
+  // Lock (and create if missing) the singleton row, capturing the pre-update
+  // values so callers can build an old/new audit diff.
+  let before = (await db.query('SELECT * FROM admin_settings WHERE id = 1 FOR UPDATE')).rows[0];
+  if (!before) {
+    before = (await db.query('INSERT INTO admin_settings (id) VALUES (1) RETURNING *')).rows[0];
+  }
+
+  const { rows } = await db.query(
     `UPDATE admin_settings SET
        delivery_charge = COALESCE($1, delivery_charge),
        free_delivery_min = COALESCE($2, free_delivery_min),
@@ -1299,7 +1307,7 @@ const updateSettings = async (data) => {
       terms_of_service_text, company_name,
     ]
   );
-  return rows[0];
+  return { before, after: rows[0] };
 };
 
 const listAdminStaff = async () => {

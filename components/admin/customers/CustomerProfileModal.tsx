@@ -41,6 +41,7 @@ import {
 } from "@/hooks/useAdminCustomers";
 import CustomerMap from "./CustomerMap";
 import CustomerInvoiceModal from "./CustomerInvoiceModal";
+import { Button } from "@/components/admin/ui";
 import { adjustCustomerWallet } from "@/services/customerAdminApi";
 
 type Props = {
@@ -140,28 +141,28 @@ export default function CustomerProfileModal({
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end animate-in fade-in">
       <div className="bg-white w-full max-w-4xl h-full shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300">
         {/* Drawer Header */}
-        <div className="bg-slate-900 text-white p-6 flex items-center justify-between shrink-0 border-b border-slate-800">
+        <div className="bg-white text-foreground p-6 flex items-center justify-between shrink-0 border-b border-border">
           <div className="flex items-center gap-4 min-w-0">
-            <div className="relative w-14 h-14 rounded-2xl overflow-hidden bg-slate-800 border-2 border-slate-700 shrink-0">
+            <div className="relative w-14 h-14 rounded-2xl overflow-hidden bg-primary/10 border-2 border-primary/20 shrink-0">
               {customer.avatarUrl ? (
                 <Image src={customer.avatarUrl} alt={customer.fullName} fill className="object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center font-black text-[#E23744] text-xl bg-slate-800">
+                <div className="w-full h-full flex items-center justify-center font-black text-primary text-xl bg-primary/10">
                   {customer.fullName.slice(0, 2).toUpperCase()}
                 </div>
               )}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-black truncate">{customer.fullName}</h2>
+                <h2 className="text-xl font-black text-foreground truncate">{customer.fullName}</h2>
                 {customer.isPremium && (
-                  <span className="bg-amber-500/20 text-amber-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1">
+                  <span className="bg-amber-50 text-amber-700 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-amber-200 flex items-center gap-1">
                     <Crown className="w-3 h-3" />
                     {customer.tier}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-400 font-mono mt-0.5">
+              <p className="text-xs text-gray-text font-mono mt-0.5">
                 {customer.customerId} • {customer.email} • {customer.phone}
               </p>
             </div>
@@ -169,51 +170,51 @@ export default function CustomerProfileModal({
 
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-all"
+            className="p-2 text-gray-400 hover:text-foreground rounded-xl hover:bg-section transition-all"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
         {/* Action Button Bar */}
-        <div className="bg-slate-950 px-6 py-2.5 flex items-center justify-between border-b border-slate-800 text-xs shrink-0 overflow-x-auto">
+        <div className="bg-white px-6 py-2.5 flex items-center justify-between border-b border-border text-xs shrink-0 overflow-x-auto">
           <div className="flex items-center gap-2">
-            <span className="text-slate-400 font-semibold">Account Actions:</span>
+            <span className="text-gray-text font-semibold">Account Actions:</span>
             <button
               onClick={() => onToggleVerify(customer)}
-              className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg font-bold flex items-center gap-1.5 transition-all"
+              className="px-3 py-1 bg-section hover:bg-gray-200/70 text-gray-700 rounded-lg font-bold flex items-center gap-1.5 transition-all"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+              <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
               <span>{customer.isVerified ? "Mark Unverified" : "Verify Customer"}</span>
             </button>
             <button
               onClick={() => onToggleBlock(customer)}
-              className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg font-bold flex items-center gap-1.5 transition-all"
+              className="px-3 py-1 bg-section hover:bg-gray-200/70 text-gray-700 rounded-lg font-bold flex items-center gap-1.5 transition-all"
             >
               {customer.status === "blocked" ? (
                 <>
-                  <Unlock className="w-3.5 h-3.5 text-emerald-400" />
+                  <Unlock className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Unblock Account</span>
                 </>
               ) : (
                 <>
-                  <Ban className="w-3.5 h-3.5 text-rose-400" />
+                  <Ban className="w-3.5 h-3.5 text-rose-600" />
                   <span>Block Account</span>
                 </>
               )}
             </button>
             <button
               onClick={() => onResetPassword(customer)}
-              className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg font-bold flex items-center gap-1.5 transition-all"
+              className="px-3 py-1 bg-section hover:bg-gray-200/70 text-gray-700 rounded-lg font-bold flex items-center gap-1.5 transition-all"
             >
-              <KeyRound className="w-3.5 h-3.5 text-indigo-400" />
+              <KeyRound className="w-3.5 h-3.5 text-indigo-600" />
               <span>Reset Password</span>
             </button>
           </div>
 
           <button
             onClick={() => onDeleteCustomer(customer)}
-            className="px-3 py-1 bg-rose-950/60 hover:bg-rose-900 text-rose-300 rounded-lg font-bold flex items-center gap-1.5 transition-all border border-rose-800/40"
+            className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-bold flex items-center gap-1.5 transition-all border border-red-100"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>Delete Customer</span>
@@ -221,7 +222,7 @@ export default function CustomerProfileModal({
         </div>
 
         {/* Tab Navigation Navigation bar */}
-        <div className="bg-gray-50 border-b border-gray-200 px-6 flex gap-1 overflow-x-auto shrink-0 custom-scrollbar">
+        <div className="bg-section border-b border-border px-6 flex gap-1 overflow-x-auto shrink-0 custom-scrollbar">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -231,7 +232,7 @@ export default function CustomerProfileModal({
                 onClick={() => setActiveTab(tab.id)}
                 className={`py-3 px-4 text-xs font-bold whitespace-nowrap flex items-center gap-2 border-b-2 transition-all ${
                   isActive
-                    ? "border-[#E23744] text-[#E23744] bg-white shadow-sm"
+                    ? "border-primary text-primary bg-white shadow-sm"
                     : "border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100/50"
                 }`}
               >
@@ -248,8 +249,8 @@ export default function CustomerProfileModal({
           {activeTab === "personal" && (
             <div className="space-y-6 animate-in fade-in">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-3">
-                  <h3 className="font-bold text-gray-900 text-sm border-b border-gray-100 pb-2">
+                <div className="bg-white border border-border rounded-2xl p-5 shadow-sm space-y-3">
+                  <h3 className="font-bold text-gray-900 text-sm border-b border-border pb-2">
                     Profile Summary
                   </h3>
                   <div className="space-y-2 text-xs">
@@ -280,8 +281,8 @@ export default function CustomerProfileModal({
                   </div>
                 </div>
 
-                <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-3">
-                  <h3 className="font-bold text-gray-900 text-sm border-b border-gray-100 pb-2">
+                <div className="bg-white border border-border rounded-2xl p-5 shadow-sm space-y-3">
+                  <h3 className="font-bold text-gray-900 text-sm border-b border-border pb-2">
                     Account Status & Verification
                   </h3>
                   <div className="space-y-2 text-xs">
@@ -321,23 +322,23 @@ export default function CustomerProfileModal({
 
               {/* Order & Spending Overview */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="bg-white border border-gray-100 rounded-2xl p-4 text-center shadow-sm">
+                <div className="bg-white border border-border rounded-2xl p-4 text-center shadow-sm">
                   <div className="text-xs text-gray-500 font-medium">Total Orders</div>
                   <div className="text-xl font-black text-gray-900 mt-1">{customer.totalOrders}</div>
                 </div>
-                <div className="bg-white border border-gray-100 rounded-2xl p-4 text-center shadow-sm">
+                <div className="bg-white border border-border rounded-2xl p-4 text-center shadow-sm">
                   <div className="text-xs text-gray-500 font-medium">Total Spending</div>
                   <div className="text-xl font-black text-gray-900 mt-1">
                     ₹{customer.totalSpending.toLocaleString("en-IN")}
                   </div>
                 </div>
-                <div className="bg-white border border-gray-100 rounded-2xl p-4 text-center shadow-sm">
+                <div className="bg-white border border-border rounded-2xl p-4 text-center shadow-sm">
                   <div className="text-xs text-gray-500 font-medium">Wallet Balance</div>
                   <div className="text-xl font-black text-emerald-600 mt-1">
                     ₹{customer.walletBalance.toLocaleString("en-IN")}
                   </div>
                 </div>
-                <div className="bg-white border border-gray-100 rounded-2xl p-4 text-center shadow-sm">
+                <div className="bg-white border border-border rounded-2xl p-4 text-center shadow-sm">
                   <div className="text-xs text-gray-500 font-medium">Reward Points</div>
                   <div className="text-xl font-black text-purple-600 mt-1">{customer.rewardPoints} pts</div>
                 </div>
@@ -350,7 +351,7 @@ export default function CustomerProfileModal({
             <div className="space-y-6 animate-in fade-in">
               <CustomerMap addresses={addresses} />
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="bg-white border border-border rounded-2xl p-5 shadow-sm space-y-4">
                 <h3 className="font-bold text-gray-900 text-sm">Saved Addresses ({addresses.length})</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {addresses.map((addr) => (
@@ -360,11 +361,11 @@ export default function CustomerProfileModal({
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-sm text-gray-900 flex items-center gap-1.5">
-                          <MapPin className="w-4 h-4 text-[#E23744]" />
+                          <MapPin className="w-4 h-4 text-primary" />
                           {addr.label}
                         </span>
                         {addr.isDefault && (
-                          <span className="bg-red-50 text-[#E23744] border border-red-100 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          <span className="bg-primary/10 text-primary border border-primary/20 text-[10px] font-bold px-2 py-0.5 rounded-full">
                             DEFAULT
                           </span>
                         )}
@@ -377,7 +378,7 @@ export default function CustomerProfileModal({
                         {addr.city}, {addr.state} - {addr.pincode}
                       </p>
                       {addr.deliveryInstructions && (
-                        <div className="text-[11px] bg-white p-2 rounded-xl border border-gray-100 text-gray-600 italic">
+                        <div className="text-[11px] bg-white p-2 rounded-xl border border-border text-gray-600 italic">
                           "{addr.deliveryInstructions}"
                         </div>
                       )}
@@ -399,7 +400,7 @@ export default function CustomerProfileModal({
                     onClick={() => setOrderStatusFilter(st)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold capitalize whitespace-nowrap transition-all ${
                       orderStatusFilter === st
-                        ? "bg-[#E23744] text-white shadow-sm"
+                        ? "bg-primary text-white shadow-sm"
                         : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
                     }`}
                   >
@@ -413,9 +414,9 @@ export default function CustomerProfileModal({
                 {orders.map((ord) => (
                   <div
                     key={ord.id}
-                    className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-4 hover:border-gray-300 transition-all"
+                    className="bg-white border border-border rounded-2xl p-5 shadow-sm space-y-4 hover:border-gray-300 transition-all"
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-black text-sm text-gray-900">{ord.restaurantName}</span>
@@ -461,7 +462,7 @@ export default function CustomerProfileModal({
                             key={idx}
                             className="bg-white border border-gray-200 rounded-xl px-3 py-1.5 shrink-0 flex items-center gap-2"
                           >
-                            <Clock className="w-3.5 h-3.5 text-[#E23744]" />
+                            <Clock className="w-3.5 h-3.5 text-primary" />
                             <div>
                               <div className="font-bold text-gray-800">{item.status}</div>
                               <div className="text-[10px] text-gray-500">{item.timestamp}</div>
@@ -477,7 +478,7 @@ export default function CustomerProfileModal({
                           onClick={() => setSelectedInvoiceOrder(ord)}
                           className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all"
                         >
-                          <FileText className="w-3.5 h-3.5 text-[#E23744]" />
+                          <FileText className="w-3.5 h-3.5 text-primary" />
                           <span>View Tax Invoice</span>
                         </button>
                       </div>
@@ -492,13 +493,13 @@ export default function CustomerProfileModal({
           {activeTab === "favorites" && favorites && (
             <div className="space-y-6 animate-in fade-in">
               {/* Favorite Restaurants */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="bg-white border border-border rounded-2xl p-5 shadow-sm space-y-4">
                 <h3 className="font-bold text-gray-900 text-sm">Favorite Restaurants</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {favorites.favoriteRestaurants.map((r) => (
                     <div
                       key={r.id}
-                      className="border border-gray-100 rounded-xl p-3 flex items-center gap-3 bg-gray-50/50"
+                      className="border border-border rounded-xl p-3 flex items-center gap-3 bg-gray-50/50"
                     >
                       <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-gray-200 shrink-0">
                         <Image src={r.imageUrl} alt={r.name} fill className="object-cover" />
@@ -517,13 +518,13 @@ export default function CustomerProfileModal({
               </div>
 
               {/* Favorite Foods */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="bg-white border border-border rounded-2xl p-5 shadow-sm space-y-4">
                 <h3 className="font-bold text-gray-900 text-sm">Favorite Foods</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {favorites.favoriteFoods.map((f) => (
                     <div
                       key={f.id}
-                      className="border border-gray-100 rounded-xl p-3 flex items-center gap-3 bg-gray-50/50"
+                      className="border border-border rounded-xl p-3 flex items-center gap-3 bg-gray-50/50"
                     >
                       <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-gray-200 shrink-0">
                         <Image src={f.imageUrl} alt={f.name} fill className="object-cover" />
@@ -543,19 +544,19 @@ export default function CustomerProfileModal({
           {/* TAB 5: WALLET & TRANSACTIONS */}
           {activeTab === "wallet" && walletData && (
             <div className="space-y-6 animate-in fade-in">
-              <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-3xl p-6 shadow-xl flex items-center justify-between">
+              <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 text-foreground rounded-3xl p-6 shadow-[var(--shadow-admin-soft)] flex items-center justify-between">
                 <div>
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  <div className="text-xs font-bold uppercase tracking-wider text-gray-text">
                     Foodiq Wallet Balance
                   </div>
-                  <div className="text-3xl font-black text-white mt-1">
+                  <div className="text-3xl font-black text-foreground mt-1">
                     ₹{walletData.balance.toLocaleString("en-IN")}
                   </div>
                 </div>
 
                 <button
                   onClick={() => setShowWalletModal(true)}
-                  className="px-4 py-2.5 bg-[#E23744] hover:bg-red-700 text-white rounded-2xl font-bold text-xs flex items-center gap-2 shadow-lg transition-all"
+                  className="px-4 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-2xl font-bold text-xs flex items-center gap-2 shadow-lg transition-all"
                 >
                   <PlusCircle className="w-4 h-4" />
                   <span>Adjust Balance</span>
@@ -563,13 +564,13 @@ export default function CustomerProfileModal({
               </div>
 
               {/* Transactions Ledger */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="bg-white border border-border rounded-2xl p-5 shadow-sm space-y-4">
                 <h3 className="font-bold text-gray-900 text-sm">Wallet Transactions Ledger</h3>
                 <div className="space-y-2">
                   {walletData.transactions.map((tx) => (
                     <div
                       key={tx.id}
-                      className="border border-gray-100 rounded-xl p-3 flex items-center justify-between bg-gray-50/50 text-xs"
+                      className="border border-border rounded-xl p-3 flex items-center justify-between bg-gray-50/50 text-xs"
                     >
                       <div className="flex items-center gap-3">
                         <div
@@ -619,7 +620,7 @@ export default function CustomerProfileModal({
           {/* TAB 6: LOYALTY & REWARDS */}
           {activeTab === "loyalty" && loyalty && (
             <div className="space-y-6 animate-in fade-in">
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="bg-white border border-border rounded-2xl p-5 shadow-sm space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="text-xs font-bold text-gray-500 uppercase">Loyalty Tier</span>
@@ -638,13 +639,13 @@ export default function CustomerProfileModal({
               </div>
 
               {/* Coupons Used */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-3">
+              <div className="bg-white border border-border rounded-2xl p-5 shadow-sm space-y-3">
                 <h3 className="font-bold text-gray-900 text-sm">Coupons Redeemed</h3>
                 <div className="space-y-2 text-xs">
                   {loyalty.couponsUsed.map((cp, idx) => (
                     <div
                       key={idx}
-                      className="border border-gray-100 rounded-xl p-3 flex items-center justify-between bg-gray-50/50"
+                      className="border border-border rounded-xl p-3 flex items-center justify-between bg-gray-50/50"
                     >
                       <span className="font-mono font-bold text-gray-900">{cp.code}</span>
                       <span className="font-bold text-emerald-600">-₹{cp.discountAmount}</span>
@@ -661,7 +662,7 @@ export default function CustomerProfileModal({
               {supportTickets.map((tkt) => (
                 <div
                   key={tkt.id}
-                  className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-3"
+                  className="bg-white border border-border rounded-2xl p-5 shadow-sm space-y-3"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -694,7 +695,7 @@ export default function CustomerProfileModal({
               {reviews.map((rev) => (
                 <div
                   key={rev.id}
-                  className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm space-y-2 text-xs"
+                  className="bg-white border border-border rounded-2xl p-4 shadow-sm space-y-2 text-xs"
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-gray-900">{rev.targetName}</span>
@@ -712,7 +713,7 @@ export default function CustomerProfileModal({
           {/* TAB 9: NOTIFICATION PREFERENCES */}
           {activeTab === "notifications" && notificationPrefs && (
             <div className="space-y-6 animate-in fade-in">
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-3">
+              <div className="bg-white border border-border rounded-2xl p-5 shadow-sm space-y-3">
                 <h3 className="font-bold text-gray-900 text-sm">Channel Preferences</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                   {Object.entries({
@@ -725,7 +726,7 @@ export default function CustomerProfileModal({
                   }).map(([key, val]) => (
                     <div
                       key={key}
-                      className="border border-gray-100 rounded-xl p-3 bg-gray-50 flex items-center justify-between"
+                      className="border border-border rounded-xl p-3 bg-gray-50 flex items-center justify-between"
                     >
                       <span className="font-semibold text-gray-700">{key}</span>
                       <span
@@ -755,8 +756,8 @@ export default function CustomerProfileModal({
       {/* Wallet Balance Adjust Modal */}
       {showWalletModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
-            <h3 className="font-black text-gray-900 text-base">Adjust Customer Wallet Balance</h3>
+          <div className="bg-white border border-border rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+            <h3 className="font-black text-foreground text-base">Adjust Customer Wallet Balance</h3>
 
             <form onSubmit={handleWalletSubmit} className="space-y-3 text-xs">
               <div>
@@ -796,20 +797,25 @@ export default function CustomerProfileModal({
               </div>
 
               <div className="flex justify-end gap-2 pt-2">
-                <button
+                <Button
                   type="button"
                   onClick={() => setShowWalletModal(false)}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded-xl"
+                  variant="secondary"
+                  size="md"
+                  className="px-4 py-2"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   disabled={isAdjustingWallet}
-                  className="px-4 py-2 bg-[#E23744] text-white font-bold rounded-xl"
+                  loading={isAdjustingWallet}
+                  variant="primary"
+                  size="md"
+                  className="px-4 py-2"
                 >
                   {isAdjustingWallet ? "Saving..." : "Apply Adjustment"}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

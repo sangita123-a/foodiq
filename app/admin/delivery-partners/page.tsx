@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { mutate } from "swr";
+import { Bike } from "lucide-react";
 import AdminShell from "@/components/admin/AdminShell";
+import { Badge, EmptyState } from "@/components/admin/ui";
 import { useAdminList } from "@/hooks/useAdminData";
 import { adminPut } from "@/services/adminApi";
 
@@ -99,18 +101,19 @@ export default function AdminDeliveryPartnersPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {partners.map((p) => (
-          <div key={p.id} className="bg-white rounded-2xl border border-border p-5 shadow-sm">
+          <div
+            key={p.id}
+            className="bg-white rounded-2xl border border-border p-5 shadow-[var(--shadow-admin-soft)] hover:shadow-[var(--shadow-admin-lifted)] transition-shadow"
+          >
             <div className="flex justify-between items-start mb-3">
               <div>
                 <h3 className="font-black text-foreground">{p.full_name || "Partner"}</h3>
                 <p className="text-xs text-gray-text">{p.email}</p>
                 <p className="text-xs text-[#9CA3AF]">{p.phone_number}</p>
               </div>
-              <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full ${
-                p.is_available ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-500"
-              }`}>
+              <Badge tone={p.is_available ? "success" : "neutral"}>
                 {p.is_available ? "Online" : "Offline"}
-              </span>
+              </Badge>
             </div>
             <p className="text-sm text-gray-text mb-1">
               {p.vehicle_type || "Vehicle"} — {p.vehicle_details || "—"}
@@ -138,21 +141,21 @@ export default function AdminDeliveryPartnersPage() {
             <div className="flex flex-wrap gap-2">
               {(p.approval_status || "approved") === "pending" && (
                 <>
-                  <button type="button" onClick={() => setApproval(p.id, "approved")} className="text-xs font-bold bg-green-500 text-white px-3 py-1.5 rounded-lg">Approve</button>
-                  <button type="button" onClick={() => setApproval(p.id, "rejected")} className="text-xs font-bold bg-red-500 text-white px-3 py-1.5 rounded-lg">Reject</button>
+                  <button type="button" onClick={() => setApproval(p.id, "approved")} className="text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-xl transition-colors">Approve</button>
+                  <button type="button" onClick={() => setApproval(p.id, "rejected")} className="text-xs font-bold bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-xl transition-colors">Reject</button>
                 </>
               )}
               {(p.approval_status || "approved") === "approved" && (
-                <button type="button" onClick={() => suspendPartner(p.id)} className="text-xs font-bold bg-amber-500 text-white px-3 py-1.5 rounded-lg">
+                <button type="button" onClick={() => suspendPartner(p.id)} className="text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-xl transition-colors">
                   Suspend
                 </button>
               )}
               {p.approval_status === "suspended" && (
-                <button type="button" onClick={() => setApproval(p.id, "approved")} className="text-xs font-bold bg-green-500 text-white px-3 py-1.5 rounded-lg">
+                <button type="button" onClick={() => setApproval(p.id, "approved")} className="text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-xl transition-colors">
                   Reactivate
                 </button>
               )}
-              <button type="button" onClick={() => toggleAvailable(p)} className="text-xs font-bold border border-border px-3 py-1.5 rounded-lg">
+              <button type="button" onClick={() => toggleAvailable(p)} className="text-xs font-bold border border-border hover:bg-section px-3 py-1.5 rounded-xl transition-colors">
                 {p.is_available ? "Set Offline" : "Set Available"}
               </button>
             </div>
@@ -160,7 +163,11 @@ export default function AdminDeliveryPartnersPage() {
         ))}
       </div>
       {!partners.length && !isLoading && (
-        <p className="text-center text-[#9CA3AF] py-16">No delivery partners registered yet.</p>
+        <EmptyState
+          icon={Bike}
+          title="No delivery partners registered yet"
+          description="Delivery partners will appear here once they sign up and complete onboarding."
+        />
       )}
     </AdminShell>
   );

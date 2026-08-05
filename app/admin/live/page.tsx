@@ -1,6 +1,7 @@
 "use client";
 
 import AdminShell from "@/components/admin/AdminShell";
+import StatCard from "@/components/admin/dashboard/StatCard";
 import { useAdminLive } from "@/hooks/useAdminLive";
 import { formatCurrency, adminFetcher } from "@/services/adminApi";
 import { Bike, Radio, ShoppingBag, Store, Wifi, WifiOff, DollarSign, MapPin, AlertTriangle } from "lucide-react";
@@ -23,7 +24,7 @@ function LiveDeliveriesPanel() {
   );
 
   return (
-    <section className="bg-white border border-border rounded-2xl p-5 mb-6">
+    <section className="bg-white border border-border rounded-2xl p-5 mb-6 shadow-[var(--shadow-admin-soft)]">
       <h2 className="text-lg font-black text-foreground mb-4 flex items-center gap-2">
         <MapPin className="w-4 h-4 text-primary" />
         Live Deliveries
@@ -108,27 +109,36 @@ export default function AdminLivePage() {
   const cards = [
     {
       label: "Active Orders",
-      value: String(data?.activeOrders ?? 0),
+      value: data?.activeOrders ?? 0,
       hint: activeOrdersDelta ? `+${activeOrdersDelta} live updates` : "Realtime",
       icon: ShoppingBag,
+      color: "text-sky-600",
+      bg: "bg-sky-500/10",
     },
     {
       label: "Online Riders",
-      value: String(onlineRiders),
+      value: onlineRiders,
       hint: "Socket presence",
       icon: Bike,
+      color: "text-cyan-600",
+      bg: "bg-cyan-500/10",
     },
     {
       label: "Restaurants",
-      value: String(data?.totalRestaurants ?? 0),
+      value: data?.totalRestaurants ?? 0,
       hint: "Platform total",
       icon: Store,
+      color: "text-violet-600",
+      bg: "bg-violet-500/10",
     },
     {
       label: "Live Revenue",
-      value: formatCurrency((data?.todaysRevenue ?? 0) + liveRevenueDelta),
+      value: (data?.todaysRevenue ?? 0) + liveRevenueDelta,
       hint: liveRevenueDelta ? `+${formatCurrency(liveRevenueDelta)} session` : "Today",
       icon: DollarSign,
+      color: "text-primary",
+      bg: "bg-primary/10",
+      format: formatCurrency,
     },
   ];
 
@@ -162,21 +172,24 @@ export default function AdminLivePage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {cards.map((c) => (
-          <div key={c.label} className="bg-white border border-border rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF]">{c.label}</p>
-              <c.icon className="w-4 h-4 text-primary" />
-            </div>
-            <p className="text-2xl font-black text-foreground">{c.value}</p>
-            <p className="text-xs text-gray-text mt-1">{c.hint}</p>
-          </div>
+          <StatCard
+            key={c.label}
+            label={c.label}
+            value={c.value}
+            icon={c.icon}
+            color={c.color}
+            bg={c.bg}
+            format={c.format}
+            hint={c.hint}
+            loading={isLoading && !data}
+          />
         ))}
       </div>
 
       <LiveDeliveriesPanel />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <section className="bg-white border border-border rounded-2xl p-5">
+        <section className="bg-white border border-border rounded-2xl p-5 shadow-[var(--shadow-admin-soft)]">
           <h2 className="text-lg font-black text-foreground mb-4 flex items-center gap-2">
             <Radio className="w-4 h-4 text-primary" />
             Live Event Feed
@@ -209,7 +222,7 @@ export default function AdminLivePage() {
           </div>
         </section>
 
-        <section className="bg-white border border-border rounded-2xl p-5">
+        <section className="bg-white border border-border rounded-2xl p-5 shadow-[var(--shadow-admin-soft)]">
           <h2 className="text-lg font-black text-foreground mb-4">Snapshot</h2>
           <ul className="space-y-3 text-sm text-gray-text">
             <li className="flex justify-between">

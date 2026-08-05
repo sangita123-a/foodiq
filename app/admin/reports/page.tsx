@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
+import { Button } from "@/components/admin/ui";
 import { adminGet, formatCurrency, formatDate } from "@/services/adminApi";
 import api from "@/services/api";
 import { Download, FileSpreadsheet, FileText } from "lucide-react";
@@ -136,14 +137,16 @@ export default function AdminReportsPage() {
             onChange={(e) => setEndDate(e.target.value)}
             className="border border-border rounded-xl px-4 py-3 text-sm"
           />
-          <button
+          <Button
             type="button"
             onClick={loadReport}
             disabled={loading}
-            className="bg-[#111827] text-white font-black rounded-xl px-4 py-3 text-sm disabled:opacity-60"
+            loading={loading}
+            variant="primary"
+            className="font-black px-4 py-3 justify-center"
           >
             {loading ? "Generating…" : "Generate Report"}
-          </button>
+          </Button>
         </div>
       </div>
 

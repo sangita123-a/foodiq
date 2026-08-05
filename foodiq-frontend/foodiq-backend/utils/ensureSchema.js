@@ -1065,13 +1065,15 @@ async function ensureSchema() {
       await q(`ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS ${col} ${typ}`);
     }
 
+    // One-time seed only — support_phone/support_email already get their
+    // defaults from the CREATE TABLE above. whatsapp_number has no column
+    // default (added via ALTER), so seed it once on first boot only; never
+    // overwrite an admin-edited value on subsequent restarts/deploys.
     await q(`
       UPDATE admin_settings SET
-        support_phone = '+91 6371115043',
-        support_email = 'ssangitasahoo48@gmail.com',
         whatsapp_number = '+91 6371115043',
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = 1
+      WHERE id = 1 AND whatsapp_number IS NULL
     `);
 
     await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS address_line VARCHAR(255)`);
@@ -1522,23 +1524,9 @@ async function ensureSchema() {
         ADD COLUMN IF NOT EXISTS notify_order_updates BOOLEAN DEFAULT TRUE
     `);
 
-    await q(`
-      CREATE TABLE IF NOT EXISTS email_logs (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-        to_email VARCHAR(255) NOT NULL,
-        subject VARCHAR(500) NOT NULL,
-        template VARCHAR(80),
-        status VARCHAR(30) NOT NULL DEFAULT 'pending',
-        provider VARCHAR(40),
-        provider_message_id VARCHAR(255),
-        error TEXT,
-        attempts INTEGER NOT NULL DEFAULT 1,
-        meta JSONB DEFAULT '{}'::jsonb,
-        related_order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    // email_logs/sms_logs/otp_codes are created once, above (§ OTP / SMS /
+    // Email tables) — this used to redefine all three a second time with
+    // identical shapes. Only the (non-duplicate) indexes below are still needed.
     await q(`
       CREATE INDEX IF NOT EXISTS idx_email_logs_user_created
         ON email_logs(user_id, created_at DESC)
@@ -1547,24 +1535,6 @@ async function ensureSchema() {
       CREATE INDEX IF NOT EXISTS idx_email_logs_status
         ON email_logs(status, created_at DESC)
     `);
-
-    await q(`
-      CREATE TABLE IF NOT EXISTS sms_logs (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-        to_phone VARCHAR(30) NOT NULL,
-        body TEXT NOT NULL,
-        template VARCHAR(80),
-        status VARCHAR(30) NOT NULL DEFAULT 'pending',
-        provider VARCHAR(40),
-        provider_message_id VARCHAR(255),
-        error TEXT,
-        attempts INTEGER NOT NULL DEFAULT 1,
-        meta JSONB DEFAULT '{}'::jsonb,
-        related_order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_sms_logs_user_created
         ON sms_logs(user_id, created_at DESC)
@@ -1572,22 +1542,6 @@ async function ensureSchema() {
     await q(`
       CREATE INDEX IF NOT EXISTS idx_sms_logs_status
         ON sms_logs(status, created_at DESC)
-    `);
-
-    await q(`
-      CREATE TABLE IF NOT EXISTS otp_codes (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-        destination VARCHAR(255) NOT NULL,
-        channel VARCHAR(20) NOT NULL DEFAULT 'email',
-        purpose VARCHAR(60) NOT NULL DEFAULT 'verification',
-        code_hash VARCHAR(128) NOT NULL,
-        attempts INTEGER NOT NULL DEFAULT 0,
-        expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-        consumed_at TIMESTAMP WITH TIME ZONE,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
     `);
     await q(`
       CREATE INDEX IF NOT EXISTS idx_otp_destination_purpose
@@ -1809,19 +1763,11 @@ async function ensureSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await q(`
-      CREATE TABLE IF NOT EXISTS support_tickets (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        category VARCHAR(255) NOT NULL,
-        subject VARCHAR(255) NOT NULL,
-        description TEXT NOT NULL,
-        status VARCHAR(50) DEFAULT 'Open',
-        admin_notes TEXT,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    // support_tickets is created once, above (Driver Support Chat Module) —
+    // this used to redefine it a second time with a conflicting (customer-
+    // ticket) shape; the ALTER TABLE support_tickets statements further down
+    // add the customer-facing columns (user_id, category, description, etc.)
+    // onto that single table instead.
     await q(`
       CREATE TABLE IF NOT EXISTS email_support (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -3537,38 +3483,12 @@ async function ensureSchema() {
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referrals_status ON delivery_referrals(status)`);
     await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referrals_created ON delivery_referrals(created_at)`);
 
-    await q(`
-      CREATE TABLE IF NOT EXISTS delivery_referral_rewards (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        partner_id UUID REFERENCES delivery_partners(id) ON DELETE CASCADE,
-        referral_id UUID REFERENCES delivery_referrals(id) ON DELETE CASCADE,
-        amount NUMERIC(10, 2) NOT NULL,
-        wallet_transaction_id UUID,
-        status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'credited', 'cancelled')),
-        credited_at TIMESTAMP WITH TIME ZONE,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referral_rewards_partner ON delivery_referral_rewards(partner_id)`);
-    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referral_rewards_status ON delivery_referral_rewards(status)`);
-    await q(`CREATE INDEX IF NOT EXISTS idx_delivery_referral_rewards_created ON delivery_referral_rewards(created_at)`);
-
-    await q(`
-      CREATE TABLE IF NOT EXISTS delivery_referral_settings (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        default_reward_amount NUMERIC(10, 2) DEFAULT 500.00,
-        reward_type VARCHAR(50) DEFAULT 'cash',
-        expiry_days INTEGER DEFAULT 30,
-        min_deliveries_required INTEGER DEFAULT 1,
-        auto_credit_enabled BOOLEAN DEFAULT TRUE,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    await q(`
-      INSERT INTO delivery_referral_settings (default_reward_amount, reward_type, expiry_days, min_deliveries_required, auto_credit_enabled)
-      SELECT 500.00, 'cash', 30, 1, TRUE
-      WHERE NOT EXISTS (SELECT 1 FROM delivery_referral_settings)
-    `);
+    // delivery_referral_rewards and delivery_referral_settings are created
+    // once, above (§ Delivery Referrals) — this used to redefine both a
+    // second time (with delivery_referral_rewards.status defaulting to
+    // 'pending' here vs 'credited' in the first definition; the first
+    // definition wins today, so 'credited' is the live default — kept as-is
+    // to avoid a silent behavior change).
 
     // ── Delivery Offline Sync Logs Table ─────────────────────────────────────
     await q(`

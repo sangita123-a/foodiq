@@ -75,30 +75,30 @@ export default function BulkActionBar({
   };
 
   return (
-    <div className="sticky top-0 z-10 mb-4 flex flex-wrap items-center gap-3 bg-foreground text-white rounded-2xl px-5 py-3 shadow-lg">
-      <span className="text-sm font-bold">{selectedIds.length} selected</span>
+    <div className="sticky top-0 z-10 mb-4 flex flex-wrap items-center gap-3 bg-white border border-primary/20 rounded-2xl px-5 py-3 shadow-[var(--shadow-admin-lifted)]">
+      <span className="text-sm font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-full">{selectedIds.length} selected</span>
 
-      <button type="button" onClick={() => run("approve", "approved")} disabled={!!busy} className="flex items-center gap-1.5 text-xs font-bold bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg disabled:opacity-50">
+      <button type="button" onClick={() => run("approve", "approved")} disabled={!!busy} className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-2 rounded-lg disabled:opacity-50 transition-colors">
         {busy === "approve" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />} Approve
       </button>
 
-      <button type="button" onClick={() => run("reject", "rejected", true)} disabled={!!busy} className="flex items-center gap-1.5 text-xs font-bold bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg disabled:opacity-50">
+      <button type="button" onClick={() => run("reject", "rejected", true)} disabled={!!busy} className="flex items-center gap-1.5 text-xs font-bold text-foreground bg-section hover:bg-red-50 hover:text-red-600 px-3 py-2 rounded-lg disabled:opacity-50 transition-colors">
         {busy === "reject" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />} Reject
       </button>
 
-      <button type="button" onClick={() => run("suspend", "suspended", true)} disabled={!!busy} className="flex items-center gap-1.5 text-xs font-bold bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg disabled:opacity-50">
+      <button type="button" onClick={() => run("suspend", "suspended", true)} disabled={!!busy} className="flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 px-3 py-2 rounded-lg disabled:opacity-50 transition-colors">
         {busy === "suspend" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Ban className="w-3.5 h-3.5" />} Suspend
       </button>
 
-      <button type="button" onClick={bulkExport} className="flex items-center gap-1.5 text-xs font-bold bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg">
+      <button type="button" onClick={bulkExport} className="flex items-center gap-1.5 text-xs font-bold text-foreground bg-section hover:bg-primary/10 hover:text-primary px-3 py-2 rounded-lg transition-colors">
         <Download className="w-3.5 h-3.5" /> Bulk Export
       </button>
 
-      <button type="button" onClick={() => setConfirmingDelete(true)} disabled={!!busy} className="flex items-center gap-1.5 text-xs font-bold bg-red-500/80 hover:bg-red-500 px-3 py-2 rounded-lg disabled:opacity-50">
+      <button type="button" onClick={() => setConfirmingDelete(true)} disabled={!!busy} className="flex items-center gap-1.5 text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg disabled:opacity-50 transition-colors">
         {busy === "delete" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />} Delete
       </button>
 
-      <button type="button" onClick={onClear} className="ml-auto flex items-center gap-1 text-xs font-bold text-white/70 hover:text-white">
+      <button type="button" onClick={onClear} className="ml-auto flex items-center gap-1 text-xs font-bold text-gray-text hover:text-foreground">
         <X className="w-3.5 h-3.5" /> Clear selection
       </button>
 

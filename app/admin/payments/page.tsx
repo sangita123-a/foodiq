@@ -5,6 +5,9 @@ import useSWR from "swr";
 import AdminShell from "@/components/admin/AdminShell";
 import { adminFetcher, adminPost, formatCurrency, formatDate } from "@/services/adminApi";
 import { useAuthToken } from "@/hooks/useAuthToken";
+import StatCard from "@/components/admin/dashboard/StatCard";
+import { Badge, EmptyState } from "@/components/admin/ui";
+import { Wallet, TrendingUp, CheckCircle2, Clock, XCircle, Undo2, Receipt } from "lucide-react";
 
 type PaymentsOverview = {
   stats: {
@@ -62,25 +65,63 @@ export default function AdminPaymentsPage() {
       )}
 
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-        {[
-          { label: "Total Revenue", value: formatCurrency(stats?.total_revenue || 0) },
-          { label: "Today's Revenue", value: formatCurrency(stats?.todays_revenue || 0) },
-          { label: "Successful", value: String(stats?.successful_payments || 0) },
-          { label: "Pending", value: String(stats?.pending_payments || 0) },
-          { label: "Failed", value: String(stats?.failed_payments || 0) },
-          { label: "Refunds", value: formatCurrency(stats?.refund_total || 0) },
-        ].map((card) => (
-          <div key={card.label} className="bg-white border border-border rounded-2xl p-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF] mb-2">
-              {card.label}
-            </p>
-            <p className="text-2xl font-black text-foreground">{card.value}</p>
-          </div>
-        ))}
+        <StatCard
+          label="Total Revenue"
+          value={stats?.total_revenue || 0}
+          icon={Wallet}
+          color="text-primary"
+          bg="bg-primary/10"
+          format={formatCurrency}
+          loading={isLoading && !stats}
+        />
+        <StatCard
+          label="Today's Revenue"
+          value={stats?.todays_revenue || 0}
+          icon={TrendingUp}
+          color="text-emerald-600"
+          bg="bg-emerald-500/10"
+          format={formatCurrency}
+          loading={isLoading && !stats}
+        />
+        <StatCard
+          label="Successful"
+          value={stats?.successful_payments || 0}
+          icon={CheckCircle2}
+          color="text-sky-600"
+          bg="bg-sky-500/10"
+          loading={isLoading && !stats}
+        />
+        <StatCard
+          label="Pending"
+          value={stats?.pending_payments || 0}
+          icon={Clock}
+          color="text-amber-600"
+          bg="bg-amber-500/10"
+          loading={isLoading && !stats}
+        />
+        <StatCard
+          label="Failed"
+          value={stats?.failed_payments || 0}
+          icon={XCircle}
+          color="text-red-500"
+          bg="bg-red-500/10"
+          loading={isLoading && !stats}
+        />
+        <StatCard
+          label="Refunds"
+          value={stats?.refund_total || 0}
+          icon={Undo2}
+          color="text-rose-600"
+          bg="bg-rose-500/10"
+          format={formatCurrency}
+          loading={isLoading && !stats}
+        />
       </div>
 
-      <section className="bg-white border border-border rounded-2xl p-5 mb-8">
-        <h2 className="text-lg font-black text-foreground mb-4">Process Refund</h2>
+      <section className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] p-5 sm:p-6 mb-8">
+        <h2 className="text-lg font-black text-foreground tracking-tight mb-4 flex items-center gap-2">
+          <Receipt className="w-4.5 h-4.5 text-primary" /> Process Refund
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <input
             value={refundOrderId}
@@ -104,7 +145,7 @@ export default function AdminPaymentsPage() {
             type="button"
             disabled={busy || !refundOrderId}
             onClick={handleRefund}
-            className="bg-primary text-white font-bold rounded-xl px-4 py-3 disabled:opacity-60"
+            className="bg-primary text-white font-bold rounded-xl px-4 py-3 shadow-[var(--shadow-button)] hover:bg-primary-hover disabled:opacity-60 transition-colors"
           >
             {busy ? "Processing..." : "Refund"}
           </button>
@@ -112,9 +153,9 @@ export default function AdminPaymentsPage() {
       </section>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <section className="bg-white border border-border rounded-2xl overflow-hidden">
+        <section className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] overflow-hidden">
           <div className="px-5 py-4 border-b border-border">
-            <h2 className="text-lg font-black text-foreground">Transaction Logs</h2>
+            <h2 className="text-lg font-black text-foreground tracking-tight">Transaction Logs</h2>
           </div>
           {isLoading && <p className="p-5 text-sm text-gray-text">Loading...</p>}
           <div className="divide-y divide-[#F3F4F6] max-h-[480px] overflow-y-auto">
@@ -126,21 +167,23 @@ export default function AdminPaymentsPage() {
                   </p>
                   <span className="font-black">{formatCurrency(Number(t.amount || 0))}</span>
                 </div>
-                <p className="text-xs text-gray-text mt-1">
-                  {String(t.status)} · {String(t.razorpay_order_id || "").slice(0, 18)} ·{" "}
-                  {formatDate(String(t.created_at || ""))}
-                </p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <Badge status={String(t.status)}>{String(t.status)}</Badge>
+                  <p className="text-xs text-gray-text">
+                    {String(t.razorpay_order_id || "").slice(0, 18)} · {formatDate(String(t.created_at || ""))}
+                  </p>
+                </div>
               </div>
             ))}
             {!data?.transactions?.length && !isLoading && (
-              <p className="p-6 text-sm text-gray-text text-center">No transactions yet</p>
+              <EmptyState icon={Receipt} title="No transactions yet" className="py-12" />
             )}
           </div>
         </section>
 
-        <section className="bg-white border border-border rounded-2xl overflow-hidden">
+        <section className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] overflow-hidden">
           <div className="px-5 py-4 border-b border-border">
-            <h2 className="text-lg font-black text-foreground">Refund Management</h2>
+            <h2 className="text-lg font-black text-foreground tracking-tight">Refund Management</h2>
           </div>
           <div className="divide-y divide-[#F3F4F6] max-h-[480px] overflow-y-auto">
             {(data?.refunds || []).map((r) => (
@@ -159,7 +202,7 @@ export default function AdminPaymentsPage() {
               </div>
             ))}
             {!data?.refunds?.length && (
-              <p className="p-6 text-sm text-gray-text text-center">No refunds yet</p>
+              <EmptyState icon={Undo2} title="No refunds yet" className="py-12" />
             )}
           </div>
         </section>

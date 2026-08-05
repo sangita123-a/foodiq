@@ -2,7 +2,8 @@
 
 import AdminShell from "@/components/admin/AdminShell";
 import { useAdminList } from "@/hooks/useAdminData";
-import { Bot } from "lucide-react";
+import StatCard from "@/components/admin/dashboard/StatCard";
+import { Bot, MessageSquare, Clock, TrendingUp, Sparkles } from "lucide-react";
 
 type AiStats = {
   sessions: number;
@@ -21,35 +22,47 @@ export default function AdminAiPage() {
           <Bot className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-3xl font-black text-foreground">AI Assistants</h1>
+          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">AI Assistants</h1>
           <p className="text-gray-text">
             Voice, chatbot, and forecast foundation stats (Foodiq 4.0).
           </p>
         </div>
       </div>
 
-      {isLoading && <p className="text-sm text-gray-text mb-4">Loading…</p>}
-
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "Chat sessions", value: data?.sessions ?? "—" },
-          { label: "Open sessions", value: data?.open_sessions ?? "—" },
-          { label: "Forecast runs", value: data?.forecast_runs ?? "—" },
-          {
-            label: "AI enabled",
-            value: data?.ai_assistants_enabled ?? "false",
-          },
-        ].map((k) => (
-          <div
-            key={k.label}
-            className="bg-white rounded-3xl border border-border p-5"
-          >
-            <p className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">
-              {k.label}
-            </p>
-            <p className="text-2xl font-black text-foreground mt-1">{k.value}</p>
-          </div>
-        ))}
+        <StatCard
+          label="Chat Sessions"
+          value={data?.sessions ?? 0}
+          icon={MessageSquare}
+          color="text-sky-600"
+          bg="bg-sky-500/10"
+          loading={isLoading && !data}
+        />
+        <StatCard
+          label="Open Sessions"
+          value={data?.open_sessions ?? 0}
+          icon={Clock}
+          color="text-amber-600"
+          bg="bg-amber-500/10"
+          loading={isLoading && !data}
+        />
+        <StatCard
+          label="Forecast Runs"
+          value={data?.forecast_runs ?? 0}
+          icon={TrendingUp}
+          color="text-violet-600"
+          bg="bg-violet-500/10"
+          loading={isLoading && !data}
+        />
+        <StatCard
+          label="AI Enabled"
+          value={data?.ai_assistants_enabled === "true" ? 1 : 0}
+          icon={Sparkles}
+          color="text-emerald-600"
+          bg="bg-emerald-500/10"
+          format={(n) => (n ? "Enabled" : "Disabled")}
+          loading={isLoading && !data}
+        />
       </div>
     </AdminShell>
   );

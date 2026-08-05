@@ -111,9 +111,6 @@ router.get('/notifications/push/targets', requirePermission('notifications', 'ma
 router.get('/settings', requirePermission('settings'), c.getSettings);
 router.put('/settings', requirePermission('settings'), c.putSettings);
 
-const { updateAdminContactInfo } = require('../controllers/contactSettingsController');
-router.put('/contact', requirePermission('settings'), updateAdminContactInfo);
-
 router.get('/reports/sales', requirePermission('reports'), c.getSalesReports);
 router.get('/reports/orders', requirePermission('reports'), c.getOrderReports);
 router.get('/reports/users', requirePermission('reports'), c.getUserReports);
@@ -152,6 +149,9 @@ router.get('/support/ticket/:id', requirePermission('delivery', 'feedback'), dri
 router.patch('/support/assign', requirePermission('delivery', 'feedback'), driverSupportAdmin.adminAssignTicket);
 router.patch('/support/status', requirePermission('delivery', 'feedback'), driverSupportAdmin.adminUpdateStatus);
 router.post('/support/message', supportLimiter, requirePermission('delivery', 'feedback'), driverSupportAdmin.adminSendMessage);
+
+router.get('/support-center/analytics', requirePermission('feedback'), c.getSupportCenterAnalytics);
+router.get('/support-center/agent-performance', requirePermission('feedback'), c.getSupportAgentPerformance);
 
 const ticketAdmin = require('../controllers/ticketController');
 router.get('/tickets', requirePermission('feedback'), ticketAdmin.adminListTickets);

@@ -1,25 +1,11 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, ArrowUpDown, AlertTriangle, PackageX } from "lucide-react";
+import { ArrowUpDown, AlertTriangle, PackageX } from "lucide-react";
 import { formatCurrency, formatDate, type AdminOrderRow, type AdminOrdersPagination } from "@/services/adminApi";
+import { Badge, Button, EmptyState, Pagination, SkeletonRows } from "@/components/admin/ui";
 import OrderActionsMenu from "./OrderActionsMenu";
 
-const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-amber-50 text-amber-700",
-  accepted: "bg-blue-50 text-blue-700",
-  preparing: "bg-orange-50 text-orange-700",
-  "ready for pickup": "bg-indigo-50 text-indigo-700",
-  "picked up": "bg-cyan-50 text-cyan-700",
-  "on the way": "bg-purple-50 text-purple-700",
-  "out for delivery": "bg-purple-50 text-purple-700",
-  delivered: "bg-emerald-50 text-emerald-700",
-  cancelled: "bg-red-50 text-red-700",
-};
-
-function StatusBadge({ status }: { status: string }) {
-  const cls = STATUS_STYLES[status?.toLowerCase()] || "bg-section text-gray-text";
-  return <span className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-bold ${cls}`}>{status}</span>;
-}
+const ORDER_TABLE_COLUMNS = 13;
 
 export default function OrderTable({
   rows,
@@ -57,19 +43,19 @@ export default function OrderTable({
 
   if (error && !loading) {
     return (
-      <div className="bg-white rounded-3xl border border-border p-16 text-center">
+      <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-16 text-center">
         <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
         <p className="text-sm font-bold text-foreground mb-1">Couldn&apos;t load orders</p>
         <p className="text-sm text-gray-text mb-4">A network or server error occurred.</p>
-        <button type="button" onClick={onRetry} className="bg-primary text-white font-bold px-5 py-2.5 rounded-xl text-sm">
+        <Button variant="primary" onClick={onRetry}>
           Retry
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-3xl border border-border overflow-hidden shadow-sm">
+    <div className="bg-white rounded-2xl border border-border overflow-hidden shadow-[var(--shadow-admin-soft)]">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1400px] text-left">
           <thead className="bg-section border-b border-border">
@@ -101,16 +87,7 @@ export default function OrderTable({
             </tr>
           </thead>
           <tbody>
-            {loading &&
-              [...Array(8)].map((_, i) => (
-                <tr key={i} className="border-b border-border">
-                  {[...Array(13)].map((__, j) => (
-                    <td key={j} className="p-4">
-                      <div className="h-4 bg-section rounded animate-pulse" />
-                    </td>
-                  ))}
-                </tr>
-              ))}
+            {loading && <SkeletonRows rows={8} columns={ORDER_TABLE_COLUMNS} />}
 
             {!loading &&
               rows.map((o) => (
@@ -140,7 +117,7 @@ export default function OrderTable({
                   <td className="p-4 font-black">{formatCurrency(o.total_amount)}</td>
                   <td className="p-4 text-sm capitalize">{(o.payment_method || "—").replace(/_/g, " ")}</td>
                   <td className="p-4 text-sm capitalize">{o.payment_status || "—"}</td>
-                  <td className="p-4"><StatusBadge status={o.status} /></td>
+                  <td className="p-4"><Badge status={o.status}>{o.status}</Badge></td>
                   <td className="p-4 text-xs text-gray-text max-w-[180px] truncate">
                     {[o.house_no, o.street, o.city].filter(Boolean).join(", ") || "—"}
                   </td>
@@ -157,44 +134,22 @@ export default function OrderTable({
         </table>
 
         {!loading && !rows.length && (
-          <div className="text-center py-20">
-            <PackageX className="w-10 h-10 text-[#D1D5DB] mx-auto mb-3" />
-            <p className="text-sm font-bold text-foreground">No orders found</p>
-            <p className="text-sm text-gray-text">Try adjusting your search or filters.</p>
-          </div>
+          <EmptyState
+            icon={PackageX}
+            title="No orders found"
+            description="Try adjusting your search or filters."
+          />
         )}
       </div>
 
-      {pagination && pagination.total > 0 && (
-        <div className="flex items-center justify-between px-5 py-3.5 border-t border-border">
-          <p className="text-xs text-gray-text">
-            Showing {(pagination.page - 1) * pagination.limit + 1}–
-            {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onPageChange(pagination.page - 1)}
-              disabled={pagination.page <= 1}
-              className="w-8 h-8 flex items-center justify-center rounded-lg border border-border disabled:opacity-40"
-              aria-label="Previous page"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="text-xs font-bold text-foreground">
-              Page {pagination.page} of {pagination.totalPages}
-            </span>
-            <button
-              type="button"
-              onClick={() => onPageChange(pagination.page + 1)}
-              disabled={pagination.page >= pagination.totalPages}
-              className="w-8 h-8 flex items-center justify-center rounded-lg border border-border disabled:opacity-40"
-              aria-label="Next page"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+      {pagination && (
+        <Pagination
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          total={pagination.total}
+          limit={pagination.limit}
+          onPageChange={onPageChange}
+        />
       )}
     </div>
   );

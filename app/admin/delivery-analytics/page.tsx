@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import AdminShell from "@/components/admin/AdminShell";
+import { Button } from "@/components/admin/ui";
+import { chartColor } from "@/lib/adminChartTheme";
 import {
   TrendingUp,
   BarChart2,
@@ -127,14 +129,15 @@ export default function AdminDeliveryAnalyticsPage() {
           >
             <Download className="w-4 h-4" /> Export CSV
           </button>
-          <button
+          <Button
             type="button"
             onClick={loadData}
             disabled={loading}
-            className="inline-flex items-center gap-2 bg-[#111827] text-white px-4 py-2.5 rounded-xl text-sm font-bold disabled:opacity-60"
+            variant="primary"
+            icon={<RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />}
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh
-          </button>
+            Refresh
+          </Button>
         </div>
       </div>
 
@@ -234,8 +237,11 @@ export default function AdminDeliveryAnalyticsPage() {
                       ${m.revenue.toFixed(0)}
                     </div>
                     <div
-                      className="w-full max-w-[32px] bg-gradient-to-t from-emerald-600 to-teal-400 rounded-t-lg transition-all duration-300"
-                      style={{ height: `${heightPct}%` }}
+                      className="w-full max-w-[32px] rounded-t-lg transition-all duration-300"
+                      style={{
+                        height: `${heightPct}%`,
+                        backgroundImage: `linear-gradient(180deg, ${chartColor(2)} 0%, ${chartColor(2)}99 100%)`,
+                      }}
                     />
                     <span className="text-xs text-gray-text font-medium">{m.month}</span>
                   </div>
@@ -265,7 +271,13 @@ export default function AdminDeliveryAnalyticsPage() {
                   </div>
                   <div className="text-lg font-bold text-foreground">{z.orders} orders</div>
                   <div className="w-full bg-border h-1.5 rounded-full overflow-hidden mt-3">
-                    <div className="bg-gradient-to-r from-orange-500 to-rose-500 h-full rounded-full" style={{ width: `${z.pct}%` }} />
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${z.pct}%`,
+                        backgroundImage: `linear-gradient(90deg, ${chartColor(3)} 0%, ${chartColor(3)}99 100%)`,
+                      }}
+                    />
                   </div>
                 </div>
               ))}

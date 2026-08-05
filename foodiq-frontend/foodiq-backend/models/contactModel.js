@@ -1,4 +1,4 @@
-const { getSettings, updateSettings } = require('./adminModel');
+const { getSettings } = require('./adminModel');
 const { mergeContactDefaults } = require('../utils/contactDefaults');
 
 const getContactInfo = async () => {
@@ -13,19 +13,6 @@ const getContactInfo = async () => {
   });
 };
 
-const updateContactInfo = async (data) => {
-  await updateSettings({
-    office_address: data.office_address,
-    support_phone: data.phone_number,
-    support_email: data.email,
-    business_hours: data.business_hours,
-    website_url: data.website,
-    whatsapp_number: data.whatsapp_number,
-  });
-  return getContactInfo();
-};
-
 module.exports = {
   getContactInfo,
-  updateContactInfo,
 };

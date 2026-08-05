@@ -13,6 +13,10 @@ import {
   Search,
   Eye,
   X,
+  Users,
+  CheckCircle2,
+  XCircle,
+  Gauge,
 } from "lucide-react";
 import AdminShell from "@/components/admin/AdminShell";
 import {
@@ -26,13 +30,15 @@ import {
 import { fetcher } from "@/services/api";
 import type { DeliveryShift } from "@/services/deliveryApi";
 import { useToast } from "@/contexts/ToastContext";
+import StatCard from "@/components/admin/dashboard/StatCard";
+import { Badge, EmptyState } from "@/components/admin/ui";
 
 const WEEK_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
-const TODAY_STATUS_STYLES: Record<string, string> = {
-  checked_in: "bg-emerald-100 text-emerald-800",
-  completed: "bg-blue-50 text-blue-700",
-  not_checked_in: "bg-gray-100 text-gray-600",
+const TODAY_STATUS_TONE: Record<string, "success" | "info" | "neutral"> = {
+  checked_in: "success",
+  completed: "info",
+  not_checked_in: "neutral",
 };
 
 const TODAY_STATUS_LABELS: Record<string, string> = {
@@ -212,11 +218,11 @@ export default function AdminShiftsPage() {
     <AdminShell title="Shift Scheduling & Attendance">
       <div className="space-y-6 max-w-7xl mx-auto pb-12">
         {/* Header */}
-        <div className="bg-white border border-border rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-white border border-border rounded-2xl p-6 shadow-[var(--shadow-admin-soft)] flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Calendar className="w-6 h-6 text-primary" />
-              <h1 className="text-2xl font-black text-foreground">Shift &amp; Attendance Dashboard</h1>
+              <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Shift &amp; Attendance Dashboard</h1>
             </div>
             <p className="text-sm text-gray-text">
               Assign recurring shifts to delivery partners, track attendance KPIs, and monitor working hours.
@@ -234,7 +240,7 @@ export default function AdminShiftsPage() {
 
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-4 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl text-xs font-extrabold flex items-center gap-2 transition-all shadow-button cursor-pointer"
+              className="px-4 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl text-xs font-extrabold flex items-center gap-2 transition-all shadow-[var(--shadow-button)] cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Assign New Shift</span>
@@ -244,57 +250,60 @@ export default function AdminShiftsPage() {
 
         {/* Dashboard Stat Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="bg-white border border-border rounded-2xl p-4 shadow-sm">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted">
-              Working Riders
-            </span>
-            <p className="text-2xl font-black text-emerald-600 mt-2">{summary.working_riders}</p>
-            <p className="text-[11px] text-gray-text mt-1">Currently On Duty</p>
-          </div>
-
-          <div className="bg-white border border-border rounded-2xl p-4 shadow-sm">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted">
-              Active Check-Ins
-            </span>
-            <p className="text-2xl font-black text-primary mt-2">{summary.active_riders}</p>
-            <p className="text-[11px] text-gray-text mt-1">Today Active</p>
-          </div>
-
-          <div className="bg-white border border-border rounded-2xl p-4 shadow-sm">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted">
-              Absent Riders
-            </span>
-            <p className="text-2xl font-black text-red-600 mt-2">{summary.absent_riders}</p>
-            <p className="text-[11px] text-gray-text mt-1">No Check-In</p>
-          </div>
-
-          <div className="bg-white border border-border rounded-2xl p-4 shadow-sm">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted">
-              Late Riders
-            </span>
-            <p className="text-2xl font-black text-amber-600 mt-2">{summary.late_riders}</p>
-            <p className="text-[11px] text-gray-text mt-1">Checked In Late</p>
-          </div>
-
-          <div className="bg-white border border-border rounded-2xl p-4 shadow-sm">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted">
-              Avg Working Hrs
-            </span>
-            <p className="text-2xl font-black text-foreground mt-2">{summary.avg_working_hours} <span className="text-xs">h</span></p>
-            <p className="text-[11px] text-gray-text mt-1">Per Rider / Shift</p>
-          </div>
-
-          <div className="bg-white border border-border rounded-2xl p-4 shadow-sm">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted">
-              Utilization
-            </span>
-            <p className="text-2xl font-black text-emerald-600 mt-2">{summary.shift_utilization}%</p>
-            <p className="text-[11px] text-gray-text mt-1">Fleet Efficiency</p>
-          </div>
+          <StatCard
+            label="Working Riders"
+            value={summary.working_riders}
+            icon={Users}
+            color="text-emerald-600"
+            bg="bg-emerald-500/10"
+            hint="Currently on duty"
+          />
+          <StatCard
+            label="Active Check-Ins"
+            value={summary.active_riders}
+            icon={CheckCircle2}
+            color="text-primary"
+            bg="bg-primary/10"
+            hint="Today active"
+          />
+          <StatCard
+            label="Absent Riders"
+            value={summary.absent_riders}
+            icon={XCircle}
+            color="text-red-500"
+            bg="bg-red-500/10"
+            hint="No check-in"
+          />
+          <StatCard
+            label="Late Riders"
+            value={summary.late_riders}
+            icon={AlertCircle}
+            color="text-amber-600"
+            bg="bg-amber-500/10"
+            hint="Checked in late"
+          />
+          <StatCard
+            label="Avg Working Hrs"
+            value={summary.avg_working_hours}
+            icon={Clock}
+            color="text-sky-600"
+            bg="bg-sky-500/10"
+            format={(n) => `${n}h`}
+            hint="Per rider / shift"
+          />
+          <StatCard
+            label="Utilization"
+            value={summary.shift_utilization}
+            icon={Gauge}
+            color="text-emerald-600"
+            bg="bg-emerald-500/10"
+            format={(n) => `${n}%`}
+            hint="Fleet efficiency"
+          />
         </div>
 
         {/* Filter & Search Bar */}
-        <div className="bg-white border border-border rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="bg-white border border-border rounded-2xl p-4 shadow-[var(--shadow-admin-soft)] flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="relative w-full sm:w-72">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-text" />
             <input
@@ -322,7 +331,7 @@ export default function AdminShiftsPage() {
         </div>
 
         {/* Shift Assignments Table */}
-        <div className="bg-white border border-border rounded-2xl shadow-card overflow-hidden">
+        <div className="bg-white border border-border rounded-2xl shadow-[var(--shadow-admin-soft)] overflow-hidden">
           {isLoading ? (
             <div className="p-4 space-y-3">
               {[1, 2, 3].map((i) => (
@@ -333,7 +342,7 @@ export default function AdminShiftsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-border bg-section/60 text-muted font-extrabold uppercase tracking-wider">
+                  <tr className="border-b border-border bg-section text-muted font-extrabold uppercase tracking-wider">
                     <th className="p-4">Delivery Partner</th>
                     <th className="p-4">Shift Name</th>
                     <th className="p-4">Timing</th>
@@ -345,7 +354,7 @@ export default function AdminShiftsPage() {
                 </thead>
                 <tbody className="divide-y divide-border/60">
                   {filteredShifts.map((s) => (
-                    <tr key={s.id} className="hover:bg-section/40">
+                    <tr key={s.id} className="hover:bg-section/50">
                       <td className="p-4">
                         <p className="font-extrabold text-foreground">{s.partner_name || "Delivery Partner"}</p>
                         <p className="text-[11px] text-gray-text">{s.partner_email || ""}</p>
@@ -359,26 +368,12 @@ export default function AdminShiftsPage() {
                         {(s.working_days || []).join(", ")}
                       </td>
                       <td className="p-4">
-                        <span
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase ${
-                            s.status === "active"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : s.status === "scheduled"
-                              ? "bg-blue-50 text-blue-700"
-                              : "bg-gray-100 text-gray-600"
-                          }`}
-                        >
-                          {s.status}
-                        </span>
+                        <Badge status={s.status}>{s.status}</Badge>
                       </td>
                       <td className="p-4">
-                        <span
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase ${
-                            TODAY_STATUS_STYLES[s.today_status || "not_checked_in"]
-                          }`}
-                        >
+                        <Badge tone={TODAY_STATUS_TONE[s.today_status || "not_checked_in"]}>
                           {TODAY_STATUS_LABELS[s.today_status || "not_checked_in"]}
-                        </span>
+                        </Badge>
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-1">
@@ -411,13 +406,11 @@ export default function AdminShiftsPage() {
               </table>
             </div>
           ) : (
-            <div className="p-12 text-center text-gray-text">
-              <Calendar className="w-12 h-12 text-muted mx-auto mb-3 opacity-40" />
-              <p className="font-bold text-foreground text-sm">No Shifts Assigned</p>
-              <p className="text-xs text-muted max-w-xs mx-auto mt-1">
-                Assign recurring shifts to delivery partners using the button above.
-              </p>
-            </div>
+            <EmptyState
+              icon={Calendar}
+              title="No shifts assigned"
+              description="Assign recurring shifts to delivery partners using the button above."
+            />
           )}
         </div>
       </div>
@@ -425,7 +418,7 @@ export default function AdminShiftsPage() {
       {/* Assign Shift Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white border border-border rounded-2xl p-6 max-w-lg w-full shadow-2xl space-y-5">
+          <div className="bg-white border border-border rounded-2xl p-6 max-w-lg w-full shadow-[var(--shadow-admin-lifted)] space-y-5">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-lg font-extrabold text-foreground">Assign New Shift Schedule</h3>
               <button
@@ -533,7 +526,7 @@ export default function AdminShiftsPage() {
       {/* Edit Shift Modal */}
       {editingShift && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white border border-border rounded-2xl p-6 max-w-lg w-full shadow-2xl space-y-5">
+          <div className="bg-white border border-border rounded-2xl p-6 max-w-lg w-full shadow-[var(--shadow-admin-lifted)] space-y-5">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-lg font-extrabold text-foreground">Edit Shift Schedule</h3>
               <button
@@ -638,7 +631,7 @@ export default function AdminShiftsPage() {
       {/* View Attendance Modal */}
       {attendanceTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white border border-border rounded-2xl p-6 max-w-xl w-full shadow-2xl space-y-5 max-h-[85vh] overflow-y-auto">
+          <div className="bg-white border border-border rounded-2xl p-6 max-w-xl w-full shadow-[var(--shadow-admin-lifted)] space-y-5 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-lg font-extrabold text-foreground">
                 Attendance &mdash; {attendanceTarget.name}

@@ -120,7 +120,7 @@ export default function AdminLiveDeliveriesPage() {
         <div className="lg:col-span-2 space-y-4">
           <AdminLiveDeliveriesMap riders={riders} />
 
-          <section className="bg-white border border-border rounded-2xl p-5">
+          <section className="bg-white border border-border rounded-2xl p-5 shadow-[var(--shadow-admin-soft)]">
             <h2 className="text-lg font-black text-foreground mb-4 flex items-center gap-2">
               <MapPin className="w-4 h-4 text-primary" />
               Current Orders ({deliveries.length})
@@ -152,7 +152,7 @@ export default function AdminLiveDeliveriesPage() {
         </div>
 
         <div className="space-y-4">
-          <section className="bg-white border border-border rounded-2xl p-5">
+          <section className="bg-white border border-border rounded-2xl p-5 shadow-[var(--shadow-admin-soft)]">
             <h2 className="text-lg font-black text-foreground mb-4 flex items-center gap-2">
               <Bike className="w-4 h-4 text-primary" />
               Live Riders ({uniqueRiders.length})
@@ -170,7 +170,7 @@ export default function AdminLiveDeliveriesPage() {
             </div>
           </section>
 
-          <section className="bg-white border border-border rounded-2xl p-5">
+          <section className="bg-white border border-border rounded-2xl p-5 shadow-[var(--shadow-admin-soft)]">
             <h2 className="text-lg font-black text-foreground mb-3 flex items-center gap-2">
               <Radio className="w-4 h-4 text-amber-500" />
               Delayed ({data?.delayed_orders?.length || 0})

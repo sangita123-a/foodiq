@@ -45,8 +45,8 @@ export default function AdminShellInner({ title, children }: AdminShellProps) {
       </div>
       <div className="flex-1 flex flex-col min-w-0">
         <AdminHeader title={title} />
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
-          <div className="max-w-7xl mx-auto">{children}</div>
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-8 custom-scrollbar">
+          <div className="max-w-[1600px] mx-auto">{children}</div>
         </main>
       </div>
     </div>

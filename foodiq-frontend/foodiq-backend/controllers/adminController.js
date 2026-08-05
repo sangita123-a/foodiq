@@ -1,4 +1,6 @@
 const admin = require('../models/adminModel');
+const { pool } = require('../config/db');
+const { validateAdminSettings } = require('../validators/settingsValidator');
 
 const ok = (res, message, data) => res.json({ success: true, message, data });
 const fail = (res, status, message, error = {}) =>
@@ -1093,10 +1095,49 @@ const getSettings = async (req, res) => {
 };
 
 const putSettings = async (req, res) => {
+  const validation = validateAdminSettings(req.body);
+  if (!validation.valid) {
+    return fail(res, 400, validation.errors[0], validation.errors);
+  }
+
+  const client = await pool.connect();
   try {
-    ok(res, 'Settings updated', await admin.updateSettings(req.body));
+    await client.query('BEGIN');
+    const { before, after } = await admin.updateSettings(validation.data, client);
+
+    const changedFields = Object.keys(validation.data).filter(
+      (key) => String(before[key]) !== String(after[key])
+    );
+    if (changedFields.length) {
+      const { writeAudit } = require('../services/auditService');
+      await writeAudit({
+        userId: req.user.id,
+        role: req.user.role,
+        action: 'settings.update',
+        category: 'settings',
+        resourceType: 'admin_settings',
+        resourceId: '1',
+        message: `Updated ${changedFields.join(', ')}`,
+        meta: {
+          old: Object.fromEntries(changedFields.map((key) => [key, before[key]])),
+          new: Object.fromEntries(changedFields.map((key) => [key, after[key]])),
+        },
+        req,
+        client,
+      });
+    }
+
+    await client.query('COMMIT');
+    ok(res, 'Settings updated', after);
   } catch (error) {
+    try {
+      await client.query('ROLLBACK');
+    } catch {
+      /* ignore */
+    }
     fail(res, 500, 'Server Error', error.message);
+  } finally {
+    client.release();
   }
 };
 
@@ -1768,6 +1809,35 @@ const getAdminInventory = async (req, res) => {
 };
 
 /**
+ * GET /api/admin/support-center/analytics — cross-subsystem KPI strip for the unified
+ * Support Center dashboard (spans customer/restaurant tickets, partner tickets, live
+ * chats, SOS emergencies, pending refunds). Neither ticketModel nor deliverySupportModel
+ * alone can answer this, which is why it's a new endpoint rather than reusing one of
+ * their existing per-subsystem analytics functions.
+ */
+const getSupportCenterAnalytics = async (req, res) => {
+  try {
+    const supportTicketModel = require('../models/supportTicketModel');
+    ok(res, 'Support Center analytics retrieved', await supportTicketModel.getSupportAnalyticsUnified());
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+/**
+ * GET /api/admin/support-center/agent-performance — resolution time and ticket load
+ * per assigned agent, spanning both ticketModel and deliverySupportModel assignments.
+ */
+const getSupportAgentPerformance = async (req, res) => {
+  try {
+    const supportTicketModel = require('../models/supportTicketModel');
+    ok(res, 'Agent performance retrieved', await supportTicketModel.getAgentPerformance());
+  } catch (error) {
+    fail(res, 500, 'Server Error', error.message);
+  }
+};
+
+/**
  * POST /api/admin/delivery/notifications/send — Admin sends a notification to one delivery partner.
  */
 const sendDeliveryNotification = async (req, res) => {
@@ -1930,4 +2000,6 @@ module.exports = {
   postLoyaltyExpire,
   postLoyaltyCampaign,
   getAdminInventory,
+  getSupportCenterAnalytics,
+  getSupportAgentPerformance,
 };

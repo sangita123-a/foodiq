@@ -5,6 +5,8 @@ import { mutate } from "swr";
 import AdminShell from "@/components/admin/AdminShell";
 import { useAdminList } from "@/hooks/useAdminData";
 import { adminPut, adminPost, formatCurrency } from "@/services/adminApi";
+import StatCard from "@/components/admin/dashboard/StatCard";
+import { Coins, Gift, TrendingUp, Users } from "lucide-react";
 
 type LoyaltyData = {
   analytics: {
@@ -62,10 +64,14 @@ export default function AdminLoyaltyPage() {
     <AdminShell title="Loyalty & Membership">
       <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-foreground">Loyalty & Membership</h1>
-          <p className="text-gray-text">Manage points rules, membership tiers, campaigns, and analytics.</p>
+          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight mb-1.5">Loyalty & Membership</h1>
+          <p className="text-gray-text text-sm">Manage points rules, membership tiers, campaigns, and analytics.</p>
         </div>
-        <button type="button" onClick={expirePoints} className="text-sm font-bold text-red-500 border border-red-200 px-4 py-2 rounded-xl">
+        <button
+          type="button"
+          onClick={expirePoints}
+          className="text-sm font-bold text-red-600 bg-white border border-red-200 hover:bg-red-50 px-4 py-2.5 rounded-xl transition-colors"
+        >
           Expire Points
         </button>
       </div>
@@ -94,22 +100,42 @@ export default function AdminLoyaltyPage() {
       {tab === "analytics" && analytics && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {[
-              { label: "Total Earned", value: analytics.total_earned.toLocaleString("en-IN") },
-              { label: "Total Redeemed", value: analytics.total_redeemed.toLocaleString("en-IN") },
-              { label: "Redemption Rate", value: `${analytics.redemption_rate_percent}%` },
-              { label: "Repeat Customers", value: String(analytics.repeat_customers) },
-            ].map((c) => (
-              <div key={c.label} className="bg-white border border-border rounded-2xl p-5">
-                <p className="text-xs font-bold uppercase text-[#9CA3AF] mb-1">{c.label}</p>
-                <p className="text-2xl font-black text-foreground">{c.value}</p>
-              </div>
-            ))}
+            <StatCard
+              label="Total Earned"
+              value={analytics.total_earned}
+              icon={Coins}
+              color="text-amber-600"
+              bg="bg-amber-500/10"
+              format={(n) => n.toLocaleString("en-IN")}
+            />
+            <StatCard
+              label="Total Redeemed"
+              value={analytics.total_redeemed}
+              icon={Gift}
+              color="text-violet-600"
+              bg="bg-violet-500/10"
+              format={(n) => n.toLocaleString("en-IN")}
+            />
+            <StatCard
+              label="Redemption Rate"
+              value={analytics.redemption_rate_percent}
+              icon={TrendingUp}
+              color="text-emerald-600"
+              bg="bg-emerald-500/10"
+              format={(n) => `${n}%`}
+            />
+            <StatCard
+              label="Repeat Customers"
+              value={analytics.repeat_customers}
+              icon={Users}
+              color="text-blue-600"
+              bg="bg-blue-500/10"
+            />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-3xl border border-border p-6">
-              <h2 className="font-black text-foreground mb-4">Membership Distribution</h2>
+            <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
+              <h2 className="text-lg font-black text-foreground tracking-tight mb-4">Membership Distribution</h2>
               <div className="space-y-2">
                 {analytics.membership_distribution.map((m) => (
                   <div key={m.slug} className="flex justify-between border border-border rounded-xl px-4 py-3">
@@ -120,8 +146,8 @@ export default function AdminLoyaltyPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl border border-border p-6">
-              <h2 className="font-black text-foreground mb-4">Most Used Coupons</h2>
+            <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
+              <h2 className="text-lg font-black text-foreground tracking-tight mb-4">Most Used Coupons</h2>
               <div className="space-y-2">
                 {analytics.most_used_coupons.map((c) => (
                   <div key={c.code} className="flex justify-between border border-border rounded-xl px-4 py-3">
@@ -139,7 +165,7 @@ export default function AdminLoyaltyPage() {
       )}
 
       {tab === "rules" && (
-        <div className="bg-white rounded-3xl border border-border p-6 space-y-3">
+        <div className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6 space-y-3">
           {(data?.rules || []).map((rule) => (
             <div key={rule.rule_key} className="flex flex-col sm:flex-row sm:items-center gap-3 border border-border rounded-xl p-4">
               <div className="flex-1">
@@ -161,7 +187,7 @@ export default function AdminLoyaltyPage() {
       {tab === "tiers" && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {(data?.tiers || []).map((tier) => (
-            <div key={tier.slug} className="bg-white rounded-3xl border border-border p-6">
+            <div key={tier.slug} className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6">
               <h3 className="font-black text-foreground mb-1">{tier.name}</h3>
               <p className="text-xs text-[#9CA3AF] mb-4 font-mono">{tier.slug}</p>
               <label className="text-xs font-bold text-gray-text">Min Lifetime Points</label>
@@ -182,8 +208,8 @@ export default function AdminLoyaltyPage() {
       )}
 
       {tab === "adjust" && (
-        <form onSubmit={adjustPoints} className="bg-white rounded-3xl border border-border p-6 max-w-md space-y-4">
-          <h2 className="font-black text-foreground">Manual Points Adjustment</h2>
+        <form onSubmit={adjustPoints} className="bg-white rounded-2xl border border-border shadow-[var(--shadow-admin-soft)] p-5 sm:p-6 max-w-md space-y-4">
+          <h2 className="text-lg font-black text-foreground tracking-tight">Manual Points Adjustment</h2>
           <input
             value={adjustForm.user_id}
             onChange={(e) => setAdjustForm({ ...adjustForm, user_id: e.target.value })}
