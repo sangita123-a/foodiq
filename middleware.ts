@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { decodeJwt } from "jose";
 import { applySecurityHeaders, getSecurityHeadersOptions } from "@/lib/security/headers";
 import { normalizePath } from "@/lib/seo/urls";
 
@@ -158,6 +159,22 @@ export function middleware(request: NextRequest) {
       loginUrl.searchParams.set("redirect", redirectTarget);
     }
     return applySeoHeaders(request, NextResponse.redirect(loginUrl));
+  }
+
+  // Admin RBAC
+  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
+    const jwtToken = request.cookies.get("token")?.value;
+    if (!jwtToken) {
+      return applySeoHeaders(request, NextResponse.redirect(new URL("/admin/login", request.url)));
+    }
+    try {
+      const payload = decodeJwt(jwtToken);
+      if (payload.role !== "ADMIN") {
+        return applySeoHeaders(request, NextResponse.redirect(new URL("/", request.url)));
+      }
+    } catch (e) {
+      return applySeoHeaders(request, NextResponse.redirect(new URL("/admin/login", request.url)));
+    }
   }
 
   // Check if it's an auth route (login/register)

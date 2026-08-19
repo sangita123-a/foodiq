@@ -31,11 +31,20 @@ model User {
   role      Role     @default(CUSTOMER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  password  String?
+  resetOtp  String?
+  resetOtpExpires DateTime?
+
 
   addresses  Address[]
   restaurants Restaurant[] // For RESTAURANT_OWNER
   orders     Order[]      // For CUSTOMER
   deliveries Order[]      @relation("RiderDeliveries") // For RIDER
+  vehicleNumber String? // For RIDER
+  kycStatus     String? // For RIDER (e.g., PENDING, APPROVED, REJECTED)
+  isOnline      Boolean? // For RIDER
+  rating        Float? // For RIDER
+  codBalance    Decimal? // For RIDER
 }
 
 model Address {
@@ -60,6 +69,11 @@ model Restaurant {
   imageUrl    String?
   ownerId     String
   owner       User     @relation(fields: [ownerId], references: [id])
+  fssaiNumber String?
+  address     String?
+  latitude    Float?
+  longitude   Float?
+  isOpen      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -73,6 +87,8 @@ model MenuItem {
   description  String?
   price        Decimal
   imageUrl     String?
+  category     String?
+  isVeg        Boolean    @default(true)
   isAvailable  Boolean    @default(true)
   restaurantId String
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
@@ -119,4 +135,16 @@ model Otp {
   code        String
   expiresAt   DateTime
   createdAt   DateTime @default(now())
+}
+
+model Coupon {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  discountType  String   // "PERCENTAGE" or "FLAT"
+  discountValue Decimal
+  minOrderValue Decimal?
+  expiryDate    DateTime?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

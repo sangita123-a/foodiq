@@ -1,11 +1,29 @@
 import { PrismaClient, Role } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Seeding database...');
 
-  // 1. Create a Restaurant Owner
+  // 1. Create Admin
+  const adminPassword = await bcrypt.hash('admin123', 10);
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@foodiq.com' },
+    update: {
+      password: adminPassword,
+      role: Role.ADMIN
+    },
+    create: {
+      email: 'admin@foodiq.com',
+      name: 'Admin User',
+      password: adminPassword,
+      role: Role.ADMIN,
+    },
+  });
+  console.log(`Created/Updated admin: ${admin.email}`);
+
+  // 2. Create a Restaurant Owner
   const owner = await prisma.user.upsert({
     where: { email: 'owner@foodiq.com' },
     update: {},
