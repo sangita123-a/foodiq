@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GET as getCustomers, POST as createCustomer } from "../customers/route";
+import { GET as getCustomers } from "../customers/route";
 
 export async function GET(request: NextRequest) {
   return getCustomers(request);
