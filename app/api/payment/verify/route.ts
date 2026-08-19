@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-
-function getBackendUrl() {
-  const envUrl = (process.env.NEXT_PUBLIC_API_URL || "").trim().replace(/\/$/, "");
-  if (process.env.NODE_ENV === "development" && !process.env.NEXT_PUBLIC_API_FORCE_REMOTE) {
-    return envUrl || "http://localhost:4000";
-  }
-  return envUrl || "https://foodiq-2.onrender.com";
-}
+import { prisma } from "@/lib/prisma";
+import crypto from "crypto";
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,21 +25,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const backend = getBackendUrl();
-    const res = await fetch(`${backend}/api/payment/verify`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token,
-      },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(30000),
+    // Verify signature
+    const secret = process.env.RAZORPAY_KEY_SECRET || "";
+    const generated_signature = crypto
+      .createHmac("sha256", secret)
+      .update(razorpay_order_id + "|" + razorpay_payment_id)
+      .digest("hex");
+
+    if (generated_signature !== razorpay_signature) {
+      return NextResponse.json(
+        { success: false, message: "Invalid payment signature" },
+        { status: 400 }
+      );
+    }
+
+    // Update the order in Prisma
+    const order = await prisma.order.findFirst({
+      where: { razorpayOrderId: razorpay_order_id },
     });
 
-    const data = await res.json().catch(() => ({}));
-    return NextResponse.json(data, { status: res.status });
+    if (!order) {
+      return NextResponse.json(
+        { success: false, message: "Order not found for the given Razorpay Order ID" },
+        { status: 404 }
+      );
+    }
+
+    await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        status: "CONFIRMED",
+        razorpayPaymentId: razorpay_payment_id,
+        razorpaySignature: razorpay_signature,
+      },
+    });
+
+    return NextResponse.json({ success: true, message: "Payment verified successfully" }, { status: 200 });
+
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Payment verification failed";
+    console.error("Payment verify error:", msg);
     return NextResponse.json(
       { success: false, message: msg },
       { status: 500 }
