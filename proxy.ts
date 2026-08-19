@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { decodeJwt } from "jose";
+import { jwtVerify } from "jose";
+
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'foodiq_secure_admin_jwt_secret_key_2026');
 import { applySecurityHeaders, getSecurityHeadersOptions } from "@/lib/security/headers";
 import { normalizePath } from "@/lib/seo/urls";
 
@@ -127,7 +129,7 @@ function applySeoHeaders(request: NextRequest, response: NextResponse): NextResp
   return response;
 }
 
-export function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const normalizedPath = normalizePath(pathname);
@@ -139,7 +141,8 @@ export function middleware(request: NextRequest) {
 
   const token =
     request.cookies.get("token")?.value ||
-    request.cookies.get("foodiq_session")?.value;
+    request.cookies.get("foodiq_session")?.value ||
+    request.cookies.get("admin_token")?.value;
 
   // Check if it's a protected route
   const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));
@@ -163,14 +166,14 @@ export function middleware(request: NextRequest) {
 
   // Admin RBAC
   if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
-    const jwtToken = request.cookies.get("token")?.value;
+    const jwtToken = request.cookies.get("admin_token")?.value;
     if (!jwtToken) {
       return applySeoHeaders(request, NextResponse.redirect(new URL("/admin/login", request.url)));
     }
     try {
-      const payload = decodeJwt(jwtToken);
+      const { payload } = await jwtVerify(jwtToken, JWT_SECRET);
       if (payload.role !== "ADMIN") {
-        return applySeoHeaders(request, NextResponse.redirect(new URL("/", request.url)));
+        return applySeoHeaders(request, NextResponse.redirect(new URL("/admin/login", request.url)));
       }
     } catch (e) {
       return applySeoHeaders(request, NextResponse.redirect(new URL("/admin/login", request.url)));
