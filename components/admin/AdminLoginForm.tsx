@@ -18,9 +18,9 @@ export default function AdminLoginForm() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/internal-admin-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
           password: password.trim(),
@@ -28,9 +28,9 @@ export default function AdminLoginForm() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        window.location.href = "/admin/dashboard";
+        window.location.href = '/admin/dashboard';
       } else {
-        setError(data.error || "Login failed");
+        setError(data.error || 'Login failed');
       }
     } catch (err: any) {
       setError(err?.message || "Login failed");

@@ -13,6 +13,7 @@ export async function middleware(request: NextRequest) {
     if (
       pathname === '/admin/login' ||
       pathname === '/api/admin/auth/login' ||
+      pathname === '/api/internal-admin-auth' ||
       pathname.startsWith('/_next') ||
       pathname === '/favicon.ico'
     ) {
