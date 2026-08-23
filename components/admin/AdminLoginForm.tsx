@@ -21,12 +21,20 @@ export default function AdminLoginForm() {
     setLoading(true);
     setError("");
     try {
-      const res = await api.post("/api/admin/auth/login", {
-        email: email.trim().toLowerCase(),
-        password,
+      const res = await fetch("/api/admin/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password,
+        }),
       });
-      if (res.data.success) {
-        const user = res.data.data;
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || data.message || "Login failed");
+      }
+      if (data.success) {
+        const user = data.data;
         if (user.role !== "admin") {
           setError("Admin access only. Use the partner or customer login for other accounts.");
           return;
@@ -36,11 +44,7 @@ export default function AdminLoginForm() {
         router.push("/admin/dashboard");
       }
     } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Login failed";
-      setError(msg);
+      setError(err?.message || "Login failed");
     } finally {
       setLoading(false);
     }
