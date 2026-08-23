@@ -4,9 +4,6 @@ import { motion } from "framer-motion";
 import { Mail, Lock, ArrowRight, Shield } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import api from "@/services/api";
-import { persistAuthUser } from "@/lib/authUser";
-import { markAuthenticated } from "@/lib/authSession";
 import { Button } from "@/components/admin/ui";
 
 export default function AdminLoginForm() {
@@ -30,18 +27,10 @@ export default function AdminLoginForm() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || data.message || "Login failed");
-      }
-      if (data.success) {
-        const user = data.data;
-        if (user.role !== "admin") {
-          setError("Admin access only. Use the partner or customer login for other accounts.");
-          return;
-        }
-        markAuthenticated(user.token);
-        persistAuthUser(user);
-        router.push("/admin/dashboard");
+      if (res.ok && data.success) {
+        window.location.href = "/admin/dashboard";
+      } else {
+        setError(data.error || "Login failed");
       }
     } catch (err: any) {
       setError(err?.message || "Login failed");
@@ -65,7 +54,7 @@ export default function AdminLoginForm() {
             <Shield className="w-7 h-7 text-white" />
           </div>
           <h2 className="text-3xl font-black text-foreground mb-2">Enterprise Admin Portal</h2>
-          <p className="text-gray-text">Secure sign-in for Super Admin, Admin, Support, Finance & Marketing roles.</p>
+          <p className="text-gray-text">Secure sign-in for Super Admin.</p>
         </div>
 
         {error && (

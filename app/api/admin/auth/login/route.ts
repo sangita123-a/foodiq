@@ -9,10 +9,10 @@ export async function POST(request: Request) {
     const { email, password } = await request.json();
 
     if (
-      (email || '').trim().toLowerCase() === 'admin@foodiq.com' &&
-      password === 'admin123'
+      (email || '').trim().toLowerCase() === 'ssangitasahoo48@gmail.com' &&
+      password === 'Foodiq@9090'
     ) {
-      const token = await new SignJWT({ email: 'admin@foodiq.com', role: 'admin' })
+      const token = await new SignJWT({ email: 'ssangitasahoo48@gmail.com', role: 'ADMIN' })
         .setProtectedHeader({ alg: 'HS256' })
         .setExpirationTime('7d')
         .sign(secretKey);
@@ -20,8 +20,7 @@ export async function POST(request: Request) {
       const response = NextResponse.json(
         { 
           success: true, 
-          message: 'Authenticated successfully',
-          data: { role: 'admin', token }
+          message: 'Admin authenticated successfully',
         },
         { status: 200 }
       );
@@ -40,12 +39,12 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { error: 'Invalid admin credentials' },
+      { success: false, error: 'Invalid admin email or password' },
       { status: 401 }
     );
   } catch (error) {
     return NextResponse.json(
-      { error: 'Internal Server Error' },
+      { success: false, error: 'Internal Server Error' },
       { status: 500 }
     );
   }

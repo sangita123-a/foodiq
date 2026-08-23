@@ -1,6 +1,6 @@
 # Foodiq Final Production SEO Audit Report
 
-**Generated:** 2026-08-04T04:57:16.636Z · **Version:** 4.1.0
+**Generated:** 2026-08-23T15:18:15.224Z · **Version:** 4.1.0
 **Scope:** Production build · No UI redesign
 
 ## Final Verdict
@@ -38,7 +38,7 @@ _Score source: lighthouse (production build on localhost)_
 | `seo:validate` | ✅ Pass |
 | `perf:validate` | ✅ Pass |
 | `mobile:validate` | ✅ Pass |
-| `security:validate` | ✅ Pass |
+| `security:validate` | ❌ Fail |
 
 ## Google Search Readiness
 

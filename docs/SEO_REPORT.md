@@ -1,6 +1,6 @@
 # Foodiq Google Search Readiness Report
 
-Generated: 2026-08-04T04:57:01.044Z
+Generated: 2026-08-23T15:18:04.637Z
 
 ## Final Verdict
 
@@ -88,7 +88,7 @@ Generated: 2026-08-04T04:57:01.044Z
 | Duplicate metadata titles | ✅ Pass | 0 duplicates |
 | Duplicate canonical paths | ✅ Pass | 0 duplicates |
 | Legacy internal links | ✅ Pass | 0 remaining |
-| Empty alt attributes (UI) | ⚠️ Review | 2 files |
+| Empty alt attributes (UI) | ⚠️ Review | 3 files |
 | Global 404 page | ✅ Present | `app/not-found.tsx` |
 | Configured redirects | ✅ | 15 rules |
 
@@ -183,6 +183,7 @@ No legacy internal links detected in `app/` or `components/`.
 
 | File | Empty alt count |
 |------|-----------------|
+| `components\admin\restaurants\RestaurantDetailsDrawer.tsx` | 1 |
 | `components\LovedByFoodLovers.tsx` | 1 |
 | `app\blog\page.tsx` | 1 |
 
@@ -201,10 +202,10 @@ No legacy internal links detected in `app/` or `components/`.
 
 ## Route Inventory
 
-- Total routes: **155**
+- Total routes: **106**
 - Public routes: **20**
-- Private routes: **134**
-- SEO layout files: **48**
+- Private routes: **85**
+- SEO layout files: **47**
 
 ## Google Search Console Setup
 

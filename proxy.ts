@@ -6,7 +6,6 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'foodiq_se
 import { applySecurityHeaders, getSecurityHeadersOptions } from "@/lib/security/headers";
 import { normalizePath } from "@/lib/seo/urls";
 
-export const runtime = "experimental-edge";
 
 // Define which routes require authentication
 const protectedRoutes = [
