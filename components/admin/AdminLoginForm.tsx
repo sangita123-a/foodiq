@@ -8,8 +8,8 @@ import { Button } from "@/components/admin/ui";
 
 export default function AdminLoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("ssangitasahoo48@gmail.com");
+  const [password, setPassword] = useState("Foodiq@9090");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +23,7 @@ export default function AdminLoginForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
-          password,
+          password: password.trim(),
         }),
       });
       const data = await res.json();

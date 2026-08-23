@@ -6,13 +6,15 @@ const secretKey = new TextEncoder().encode(JWT_SECRET);
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    const body = await request.json();
+    const email = (body.email || '').toString().trim().toLowerCase();
+    const password = (body.password || '').toString().trim();
 
-    if (
-      (email || '').trim().toLowerCase() === 'ssangitasahoo48@gmail.com' &&
-      password === 'Foodiq@9090'
-    ) {
-      const token = await new SignJWT({ email: 'ssangitasahoo48@gmail.com', role: 'ADMIN' })
+    const FIXED_EMAIL = 'ssangitasahoo48@gmail.com';
+    const FIXED_PASSWORD = 'Foodiq@9090';
+
+    if (email === FIXED_EMAIL.toLowerCase() && password === FIXED_PASSWORD) {
+      const token = await new SignJWT({ email: FIXED_EMAIL, role: 'ADMIN' })
         .setProtectedHeader({ alg: 'HS256' })
         .setExpirationTime('7d')
         .sign(secretKey);
@@ -39,7 +41,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { success: false, error: 'Invalid admin email or password' },
+      { success: false, error: 'Invalid admin credentials' },
       { status: 401 }
     );
   } catch (error) {
