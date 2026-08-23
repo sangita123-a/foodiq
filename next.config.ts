@@ -247,6 +247,11 @@ const nextConfig: NextConfig = {
         source: "/firebase-messaging-sw.js",
         destination: "/api/firebase-messaging-sw",
       },
+      {
+        // Only proxy customer APIs, NOT admin APIs
+        source: "/api/((?!admin/).*)",
+        destination: "https://foodiq-2.onrender.com/api/:1",
+      },
     ];
   },
 };
