@@ -12,7 +12,9 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
     if (
       pathname === '/admin/login' ||
-      pathname === '/api/admin/auth/login'
+      pathname === '/api/admin/auth/login' ||
+      pathname.startsWith('/_next') ||
+      pathname === '/favicon.ico'
     ) {
       return NextResponse.next();
     }
@@ -20,14 +22,23 @@ export async function middleware(request: NextRequest) {
     const token = request.cookies.get('admin_token')?.value;
 
     if (!token) {
+      if (pathname.startsWith('/api/admin')) {
+        return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+      }
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
 
     try {
-      await jwtVerify(token, secretKey);
+      const { payload } = await jwtVerify(token, secretKey);
+      if (payload.role !== 'ADMIN') {
+        throw new Error('Invalid role');
+      }
       return NextResponse.next();
     } catch (error) {
       // Invalid token
+      if (pathname.startsWith('/api/admin')) {
+        return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+      }
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
   }
