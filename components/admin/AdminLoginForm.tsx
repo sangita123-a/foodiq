@@ -21,7 +21,7 @@ export default function AdminLoginForm() {
     setLoading(true);
     setError("");
     try {
-      const res = await api.post("/api/auth/login", {
+      const res = await api.post("/api/admin/auth/login", {
         email: email.trim().toLowerCase(),
         password,
       });
@@ -35,15 +35,11 @@ export default function AdminLoginForm() {
         persistAuthUser(user);
         router.push("/admin/dashboard");
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { message?: string } }; message?: string }).response?.data
-              ?.message ||
-            ((err as { message?: string }).message === "Network Error"
-              ? "Cannot reach the server. Make sure the backend is running on port 4000."
-              : "Login failed")
-          : "Login failed";
+        err?.response?.data?.message ||
+        err?.message ||
+        "Login failed";
       setError(msg);
     } finally {
       setLoading(false);

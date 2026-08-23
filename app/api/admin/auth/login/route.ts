@@ -9,16 +9,20 @@ export async function POST(request: Request) {
     const { email, password } = await request.json();
 
     if (
-      email?.trim().toLowerCase() === 'admin@foodiq.com' &&
+      (email || '').trim().toLowerCase() === 'admin@foodiq.com' &&
       password === 'admin123'
     ) {
-      const token = await new SignJWT({ email: 'admin@foodiq.com', role: 'ADMIN' })
+      const token = await new SignJWT({ email: 'admin@foodiq.com', role: 'admin' })
         .setProtectedHeader({ alg: 'HS256' })
         .setExpirationTime('7d')
         .sign(secretKey);
 
       const response = NextResponse.json(
-        { success: true, message: 'Authenticated successfully' },
+        { 
+          success: true, 
+          message: 'Authenticated successfully',
+          data: { role: 'admin', token }
+        },
         { status: 200 }
       );
 
